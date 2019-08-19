@@ -2,6 +2,7 @@ package self.me.matchday.fileserver;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestMethodOrder(OrderAnnotation.class)
 class ICDManagerTest
 {
     private static final String LOG_TAG = "ICDManagerTest";
@@ -115,7 +117,8 @@ class ICDManagerTest
     // Tests
     // ----------------------------------------------------------------------------------
     @Test
-    @DisplayName("Test the login function")
+    @Order(1)
+    @DisplayName("Login test; ensure login functionality")
     void login()
     {
         Log.i( LOG_TAG, "POSTing to URL: " + ICDManager.ICDData .getLoginURL());
@@ -131,8 +134,9 @@ class ICDManagerTest
         assertTrue( icdm.isLoggedIn() );
     }
 
-    @DisplayName("Logout disables page read; make sure we CAN'T read download page")
     @Test
+    @Order(3)
+    @DisplayName("Logout disables page read; make sure we CAN'T read download page")
     void logoutTest()
     {
         // Perform logout
@@ -157,6 +161,7 @@ class ICDManagerTest
     }
 
     @Tag("ICD")
+    @Order(2)
     @DisplayName("Test the getDownloadURL method can get the D/L link")
     @ParameterizedTest(name=" for: {index}: {0}")
     @MethodSource("getUrls")
@@ -186,11 +191,13 @@ class ICDManagerTest
 
     @Disabled
     @Test
+    @Order(5)
     void saveCookieData() {
     }
 
     @Disabled
     @Test
+    @Order(6)
     void loadCookieData() {
     }
 

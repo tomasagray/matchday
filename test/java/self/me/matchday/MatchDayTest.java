@@ -30,13 +30,13 @@ public class MatchDayTest
     // Local sources
     // -------------------------------------------------------------------------
     public static final String LOCAL_KNOWN_GOOD_JSON
-            = "src/test/resources/galataman.json";
+            = "src/test/resources/self/me/matchday/io/galataman.json";
     public static final String LOCAL_INVALID_JSON
-            = "src/test/resources/gman_beautified_INVALID.json";
+            = "src/test/resources/self/me/matchday/io/gman_beautified_INVALID.json";
     public static final String MISSING_DATA_JSON
-            = "src/test/resources/missing_data.json";
+            = "src/test/resources/self/me/matchday/io/missing_data.json";
     public static final String LOCAL_KNOWN_GOOD_HTML
-           = "src/test/resources/gman_post_beautified.html";
+           = "src/test/resources/self/me/matchday/io/gman_post_beautified.html";
     // Image
     public static final String IMAGE_FILE
             = "src/test/resources/hasselhoff.jpg";

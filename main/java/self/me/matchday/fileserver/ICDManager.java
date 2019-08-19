@@ -135,7 +135,8 @@ public class ICDManager implements IFSManager
     {
         // Delete ALL cookies
         cookieManager.getCookieStore().removeAll();
-
+        // Clear login response
+        loginResponse = null;
         // Clear the user
         this.user = null;
     }
