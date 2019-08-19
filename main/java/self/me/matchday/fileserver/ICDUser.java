@@ -36,7 +36,6 @@ public class ICDUser extends FSUser
         // Assemble and return String data as a byte array
         return sj.toString()
                 .getBytes( StandardCharsets.UTF_8 );
-
     }
 
     private String getURLComponent(String key, Object value)

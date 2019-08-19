@@ -1,4 +1,4 @@
-package self.me.matchday.feed.Galataman;
+package self.me.matchday.feed.galataman;
 
 class GalatamanPostParseException extends RuntimeException
 {

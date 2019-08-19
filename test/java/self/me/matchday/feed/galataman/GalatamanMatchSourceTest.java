@@ -2,7 +2,7 @@
  *  All code written by Tomás Gray unless otherwise noted.
  *  May not be reproduced without written consent from the above.
  */
-package self.me.matchday.feed.Galataman;
+package self.me.matchday.feed.galataman;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;

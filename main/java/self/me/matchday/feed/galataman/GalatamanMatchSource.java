@@ -2,7 +2,7 @@
  *  All code written by Tomás Gray unless otherwise noted.
  *  May not be reproduced without written consent from the above.
  */
-package self.me.matchday.feed.Galataman;
+package self.me.matchday.feed.galataman;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static self.me.matchday.feed.Galataman.GalatamanPattern.*;
+import static self.me.matchday.feed.galataman.GalatamanPattern.*;
 
 /**
  * Represents a specific source for a match (for example: 1080i, Spanish),
@@ -123,7 +123,7 @@ public final class GalatamanMatchSource
                         + "\t]\n";
     }
 
-    public static final class GalatamanMatchSourceBuilder
+    static final class GalatamanMatchSourceBuilder
     {
         // Fields
         // -------------------------------------------------------------------------
@@ -169,11 +169,10 @@ public final class GalatamanMatchSource
         private List<MetadataTuple> parseDataItems(@NotNull String data)
         {
             return
+                // Break apart stream into individual data items...
                 Arrays.stream(
-                    // Break apart stream into individual data items...
                     data.split( METADATA_ITEM_DELIMITER )
-                )
-                // ... eliminating any empty entries ...
+                ) // ... eliminating any empty entries ...
                 .filter((item) ->
                     !("".equals(item))
                 ) // ... convert to a tuple.
@@ -308,7 +307,7 @@ public final class GalatamanMatchSource
 
         @NotNull
         @Contract(" -> new")
-        public GalatamanMatchSource build()
+        GalatamanMatchSource build()
         {
             return new GalatamanMatchSource(this);
         }

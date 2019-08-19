@@ -12,9 +12,11 @@ import self.me.matchday.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Optional;
 
 public class ICDManager implements IFSManager
 {
@@ -22,6 +24,9 @@ public class ICDManager implements IFSManager
 
 
     // Static members
+    // -------------------------------------------------------------------------------------------
+    private static final String DOWNLOAD_LINK_IDENTIFIER = "downloadnow";
+    private static final String USER_DATA_IDENTIFIER = "doz";
     private static final String USER_AGENT
             // Windows
             // = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
@@ -29,33 +34,30 @@ public class ICDManager implements IFSManager
             // Mac
             = "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) " +
                 "Gecko/20100316 Firefox/3.6.2";
-    private static final String DOWNLOAD_LINK_IDENTIFIER = "downloadnow";
-    // -------------------------------------------------------------------------------------------
 
     // Singleton instance
-    private static final ICDManager INSTANCE = new ICDManager();
+    // -------------------------------------------------------------------------------------------
+    private static volatile ICDManager INSTANCE;
     public static ICDManager getInstance() {
+        if(INSTANCE == null)
+            INSTANCE = new ICDManager();
+
         return INSTANCE;
     }
-    // ----------------------------------------------------------------------------
-
 
     // Fields
     // -----------------------------------------------------------------------------------------
+    private final ICDCookieManager cookieManager;
     private FSUser user;
     private JsonObject loginResponse;   // Response from server after latest login attempt
     private boolean isLoggedIn;         // Current login status
-    private final CookieManager cookieManager;
 
     // Constructor
     // --------------------------------------------------------------------------------------------
     private ICDManager()
     {
         // Setup cookie management
-        cookieManager = new CookieManager();
-        cookieManager.setCookiePolicy( new ICDCookiePolicy(ICDData.getDomain()) );
-        CookieHandler.setDefault(cookieManager);
-
+        cookieManager = new ICDCookieManager();
         // Set default status to 'logged out'
         this.isLoggedIn = false;
     }
@@ -87,6 +89,11 @@ public class ICDManager implements IFSManager
             //   - POST login data to OutputStream
             try( OutputStream os = connection.getOutputStream() ) {
                 os.write( loginData );
+            } catch(IOException e) {
+                Log.e(
+                        LOG_TAG,
+                        "Could not write login data to output stream!", e
+                );
             }
 
             // Read response as a JSON object
@@ -99,44 +106,35 @@ public class ICDManager implements IFSManager
             loginSuccessful = isLoginSuccessful();
             if( loginSuccessful )
             {
-                // Extract cookie from response
-                // - Get userdata cookie data
-                String userdata =
-                        URLEncoder.encode(
-                            loginResponse.get("doz").getAsString(),
-                            StandardCharsets.UTF_8.toString()
-                        );
-
-                // - Create userdata cookie
-                HttpCookie userDataCookie = new HttpCookie("userdata", userdata );
-                userDataCookie.setDomain( "." + ICDData.getDomain() );
-                // - Add to cookie store
-                cookieManager
-                    .getCookieStore()
-                    .add(
-                        new URI( userDataCookie.getDomain() ),
-                        userDataCookie
-                    );
+                // Extract cookie from response, create userdata cookie
+                cookieManager.addCookie(
+                        "userdata",
+                        loginResponse
+                            .get(USER_DATA_IDENTIFIER)
+                            .getAsString()
+                );
 
                 Log.i(LOG_TAG, "Successfully logged in user: " + user.getUserName());
             } else {
                 Log.i(LOG_TAG, "Failed to login with user: " + user.getUserName());
             }
 
-        } catch(IOException | URISyntaxException e) {
-            // TODO:
-            //  - Handle login exceptions
-            Log.e(LOG_TAG, "Error while performing login function; please check URL", e);
+        } catch(IOException e) {
+            Log.e(LOG_TAG, "I/O Error while performing login function", e);
         }
 
         return loginSuccessful;
     }
 
+    /**
+     * Clear saved cookies, requiring the user to re-authenticate.
+     *
+     */
     @Override
     public void logout()
     {
-        // TODO:
-        //  - Implement logout functionality
+        // Delete ALL cookies
+        cookieManager.getCookieStore().removeAll();
 
         // Clear the user
         this.user = null;
@@ -161,14 +159,16 @@ public class ICDManager implements IFSManager
     @Override
     public Optional<URL> getDownloadURL(URL url) throws IOException
     {
+        // By default, empty container
         Optional<URL> downloadLink = Optional.empty();
 
         // Open a connection
         URLConnection conn = url.openConnection();
         // Attach cookies
-        conn.setRequestProperty("Cookie", getCookieString() );
+        conn.setRequestProperty("Cookie", cookieManager.getCookieString() );
         // Connect to file server
         conn.connect();
+
         // Read the page from the file server & DOM-ify it
         Document filePage = Jsoup.parse( readServerResponse(conn) );
         // Get all <a> with the 'downloadnow' class
@@ -183,49 +183,19 @@ public class ICDManager implements IFSManager
 
         return downloadLink;
     }
-    // -----------------------------------------------------------------------------------------------------------------
 
-
-    // Cookies
-    // -----------------------------------------------------------------------------------------------------------------
-    private boolean saveCookieData()
+    /**
+     * Expose the login response to the API as a String
+     *
+     */
+    public String getLoginResponse()
     {
-        // TODO:
-        //  - Implement persistent cookie storage
-
-        return false;
+        return
+            (loginResponse == null || loginResponse.isJsonNull())
+                    ? null
+                    : loginResponse.toString();
     }
 
-
-    private List<HttpCookie> loadCookieData()
-    {
-        List<HttpCookie> cookies = new ArrayList<>();
-        // TODO:
-        //  - Implement persistent cookie loading
-
-        return cookies;
-    }
-
-    @NotNull
-    private String getCookieString()
-    {
-        // Container for cookie String
-        StringBuilder sb = new StringBuilder();
-        // Our cookies
-        List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
-        // Add each cookie to String
-        cookies.forEach((cookie) ->
-                sb
-                        .append( cookie.getName() )
-                        .append("=")
-                        .append( cookie.getValue() )
-                        .append("; ")   // separator
-        );
-
-        // Return assembled String
-        return sb.toString();
-    }
-    // -----------------------------------------------------------------------------------------------------------------
 
     // Server
     // -----------------------------------------------------------------------------------------------------------------
@@ -242,7 +212,6 @@ public class ICDManager implements IFSManager
     {
         // Get an HTTP connection
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
         // Set connection properties
         // - Make it a POST
         connection.setRequestMethod("POST");
@@ -313,8 +282,6 @@ public class ICDManager implements IFSManager
 
         return loggedIn;
     }
-    // -----------------------------------------------------------------------------------------------------------------
-
 
     /**
      * Helper class to hold data relevant to file-server
@@ -326,33 +293,32 @@ public class ICDManager implements IFSManager
         // File server URL
         private static URL url;
 
-        // URL data
-        // -------------------------------------------------------------------------------------
-        private static final String protocol = "https://";
-        private static final String domain = "inclouddrive.com";
-        private static final String subDomain = "www";
-        private static final String baseURL
-                = protocol + subDomain + "." + domain + "/";
-
         // User/access data
         // -------------------------------------------------------------------------------------
         private static final int    me      = 0;
         private static final String app     = "br68ufmo5ej45ue1q10w68781069v666l2oh1j2ijt94";
         private static final String accessToken = "";
 
-        // Initialize file server URL
-        static
+        // URL data
+        // -------------------------------------------------------------------------------------
+        private static final String protocol = "https://";
+        private static final String domain = "inclouddrive.com";
+        private static final String subDomain = "www";
+        private static final String baseURL =
+                protocol + subDomain + "." + domain + "/";
+        private static final String loginUrl =
+                baseURL
+                        + "api/"
+                        + me
+                        + "/signmein?useraccess="
+                        + accessToken
+                        + "&access_token="
+                        + app;
+
+        static // Initialize file server URL
         {
             try {
-                url = new URL(
-                        baseURL
-                                + "api/"
-                                + me
-                                + "/signmein?useraccess="
-                                + accessToken
-                                + "&access_token="
-                                + app
-                );
+                url = new URL( loginUrl );
             } catch (MalformedURLException e) {
                 Log.e(LOG_TAG, "Error parsing InCloudDrive data!", e);
             }

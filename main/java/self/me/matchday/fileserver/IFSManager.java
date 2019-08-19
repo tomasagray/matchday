@@ -1,9 +1,7 @@
 package self.me.matchday.fileserver;
 
 import java.io.IOException;
-import java.net.HttpCookie;
 import java.net.URL;
-import java.util.List;
 import java.util.Optional;
 
 public interface IFSManager
@@ -19,5 +17,4 @@ public interface IFSManager
 
     // Extract download data from a given URL
     Optional<URL> getDownloadURL(URL url) throws IOException;
-
 }

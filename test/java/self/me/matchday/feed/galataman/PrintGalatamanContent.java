@@ -2,7 +2,7 @@
  *  All code written by Tomás Gray unless otherwise noted.
  *  May not be reproduced without written consent from the above.
  */
-package self.me.matchday.feed.Galataman;
+package self.me.matchday.feed.galataman;
 
 import self.me.matchday.MatchDayTest;
 import self.me.matchday.feed.Blogger;

@@ -2,10 +2,9 @@
  *  All code written by Tomás Gray unless otherwise noted.
  *  May not be reproduced without written consent from the above.
  */
-package self.me.matchday.feed.Galataman;
+package self.me.matchday.feed.galataman;
 
 import com.google.gson.JsonObject;
-import org.jetbrains.annotations.Contract;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static self.me.matchday.feed.Galataman.GalatamanPattern.*;
+import static self.me.matchday.feed.galataman.GalatamanPattern.*;
 
 /**
  * Represents an individual post on the Galataman website. Extends the BloggerPost
@@ -51,7 +50,6 @@ public final class GalatamanPost extends BloggerPost
     
     // Getters
     // -------------------------------------------------------------------------
-    @Contract(pure = true)
     public List<GalatamanMatchSource> getSources() {
         return this.sources;
     }

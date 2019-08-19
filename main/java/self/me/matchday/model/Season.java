@@ -2,7 +2,6 @@ package self.me.matchday.model;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.zip.ZipInputStream;
 
 public class Season
 {

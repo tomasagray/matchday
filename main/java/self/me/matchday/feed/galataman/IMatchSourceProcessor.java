@@ -1,4 +1,4 @@
-package self.me.matchday.feed.Galataman;
+package self.me.matchday.feed.galataman;
 
 import java.net.URL;
 import java.util.List;

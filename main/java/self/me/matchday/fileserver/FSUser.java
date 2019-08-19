@@ -30,6 +30,7 @@ public abstract class FSUser
     public String getUserName() {
         return userName;
     }
+
     String getPassword() {
         return password;
     }

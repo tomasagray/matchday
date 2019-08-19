@@ -183,27 +183,18 @@ public final class Blogger
 
             // Iterate over blogEntries
             blogEntries.forEach((entry) -> {
-                try {
-                    // Ensure valid JSON;
-                    if( entry.isJsonObject() )
-                    {
-                        //Parse entry & add to collection
-                        localEntries.add(
-                                this.postProcessor.parse( entry.getAsJsonObject() )
-                        );
-                    }
-                } catch(InvalidBloggerPostException e) {
-                    // TODO:
-                    //  - Handle this exception
-                    System.out.println(e.getMessage());
-                    System.out.println("Error parsing blog entry:\n" + entry.toString() + "\n\n\n");
+                // Ensure valid JSON;
+                if( entry.isJsonObject() )
+                {
+                    //Parse entry & add to collection
+                    localEntries.add(
+                            this.postProcessor.parse( entry.getAsJsonObject() )
+                    );
                 }
             });
 
         } catch(InvalidBloggerPostException e) {
-            System.out.println("Error parsing blog entry:\n" + e.getMessage());
-            // TODO:
-            //  - Rethrow as more intelligible exception
+            // Rethrow as more intelligible exception
             throw new InvalidBloggerFeedException("Error parsing blog entries", e);
         }
 

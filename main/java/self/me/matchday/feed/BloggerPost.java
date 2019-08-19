@@ -7,6 +7,7 @@ package self.me.matchday.feed;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import self.me.matchday.util.Log;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -27,6 +28,8 @@ import java.util.List;
  */
 public class BloggerPost
 {
+    private static final String LOG_TAG = "BloggerPostClass";
+
     // Fields
     // -------------------------------------------------------------------------
     private final JsonObject bloggerPost;
@@ -128,6 +131,10 @@ public class BloggerPost
 
         // Parsers for MANDATORY fields
         // ---------------------------------------------------------------------------
+
+        /**
+         * Get the Post ID
+         */
         protected void parsePostID()
         {
             try {
@@ -147,6 +154,9 @@ public class BloggerPost
             }
         }
 
+        /**
+         * Get the date Post was initially published
+         */
         protected void parsePublished()
         {
             try {
@@ -160,6 +170,9 @@ public class BloggerPost
             }
         }
 
+        /**
+         * Get the Post title
+         */
         protected void parseTitle()
         {
             try {
@@ -172,13 +185,14 @@ public class BloggerPost
                         .getAsString();
 
             } catch (NullPointerException e ) {
-                throw new InvalidBloggerPostException(
-                        "Could not parse post title",
-                        e
-                );
+                String msg = "Could not parse post title";
+                throw new InvalidBloggerPostException(msg, e);
             }
         }
 
+        /**
+         * Get the link to the Post
+         */
         protected void parseLink()
         {
             try {
@@ -203,8 +217,9 @@ public class BloggerPost
                 }
 
                 // If we didn't find it
-                if (this.link == null)
+                if (this.link == null) {
                     throw new InvalidBloggerPostException("Could not parse 'alternate' link");
+                }
 
             } catch(NullPointerException e) {
                 // Wrap as a more descriptive exception
@@ -233,17 +248,27 @@ public class BloggerPost
 
         // Parsers for optional fields
         // --------------------------------------------------------------------------
+
+        /**
+         * Get update timestamp
+         */
         protected void parseLastUpdated()
         {
             try {
                 this.lastUpdated = parseDateTimeString("updated");
 
             } catch (NullPointerException | DateTimeParseException e) {
-                // TODO:
-                //  - Implement logging for this
+                Log.e(
+                        LOG_TAG,
+                        "Could not parse UPDATE DATE data for BloggerPost: " + getBloggerPostID(),
+                        e
+                );
             }
         }
 
+        /**
+         * Get categories for this Post (teams, competition)
+         */
         protected void parseCategories()
         {
             try {
@@ -260,8 +285,11 @@ public class BloggerPost
                                     .getAsString()
                             ));
             } catch (NullPointerException | IllegalStateException | ClassCastException e ) {
-                // TODO:
-                //  - Implement logging to handle these exceptions
+                Log.e(
+                        LOG_TAG,
+                        "Could not parse CATEGORY data for BloggerPost: " + getBloggerPostID(),
+                        e
+                );
             }
         }
 
@@ -272,7 +300,7 @@ public class BloggerPost
          * @param timeString The identifier of the timestamp
          * @return A LocalDateTime object, with nano set to 0
          */
-        LocalDateTime parseDateTimeString(String timeString)
+        private LocalDateTime parseDateTimeString(String timeString)
         {
             return
                 OffsetDateTime.parse
