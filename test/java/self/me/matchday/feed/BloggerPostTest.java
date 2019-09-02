@@ -87,6 +87,7 @@ class BloggerPostTest
     void verifySetsAllPostIDs(BloggerPost entry)
     {
         try {
+            Log.d(LOG_TAG, "Testing Post ID: " + entry.getBloggerPostID() + "...");
             assertTrue(
                     entry
                             .getBloggerPostID()
@@ -95,6 +96,8 @@ class BloggerPostTest
                                             + "blog-\\d*.post-\\d*"
                             )
             );
+
+            Log.d(LOG_TAG, "Passed.");
 
         } catch(AssertionFailedError e ) {
             String msg = "ID test failed on: " + entry.getBloggerPostID();
@@ -110,6 +113,8 @@ class BloggerPostTest
     void verifySetsAllPublishedDates(BloggerPost entry)
     {
         try {
+            Log.d(LOG_TAG, "Publication date: " + entry.getPublished() + "..." );
+
             assertTrue(
                 LocalDateTime.parse(
                     entry.getPublished().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
@@ -118,6 +123,9 @@ class BloggerPostTest
                     "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?"
                 )
             );
+
+            Log.d(LOG_TAG, "Passed.");
+
         } catch(AssertionFailedError e) {
             String msg = "Published date test failed on:\n" + entry;
             throw new AssertionFailedError(msg, e);
@@ -132,6 +140,8 @@ class BloggerPostTest
     void verifySetsAllUpdatedDates(BloggerPost entry)
     {
         try {
+            Log.d(LOG_TAG, "Update date: " + entry.getLastUpdated() + "..." );
+
             assertTrue(
                     LocalDateTime.parse(
                         entry.getLastUpdated().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
@@ -140,6 +150,9 @@ class BloggerPostTest
                         "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?"
                     )
             );
+
+            Log.d(LOG_TAG, "Passed.");
+
         } catch (AssertionFailedError e) {
             String msg = "Updated test failed on: " + entry;
             throw new AssertionFailedError(msg, e);
@@ -154,42 +167,31 @@ class BloggerPostTest
     void verifySetsAllCategories(BloggerPost entry)
     {
         try {
+            int catCount = entry.getCategories().size();
+            Log.d( LOG_TAG, "Post has: " + catCount + " categories.");
+
+            // TESTS:*******************************
+            // Ensure we have at least one category set
+            assertTrue(catCount >= 1);
             // Ensure no nulls/empties
             entry
                 .getCategories()
-                .forEach(category ->
+                .forEach(category -> {
+                    Log.d(LOG_TAG, "Testing category: " + category);
                     assertNotEquals(
-                        "", category
-                    )
-                );
+                            "", category
+                    );
+                });
+
+            Log.d(LOG_TAG, "All tests passed." );
+
         } catch(AssertionFailedError e ) {
             String msg = "Category not null test failed on: " + entry;
             throw new AssertionFailedError(msg, e);
         }
     }
     
-    
-    @Tag("FIELDS")
-    @DisplayName("Check category size (should be at least 1)")
-    @ParameterizedTest(name="Checking {index}: {0}")
-    @MethodSource("getArguments")
-    void verifyCategory(BloggerPost entry)
-    {
-        try{
-            // Ensure post has at least one category
-            // tag attached
-            assertTrue( entry.getCategories().size() >= 1 );
-            
-        } catch(AssertionFailedError e) {
-            String msg
-                    = "Test failed on:\n" + entry + "\n"
-                    + "Expected: >= 1"
-                    + "; Actual: " + entry.getCategories().size();
-            throw new AssertionFailedError(msg, e);
-        }
-    }
-    
-    
+
     @Tag("FIELDS")
     @DisplayName("Check that all titles are not empty/null")
     @ParameterizedTest(name="{index} => entries={0}")
@@ -197,9 +199,14 @@ class BloggerPostTest
     void verifySetsAllTitles(BloggerPost entry)
     {
         try {
+            Log.d(LOG_TAG, "Checking title: " + entry.getTitle() );
+
             assertNotEquals(
                     "", entry.getTitle()
             );
+
+            Log.d(LOG_TAG, "Passed.");
+
         } catch (AssertionFailedError e) {
             String msg = "Title test failed on: " + entry;
             throw new AssertionFailedError(msg, e);
@@ -214,11 +221,18 @@ class BloggerPostTest
     void verifySetsAllContents(BloggerPost entry)
     {
         try {
+            Log.d(
+                    LOG_TAG,
+                    "Testing content:\n-------------------------------------------------------\n"
+                            + entry.getContent()
+            );
             assertTrue(
                     entry.getContent().matches(
                             "(<\\w*)((\\s/>)|(.*</\\w*>))"
                     )
             );
+            Log.d(LOG_TAG, "\n\nPassed.");
+
         } catch (AssertionFailedError e) {
             String msg = "Content test failed on: " + entry;
             throw new AssertionFailedError(msg, e);
@@ -233,11 +247,15 @@ class BloggerPostTest
     void verifySetsAllLinks(BloggerPost entry)
     {
         try {
+            Log.d(LOG_TAG, "Testing link: " + entry.getLink() );
+
             assertTrue(
                     entry.getLink().matches(
                     "http://galatamanhdf.blogspot.com/\\d{4}/\\d{2}/[-,\\w]*.html"
                     )
             );
+            Log.d(LOG_TAG, "Passed.");
+
         } catch (AssertionFailedError e) {
             String msg = "Links test failed on: " + entry.getLink();
             throw new AssertionFailedError(msg, e);

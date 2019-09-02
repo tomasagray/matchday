@@ -6,6 +6,7 @@ package self.me.matchday.io;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,8 +32,10 @@ class JsonStreamReaderTest
     
     @Test
     @Tag("GENERAL")
+    @DisplayName("Ensure JsonStreamReader correctly parses a LOCAL known-good JSON file.")
     void verifyHandlesValidJSONTest() throws IOException
-    {        
+    {
+        Log.d(LOG_TAG, "Testing JSON data at: " + MatchDayTest.LOCAL_KNOWN_GOOD_JSON);
         // Good JSON - should not throw exception
         JsonObject localJson = 
                 JsonStreamReader.readLocal(
@@ -47,25 +50,29 @@ class JsonStreamReaderTest
         // Tests
         assertFalse( localJson.entrySet().isEmpty() );
         assertFalse( remoteJson.entrySet().isEmpty() );
+
+        Log.d(LOG_TAG, "Test passed.");
     }
     
     
     @ParameterizedTest
     @Tag("GENERAL")
     @ValueSource( strings = { MatchDayTest.LOCAL_INVALID_JSON })
+    @DisplayName("Ensure JsonStreamReader catches errors in invalid JSON from a LOCAL source.")
     void verifyHandlesInvalidJSONTest(String candidate)
     {
-        Log.i(LOG_TAG, "Testing: " + candidate);
+        Log.d(LOG_TAG, "Testing: " + candidate);
         
         try {
             // Bad JSON - should throw JsonSyntaxException
             JsonObject badJson = JsonStreamReader.readLocal( Paths.get(candidate) );
-            Log.d(LOG_TAG, "This should NOT be printed!!!" + badJson.getAsString());
+            Log.e(LOG_TAG, "This should NOT be printed!!!" + badJson.toString() );
             
             // Should not be thrown
             throw new NullPointerException();
+
         } catch(Exception e) {
-            Log.d(LOG_TAG, "Caught exception: " + e.getMessage());
+            Log.d(LOG_TAG, "Caught exception:\n\t" + e.getMessage());
             assertTrue( e instanceof JsonSyntaxException );
         }
     }

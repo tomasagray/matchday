@@ -33,6 +33,8 @@ class GalatamanMatchSourceTest
     private static Blogger currentBlog;
     private static Blogger knownGoodBlog;
 
+    // Setup
+    // --------------------------------------------------------------------------------------------
     @BeforeAll
     static void setup()
     {
@@ -62,21 +64,19 @@ class GalatamanMatchSourceTest
     {
         return
                 Stream.concat(
-                        currentBlog
-                                .getEntries()
-                                .stream()
-//                                .map(post -> (GalatamanPost)post)
-//                                .map(GalatamanPost::new)
-                                .map(Arguments::of),
-                        knownGoodBlog
-                                .getEntries()
-                                .stream()
-//                                .map(post -> (GalatamanPost)post)
-//                                .map(GalatamanPost::new)
-                                .map(Arguments::of)
+                    currentBlog
+                        .getEntries()
+                        .stream()
+                        .map(Arguments::of),
+                    knownGoodBlog
+                        .getEntries()
+                        .stream()
+                        .map(Arguments::of)
                 );
     }
 
+    // Tests
+    // ------------------------------------------------------------------------------------------
 
     @Tag("LINKS")
     @DisplayName("Ensure every source has at least one link ")
@@ -85,9 +85,13 @@ class GalatamanMatchSourceTest
     void verifyGetsAtLeastOneLink(GalatamanPost gp)
     {
         try {
-            gp.getSources().forEach(source ->
-                    assertTrue(source.getURLs().size() >= 1)
-            );
+            Log.d(LOG_TAG, "Testing Post: " + gp.getTitle() );
+
+            gp.getSources().forEach(source -> {
+                int count = source.getURLs().size();
+                assertTrue(count >= 1);
+                Log.d(LOG_TAG, "Test passed, URL count: " + count);
+            });
 
         } catch (AssertionFailedError e) {
             String msg = "Minimal link test failed on:\n" + gp

@@ -5,6 +5,7 @@
 package self.me.matchday.io;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import self.me.matchday.util.Log;
@@ -23,6 +24,7 @@ class TextFileReaderTest
 
     @Test
     @Tag("GENERAL")
+    @DisplayName("Ensure TextFileReader throws an IOException when trying to read from invalid source.")
     void verifyHandlesBadURLTest()
     {
         // The bad URLs
@@ -37,29 +39,15 @@ class TextFileReaderTest
         {
             // Ensure each generates an exception
             try {
-                Log.i(LOG_TAG, "Testing: " + url);
-
+                Log.d(LOG_TAG, "Testing: " + url);
+                // Attempt to read non-existent data
                 String nothing = TextFileReader.readRemote( new URL(url) );
+
             } catch(Exception e) {
+                Log.d(LOG_TAG, "Caught exception type: " + e.getClass().getCanonicalName() );
                 // Make sure each one throws an IO exception
                 Assertions.assertTrue( e instanceof  IOException );
             }
-        }
-    }
-    
-    @Test
-    @Tag("ERRORS")
-    void verifyHandlesImageTest()
-    {
-        String imgURL = "https://images-na.ssl-images-amazon.com/images/I/51Oe1gyY85L.jpg";
-        try {
-            Log.i(LOG_TAG, "Testing: " + imgURL);
-            // Try to read an image remotely
-            String hasselhoff = TextFileReader.readRemote( new URL(imgURL) );
-            // Should not execute
-            Log.e(LOG_TAG, "This should not be! " + hasselhoff);
-        } catch(IOException e) {
-            Log.e(LOG_TAG, "Could not read test data\n" + e.getMessage());
         }
     }
 }

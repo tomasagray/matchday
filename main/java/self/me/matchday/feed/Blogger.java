@@ -29,6 +29,8 @@ public final class Blogger
     private final JsonObject blog;
     private final IBloggerPostProcessor postProcessor;
     private final JsonObject feed;
+
+    private final String blogId;
     private final String title;
     private final String version;
     private final String author;
@@ -48,6 +50,7 @@ public final class Blogger
 
         // Parse the blog metadata
         this.feed = parseFeed();
+        this.blogId = parseId();
         this.title = parseTitle();
         this.version = parseVersion();
         this.author = parseAuthor();
@@ -73,6 +76,28 @@ public final class Blogger
         }
         
         return feed;
+    }
+
+    /**
+     * Get the top-level Blogger ID.
+     *
+     * @return String representing the Blog's ID
+     */
+    private String parseId()
+    {
+        String id;
+
+        try {
+            id =
+                    feed.get("id")
+                    .getAsJsonObject()
+                    .get("$t")
+                    .getAsString();
+        } catch (NullPointerException e) {
+            throw new InvalidBloggerFeedException("Could not parse blog ID", e);
+        }
+
+        return id;
     }
     
     /**
@@ -203,6 +228,10 @@ public final class Blogger
     
     // Getters 
     // -----------------------------------------------------------------------
+    @Contract(pure = true)
+    public String getBlogId() {
+        return this.blogId;
+    }
     @Contract(pure = true)
     public List<BloggerPost> getEntries() {
         return this.entries;

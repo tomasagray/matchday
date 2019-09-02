@@ -16,8 +16,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,15 +32,15 @@ class ICDManagerTest
 
     // Test parameters
     // -----------------------------------------------------------------------------------
-    private static final String testURL =
-            "http://galatamanhdf.blogspot.com/feeds/posts/default?alt=json";
-    private static final List<URL> urls = new ArrayList<>();
-    private static final ICDManager icdm = ICDManager.getInstance();
-    private static final int URL_LIMIT = 10;
+    private static final int URL_LIMIT = 3;
     private static final String LINK_PATTERN =
             "https://d\\d{2}.inclouddrive.com/download.php\\?accesstoken=([A-z,0-9-])*";
+    private static final String testURL =
+            "http://galatamanhdf.blogspot.com/feeds/posts/default?alt=json";
 
     // Test resources
+    private static final List<URL> urls = new ArrayList<>();
+    private static final ICDManager icdm = ICDManager.getInstance();
     private static FSUser user;
     private static Blogger blog;
 
@@ -139,28 +141,38 @@ class ICDManagerTest
     @DisplayName("Logout disables page read; make sure we CAN'T read download page")
     void logoutTest()
     {
-        // Perform logout
-        icdm.logout();
+        try {
+            // Perform logout
+            icdm.logout();
 
-        // TEST: ************************
-        assertFalse( icdm.isLoggedIn() );
-        System.out.println("ICDM is logged out");
+            // TESTS: ************************
+            assertFalse(icdm.isLoggedIn());
+            Log.d(LOG_TAG, "ICDM successfully logged out.");
 
-        Optional<List<URL>> url = ((GalatamanPost) blog.getEntries().get(0))
-                .getSources()
-                .stream()
-                .map(GalatamanMatchSource::getURLs)
-                .reduce((a, b) -> a);
+            // Get a sample URL from the MatchSource
+            List<URL> urls = ((GalatamanPost) blog.getEntries().get(0))
+                    .getSources()
+                    .stream()
+                    .map(GalatamanMatchSource::getURLs)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+            URL testUrl = urls.get(0);
 
-        if(url.isPresent()) {
-            URL theUrl = url.get().get(0);
-            // TEST: **********************
-            assertFalse( theUrl.toString().matches(LINK_PATTERN) );
-            System.out.println("Did not read URL");
+            Log.d(LOG_TAG, "Testing URL: " + testUrl );
+            // Attempt to extract D/L URL; should fail
+            Optional<URL> downloadURL = icdm.getDownloadURL(urls.get(0));
+            // Perform test
+            assertFalse( downloadURL.isPresent() );
+
+            Log.d(LOG_TAG, "Test passed; we could NOT read D/L URL after logging out.");
+
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Caught exception during test:\n" + e.getMessage(), e);
         }
     }
 
     @Tag("ICD")
+//    @Disabled
     @Order(2)
     @DisplayName("Test the getDownloadURL method can get the D/L link")
     @ParameterizedTest(name=" for: {index}: {0}")
@@ -192,12 +204,14 @@ class ICDManagerTest
     @Disabled
     @Test
     @Order(5)
+    @DisplayName("Ensure we can properly save all cookie data")
     void saveCookieData() {
     }
 
     @Disabled
     @Test
     @Order(6)
+    @DisplayName("Ensure we can retrieve all needed cookie data from local store")
     void loadCookieData() {
     }
 
