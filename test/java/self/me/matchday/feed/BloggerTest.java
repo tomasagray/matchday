@@ -4,16 +4,19 @@
  */
 package self.me.matchday.feed;
 
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import self.me.matchday.MatchDayTest;
-import self.me.matchday.util.Log;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import self.me.matchday.MatchDayTest;
+import self.me.matchday.util.Log;
 
 /**
  * Test suite for the Blogger class.
