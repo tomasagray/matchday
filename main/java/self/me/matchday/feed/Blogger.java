@@ -21,7 +21,7 @@ import self.me.matchday.io.JsonStreamReader;
  *
  * @author tomas
  */
-public final class Blogger {
+public abstract class Blogger {
   // Fields
   // -------------------------------------------------------------------------
   private final JsonObject blog;
@@ -37,7 +37,7 @@ public final class Blogger {
 
   // Constructor
   // -------------------------------------------------------------------------
-  public Blogger(URL url, IBloggerPostProcessor postProcessor) throws IOException {
+  protected Blogger(URL url, IBloggerPostProcessor postProcessor) throws IOException {
     // Save constructor args
     this.postProcessor = postProcessor;
 

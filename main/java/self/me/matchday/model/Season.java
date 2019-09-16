@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 
 public class Season {
-  private LocalDate startDate;
-  private LocalDate endDate;
-  private ZoneId timeZone;
+  private final LocalDate startDate;
+  private final LocalDate endDate;
+  private final ZoneId timeZone;
 
   public Season(LocalDate startDate, LocalDate endDate, ZoneId timeZone) {
     this.startDate = startDate;

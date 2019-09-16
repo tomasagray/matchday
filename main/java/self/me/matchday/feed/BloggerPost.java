@@ -29,7 +29,6 @@ public class BloggerPost {
 
   // Fields
   // -------------------------------------------------------------------------
-  private final JsonObject bloggerPost;
   private final String bloggerPostID;
   private final LocalDateTime published;
   private final LocalDateTime lastUpdated;
@@ -42,7 +41,6 @@ public class BloggerPost {
   // -------------------------------------------------------------------------
   protected BloggerPost(BloggerPostBuilder builder) {
     // Initialize our object with a properly initialized copy
-    this.bloggerPost = builder.bloggerPost;
     this.bloggerPostID = builder.bloggerPostID;
     this.published = builder.published;
     this.lastUpdated = builder.lastUpdated;

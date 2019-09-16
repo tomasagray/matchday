@@ -4,15 +4,10 @@
  */
 package self.me.matchday.feed;
 
-/**
- *
- * @author tomas
- */
-public class EmptyBloggerFeedException extends RuntimeException
-{
-    @Override
-    public String getMessage()
-    {
-        return "This feed contains no entries, or is an invalid Blogger feed.";
-    }
+/** @author tomas */
+public class EmptyBloggerFeedException extends RuntimeException {
+  @Override
+  public String getMessage() {
+    return "This feed contains no entries, or is an invalid Blogger feed.";
+  }
 }

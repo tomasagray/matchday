@@ -19,7 +19,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
-import self.me.matchday.MatchDayTest;
+import self.me.matchday.TestConstants;
+import self.me.matchday.feed.galataman.GalatamanBlog;
 import self.me.matchday.util.Log;
 
 /** @author tomas */
@@ -36,9 +37,11 @@ class BloggerPostTest {
     try {
       // Read the JSON files & make Bloggers
       currentBlog =
-          new Blogger(new URL(MatchDayTest.REMOTE_CONTEMPORARY_JSON), new BloggerPostProcessor());
+          new GalatamanBlog(
+              new URL(TestConstants.REMOTE_CONTEMPORARY_JSON), new BloggerPostProcessor());
       knownGoodBlog =
-          new Blogger(new URL(MatchDayTest.REMOTE_KNOWN_GOOD_JSON), new BloggerPostProcessor());
+          new GalatamanBlog(
+              new URL(TestConstants.REMOTE_KNOWN_GOOD_JSON), new BloggerPostProcessor());
 
     } catch (IOException e) {
       Log.d(LOG_TAG, "Could not open test file: " + e.getMessage(), e);

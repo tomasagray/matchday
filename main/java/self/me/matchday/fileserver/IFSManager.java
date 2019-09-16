@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 
-public interface IFSManager {
+interface IFSManager {
   // Login to the file-server
   boolean login(FSUser user);
 

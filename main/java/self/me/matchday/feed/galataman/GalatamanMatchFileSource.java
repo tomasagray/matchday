@@ -27,7 +27,7 @@ import self.me.matchday.util.Log;
  *
  * @author tomas
  */
-public final class GalatamanMatchSource {
+public final class GalatamanMatchFileSource {
   private static final String LOG_TAG = "GManMatchSource";
 
   // Fields
@@ -45,8 +45,8 @@ public final class GalatamanMatchSource {
 
   // Constructor
   // -------------------------------------------------------------------------
-  private GalatamanMatchSource(GalatamanMatchSourceBuilder builder) {
-    // Initialize fields
+  private GalatamanMatchFileSource(GalatamanMatchSourceBuilder builder) {
+    // Unpack builder object
     this.metadataStr = builder.metadataStr;
     this.channel = builder.channel;
     this.source = builder.source;
@@ -304,8 +304,8 @@ public final class GalatamanMatchSource {
 
     @NotNull
     @Contract(" -> new")
-    GalatamanMatchSource build() {
-      return new GalatamanMatchSource(this);
+    GalatamanMatchFileSource build() {
+      return new GalatamanMatchFileSource(this);
     }
   }
 }

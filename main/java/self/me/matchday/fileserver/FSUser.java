@@ -11,11 +11,11 @@ public abstract class FSUser {
 
   // Constructors
   // --------------------------------------------------------
-  public FSUser(String name) {
+  FSUser(String name) {
     this.userName = name;
   }
 
-  public FSUser(String name, String password) {
+  private FSUser(String name, String password) {
     this(name);
     this.password = password;
   }

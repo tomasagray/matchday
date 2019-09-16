@@ -18,6 +18,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import self.me.matchday.feed.BloggerPost;
+import self.me.matchday.feed.galataman.GalatamanMatchFileSource.GalatamanMatchSourceBuilder;
 import self.me.matchday.util.Log;
 
 /**
@@ -31,7 +32,7 @@ public final class GalatamanPost extends BloggerPost {
 
   // Fields
   // -------------------------------------------------------------------------
-  private final List<GalatamanMatchSource> sources;
+  private final List<GalatamanMatchFileSource> sources;
 
   // Constructor
   // -------------------------------------------------------------------------
@@ -46,7 +47,7 @@ public final class GalatamanPost extends BloggerPost {
 
   // Getters
   // -------------------------------------------------------------------------
-  public List<GalatamanMatchSource> getSources() {
+  public List<GalatamanMatchFileSource> getSources() {
     return this.sources;
   }
 
@@ -67,14 +68,11 @@ public final class GalatamanPost extends BloggerPost {
   // ---------------------------------------------------------------------------------
   /** Parses Galataman-specific content and constructs a fully-formed GalatamanPost object. */
   static class GalatamanPostBuilder extends BloggerPostBuilder {
-    private final List<GalatamanMatchSource> sources = new ArrayList<>();
-    private final IMatchSourceProcessor sourceProcessor;
+    private final List<GalatamanMatchFileSource> sources = new ArrayList<>();
 
     // Constructor
-    GalatamanPostBuilder(JsonObject bloggerPost, IMatchSourceProcessor sourceProcessor) {
+    GalatamanPostBuilder(JsonObject bloggerPost) {
       super(bloggerPost);
-      // Save source processor
-      this.sourceProcessor = sourceProcessor;
     }
 
     /** Extracts match source data from this post. */
@@ -102,20 +100,22 @@ public final class GalatamanPost extends BloggerPost {
             Element innerToken = token.nextElementSibling();
             while ((innerToken != null) && !(isSourceData.test(innerToken))) {
               // When we find a link to a video file
-              if (isVideoLink.test(innerToken))
+              if (isVideoLink.test(innerToken)) {
                 // Extract href attribute & add it to our
                 // source's list of URLs
                 urls.add(new URL(innerToken.attr("href")));
+              }
 
               // Advance inner token
               innerToken = innerToken.nextElementSibling();
             }
 
-            // Parse dara
-            GalatamanMatchSource source = sourceProcessor.parse(html, urls);
+            // Parse data into file sources
+            GalatamanMatchFileSource fileSources =
+                new GalatamanMatchSourceBuilder(html, urls).build();
 
             // Add match source to object
-            this.sources.add(source);
+            this.sources.add(fileSources);
           }
 
           // Advance the search token
@@ -167,6 +167,7 @@ public final class GalatamanPost extends BloggerPost {
       // -----------------------------------------------
       // Parse content
       parseMatchSources();
+
       // Construct a fully-formed GalatamanPost object
       return new GalatamanPost(this);
     }

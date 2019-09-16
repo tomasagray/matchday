@@ -4,14 +4,9 @@
  */
 package self.me.matchday.feed;
 
-/**
- *
- * @author tomas
- */
-class InvalidBloggerFeedException extends RuntimeException
-{
-    InvalidBloggerFeedException(String msg, Exception e)
-    {
-        super(msg, e);
-    }
+/** @author tomas */
+class InvalidBloggerFeedException extends RuntimeException {
+  InvalidBloggerFeedException(String msg, Exception e) {
+    super(msg, e);
+  }
 }

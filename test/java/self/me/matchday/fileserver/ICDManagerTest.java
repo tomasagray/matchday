@@ -25,7 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import self.me.matchday.feed.Blogger;
-import self.me.matchday.feed.galataman.GalatamanMatchSource;
+import self.me.matchday.feed.galataman.GalatamanBlog;
+import self.me.matchday.feed.galataman.GalatamanMatchFileSource;
 import self.me.matchday.feed.galataman.GalatamanPost;
 import self.me.matchday.feed.galataman.GalatamanPostProcessor;
 import self.me.matchday.util.Log;
@@ -56,7 +57,7 @@ class ICDManagerTest {
     loadUserData();
 
     // Setup blog
-    blog = new Blogger(new URL(testURL), new GalatamanPostProcessor());
+    blog = new GalatamanBlog(new URL(testURL), new GalatamanPostProcessor());
 
     // Populate url list with all available URLs,
     // regardless of match/post
@@ -65,7 +66,9 @@ class ICDManagerTest {
             gp -> {
               if (gp instanceof GalatamanPost) {
                 ((GalatamanPost) gp)
-                    .getSources().stream().map(GalatamanMatchSource::getURLs).forEach(urls::addAll);
+                    .getSources().stream()
+                        .map(GalatamanMatchFileSource::getURLs)
+                        .forEach(urls::addAll);
               }
             });
 
@@ -138,7 +141,7 @@ class ICDManagerTest {
       List<URL> urls =
           ((GalatamanPost) blog.getEntries().get(0))
               .getSources().stream()
-                  .map(GalatamanMatchSource::getURLs)
+                  .map(GalatamanMatchFileSource::getURLs)
                   .flatMap(Collection::stream)
                   .collect(Collectors.toList());
       URL testUrl = urls.get(0);

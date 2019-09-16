@@ -7,7 +7,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import self.me.matchday.util.Log;
 
-public class ICDCookiePolicy implements CookiePolicy {
+class ICDCookiePolicy implements CookiePolicy {
   private static final String LOG_TAG = "ICDCookiePolicy";
 
   // Other InCloudDrive URLs
