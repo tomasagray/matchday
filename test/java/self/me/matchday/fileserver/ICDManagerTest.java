@@ -25,8 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import self.me.matchday.feed.Blogger;
+import self.me.matchday.feed.IMatchFileSource;
 import self.me.matchday.feed.galataman.GalatamanBlog;
-import self.me.matchday.feed.galataman.GalatamanMatchFileSource;
 import self.me.matchday.feed.galataman.GalatamanPost;
 import self.me.matchday.feed.galataman.GalatamanPostProcessor;
 import self.me.matchday.util.Log;
@@ -66,8 +66,8 @@ class ICDManagerTest {
             gp -> {
               if (gp instanceof GalatamanPost) {
                 ((GalatamanPost) gp)
-                    .getSources().stream()
-                        .map(GalatamanMatchFileSource::getURLs)
+                    .getMatchFileSources().stream()
+                        .map(IMatchFileSource::getUrls)
                         .forEach(urls::addAll);
               }
             });
@@ -129,34 +129,29 @@ class ICDManagerTest {
   @Order(3)
   @DisplayName("Logout disables page read; make sure we CAN'T read download page")
   void logoutTest() {
-    try {
-      // Perform logout
-      icdm.logout();
+    // Perform logout
+    icdm.logout();
 
-      // TESTS: ************************
-      assertFalse(icdm.isLoggedIn());
-      Log.d(LOG_TAG, "ICDM successfully logged out.");
+    // TESTS: ************************
+    assertFalse(icdm.isLoggedIn());
+    Log.d(LOG_TAG, "ICDM successfully logged out.");
 
-      // Get a sample URL from the MatchSource
-      List<URL> urls =
-          ((GalatamanPost) blog.getEntries().get(0))
-              .getSources().stream()
-                  .map(GalatamanMatchFileSource::getURLs)
-                  .flatMap(Collection::stream)
-                  .collect(Collectors.toList());
-      URL testUrl = urls.get(0);
+    // Get a sample URL from the MatchSource
+    List<URL> urls =
+        ((GalatamanPost) blog.getEntries().get(0))
+            .getMatchFileSources().stream()
+                .map(IMatchFileSource::getUrls)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    URL testUrl = urls.get(0);
 
-      Log.d(LOG_TAG, "Testing URL: " + testUrl);
-      // Attempt to extract D/L URL; should fail
-      Optional<URL> downloadURL = icdm.getDownloadURL(urls.get(0));
-      // Perform test
-      assertFalse(downloadURL.isPresent());
+    Log.d(LOG_TAG, "Testing URL: " + testUrl);
+    // Attempt to extract D/L URL; should fail
+    Optional<URL> downloadURL = icdm.getDownloadURL(urls.get(0));
+    // Perform test
+    assertFalse(downloadURL.isPresent());
 
-      Log.d(LOG_TAG, "Test passed; we could NOT read D/L URL after logging out.");
-
-    } catch (IOException e) {
-      Log.e(LOG_TAG, "Caught exception during test:\n" + e.getMessage(), e);
-    }
+    Log.d(LOG_TAG, "Test passed; we could NOT read D/L URL after logging out.");
   }
 
   @Tag("ICD")
@@ -165,7 +160,7 @@ class ICDManagerTest {
   @DisplayName("Test the getDownloadURL method can get the D/L link")
   @ParameterizedTest(name = " for: {index}: {0}")
   @MethodSource("getUrls")
-  void getDownloadURL(URL url) throws IOException {
+  void getDownloadURL(URL url) {
     // Ensure logged in
     if (!icdm.isLoggedIn()) {
       Log.i(LOG_TAG, "User was not logged in; logging in now...");

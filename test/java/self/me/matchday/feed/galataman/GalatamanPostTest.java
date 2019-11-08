@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Stream;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -53,15 +54,12 @@ class GalatamanPostTest {
    *
    * @return Stream<Arguments> A stream of Arguments for test methods
    */
+  @NotNull
   private static Stream<Arguments> getArguments() {
     return Stream.concat(
         currentBlog.getEntries().stream()
-            //                                .map(post -> (GalatamanPost)post)
-            //                                .map(GalatamanPost::new)
             .map(Arguments::of),
         knownGoodBlog.getEntries().stream()
-            //                                .map(post -> (GalatamanPost)post)
-            //                                .map(GalatamanPost::new)
             .map(Arguments::of));
   }
 
@@ -69,9 +67,9 @@ class GalatamanPostTest {
   @DisplayName("Verify gets at least one source from each post")
   @ParameterizedTest(name = "Testing: {index}; {0}")
   @MethodSource("getArguments")
-  void getsAtLeastOneSourceFromEachPost(GalatamanPost gp) {
+  void getsAtLeastOneSourceFromEachPost(@NotNull GalatamanPost gp) {
     try {
-      assertTrue(gp.getSources().size() >= 1);
+      assertTrue(gp.getMatchFileSources().size() >= 1);
       Log.d(LOG_TAG, "Found:\n" + gp);
 
     } catch (AssertionFailedError e) {
@@ -86,7 +84,7 @@ class GalatamanPostTest {
   void examineKnownGoodForCorrectSourceCount() {
     try {
       GalatamanPost gp = (GalatamanPost) knownGoodBlog.getEntries().get(0);
-      assertEquals(4, gp.getSources().size());
+      assertEquals(4, gp.getMatchFileSources().size());
 
     } catch (AssertionFailedError e) {
       String msg = "Link count test failed!:\n" + e.getMessage();

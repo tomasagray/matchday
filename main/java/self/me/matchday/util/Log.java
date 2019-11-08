@@ -8,6 +8,7 @@ import java.time.ZoneId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+// TODO: Write tests for this class.
 /** Class to handle logging functionality. */
 public final class Log {
   // Identifier constants
@@ -50,16 +51,20 @@ public final class Log {
       pkg = getCallingPackage(currentThread().getStackTrace());
     }
 
+    // TODO: Fix this
     /**
      * Helper method to extract the package name of the method which sent the log message. This will
-     * be the 5th element in the stack: java.lang <> getStackTrace |-self.me.matchday.util.LogEntry
+     * be the 5th element in the stack:
+     * java.lang <> getStackTrace
+     *  |-self.me.matchday.util.LogEntry
      * <> <init> |-self.me.matchday.util.Log <> <init> |-self.me.matchday.util.Log <> d |-{THE CLASS
      * WE WANT}
      *
      * @param elements Array of stack trace elements
      * @return The name of the package
      */
-    private String getCallingPackage(StackTraceElement[] elements) {
+    @NotNull
+    private String getCallingPackage(@NotNull StackTraceElement[] elements) {
       // 5th Element
       StackTraceElement callingElement = elements[4];
       String className = callingElement.getClassName();
@@ -78,12 +83,12 @@ public final class Log {
       sb.append(dateTime.toLocalDate().toString())
           .append(" - ")
           .append(dateTime.toLocalTime().toString())
-          .append("] ")
+          .append("]   (=")
+          .append(tag)
+          .append(")\n")
           .append(level.name())
           .append(": ")
           .append(pkg)
-          .append("/")
-          .append(tag)
           .append(":\n\t")
           .append(logMsg);
       if (throwable != null) {

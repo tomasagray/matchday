@@ -14,6 +14,8 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Log;
 
 /**
@@ -24,7 +26,7 @@ import self.me.matchday.util.Log;
  *
  * @author tomas
  */
-public class BloggerPost {
+public abstract class BloggerPost {
   private static final String LOG_TAG = "BloggerPostClass";
 
   // Fields
@@ -39,7 +41,8 @@ public class BloggerPost {
 
   // Constructor
   // -------------------------------------------------------------------------
-  protected BloggerPost(BloggerPostBuilder builder) {
+  @Contract(pure = true)
+  protected BloggerPost(@NotNull BloggerPostBuilder builder) {
     // Initialize our object with a properly initialized copy
     this.bloggerPostID = builder.bloggerPostID;
     this.published = builder.published;
@@ -117,7 +120,7 @@ public class BloggerPost {
    * Constructs a fully-formed BloggerPost object which is then passed to the BloggerPost
    * constructor.
    */
-  public static class BloggerPostBuilder {
+  public static abstract class BloggerPostBuilder {
     private final JsonObject bloggerPost;
     private String bloggerPostID;
     private String title;
@@ -259,18 +262,6 @@ public class BloggerPost {
      *
      * @return A fully-formed, properly constructed BloggerPost
      */
-    public BloggerPost build() {
-      // Parse mandatory fields
-      parsePostID();
-      parsePublished();
-      parseTitle();
-      parseLink();
-      parseContent();
-      // Parse optional fields
-      parseLastUpdated();
-      parseCategories();
-      // Construct a fully-formed BloggerPost object
-      return new BloggerPost(this);
-    }
+    public abstract BloggerPost build();
   }
 }

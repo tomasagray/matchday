@@ -14,9 +14,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.feed.IMatchFileSource;
 import self.me.matchday.model.InvalidMetadataException;
 import self.me.matchday.model.MetadataTuple;
 import self.me.matchday.util.Log;
@@ -27,12 +30,11 @@ import self.me.matchday.util.Log;
  *
  * @author tomas
  */
-public final class GalatamanMatchFileSource {
+public final class GalatamanMatchFileSource implements IMatchFileSource {
   private static final String LOG_TAG = "GManMatchSource";
 
   // Fields
-  // -------------------------------------------------------------------------
-  private final String metadataStr;
+  // ------------------------------------------------------------------------
   private final String channel;
   private final String source;
   private final List<String> languages;
@@ -40,19 +42,18 @@ public final class GalatamanMatchFileSource {
   private final List<String> audioData;
   private final String duration;
   private final String size;
-  private final String release;
+  private final Resolution resolution;
   private final List<URL> urls;
 
   // Constructor
   // -------------------------------------------------------------------------
   private GalatamanMatchFileSource(GalatamanMatchSourceBuilder builder) {
     // Unpack builder object
-    this.metadataStr = builder.metadataStr;
     this.channel = builder.channel;
     this.source = builder.source;
     this.duration = builder.duration;
     this.size = builder.size;
-    this.release = builder.release;
+    this.resolution = builder.resolution;
 
     // Initialize immutable List fields
     this.languages = Collections.unmodifiableList(builder.languages);
@@ -63,11 +64,7 @@ public final class GalatamanMatchFileSource {
   // Getters
   // -------------------------------------------------------------------------
   @Contract(pure = true)
-  public String getMetadataStr() {
-    return metadataStr;
-  }
-
-  @Contract(pure = true)
+  @Override
   public String getChannel() {
     return channel;
   }
@@ -103,12 +100,12 @@ public final class GalatamanMatchFileSource {
   }
 
   @Contract(pure = true)
-  public String getRelease() {
-    return this.release;
+  public Resolution getResolution() {
+    return this.resolution;
   }
 
   @Contract(pure = true)
-  public List<URL> getURLs() {
+  public List<URL> getUrls() {
     return this.urls;
   }
 
@@ -140,8 +137,8 @@ public final class GalatamanMatchFileSource {
         + "\t\tSize: "
         + this.size
         + "\n"
-        + "\t\tRelease: "
-        + this.release
+        + "\t\tResolution: "
+        + this.resolution
         + "\n"
         + "\t\tURLS: "
         + this.urls
@@ -151,6 +148,18 @@ public final class GalatamanMatchFileSource {
 
   /** Builder class to parse and create a MatchSource from a GalatamanHDF post. */
   static final class GalatamanMatchSourceBuilder {
+    // Metadata identifiers
+    // -------------------------------------------------------------------------
+    private static final String CHANNEL = "CHANNEL";
+    private static final String SOURCE = "SOURCE";
+    private static final String LANGUAGE = "LANGUAGE";
+    private static final String COMMENTARY = "COMMENTARY";
+    private static final String VIDEO = "VIDEO";
+    private static final String AUDIO = "AUDIO";
+    private static final String DURATION = "DURATION";
+    private static final String SIZE = "SIZE";
+    private static final String RESOLUTION = "RELEASE";
+
     // Fields
     // -------------------------------------------------------------------------
     private final String metadataStr;
@@ -161,7 +170,7 @@ public final class GalatamanMatchFileSource {
     private final List<String> audioData = new ArrayList<>();
     private String duration;
     private String size;
-    private String release;
+    private Resolution resolution;
     private final List<URL> urls;
 
     // Constructor
@@ -172,11 +181,8 @@ public final class GalatamanMatchFileSource {
       // Copy URL List
       this.urls = new ArrayList<>(urls);
 
-      // Cleanup HTML, removing superfluous &nbsp;
-      String cleanedHTML = matchDataHTML.replace("&nbsp;", "");
-
-      // Parse data into items
-      parseDataItems(cleanedHTML)
+      // Cleanup HTML, removing superfluous &nbsp; and parse data into items
+      parseDataItems(matchDataHTML.replace("&nbsp;", ""))
           // Parse each data item
           .forEach(this::parseDataItem);
     }
@@ -223,30 +229,30 @@ public final class GalatamanMatchFileSource {
       // Examine the key and assign the value to the correct
       // metadata field
       switch (key) {
-        case "CHANNEL":
+        case CHANNEL:
           this.channel = value;
           break;
-        case "SOURCE":
+        case SOURCE:
           this.source = value;
           break;
-        case "LANGUAGE":
-        case "COMMENTARY":
+        case LANGUAGE:
+        case COMMENTARY:
           this.languages.addAll(parseLanguages(value));
           break;
-        case "VIDEO":
+        case VIDEO:
           this.videoData.addAll(parseAVData(value));
           break;
-        case "AUDIO":
+        case AUDIO:
           this.audioData.addAll(parseAVData(value));
           break;
-        case "DURATION":
+        case DURATION:
           this.duration = value;
           break;
-        case "SIZE":
+        case SIZE:
           this.size = value;
           break;
-        case "RELEASE":
-          this.release = value;
+        case RESOLUTION:
+          this.resolution = parseResolution(value);
           break;
         default:
           throw new GalatamanPostParseException("INVALID KEY/VALUE: " + kv.toString());
@@ -259,6 +265,7 @@ public final class GalatamanMatchFileSource {
      * @param langStr A String containing language names, separated by a delimiter configured in the
      *     GalatamanPost class.
      */
+    @NotNull
     private List<String> parseLanguages(@NotNull String langStr) {
       // Split string based on delimiter
       List<String> languages = new ArrayList<>(Arrays.asList(langStr.split(LANGUAGE_DELIMITER)));
@@ -274,6 +281,7 @@ public final class GalatamanMatchFileSource {
      * @param avData A String containing audio/video data items, separated by a delimiter configured
      *     in the GalatamanPost class.
      */
+    @NotNull
     private List<String> parseAVData(@NotNull String avData) {
       // Temporary container
       List<String> dataItems = new ArrayList<>();
@@ -288,6 +296,42 @@ public final class GalatamanMatchFileSource {
       }
 
       return dataItems;
+    }
+
+    /**
+     * Determine the appropriate enumerated video resolution for this video source.
+     *
+     * @param resolution The String representing the video resolution
+     * @return An enumerated video resolution value.
+     */
+    private Resolution parseResolution(@NotNull String resolution) {
+      // Define pattern matchers
+      final Matcher matcher4k = Pattern.compile(".*4k.*").matcher(resolution);
+      final Matcher matcher1080p = Pattern.compile(".*1080p.*").matcher(resolution);
+      final Matcher matcher1080i = Pattern.compile(".*1080i.*").matcher(resolution);
+      // all 720 sources are treated as 720p
+      final Matcher matcher720p = Pattern.compile(".*720.*").matcher(resolution);
+      final Matcher matcher576p = Pattern.compile(".*576p.*").matcher(resolution);
+
+      // Analyze resolution & return
+      if (matcher4k.matches()) {
+        return Resolution.R_4k;
+      } else if (matcher1080p.matches()) {
+        return Resolution.R_1080p;
+      } else if (matcher1080i.matches()) {
+        return Resolution.R_1080i;
+      } else if (matcher720p.matches()) {
+        return Resolution.R_720p;
+      } else if (matcher576p.matches()) {
+        return Resolution.R_576p;
+      } else {
+        Log.i(
+            LOG_TAG,
+            "Could not determine video resolution for file source: "
+                + metadataStr + "; defaulting to SD"
+        );
+        return Resolution.R_SD;
+      }
     }
 
     /**

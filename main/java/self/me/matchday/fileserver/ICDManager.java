@@ -61,9 +61,11 @@ public class ICDManager implements IFSManager {
 
   // Public API
   // -----------------------------------------------------------------------------------------------------------------
+  // TODO:
+  //  Rewrite this function (and related functions) - division of tasks is unclear
   /** Perform user login and authentication to the file server, and save the returned cookies. */
   @Override
-  public boolean login(FSUser fsUser) {
+  public boolean login(@NotNull FSUser fsUser) {
     // Assume login will fail
     boolean loginSuccessful = false;
     // Save user instance
@@ -129,29 +131,32 @@ public class ICDManager implements IFSManager {
    *
    * @param url The URL of the ICD page
    * @return An Optional containing the DD URL, if found
-   * @throws IOException If any problems connecting to, or reading the page
    */
   @Override
-  public Optional<URL> getDownloadURL(URL url) throws IOException {
+  public Optional<URL> getDownloadURL(@NotNull URL url)  {
     // By default, empty container
     Optional<URL> downloadLink = Optional.empty();
 
-    // Open a connection
-    URLConnection conn = url.openConnection();
-    // Attach cookies
-    conn.setRequestProperty("Cookie", cookieManager.getCookieString());
-    // Connect to file server
-    conn.connect();
+    try {
+      // Open a connection
+      URLConnection conn = url.openConnection();
+      // Attach cookies
+      conn.setRequestProperty("Cookie", cookieManager.getCookieString());
+      // Connect to file server
+      conn.connect();
 
-    // Read the page from the file server & DOM-ify it
-    Document filePage = Jsoup.parse(readServerResponse(conn));
-    // Get all <a> with the 'downloadnow' class
-    Elements elements = filePage.getElementsByClass(DOWNLOAD_LINK_IDENTIFIER);
-    // - If we got a hit
-    if (!elements.isEmpty()) {
-      // - Extract href from <a>
-      String theLink = elements.first().attr("href");
-      downloadLink = Optional.of(new URL(theLink));
+      // Read the page from the file server & DOM-ify it
+      Document filePage = Jsoup.parse(readServerResponse(conn));
+      // Get all <a> with the 'downloadnow' class
+      Elements elements = filePage.getElementsByClass(DOWNLOAD_LINK_IDENTIFIER);
+      // - If we got a hit
+      if (!elements.isEmpty()) {
+        // - Extract href from <a>
+        String theLink = elements.first().attr("href");
+        downloadLink = Optional.of(new URL(theLink));
+      }
+    } catch (IOException e) {
+      Log.e(LOG_TAG, "Could not parse download link from supplied URL: " + url, e);
     }
 
     return downloadLink;
@@ -187,7 +192,7 @@ public class ICDManager implements IFSManager {
     connection.setRequestProperty(
         "Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
     // Set user agent (how we appear to server)
-    connection.setRequestProperty("User-Agent", ICDManager.USER_AGENT);
+    connection.setRequestProperty("User-Agent", USER_AGENT);
 
     // Return the connection
     return connection;
@@ -207,7 +212,9 @@ public class ICDManager implements IFSManager {
       int i;
       // Read the response, one byte at a time
       // until the end of the stream
-      while ((i = is.read()) != -1) response.append((char) i);
+      while ((i = is.read()) != -1) {
+        response.append((char) i);
+      }
     }
 
     // Assemble and return response

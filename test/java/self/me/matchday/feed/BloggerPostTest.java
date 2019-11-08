@@ -38,10 +38,10 @@ class BloggerPostTest {
       // Read the JSON files & make Bloggers
       currentBlog =
           new GalatamanBlog(
-              new URL(TestConstants.REMOTE_CONTEMPORARY_JSON), new BloggerPostProcessor());
+              new URL(TestConstants.REMOTE_CONTEMPORARY_JSON), new MockBloggerPostProcessor());
       knownGoodBlog =
           new GalatamanBlog(
-              new URL(TestConstants.REMOTE_KNOWN_GOOD_JSON), new BloggerPostProcessor());
+              new URL(TestConstants.REMOTE_KNOWN_GOOD_JSON), new MockBloggerPostProcessor());
 
     } catch (IOException e) {
       Log.d(LOG_TAG, "Could not open test file: " + e.getMessage(), e);

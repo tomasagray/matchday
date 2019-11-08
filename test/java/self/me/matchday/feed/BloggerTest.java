@@ -40,7 +40,7 @@ class BloggerTest {
   @BeforeAll
   void setup() throws IOException {
     blog =
-        new GalatamanBlog(new URL(TestConstants.REMOTE_KNOWN_GOOD_JSON), new BloggerPostProcessor());
+        new GalatamanBlog(new URL(TestConstants.REMOTE_KNOWN_GOOD_JSON), new MockBloggerPostProcessor());
   }
 
   // Tests
@@ -91,7 +91,7 @@ class BloggerTest {
       // Read the file
       // Make sure Blogger.java handles the unexpected
       Blogger blg =
-          new GalatamanBlog(new URL(TestConstants.REMOTE_MISSING_DATA), new BloggerPostProcessor());
+          new GalatamanBlog(new URL(TestConstants.REMOTE_MISSING_DATA), new MockBloggerPostProcessor());
       // Try to use the object; this should NOT execute
       Log.e(LOG_TAG, "This should NOT have printed!\nBlog: " + blg);
 
@@ -111,7 +111,7 @@ class BloggerTest {
 
     try {
       // Make a Blogger - should throw EmptyBloggerFeedException
-      Blogger blg = new GalatamanBlog(new URL(TestConstants.EMPTY_SET), new BloggerPostProcessor());
+      Blogger blg = new GalatamanBlog(new URL(TestConstants.EMPTY_SET), new MockBloggerPostProcessor());
 
       // This should not execute
       Log.e(LOG_TAG, "This should NOT be printed: " + blg.getEntries().size());

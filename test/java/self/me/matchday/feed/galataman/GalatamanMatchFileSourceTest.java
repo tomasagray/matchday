@@ -67,10 +67,10 @@ class GalatamanMatchFileSourceTest {
     try {
       Log.d(LOG_TAG, "Testing Post: " + gp.getTitle());
 
-      gp.getSources()
+      gp.getMatchFileSources()
           .forEach(
               source -> {
-                int count = source.getURLs().size();
+                int count = source.getUrls().size();
                 assertTrue(count >= 1);
                 Log.d(LOG_TAG, "Test passed, URL count: " + count);
               });
