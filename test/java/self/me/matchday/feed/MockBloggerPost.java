@@ -1,6 +1,11 @@
+/*
+ * Copyright © 2020, Tomás Gray. All rights reserved.
+ */
+
 package self.me.matchday.feed;
 
 import com.google.gson.JsonObject;
+import self.me.matchday.feed.blogger.BloggerPost;
 
 public class MockBloggerPost extends BloggerPost {
 

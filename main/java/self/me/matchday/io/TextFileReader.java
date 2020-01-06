@@ -1,4 +1,8 @@
 /*
+ * Copyright © 2020, Tomás Gray. All rights reserved.
+ */
+
+/*
  *  All code written by Tomás Gray unless otherwise noted.
  *  May not be reproduced without written consent from the above.
  */
@@ -13,7 +17,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.jetbrains.annotations.NotNull;
 
-/** @author tomas */
+/**
+ * A simple class for reading text files into a String.
+ */
 public class TextFileReader {
   /**
    * Reads a remote text file from a web server via HTTP
@@ -43,7 +49,10 @@ public class TextFileReader {
       throw new IOException(
           "Stream read error <"
               + e.getClass().getCanonicalName()
-              + ">: Could not find a file at the specified URL.");
+              + ">: Could not find a file at the specified URL ("
+              + url.toString() + ")",
+          e
+      );
     } finally {
       // Make sure the stream is closed
       if (reader != null) reader.close();

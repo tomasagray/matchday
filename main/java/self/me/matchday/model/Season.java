@@ -1,36 +1,128 @@
+/*
+ * Copyright © 2020, Tomás Gray. All rights reserved.
+ */
+
 package self.me.matchday.model;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Objects;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import lombok.Data;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
-public class Season {
+@Data
+@Entity
+@Table(name = "Seasons")
+@Embeddable
+public final class Season implements Serializable {
+
+  private static final String LOG_TAG = "SeasonClass";
+  private static final long serialVersionUID = 123456L;   // for cross-platform serialization
+
   // Default parameters
-  private static final LocalDate START_DATE = LocalDate.of(-1, Month.AUGUST, 1);
-  private static final LocalDate END_DATE = LocalDate.of(-1, Month.MAY, 31);
+  private static final int MILLENNIUM = 2_000;
+  private static final int MAX_YEAR = 3_000;
+  private static final int DEFAULT_YEAR = -1;
+  private static final int DEFAULT_START_DAY = 1;
+  private static final int DEFAULT_END_DAY = 31;
+  private static final LocalDate START_DATE = LocalDate.of(DEFAULT_YEAR, Month.AUGUST, DEFAULT_START_DAY);
+  private static final LocalDate END_DATE = LocalDate.of(DEFAULT_YEAR, Month.MAY, DEFAULT_END_DAY);
+  private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
   // Fields
+  @Id
+  private final String seasonId;
   private final LocalDate startDate;
   private final LocalDate endDate;
 
-  public Season(int startYear, int endYear) {
+  /**
+   * Default constructor; defaults to the current year, 1 Aug to 31 May of next year.
+   */
+  public Season() {
+    this.startDate = LocalDate.from(START_DATE).withYear(LocalDate.now().getYear());
+    this.endDate = this.startDate.plusYears(1);
+    this.seasonId = MD5String.fromData(this.startDate.toString());
+  }
+  /**
+   * Create a new Season object. Defaults to 1 Aug, and 31 May of given years. Two-digit years
+   * (e.g., 14) are changed to four-digit by adding the millennium (2000). Illegal dates throw a
+   * DateTimeFormatException.
+   *
+   * @param startYear The beginning year of the season (ex.: 2019)
+   * @param endYear The end year of the season (ex: 2020)
+   */
+  public Season(final int startYear, final int endYear) {
+    // Check for illegal dates
+    if (startYear < MILLENNIUM
+        || startYear > MAX_YEAR
+        || endYear < MILLENNIUM
+        || endYear > MAX_YEAR) {
+      throw new DateTimeParseException(
+          "The years must be within the range: 2000 - 3000", startYear + "/" + endYear, 0
+      );
+    }
+
     this.startDate = LocalDate.from(START_DATE).withYear(startYear);
     this.endDate = LocalDate.from(END_DATE).withYear(endYear);
+    this.seasonId = MD5String.fromData(this.startDate.toString());
+  }
+  /**
+   * Create a Season object from a given date. The Season is assumed to start on 1 August and finish
+   * on 31 May.
+   *
+   */
+  public Season(@NotNull LocalDate date) {
+    int startYear, endYear;
+    // Equalize years for comparison
+    final LocalDate comparisonDate = date.withYear(DEFAULT_YEAR);
+
+    // Date is in later half of season
+    if (comparisonDate.isBefore(END_DATE)) {
+      endYear = date.getYear();
+      startYear = endYear -1;
+    } else {
+      // Date is in first half of season
+      startYear = date.getYear();
+      endYear = startYear +1;
+    }
+
+    this.startDate = LocalDate.from(date).withYear(startYear);
+    this.endDate = LocalDate.from(date).withYear(endYear);
+    this.seasonId = MD5String.fromData(this.startDate.toString());
   }
 
-  // Getters & Setters
-  // -------------------------------------------------------------------------
-  public LocalDate getStartDate() {
-    return startDate;
-  }
-
-  public LocalDate getEndDate() {
-    return endDate;
+  @NotNull
+  @Contract(pure = true)
+  @Override
+  public String toString() {
+    return DATE_FORMATTER.format(startDate) + " - " + DATE_FORMATTER.format(endDate);
   }
 
   @Override
-  public String toString() {
-    return startDate.getYear()
-        + " - "
-        + endDate.getYear();
+  public boolean equals(Object obj) {
+    if(obj == this) {
+      return true;
+    }
+    if( !(obj instanceof Season) ) {
+      return false;
+    }
+
+    // Cast for comparison
+    Season season = (Season)obj;
+    return season.getStartDate().isEqual(this.getStartDate())
+        && season.getEndDate().isEqual(this.getEndDate());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this);
   }
 }

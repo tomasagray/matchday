@@ -1,4 +1,8 @@
 /*
+ * Copyright © 2020, Tomás Gray. All rights reserved.
+ */
+
+/*
  *  All code written by Tomás Gray unless otherwise noted.
  *  May not be reproduced without written consent from the above.
  */
@@ -52,11 +56,11 @@ public class JsonStreamReader {
     return parser.parse(json).getAsJsonObject();
   }
 
-  /*
+  /**
    * Parses a JSON string into a JsonObject.
    *
    * @param   json    A JSON String
-   * @return  JsonObject A JSON Object
+   * @return  A JSON Object
    */
   public static JsonObject readJsonString(String json) {
     return parser.parse(json).getAsJsonObject();
