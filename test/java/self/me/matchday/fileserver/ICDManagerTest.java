@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2020, Tomás Gray. All rights reserved.
+ */
+
 package self.me.matchday.fileserver;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -24,19 +28,21 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import self.me.matchday.feed.Blogger;
-import self.me.matchday.feed.IMatchFileSource;
-import self.me.matchday.feed.galataman.GalatamanBlog;
-import self.me.matchday.feed.galataman.GalatamanPost;
-import self.me.matchday.feed.galataman.GalatamanPostProcessor;
+import self.me.matchday.feed.IEventFileSource;
+import self.me.matchday.feed.blogger.Blogger;
+import self.me.matchday.feed.blogger.galataman.GalatamanBlog;
+import self.me.matchday.feed.blogger.galataman.GalatamanPost;
+import self.me.matchday.feed.blogger.galataman.GalatamanPostProcessor;
+import self.me.matchday.fileserver.inclouddrive.ICDManager;
+import self.me.matchday.fileserver.inclouddrive.ICDUser;
 import self.me.matchday.util.Log;
 
+@Disabled
 @TestMethodOrder(OrderAnnotation.class)
 class ICDManagerTest {
   private static final String LOG_TAG = "ICDManagerTest";
 
   // Test parameters
-  // -----------------------------------------------------------------------------------
   private static final int URL_LIMIT = 3;
   private static final String LINK_PATTERN =
       "https://d\\d{2}.inclouddrive.com/download.php\\?accesstoken=([A-z,0-9-])*";
@@ -50,7 +56,6 @@ class ICDManagerTest {
   private static Blogger blog;
 
   // Setup
-  // ----------------------------------------------------------------------------------
   @BeforeAll
   static void setup() throws IOException {
     // Setup user
@@ -66,9 +71,9 @@ class ICDManagerTest {
             gp -> {
               if (gp instanceof GalatamanPost) {
                 ((GalatamanPost) gp)
-                    .getMatchFileSources().stream()
-                        .map(IMatchFileSource::getUrls)
-                        .forEach(urls::addAll);
+                    .getEventFileSources().stream()
+                    .map(IEventFileSource::getUrls)
+                    .forEach(urls::addAll);
               }
             });
 
@@ -107,18 +112,15 @@ class ICDManagerTest {
   }
 
   // Tests
-  // ----------------------------------------------------------------------------------
   @Test
   @Order(1)
   @DisplayName("Login test; ensure login functionality")
   void login() {
-    Log.i(LOG_TAG, "POSTing to URL: " + ICDManager.ICDData.getLoginURL());
     Log.i(LOG_TAG, "Data:\n" + user.toString());
     // Attempt to login
     icdm.login(user);
 
     // Print results
-    Log.i(LOG_TAG, "Response:\n" + icdm.getLoginResponse());
     Log.i(LOG_TAG, "Login Successful?:\n" + icdm.isLoggedIn() + "\n");
 
     // Run the tests
@@ -139,10 +141,10 @@ class ICDManagerTest {
     // Get a sample URL from the MatchSource
     List<URL> urls =
         ((GalatamanPost) blog.getEntries().get(0))
-            .getMatchFileSources().stream()
-                .map(IMatchFileSource::getUrls)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+            .getEventFileSources().stream()
+            .map(IEventFileSource::getUrls)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
     URL testUrl = urls.get(0);
 
     Log.d(LOG_TAG, "Testing URL: " + testUrl);
@@ -155,7 +157,7 @@ class ICDManagerTest {
   }
 
   @Tag("ICD")
-  //    @Disabled
+//  @Disabled
   @Order(2)
   @DisplayName("Test the getDownloadURL method can get the D/L link")
   @ParameterizedTest(name = " for: {index}: {0}")
@@ -193,3 +195,4 @@ class ICDManagerTest {
   @DisplayName("Ensure we can retrieve all needed cookie data from local store")
   void loadCookieData() {}
 }
+

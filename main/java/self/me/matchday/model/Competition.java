@@ -1,10 +1,20 @@
 /*
+ * Copyright © 2020, Tomás Gray. All rights reserved.
+ */
+
+/*
  *  All code written by Tomás Gray unless otherwise noted.
  *  May not be reproduced without written consent from the above.
  */
 package self.me.matchday.model;
 
-import java.awt.Image;
+import java.io.Serializable;
+import java.util.Locale;
+import java.util.Objects;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -13,44 +23,61 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author tomas
  */
-public class Competition {
+@Data
+@Entity
+@Table(name = "Competitions")
+public final class Competition implements Serializable {
+
+  private static final long serialVersionUID = 123456L;   // for cross-platform serialization
+
   // Fields
-  // -----------------------------------------------------
-  private MD5 competitionID;
+  @Id
+  private final String competitionId;
   private String name;
   private String abbreviation;
   private Affinity affinity;
-  private int countryID;
-  // Images
-  private Image emblem;
-  private Image clearLogo;
-  private Image landscape;
+  private Locale locale;
 
-  // TODO: Fix this
-  public Competition(@NotNull String name) {
-    this.name = name;
-    // Automatically create an abbreviation if none is supplied
-    this.abbreviation = this.name.substring(0, 2);
-    // Generate ID
-    this.competitionID = new MD5(name);
+  // Default constructor
+  public Competition() {
+    this.competitionId = MD5String.generate();
   }
 
-  public Competition(@NotNull String name, @NotNull String abbreviation, @NotNull MD5 competitionID) {
+  public Competition(@NotNull String name) {
+    this.name = name.trim();
+    // Automatically create an abbreviation if none is supplied
+    this.abbreviation = Abbreviator.abbreviate(this.name);
+    // Generate ID
+    this.competitionId = MD5String.fromData(this.name);
+}
+
+  public Competition(@NotNull String name, @NotNull String abbreviation) {
     this.name = name;
     this.abbreviation = abbreviation;
-    this.competitionID = competitionID;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getAbbreviation() {
-    return abbreviation;
+    this.competitionId = MD5String.fromData(this.name);
   }
 
   @Override
   public String toString() {
     return this.name;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(obj == this) {
+      return true;
+    }
+    if( !(obj instanceof Competition) ) {
+      return false;
+    }
+
+    // Cast for comparison
+    Competition competition = (Competition)obj;
+    return competition.getName().equals(this.getName());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this);
   }
 }

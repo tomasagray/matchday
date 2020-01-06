@@ -1,4 +1,8 @@
 /*
+ * Copyright © 2020, Tomás Gray. All rights reserved.
+ */
+
+/*
  *  All code written by Tomás Gray unless otherwise noted.
  *  May not be reproduced without written consent from the above.
  */

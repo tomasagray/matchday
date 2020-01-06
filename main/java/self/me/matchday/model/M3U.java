@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2020, Tomás Gray. All rights reserved.
+ */
+
 package self.me.matchday.model;
 
 import java.net.URL;
@@ -17,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
  *  Records may be added to, but not deleted from the playlist.
  */
 public class M3U {
+
   /**
    * Represents a single segment (record) in the playlist, which includes the URI of the media
    * resource, its duration in seconds and an optional title.
@@ -49,8 +54,8 @@ public class M3U {
       return title;
     }
   }
+
   // Static members
-  // ---------------------------------------------------------------------------
   // Standard tags
   private static final String HEADER = "#EXTM3U";
   private static final String INF = "#EXTINF:"; // required; format: #EXTINF:<duration>,<title>
@@ -66,16 +71,12 @@ public class M3U {
   private static final String ENDLIST = "#EXT-X-ENDLIST"; // end of the playlist
 
   // Fields
-  // ----------------------------------------------------------------------------
   private float targetDuration;
   private LocalDateTime programDateTime;
   private final List<MediaSegment> mediaSegments = new ArrayList<>();
   private boolean finalized = false;
 
-  public M3U() {}
-
   // Setters
-  // ----------------------------------------------------------------------------
   /**
    * Set the maximum duration of any given segment.
    * @param duration The duration of the longest segment, in seconds.
@@ -116,7 +117,6 @@ public class M3U {
   }
 
   // Getters
-  // ----------------------------------------------------------------
   /**
    * Returns the longest allowable segment duration, rounded UP to the nearest integer.
    *

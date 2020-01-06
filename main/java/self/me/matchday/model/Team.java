@@ -1,12 +1,23 @@
 /*
+ * Copyright © 2020, Tomás Gray. All rights reserved.
+ */
+
+/*
  *  All code written by Tomás Gray unless otherwise noted.
  *  May not be reproduced without written consent from the above.
  */
 package self.me.matchday.model;
 
 // Imports
-// -----------------------------------------------------
-import java.awt.Image;
+
+import java.io.Serializable;
+import java.util.Locale;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -14,53 +25,62 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author tomas
  */
-public class Team {
+@Data
+@Entity
+@Table(name = "Teams")
+public final class Team implements Serializable {
+
+  private static final long serialVersionUID = 123456L; // for serialization across platforms
+
   // Fields
-  // -----------------------------------------------------
-  private MD5 teamID;
+  @Id
+  @Column(name = "teamId")
+  private final String teamId;
+
   private String name;
   private String abbreviation;
   private Affinity affinity;
-  private int countryID;
-  private int prefLanguageID;
-  // Images
-  private Image emblem;
-  private Image background;
+  private Locale locale;
+
+  // Default constructor
+  public Team() {
+    this.teamId = MD5String.generate();
+  }
 
   public Team(@NotNull String name) {
-    this.name = name.trim();
+    this.name = name;
     // Defaults
-    this.abbreviation = this.name.substring(0,2);
+    this.abbreviation = Abbreviator.abbreviate(this.name);
     this.affinity = Affinity.IGNORE;
-    this.teamID = new MD5(name);
-  }
-
-  public MD5 getTeamID() {
-    return teamID;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getAbbreviation() {
-    return abbreviation;
-  }
-
-  public Affinity getAffinity() {
-    return affinity;
-  }
-
-  public void setAbbreviation(String abbreviation) {
-    this.abbreviation = abbreviation;
-  }
-
-  public void setAffinity(Affinity affinity) {
-    this.affinity = affinity;
+    this.teamId = MD5String.fromData(name);
   }
 
   @Override
   public String toString() {
     return this.name;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this);
+  }
+
+  /**
+   * Compare Teams; they must have identical names and Locales.
+   *
+   * @param obj The team to be compared
+   * @return True/false
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    } else if (!(obj instanceof Team)) {
+      return false;
+    }
+
+    // Cast for comparison
+    final Team team = (Team) obj;
+    return team.getName().equals(this.getName()) && team.getLocale().equals(this.getLocale());
   }
 }

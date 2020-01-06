@@ -1,6 +1,8 @@
-package self.me.matchday.util;
+/*
+ * Copyright © 2020, Tomás Gray. All rights reserved.
+ */
 
-import static java.lang.Thread.currentThread;
+package self.me.matchday.util;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -8,19 +10,12 @@ import java.time.ZoneId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-// TODO: Write tests for this class.
-/** Class to handle logging functionality. */
+/**
+ * Class to handle logging functionality.
+ */
 public final class Log {
-  // Identifier constants
-  // -------------------------------------
-  //    private static final int ERROR = 0;
-  //    private static final int DEBUG = 1;
-  //    private static final int INFO = 2;
-  //    private static final int VERBOSE = 3;
-  //    private static final int WARN = 4;
-  //    private static final int ASSERT = 5;
 
-  public enum Level {
+  private enum Level {
     ERROR,
     DEBUG,
     INFO,
@@ -31,10 +26,9 @@ public final class Log {
 
   private static class LogEntry {
     // Fields
-    // -----------------------------------------
     private final String tag;
     private final String msg;
-    private final String pkg;
+    private final String thread;
     private final Instant timestamp;
     private final Level level;
     private final Throwable throwable;
@@ -46,30 +40,7 @@ public final class Log {
       this.timestamp = timestamp;
       this.level = level;
       this.throwable = throwable;
-
-      // Obtain package info for the calling method
-      pkg = getCallingPackage(currentThread().getStackTrace());
-    }
-
-    // TODO: Fix this
-    /**
-     * Helper method to extract the package name of the method which sent the log message. This will
-     * be the 5th element in the stack:
-     * java.lang <> getStackTrace
-     *  |-self.me.matchday.util.LogEntry
-     * <> <init> |-self.me.matchday.util.Log <> <init> |-self.me.matchday.util.Log <> d |-{THE CLASS
-     * WE WANT}
-     *
-     * @param elements Array of stack trace elements
-     * @return The name of the package
-     */
-    @NotNull
-    private String getCallingPackage(@NotNull StackTraceElement[] elements) {
-      // 5th Element
-      StackTraceElement callingElement = elements[4];
-      String className = callingElement.getClassName();
-      // Return the package name, sans method
-      return className.substring(0, className.lastIndexOf("."));
+      this.thread = Thread.currentThread().getName();
     }
 
     @Override
@@ -79,17 +50,18 @@ public final class Log {
       // Prepare timestamp
       LocalDateTime dateTime = LocalDateTime.ofInstant(timestamp, ZoneId.systemDefault());
       // Holder for text output
-      StringBuilder sb = new StringBuilder("[");
-      sb.append(dateTime.toLocalDate().toString())
-          .append(" - ")
+      StringBuilder sb = new StringBuilder();
+      sb
+          .append(dateTime.toLocalDate().toString())
+          .append(" ")
           .append(dateTime.toLocalTime().toString())
-          .append("]   (=")
-          .append(tag)
-          .append(")\n")
+          .append("  <")
           .append(level.name())
-          .append(": ")
-          .append(pkg)
-          .append(":\n\t")
+          .append(">  --- [")
+          .append(tag)
+          .append("] ")
+          .append(thread)
+          .append(":\t")
           .append(logMsg);
       if (throwable != null) {
         sb.append("\n\tException:\n-----------------\n\t").append(throwable.toString());
