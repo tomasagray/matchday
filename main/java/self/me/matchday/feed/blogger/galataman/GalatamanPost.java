@@ -17,16 +17,23 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import self.me.matchday.feed.IEventFileSource;
-import self.me.matchday.feed.IEventSource;
+import self.me.matchday.feed.EventFileSource;
 import self.me.matchday.feed.blogger.BloggerPost;
 import self.me.matchday.feed.blogger.galataman.GalatamanEventFileSource.GalatamanEventSourceBuilder;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.util.Log;
 
 /**
@@ -35,13 +42,23 @@ import self.me.matchday.util.Log;
  *
  * @author tomas
  */
-public final class GalatamanPost extends BloggerPost implements IEventSource {
+@Entity
+public final class GalatamanPost extends BloggerPost {
 
   private static final String LOG_TAG = "GalatamanPost";
 
   // Fields
-  private final List<IEventFileSource> matchFileSources;
+  @OneToOne(cascade = CascadeType.MERGE)
   private final Event event; // the Event represented by this Post
+  @ElementCollection
+  @OneToMany(cascade = CascadeType.MERGE)
+  private final List<EventFileSource> eventFileSources;
+
+  public GalatamanPost() {
+    super();
+    this.event = null;
+    this.eventFileSources = null;
+  }
 
   // Constructor
   private GalatamanPost(GalatamanPostBuilder builder) {
@@ -49,15 +66,20 @@ public final class GalatamanPost extends BloggerPost implements IEventSource {
     super(builder);
 
     // Copy over parsed Galataman-specific content, making sure List is immutable
-    this.matchFileSources = Collections.unmodifiableList(builder.sources);
+    this.eventFileSources = Collections.unmodifiableList(builder.sources);
     // Extract Event metadata
     this.event = new GalatamanEventDataParser(this).getEvent();
   }
 
   // Overridden methods
   @Override
-  public List<IEventFileSource> getEventFileSources() {
-    return this.matchFileSources;
+  public Event getEvent() {
+    return this.event;
+  }
+
+  @Override
+  public List<EventFileSource> getEventFileSources() {
+    return this.eventFileSources;
   }
 
   @NotNull
@@ -67,17 +89,8 @@ public final class GalatamanPost extends BloggerPost implements IEventSource {
     // Add newly analyzed info to previous String output
     sb.append(super.toString()).append("\nSources:\n");
     // Add each source
-    this.matchFileSources.forEach(sb::append);
+    this.eventFileSources.forEach(sb::append);
     return sb.toString();
-  }
-
-  /**
-   * Return Event metadata.
-   * @return The Event represented by this Post
-   */
-  @Override
-  public Event getEvent() {
-    return this.event;
   }
 
   /** Parses Galataman-specific content and constructs a fully-formed GalatamanPost object. */
@@ -107,17 +120,23 @@ public final class GalatamanPost extends BloggerPost implements IEventSource {
             // Save HTML
             String html = token.html();
             // URLS for this source
-            List<URL> urls = new ArrayList<>();
+            Map<URL, EventPartIdentifier> urls = new HashMap<>();
 
             // Now, continue searching, this time for links,
             // until the next source or the end of the HTML
             Element innerToken = token.nextElementSibling();
+            EventPartIdentifier partIdentifier = EventPartIdentifier.DEFAULT;
+
             while ((innerToken != null) && !(isSourceData.test(innerToken))) {
-              // When we find a link to a video file
-              if (isVideoLink.test(innerToken)) {
-                // Extract href attribute & add it to our
+              // Look for a part identifier
+              final String tokenHtml = innerToken.html();
+              if(EventPartIdentifier.isPartIdentifier(tokenHtml)) {
+                // Create identifier for this part
+                partIdentifier = EventPartIdentifier.fromString(tokenHtml);
+              } else if (isVideoLink.test(innerToken)) {
+                // When we find a link to a video file, extract href attribute & add it to our
                 // source's list of URLs
-                urls.add(new URL(innerToken.attr("href")));
+                urls.put(new URL(innerToken.attr("href")), partIdentifier);
               }
 
               // Advance inner token

@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 @Data
 @Entity
 @Table(name = "Teams")
-public final class Team implements Serializable {
+public class Team implements Serializable {
 
   private static final long serialVersionUID = 123456L; // for serialization across platforms
 

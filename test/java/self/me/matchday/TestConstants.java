@@ -27,8 +27,7 @@ public class TestConstants {
   public static final String EMPTY_SET =
       TEST_SERVER + "soccer/testing/gman_beautified_no_entries.json";
   public static final String REMOTE_CONTEMPORARY_JSON =
-      "https://galatamanhdf.blogspot.com/feeds/posts/default/?alt=json";
-  //            = HOME_SERVER + "soccer/testing/download.json";
+      REMOTE_KNOWN_GOOD_JSON; //"https://galatamanhdfb.blogspot.com/feeds/posts/default/?alt=json";
   public static final String NON_BLOGGER_JSON = "https://daringfireball.net/feeds/json";
 
   // Local sources

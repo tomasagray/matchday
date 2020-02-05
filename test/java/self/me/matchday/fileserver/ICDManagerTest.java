@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,7 +29,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import self.me.matchday.feed.IEventFileSource;
+import self.me.matchday.feed.EventFileSource;
 import self.me.matchday.feed.blogger.Blogger;
 import self.me.matchday.feed.blogger.galataman.GalatamanBlog;
 import self.me.matchday.feed.blogger.galataman.GalatamanPost;
@@ -70,10 +71,13 @@ class ICDManagerTest {
         .forEach(
             gp -> {
               if (gp instanceof GalatamanPost) {
-                ((GalatamanPost) gp)
+                gp
                     .getEventFileSources().stream()
-                    .map(IEventFileSource::getUrls)
-                    .forEach(urls::addAll);
+                    .map(EventFileSource::getUrls)
+                    .map(Map::entrySet)
+                    .flatMap(Collection::stream)
+                    .map(Map.Entry::getKey)
+                    .forEach(urls::add);
               }
             });
 
@@ -140,10 +144,12 @@ class ICDManagerTest {
 
     // Get a sample URL from the MatchSource
     List<URL> urls =
-        ((GalatamanPost) blog.getEntries().get(0))
+        blog.getEntries().get(0)
             .getEventFileSources().stream()
-            .map(IEventFileSource::getUrls)
+            .map(EventFileSource::getUrls)
+            .map(Map::entrySet)
             .flatMap(Collection::stream)
+            .map(Map.Entry::getKey)
             .collect(Collectors.toList());
     URL testUrl = urls.get(0);
 

@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.feed.IEventDataParser;
-import self.me.matchday.feed.IEventSource;
+import self.me.matchday.feed.EventSource;
 import self.me.matchday.feed.InvalidMetadataException;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
@@ -38,11 +38,9 @@ public class GalatamanEventDataParser implements IEventDataParser {
   // Constants
   private static final int MILLENNIUM = 2_000;
   // Title part indices
-  // TODO: Avoid hardcoding these
   private static final int COMP_SEASON_INDEX = 0;
   private static final int FIXTURE_INDEX = 1;
   private static final int TEAM_INDEX = 2;
-  private static final int DATE_INDEX = 3;
 
   // Fields
   private final String[] titleParts;
@@ -55,7 +53,7 @@ public class GalatamanEventDataParser implements IEventDataParser {
   private Team homeTeam;
   private Team awayTeam;
 
-  GalatamanEventDataParser(@NotNull IEventSource eventSource) {
+  GalatamanEventDataParser(@NotNull EventSource eventSource) {
     // Cast to Galataman Post
     GalatamanPost galatamanPost = (GalatamanPost) eventSource;
     this.titleParts = galatamanPost.getTitle().split(TITLE_SPLITTER);

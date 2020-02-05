@@ -31,8 +31,10 @@ import self.me.matchday.util.Log;
  */
 @TestInstance(Lifecycle.PER_CLASS)
 class BloggerTest {
+
   private static final String LOG_TAG = "BloggerTest";
 
+  private static final String IMPOSSIBLE = "This is an impossible link value.";
   private Blogger blog;
 
   // Setup
@@ -98,7 +100,7 @@ class BloggerTest {
               new URL(TestConstants.REMOTE_MISSING_DATA), new MockBloggerPostProcessor());
 
       // Ensure the test fails if an exception is not thrown by the above code
-      assert ((2 + 2) == 5);
+      assert blg.getLink().equals(IMPOSSIBLE);
       Log.e(LOG_TAG, "The test failed. This should not have executed. 2 + 2 does not equal 5.");
 
     } catch (Exception e) {
@@ -125,7 +127,7 @@ class BloggerTest {
           new GalatamanBlog(new URL(TestConstants.EMPTY_SET), new MockBloggerPostProcessor());
 
       // Ensure test fails if no exception thrown. This should not execute
-      assert (2 + 2) == 5;
+      assert blg.getLink().equals(IMPOSSIBLE);
       Log.e(LOG_TAG, "Test FAILED! This should NOT have executed.");
 
     } catch (Exception e) {

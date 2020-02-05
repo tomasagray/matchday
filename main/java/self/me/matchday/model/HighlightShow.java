@@ -6,50 +6,26 @@ package self.me.matchday.model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.HighlightShow.HighlightShowId;
 
 /** A highlight show, week in review or other non-Match televised Event. */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "Highlights")
-@IdClass(HighlightShowId.class)
-public final class HighlightShow extends Event implements Serializable {
+public class HighlightShow extends Event implements Serializable {
 
-  @Id
-  @ManyToOne(targetEntity = Competition.class)
-  @JoinColumn(name = "competitionId")
-  private Competition competition;
-
-  @Id
-  @ManyToOne(targetEntity = Season.class)
-  @JoinColumn(name = "seasonId")
-  private Season season;
-
-  @Id
-  @ManyToOne(targetEntity = Fixture.class)
-  @JoinColumn(name = "fixtureId")
-  private Fixture fixture;
-
-  @Id private String title;
-
-  @Id
-  @Column(name = "date")
-  private LocalDateTime date;
+  // For external identification (MD5 String)
+  private final String highlightShowId;
 
   /** Default, no arg-constructor */
-  HighlightShow() {}
+  HighlightShow() {
+    this.highlightShowId = MD5String.generate();
+  }
 
   private HighlightShow(
       Competition competition, Season season, Fixture fixture, String title, LocalDateTime date) {
@@ -58,6 +34,7 @@ public final class HighlightShow extends Event implements Serializable {
     this.fixture = fixture;
     this.title = title;
     this.date = date;
+    this.highlightShowId = generateHighlightShowId();
   }
 
   // Overrides
@@ -114,42 +91,13 @@ public final class HighlightShow extends Event implements Serializable {
     }
   }
 
-  /** Class representing the composite primary key for this JPA entity. */
-  public static class HighlightShowId implements Serializable {
-    protected String competition;
-    protected String season;
-    protected String fixture;
-    protected LocalDateTime date;
+  private String generateHighlightShowId() {
 
-    public HighlightShowId() {}
-
-    public HighlightShowId(
-        String competitionId, String seasonId, String fixtureId, LocalDateTime date) {
-      this.competition = competitionId;
-      this.season = seasonId;
-      this.fixture = fixtureId;
-      this.date = date;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj == this) {
-        return true;
-      } else if (!(obj instanceof HighlightShowId)) {
-        return false;
-      }
-
-      // Cast
-      final HighlightShowId testId = (HighlightShowId) obj;
-      return testId.competition.equals(this.competition)
-          && testId.fixture.equals(this.fixture)
-          && testId.season.equals(this.season)
-          && testId.date.isEqual(this.date);
-    }
+    return MD5String.fromData(
+        this.title
+            + this.getCompetition().getCompetitionId()
+            + this.getSeason().getSeasonId()
+            + this.getFixture().getFixtureId()
+            + this.getDate().format(EVENT_ID_DATE_FORMATTER));
   }
 }

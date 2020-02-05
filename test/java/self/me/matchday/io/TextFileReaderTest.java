@@ -34,7 +34,7 @@ class TextFileReaderTest {
             "http://ww.nothing.com",
             "http://&&&www.google.com/",
             "http:www.google.com/",
-            "dddddd",
+            "This, of course, is not a valid URL",
             "http://",
             "http//www.google.com/");
   }
