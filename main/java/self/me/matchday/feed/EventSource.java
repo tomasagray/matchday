@@ -5,26 +5,40 @@
 package self.me.matchday.feed;
 
 import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import lombok.Data;
 import self.me.matchday.model.Event;
 
 /**
  * Represents a source for a given Event. Events can have multiple Sources - for example, ESPN, BBC
  * and NBC all broadcast the same Match.
  */
-public interface IEventSource {
+@Data
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class EventSource {
+
+  @Id
+  @GeneratedValue
+  private Long eventSourceId;
+  protected String link;
 
   /**
    * Return the Event this source provides.
    *
    * @return An Event
    */
-  Event getEvent();
+  public abstract Event getEvent();
 
   /**
    * Returns the file resources for this Event.
    *
    * @return An Event file resource
    */
-  List<IEventFileSource> getEventFileSources();
+  public abstract List<EventFileSource> getEventFileSources();
 
 }

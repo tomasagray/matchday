@@ -18,15 +18,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.Data;
+import javax.persistence.Entity;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.feed.IEventFileSource;
+import self.me.matchday.feed.EventFileSource;
 import self.me.matchday.feed.InvalidMetadataException;
 import self.me.matchday.feed.MetadataTuple;
+import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.util.Log;
 
 /**
@@ -35,37 +35,73 @@ import self.me.matchday.util.Log;
  *
  * @author tomas
  */
-@Data
-public final class GalatamanEventFileSource implements IEventFileSource {
+@Entity
+public final class GalatamanEventFileSource extends EventFileSource {
+
   private static final String LOG_TAG = "GManMatchSource";
 
-  // Fields
-  private final String channel;
-  private final String source;
-  private final List<String> languages;
-  private final List<String> videoData;
-  private final List<String> audioData;
-  private final String duration;
-  private final String size;
-  private final Resolution resolution;
-  private final List<URL> urls;
+  @Override
+  public String getChannel() {
+    return this.channel;
+  }
 
-  // Constructor
-  private GalatamanEventFileSource(@NotNull GalatamanMatchSourceBuilder builder) {
+  @Override
+  public String getSource() {
+    return this.source;
+  }
+
+  @Override
+  public List<String> getLanguages() {
+    return this.languages;
+  }
+
+  @Override
+  public List<String> getVideoData() {
+    return this.videoData;
+  }
+
+  @Override
+  public List<String> getAudioData() {
+    return this.audioData;
+  }
+
+  @Override
+  public String getApproximateDuration() {
+    return this.approximateDuration;
+  }
+
+  @Override
+  public String getApproximateFileSize() {
+    return this.approximateFileSize;
+  }
+
+  @Override
+  public Resolution getResolution() {
+    return this.resolution;
+  }
+
+  @Override
+  public Map<URL, EventPartIdentifier> getUrls() {
+    return this.urls;
+  }
+
+  // Constructors
+  public GalatamanEventFileSource() {}
+
+  private GalatamanEventFileSource(@NotNull GalatamanEventSourceBuilder builder) {
     // Unpack builder object
     this.channel = builder.channel;
     this.source = builder.source;
-    this.duration = builder.duration;
-    this.size = builder.size;
+    this.approximateDuration = builder.duration;
+    this.approximateFileSize = builder.size;
     this.resolution = builder.resolution;
 
     // Initialize immutable List fields
     this.languages = Collections.unmodifiableList(builder.languages);
     this.videoData = Collections.unmodifiableList(builder.videoData);
     this.audioData = Collections.unmodifiableList(builder.audioData);
-    this.urls = Collections.unmodifiableList(builder.urls);
+    this.urls = Collections.unmodifiableMap(builder.urls);
   }
-
 
   // Overridden methods
   @NotNull
@@ -89,13 +125,13 @@ public final class GalatamanEventFileSource implements IEventFileSource {
         + this.audioData
         + "\n"
         + "\t\tDuration: "
-        + this.duration
+        + this.approximateDuration
         + "\n"
         + "\t\tSize: "
-        + this.size
+        + this.approximateFileSize
         + "\n"
         + "\t\tResolution: "
-        + this.resolution
+        + this.resolution.getName()
         + "\n"
         + "\t\tURLS: "
         + this.urls
@@ -103,8 +139,8 @@ public final class GalatamanEventFileSource implements IEventFileSource {
         + "\t]\n";
   }
 
-  /** Builder class to parse and create a MatchSource from a GalatamanHDF post. */
-  static final class GalatamanMatchSourceBuilder {
+  /** Builder class to parse and create an EventSource from a GalatamanHDF post. */
+  static final class GalatamanEventSourceBuilder {
     // Metadata identifiers
     private static final String CHANNEL = "CHANNEL";
     private static final String SOURCE = "SOURCE";
@@ -126,14 +162,15 @@ public final class GalatamanEventFileSource implements IEventFileSource {
     private String duration;
     private String size;
     private Resolution resolution;
-    private final List<URL> urls;
+    private final Map<URL, EventPartIdentifier> urls;
 
     // Constructor
-    GalatamanMatchSourceBuilder(@NotNull String matchDataHTML, final List<URL> urls) {
+    GalatamanEventSourceBuilder(
+        @NotNull String matchDataHTML, final Map<URL, EventPartIdentifier> urls) {
       // Save raw metadata
       this.metadataStr = matchDataHTML;
       // Copy URL List
-      this.urls = new ArrayList<>(urls);
+      this.urls = urls;
 
       // Cleanup HTML, removing superfluous &nbsp; and parse data into items
       parseDataItems(matchDataHTML.replace("&nbsp;", ""))
@@ -259,31 +296,15 @@ public final class GalatamanEventFileSource implements IEventFileSource {
      * @return An enumerated video resolution value.
      */
     private Resolution parseResolution(@NotNull String resolution) {
-      // Define pattern matchers
-      final Matcher matcher4k = Pattern.compile(".*4k.*").matcher(resolution);
-      final Matcher matcher1080p = Pattern.compile(".*1080p.*").matcher(resolution);
-      final Matcher matcher1080i = Pattern.compile(".*1080i.*").matcher(resolution);
-      // all 720 sources are treated as 720p
-      final Matcher matcher720p = Pattern.compile(".*720.*").matcher(resolution);
-      final Matcher matcher576p = Pattern.compile(".*576p.*").matcher(resolution);
-
       // Analyze resolution & return
-      if (matcher4k.matches()) {
-        return Resolution.R_4k;
-      } else if (matcher1080p.matches()) {
-        return Resolution.R_1080p;
-      } else if (matcher1080i.matches()) {
-        return Resolution.R_1080i;
-      } else if (matcher720p.matches()) {
-        return Resolution.R_720p;
-      } else if (matcher576p.matches()) {
-        return Resolution.R_576p;
+      if (Resolution.isResolution(resolution)) {
+        return Resolution.fromString(resolution);
       } else {
         Log.i(
             LOG_TAG,
             "Could not determine video resolution for file source: "
-                + metadataStr + "; defaulting to SD"
-        );
+                + metadataStr
+                + "; defaulting to SD");
         return Resolution.R_SD;
       }
     }

@@ -27,9 +27,7 @@ import self.me.matchday.fileserver.IFSManager;
 import self.me.matchday.io.JsonStreamReader;
 import self.me.matchday.util.Log;
 
-/**
- * Implementation of file server management for the InCloudDrive file service.
- */
+/** Implementation of file server management for the InCloudDrive file service. */
 public class ICDManager implements IFSManager {
 
   private static final String LOG_TAG = "ICDManager";
@@ -40,9 +38,11 @@ public class ICDManager implements IFSManager {
   private static final String USERDATA = "userdata";
   private static final String USER_AGENT
       // Windows
-      // = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36";
+      // = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
+      // Chrome/71.0.3578.98 Safari/537.36";
       // Mac
-      = "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
+      =
+      "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
 
   // Singleton instance
   private static volatile ICDManager INSTANCE;
@@ -57,10 +57,10 @@ public class ICDManager implements IFSManager {
   private final ICDCookieManager cookieManager;
   private FSUser user;
   private JsonObject loginResponse; // Response from server after latest login attempt
-  private boolean isLoggedIn;       // Current login status
+  private boolean isLoggedIn; // Current login status
 
   // Constructor
-  private ICDManager() {
+  public ICDManager() {
     // Setup cookie management
     cookieManager = new ICDCookieManager();
     // Set default status to 'logged out'
@@ -68,9 +68,7 @@ public class ICDManager implements IFSManager {
   }
 
   // Public API
-  /**
-   * Perform user login and authentication to the file server, and save the returned cookies.
-   */
+  /** Perform user login and authentication to the file server, and save the returned cookies. */
   @Override
   public void login(@NotNull FSUser fsUser) {
 
@@ -87,19 +85,22 @@ public class ICDManager implements IFSManager {
       // POST login data
       postData(connection, loginData);
       // Read response as a JSON object
-      loginResponse = JsonStreamReader.readJsonString(readServerResponse(connection));
-      Log.i(LOG_TAG, "Got login response: " + loginResponseToString());
+      final JsonObject loginResponse =
+          JsonStreamReader.readJsonString(readServerResponse(connection));
 
-      if (isLoginSuccessful()) {
+      if (isLoginSuccessful(loginResponse)) {
         this.isLoggedIn = true;
         // Save user instance
         this.user = fsUser;
         // Extract cookie from response, create userdata cookie
-        cookieManager.addCookie( USERDATA, loginResponse.get(USER_DATA_IDENTIFIER).getAsString() );
-        Log.i(LOG_TAG, "Successfully logged in user: " + user.getUserName());
+        cookieManager.addCookie(
+            USERDATA, this.loginResponse.get(USER_DATA_IDENTIFIER).getAsString());
+        Log.i(LOG_TAG, "Successfully logged in user: " + user);
 
       } else {
-        Log.i(LOG_TAG, "Failed to login with user: " + user.getUserName());
+        Log.i(
+            LOG_TAG,
+            "Failed to login with user: " + user + "; login response: " + loginResponseToString());
       }
 
     } catch (IOException e) {
@@ -130,7 +131,7 @@ public class ICDManager implements IFSManager {
    * @return An Optional containing the DD URL, if found
    */
   @Override
-  public Optional<URL> getDownloadURL(@NotNull URL url)  {
+  public Optional<URL> getDownloadURL(@NotNull URL url) {
     // By default, empty container
     Optional<URL> downloadLink = Optional.empty();
 
@@ -144,7 +145,7 @@ public class ICDManager implements IFSManager {
 
       // Read the page from the file server & DOM-ify it
       Document filePage = Jsoup.parse(readServerResponse(connection));
-      // Get all <a> with the 'downloadnow' class
+      // Get all <a> with the link identifier class
       Elements elements = filePage.getElementsByClass(DOWNLOAD_LINK_IDENTIFIER);
       // - If we got a hit
       if (!elements.isEmpty()) {
@@ -228,19 +229,23 @@ public class ICDManager implements IFSManager {
     return response.toString();
   }
 
+  // Login
   /**
    * Determine if login has been successfully performed.
    *
    * @return A boolean indicating if the last login attempt was successful
    */
-  private boolean isLoginSuccessful() {
+  private boolean isLoginSuccessful(JsonObject loginResponse) {
+
+    // Save login response
+    this.loginResponse = loginResponse;
     // Assume login will fail
     boolean loggedIn = false;
 
     if (loginResponse != null && !(loginResponse.isJsonNull())) {
       final JsonElement result = loginResponse.get("result");
 
-      if( result != null && !(result.isJsonNull()) ) {
+      if (result != null && !(result.isJsonNull())) {
         final String loginResult = result.getAsString().trim().toUpperCase();
         if ("OK".equals(loginResult)) {
           loggedIn = true;
@@ -301,5 +306,4 @@ public class ICDManager implements IFSManager {
 
     return sb.toString();
   }
-
 }

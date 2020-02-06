@@ -82,6 +82,9 @@ class GalatamanPostTest {
       // Test
       assertTrue(sourceCount >= MIN_SOURCE_COUNT);
 
+      // Print results
+      gp.getEventFileSources().forEach(System.out::println);
+
     } catch (AssertionFailedError e) {
       String msg = "TEST FAILED! Does not contain at least one source:\n" + gp;
       throw new AssertionFailedError(msg, e);

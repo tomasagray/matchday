@@ -12,11 +12,8 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Objects;
-import javax.persistence.Column;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -24,7 +21,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.Match.MatchId;
 
 /**
  * Class representing a match (game) between two teams (home & away) in a given Competition on a
@@ -36,42 +32,26 @@ import self.me.matchday.model.Match.MatchId;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "Matches")
-@IdClass(MatchId.class)
-public final class Match extends Event implements Serializable {
+public class Match extends Event implements Serializable {
 
   private static final long serialVersionUID = 123456L; // for cross-platform serialization
 
-  @Id
-  @ManyToOne(targetEntity = Team.class)
+  // For external identification (MD5 string)
+  // TODO: Resolve Match/HighlightShow ID conflict
+  private final String matchId;
+
+  @ManyToOne(targetEntity = Team.class, cascade = CascadeType.MERGE)
   @JoinColumn(name = "homeTeamId")
   private Team homeTeam;
 
-  @Id
-  @ManyToOne(targetEntity = Team.class)
+  @ManyToOne(targetEntity = Team.class, cascade = CascadeType.MERGE)
   @JoinColumn(name = "awayTeamId")
   private Team awayTeam;
 
-  @Id
-  @ManyToOne(targetEntity = Competition.class)
-  @JoinColumn(name = "competitionId")
-  private Competition competition;
-
-  @Id
-  @ManyToOne(targetEntity = Season.class)
-  @JoinColumn(name = "seasonId")
-  private Season season;
-
-  @Id
-  @ManyToOne(targetEntity = Fixture.class)
-  @JoinColumn(name = "fixtureId")
-  private Fixture fixture;
-
-  @Id
-  @Column(name = "date")
-  private LocalDateTime date;
-
   // Default constructor
-  public Match() {}
+  public Match() {
+    this.matchId = MD5String.generate();
+  }
 
   @Contract(pure = true)
   public Match(
@@ -81,13 +61,27 @@ public final class Match extends Event implements Serializable {
       Season season,
       Fixture fixture,
       LocalDateTime date) {
-    //    this.matchID = matchID;
     this.homeTeam = homeTeam;
     this.awayTeam = awayTeam;
     this.competition = competition;
     this.date = date;
     this.season = season;
     this.fixture = fixture;
+    this.matchId = generateMatchId();
+  }
+
+  @NotNull
+  @Override
+  public String getTitle() {
+    return competition.getName()
+        + ": "
+        + homeTeam.getName()
+        + " vs. "
+        + awayTeam.getName()
+        + " - "
+        + ((fixture.getFixtureNumber() != 0)
+            ? String.format("%s %s", fixture.getTitle(), fixture.getFixtureNumber())
+            : fixture.getTitle());
   }
 
   @NotNull
@@ -107,30 +101,6 @@ public final class Match extends Event implements Serializable {
 
     return str;
   }
-
-//  @Override
-//  public boolean equals(Object obj) {
-//    if (obj == this) {
-//      return true;
-//    }
-//    if (!(obj instanceof Match)) {
-//      return false;
-//    }
-//
-//    // Cast for comparison
-//    Match match = (Match) obj;
-//    return match.getHomeTeam().equals(this.getHomeTeam())
-//        && match.getAwayTeam().equals(this.getAwayTeam())
-//        && match.getCompetition().equals(this.getCompetition())
-//        && match.getSeason().equals(this.getSeason())
-//        && match.getFixture().equals(this.getFixture())
-//        && match.getDate().isEqual(this.getDate());
-//  }
-//
-//  @Override
-//  public int hashCode() {
-//    return Objects.hash(this);
-//  }
 
   /** Builder class for Matches */
   public static class MatchBuilder {
@@ -178,55 +148,15 @@ public final class Match extends Event implements Serializable {
     }
   }
 
-  /** Class representing a unique ID for each Match object, based on the data within that object. */
-  public static class MatchId implements Serializable {
-    protected String homeTeam;
-    protected String awayTeam;
-    protected String competition;
-    protected String season;
-    protected String fixture;
-    protected LocalDateTime date;
+  @NotNull
+  private String generateMatchId() {
 
-    @Contract(pure = true)
-    public MatchId() {}
-
-    @Contract(pure = true)
-    public MatchId(
-        String homeTeam,
-        String awayTeam,
-        String competition,
-        String season,
-        String fixture,
-        LocalDateTime date) {
-      this.homeTeam = homeTeam;
-      this.awayTeam = awayTeam;
-      this.competition = competition;
-      this.season = season;
-      this.fixture = fixture;
-      this.date = date;
-    }
-
-    @Contract(value = "null -> false", pure = true)
-    @Override
-    public boolean equals(Object obj) {
-      if (obj == this) {
-        return true;
-      } else if (!(obj instanceof MatchId)) {
-        return false;
-      }
-
-      MatchId matchId = (MatchId) obj;
-      return matchId.homeTeam.equals(this.homeTeam)
-          && matchId.awayTeam.equals(this.awayTeam)
-          && matchId.competition.equals(this.competition)
-          && matchId.season.equals(this.season)
-          && matchId.fixture.equals(this.fixture)
-          && matchId.date.equals(this.date);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(this);
-    }
+    return MD5String.fromData(
+        this.homeTeam.getTeamId()
+            + this.awayTeam.getTeamId()
+            + this.competition.getCompetitionId()
+            + this.getSeason().getSeasonId()
+            + this.getFixture().getFixtureId()
+            + this.getDate().format(EVENT_ID_DATE_FORMATTER));
   }
 }

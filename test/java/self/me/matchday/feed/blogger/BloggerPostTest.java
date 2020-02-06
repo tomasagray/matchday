@@ -168,7 +168,9 @@ class BloggerPostTest {
       final Matcher matcher = titlePattern.matcher(title);
 
       Log.d(LOG_TAG, "Checking title: " + entry.getTitle());
-      assert matcher.find();
+
+      boolean found = matcher.find();
+      assert found; // TEST
       Log.d(LOG_TAG, "Passed.");
 
     } catch (AssertionFailedError e) {

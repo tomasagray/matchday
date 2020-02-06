@@ -19,8 +19,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.feed.EventSource;
 import self.me.matchday.util.Log;
 
 /**
@@ -31,8 +33,10 @@ import self.me.matchday.util.Log;
  *
  * @author tomas
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class BloggerPost {
+public abstract class BloggerPost extends EventSource {
+
   private static final String LOG_TAG = "BloggerPostClass";
 
   // Fields
@@ -42,7 +46,16 @@ public abstract class BloggerPost {
   private final List<String> categories;
   private final String title;
   private final String content;
-  private final String link;
+
+  // Default constructor, for JPA
+  public BloggerPost() {
+    bloggerPostID = null;
+    published = null;
+    lastUpdated = null;
+    categories = null;
+    title = null;
+    content = null;
+  }
 
   // Constructor
   @Contract(pure = true)
@@ -57,8 +70,6 @@ public abstract class BloggerPost {
     this.content = builder.content;
     this.link = builder.link;
   }
-
-
 
   // Overridden methods
   @Override
@@ -138,8 +149,7 @@ public abstract class BloggerPost {
         this.title = this.bloggerPost.get("title").getAsJsonObject().get("$t").getAsString();
 
       } catch (NullPointerException e) {
-        String msg = "Could not parse post title";
-        throw new InvalidBloggerPostException(msg, e);
+        throw new InvalidBloggerPostException("Could not parse post title", e);
       }
     }
 
@@ -155,12 +165,6 @@ public abstract class BloggerPost {
             // Assign the link
             this.link = link.getAsJsonObject().get("href").getAsString();
         }
-
-        // If we didn't find it
-        if (this.link == null) {
-          throw new InvalidBloggerPostException("Could not parse 'alternate' link");
-        }
-
       } catch (NullPointerException e) {
         // Wrap as a more descriptive exception
         throw new InvalidBloggerPostException("Could not parse post link", e);

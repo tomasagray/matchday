@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 @Data
 @Entity
 @Table(name = "Competitions")
-public final class Competition implements Serializable {
+public class Competition implements Serializable {
 
   private static final long serialVersionUID = 123456L;   // for cross-platform serialization
 

@@ -5,10 +5,22 @@
 package self.me.matchday.feed;
 
 import com.google.gson.JsonObject;
+import java.util.List;
 import self.me.matchday.feed.blogger.BloggerPost;
+import self.me.matchday.model.Event;
 
 public class MockBloggerPost extends BloggerPost {
 
+  // Unused; required by EventSource
+  @Override
+  public Event getEvent() {
+    return null;
+  }
+  // Unused; required by EventSource
+  @Override
+  public List<EventFileSource> getEventFileSources() {
+    return null;
+  }
 
   protected MockBloggerPost(BloggerPostBuilder builder) {
     super(builder);

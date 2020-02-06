@@ -59,25 +59,25 @@ class IEventSourceTest {
   @NotNull
   private static Stream<Arguments> getAllEvents() {
     return Stream.concat(
-        currentBlog.getEvents().map(Arguments::of), knownGoodBlog.getEvents().map(Arguments::of));
+        currentBlog.getEventSources().map(Arguments::of), knownGoodBlog.getEventSources().map(Arguments::of));
   }
 
   @NotNull
   private static Stream<Arguments> getMatches() {
     return Stream.concat(
-        currentBlog.getEvents().filter(e -> e.getEvent() instanceof Match).map(Arguments::of),
-        knownGoodBlog.getEvents().filter(e -> e.getEvent() instanceof Match).map(Arguments::of));
+        currentBlog.getEventSources().filter(e -> e.getEvent() instanceof Match).map(Arguments::of),
+        knownGoodBlog.getEventSources().filter(e -> e.getEvent() instanceof Match).map(Arguments::of));
   }
 
   @NotNull
   private static Stream<Arguments> getHighlightShows() {
     return Stream.concat(
         currentBlog
-            .getEvents()
+            .getEventSources()
             .filter(e -> e.getEvent() instanceof HighlightShow)
             .map(Arguments::of),
         knownGoodBlog
-            .getEvents()
+            .getEventSources()
             .filter(e -> e.getEvent() instanceof HighlightShow)
             .map(Arguments::of));
   }
@@ -85,7 +85,7 @@ class IEventSourceTest {
   @DisplayName("Ensure each Post can be parsed into a Event")
   @ParameterizedTest(name = "Testing: {index}; {0}")
   @MethodSource("getAllEvents")
-  void ensureParsesEvents(@NotNull IEventSource eventSource) {
+  void ensureParsesEvents(@NotNull EventSource eventSource) {
     // Cast to GalatamanPost for identification purposes
     GalatamanPost gp = (GalatamanPost) eventSource;
     System.out.println("Testing post: [" + gp.getBloggerPostID() + "] @ " + gp.getLink() + "\n\n");
@@ -98,10 +98,10 @@ class IEventSourceTest {
   @DisplayName("Ensure parses Match metadata")
   @ParameterizedTest(name = "Testing: {index}; {0}")
   @MethodSource("getMatches")
-  void ensureParsesMatchData(@NotNull IEventSource eventSource) {
+  void ensureParsesMatchData(@NotNull EventSource eventSource) {
     Event event = null;
     // Get the link
-    final String postLink = ((GalatamanPost) eventSource).getLink();
+    final String postLink = eventSource.getLink();
 
     try {
       event = eventSource.getEvent();
@@ -147,10 +147,10 @@ class IEventSourceTest {
   @DisplayName("Ensure parses Highlight Show metadata correctly")
   @ParameterizedTest(name = "Testing: {index}")
   @MethodSource("getHighlightShows")
-  void ensureParsesHighlightData(@NotNull IEventSource eventSource) {
+  void ensureParsesHighlightData(@NotNull EventSource eventSource) {
     Event event = null;
     // Get the link
-    final String postLink = ((GalatamanPost) eventSource).getLink();
+    final String postLink = eventSource.getLink();
 
     try {
       event = eventSource.getEvent();

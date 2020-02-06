@@ -17,6 +17,7 @@ import self.me.matchday.fileserver.inclouddrive.ICDData;
  * Collection class of Patterns specific to the Galataman HDF Blog.
  */
 class GalatamanPattern {
+
   // Entry parsing patterns
   static final String START_OF_SOURCE = Pattern.compile("__*").pattern();
 
@@ -30,6 +31,7 @@ class GalatamanPattern {
 
   static final String AV_DATA_DELIMITER = Pattern.compile("‖").pattern();
 
+
   // Predicates
   static final Predicate<Element> isSourceData =
       elem -> ("b".equals(elem.tagName())) && (elem.text().contains("Channel"));
@@ -38,4 +40,5 @@ class GalatamanPattern {
       elem ->
           ("a".equals(elem.tagName()))
               && (elem.attr("href").startsWith(ICDData.getFileUrlStub()));
+
 }

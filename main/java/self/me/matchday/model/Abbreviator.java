@@ -11,8 +11,6 @@ package self.me.matchday.model;
  */
 class Abbreviator {
 
-  private static final String LOG_TAG = "Abbreviator";
-
   private static final int DEFAULT_LENGTH = 3;
 
   /**

@@ -16,7 +16,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.jetbrains.annotations.Contract;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.io.JsonStreamReader;
 
@@ -25,6 +25,7 @@ import self.me.matchday.io.JsonStreamReader;
  *
  * @author tomas
  */
+@Getter
 public abstract class Blogger {
   // Fields
   private final JsonObject blog;
@@ -230,35 +231,5 @@ public abstract class Blogger {
         + "\n]";
   }
 
-  // Getters
-  @Contract(pure = true)
-  public String getBlogId() {
-    return this.blogId;
-  }
-
-  @Contract(pure = true)
-  public List<BloggerPost> getEntries() {
-    return this.entries;
-  }
-
-  @Contract(pure = true)
-  public String getTitle() {
-    return this.title;
-  }
-
-  @Contract(pure = true)
-  public String getVersion() {
-    return this.version;
-  }
-
-  @Contract(pure = true)
-  public String getAuthor() {
-    return this.author;
-  }
-
-  @Contract(pure = true)
-  public String getLink() {
-    return this.link;
-  }
 
 }
