@@ -9,7 +9,7 @@ package self.me.matchday.model;
  *    Truncate the given String, removing all whitespace first. The user can supply a custom
  *    length for the abbreviation; otherwise the default length (3) will be used.
  */
-class Abbreviator {
+public class Abbreviator {
 
   private static final int DEFAULT_LENGTH = 3;
 
@@ -27,16 +27,17 @@ class Abbreviator {
    * @param str The String to be abbreviated.
    * @return The abbreviated String.
    */
-  static String abbreviate(final String str, final int len) {
+  static String abbreviate(final String str, final int length) {
     String result = null;
     if (str != null) {
       final String noSpaces =
-          str.replaceAll("\\s", ""); // If we are we shipped only whitespace, return null
+          str.replaceAll("\\s", "");
+      // If we are shipped only whitespace, return null
       if (!noSpaces.equals("")) {
-        if (noSpaces.length() < len) {
+        if (noSpaces.length() < length) {
           result = noSpaces.toUpperCase();
         } else {
-          result = noSpaces.substring(0, len).toUpperCase();
+          result = noSpaces.substring(0, length).toUpperCase();
         }
       }
     }

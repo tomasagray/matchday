@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -29,26 +28,31 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import self.me.matchday.feed.EventFileSource;
+import self.me.matchday.TestConstants;
+import self.me.matchday.model.EventFile;
+import self.me.matchday.model.EventFileSource;
 import self.me.matchday.feed.blogger.Blogger;
 import self.me.matchday.feed.blogger.galataman.GalatamanBlog;
 import self.me.matchday.feed.blogger.galataman.GalatamanPost;
 import self.me.matchday.feed.blogger.galataman.GalatamanPostProcessor;
 import self.me.matchday.fileserver.inclouddrive.ICDManager;
 import self.me.matchday.fileserver.inclouddrive.ICDUser;
+import self.me.matchday.io.TextFileReader;
 import self.me.matchday.util.Log;
 
+// todo: re-enable test
 @Disabled
 @TestMethodOrder(OrderAnnotation.class)
 class ICDManagerTest {
   private static final String LOG_TAG = "ICDManagerTest";
 
   // Test parameters
-  private static final int URL_LIMIT = 3;
+  private static final int URL_LIMIT = 2;
   private static final String LINK_PATTERN =
       "https://d\\d{2}.inclouddrive.com/download.php\\?accesstoken=([A-z,0-9-])*";
   private static final String testURL =
-      "http://galatamanhdf.blogspot.com/feeds/posts/default?alt=json";
+      TestConstants.REMOTE_KNOWN_GOOD_JSON;
+      //"http://galatamanhdf.blogspot.com/feeds/posts/default?alt=json";
 
   // Test resources
   private static final List<URL> urls = new ArrayList<>();
@@ -73,10 +77,9 @@ class ICDManagerTest {
               if (gp instanceof GalatamanPost) {
                 gp
                     .getEventFileSources().stream()
-                    .map(EventFileSource::getUrls)
-                    .map(Map::entrySet)
+                    .map(EventFileSource::getEventFiles)
                     .flatMap(Collection::stream)
-                    .map(Map.Entry::getKey)
+                    .map(EventFile::getExternalUrl)
                     .forEach(urls::add);
               }
             });
@@ -101,10 +104,8 @@ class ICDManagerTest {
    */
   private static void loadUserData() throws IOException {
     // Read user data from file
-    String loginData =
-        IOUtils.toString(
-            ICDManagerTest.class.getResourceAsStream("login_data.csv"),
-            StandardCharsets.UTF_8.toString());
+    String loginFile = "C:\\Users\\Tomas\\Code\\Source\\IdeaProjects\\Matchday\\src\\test\\resources\\self\\me\\matchday\\fileserver\\login_data.csv";
+    final String loginData = TextFileReader.readLocal(Path.of(loginFile));
     Log.d(LOG_TAG, "Loaded login data: " + loginData);
 
     // Explode data
@@ -131,6 +132,7 @@ class ICDManagerTest {
     assertTrue(icdm.isLoggedIn());
   }
 
+  @Disabled
   @Test
   @Order(3)
   @DisplayName("Logout disables page read; make sure we CAN'T read download page")
@@ -146,10 +148,9 @@ class ICDManagerTest {
     List<URL> urls =
         blog.getEntries().get(0)
             .getEventFileSources().stream()
-            .map(EventFileSource::getUrls)
-            .map(Map::entrySet)
+            .map(EventFileSource::getEventFiles)
             .flatMap(Collection::stream)
-            .map(Map.Entry::getKey)
+            .map(EventFile::getExternalUrl)
             .collect(Collectors.toList());
     URL testUrl = urls.get(0);
 
@@ -162,8 +163,8 @@ class ICDManagerTest {
     Log.d(LOG_TAG, "Test passed; we could NOT read D/L URL after logging out.");
   }
 
-  @Tag("ICD")
 //  @Disabled
+  @Tag("ICD")
   @Order(2)
   @DisplayName("Test the getDownloadURL method can get the D/L link")
   @ParameterizedTest(name = " for: {index}: {0}")

@@ -21,6 +21,7 @@ import self.me.matchday.feed.blogger.galataman.GalatamanBlog;
 import self.me.matchday.feed.blogger.galataman.GalatamanPost;
 import self.me.matchday.feed.blogger.galataman.GalatamanPostProcessor;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.EventSource;
 import self.me.matchday.model.HighlightShow;
 import self.me.matchday.model.Match;
 import self.me.matchday.util.Log;

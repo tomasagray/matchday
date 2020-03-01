@@ -2,7 +2,7 @@
  * Copyright © 2020, Tomás Gray. All rights reserved.
  */
 
-package self.me.matchday.feed;
+package self.me.matchday.model;
 
 import java.util.List;
 import javax.persistence.Entity;
@@ -11,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import lombok.Data;
-import self.me.matchday.model.Event;
 
 /**
  * Represents a source for a given Event. Events can have multiple Sources - for example, ESPN, BBC

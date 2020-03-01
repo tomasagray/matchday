@@ -37,7 +37,6 @@ public class Match extends Event implements Serializable {
   private static final long serialVersionUID = 123456L; // for cross-platform serialization
 
   // For external identification (MD5 string)
-  // TODO: Resolve Match/HighlightShow ID conflict
   private final String matchId;
 
   @ManyToOne(targetEntity = Team.class, cascade = CascadeType.MERGE)
@@ -88,11 +87,11 @@ public class Match extends Event implements Serializable {
   @Override
   public String toString() {
     String str =
-        "Competition: " + competition + "\n" + "Season: " + season + "\n" + "Teams: " + homeTeam;
+        "Competition: " + competition + ", " + "Season: " + season + ", " + "Teams: " + homeTeam;
     if (awayTeam != null) {
       str += " vs. " + awayTeam;
     }
-    str += "\n" + "Fixture: " + fixture + "\n";
+    str += ", " + "Fixture: " + fixture + ", ";
     if (date != null) {
       str += "Date: " + DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).format(date);
     } else {

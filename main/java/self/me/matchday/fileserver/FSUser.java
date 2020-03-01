@@ -11,6 +11,7 @@ import lombok.Data;
  */
 @Data
 public abstract class FSUser {
+
   // Fields
   private final String userName;
   private String password;

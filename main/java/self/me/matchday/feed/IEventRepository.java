@@ -5,6 +5,7 @@
 package self.me.matchday.feed;
 
 import java.util.stream.Stream;
+import self.me.matchday.model.EventSource;
 
 /**
  * Represents a source of sporting Events. Provides a stream of Events for the end user to watch.

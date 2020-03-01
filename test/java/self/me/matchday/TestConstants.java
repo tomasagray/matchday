@@ -26,15 +26,17 @@ public class TestConstants {
       TEST_SERVER + "soccer/testing/galataman_damaged.json";
   public static final String EMPTY_SET =
       TEST_SERVER + "soccer/testing/gman_beautified_no_entries.json";
-  public static final String REMOTE_CONTEMPORARY_JSON =
-      REMOTE_KNOWN_GOOD_JSON; //"https://galatamanhdfb.blogspot.com/feeds/posts/default/?alt=json";
+  public static final String REMOTE_CONTEMPORARY_JSON = "https://zkfootballmatch.blogspot.com/feeds/posts/default?alt=json";
+      //REMOTE_KNOWN_GOOD_JSON; //"https://galatamanhdfb.blogspot.com/feeds/posts/default/?alt=json";
   public static final String NON_BLOGGER_JSON = "https://daringfireball.net/feeds/json";
 
   // Local sources
   public static final String LOCAL_KNOWN_GOOD_JSON =
-      "src/test/resources/self/me/matchday/io/galataman.json";
+      "C:\\Users\\Tomas\\Code\\Source\\IdeaProjects\\Matchday\\src\\test\\resources\\"
+          + "self\\me\\matchday\\io\\galataman.json";
   public static final String LOCAL_INVALID_JSON =
-      "src/test/resources/self/me/matchday/io/gman_beautified_INVALID.json";
+      "C:\\Users\\Tomas\\Code\\Source\\IdeaProjects\\Matchday\\src\\test\\resources\\"
+          + "self\\me\\matchday\\io\\gman_beautified_INVALID.json";
   public static final String MISSING_DATA_JSON =
       "src/test/resources/self/me/matchday/io/missing_data.json";
   public static final String LOCAL_KNOWN_GOOD_HTML =

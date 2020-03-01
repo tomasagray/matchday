@@ -33,9 +33,9 @@ class TextFileReaderTest {
         List.of(
             "http://ww.nothing.com",
             "http://&&&www.google.com/",
-            "http:www.google.com/",
+            "http;www.google.com/",
             "This, of course, is not a valid URL",
-            "http://",
+            "http//",
             "http//www.google.com/");
   }
 

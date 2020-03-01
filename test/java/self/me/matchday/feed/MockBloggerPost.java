@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import java.util.List;
 import self.me.matchday.feed.blogger.BloggerPost;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.EventFileSource;
 
 public class MockBloggerPost extends BloggerPost {
 

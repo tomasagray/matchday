@@ -13,20 +13,19 @@ import static self.me.matchday.feed.blogger.galataman.GalatamanPattern.LANGUAGE_
 import static self.me.matchday.feed.blogger.galataman.GalatamanPattern.METADATA_ITEM_DELIMITER;
 import static self.me.matchday.feed.blogger.galataman.GalatamanPattern.METADATA_KV_DELIMITER;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.persistence.Entity;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.feed.EventFileSource;
 import self.me.matchday.feed.InvalidMetadataException;
-import self.me.matchday.feed.MetadataTuple;
-import self.me.matchday.model.EventFile.EventPartIdentifier;
+import self.me.matchday.model.EventFile;
+import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.MetadataTuple;
 import self.me.matchday.util.Log;
 
 /**
@@ -36,6 +35,7 @@ import self.me.matchday.util.Log;
  * @author tomas
  */
 @Entity
+@NoArgsConstructor
 public final class GalatamanEventFileSource extends EventFileSource {
 
   private static final String LOG_TAG = "GManMatchSource";
@@ -81,14 +81,12 @@ public final class GalatamanEventFileSource extends EventFileSource {
   }
 
   @Override
-  public Map<URL, EventPartIdentifier> getUrls() {
-    return this.urls;
+  public List<EventFile> getEventFiles() {
+    return this.eventFiles;
   }
 
-  // Constructors
-  public GalatamanEventFileSource() {}
-
-  private GalatamanEventFileSource(@NotNull GalatamanEventSourceBuilder builder) {
+  // Constructor
+  private GalatamanEventFileSource(@NotNull GalatamanEventFileSource.GalatamanEventFileSourceBuilder builder) {
     // Unpack builder object
     this.channel = builder.channel;
     this.source = builder.source;
@@ -100,47 +98,11 @@ public final class GalatamanEventFileSource extends EventFileSource {
     this.languages = Collections.unmodifiableList(builder.languages);
     this.videoData = Collections.unmodifiableList(builder.videoData);
     this.audioData = Collections.unmodifiableList(builder.audioData);
-    this.urls = Collections.unmodifiableMap(builder.urls);
-  }
-
-  // Overridden methods
-  @NotNull
-  @Contract(pure = true)
-  @Override
-  public String toString() {
-    return "\tSource:\n\t[\n"
-        + "\t\tChannel: "
-        + this.channel
-        + "\n"
-        + "\t\tSource: "
-        + this.source
-        + "\n"
-        + "\t\tLanguages: "
-        + this.languages
-        + "\n"
-        + "\t\tVideo: "
-        + this.videoData
-        + "\n"
-        + "\t\tAudio: "
-        + this.audioData
-        + "\n"
-        + "\t\tDuration: "
-        + this.approximateDuration
-        + "\n"
-        + "\t\tSize: "
-        + this.approximateFileSize
-        + "\n"
-        + "\t\tResolution: "
-        + this.resolution.getName()
-        + "\n"
-        + "\t\tURLS: "
-        + this.urls
-        + "\n"
-        + "\t]\n";
+    this.eventFiles = Collections.unmodifiableList(builder.eventFiles);
   }
 
   /** Builder class to parse and create an EventSource from a GalatamanHDF post. */
-  static final class GalatamanEventSourceBuilder {
+  static final class GalatamanEventFileSourceBuilder {
     // Metadata identifiers
     private static final String CHANNEL = "CHANNEL";
     private static final String SOURCE = "SOURCE";
@@ -162,15 +124,14 @@ public final class GalatamanEventFileSource extends EventFileSource {
     private String duration;
     private String size;
     private Resolution resolution;
-    private final Map<URL, EventPartIdentifier> urls;
+    private final List<EventFile> eventFiles;
 
     // Constructor
-    GalatamanEventSourceBuilder(
-        @NotNull String matchDataHTML, final Map<URL, EventPartIdentifier> urls) {
+    GalatamanEventFileSourceBuilder(
+        @NotNull String matchDataHTML, final List<EventFile> eventFiles) {
       // Save raw metadata
       this.metadataStr = matchDataHTML;
-      // Copy URL List
-      this.urls = urls;
+      this.eventFiles = eventFiles;
 
       // Cleanup HTML, removing superfluous &nbsp; and parse data into items
       parseDataItems(matchDataHTML.replace("&nbsp;", ""))

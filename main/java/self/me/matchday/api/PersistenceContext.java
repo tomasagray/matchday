@@ -9,4 +9,5 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PersistenceContext {
   // Configure required beans
+  // todo: what is this/do we need it?
 }

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Stream;
 import self.me.matchday.feed.IEventRepository;
-import self.me.matchday.feed.EventSource;
+import self.me.matchday.model.EventSource;
 import self.me.matchday.feed.blogger.Blogger;
 import self.me.matchday.feed.blogger.IBloggerPostProcessor;
 

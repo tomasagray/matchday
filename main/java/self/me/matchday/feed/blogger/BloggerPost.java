@@ -22,7 +22,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.feed.EventSource;
+import self.me.matchday.model.EventSource;
 import self.me.matchday.util.Log;
 
 /**

@@ -4,6 +4,8 @@
 
 package self.me.matchday.fileserver.inclouddrive;
 
+import static java.net.HttpURLConnection.HTTP_OK;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.io.IOException;
@@ -17,17 +19,20 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import self.me.matchday.fileserver.FSUser;
 import self.me.matchday.fileserver.IFSManager;
 import self.me.matchday.io.JsonStreamReader;
 import self.me.matchday.util.Log;
 
 /** Implementation of file server management for the InCloudDrive file service. */
+@Component
 public class ICDManager implements IFSManager {
 
   private static final String LOG_TAG = "ICDManager";
@@ -35,7 +40,6 @@ public class ICDManager implements IFSManager {
   // Static members
   private static final String DOWNLOAD_LINK_IDENTIFIER = "downloadnow";
   private static final String USER_DATA_IDENTIFIER = "doz";
-  private static final String USERDATA = "userdata";
   private static final String USER_AGENT
       // Windows
       // = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
@@ -46,32 +50,40 @@ public class ICDManager implements IFSManager {
 
   // Singleton instance
   private static volatile ICDManager INSTANCE;
-
   public static ICDManager getInstance() {
-    if (INSTANCE == null) INSTANCE = new ICDManager();
+    if (INSTANCE == null) {
+      INSTANCE = new ICDManager();
+    }
 
     return INSTANCE;
   }
 
   // Fields
-  private final ICDCookieManager cookieManager;
+  @Autowired  // todo: delete this?
+  private ICDCookieManager cookieManager;
   private FSUser user;
-  private JsonObject loginResponse; // Response from server after latest login attempt
+  private JsonObject loginResponse; // Response from the server after latest login attempt
   private boolean isLoggedIn; // Current login status
+  private final Pattern urlMatcher;
 
   // Constructor
-  public ICDManager() {
+  private ICDManager() {
     // Setup cookie management
     cookieManager = new ICDCookieManager();
     // Set default status to 'logged out'
     this.isLoggedIn = false;
+    urlMatcher = Pattern.compile("https://www.inclouddrive.com/file/.*");
   }
 
   // Public API
-  /** Perform user login and authentication to the file server, and save the returned cookies. */
+  /**
+   * Perform user login and authentication to the file server, and save the returned cookies.
+   * @param fsUser The file system user to be logged in
+   * @return Login success (true/false)
+   */
   @Override
-  public void login(@NotNull FSUser fsUser) {
-
+  public boolean login(@NotNull FSUser fsUser) {
+if(cookieManager == null) return false;
     // Create POST connection & attach request data
     try {
       // Get login data
@@ -84,28 +96,45 @@ public class ICDManager implements IFSManager {
       connection.connect();
       // POST login data
       postData(connection, loginData);
-      // Read response as a JSON object
-      final JsonObject loginResponse =
-          JsonStreamReader.readJsonString(readServerResponse(connection));
 
-      if (isLoginSuccessful(loginResponse)) {
-        this.isLoggedIn = true;
-        // Save user instance
-        this.user = fsUser;
-        // Extract cookie from response, create userdata cookie
-        cookieManager.addCookie(
-            USERDATA, this.loginResponse.get(USER_DATA_IDENTIFIER).getAsString());
-        Log.i(LOG_TAG, "Successfully logged in user: " + user);
+      if (connection.getResponseCode() == HTTP_OK) {
+        // Read response as a JSON object
+        final JsonObject loginResponse =
+            JsonStreamReader.readJsonString(readServerResponse(connection));
 
+        if (isLoginSuccessful(loginResponse)) {
+          this.isLoggedIn = true;
+          // Save user instance
+          this.user = fsUser;
+          // Extract cookie from response, create userdata cookie
+          cookieManager.saveUserDataCookie(loginResponse.get(USER_DATA_IDENTIFIER).getAsString());
+          Log.i(LOG_TAG, "Successfully logged in user: " + user);
+
+          // Login success!
+          return true;
+        } else {
+          Log.e(
+              LOG_TAG,
+              String.format(
+                  "Failed to login with user: %s; login response: %s",
+                  user,
+                  (loginResponse == null || loginResponse.isJsonNull())
+                      ? null
+                      : loginResponse.toString()));
+        }
       } else {
-        Log.i(
+        Log.e(
             LOG_TAG,
-            "Failed to login with user: " + user + "; login response: " + loginResponseToString());
+            String.format(
+                "Could not connect to file server login service; response: [%s], %s",
+                connection.getResponseCode(), connection.getResponseMessage()));
       }
-
     } catch (IOException e) {
       Log.e(LOG_TAG, "I/O Error while performing login function", e);
     }
+
+    // Login FAILED!
+    return false;
   }
 
   /** Clear saved cookies, requiring the user to re-authenticate. */
@@ -124,6 +153,11 @@ public class ICDManager implements IFSManager {
     return this.isLoggedIn;
   }
 
+  @Override
+  public Pattern getUrlMatcher() {
+    return this.urlMatcher;
+  }
+
   /**
    * Extract the direct download link from the ICD page.
    *
@@ -138,6 +172,8 @@ public class ICDManager implements IFSManager {
     try {
       // Open a connection
       URLConnection connection = url.openConnection();
+
+      // todo: is this needed?
       // Attach cookies
       connection.setRequestProperty("Cookie", cookieManager.getCookieString());
       // Connect to file server
@@ -254,12 +290,6 @@ public class ICDManager implements IFSManager {
     }
 
     return loggedIn;
-  }
-
-  /** Expose the login response as a String */
-  @Nullable
-  private String loginResponseToString() {
-    return (loginResponse == null || loginResponse.isJsonNull()) ? null : loginResponse.toString();
   }
 
   /**

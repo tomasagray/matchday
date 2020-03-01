@@ -16,7 +16,7 @@ import self.me.matchday.db.HighlightShowRepository;
 import self.me.matchday.db.MatchRepository;
 import self.me.matchday.db.SeasonRepository;
 import self.me.matchday.db.TeamRepository;
-import self.me.matchday.feed.EventSource;
+import self.me.matchday.model.EventSource;
 import self.me.matchday.feed.blogger.galataman.GalatamanBlog;
 import self.me.matchday.feed.blogger.galataman.GalatamanPostProcessor;
 import self.me.matchday.model.Event;

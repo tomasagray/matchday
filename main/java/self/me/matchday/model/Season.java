@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Data
-@Entity
+@Entity // todo: delete this?
 @Table(name = "Seasons")
 @Embeddable
 public final class Season implements Serializable {
@@ -72,30 +72,6 @@ public final class Season implements Serializable {
 
     this.startDate = LocalDate.from(START_DATE).withYear(startYear);
     this.endDate = LocalDate.from(END_DATE).withYear(endYear);
-    this.seasonId = MD5String.fromData(this.startDate.toString());
-  }
-  /**
-   * Create a Season object from a given date. The Season is assumed to start on 1 August and finish
-   * on 31 May.
-   *
-   */
-  public Season(@NotNull LocalDate date) {
-    int startYear, endYear;
-    // Equalize years for comparison
-    final LocalDate comparisonDate = date.withYear(DEFAULT_YEAR);
-
-    // Date is in later half of season
-    if (comparisonDate.isBefore(END_DATE)) {
-      endYear = date.getYear();
-      startYear = endYear -1;
-    } else {
-      // Date is in first half of season
-      startYear = date.getYear();
-      endYear = startYear +1;
-    }
-
-    this.startDate = LocalDate.from(date).withYear(startYear);
-    this.endDate = LocalDate.from(date).withYear(endYear);
     this.seasonId = MD5String.fromData(this.startDate.toString());
   }
 

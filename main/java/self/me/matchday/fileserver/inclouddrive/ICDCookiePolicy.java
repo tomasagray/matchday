@@ -41,7 +41,7 @@ class ICDCookiePolicy implements CookiePolicy {
     }
   }
 
-  public ICDCookiePolicy(String url) {
-    altURL = url;
+  public ICDCookiePolicy() {
+    this.altURL = ICDData.getDomain();
   }
 }

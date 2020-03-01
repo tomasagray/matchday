@@ -1,21 +1,24 @@
-package self.me.matchday.feed;
+package self.me.matchday.model;
 
-import java.net.URL;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import self.me.matchday.model.EventFile.EventPartIdentifier;
 
 /**
  * Represents a collection of files which compose an Event. Includes metadata describing the media
@@ -25,7 +28,10 @@ import self.me.matchday.model.EventFile.EventPartIdentifier;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class EventFileSource {
 
-  @Id @GeneratedValue protected Long eventFileSrcId;
+  @Id
+  @GeneratedValue
+  protected Long eventFileSrcId;
+
   public Long getEventFileSrcId() {
     return eventFileSrcId;
   }
@@ -36,10 +42,15 @@ public abstract class EventFileSource {
   protected String approximateDuration;
   protected String approximateFileSize;
   protected Resolution resolution;
-  @ElementCollection protected List<String> languages;
-  @ElementCollection protected List<String> videoData;
-  @ElementCollection protected List<String> audioData;
-  @ElementCollection protected Map<URL, EventPartIdentifier> urls;
+  @ElementCollection
+  protected List<String> languages;
+  @ElementCollection
+  protected List<String> videoData;
+  @ElementCollection
+  protected List<String> audioData;
+  @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL)
+  protected List<EventFile> eventFiles;
+  protected Timestamp lastRefreshed = new Timestamp(0L);
 
   public abstract String getChannel();
 
@@ -57,7 +68,31 @@ public abstract class EventFileSource {
 
   public abstract List<String> getAudioData();
 
-  public abstract Map<URL, EventPartIdentifier> getUrls();
+  public abstract List<EventFile> getEventFiles();
+
+  public void setEventFiles(List<EventFile> eventFiles) {
+    this.eventFiles = eventFiles;
+  }
+
+  public Timestamp getLastRefreshed() {
+    return this.lastRefreshed;
+  }
+
+  public void setLastRefreshed(@NotNull final Timestamp refreshed) {
+    this.lastRefreshed = refreshed;
+  }
+
+  public String toString() {
+
+    return
+        String.format(
+            "%s (%s) - %s, %s files",
+            getChannel(),
+            getResolution().getName(),
+            String.join("/", getLanguages()),
+            getEventFiles().size()
+        );
+  }
 
   public enum Resolution {
     R_4k("4K", 3840, 2160),
@@ -111,7 +146,7 @@ public abstract class EventFileSource {
      *
      * @param str The String to be converted.
      * @return The Resolution value, or <b>null</b> if the given String does not match an enumerated
-     *     value.
+     * value.
      */
     @Nullable
     @Contract(pure = true)

@@ -4,135 +4,158 @@
 
 package self.me.matchday.model;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
-
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.feed.EventFileSource;
-import self.me.matchday.feed.EventFileSource.Resolution;
-import self.me.matchday.feed.EventSource;
 
-// Variant playlist
-public final class VariantM3U extends M3U {
+// Simple playlist
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@Entity
+public class VariantM3U extends M3U {
 
   // M3U extended tags
-  private static final String MEDIA_LINK = "#EXT-X-MEDIA:";  // for linking multiple versions
-  private static final String MEDIA_TYPE = "TYPE=VIDEO";
-  private static final String GROUP_ID_TAG = "GROUP-ID=";
-  private static final String NAME_TAG = "NAME=";
-  private static final String DEFAULT_TAG = "DEFAULT=";
-  private static final String URI_TAG = "URI=";
-  private static final String STREAM_INF = "#EXT-X-STREAM-INF:";
-  private static final String BANDWIDTH_TAG = "BANDWIDTH=";
-  private static final String VIDEO_TAG = "VIDEO=";
-  private static final String RESOLUTION_TAG = "RESOLUTION=";
+  private static final String VERSION = "#EXT-X-VERSION:4";
+  private static final String ALLOW_CACHE = "#EXT-X-ALLOW-CACHE:YES"; // allow clients to cache
+  private static final String PLAYLIST_TYPE =
+      "#EXT-X-PLAYLIST-TYPE:EVENT"; // allows playlist to be updated
+  private static final String TARGET_DURATION =
+      "#EXT-X-TARGETDURATION:"; // required; max duration in seconds
+  private static final String PROGRAM_TIME =
+      "#EXT-X-PROGRAM-DATE-TIME:"; // <YYYY-MM-DDThh:mm:ssZ>, ex: 2010-02-19T14:54:23.031+08:00
+  private static final String MEDIA_SEQUENCE = "#EXT-X-MEDIA-SEQUENCE:"; // should begin at 0
+  private static final String ENDLIST = "#EXT-X-ENDLIST"; // end of the playlist
 
-  private static class SimplePlaylistEntry {
+  // Fields
+  @Id
+  private String id;
+  @ManyToOne(targetEntity = Event.class)
+  @JoinColumn(name = "eventId")
+  private Event event;
+  @OneToMany(targetEntity = MediaSegment.class, cascade = CascadeType.ALL)
+  private List<MediaSegment> mediaSegments = new ArrayList<>();
+  private double targetDuration;
+  private boolean finalized = true;
 
-    private static final int BITRATE_INDEX = 0;
-    // Fields
-    private final String simplePlaylistUrl;
-    private final Resolution resolution;
-    private final List<String> languages;
-    private final long bitrate;
+  public VariantM3U(@NotNull Event event, @NotNull List<EventFile> eventFiles) {
 
-    SimplePlaylistEntry(EventFileSource eventFileSource) {
-      simplePlaylistUrl = SimpleM3U.generateSimplePlaylistUrl(eventFileSource);
-      resolution = eventFileSource.getResolution();
-      languages = eventFileSource.getLanguages();
-      bitrate = parseBitrate(eventFileSource.getVideoData().get(BITRATE_INDEX));
+    // Generate playlist ID
+    this.id = MD5String
+        .fromData(event.getTitle() + "-" + eventFiles.stream().map(EventFile::toString)
+            .collect(Collectors.joining("-")));
+
+    // Save Event metadata
+    this.event = event;
+
+    // Add each event file as a listing in the playlist
+    AtomicReference<Double> totalDuration = new AtomicReference<>(0.0d);
+    eventFiles.forEach(
+        eventFile -> {
+          final String partTitle = event.getTitle() + " - " + eventFile.getTitle().toString();
+          mediaSegments.add(
+              new MediaSegment(eventFile.getInternalUrl(), eventFile.getDuration(), partTitle));
+          // Add to total playlist length
+          totalDuration.updateAndGet(currTot -> currTot + eventFile.getDuration());
+        });
+    targetDuration = totalDuration.get();
+  }
+
+  /**
+   * Output a standards-conforming, UTF-8 encoded playlist (.m3u8 file). See:
+   * https://tools.ietf.org/html/rfc8216
+   *
+   * @return The formatted playlist
+   */
+  @Override
+  public String toString() {
+
+    // Container
+    StringBuilder sb =
+        new StringBuilder(HEADER)
+            .append("\n")
+            // hardcoded fields
+            .append(PLAYLIST_TYPE)
+            .append("\n")
+            .append(VERSION)
+            .append("\n")
+            .append(ALLOW_CACHE)
+            .append("\n")
+            // user set fields
+            .append(TARGET_DURATION)
+            .append(getTargetDuration())
+            .append("\n")
+            .append(PROGRAM_TIME)
+            .append(event.getDate())
+            .append("\n")
+            // Start at 0
+            .append(MEDIA_SEQUENCE)
+            .append(0)
+            .append("\n");
+
+    // Print each media segment
+    mediaSegments.forEach(sb::append);
+    // Are we done with this playlist?
+    if (isFinalized()) {
+      sb.append(ENDLIST);
     }
 
-    String getSimplePlaylistUrl() {
-      return this.simplePlaylistUrl;
+    // Export playlist
+    return sb.toString();
+  }
+
+  /**
+   * Represents a single segment (record) in the playlist, which includes the URI of the media
+   * resource, its duration in seconds and an optional title.
+   */
+  @Entity
+  @NoArgsConstructor
+  private static class MediaSegment {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+    private URL url;
+    private String title;
+    private double duration;
+
+    @Contract(pure = true)
+    MediaSegment(@NotNull URL url, double duration) {
+      this.url = url;
+      this.duration = duration;
     }
 
-    @NotNull
-    private static Long parseBitrate(@NotNull String videoBitrate) {
-      final double CONVERSION_FACTOR = 1_000_000d;
-      // Convert to a double, then convert Mbps -> bps
-      double bitrate =
-          Double.parseDouble(videoBitrate.substring(0, videoBitrate.indexOf(" ")))
-              * CONVERSION_FACTOR;
-      return (long) bitrate;
+    @Contract(pure = true)
+    public MediaSegment(@NotNull URL url, double duration, String title) {
+      this(url, duration);
+      this.title = title;
     }
 
     @Override
     public String toString() {
-      return MEDIA_LINK
-          + MEDIA_TYPE
-          + ","
-          + GROUP_ID_TAG
-          + "\""
-          + this.resolution.getName()
-          + "\","
-          + NAME_TAG
-          + "\""
-          + String.join("/", this.languages)
-          + "\","
-          // todo: add default status
-          + URI_TAG
-          + "\""
-          + this.simplePlaylistUrl
-          + "\"";
+      // Print tag & duration
+      final StringBuilder sb = new StringBuilder(INF).append(this.duration).append(",");
+      if (this.title != null) {
+        sb.append(this.title);
+      }
+      // Print URL
+      sb.append("\n").append(this.url).append("\n");
+
+      return sb.toString();
     }
-  }
-
-  final Map<Resolution, List<SimplePlaylistEntry>> simplePlaylistEntries;
-
-  public VariantM3U(@NotNull final EventSource eventSource) {
-    // Organize file sources by video resolution
-    simplePlaylistEntries =
-        eventSource.getEventFileSources().stream()
-            .collect(
-                groupingBy(
-                    EventFileSource::getResolution,
-                    TreeMap::new, // sort by resolution (map key)
-                    mapping(SimplePlaylistEntry::new, toList())));
-  }
-
-  /**
-   * Output a standards-conforming, UTF-8 encoded playlist (.m3u8 file).
-   * See:
-   *  https://tools.ietf.org/html/rfc8216
-   * @return The formatted playlist
-   */
-  @NotNull
-  @Override
-  public String getPlaylistAsString() {
-    final StringBuilder stringBuilder = new StringBuilder(HEADER).append("\n");
-    this.simplePlaylistEntries.forEach(
-        (resolution, simplePlaylists) -> {
-          // Add each variant
-          if(simplePlaylists.size() > 1) {
-            simplePlaylists.forEach(
-                simplePlaylistEntry -> stringBuilder.append(simplePlaylistEntry).append("\n"));
-          }
-          // Add default playlist for each resolution
-          stringBuilder.append(getPlaylistIdentifier(simplePlaylists.get(0)));
-        });
-
-    return stringBuilder.toString();
-  }
-  
-  @NotNull
-  private String getPlaylistIdentifier(@NotNull SimplePlaylistEntry playlistEntry) {
-    return STREAM_INF
-        + BANDWIDTH_TAG
-        + playlistEntry.bitrate
-        + ","
-        + RESOLUTION_TAG
-        + playlistEntry.resolution.getWidth() + "x" + playlistEntry.resolution.getHeight()
-        + ","
-        + VIDEO_TAG
-        + "\""
-        + playlistEntry.resolution.getName()
-        + "\"\n"
-        + playlistEntry.getSimplePlaylistUrl()
-        + "\n";
   }
 }

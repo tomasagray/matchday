@@ -6,10 +6,11 @@
  *  All code written by Tomás Gray unless otherwise noted.
  *  May not be reproduced without written consent from the above.
  */
-package self.me.matchday.feed;
+package self.me.matchday.model;
 
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.feed.InvalidMetadataException;
 
 /** A class representing a key/value pair for a metadata item. */
 public class MetadataTuple {

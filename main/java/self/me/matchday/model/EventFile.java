@@ -11,19 +11,41 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class EventFile {
 
   // Fields
   @Id
   @GeneratedValue
-  private Long id;
-  private final EventPartIdentifier title;
-  private final URL uri;
-  private final float duration;
+  private Long eventFileId;
+  private EventPartIdentifier title;
+  private URL externalUrl;
+  // refreshed data
+  private URL internalUrl;
+  private String metadata;
+
+  public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
+
+    this.title = title;
+    this.externalUrl = externalUrl;
+    this.internalUrl = null;
+    this.metadata = null;
+  }
+
+  // todo: maybe change this to getMetadata()?
+  public double getDuration() {
+    // todo: phony
+    return 3012.541956d;
+  }
+
+  public String toString() {
+    return String.format("%s - %s", getTitle(), getExternalUrl().toString());
+  }
 
   /**
    * Event part identifiers

@@ -17,9 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -29,11 +27,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import self.me.matchday.feed.EventFileSource;
 import self.me.matchday.feed.blogger.BloggerPost;
-import self.me.matchday.feed.blogger.galataman.GalatamanEventFileSource.GalatamanEventSourceBuilder;
+import self.me.matchday.feed.blogger.galataman.GalatamanEventFileSource.GalatamanEventFileSourceBuilder;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
+import self.me.matchday.model.EventFileSource;
 import self.me.matchday.util.Log;
 
 /**
@@ -85,16 +84,15 @@ public final class GalatamanPost extends BloggerPost {
   @NotNull
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    // Add newly analyzed info to previous String output
-    sb.append(super.toString()).append("\nSources:\n");
-    // Add each source
-    this.eventFileSources.forEach(sb::append);
-    return sb.toString();
+    return
+        String.format("%s (%s), %s sources", getTitle(), getLink(), getEventFileSources().size());
   }
 
-  /** Parses Galataman-specific content and constructs a fully-formed GalatamanPost object. */
+  /**
+   * Parses Galataman-specific content and constructs a fully-formed GalatamanPost object.
+   */
   static class GalatamanPostBuilder extends BloggerPostBuilder {
+
     private final List<GalatamanEventFileSource> sources = new ArrayList<>();
 
     // Constructor
@@ -102,7 +100,9 @@ public final class GalatamanPost extends BloggerPost {
       super(bloggerPost);
     }
 
-    /** Extracts match source data from this post. */
+    /**
+     * Extracts match source data from this post.
+     */
     private void parseMatchSources() {
       try {
         // DOM-ify HTML content for easy manipulation
@@ -118,9 +118,9 @@ public final class GalatamanPost extends BloggerPost {
           // When we find a source
           if (isSourceData.test(token)) {
             // Save HTML
-            String html = token.html();
-            // URLS for this source
-            Map<URL, EventPartIdentifier> urls = new HashMap<>();
+            String metadata = token.html();
+            // Video files for this source
+            List<EventFile> eventFiles = new ArrayList<>();
 
             // Now, continue searching, this time for links,
             // until the next source or the end of the HTML
@@ -130,13 +130,15 @@ public final class GalatamanPost extends BloggerPost {
             while ((innerToken != null) && !(isSourceData.test(innerToken))) {
               // Look for a part identifier
               final String tokenHtml = innerToken.html();
-              if(EventPartIdentifier.isPartIdentifier(tokenHtml)) {
-                // Create identifier for this part
+              if (EventPartIdentifier.isPartIdentifier(tokenHtml)) {
+                // Create an identifier for this part
                 partIdentifier = EventPartIdentifier.fromString(tokenHtml);
               } else if (isVideoLink.test(innerToken)) {
                 // When we find a link to a video file, extract href attribute & add it to our
-                // source's list of URLs
-                urls.put(new URL(innerToken.attr("href")), partIdentifier);
+                // source's list of EventFiles, with an identifier (might be null)
+                eventFiles.add(
+                    new EventFile(partIdentifier, new URL(innerToken.attr("href")))
+                );
               }
 
               // Advance inner token
@@ -145,7 +147,7 @@ public final class GalatamanPost extends BloggerPost {
 
             // Parse data into file sources
             GalatamanEventFileSource fileSources =
-                new GalatamanEventSourceBuilder(html, urls).build();
+                new GalatamanEventFileSourceBuilder(metadata, eventFiles).build();
 
             // Add match source to object
             this.sources.add(fileSources);

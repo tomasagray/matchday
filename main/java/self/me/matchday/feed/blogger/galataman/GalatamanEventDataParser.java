@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.feed.IEventDataParser;
-import self.me.matchday.feed.EventSource;
+import self.me.matchday.model.EventSource;
 import self.me.matchday.feed.InvalidMetadataException;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
@@ -38,6 +38,7 @@ public class GalatamanEventDataParser implements IEventDataParser {
   // Constants
   private static final int MILLENNIUM = 2_000;
   // Title part indices
+  // todo: determine these at runtime
   private static final int COMP_SEASON_INDEX = 0;
   private static final int FIXTURE_INDEX = 1;
   private static final int TEAM_INDEX = 2;

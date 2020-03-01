@@ -22,6 +22,7 @@ import java.nio.file.Path;
  * @author tomas
  */
 public class JsonStreamReader {
+
   private static final JsonParser parser = new JsonParser();
 
   /**
@@ -36,6 +37,10 @@ public class JsonStreamReader {
   public static JsonObject readRemote(URL url) throws IOException {
     // Read the file
     String json = TextFileReader.readRemote(url);
+    // Ensure data read
+    if ("".equals(json)) {
+      throw new IOException("No data read from URL: " + url);
+    }
 
     // Parse & return
     return parser.parse(json).getAsJsonObject();
@@ -51,7 +56,10 @@ public class JsonStreamReader {
   static JsonObject readLocal(Path uri) throws IOException {
     // Read the file
     String json = TextFileReader.readLocal(uri);
-
+    // Ensure data read
+    if ("".equals(json)) {
+      throw new IOException("No data read from URL: " + uri);
+    }
     // Parse & return
     return parser.parse(json).getAsJsonObject();
   }
@@ -59,8 +67,8 @@ public class JsonStreamReader {
   /**
    * Parses a JSON string into a JsonObject.
    *
-   * @param   json    A JSON String
-   * @return  A JSON Object
+   * @param json A JSON String
+   * @return A JSON Object
    */
   public static JsonObject readJsonString(String json) {
     return parser.parse(json).getAsJsonObject();

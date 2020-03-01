@@ -75,7 +75,7 @@ class GalatamanMatchFileSourceTest {
       gp.getEventFileSources()
           .forEach(
               source -> {
-                int count = source.getUrls().size();
+                int count = source.getEventFiles().size();
                 assertTrue(count >= 1);
                 Log.d(LOG_TAG, "Test passed, URL count: " + count);
               });

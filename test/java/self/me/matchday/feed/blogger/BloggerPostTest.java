@@ -204,7 +204,7 @@ class BloggerPostTest {
   @MethodSource("getArguments")
   void verifySetsAllLinks(@NotNull BloggerPost entry) {
 
-    final String TEST_PATTERN = "[^:]*://galatamanhdf.blogspot.com/\\d{4}/\\d{2}/[-,\\w]*.html";
+    final String TEST_PATTERN = "[^:]*://.*.blogspot.com/\\d{4}/\\d{2}/[-,\\w]*.html";
 
     try {
       Log.d(LOG_TAG, "Testing link: " + entry.getLink());
