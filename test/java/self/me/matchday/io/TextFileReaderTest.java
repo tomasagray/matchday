@@ -41,7 +41,7 @@ class TextFileReaderTest {
 
   /**
    * Provide the bad URLs as a Stream of Arguments for parameterized tests.
-   * @return The bad URLs as a Stream
+   * @return The bad URLs as a Stream.
    */
   private static Stream<Arguments> getBadUrls() {
     return invalidUrls.stream().map(Arguments::of);

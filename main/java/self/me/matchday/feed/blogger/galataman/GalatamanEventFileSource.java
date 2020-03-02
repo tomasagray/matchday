@@ -143,8 +143,8 @@ public final class GalatamanEventFileSource extends EventFileSource {
      * Break the Event data string apart into parse-able chunks, and collect them into a List.
      *
      * @param data A String containing raw HTML to be parsed into metadata items concerning a
-     *     particular source.
-     * @return A List of key/value tuples, each representing a metadata item
+     * particular source.
+     * @return A List of key/value tuples, each representing a metadata item.
      */
     private List<MetadataTuple> parseDataItems(@NotNull String data) {
       return
@@ -215,7 +215,7 @@ public final class GalatamanEventFileSource extends EventFileSource {
      * Break apart a String into language names.
      *
      * @param langStr A String containing language names, separated by a delimiter configured in the
-     *     GalatamanPost class.
+     * GalatamanPost class.
      */
     @NotNull
     private List<String> parseLanguages(@NotNull String langStr) {
@@ -231,7 +231,7 @@ public final class GalatamanEventFileSource extends EventFileSource {
      * Split video data string apart.
      *
      * @param avData A String containing audio/video data items, separated by a delimiter configured
-     *     in the GalatamanPost class.
+     * in the GalatamanPost class.
      */
     @NotNull
     private List<String> parseAVData(@NotNull String avData) {

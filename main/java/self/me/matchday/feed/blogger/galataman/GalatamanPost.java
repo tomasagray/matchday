@@ -108,9 +108,8 @@ public final class GalatamanPost extends BloggerPost {
         // DOM-ify HTML content for easy manipulation
         Document doc = Jsoup.parse(this.getContent());
 
-        // Since the document is loosely structured, we will walk through
-        // it using a token, starting at the first source and looking
-        // for what we want along the way
+        // Since this is a loosely structured document, we will use a token, starting at the first
+        // source and looking for what we want along the way
         Element token = doc.getElementsMatchingOwnText(START_OF_SOURCE).first();
 
         // Search until the end of the Document

@@ -77,7 +77,7 @@ class GalatamanPostTest {
     try {
       final int sourceCount = gp.getEventFileSources().size();
       Log.d(LOG_TAG, "Testing post at URL: " + gp.getLink());
-      Log.d(LOG_TAG, "Number of  sources found: " + sourceCount);
+      Log.d(LOG_TAG, "Number of sources found: " + sourceCount);
 
       // Test
       assertTrue(sourceCount >= MIN_SOURCE_COUNT);

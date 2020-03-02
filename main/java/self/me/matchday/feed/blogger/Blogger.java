@@ -62,7 +62,7 @@ public abstract class Blogger {
   /**
    * Get the "feed" portion of the JSON object.
    *
-   * @return JsonObject An object representing the "feed" sub-object
+   * @return JsonObject An object representing the "feed" sub-object.
    */
   private JsonObject parseFeed() {
     JsonObject feed;
@@ -79,7 +79,7 @@ public abstract class Blogger {
   /**
    * Get the top-level Blogger ID.
    *
-   * @return String representing the Blog's ID
+   * @return String representing the Blog's ID.
    */
   private String parseId() {
     String id;
@@ -96,7 +96,7 @@ public abstract class Blogger {
   /**
    * Extract the title of the blog.
    *
-   * @return String The blog title
+   * @return String The blog title.
    */
   private String parseTitle() {
     String t;
@@ -114,7 +114,7 @@ public abstract class Blogger {
   /**
    * Get the version info as a String.
    *
-   * @return String The blog version
+   * @return String The blog version.
    */
   private String parseVersion() {
     String v;
@@ -131,7 +131,7 @@ public abstract class Blogger {
   /**
    * Extract the author's name.
    *
-   * @return String The author's name
+   * @return String The author's name.
    */
   private String parseAuthor() {
     String a;
@@ -185,7 +185,8 @@ public abstract class Blogger {
    */
   @NotNull
   private List<BloggerPost> parseEntries() {
-    // Temporary container for entries
+
+    // Result container for entries
     List<BloggerPost> localEntries = new ArrayList<>();
 
     try {

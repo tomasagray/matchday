@@ -15,7 +15,7 @@ public interface IEventDataParser {
   /**
    * Return an Event subclass instantiation.
    *
-   * @return An Event object
+   * @return An Event object.
    */
   Event getEvent();
 }

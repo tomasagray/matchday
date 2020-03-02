@@ -1,10 +1,8 @@
 package self.me.matchday;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import self.me.matchday.db.CookieRepository;
 import self.me.matchday.fileserver.inclouddrive.ICDManager;

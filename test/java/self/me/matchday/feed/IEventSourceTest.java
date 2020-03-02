@@ -83,7 +83,7 @@ class IEventSourceTest {
             .map(Arguments::of));
   }
 
-  @DisplayName("Ensure each Post can be parsed into a Event")
+  @DisplayName("Ensure each Post can be parsed into an Event")
   @ParameterizedTest(name = "Testing: {index}; {0}")
   @MethodSource("getAllEvents")
   void ensureParsesEvents(@NotNull EventSource eventSource) {
@@ -93,7 +93,7 @@ class IEventSourceTest {
 
     // Ensure Event can be parsed
     assertNotNull(eventSource.getEvent());
-    System.out.println("Successfully parsed event:\n" + eventSource.getEvent());
+    System.out.println("Successfully parsed the Event:\n" + eventSource.getEvent());
   }
 
   @DisplayName("Ensure parses Match metadata")

@@ -65,7 +65,7 @@ class BloggerPostTest {
   }
 
   @Tag("FIELDS")
-  @DisplayName("Check that Blogger IDs conform to pattern")
+  @DisplayName("Check Blogger IDs conform to pattern")
   @ParameterizedTest(name = "Checking {index}: {0}")
   @MethodSource("getArguments")
   void verifySetsAllPostIDs(@NotNull BloggerPost entry) {
@@ -158,7 +158,7 @@ class BloggerPostTest {
   }
 
   @Tag("FIELDS")
-  @DisplayName("Check that all titles match pattern")
+  @DisplayName("Check all titles match pattern")
   @ParameterizedTest(name = "{index} => entries={0}")
   @MethodSource("getArguments")
   void verifySetsAllTitles(@NotNull BloggerPost entry) {

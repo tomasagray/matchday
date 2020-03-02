@@ -18,8 +18,6 @@ import self.me.matchday.db.CookieRepository.FSPersistentCookie;
 @Repository
 public interface CookieRepository extends JpaRepository<FSPersistentCookie, Long> {
 
-  // TODO: Delete this repo?
-
   default List<HttpCookie> findAllHttpCookies() {
     return this.findAll().stream()
         .map(FSPersistentCookie::toHttpCookie)
@@ -31,6 +29,8 @@ public interface CookieRepository extends JpaRepository<FSPersistentCookie, Long
   @Data
   @NoArgsConstructor
   class FSPersistentCookie implements Serializable {
+
+    private static final long serialVersionUID = -972173957547982094L;
 
     @Id @GeneratedValue private Long cookieId;
     private String domain;
@@ -82,7 +82,7 @@ public interface CookieRepository extends JpaRepository<FSPersistentCookie, Long
       boolean discard = cookie.getDiscard();
       long maxAge = cookie.getMaxAge();
       String path = cookie.getPath();
-      String portlist = cookie.getPortlist();
+      String portList = cookie.getPortlist();
       boolean secure = cookie.getSecure();
 
       return new FSPersistentCookie(
@@ -95,7 +95,7 @@ public interface CookieRepository extends JpaRepository<FSPersistentCookie, Long
           discard,
           maxAge,
           path,
-          portlist,
+          portList,
           secure);
     }
 

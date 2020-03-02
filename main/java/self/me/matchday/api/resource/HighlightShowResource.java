@@ -31,7 +31,7 @@ import self.me.matchday.model.Season;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "highlight-show")
 @Relation(collectionRelation = "highlight-shows")
 @JsonInclude(value = Include.NON_NULL)

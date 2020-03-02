@@ -27,9 +27,9 @@ import org.jetbrains.annotations.NotNull;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Entity
-public class VariantM3U extends M3U {
+public class VariantM3U extends M3UPlaylist {
 
-  // M3U extended tags
+  // M3UPlaylist extended tags
   private static final String VERSION = "#EXT-X-VERSION:4";
   private static final String ALLOW_CACHE = "#EXT-X-ALLOW-CACHE:YES"; // allow clients to cache
   private static final String PLAYLIST_TYPE =
@@ -107,7 +107,7 @@ public class VariantM3U extends M3U {
             .append(0)
             .append("\n");
 
-    // Print each media segment
+    // Print each MediaSegment
     mediaSegments.forEach(sb::append);
     // Are we done with this playlist?
     if (isFinalized()) {

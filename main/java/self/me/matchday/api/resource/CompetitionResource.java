@@ -26,7 +26,7 @@ import self.me.matchday.model.Competition;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "competition")
 @Relation(collectionRelation = "competitions")
 @JsonInclude(value = Include.NON_NULL)

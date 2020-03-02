@@ -34,7 +34,7 @@ public class CompetitionController {
   /**
    * Fetch all Competitions in the database.
    *
-   * @return All Competitions as an HttpEntity
+   * @return All Competitions as an HttpEntity.
    */
   @GetMapping("/competitions")
   public ResponseEntity<CollectionModel<CompetitionResource>> fetchAllCompetitions() {
@@ -54,7 +54,7 @@ public class CompetitionController {
    * Retrieve a single Competition from the local database.
    *
    * @param competitionId MD5 String ID for the desired Competition.
-   * @return A Competition Resource
+   * @return A Competition Resource.
    */
   @GetMapping("/competitions/competition/{competitionId}")
   public ResponseEntity<CompetitionResource> fetchCompetitionById(

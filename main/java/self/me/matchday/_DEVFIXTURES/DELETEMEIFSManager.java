@@ -9,6 +9,7 @@ import self.me.matchday.fileserver.FSUser;
 import self.me.matchday.fileserver.IFSManager;
 import self.me.matchday.util.Log;
 
+// TODO: delete me!
 public class DELETEMEIFSManager implements IFSManager {
 
   private static final String LOG_TAG = "FAKE_IFS_MANAGER";

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.EventFileSrcRepository;
 import self.me.matchday.db.EventRepository;
-import self.me.matchday.db.VariantM3URepository;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.VariantM3U;
@@ -28,17 +27,14 @@ public class VariantPlaylistService {
   private final EventRepository eventRepository;
   private final EventFileSrcRepository eventFileSrcRepository;
   private final EventFileService eventFileService;
-  private final VariantM3URepository variantM3URepository;
 
   @Autowired
   public VariantPlaylistService(EventRepository eventRepository,
-      EventFileSrcRepository eventFileSrcRepository, VariantM3URepository variantM3URepository,
-      EventFileService eventFileService) {
+      EventFileSrcRepository eventFileSrcRepository, EventFileService eventFileService) {
 
     this.eventRepository = eventRepository;
     this.eventFileSrcRepository = eventFileSrcRepository;
     this.eventFileService = eventFileService;
-    this.variantM3URepository = variantM3URepository;
   }
 
   public Optional<VariantM3U> fetchVariantPlaylist(@NotNull final Long eventId,

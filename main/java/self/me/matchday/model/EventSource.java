@@ -36,7 +36,7 @@ public abstract class EventSource {
   /**
    * Returns the file resources for this Event.
    *
-   * @return An Event file resource
+   * @return An Event file resource.
    */
   public abstract List<EventFileSource> getEventFileSources();
 

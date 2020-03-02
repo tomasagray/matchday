@@ -107,28 +107,17 @@ public class EventFileService {
           .getDownloadUrl(eventFile.getExternalUrl());
       downloadUrl.ifPresent(url -> {
         eventFile.setInternalUrl(url);
-        eventFile.setMetadata(getFileMetadata());  // todo: update metadata (ex: duration)? - expensive!
+        eventFile.setMetadata(getFileMetadata());
       });
+
       return eventFile;
     }
 
-    /**
-     * Read video file metadata from remote source using FFMPEG.
-     */
     @NotNull
     @Contract(pure = true)
     private String getFileMetadata() {
+      // todo: update metadata (ex: duration)? - expensive!
       return "";
-      /*// TODO: Is this even necessary? Rewrite ffprobe myself?
-      try {
-        final FFprobe fFprobe = new FFprobe("C:\\Program Files\\ffmpeg\\bin\\ffprobe.exe");
-        final FFmpegProbeResult probeResult = fFprobe.probe(downloadUrl.toString());
-        this.duration = (float) probeResult.getFormat().duration;
-        System.out.println("The duration is: " + probeResult.getFormat().duration);
-
-      } catch (IOException e) {
-        e.printStackTrace();
-      }*/
     }
   }
 }

@@ -26,7 +26,7 @@ import self.me.matchday.model.Team;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "team")
 @Relation(collectionRelation = "teams")
 @JsonInclude(value = Include.NON_NULL)

@@ -35,7 +35,6 @@ public class Competition implements Serializable {
   private final String competitionId;
   private String name;
   private String abbreviation;
-  private Affinity affinity;
   private Locale locale;
 
   // Default constructor
@@ -45,15 +44,9 @@ public class Competition implements Serializable {
 
   public Competition(@NotNull String name) {
     this.name = name.trim();
-    // Automatically create an abbreviation if none is supplied
+    // Automatically create an abbreviation
     this.abbreviation = Abbreviator.abbreviate(this.name);
     // Generate ID
-    this.competitionId = MD5String.fromData(this.name);
-}
-
-  public Competition(@NotNull String name, @NotNull String abbreviation) {
-    this.name = name;
-    this.abbreviation = abbreviation;
     this.competitionId = MD5String.fromData(this.name);
   }
 

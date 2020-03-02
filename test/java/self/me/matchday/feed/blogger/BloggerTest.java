@@ -41,7 +41,7 @@ class BloggerTest {
   /**
    * Read the known good example file.
    *
-   * @throws IOException If the URL is invalid
+   * @throws IOException If the URL is invalid.
    */
   @BeforeAll
   void setup() throws IOException {
@@ -51,7 +51,7 @@ class BloggerTest {
   }
 
   // Tests
-  /** Ensure the basic attributes of the Blog are read correctly. */
+  /** Ensure the basic attributes of the Blog read correctly. */
   @Test
   @Tag("GENERAL")
   @DisplayName("Verify Blogger class reads JSON data correctly.")
@@ -99,7 +99,7 @@ class BloggerTest {
           new GalatamanBlog(
               new URL(TestConstants.REMOTE_MISSING_DATA), new MockBloggerPostProcessor());
 
-      // Ensure the test fails if an exception is not thrown by the above code
+      // Ensure the test fails if the above code throws an exception
       assert blg.getLink().equals(IMPOSSIBLE);
       Log.e(LOG_TAG, "The test failed. This should not have executed. 2 + 2 does not equal 5.");
 
@@ -126,7 +126,7 @@ class BloggerTest {
       Blogger blg =
           new GalatamanBlog(new URL(TestConstants.EMPTY_SET), new MockBloggerPostProcessor());
 
-      // Ensure test fails if no exception thrown. This should not execute
+      // Ensure test fails if no exception thrown. This should not execute.
       assert blg.getLink().equals(IMPOSSIBLE);
       Log.e(LOG_TAG, "Test FAILED! This should NOT have executed.");
 

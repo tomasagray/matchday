@@ -25,7 +25,7 @@ public class TextFileReader {
    *
    * @param url the URL of the text file
    * @return the text data of the file
-   * @throws IOException if the URL is invalid or the source cannot be read
+   * @throws IOException if the URL is invalid, or the source cannot be read
    */
   @NotNull
   public static String readRemote(URL url) throws IOException {
@@ -45,7 +45,7 @@ public class TextFileReader {
    *
    * @param uri a representing the Path to the file
    * @return the text data in the file
-   * @throws IOException if the file cannot be read
+   * @throws IOException if the file cannot be read.
    */
   @NotNull
   public static String readLocal(Path uri) throws IOException {

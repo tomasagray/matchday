@@ -28,7 +28,7 @@ import self.me.matchday.model.EventFileSource.Resolution;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public final class MasterM3U extends M3U {
+public final class MasterM3U extends M3UPlaylist {
 
   @Id
   private Long id;
@@ -85,7 +85,7 @@ public final class MasterM3U extends M3U {
   public static class VariantPlaylistEntry {
 
     private static final int BITRATE_INDEX = 0;
-    // M3U extended tags
+    // M3UPlaylist extended tags
     private static final String STREAM_INF = "#EXT-X-STREAM-INF:";
     private static final String BANDWIDTH_TAG = "BANDWIDTH=";
     private static final String VIDEO_TAG = "VIDEO=";

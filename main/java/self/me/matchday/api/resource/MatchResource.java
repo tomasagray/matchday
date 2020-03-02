@@ -35,7 +35,7 @@ import self.me.matchday.model.Season;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "match")
 @Relation(collectionRelation = "matches")
 @JsonInclude(value = Include.NON_NULL)

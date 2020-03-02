@@ -38,6 +38,7 @@ public class ICDManager implements IFSManager {
   private static final String LOG_TAG = "ICDManager";
 
   // Static members
+  private static final String URL_PATTERN = "https://www.inclouddrive.com/file/.*";
   private static final String DOWNLOAD_LINK_IDENTIFIER = "downloadnow";
   private static final String USER_DATA_IDENTIFIER = "doz";
   private static final String USER_AGENT
@@ -59,7 +60,7 @@ public class ICDManager implements IFSManager {
   }
 
   // Fields
-  @Autowired  // todo: delete this?
+  @Autowired
   private ICDCookieManager cookieManager;
   private FSUser user;
   private JsonObject loginResponse; // Response from the server after latest login attempt
@@ -69,10 +70,10 @@ public class ICDManager implements IFSManager {
   // Constructor
   private ICDManager() {
     // Setup cookie management
-    cookieManager = new ICDCookieManager();
+//    cookieManager = new ICDCookieManager();
     // Set default status to 'logged out'
     this.isLoggedIn = false;
-    urlMatcher = Pattern.compile("https://www.inclouddrive.com/file/.*");
+    urlMatcher = Pattern.compile(URL_PATTERN);
   }
 
   // Public API
@@ -162,7 +163,7 @@ if(cookieManager == null) return false;
    * Extract the direct download link from the ICD page.
    *
    * @param url The URL of the ICD page
-   * @return An Optional containing the DD URL, if found
+   * @return An Optional containing the DD URL, if found.
    */
   @Override
   public Optional<URL> getDownloadURL(@NotNull URL url) {
@@ -173,7 +174,7 @@ if(cookieManager == null) return false;
       // Open a connection
       URLConnection connection = url.openConnection();
 
-      // todo: is this needed?
+      // todo: is manual cookie attachment needed?
       // Attach cookies
       connection.setRequestProperty("Cookie", cookieManager.getCookieString());
       // Connect to file server
@@ -203,7 +204,7 @@ if(cookieManager == null) return false;
    * @param url The URL we want a connection to
    * @param dataSize The size of the datagram that will be POSTed to this URL
    * @return HttpURLConnection A configured HTTP connection
-   * @throws IOException If the connection cannot be opened
+   * @throws IOException If the connection cannot be opened.
    */
   @NotNull
   private HttpURLConnection setupICDPostConnection(@NotNull URL url, int dataSize)
@@ -269,13 +270,13 @@ if(cookieManager == null) return false;
   /**
    * Determine if login has been successfully performed.
    *
-   * @return A boolean indicating if the last login attempt was successful
+   * @return A boolean indicating if the last login attempt was successful.
    */
   private boolean isLoginSuccessful(JsonObject loginResponse) {
 
     // Save login response
     this.loginResponse = loginResponse;
-    // Assume login will fail
+    // Assume the login will fail
     boolean loggedIn = false;
 
     if (loginResponse != null && !(loginResponse.isJsonNull())) {
@@ -295,7 +296,7 @@ if(cookieManager == null) return false;
   /**
    * Get an array of bytes for transmission
    *
-   * @param user The user being logged into the file server
+   * @param user The user that will be logged into the file server
    * @return An array of bytes of the URL encoded String
    */
   @NotNull
@@ -316,9 +317,9 @@ if(cookieManager == null) return false;
   /**
    * Helper method for getLoginDataByteArray. URL encodes a given object.
    *
-   * @param key The key that will be used to retrieve the Object
+   * @param key The key used to retrieve the Object
    * @param value The object to be encoded
-   * @return URL encoded String
+   * @return URL encoded String.
    */
   @NotNull
   private static String getURLComponent(@NotNull String key, @NotNull Object value) {

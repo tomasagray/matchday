@@ -11,7 +11,6 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday._DEVFIXTURES.FAKECookieRepo;
@@ -30,7 +29,7 @@ class ICDCookieManager extends CookieManager {
 
   // cookie persistence
   // todo: delete, switch to real cookie repo
-  private FAKECookieRepo cookieRepository = new FAKECookieRepo();
+  private final FAKECookieRepo cookieRepository = new FAKECookieRepo();
 
   ICDCookieManager() {
     // Setup cookie policy
@@ -42,6 +41,7 @@ class ICDCookieManager extends CookieManager {
 
   /**
    * Add a cookie to the Cookie Store
+   *
    * @param data Cookie data for the user data cookie
    */
   void saveUserDataCookie(@NotNull String data) {
@@ -55,8 +55,7 @@ class ICDCookieManager extends CookieManager {
       // Add to store
       getCookieStore().add(DOMAIN, cookie);
       // Persist cookie
-      // todo: change to repo method
-      cookieRepository.save(cookie);
+      saveCookieData();
 
     } catch (IOException e) {
       Log.e(LOG_TAG, "Could not save cookie to the cookie store", e);
@@ -67,22 +66,22 @@ class ICDCookieManager extends CookieManager {
    * Save cookie data to persistent storage for later
    * retrieval.
    */
-  boolean saveCookieData() {
-    // TODO: Implement persistent cookie storage
-    return false;
+  void saveCookieData() {
+    getCookieStore().getCookies().forEach(cookieRepository::save);
   }
 
   /*
    * Load previously saved cookie data.
    */
-  Optional<List<HttpCookie>> loadCookieData() {
-    // We may not have any data saved yet.
-    // TODO: Implement persistent cookie loading
-    return Optional.empty();
+  void loadCookieData() {
+    cookieRepository
+        .findAll()
+        .forEach(httpCookie -> getCookieStore().add(DOMAIN, httpCookie));
   }
 
   @NotNull
   String getCookieString() {
+
     // Container for cookie String
     StringBuilder sb = new StringBuilder();
     // Our cookies
@@ -94,7 +93,7 @@ class ICDCookieManager extends CookieManager {
                 .append("=")
                 .append(cookie.getValue())
                 .append("; ") // separator
-        );
+    );
 
     // Return assembled String
     return sb.toString();

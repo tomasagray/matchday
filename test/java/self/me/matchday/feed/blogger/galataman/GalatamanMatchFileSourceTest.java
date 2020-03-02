@@ -41,9 +41,9 @@ class GalatamanMatchFileSourceTest {
           new GalatamanBlog(
               new URL(TestConstants.REMOTE_CONTEMPORARY_JSON), new GalatamanPostProcessor());
 
-      knownGoodBlog =
-          new GalatamanBlog(
-              new URL(TestConstants.REMOTE_KNOWN_GOOD_JSON), new GalatamanPostProcessor());
+//      knownGoodBlog =
+//          new GalatamanBlog(
+//              new URL(TestConstants.REMOTE_KNOWN_GOOD_JSON), new GalatamanPostProcessor());
 
     } catch (IOException e) {
       Log.e(LOG_TAG, "Could not read test data!", e);
@@ -57,9 +57,9 @@ class GalatamanMatchFileSourceTest {
    */
   @NotNull
   private static Stream<Arguments> getArguments() {
-    return Stream.concat(
-        currentBlog.getEntries().stream().map(Arguments::of),
-        knownGoodBlog.getEntries().stream().map(Arguments::of));
+    return //Stream.concat(
+        currentBlog.getEntries().stream().map(Arguments::of);
+//        knownGoodBlog.getEntries().stream().map(Arguments::of));
   }
 
   // Tests

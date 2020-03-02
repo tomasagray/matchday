@@ -4,17 +4,12 @@
 
 package self.me.matchday.api.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,7 +45,7 @@ public class TeamController {
     if (teams.size() > 0) {
       return new ResponseEntity<>(teamResourceAssembler.toCollectionModel(teams), HttpStatus.OK);
     } else {
-      Log.d(LOG_TAG, "Attempted to fetch all Teams, but nothing was found.");
+      Log.d(LOG_TAG, "Attempted to fetch all Teams, but nothing found.");
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
   }
@@ -59,7 +54,7 @@ public class TeamController {
    * Fetch a single Team from the local DB, specified by the Team ID.
    *
    * @param teamId The Team ID (MD5 String)
-   * @return The Team as an HttpEntity
+   * @return The Team as an HttpEntity.
    */
   @GetMapping("/teams/team/{teamId}")
   public ResponseEntity<TeamResource> fetchTeamById(@PathVariable final String teamId) {

@@ -13,11 +13,12 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.CookieRepository.FSPersistentCookie;
 import self.me.matchday.util.Log;
 
+// TODO: DELETE THIS!
 public class FAKECookieRepo {
-  // TODO: DELETE ALL THIS!
+
   // =============================================================================================
-  String LOG_TAG = "CookieRepo";
-  String FILE_PATH =
+  final String LOG_TAG = "CookieRepo";
+  final String FILE_PATH =
       "C:\\Users\\Tomas\\Code\\Source\\IdeaProjects\\Matchday\\src\\test\\resources\\self\\me\\matchday\\userdata.cookie";
 
   public List<HttpCookie> findAll() {
@@ -37,14 +38,14 @@ public class FAKECookieRepo {
         .map(FSPersistentCookie::toHttpCookie)
         .collect(Collectors.toList());
   }
-  public void save(@NotNull final HttpCookie cookie) throws IOException {
+  public void save(@NotNull final HttpCookie cookie) {
     try(FileOutputStream fos = new FileOutputStream(FILE_PATH);
         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 
       oos.writeObject(FSPersistentCookie.fromHttpCookie(cookie));
-
+    } catch (IOException e) {
+      Log.d(LOG_TAG, "Could not write the cookie to local storage: " + cookie, e);
     }
   }
   // ===============================================================================================
-  // TODO: End delete
 }

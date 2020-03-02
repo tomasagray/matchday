@@ -45,7 +45,7 @@ public final class Log {
 
     @Override
     public String toString() {
-      // Ensure newlines are indented
+      // indent newlines
       String logMsg = msg.replaceAll("\\n", "\n\t");
       // Prepare timestamp
       LocalDateTime dateTime = LocalDateTime.ofInstant(timestamp, ZoneId.systemDefault());
@@ -76,7 +76,7 @@ public final class Log {
    * For logging outright errors.
    *
    * @param tag An identifier for easier log sorting
-   * @param msg The message to be logged
+   * @param msg The message to be logged.
    */
   public static void e(String tag, String msg) {
     LogEntry log = new LogEntry(tag, msg, Instant.now(), Level.ERROR, null);
@@ -99,7 +99,7 @@ public final class Log {
    * Debug method, for logs relevant to detecting problems within the application.
    *
    * @param tag An identifier for easier log sorting
-   * @param msg The message to be logged
+   * @param msg The message to be logged.
    */
   public static void d(String tag, String msg) {
     LogEntry log = new LogEntry(tag, msg, Instant.now(), Level.DEBUG, null);
@@ -111,7 +111,7 @@ public final class Log {
    *
    * @param tag Tag for sorting log output
    * @param msg The message to be logged
-   * @param exception The exception thrown
+   * @param exception The exception thrown.
    */
   public static void d(String tag, String msg, Throwable exception) {
     LogEntry log = new LogEntry(tag, msg, Instant.now(), Level.DEBUG, exception);
@@ -122,7 +122,7 @@ public final class Log {
    * Informational logging messages.
    *
    * @param tag Tag for sorting logging output
-   * @param msg The message to be logged
+   * @param msg The message to be logged.
    */
   public static void i(String tag, String msg) {
     LogEntry log = new LogEntry(tag, msg, Instant.now(), Level.INFO, null);
@@ -168,7 +168,7 @@ public final class Log {
    * Warning messages; more serious than informational, less serious than errors.
    *
    * @param tag Tag for sorting log output
-   * @param msg The message to be logged
+   * @param msg The message to be logged.
    */
   public static void w(String tag, String msg) {
     LogEntry log = new LogEntry(tag, msg, Instant.now(), Level.WARN, null);
@@ -190,7 +190,7 @@ public final class Log {
   /**
    * Write the log entry to the console.
    *
-   * @param logEntry The log entry to display
+   * @param logEntry The log entry to display.
    */
   private static void print_log_entry(@NotNull LogEntry logEntry) {
     System.out.println(logEntry.toString());

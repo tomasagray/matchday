@@ -5,7 +5,7 @@
 package self.me.matchday.model;
 
 /**
- * The application-wide abbreviation strategy. The current strategy is:
+ * Application-wide abbreviation strategy. The current strategy is:
  *    Truncate the given String, removing all whitespace first. The user can supply a custom
  *    length for the abbreviation; otherwise the default length (3) will be used.
  */

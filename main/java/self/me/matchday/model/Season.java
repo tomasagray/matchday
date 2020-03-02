@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Data
-@Entity // todo: delete this?
+@Entity
 @Table(name = "Seasons")
 @Embeddable
 public final class Season implements Serializable {
@@ -44,7 +44,7 @@ public final class Season implements Serializable {
   private final LocalDate endDate;
 
   /**
-   * Default constructor; defaults to the current year, 1 Aug to 31 May of next year.
+   * Default constructor; defaults to the current year, Aug 1 to May 31 of next year.
    */
   public Season() {
     this.startDate = LocalDate.from(START_DATE).withYear(LocalDate.now().getYear());
@@ -52,7 +52,7 @@ public final class Season implements Serializable {
     this.seasonId = MD5String.fromData(this.startDate.toString());
   }
   /**
-   * Create a new Season object. Defaults to 1 Aug, and 31 May of given years. Two-digit years
+   * Create a new Season object. Defaults to Aug 1, and May 31 of given years. Two-digit years
    * (e.g., 14) are changed to four-digit by adding the millennium (2000). Illegal dates throw a
    * DateTimeFormatException.
    *

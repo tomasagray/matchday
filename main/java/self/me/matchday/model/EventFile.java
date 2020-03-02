@@ -37,9 +37,8 @@ public class EventFile {
     this.metadata = null;
   }
 
-  // todo: maybe change this to getMetadata()?
   public double getDuration() {
-    // todo: phony
+    // TODO: get real file duration
     return 3012.541956d;
   }
 
@@ -76,7 +75,7 @@ public class EventFile {
     /**
      * Determines if the given String corresponds to an enumerated Event part identifier.
      * @param str The test String
-     * @return True / false
+     * @return True / false.
      */
     public static boolean isPartIdentifier(@NotNull String str) {
       return PRE_MATCH.pattern.matcher(str).find()

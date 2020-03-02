@@ -27,9 +27,9 @@ import self.me.matchday.util.Log;
 
 /**
  * Represents an individual, generic post on a Blogger blog. The constructor accepts either a Gson
- * JsonObject or a JSON string.
+ * JsonObject, or a JSON string.
  *
- * <p>This class can be extended to allow it to be customized to a particular blog.
+ * This class can be extended to allow it to be customized to a particular blog.
  *
  * @author tomas
  */
@@ -128,12 +128,12 @@ public abstract class BloggerPost extends EventSource {
       try {
         this.bloggerPostID = this.bloggerPost.get("id").getAsJsonObject().get("$t").getAsString();
       } catch (NullPointerException e) {
-        // No post ID was found - ABORT!
+        // No post ID found - ABORT!
         throw new InvalidBloggerPostException("Could not determine post ID", e);
       }
     }
 
-    /** Get the date Post was initially published */
+    /** Get the Post's initially published date */
     protected void parsePublished() {
       try {
         this.published = parseDateTimeString("published");
@@ -179,9 +179,6 @@ public abstract class BloggerPost extends EventSource {
         throw new InvalidBloggerPostException("Could not parse post content", e);
       }
     }
-
-    // Parsers for optional fields
-    // --------------------------------------------------------------------------
 
     /** Get update timestamp */
     protected void parseLastUpdated() {
@@ -233,11 +230,7 @@ public abstract class BloggerPost extends EventSource {
       return this.link;
     }
 
-    /**
-     * Call each build method, to ensure a properly constructed BloggerPost object is created
-     *
-     * @return A fully-formed, properly constructed BloggerPost
-     */
+    // Build object
     public abstract BloggerPost build();
   }
 }

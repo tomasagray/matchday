@@ -27,7 +27,7 @@ import self.me.matchday.model.MasterM3U;
 @Data
 @Builder
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "playlist")
 @Relation(collectionRelation = "playlists")
 public class PlaylistResource extends RepresentationModel<PlaylistResource> {

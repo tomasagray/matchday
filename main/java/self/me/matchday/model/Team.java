@@ -39,7 +39,6 @@ public class Team implements Serializable {
 
   private String name;
   private String abbreviation;
-  private Affinity affinity;
   private Locale locale;
 
   // Default constructor
@@ -51,7 +50,6 @@ public class Team implements Serializable {
     this.name = name;
     // Defaults
     this.abbreviation = Abbreviator.abbreviate(this.name);
-    this.affinity = Affinity.IGNORE;
     this.teamId = MD5String.fromData(name);
   }
 
@@ -69,7 +67,7 @@ public class Team implements Serializable {
    * Compare Teams; they must have identical names and Locales.
    *
    * @param obj The team to be compared
-   * @return True/false
+   * @return True/false.
    */
   @Override
   public boolean equals(Object obj) {

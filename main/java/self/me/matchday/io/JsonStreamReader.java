@@ -30,9 +30,9 @@ public class JsonStreamReader {
    *
    * @param url The URL of the JSON file/stream
    * @return JsonObject A JsonObject (Gson) representing the stream.
-   * @throws IOException if the JSON cannot be read from the source
-   * @throws JsonParseException if the loaded text is not valid JSON
-   * @throws JsonSyntaxException is the JSON is invalid
+   * @throws IOException JSON cannot be read from the source.
+   * @throws JsonParseException The loaded text is not valid JSON.
+   * @throws JsonSyntaxException JSON is invalid.
    */
   public static JsonObject readRemote(URL url) throws IOException {
     // Read the file
@@ -51,7 +51,7 @@ public class JsonStreamReader {
    *
    * @param uri A String representing the Path to the .json file
    * @return JsonObject A Gson object representing the file
-   * @throws IOException if the file cannot be read
+   * @throws IOException if the file cannot be read.
    */
   static JsonObject readLocal(Path uri) throws IOException {
     // Read the file
@@ -68,7 +68,7 @@ public class JsonStreamReader {
    * Parses a JSON string into a JsonObject.
    *
    * @param json A JSON String
-   * @return A JSON Object
+   * @return A JSON Object.
    */
   public static JsonObject readJsonString(String json) {
     return parser.parse(json).getAsJsonObject();

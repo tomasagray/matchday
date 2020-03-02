@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -172,7 +171,7 @@ class ICDManagerTest {
   void getDownloadURL(URL url) {
     // Ensure logged in
     if (!icdm.isLoggedIn()) {
-      Log.i(LOG_TAG, "User was not logged in; logging in now...");
+      Log.i(LOG_TAG, "User not logged in; logging in now...");
       icdm.login(user);
     }
 
@@ -186,7 +185,7 @@ class ICDManagerTest {
     Log.i(LOG_TAG, "\t|_Found link: " + theLink);
 
     // TEST: *********************************
-    // Ensure link is the one we are expecting
+    // Ensure the link is the one we are expecting
     assertTrue(theLink.matches(LINK_PATTERN));
   }
 
