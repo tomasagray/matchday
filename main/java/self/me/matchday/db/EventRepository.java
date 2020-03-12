@@ -5,5 +5,4 @@ import self.me.matchday.model.Event;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-  // todo: is there a better way to handle supertypes?
 }

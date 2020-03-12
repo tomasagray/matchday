@@ -2,7 +2,7 @@
  * Copyright © 2020, Tomás Gray. All rights reserved.
  */
 
-package self.me.matchday.model;
+package self.me.matchday.util;
 
 /**
  * Application-wide abbreviation strategy. The current strategy is:
@@ -18,7 +18,7 @@ public class Abbreviator {
    * @param str The String to be abbreviated.
    * @return The abbreviated String.
    */
-  static String abbreviate(final String str) {
+  public static String abbreviate(final String str) {
     return abbreviate(str, DEFAULT_LENGTH);
   }
 
@@ -27,7 +27,7 @@ public class Abbreviator {
    * @param str The String to be abbreviated.
    * @return The abbreviated String.
    */
-  static String abbreviate(final String str, final int length) {
+  public static String abbreviate(final String str, final int length) {
     String result = null;
     if (str != null) {
       final String noSpaces =

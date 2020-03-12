@@ -72,15 +72,13 @@ public class CompetitionController {
   @GetMapping("/competitions/competition/{competitionId}/emblem")
   public ResponseEntity<URL> fetchCompetitionEmblemUrl(@PathVariable final String competitionId) {
 
-    // TODO: implement this
     Log.i(LOG_TAG, "Getting emblem for competition: " + competitionId);
 
+    // TODO: implement competition emblem service
     URL url = null;
     try {
       url = new URL("http://www.competition-emblem-url.com");
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-    }
+    } catch (MalformedURLException ignored) {}
 
     return new ResponseEntity<>(url, HttpStatus.OK);
   }

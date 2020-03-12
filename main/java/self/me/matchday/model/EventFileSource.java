@@ -1,6 +1,7 @@
 package self.me.matchday.model;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -10,9 +11,8 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
+import lombok.Data;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,62 +22,32 @@ import org.jetbrains.annotations.Nullable;
  * stream and its origin.
  */
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class EventFileSource {
+@Data
+public class EventFileSource {
 
   @Id
   @GeneratedValue
-  protected Long eventFileSrcId;
+  private Long eventFileSrcId;
 
   public Long getEventFileSrcId() {
     return eventFileSrcId;
   }
 
   // Fields
-  protected String channel;
-  protected String source;
-  protected String approximateDuration;
-  protected String approximateFileSize;
-  protected Resolution resolution;
+  private String channel;
+  private String source;
+  private String approximateDuration;
+  private String approximateFileSize;
+  private Resolution resolution;
   @ElementCollection
-  protected List<String> languages;
+  private List<String> languages = new ArrayList<>();
   @ElementCollection
-  protected List<String> videoData;
+  private List<String> videoData = new ArrayList<>();
   @ElementCollection
-  protected List<String> audioData;
+  private List<String> audioData = new ArrayList<>();
   @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL)
-  protected List<EventFile> eventFiles;
-  protected Timestamp lastRefreshed = new Timestamp(0L);
-
-  public abstract String getChannel();
-
-  public abstract String getSource();
-
-  public abstract String getApproximateDuration();
-
-  public abstract String getApproximateFileSize();
-
-  public abstract Resolution getResolution();
-
-  public abstract List<String> getLanguages();
-
-  public abstract List<String> getVideoData();
-
-  public abstract List<String> getAudioData();
-
-  public abstract List<EventFile> getEventFiles();
-
-  public void setEventFiles(List<EventFile> eventFiles) {
-    this.eventFiles = eventFiles;
-  }
-
-  public Timestamp getLastRefreshed() {
-    return this.lastRefreshed;
-  }
-
-  public void setLastRefreshed(@NotNull final Timestamp refreshed) {
-    this.lastRefreshed = refreshed;
-  }
+  private List<EventFile> eventFiles = new ArrayList<>();
+  private Timestamp lastRefreshed = new Timestamp(0L);
 
   public String toString() {
 

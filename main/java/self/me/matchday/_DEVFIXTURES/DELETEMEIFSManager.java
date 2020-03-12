@@ -42,8 +42,8 @@ public class DELETEMEIFSManager implements IFSManager {
   }
 
   @Override
-  public Pattern getUrlMatcher() {
-    return this.urlMatcher;
+  public boolean acceptsUrl(@NotNull URL url) {
+    return true;
   }
 
   @Override

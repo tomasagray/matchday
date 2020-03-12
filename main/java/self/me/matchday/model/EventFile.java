@@ -51,25 +51,27 @@ public class EventFile {
   */
   public enum EventPartIdentifier {
 
-    DEFAULT("", -1),
-    PRE_MATCH("Pre-Match", 0),
-    FIRST_HALF("1st Half", 1),
-    SECOND_HALF("2nd Half", 2),
-    EXTRA_TIME("Extra-Time/Penalties", 3),
-    TROPHY_CEREMONY("Trophy Ceremony", 4),
-    POST_MATCH("Post-Match", 5);
+    DEFAULT("", "", -1),
+    PRE_MATCH("Pre-Match", "^[Pp][Rr][Ee][- ][Mm][Aa][Tt][Cc][Hh]$", 0),
+    FIRST_HALF("1st Half", "1 ?[Ss][Tt] [Hh][Aa][Ll][Ff]", 1),
+    SECOND_HALF("2nd Half", "2 ?[Nn][Dd] [Hh][Aa][Ll][Ff]", 2),
+    EXTRA_TIME("Extra-Time/Penalties", "^[Ee][Xx][Tt][Rr][Aa][- ][Tt][Ii][Mm][Ee]", 3),
+    TROPHY_CEREMONY("Trophy Ceremony", "^[Tt][Rr][Oo][Pp][Hh][Yy]", 4),
+    POST_MATCH("Post-Match", "^[Pp][Oo][Ss][Tt][- ][Mm][Aa][Tt][Cc][Hh]$", 5);
 
+    private final String name;
     private final Pattern pattern;
     private final int order;
 
-    EventPartIdentifier(@NotNull String pattern, int order) {
+    EventPartIdentifier(@NotNull String name, @NotNull String pattern, int order) {
+      this.name = name;
       this.pattern = Pattern.compile(pattern);
       this.order = order;
     }
 
     @Override
     public String toString() {
-      return this.pattern.toString();
+      return this.name;
     }
 
     /**

@@ -13,7 +13,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.Data;
 
@@ -31,16 +30,13 @@ public abstract class Event {
 
   @Id @GeneratedValue private Long eventId; // for internal database reference
 
-  @ManyToOne(targetEntity = Competition.class, cascade = CascadeType.REFRESH)
-  @JoinColumn(name = "competitionId")
+  @ManyToOne(cascade = {CascadeType.MERGE})
   protected Competition competition;
 
-  @ManyToOne(targetEntity = Season.class, cascade = CascadeType.REFRESH)
-  @JoinColumn(name = "seasonId")
+  @ManyToOne(cascade = CascadeType.MERGE)
   protected Season season;
 
-  @ManyToOne(targetEntity = Fixture.class, cascade = CascadeType.REFRESH)
-  @JoinColumn(name = "fixtureId")
+  @ManyToOne(cascade = CascadeType.MERGE)
   protected Fixture fixture;
 
   @Column(name = "title")

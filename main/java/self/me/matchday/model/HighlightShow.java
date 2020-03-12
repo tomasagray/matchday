@@ -20,11 +20,11 @@ import org.jetbrains.annotations.NotNull;
 public class HighlightShow extends Event implements Serializable {
 
   // For external identification (MD5 String)
-  private final String highlightShowId;
+//  private final String highlightShowId;
 
   /** Default, no arg-constructor */
   HighlightShow() {
-    this.highlightShowId = MD5String.generate();
+//    this.highlightShowId = MD5String.generate();
   }
 
   private HighlightShow(
@@ -34,7 +34,7 @@ public class HighlightShow extends Event implements Serializable {
     this.fixture = fixture;
     this.title = title;
     this.date = date;
-    this.highlightShowId = generateHighlightShowId();
+//    this.highlightShowId = generateHighlightShowId();
   }
 
   // Overrides

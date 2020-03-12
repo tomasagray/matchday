@@ -14,10 +14,12 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.Getter;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.feed.blogger.BloggerPost.BloggerPostBuilder;
 import self.me.matchday.io.JsonStreamReader;
 
 /**
@@ -26,7 +28,8 @@ import self.me.matchday.io.JsonStreamReader;
  * @author tomas
  */
 @Getter
-public abstract class Blogger {
+public class Blogger {
+
   // Fields
   private final JsonObject blog;
   private final IBloggerPostProcessor postProcessor;
@@ -37,10 +40,18 @@ public abstract class Blogger {
   private final String version;
   private final String author;
   private final String link;
-  private final List<BloggerPost> entries;
+  private final Stream<BloggerPost> entries;
+
+  // Factory
+  @NotNull
+  @Contract("_ -> new")
+  public static Blogger fromUrl(@NotNull final URL url) throws IOException {
+    return
+        new Blogger(url, new BloggerPostBuilder());
+  }
 
   // Constructor
-  protected Blogger(URL url, IBloggerPostProcessor postProcessor) throws IOException {
+  private Blogger(URL url, IBloggerPostProcessor postProcessor) throws IOException {
     // Save constructor args
     this.postProcessor = postProcessor;
 
@@ -56,12 +67,11 @@ public abstract class Blogger {
     this.link = parseLink();
 
     // Parse blog entries; ensure the list is immutable
-    this.entries = Collections.unmodifiableList(parseEntries());
+    this.entries = parseEntries();
   }
 
   /**
    * Get the "feed" portion of the JSON object.
-   *
    * @return JsonObject An object representing the "feed" sub-object.
    */
   private JsonObject parseFeed() {
@@ -78,7 +88,6 @@ public abstract class Blogger {
 
   /**
    * Get the top-level Blogger ID.
-   *
    * @return String representing the Blog's ID.
    */
   private String parseId() {
@@ -95,7 +104,6 @@ public abstract class Blogger {
 
   /**
    * Extract the title of the blog.
-   *
    * @return String The blog title.
    */
   private String parseTitle() {
@@ -113,7 +121,6 @@ public abstract class Blogger {
 
   /**
    * Get the version info as a String.
-   *
    * @return String The blog version.
    */
   private String parseVersion() {
@@ -130,7 +137,6 @@ public abstract class Blogger {
 
   /**
    * Extract the author's name.
-   *
    * @return String The author's name.
    */
   private String parseAuthor() {
@@ -184,7 +190,7 @@ public abstract class Blogger {
    * object, and add it to this object's collection.
    */
   @NotNull
-  private List<BloggerPost> parseEntries() {
+  private Stream<BloggerPost> parseEntries() {
 
     // Result container for entries
     List<BloggerPost> localEntries = new ArrayList<>();
@@ -202,7 +208,7 @@ public abstract class Blogger {
             // Ensure valid JSON;
             if (entry.isJsonObject()) {
               // Parse entry & add to collection
-              localEntries.add(this.postProcessor.parse(entry.getAsJsonObject()));
+              localEntries.add(postProcessor.parse(entry.getAsJsonObject()));
             }
           });
 
@@ -211,7 +217,8 @@ public abstract class Blogger {
       throw new InvalidBloggerFeedException("Error parsing blog entries", e);
     }
 
-    return localEntries;
+    // Return a Stream of BloggerPosts
+    return localEntries.stream();
   }
 
   // Overridden methods
@@ -228,9 +235,7 @@ public abstract class Blogger {
         + "\n\tLink: "
         + this.link
         + "\n\tEntries: "
-        + this.entries.size()
+        + this.entries.count()
         + "\n]";
   }
-
-
 }

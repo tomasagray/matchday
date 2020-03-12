@@ -25,8 +25,8 @@ public class MatchController extends EventController {
 
   private static final String LOG_TAG = "MatchController";
 
-  private MatchRepository matchRepository;
-  private MatchResourceAssembler matchResourceAssembler;
+  private final MatchRepository matchRepository;
+  private final MatchResourceAssembler matchResourceAssembler;
 
   @Autowired
   public MatchController(MatchRepository matchRepository,

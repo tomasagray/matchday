@@ -7,9 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 // TODO: DELETE THIS!! ONLY FOR DEVELOPMENT!
 @Configuration
+@EnableWebMvc
 public class DEVELOPMENTSECURITYCONFIG extends WebSecurityConfigurerAdapter {
 
   @Override

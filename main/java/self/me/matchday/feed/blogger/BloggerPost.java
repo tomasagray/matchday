@@ -16,60 +16,48 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.EventSource;
 import self.me.matchday.util.Log;
 
 /**
  * Represents an individual, generic post on a Blogger blog. The constructor accepts either a Gson
  * JsonObject, or a JSON string.
- *
+ * <p>
  * This class can be extended to allow it to be customized to a particular blog.
  *
  * @author tomas
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class BloggerPost extends EventSource {
+@AllArgsConstructor
+@NoArgsConstructor
+public class BloggerPost {
 
   private static final String LOG_TAG = "BloggerPostClass";
 
   // Fields
-  private final String bloggerPostID;
-  private final LocalDateTime published;
-  private final LocalDateTime lastUpdated;
-  private final List<String> categories;
-  private final String title;
-  private final String content;
+  private String bloggerPostID;
+  private LocalDateTime published;
+  private LocalDateTime lastUpdated;
+  private List<String> categories;
+  private String title;
+  private String content;
+  private String link;
 
   // Default constructor, for JPA
-  public BloggerPost() {
+  /*public BloggerPost() {
     bloggerPostID = null;
     published = null;
     lastUpdated = null;
     categories = null;
     title = null;
     content = null;
-  }
-
-  // Constructor
-  @Contract(pure = true)
-  protected BloggerPost(@NotNull BloggerPostBuilder builder) {
-    // Initialize our object with a properly initialized copy
-    this.bloggerPostID = builder.bloggerPostID;
-    this.published = builder.published;
-    this.lastUpdated = builder.lastUpdated;
-    // Ensure categories List is immutable
-    this.categories = Collections.unmodifiableList(builder.categories);
-    this.title = builder.title;
-    this.content = builder.content;
-    this.link = builder.link;
-  }
+    link = null;
+  }*/
 
   // Overridden methods
   @Override
@@ -106,25 +94,27 @@ public abstract class BloggerPost extends EventSource {
    * Constructs a fully-formed BloggerPost object which is then passed to the BloggerPost
    * constructor.
    */
-  public static abstract class BloggerPostBuilder {
-    private final JsonObject bloggerPost;
+  public static class BloggerPostBuilder implements IBloggerPostProcessor {
+
+    private JsonObject bloggerPost;
     private String bloggerPostID;
     private String title;
     private String content;
     private String link;
     private LocalDateTime published;
     private LocalDateTime lastUpdated;
-    private final List<String> categories =
-        new ArrayList<>(); // will be empty if no categories parsed
+    private final List<String> categories = new ArrayList<>();
 
     // Constructor
-    public BloggerPostBuilder(JsonObject bloggerPost) {
-      this.bloggerPost = bloggerPost;
-    }
+//    private BloggerPostBuilder(JsonObject bloggerPost) {
+//      this.bloggerPost = bloggerPost;
+//    }
 
     // Parsers for MANDATORY fields
-    /** Get the Post ID */
-    protected void parsePostID() {
+    /**
+     * Get the Post ID
+     */
+    private void parsePostID() {
       try {
         this.bloggerPostID = this.bloggerPost.get("id").getAsJsonObject().get("$t").getAsString();
       } catch (NullPointerException e) {
@@ -133,8 +123,10 @@ public abstract class BloggerPost extends EventSource {
       }
     }
 
-    /** Get the Post's initially published date */
-    protected void parsePublished() {
+    /**
+     * Get the Post's initially published date
+     */
+    private void parsePublished() {
       try {
         this.published = parseDateTimeString("published");
 
@@ -143,8 +135,10 @@ public abstract class BloggerPost extends EventSource {
       }
     }
 
-    /** Get the Post title */
-    protected void parseTitle() {
+    /**
+     * Get the Post title
+     */
+    private void parseTitle() {
       try {
         this.title = this.bloggerPost.get("title").getAsJsonObject().get("$t").getAsString();
 
@@ -153,8 +147,10 @@ public abstract class BloggerPost extends EventSource {
       }
     }
 
-    /** Get the link to the Post */
-    protected void parseLink() {
+    /**
+     * Get the link to the Post
+     */
+    private void parseLink() {
       try {
         JsonArray links = this.bloggerPost.get("link").getAsJsonArray();
         // Search the array of links for the one we want
@@ -162,8 +158,10 @@ public abstract class BloggerPost extends EventSource {
           // Find the 'alternate' link
           String linkType = link.getAsJsonObject().get("rel").getAsString();
           if ("alternate".equals(linkType))
-            // Assign the link
+          // Assign the link
+          {
             this.link = link.getAsJsonObject().get("href").getAsString();
+          }
         }
       } catch (NullPointerException e) {
         // Wrap as a more descriptive exception
@@ -171,7 +169,7 @@ public abstract class BloggerPost extends EventSource {
       }
     }
 
-    protected void parseContent() {
+    private void parseContent() {
       try {
         this.content = this.bloggerPost.get("content").getAsJsonObject().get("$t").getAsString();
 
@@ -180,26 +178,28 @@ public abstract class BloggerPost extends EventSource {
       }
     }
 
-    /** Get update timestamp */
-    protected void parseLastUpdated() {
+    /**
+     * Get update timestamp
+     */
+    private void parseLastUpdated() {
       try {
         this.lastUpdated = parseDateTimeString("updated");
-
       } catch (NullPointerException | DateTimeParseException e) {
-        Log.e(
-            LOG_TAG, "Could not parse UPDATE DATE data for BloggerPost: " + getBloggerPostID(), e);
+        Log.e(LOG_TAG, "Could not parse UPDATE DATE data for BloggerPost: " + bloggerPostID, e);
       }
     }
 
-    /** Get categories for this Post (teams, competition) */
-    protected void parseCategories() {
+    /**
+     * Get categories for this Post (teams, competition)
+     */
+    private void parseCategories() {
       try {
         this.bloggerPost
             .get("category")
             .getAsJsonArray()
             .forEach((c) -> this.categories.add(c.getAsJsonObject().get("term").getAsString()));
       } catch (NullPointerException | IllegalStateException | ClassCastException e) {
-        Log.e(LOG_TAG, "Could not parse CATEGORY data for BloggerPost: " + getBloggerPostID(), e);
+        Log.e(LOG_TAG, "Could not parse CATEGORY data for BloggerPost: " + bloggerPostID, e);
       }
     }
 
@@ -211,26 +211,35 @@ public abstract class BloggerPost extends EventSource {
      */
     private LocalDateTime parseDateTimeString(String timeString) {
       return OffsetDateTime.parse(
-              this.bloggerPost.get(timeString).getAsJsonObject().get("$t").getAsString(),
-              DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+          this.bloggerPost.get(timeString).getAsJsonObject().get("$t").getAsString(),
+          DateTimeFormatter.ISO_OFFSET_DATE_TIME)
           .withNano(0)
           .toLocalDateTime();
     }
 
-    // Expose data for use by subclasses
-    protected String getContent() {
-      return this.content;
-    }
-
-    protected String getBloggerPostID() {
-      return this.bloggerPostID;
-    }
-
-    protected String getLink() {
-      return this.link;
-    }
-
     // Build object
-    public abstract BloggerPost build();
+    @NotNull
+    @Contract(" -> new")
+    private BloggerPost buildPost() {
+
+      // Parse each element of the post (entry)
+      parsePostID();
+      parsePublished();
+      parseTitle();
+      parseLink();
+      parseContent();
+      parseLastUpdated();
+      parseCategories();
+
+      // Construct post
+      return
+          new BloggerPost(bloggerPostID, published, lastUpdated, categories, title, content, link);
+    }
+
+    @Override
+    public BloggerPost parse(JsonObject entry) {
+      this.bloggerPost = entry;
+      return buildPost();
+    }
   }
 }

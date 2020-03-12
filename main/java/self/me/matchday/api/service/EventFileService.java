@@ -31,8 +31,8 @@ public class EventFileService {
   private static final int THREAD_POOL_SIZE = 12;
   // Fields
   private final ExecutorService executorService;
-  private FileServerService fileServerService;
-  private EventFileSrcRepository fileSrcRepository;
+  private final FileServerService fileServerService;
+  private final EventFileSrcRepository fileSrcRepository;
 
   @Autowired
   public EventFileService(FileServerService fileServerService,

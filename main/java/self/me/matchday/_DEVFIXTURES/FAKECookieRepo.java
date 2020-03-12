@@ -14,7 +14,7 @@ import self.me.matchday.db.CookieRepository.FSPersistentCookie;
 import self.me.matchday.util.Log;
 
 // TODO: DELETE THIS!
-public class FAKECookieRepo {
+public class FAKECookieRepo  {
 
   // =============================================================================================
   final String LOG_TAG = "CookieRepo";

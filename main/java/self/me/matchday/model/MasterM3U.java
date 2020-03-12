@@ -22,6 +22,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.EventFileSource.Resolution;
+import self.me.matchday.util.Log;
 
 // Variant playlist
 @Entity
@@ -29,6 +30,8 @@ import self.me.matchday.model.EventFileSource.Resolution;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public final class MasterM3U extends M3UPlaylist {
+
+  private static final String LOG_TAG = "MasterM3U";
 
   @Id
   private Long id;
@@ -154,11 +157,20 @@ public final class MasterM3U extends M3UPlaylist {
     @NotNull
     private static Long parseBitrate(@NotNull String videoBitrate) {
       final double CONVERSION_FACTOR = 1_000_000d;
-      // Convert to a double, then convert Mbps -> bps
-      double bitrate =
-          Double.parseDouble(videoBitrate.substring(0, videoBitrate.indexOf(" ")))
-              * CONVERSION_FACTOR;
-      return (long) bitrate;
+      try {
+        // Convert to a double, then convert Mbps -> bps
+        double bitrate =
+            Double.parseDouble(videoBitrate.substring(0, videoBitrate.indexOf(" ")))
+                * CONVERSION_FACTOR;
+        return (long) bitrate;
+      } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+        Log.d(LOG_TAG,
+            String.format(
+                "Could not parse video bitrate [%s] for MasterM3U playlist; defaulting to 4Mbs",
+                videoBitrate));
+
+        return 4_000_000L;
+      }
     }
   }
 }

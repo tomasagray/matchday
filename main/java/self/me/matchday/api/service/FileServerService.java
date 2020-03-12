@@ -4,10 +4,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import self.me.matchday._DEVFIXTURES.DELETEMEIFSManager;
+import self.me.matchday.fileserver.FSUser;
 import self.me.matchday.fileserver.IFSManager;
 
 /**
@@ -17,17 +17,26 @@ import self.me.matchday.fileserver.IFSManager;
 @Service
 public class FileServerService {
 
-  private final List<IFSManager> fileServerManagers;
+  private final List<IFSManager> fileServerManagers = new ArrayList<>();
 
   FileServerService() {
-    fileServerManagers = new ArrayList<>();
-    // todo: move this elsewhere, so managers can be added at runtime, change to REAL ICD manager
-    fileServerManagers.add(DELETEMEIFSManager.getInstance());
+    // TODO: read FileServers from persistent storage
+    final boolean b = addFSManager(DELETEMEIFSManager.getInstance());
 //    fileServerManagers.add(ICDManager.getInstance());
   }
 
   public boolean addFSManager(@NotNull final IFSManager ifsManager) {
     return this.fileServerManagers.add(ifsManager);
+  }
+
+  /**
+   * Log a file server user (FSUser) into the appropriate file server.
+   * @param fsUser The User.
+   * @return Was login successful? (true/false)
+   */
+  public boolean login(@NotNull final FSUser fsUser) {
+    // TODO: Implement login of user to correct file server!
+    return fileServerManagers.get(0).login(fsUser);
   }
 
   /**
@@ -42,8 +51,7 @@ public class FileServerService {
     Optional<URL> result = Optional.empty();
     // Determine correct FS manager
     for (IFSManager ifsManager : fileServerManagers) {
-      final Matcher matcher = ifsManager.getUrlMatcher().matcher(externalUrl.toString());
-      if (matcher.find()) {
+      if(ifsManager.acceptsUrl(externalUrl)) {
         // this FS manager can handle this URL
         result = ifsManager.getDownloadURL(externalUrl);
       }

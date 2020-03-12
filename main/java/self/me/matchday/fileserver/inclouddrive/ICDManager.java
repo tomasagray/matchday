@@ -5,6 +5,9 @@
 package self.me.matchday.fileserver.inclouddrive;
 
 import static java.net.HttpURLConnection.HTTP_OK;
+import static self.me.matchday.fileserver.inclouddrive.ICDData.DOWNLOAD_LINK_IDENTIFIER;
+import static self.me.matchday.fileserver.inclouddrive.ICDData.USER_AGENT;
+import static self.me.matchday.fileserver.inclouddrive.ICDData.USER_DATA_IDENTIFIER;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,7 +22,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,52 +34,31 @@ import self.me.matchday.fileserver.IFSManager;
 import self.me.matchday.io.JsonStreamReader;
 import self.me.matchday.util.Log;
 
-/** Implementation of file server management for the InCloudDrive file service. */
+/**
+ * Implementation of file server management for the InCloudDrive file service.
+ */
 @Component
 public class ICDManager implements IFSManager {
 
   private static final String LOG_TAG = "ICDManager";
 
-  // Static members
-  private static final String URL_PATTERN = "https://www.inclouddrive.com/file/.*";
-  private static final String DOWNLOAD_LINK_IDENTIFIER = "downloadnow";
-  private static final String USER_DATA_IDENTIFIER = "doz";
-  private static final String USER_AGENT
-      // Windows
-      // = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
-      // Chrome/71.0.3578.98 Safari/537.36";
-      // Mac
-      =
-      "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
-
-  // Singleton instance
-  private static volatile ICDManager INSTANCE;
-  public static ICDManager getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new ICDManager();
-    }
-
-    return INSTANCE;
-  }
-
   // Fields
-  @Autowired
-  private ICDCookieManager cookieManager;
-  private FSUser user;
-  private JsonObject loginResponse; // Response from the server after latest login attempt
+  private final ICDCookieManager cookieManager;
+  private ICDUser user;
   private boolean isLoggedIn; // Current login status
-  private final Pattern urlMatcher;
 
   // Constructor
-  private ICDManager() {
+  @Autowired
+  public ICDManager(@NotNull final ICDCookieManager cookieManager) {
     // Setup cookie management
-//    cookieManager = new ICDCookieManager();
+    this.cookieManager = cookieManager;
     // Set default status to 'logged out'
     this.isLoggedIn = false;
-    urlMatcher = Pattern.compile(URL_PATTERN);
   }
 
-  // Public API
+
+  // Login
+  // ===============================================================================================
   /**
    * Perform user login and authentication to the file server, and save the returned cookies.
    * @param fsUser The file system user to be logged in
@@ -84,7 +66,7 @@ public class ICDManager implements IFSManager {
    */
   @Override
   public boolean login(@NotNull FSUser fsUser) {
-if(cookieManager == null) return false;
+
     // Create POST connection & attach request data
     try {
       // Get login data
@@ -106,7 +88,7 @@ if(cookieManager == null) return false;
         if (isLoginSuccessful(loginResponse)) {
           this.isLoggedIn = true;
           // Save user instance
-          this.user = fsUser;
+          this.user = (ICDUser)fsUser;
           // Extract cookie from response, create userdata cookie
           cookieManager.saveUserDataCookie(loginResponse.get(USER_DATA_IDENTIFIER).getAsString());
           Log.i(LOG_TAG, "Successfully logged in user: " + user);
@@ -138,13 +120,13 @@ if(cookieManager == null) return false;
     return false;
   }
 
-  /** Clear saved cookies, requiring the user to re-authenticate. */
+  /**
+   * Clear saved cookies, requiring the user to re-authenticate.
+   */
   @Override
   public void logout() {
     // Delete ALL cookies
     cookieManager.getCookieStore().removeAll();
-    // Clear login response
-    loginResponse = null;
     // Clear the user
     this.user = null;
   }
@@ -154,9 +136,13 @@ if(cookieManager == null) return false;
     return this.isLoggedIn;
   }
 
+
+  // Download
+  // ===============================================================================================
   @Override
-  public Pattern getUrlMatcher() {
-    return this.urlMatcher;
+  public boolean acceptsUrl(@NotNull URL url) {
+    final Matcher matcher = ICDData.getUrlMatcher().matcher(url.toString());
+    return matcher.find();
   }
 
   /**
@@ -197,11 +183,13 @@ if(cookieManager == null) return false;
     return downloadLink;
   }
 
+
   // Server
+  // ===============================================================================================
   /**
    * Prepares an HttpURLConnection for a given URL, with a given POST data size.
    *
-   * @param url The URL we want a connection to
+   * @param url      The URL we want a connection to
    * @param dataSize The size of the datagram that will be POSTed to this URL
    * @return HttpURLConnection A configured HTTP connection
    * @throws IOException If the connection cannot be opened.
@@ -232,7 +220,7 @@ if(cookieManager == null) return false;
    * Send data via a POST connection to the server.
    *
    * @param connection The connection to the server. <i>Must already be opened.</i>
-   * @param loginData An array of bytes to be written to the server.
+   * @param loginData  An array of bytes to be written to the server.
    */
   private void postData(@NotNull HttpURLConnection connection, byte[] loginData) {
     //   - POST login data to OutputStream
@@ -266,7 +254,9 @@ if(cookieManager == null) return false;
     return response.toString();
   }
 
+
   // Login
+  // ===============================================================================================
   /**
    * Determine if login has been successfully performed.
    *
@@ -274,8 +264,6 @@ if(cookieManager == null) return false;
    */
   private boolean isLoginSuccessful(JsonObject loginResponse) {
 
-    // Save login response
-    this.loginResponse = loginResponse;
     // Assume the login will fail
     boolean loggedIn = false;
 
@@ -317,7 +305,7 @@ if(cookieManager == null) return false;
   /**
    * Helper method for getLoginDataByteArray. URL encodes a given object.
    *
-   * @param key The key used to retrieve the Object
+   * @param key   The key used to retrieve the Object
    * @param value The object to be encoded
    * @return URL encoded String.
    */

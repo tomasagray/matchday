@@ -12,8 +12,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import self.me.matchday._DEVFIXTURES.FAKECookieRepo;
+import self.me.matchday.api.service.CookieService;
 import self.me.matchday.util.Log;
 
 /**
@@ -28,15 +29,27 @@ class ICDCookieManager extends CookieManager {
   private static final String USERDATA = "userdata";
 
   // cookie persistence
-  // todo: delete, switch to real cookie repo
-  private final FAKECookieRepo cookieRepository = new FAKECookieRepo();
+  private final CookieService cookieService;
+  @Autowired
+  ICDCookieManager(@NotNull final CookieService cookieService) {
 
-  ICDCookieManager() {
+    // Save CookieService reference
+    this.cookieService = cookieService;
     // Setup cookie policy
     setCookiePolicy(new ICDCookiePolicy());
+    // Load previously saved cookies
+    loadCookies();
+  }
 
+
+  /*
+   * Load previously saved cookie data.
+   */
+  private void loadCookies() {
     // Load persisted cookies
-    cookieRepository.findAll().forEach(cookie -> getCookieStore().add(DOMAIN, cookie));
+    cookieService
+        .fetchAll()
+        .forEach(cookie -> getCookieStore().add(DOMAIN, cookie));
   }
 
   /**
@@ -67,16 +80,7 @@ class ICDCookieManager extends CookieManager {
    * retrieval.
    */
   void saveCookieData() {
-    getCookieStore().getCookies().forEach(cookieRepository::save);
-  }
-
-  /*
-   * Load previously saved cookie data.
-   */
-  void loadCookieData() {
-    cookieRepository
-        .findAll()
-        .forEach(httpCookie -> getCookieStore().add(DOMAIN, httpCookie));
+    getCookieStore().getCookies().forEach(cookieService::saveCookie);
   }
 
   @NotNull

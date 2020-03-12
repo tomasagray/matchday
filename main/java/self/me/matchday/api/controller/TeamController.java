@@ -57,7 +57,7 @@ public class TeamController {
    * @return The Team as an HttpEntity.
    */
   @GetMapping("/teams/team/{teamId}")
-  public ResponseEntity<TeamResource> fetchTeamById(@PathVariable final String teamId) {
+  public ResponseEntity<TeamResource> fetchTeamById(@PathVariable final Long teamId) {
 
     Log.i(LOG_TAG, "Fetching Team with ID: " + teamId);
     // Get Team from local DB
@@ -68,16 +68,14 @@ public class TeamController {
   }
 
   @GetMapping("/teams/team/{teamId}/emblem")
-  public ResponseEntity<URL> fetchTeamEmblemUrl(@PathVariable final String teamId) {
-    // todo: implement this
+  public ResponseEntity<URL> fetchTeamEmblemUrl(@PathVariable final Long teamId) {
+
+    // TODO: implement Team artwork service
 
     URL url = null;
     try {
       url = new URL("http://www.team-emblem-url.com");
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-    }
-
+    } catch (MalformedURLException ignored) {}
     return new ResponseEntity<>(url, HttpStatus.OK);
   }
 }

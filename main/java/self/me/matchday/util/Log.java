@@ -7,6 +7,7 @@ package self.me.matchday.util;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,12 +50,14 @@ public final class Log {
       String logMsg = msg.replaceAll("\\n", "\n\t");
       // Prepare timestamp
       LocalDateTime dateTime = LocalDateTime.ofInstant(timestamp, ZoneId.systemDefault());
+      final String date = dateTime.format(DateTimeFormatter.ISO_DATE);
+      final String time = dateTime.format(DateTimeFormatter.ofPattern("hh:mm:ss.SSS"));
       // Holder for text output
       StringBuilder sb = new StringBuilder();
       sb
-          .append(dateTime.toLocalDate().toString())
+          .append(date)
           .append(" ")
-          .append(dateTime.toLocalTime().toString())
+          .append(time)
           .append("  <")
           .append(level.name())
           .append(">  --- [")

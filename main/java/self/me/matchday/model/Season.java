@@ -51,6 +51,7 @@ public final class Season implements Serializable {
     this.endDate = this.startDate.plusYears(1);
     this.seasonId = MD5String.fromData(this.startDate.toString());
   }
+
   /**
    * Create a new Season object. Defaults to Aug 1, and May 31 of given years. Two-digit years
    * (e.g., 14) are changed to four-digit by adding the millennium (2000). Illegal dates throw a

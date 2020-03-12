@@ -37,19 +37,19 @@ public class Match extends Event implements Serializable {
   private static final long serialVersionUID = 123456L; // for cross-platform serialization
 
   // For external identification (MD5 string)
-  private final String matchId;
+//  private final String matchId;
 
-  @ManyToOne(targetEntity = Team.class, cascade = CascadeType.MERGE)
+  @ManyToOne(targetEntity = Team.class, cascade = CascadeType.ALL)
   @JoinColumn(name = "homeTeamId")
   private Team homeTeam;
 
-  @ManyToOne(targetEntity = Team.class, cascade = CascadeType.MERGE)
+  @ManyToOne(targetEntity = Team.class, cascade = CascadeType.ALL)
   @JoinColumn(name = "awayTeamId")
   private Team awayTeam;
 
   // Default constructor
   public Match() {
-    this.matchId = MD5String.generate();
+    /*this.matchId = MD5String.generate();*/
   }
 
   @Contract(pure = true)
@@ -66,7 +66,7 @@ public class Match extends Event implements Serializable {
     this.date = date;
     this.season = season;
     this.fixture = fixture;
-    this.matchId = generateMatchId();
+//    this.matchId = generateMatchId();
   }
 
   @NotNull

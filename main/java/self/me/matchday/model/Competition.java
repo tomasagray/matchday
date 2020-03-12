@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.util.Abbreviator;
 
 /**
  * Represents a competition, e.g., a domestic league (EPL) or cup (FA Cup), a tournament (UCL, World
@@ -32,7 +33,7 @@ public class Competition implements Serializable {
 
   // Fields
   @Id
-  private final String competitionId;
+  private String competitionId;
   private String name;
   private String abbreviation;
   private Locale locale;
@@ -73,4 +74,5 @@ public class Competition implements Serializable {
   public int hashCode() {
     return Objects.hash(this);
   }
+
 }

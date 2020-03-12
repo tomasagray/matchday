@@ -12,6 +12,7 @@ package self.me.matchday.feed.blogger;
  * Indicates the Blogger contains no posts, or the parser was not capable of finding any.
  */
 public class EmptyBloggerFeedException extends RuntimeException {
+
   @Override
   public String getMessage() {
     return "This feed contains no entries, or is an invalid Blogger feed.";

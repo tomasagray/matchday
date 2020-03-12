@@ -2,6 +2,7 @@ package self.me.matchday.api.service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import self.me.matchday.db.EventFileSrcRepository;
 import self.me.matchday.db.EventRepository;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.VariantM3U;
 import self.me.matchday.util.Log;
@@ -20,7 +22,7 @@ public class VariantPlaylistService {
 
   private static final String LOG_TAG = "VariantPlaylistService";
 
-  // todo: de-couple? may be different for different file servers.
+  // todo: de-couple refresh timeout? may be different for different file servers.
   private static final Duration REFRESH_RATE = Duration.ofHours(4);
 
   // JPA repositories
@@ -57,7 +59,12 @@ public class VariantPlaylistService {
         if (shouldRefreshFileData(eventFileSource)) {
           eventFileService.refreshEventFileData(eventFileSource);
         }
-        result = Optional.of(new VariantM3U(event, eventFileSource.getEventFiles()));
+        final List<EventFile> eventFiles = eventFileSource.getEventFiles();
+        if(eventFiles.size() > 0) {
+          result = Optional.of(new VariantM3U(event, eventFiles));
+        } else {
+          Log.d(LOG_TAG, "Could not create variant playlist; no EventFiles!");
+        }
       } else {
         Log.d(LOG_TAG, "Could not create Variant Playlist; invalid File Source ID: " + fileSrcId);
       }

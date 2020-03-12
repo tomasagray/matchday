@@ -6,11 +6,10 @@ package self.me.matchday.fileserver;
 
 import java.net.URL;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents a file server management service. Can login/logout and translate download requests.
+ * Represents a file server management service. Can log-in/logout and translate download requests.
  */
 public interface IFSManager {
 
@@ -31,10 +30,11 @@ public interface IFSManager {
   boolean isLoggedIn();
 
   /**
-   * Return a Pattern which matches URLs this file server is capable of decoding.
-   * @return A Pattern
+   * Determine whether this file server can translate the given URL into a download URL.
+   * @param url The URL to be tested.
+   * @return True/false.
    */
-  Pattern getUrlMatcher();
+  boolean acceptsUrl(@NotNull final URL url);
 
   /**
    * Extract download URL data from a given URL

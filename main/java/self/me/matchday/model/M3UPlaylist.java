@@ -9,7 +9,7 @@ package self.me.matchday.model;
  * tags are hardcoded:
  *  - #EXT-X-VERSION:4
  *  - #EXT-X-ALLOW-CACHE:YES
- *  - #EXT-X-PLAYLIST-TYPE:EVENT
+ *  - #EXT-X-PLAYLIST-TYPE:EVENT .
  */
 public abstract class M3UPlaylist {
 

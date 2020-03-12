@@ -78,6 +78,7 @@ public class MasterPlaylistService {
       // Create Master Playlist
       final MasterM3U masterPlaylist = new MasterM3U(eventId);
       // add variants
+      // todo: address no variants
       eventFileSources.forEach(eventFileSource -> {
         final Link variantLink = linkTo(methodOn(PlaylistController.class)
             .fetchVariantPlaylist(eventId, eventFileSource.getEventFileSrcId())).withSelfRel();
