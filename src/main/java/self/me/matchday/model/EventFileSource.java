@@ -55,7 +55,7 @@ public class EventFileSource {
         String.format(
             "%s (%s) - %s, %s files",
             getChannel(),
-            getResolution().getName(),
+            getResolution(),
             String.join("/", getLanguages()),
             getEventFiles().size()
         );
@@ -86,6 +86,11 @@ public class EventFileSource {
     @Contract(pure = true)
     public String getName() {
       return this.name;
+    }
+
+    @Override
+    public String toString() {
+      return getName();
     }
 
     public int getWidth() {
