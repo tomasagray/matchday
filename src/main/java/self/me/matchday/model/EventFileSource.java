@@ -38,15 +38,19 @@ public class EventFileSource {
   private String source;
   private String approximateDuration;
   private String approximateFileSize;
-  private Resolution resolution;
   @ElementCollection
   private List<String> languages = new ArrayList<>();
-  @ElementCollection
-  private List<String> videoData = new ArrayList<>();
-  @ElementCollection
-  private List<String> audioData = new ArrayList<>();
   @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL)
   private List<EventFile> eventFiles = new ArrayList<>();
+  // Media metadata
+  private Resolution resolution;
+  private String mediaContainer;
+  private Long bitrate;
+  private String videoCodec;
+  private int frameRate;
+  private String audioCodec;
+  private int audioChannels;
+  // For local DB
   private Timestamp lastRefreshed = new Timestamp(0L);
 
   public String toString() {
@@ -83,14 +87,9 @@ public class EventFileSource {
       this.height = height;
     }
 
-    @Contract(pure = true)
-    public String getName() {
-      return this.name;
-    }
-
     @Override
     public String toString() {
-      return getName();
+      return this.name;
     }
 
     public int getWidth() {

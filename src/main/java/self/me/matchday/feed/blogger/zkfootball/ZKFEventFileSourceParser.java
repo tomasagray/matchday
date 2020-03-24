@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import self.me.matchday.feed.IEventFileSourceParser;
 import self.me.matchday.feed.blogger.InvalidBloggerPostException;
@@ -28,6 +29,9 @@ import self.me.matchday.util.Log;
 public class ZKFEventFileSourceParser implements IEventFileSourceParser {
 
   private static final String LOG_TAG = "ZKEventFileSrcParser";
+
+  // Default values
+  private static final Long DEFAULT_BITRATE = 4_000_000L;
 
   // Metadata tags
   private static final String CHANNEL = "channel:";
@@ -74,12 +78,12 @@ public class ZKFEventFileSourceParser implements IEventFileSourceParser {
         EventFileSource eventFileSource = new EventFileSource();
 
         // find next source - links (w/titles), metadata
-        while (token != null && !(ZKVars.SOURCE_SEPARATOR.matcher(token.text()).find())) {
+        while (token != null && !(ZKPatterns.SOURCE_SEPARATOR.matcher(token.text()).find())) {
 
           // find part title
           if (EventPartIdentifier.isPartIdentifier(token.html())) {
             eventPartIdentifier = EventPartIdentifier.fromString(token.text());
-          } else if (ZKVars.isVideoLink.test(token)) {
+          } else if (ZKPatterns.isVideoLink.test(token)) {
             // Create EventFile from link w/ above title
             try {
               eventFile = new EventFile(eventPartIdentifier, new URL(token.attr("href")));
@@ -87,9 +91,9 @@ public class ZKFEventFileSourceParser implements IEventFileSourceParser {
             } catch (MalformedURLException e) {
               Log.d(LOG_TAG, "Could not parse href: " + token.attr("href"));
             }
-          } else if (ZKVars.isMetadata.test(token)) {
+          } else if (ZKPatterns.isMetadata.test(token)) {
             // Populate EventFileSource metadata
-            populateFileSourceMetadata(token.select(ZKVars.METADATA_SELECTOR), eventFileSource);
+            populateFileSourceMetadata(token.select(ZKPatterns.METADATA_SELECTOR), eventFileSource);
             // add complete file source to list
             eventFileSources.add(eventFileSource);
             // reset container
@@ -131,21 +135,69 @@ public class ZKFEventFileSourceParser implements IEventFileSourceParser {
           break;
 
         case FORMAT:
-          // split resolution & container
-          final String[] format = element.nextSibling().toString().split(" ");
-          if (format[0].contains("4096x2160")) {
-            eventFileSource.setResolution(Resolution.R_4k);
-          } else {
-            eventFileSource.setResolution(Resolution.fromString(cleanMetadata(format[0])));
-          }
-          // add other video metadata
-          for (int i = 1; i < format.length; ++i) {
-            eventFileSource.getVideoData().add(cleanMetadata(format[i]));
+          // Format patterns
+          final Pattern resolutionPattern = Pattern
+              .compile("(720|1080)[pi]", Pattern.CASE_INSENSITIVE);
+          final Pattern frameRatePattern = Pattern.compile("(\\d+)(fps)", Pattern.CASE_INSENSITIVE);
+          final Pattern containerPattern = Pattern.compile("mkv|ts", Pattern.CASE_INSENSITIVE);
+
+          // split format string
+          final Node sibling = element.nextSibling();
+          final String[] format = sibling.toString().split(" ");
+          try {
+            for (String part : format) {
+              // Special 4k handler
+              if (part.contains("4096x2160")) {
+                eventFileSource.setResolution(Resolution.R_4k);
+                // 720 & 1080
+              } else if (resolutionPattern.matcher(part).find()) {
+                eventFileSource.setResolution(Resolution.fromString(part));
+              } else {
+                final Matcher frMatcher = frameRatePattern.matcher(part);
+                if (frMatcher.find()) {
+                  // Parse frame rate
+                  eventFileSource.setFrameRate(Integer.parseInt(frMatcher.group(1)));
+                } else if (containerPattern.matcher(part).find()) {
+                  eventFileSource.setMediaContainer(part.toUpperCase());
+                }
+              }
+            }
+          } catch (RuntimeException e) {
+            Log.d(LOG_TAG, "Could not parse format data from Element: " + sibling, e);
           }
           break;
 
         case BITRATE:
-          eventFileSource.getVideoData().add(cleanMetadata(element.nextSibling().toString()));
+          // Bitrate patterns
+          final Pattern mbpsPattern = Pattern.compile("mb/sec", Pattern.CASE_INSENSITIVE);
+          final Pattern kbpsPattern = Pattern.compile("kbps", Pattern.CASE_INSENSITIVE);
+
+          // Parse bitrate
+          final Node bitrateNode = element.nextSibling();
+          try {
+            final String bitrate = cleanMetadata(bitrateNode.toString()).trim();
+            // Split digit from unit
+            final Matcher bitrateMatcher = Pattern.compile("(\\d+)").matcher(bitrate);
+            if (bitrateMatcher.find()) {
+              final int digit = Integer.parseInt(bitrateMatcher.group());
+              // Parse conversion factor
+              if (mbpsPattern.matcher(bitrate).find()) {
+                eventFileSource.setBitrate(digit * 1_000_000L);
+              } else if (kbpsPattern.matcher(bitrate).find()) {
+                eventFileSource.setBitrate(digit * 1_000L);
+              }
+            }
+          } catch (NumberFormatException e) {
+            Log.d(LOG_TAG, "Error parsing bitrate data", e);
+          } finally {
+            // Ensure bitrate has been set
+            if (eventFileSource.getBitrate() == null) {
+              Log.d(LOG_TAG, String.format(
+                  "Could not parse EventFileSource bitrate from String: %s; defaulting to 4MBps",
+                  bitrateNode));
+              eventFileSource.setBitrate(DEFAULT_BITRATE);
+            }
+          }
           break;
 
         case SIZE:
@@ -172,7 +224,7 @@ public class ZKFEventFileSourceParser implements IEventFileSourceParser {
   /**
    * Container class for variables specific to the ZKFootball Blogger blog, needed for parsing.
    */
-  private static class ZKVars {
+  private static class ZKPatterns {
 
     // Delineates each File Source
     public static final Pattern SOURCE_SEPARATOR = Pattern.compile("___*");
@@ -185,7 +237,8 @@ public class ZKFEventFileSourceParser implements IEventFileSourceParser {
             final Matcher urlMatcher = ICDData.getUrlMatcher().matcher(url.toString());
             // Perform link match test
             return ("a".equals(elem.tagName()) && urlMatcher.find());
-          } catch (MalformedURLException ignored) {}
+          } catch (MalformedURLException ignored) {
+          }
 
           return false;
         };

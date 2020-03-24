@@ -114,7 +114,7 @@ public final class MasterM3U extends M3UPlaylist {
       this.playlistLink = playlistLink;
       this.resolution = eventFileSource.getResolution();
       this.languages = eventFileSource.getLanguages();
-      this.bitrate = parseBitrate(eventFileSource.getVideoData().get(BITRATE_INDEX));
+      this.bitrate = eventFileSource.getBitrate();
     }
 
     @Override
@@ -124,7 +124,7 @@ public final class MasterM3U extends M3UPlaylist {
           + ","
           + GROUP_ID_TAG
           + "\""
-          + getResolution().getName()
+          + getResolution()
           + "\","
           + NAME_TAG
           + "\""
@@ -148,13 +148,13 @@ public final class MasterM3U extends M3UPlaylist {
           + ","
           + VIDEO_TAG
           + "\""
-          + getResolution().getName()
+          + getResolution()
           + "\"\n"
           + getPlaylistLink()
           + "\n";
     }
 
-    @NotNull
+/*    @NotNull
     private static Long parseBitrate(@NotNull String videoBitrate) {
       final double CONVERSION_FACTOR = 1_000_000d;
       try {
@@ -171,6 +171,6 @@ public final class MasterM3U extends M3UPlaylist {
 
         return 4_000_000L;
       }
-    }
+    }*/
   }
 }

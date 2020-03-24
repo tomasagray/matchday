@@ -37,7 +37,7 @@ public class LoadEventData {
   private static final String LOG_TAG = "LoadEventData";
 
   private static final String LIVE_URL =
-      "https://zkfootballmatch.blogspot.com/feeds/posts/default?alt=json";
+      "http://192.168.0.101/soccer/testing/zkf_known_good.json";
   private static final String LOCAL_URL =
       "http://192.168.0.101/soccer/testing/galataman_known_good.json";
 

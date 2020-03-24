@@ -83,7 +83,7 @@ public class PlaylistResource extends RepresentationModel<PlaylistResource> {
   @NotNull
   private static LinkRelation getFileSourceLinkRel(@NotNull final EventFileSource eventFileSource) {
 
-    final String resolution = eventFileSource.getResolution().getName();
+    final String resolution = eventFileSource.getResolution().toString().toLowerCase();
     final String language = eventFileSource.getLanguages().get(0).toLowerCase();
     return LinkRelation.of(String.format("%s_%s", resolution, language));
   }

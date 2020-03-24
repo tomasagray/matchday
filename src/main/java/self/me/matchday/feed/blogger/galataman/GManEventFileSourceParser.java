@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.Contract;
@@ -48,7 +49,7 @@ import self.me.matchday.util.Log;
  */
 public final class GManEventFileSourceParser implements IEventFileSourceParser {
 
-  private static final String LOG_TAG = "GManMatchSource";
+  private static final String LOG_TAG = "GManEventFileSourceParser";
 
   private final String html;
   private final List<EventFileSource> eventFileSources;
@@ -138,19 +139,27 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
       setApproximateDuration(metadata.duration);
       setApproximateFileSize(metadata.size);
       setResolution(metadata.resolution);
+      setMediaContainer(metadata.mediaContainer);
+      setBitrate(metadata.bitrate);
+      setVideoCodec(metadata.videoCodec);
+      setFrameRate(metadata.frameRate);
+      setAudioCodec(metadata.audioCodec);
+      setAudioChannels(metadata.audioChannels);
 
       // Initialize immutable List fields
       setLanguages(Collections.unmodifiableList(metadata.languages));
-      setVideoData(Collections.unmodifiableList(metadata.videoData));
-      setAudioData(Collections.unmodifiableList(metadata.audioData));
       setEventFiles(Collections.unmodifiableList(eventFiles));
     }
   }
+
+  // TODO: Make this more like ZKF example
 
   /**
    * Builder class to parse and create an EventSource from a GalatamanHDF post.
    */
   private static final class GManFileSourceMetadataParser {
+
+    private static final String LOG_TAG = "GManEventFileSrc";
 
     // Metadata identifiers
     private static final String CHANNEL = "CHANNEL";
@@ -168,8 +177,12 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
     private String channel;
     private String source;
     private final List<String> languages = new ArrayList<>();
-    private final List<String> videoData = new ArrayList<>();
-    private final List<String> audioData = new ArrayList<>();
+    private String mediaContainer;
+    private Long bitrate;
+    private String videoCodec;
+    private int frameRate;
+    private String audioCodec;
+    private int audioChannels;
     private String duration;
     private String size;
     private Resolution resolution;
@@ -194,7 +207,7 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
      * Break the Event data string apart into parse-able chunks, and collect them into a List.
      *
      * @param data A String containing raw HTML to be parsed into metadata items concerning a
-     * particular source.
+     *             particular source.
      * @return A List of key/value tuples, each representing a metadata item.
      */
     private List<MetadataTuple> parseDataItems(@NotNull String data) {
@@ -234,16 +247,16 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
           this.languages.addAll(parseLanguages(value));
           break;
         case VIDEO:
-          this.videoData.addAll(parseAVData(value));
+          parseVideoMetadata(value);
           break;
         case AUDIO:
-          this.audioData.addAll(parseAVData(value));
+          parseAudioMetadata(value);
           break;
         case DURATION:
           this.duration = value;
           break;
         case SIZE:
-          this.size = value;
+          this.size = value.replace("~", "");
           break;
         case RESOLUTION:
           this.resolution = parseResolution(value);
@@ -258,7 +271,7 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
      * Break apart a String into language names.
      *
      * @param langStr A String containing language names, separated by a delimiter configured in the
-     * GalatamanPost class.
+     *                GalatamanPost class.
      */
     @NotNull
     private List<String> parseLanguages(@NotNull String langStr) {
@@ -266,33 +279,77 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
       List<String> languages = new ArrayList<>(Arrays.asList(langStr.split(LANGUAGE_DELIMITER)));
       // Remove empty entries
       languages.removeIf((lang) -> "".equals(lang.trim()));
-
       return languages;
     }
 
     /**
      * Split video data string apart.
      *
-     * @param avData A String containing audio/video data items, separated by a delimiter configured
-     * in the GalatamanPost class.
+     * @param videoMetadata A String containing audio/video data items, separated by a delimiter
+     *                      configured in the GalatamanPost class.
      */
-    @NotNull
-    private List<String> parseAVData(@NotNull String avData) {
-      // Temporary container
-      List<String> dataItems = new ArrayList<>();
+    private void parseVideoMetadata(@NotNull String videoMetadata) {
 
-      // Split the string into data items
-      for (String dataItem : avData.split(AV_DATA_DELIMITER)) {
-        // Remove empty space
-        String trim = dataItem.trim();
-        if (!("".equals(trim)))
-        // Add data to object
-        {
-          dataItems.add(trim);
+      final long BITRATE_CONVERSION_FACTOR = 1_000_000L;
+      // Video patterns
+      final Pattern bitratePattern = Pattern.compile("[\\d.]+\\smbps", Pattern.CASE_INSENSITIVE);
+      final Pattern containerPattern = Pattern.compile("\\w\\.\\d+ \\w+");
+      final Pattern frameRatePattern = Pattern.compile("(\\d+)(fps)", Pattern.CASE_INSENSITIVE);
+
+      // Split the string into data items & parse
+      for (String dataItem : videoMetadata.split(AV_DATA_DELIMITER)) {
+        // Clean up data
+        dataItem = dataItem.trim();
+        if (bitratePattern.matcher(dataItem).find()) {
+          final Matcher matcher = Pattern.compile("(\\d+)").matcher(dataItem);
+          if (matcher.find()) {
+            final String bitrate = matcher.group(1);
+            this.bitrate = Long.parseLong(bitrate) * BITRATE_CONVERSION_FACTOR;
+          }
+        } else if (containerPattern.matcher(dataItem).find()) {
+          // [video codec] [container]; ex: H.264 mkv
+          final String[] containerParts = dataItem.split(" ");
+          this.videoCodec = containerParts[0];
+          this.mediaContainer = containerParts[1].toUpperCase();
+        } else {
+          final Matcher matcher = frameRatePattern.matcher(dataItem);
+          if (matcher.find()) {
+            // Get digit
+            this.frameRate = Integer.parseInt(matcher.group(1));
+          }
         }
       }
+    }
 
-      return dataItems;
+    private void parseAudioMetadata(@NotNull final String audioData) {
+
+      final Pattern channelPattern = Pattern.compile("([.\\d]+) (channels)");
+      final Pattern bitratePattern = Pattern.compile("(\\d+) (kbps)", Pattern.CASE_INSENSITIVE);
+
+      try {
+        for (String dataItem : audioData.split(AV_DATA_DELIMITER)) {
+
+          dataItem = dataItem.trim();
+          // Parse channel data
+          if ("stereo".equals(dataItem)) {
+            this.audioChannels = 2;
+          } else if (channelPattern.matcher(dataItem).find()) {
+            // Get numerical component of channel data
+            final String[] channels = dataItem.split("channels");
+            // Split main & sub-woofer channels
+            final String[] split = channels[0].split("\\.");
+            for (String channel : split) {
+              // combine channels
+              this.audioChannels += Integer.parseInt(channel.trim());
+            }
+          } else if (!(bitratePattern.matcher(dataItem).find())) {
+            // Only other possibility is audio codec
+            this.audioCodec = dataItem.toUpperCase();
+          }
+        }
+      } catch (RuntimeException e) {
+        Log.d(LOG_TAG, "Error parsing audio metadata from String: " + audioData, e);
+      }
     }
 
     /**
@@ -326,8 +383,11 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
       return input.replaceAll("<[^>]*>", "").trim();
     }
 
-    /** A class representing a key/value pair for a metadata item. */
+    /**
+     * A class representing a key/value pair for a metadata item.
+     */
     public static class MetadataTuple {
+
       private final String key;
       private final String value;
 
@@ -339,8 +399,10 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
         if (kvPair.length == 2) {
           this.key = kvPair[0];
           this.value = kvPair[1];
-        } else
-          throw new InvalidMetadataException("Could not split " + data + " with splitter " + delimiter);
+        } else {
+          throw new InvalidMetadataException(
+              "Could not split " + data + " with splitter " + delimiter);
+        }
       }
 
       /**
@@ -363,7 +425,7 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
 
       @Override
       public boolean equals(Object o) {
-        if(o == this) {
+        if (o == this) {
           return true;
         }
         if (!(o instanceof MetadataTuple)) {
