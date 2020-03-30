@@ -19,7 +19,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
-import self.me.matchday.api.controller.MatchController;
+import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.PlaylistResource.PlaylistResourceAssembler;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
@@ -65,7 +65,7 @@ public class MatchResource extends RepresentationModel<MatchResource> {
         CompetitionResourceAssembler competitionResourceAssembler,
         PlaylistResourceAssembler playlistResourceAssembler) {
 
-      super(MatchController.class, MatchResource.class);
+      super(EventController.class, MatchResource.class);
       this.masterPlaylistService = masterPlaylistService;
       this.teamResourceAssembler = teamResourceAssembler;
       this.competitionResourceAssembler = competitionResourceAssembler;
@@ -95,7 +95,7 @@ public class MatchResource extends RepresentationModel<MatchResource> {
           );
       // add self link
       matchResource.add(
-          linkTo(methodOn(MatchController.class)
+          linkTo(methodOn(EventController.class)
               .fetchMatch(match.getEventId()))
               .withSelfRel()
       );
@@ -110,7 +110,7 @@ public class MatchResource extends RepresentationModel<MatchResource> {
 
       final CollectionModel<MatchResource> matchResources = super.toCollectionModel(matches);
       // add a self link to collection
-      matchResources.add(linkTo(methodOn(MatchController.class).fetchAllMatches()).withSelfRel());
+      matchResources.add(linkTo(methodOn(EventController.class).fetchAllMatches()).withSelfRel());
       return matchResources;
     }
   }

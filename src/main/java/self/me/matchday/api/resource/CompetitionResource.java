@@ -20,6 +20,7 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.CompetitionController;
+import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.model.Competition;
 
 @Data
@@ -44,7 +45,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
     private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
 
     public CompetitionResourceAssembler() {
-      super(CompetitionController.class, CompetitionResource.class);
+      super(CompetitionService.class, CompetitionResource.class);
     }
 
     @NotNull
@@ -72,12 +73,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
     public CollectionModel<CompetitionResource> toCollectionModel(
         @NotNull Iterable<? extends Competition> competitions) {
 
-      final CollectionModel<CompetitionResource> competitionResources = super
-          .toCollectionModel(competitions);
-      // add a self link
-      competitionResources
-          .add(linkTo(methodOn(CompetitionController.class).fetchAllCompetitions()).withSelfRel());
-      return competitionResources;
+      return super.toCollectionModel(competitions);
     }
   }
 

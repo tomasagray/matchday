@@ -1,0 +1,130 @@
+package self.me.matchday.api.service;
+
+import java.util.List;
+import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.stereotype.Service;
+import self.me.matchday.api.resource.EventResource;
+import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
+import self.me.matchday.api.resource.HighlightShowResource;
+import self.me.matchday.api.resource.HighlightShowResource.HighlightResourceAssembler;
+import self.me.matchday.api.resource.MatchResource;
+import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
+import self.me.matchday.db.EventRepository;
+import self.me.matchday.db.HighlightShowRepository;
+import self.me.matchday.db.MatchRepository;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.HighlightShow;
+import self.me.matchday.model.Match;
+import self.me.matchday.util.Log;
+
+@Service
+public class EventService {
+
+  private static final String LOG_TAG = "EventService";
+
+  private MatchRepository matchRepository;
+  private HighlightShowRepository highlightShowRepository;
+  private final EventRepository eventRepository;
+  private final EventResourceAssembler eventResourceAssembler;
+  private MatchResourceAssembler matchResourceAssembler;
+  private HighlightResourceAssembler highlightResourceAssembler;
+
+  @Autowired
+  EventService(MatchRepository matchRepository, MatchResource.MatchResourceAssembler matchResourceAssembler,
+      EventRepository eventRepository, EventResourceAssembler eventResourceAssembler,
+      HighlightShowRepository highlightShowRepository, HighlightResourceAssembler highlightResourceAssembler) {
+
+    this.matchRepository = matchRepository;
+    this.eventRepository = eventRepository;
+    this.eventResourceAssembler = eventResourceAssembler;
+    this.matchResourceAssembler = matchResourceAssembler;
+    this.highlightShowRepository = highlightShowRepository;
+    this.highlightResourceAssembler = highlightResourceAssembler;
+  }
+
+  public Optional<CollectionModel<EventResource>> fetchFeaturedEvents() {
+
+    Log.i(LOG_TAG, "Fetching featured Events.");
+    // Get latest 3 events from database
+    final int EVENT_COUNT = 3;
+    final List<Event> events = eventRepository.findAll();
+
+    if(events.size() > 0) {
+      // Sort in reverse chronological order
+      events.sort((ev1, ev2) -> (ev1.getDate().compareTo(ev2.getDate())) * -1);
+      // Map to DTOs and return top 3 entries
+      return Optional.of(eventResourceAssembler.toCollectionModel(events.subList(0, EVENT_COUNT)));
+    } else {
+      Log.i(LOG_TAG, "Attempted to retrieve featured Events, but none found.");
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Retrieve all Matches from the repo (database) and assemble into a collection of resources.
+   * @return Collection of assembled resources.
+   */
+  public Optional<CollectionModel<MatchResource>> fetchAllMatches() {
+
+    Log.i(LOG_TAG, "Fetching all Matches from database.");
+    // Retrieve all matches from repo
+    final List<Match> matches = matchRepository.findAll();
+
+    if (matches.size() > 0) {
+      // Sort by date (descending)
+      matches.sort((match, t1) -> (match.getDate().compareTo(t1.getDate())) * -1);
+      // return DTOs
+      return Optional.of(matchResourceAssembler.toCollectionModel(matches));
+    } else {
+      Log.d(LOG_TAG, "Attempting to retrieve all Matches, but none found");
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Retrieve a specific match from the local DB.
+   * @param matchId The ID of the match we want.
+   * @return An optional containing the match resource, if it was found.
+   */
+  public Optional<MatchResource> fetchMatch(@NotNull Long matchId) {
+
+    Log.i(LOG_TAG, String.format("Fetching Match with ID: %s from database.", matchId));
+    return
+        matchRepository
+            .findById(matchId)
+            .map(matchResourceAssembler::toModel);
+  }
+
+  /**
+   * Retrieve all Highlight Shows from the database.
+   * @return Optional collection model of highlight show resources.
+   */
+  public Optional<CollectionModel<HighlightShowResource>> fetchAllHighlightShows() {
+
+    Log.i(LOG_TAG, "Fetching all Highlight Shows from database.");
+    // Retrieve highlights from database
+    final List<HighlightShow> highlightShows = highlightShowRepository.findAll();
+
+    if (highlightShows.size() > 0) {
+      // Sort in reverse chronological order
+      highlightShows.sort((o1, o2) -> (o1.getDate().compareTo(o2.getDate())) * -1);
+      // return DTO
+      return Optional.of(highlightResourceAssembler.toCollectionModel(highlightShows));
+    } else {
+      Log.d(LOG_TAG, "Attempting to retrieve all Highlight Shows, but none found");
+      return Optional.empty();
+    }
+  }
+
+  public Optional<HighlightShowResource> fetchHighlightShow(@NotNull Long highlightShowId) {
+
+    Log.i(LOG_TAG, "Fetching Highlight Show for ID: " + highlightShowId);
+    return
+        highlightShowRepository
+        .findById(highlightShowId)
+        .map(highlightResourceAssembler::toModel);
+  }
+}

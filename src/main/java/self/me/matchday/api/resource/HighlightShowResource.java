@@ -19,7 +19,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
-import self.me.matchday.api.controller.HighlightShowController;
+import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.PlaylistResource.PlaylistResourceAssembler;
 import self.me.matchday.api.service.MasterPlaylistService;
@@ -57,7 +57,7 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
     public HighlightResourceAssembler(CompetitionResourceAssembler competitionResourceAssembler,
         MasterPlaylistService masterPlaylistService,
         PlaylistResourceAssembler playlistResourceAssembler) {
-      super(HighlightShowController.class, HighlightShowResource.class);
+      super(EventController.class, HighlightShowResource.class);
 
       this.competitionResourceAssembler = competitionResourceAssembler;
       this.masterPlaylistService = masterPlaylistService;
@@ -89,7 +89,7 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
 
       // add self link
       highlightShowResource.add(
-          linkTo(methodOn(HighlightShowController.class)
+          linkTo(methodOn(EventController.class)
               .fetchHighlightById(entity.getEventId()))
               .withSelfRel());
 
@@ -104,7 +104,7 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
       final CollectionModel<HighlightShowResource> highlightShowResources = super
           .toCollectionModel(entities);
       highlightShowResources
-          .add(linkTo(methodOn(HighlightShowController.class).fetchAllHighlights()).withSelfRel());
+          .add(linkTo(methodOn(EventController.class).fetchAllHighlights()).withSelfRel());
       return highlightShowResources;
     }
   }

@@ -75,19 +75,26 @@ public class MasterPlaylistService {
               .flatMap(Collection::stream)
               .collect(Collectors.toList());
 
-      // Create Master Playlist
-      final MasterM3U masterPlaylist = new MasterM3U(eventId);
-      // add variants
-      // todo: address no variants
-      eventFileSources.forEach(eventFileSource -> {
-        final Link variantLink = linkTo(methodOn(PlaylistController.class)
-            .fetchVariantPlaylist(eventId, eventFileSource.getEventFileSrcId())).withSelfRel();
-        masterPlaylist.addVariant(eventFileSource, variantLink.toUri());
-      });
-      result = Optional.of(masterPlaylist);
+      if (eventFileSources.size() > 0) {
+        // Create Master Playlist
+        final MasterM3U masterPlaylist = new MasterM3U(eventId);
+        // add variants
+        // todo: address no variants
+        eventFileSources.forEach(eventFileSource -> {
+          final Link variantLink = linkTo(methodOn(PlaylistController.class)
+              .fetchVariantPlaylist(eventId, eventFileSource.getEventFileSrcId())).withSelfRel();
+          masterPlaylist.addVariant(eventFileSource, variantLink.toUri());
+        });
+        result = Optional.of(masterPlaylist);
+      } else {
+        Log.i(LOG_TAG, String
+            .format("Did not generate playlist for Event with ID: %s; no file sources.", eventId));
+      }
     } else {
       // Playlist generation failed
-      Log.d(LOG_TAG, "Could not generate Master Playlist for Event with ID: " + eventId);
+      Log.i(LOG_TAG, String
+          .format("Could not generate Master Playlist for Event with ID: %s; no EventSources",
+              eventId));
     }
 
     return result;

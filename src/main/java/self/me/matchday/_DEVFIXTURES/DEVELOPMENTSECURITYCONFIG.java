@@ -1,4 +1,4 @@
-package self.me.matchday.api.security.dev;
+package self.me.matchday._DEVFIXTURES;
 
 import java.util.Arrays;
 import org.jetbrains.annotations.NotNull;

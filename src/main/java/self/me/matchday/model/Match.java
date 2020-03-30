@@ -36,6 +36,7 @@ public class Match extends Event implements Serializable {
 
   private static final long serialVersionUID = 123456L; // for cross-platform serialization
 
+  // todo: use the String (unique) Match ID
   // For external identification (MD5 string)
 //  private final String matchId;
 
@@ -65,6 +66,7 @@ public class Match extends Event implements Serializable {
     this.competition = competition;
     this.date = date;
     this.season = season;
+    // todo: change this, fixture should be nullable
     this.fixture = fixture;
 //    this.matchId = generateMatchId();
   }
@@ -72,15 +74,20 @@ public class Match extends Event implements Serializable {
   @NotNull
   @Override
   public String getTitle() {
-    return competition.getName()
-        + ": "
-        + homeTeam.getName()
-        + " vs. "
-        + awayTeam.getName()
-        + " - "
-        + ((fixture.getFixtureNumber() != 0)
-            ? String.format("%s %s", fixture.getTitle(), fixture.getFixtureNumber())
-            : fixture.getTitle());
+
+    final StringBuilder sb =
+        new StringBuilder(competition.getName())
+            .append(": ")
+            .append(homeTeam.getName())
+            .append(" vs. ")
+            .append(awayTeam.getName());
+
+    // Add fixture data, if available
+    if (fixture.getFixtureNumber() != 0) {
+      sb.append(String.format(" - %s %s", fixture.getTitle(), fixture.getFixtureNumber()));
+    }
+
+    return sb.toString();
   }
 
   @NotNull
@@ -101,7 +108,9 @@ public class Match extends Event implements Serializable {
     return str;
   }
 
-  /** Builder class for Matches */
+  /**
+   * Builder class for Matches
+   */
   public static class MatchBuilder {
 
     // Match components

@@ -6,8 +6,6 @@ package self.me.matchday.api.controller;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
@@ -16,42 +14,37 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.TeamResource;
-import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
-import self.me.matchday.db.TeamRepository;
-import self.me.matchday.model.Team;
-import self.me.matchday.util.Log;
+import self.me.matchday.api.service.TeamService;
 
 @RestController
 public class TeamController {
 
   private static final String LOG_TAG = "TeamController";
 
+  private final TeamService teamService;
+
   @Autowired
-  private TeamRepository teamRepository;
-  @Autowired
-  private TeamResourceAssembler teamResourceAssembler;
+  public TeamController(TeamService teamService) {
+    this.teamService = teamService;
+  }
 
   /**
-   * Fetch all Teams from local DB
+   * Publish all Teams to the API.
    *
-   * @return A List of Teams as an HttpEntity
+   * @return A List of Teams as an HttpEntity.
    */
   @GetMapping("/teams")
   public ResponseEntity<CollectionModel<TeamResource>> fetchAllTeams() {
 
-    Log.i(LOG_TAG, "Fetching all Teams");
-
-    final List<Team> teams = teamRepository.findAll();
-    if (teams.size() > 0) {
-      return new ResponseEntity<>(teamResourceAssembler.toCollectionModel(teams), HttpStatus.OK);
-    } else {
-      Log.d(LOG_TAG, "Attempted to fetch all Teams, but nothing found.");
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+    return
+        teamService
+            .fetchAllTeams()
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.noContent().build());
   }
 
   /**
-   * Fetch a single Team from the local DB, specified by the Team ID.
+   * Publish a single Team to the API, specified by the Team ID.
    *
    * @param teamId The Team ID (MD5 String)
    * @return The Team as an HttpEntity.
@@ -59,12 +52,11 @@ public class TeamController {
   @GetMapping("/teams/team/{teamId}")
   public ResponseEntity<TeamResource> fetchTeamById(@PathVariable final Long teamId) {
 
-    Log.i(LOG_TAG, "Fetching Team with ID: " + teamId);
-    // Get Team from local DB
-    final Optional<Team> teamOptional = teamRepository.findById(teamId);
-    return teamOptional.map(teamResourceAssembler::toModel)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+    return
+        teamService
+            .fetchTeamById(teamId)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
   }
 
   @GetMapping("/teams/team/{teamId}/emblem")
@@ -75,7 +67,8 @@ public class TeamController {
     URL url = null;
     try {
       url = new URL("http://www.team-emblem-url.com");
-    } catch (MalformedURLException ignored) {}
+    } catch (MalformedURLException ignored) {
+    }
     return new ResponseEntity<>(url, HttpStatus.OK);
   }
 }
