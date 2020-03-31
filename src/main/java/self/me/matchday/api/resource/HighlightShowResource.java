@@ -97,9 +97,8 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
 
       final CollectionModel<HighlightShowResource> highlightShowResources = super
           .toCollectionModel(entities);
-      // TODO: Needed?
-//      highlightShowResources
-//          .add(linkTo(methodOn(EventController.class).fetchAllHighlights()).withSelfRel());
+      highlightShowResources
+          .add(linkTo(methodOn(EventController.class).fetchAllHighlights()).withSelfRel());
       return highlightShowResources;
     }
   }
