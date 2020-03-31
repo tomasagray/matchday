@@ -7,6 +7,6 @@ package self.me.matchday.db;
 import org.springframework.data.jpa.repository.JpaRepository;
 import self.me.matchday.model.Match;
 
-public interface MatchRepository extends JpaRepository<Match, Long> {
+public interface MatchRepository extends JpaRepository<Match, String> {
 
 }

@@ -53,19 +53,19 @@ public class PlaylistResource extends RepresentationModel<PlaylistResource> {
       // add a self link
       playlistResource.add(
           linkTo(methodOn(PlaylistController.class)
-              .fetchMasterPlaylistById(masterM3U.getId()))
+              .fetchMasterPlaylistById(masterM3U.getEventId()))
               .withRel(MASTER_PLAYLIST));
 
       // add playlist variant links
       final Optional<List<EventFileSource>> fileSourceOptional = eventFileSrcRepository
-          .findFileSourcesForEventId(masterM3U.getId());
+          .findFileSourcesForEventId(masterM3U.getEventId());
 
       if (fileSourceOptional.isPresent()) {
         final List<EventFileSource> eventFileSources = fileSourceOptional.get();
         eventFileSources.forEach(eventFileSource ->
             playlistResource.add(
                 linkTo(methodOn(PlaylistController.class)
-                    .fetchVariantPlaylist(masterM3U.getId(), eventFileSource.getEventFileSrcId()))
+                    .fetchVariantPlaylist(masterM3U.getEventId(), eventFileSource.getEventFileSrcId()))
                     .withRel(getFileSourceLinkRel(eventFileSource))
             )
         );

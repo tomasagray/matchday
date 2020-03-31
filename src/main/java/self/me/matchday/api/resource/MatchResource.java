@@ -41,7 +41,7 @@ import self.me.matchday.model.Season;
 @JsonInclude(value = Include.NON_NULL)
 public class MatchResource extends RepresentationModel<MatchResource> {
 
-  private Long id;
+  private String id;
   private RepresentationModel<TeamResource> homeTeam;
   private RepresentationModel<TeamResource> awayTeam;
   private RepresentationModel<CompetitionResource> competition;
@@ -93,12 +93,6 @@ public class MatchResource extends RepresentationModel<MatchResource> {
           .ifPresent(
               masterM3U -> matchResource.setPlaylists(playlistResourceAssembler.toModel(masterM3U))
           );
-      // add self link
-      matchResource.add(
-          linkTo(methodOn(EventController.class)
-              .fetchMatch(match.getEventId()))
-              .withSelfRel()
-      );
 
       return matchResource;
     }

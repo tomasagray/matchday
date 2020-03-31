@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.resource.EventResource;
@@ -25,17 +26,19 @@ public class EventService {
 
   private static final String LOG_TAG = "EventService";
 
-  private MatchRepository matchRepository;
-  private HighlightShowRepository highlightShowRepository;
+  private final MatchRepository matchRepository;
+  private final HighlightShowRepository highlightShowRepository;
   private final EventRepository eventRepository;
   private final EventResourceAssembler eventResourceAssembler;
-  private MatchResourceAssembler matchResourceAssembler;
-  private HighlightResourceAssembler highlightResourceAssembler;
+  private final MatchResourceAssembler matchResourceAssembler;
+  private final HighlightResourceAssembler highlightResourceAssembler;
 
   @Autowired
-  EventService(MatchRepository matchRepository, MatchResource.MatchResourceAssembler matchResourceAssembler,
+  EventService(MatchRepository matchRepository,
+      MatchResource.MatchResourceAssembler matchResourceAssembler,
       EventRepository eventRepository, EventResourceAssembler eventResourceAssembler,
-      HighlightShowRepository highlightShowRepository, HighlightResourceAssembler highlightResourceAssembler) {
+      HighlightShowRepository highlightShowRepository,
+      HighlightResourceAssembler highlightResourceAssembler) {
 
     this.matchRepository = matchRepository;
     this.eventRepository = eventRepository;
@@ -48,15 +51,14 @@ public class EventService {
   public Optional<CollectionModel<EventResource>> fetchFeaturedEvents() {
 
     Log.i(LOG_TAG, "Fetching featured Events.");
-    // Get latest 3 events from database
     final int EVENT_COUNT = 3;
-    final List<Event> events = eventRepository.findAll();
 
-    if(events.size() > 0) {
-      // Sort in reverse chronological order
-      events.sort((ev1, ev2) -> (ev1.getDate().compareTo(ev2.getDate())) * -1);
-      // Map to DTOs and return top 3 entries
-      return Optional.of(eventResourceAssembler.toCollectionModel(events.subList(0, EVENT_COUNT)));
+    // Get latest 3 events from DB
+    final Optional<List<Event>> eventOptional = eventRepository
+        .fetchLatestEvents(PageRequest.of(0, 3));
+    if (eventOptional.isPresent()) {
+      final List<Event> events = eventOptional.get();
+      return Optional.of(eventResourceAssembler.toCollectionModel(events));
     } else {
       Log.i(LOG_TAG, "Attempted to retrieve featured Events, but none found.");
       return Optional.empty();
@@ -65,6 +67,7 @@ public class EventService {
 
   /**
    * Retrieve all Matches from the repo (database) and assemble into a collection of resources.
+   *
    * @return Collection of assembled resources.
    */
   public Optional<CollectionModel<MatchResource>> fetchAllMatches() {
@@ -86,12 +89,13 @@ public class EventService {
 
   /**
    * Retrieve a specific match from the local DB.
+   *
    * @param matchId The ID of the match we want.
    * @return An optional containing the match resource, if it was found.
    */
-  public Optional<MatchResource> fetchMatch(@NotNull Long matchId) {
+  public Optional<MatchResource> fetchMatch(@NotNull String matchId) {
 
-    Log.i(LOG_TAG, String.format("Fetching Match with ID: %s from database.", matchId));
+    Log.i(LOG_TAG, String.format("Fetching Match with ID: %s from the database.", matchId));
     return
         matchRepository
             .findById(matchId)
@@ -100,11 +104,12 @@ public class EventService {
 
   /**
    * Retrieve all Highlight Shows from the database.
+   *
    * @return Optional collection model of highlight show resources.
    */
   public Optional<CollectionModel<HighlightShowResource>> fetchAllHighlightShows() {
 
-    Log.i(LOG_TAG, "Fetching all Highlight Shows from database.");
+    Log.i(LOG_TAG, "Fetching all Highlight Shows from the database.");
     // Retrieve highlights from database
     final List<HighlightShow> highlightShows = highlightShowRepository.findAll();
 
@@ -119,12 +124,12 @@ public class EventService {
     }
   }
 
-  public Optional<HighlightShowResource> fetchHighlightShow(@NotNull Long highlightShowId) {
+  public Optional<HighlightShowResource> fetchHighlightShow(@NotNull String highlightShowId) {
 
     Log.i(LOG_TAG, "Fetching Highlight Show for ID: " + highlightShowId);
     return
         highlightShowRepository
-        .findById(highlightShowId)
-        .map(highlightResourceAssembler::toModel);
+            .findById(highlightShowId)
+            .map(highlightResourceAssembler::toModel);
   }
 }

@@ -50,7 +50,7 @@ public class TeamController {
    * @return The Team as an HttpEntity.
    */
   @GetMapping("/teams/team/{teamId}")
-  public ResponseEntity<TeamResource> fetchTeamById(@PathVariable final Long teamId) {
+  public ResponseEntity<TeamResource> fetchTeamById(@PathVariable final String teamId) {
 
     return
         teamService
@@ -60,7 +60,7 @@ public class TeamController {
   }
 
   @GetMapping("/teams/team/{teamId}/emblem")
-  public ResponseEntity<URL> fetchTeamEmblemUrl(@PathVariable final Long teamId) {
+  public ResponseEntity<URL> fetchTeamEmblemUrl(@PathVariable final String teamId) {
 
     // TODO: implement Team artwork service
 

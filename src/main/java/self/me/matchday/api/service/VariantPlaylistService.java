@@ -39,7 +39,7 @@ public class VariantPlaylistService {
     this.eventFileService = eventFileService;
   }
 
-  public Optional<VariantM3U> fetchVariantPlaylist(@NotNull final Long eventId,
+  public Optional<VariantM3U> fetchVariantPlaylist(@NotNull final String eventId,
       @NotNull final Long fileSrcId) {
 
     Log.i(LOG_TAG, String

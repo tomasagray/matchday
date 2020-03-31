@@ -29,6 +29,7 @@ import self.me.matchday.util.Log;
  * JsonObject, or a JSON string.
  * <p>
  * This class can be extended to allow it to be customized to a particular blog.
+ *</p>
  *
  * @author tomas
  */

@@ -29,10 +29,6 @@ public class EventFileSource {
   @GeneratedValue
   private Long eventFileSrcId;
 
-  public Long getEventFileSrcId() {
-    return eventFileSrcId;
-  }
-
   // Fields
   private String channel;
   private String source;

@@ -53,7 +53,8 @@ public class CompetitionService {
    */
   public Optional<CompetitionResource> fetchCompetitionById(@NotNull String competitionId) {
 
-    Log.i(LOG_TAG, String.format("Fetching competition with ID: %s from database.", competitionId));
+    Log.i(LOG_TAG,
+        String.format("Fetching competition with ID: %s from the database.", competitionId));
     return
         competitionRepository
             .findById(competitionId)

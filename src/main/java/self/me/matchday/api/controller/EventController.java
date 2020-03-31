@@ -18,7 +18,7 @@ public class EventController {
 
   private static final String LOG_TAG = "EventController";
 
-  private EventService eventService;
+  private final EventService eventService;
 
   @Autowired
   EventController(EventService eventService) {
@@ -49,7 +49,7 @@ public class EventController {
    */
   @RequestMapping(value = "/matches/match/{matchId}", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<MatchResource> fetchMatch(@PathVariable Long matchId) {
+  public ResponseEntity<MatchResource> fetchMatch(@PathVariable String matchId) {
 
     return
         eventService
@@ -76,7 +76,7 @@ public class EventController {
 
   @RequestMapping(value = "/highlight-shows/highlight/{eventId}", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<HighlightShowResource> fetchHighlightById(@PathVariable Long eventId) {
+  public ResponseEntity<HighlightShowResource> fetchHighlightById(@PathVariable String eventId) {
 
     Log.i(LOG_TAG, "Fetching Highlight Show with ID: " + eventId);
 

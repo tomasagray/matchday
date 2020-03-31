@@ -19,12 +19,8 @@ import org.jetbrains.annotations.NotNull;
 @Table(name = "Highlights")
 public class HighlightShow extends Event implements Serializable {
 
-  // For external identification (MD5 String)
-//  private final String highlightShowId;
-
-  /** Default, no arg-constructor */
   HighlightShow() {
-//    this.highlightShowId = MD5String.generate();
+    this.eventId = MD5String.generate();
   }
 
   private HighlightShow(
@@ -34,7 +30,7 @@ public class HighlightShow extends Event implements Serializable {
     this.fixture = fixture;
     this.title = title;
     this.date = date;
-//    this.highlightShowId = generateHighlightShowId();
+    this.eventId = generateHighlightShowId();
   }
 
   // Overrides

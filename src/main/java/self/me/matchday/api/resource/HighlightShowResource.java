@@ -37,7 +37,7 @@ import self.me.matchday.model.Season;
 @JsonInclude(value = Include.NON_NULL)
 public class HighlightShowResource extends RepresentationModel<HighlightShowResource> {
 
-  private Long id;
+  private String id;
   private String title;
   private RepresentationModel<CompetitionResource> competition;
   private RepresentationModel<PlaylistResource> playlists;
@@ -86,12 +86,6 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
               masterM3U -> highlightShowResource
                   .setPlaylists(playlistResourceAssembler.toModel(masterM3U))
           );
-
-      // add self link
-      highlightShowResource.add(
-          linkTo(methodOn(EventController.class)
-              .fetchHighlightById(entity.getEventId()))
-              .withSelfRel());
 
       return highlightShowResource;
     }

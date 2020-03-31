@@ -38,14 +38,22 @@ public class MasterPlaylistService {
     this.eventSourceRepository = eventSourceRepository;
   }
 
-  public Optional<MasterM3U> fetchPlaylistById(@NotNull final Long eventId) {
+  /**
+   * Get the Master playlist for the specified Event. If it does not exist yet in the database,
+   * create it. If there are no EventSources or EventFileSources for this Event, the Optional which
+   * is returned will be empty.
+   *
+   * @param eventId The ID of the Event for which we want a playlist.
+   * @return An Optional containing the playlist.
+   */
+  public Optional<MasterM3U> fetchPlaylistById(@NotNull final String eventId) {
 
     Log.i(LOG_TAG, "Fetching Master Playlist for Event: " + eventId);
     Optional<MasterM3U> result = Optional.empty();
     // ensure valid Event ID
     if (eventRepository.findById(eventId).isPresent()) {
       // check DB for playlist
-      final Optional<MasterM3U> playlistOptional = masterM3URepository.findById(eventId);
+      final Optional<MasterM3U> playlistOptional = masterM3URepository.findByEventId(eventId);
       if (playlistOptional.isPresent()) {
         result = playlistOptional;
       } else {
@@ -59,7 +67,13 @@ public class MasterPlaylistService {
     return result;
   }
 
-  private Optional<MasterM3U> createMasterPlaylist(@NotNull final Long eventId) {
+  /**
+   * Create a Master playlist (.m3u8) for the given Event.
+   *
+   * @param eventId The ID of the Event for which this playlist will be created.
+   * @return An Optional containing the Master playlist.
+   */
+  private Optional<MasterM3U> createMasterPlaylist(@NotNull final String eventId) {
 
     Optional<MasterM3U> result = Optional.empty();
 
@@ -67,6 +81,7 @@ public class MasterPlaylistService {
     final Optional<List<EventSource>> eventSourceOptional =
         eventSourceRepository.findSourcesForEvent(eventId);
     if (eventSourceOptional.isPresent()) {
+
       // Collect all EventFileSources for this Event
       final List<EventFileSource> eventFileSources =
           eventSourceOptional
@@ -76,16 +91,18 @@ public class MasterPlaylistService {
               .collect(Collectors.toList());
 
       if (eventFileSources.size() > 0) {
+
         // Create Master Playlist
         final MasterM3U masterPlaylist = new MasterM3U(eventId);
-        // add variants
-        // todo: address no variants
+        // Add variants
         eventFileSources.forEach(eventFileSource -> {
+          // Get variant link
           final Link variantLink = linkTo(methodOn(PlaylistController.class)
               .fetchVariantPlaylist(eventId, eventFileSource.getEventFileSrcId())).withSelfRel();
           masterPlaylist.addVariant(eventFileSource, variantLink.toUri());
         });
         result = Optional.of(masterPlaylist);
+
       } else {
         Log.i(LOG_TAG, String
             .format("Did not generate playlist for Event with ID: %s; no file sources.", eventId));

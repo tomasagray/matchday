@@ -19,5 +19,5 @@ public interface EventFileSrcRepository extends JpaRepository<EventFileSource, L
 
   @Query("SELECT efs FROM EventSource es JOIN es.event ev JOIN es.eventFileSources efs "
       + "WHERE ev.eventId = :eventId")
-  Optional<List<EventFileSource>> findFileSourcesForEventId(@Param("eventId") Long eventId);
+  Optional<List<EventFileSource>> findFileSourcesForEventId(@Param("eventId") String eventId);
 }

@@ -8,13 +8,10 @@
  */
 package self.me.matchday.model;
 
-// Imports
-
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Data;
@@ -35,9 +32,7 @@ public class Team implements Serializable {
 
   // Fields
   @Id
-  @GeneratedValue
-//  @Column(name = "teamId")
-  private Long teamId;
+  private final String teamId;
 
   private String name;
   private String abbreviation;
@@ -45,14 +40,14 @@ public class Team implements Serializable {
 
   // Default constructor
   public Team() {
-    /*this.teamId = MD5String.generate();*/
+    this.teamId = MD5String.generate();
   }
 
   public Team(@NotNull String name) {
     this.name = name;
     // Defaults
     this.abbreviation = Abbreviator.abbreviate(this.name);
-//    this.teamId = MD5String.fromData(name);
+    this.teamId = MD5String.fromData(name);
   }
 
   @Override
