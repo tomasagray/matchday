@@ -32,7 +32,7 @@ import self.me.matchday.model.Team;
 @JsonInclude(value = Include.NON_NULL)
 public class TeamResource extends RepresentationModel<TeamResource> {
 
-  private Long id;
+  private String id;
   private String name;
   private String abbreviation;
   private Locale locale;

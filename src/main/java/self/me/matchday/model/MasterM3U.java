@@ -22,9 +22,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.EventFileSource.Resolution;
-import self.me.matchday.util.Log;
 
-// Variant playlist
 @Entity
 @Data
 @NoArgsConstructor
@@ -34,13 +32,15 @@ public final class MasterM3U extends M3UPlaylist {
   private static final String LOG_TAG = "MasterM3U";
 
   @Id
+  @GeneratedValue
   private Long id;
-  @OneToMany(targetEntity = VariantPlaylistEntry.class, cascade = CascadeType.ALL)
+  private String eventId;
+  @OneToMany(cascade = CascadeType.ALL)
   private List<VariantPlaylistEntry> variantPlaylistEntries;
 
-  public MasterM3U(@NotNull Long eventId) {
-    // todo: is this wise?
-    this.id = eventId; // same as event - one-to-one relationship
+  public MasterM3U(@NotNull String eventId) {
+
+    this.eventId = eventId;
     this.variantPlaylistEntries = new ArrayList<>();
   }
 
@@ -113,7 +113,7 @@ public final class MasterM3U extends M3UPlaylist {
     VariantPlaylistEntry(@NotNull EventFileSource eventFileSource, @NotNull URI playlistLink) {
       this.playlistLink = playlistLink;
       this.resolution = eventFileSource.getResolution();
-      this.languages = eventFileSource.getLanguages();
+      this.languages = new ArrayList<>(eventFileSource.getLanguages());
       this.bitrate = eventFileSource.getBitrate();
     }
 
@@ -153,24 +153,5 @@ public final class MasterM3U extends M3UPlaylist {
           + getPlaylistLink()
           + "\n";
     }
-
-/*    @NotNull
-    private static Long parseBitrate(@NotNull String videoBitrate) {
-      final double CONVERSION_FACTOR = 1_000_000d;
-      try {
-        // Convert to a double, then convert Mbps -> bps
-        double bitrate =
-            Double.parseDouble(videoBitrate.substring(0, videoBitrate.indexOf(" ")))
-                * CONVERSION_FACTOR;
-        return (long) bitrate;
-      } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-        Log.d(LOG_TAG,
-            String.format(
-                "Could not parse video bitrate [%s] for MasterM3U playlist; defaulting to 4Mbs",
-                videoBitrate));
-
-        return 4_000_000L;
-      }
-    }*/
   }
 }

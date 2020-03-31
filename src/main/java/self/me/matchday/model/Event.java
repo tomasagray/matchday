@@ -28,7 +28,8 @@ public abstract class Event {
   protected static final DateTimeFormatter EVENT_ID_DATE_FORMATTER =
       DateTimeFormatter.ISO_LOCAL_DATE;
 
-  @Id @GeneratedValue private Long eventId; // for internal database reference
+  @Id
+  protected String eventId;
 
   @ManyToOne(cascade = {CascadeType.MERGE})
   protected Competition competition;

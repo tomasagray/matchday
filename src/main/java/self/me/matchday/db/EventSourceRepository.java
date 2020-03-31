@@ -14,5 +14,5 @@ import self.me.matchday.model.EventSource;
 public interface EventSourceRepository extends JpaRepository<EventSource, Long> {
 
   @Query("SELECT es FROM EventSource es JOIN es.event ev WHERE ev.eventId = :eventId")
-  Optional<List<EventSource>> findSourcesForEvent(@Param("eventId") Long eventId);
+  Optional<List<EventSource>> findSourcesForEvent(@Param("eventId") String eventId);
 }

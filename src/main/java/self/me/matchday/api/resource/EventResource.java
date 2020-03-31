@@ -35,7 +35,7 @@ import self.me.matchday.model.Season;
 @JsonInclude(value = Include.NON_NULL)
 public class EventResource extends RepresentationModel<EventResource> {
 
-  private Long id;
+  private String eventId;
   private String title;
   // Only for Matches
   private RepresentationModel<TeamResource> homeTeam;
@@ -76,7 +76,7 @@ public class EventResource extends RepresentationModel<EventResource> {
       final EventResource eventResource = instantiateModel(entity);
 
       // populate DTO
-      eventResource.setId(entity.getEventId());
+      eventResource.setEventId(entity.getEventId());
       eventResource.setTitle(entity.getTitle());
       if (entity instanceof Match) {
         // Cast to Match

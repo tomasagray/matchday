@@ -97,9 +97,9 @@ public class LoadEventData {
 
     if (event instanceof Match) {
       final Match match = (Match) event;
-      Log.i(LOG_TAG, "Saving MATCH: " + matchRepository.save(match) );
       Log.i(LOG_TAG, "Saving Team: " + teamRepository.save(match.getHomeTeam()) );
       Log.i(LOG_TAG, "Saving Team: " + teamRepository.save(match.getAwayTeam()) );
+      Log.i(LOG_TAG, "Saving MATCH: " + matchRepository.save(match) );
     } else {
       final HighlightShow highlightShow = (HighlightShow) event;
       Log.i(LOG_TAG, "Saving HIGHLIGHT: " + highlightShowRepository.saveAndFlush(highlightShow) );

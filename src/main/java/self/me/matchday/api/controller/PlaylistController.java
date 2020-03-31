@@ -51,7 +51,7 @@ public class PlaylistController {
   @RequestMapping(value = {"/matches/match/{eventId}/playlist",
       "/highlight-shows/highlight/{eventId}/playlist"}, method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<String> fetchMasterPlaylistById(@PathVariable final Long eventId) {
+  public ResponseEntity<String> fetchMasterPlaylistById(@PathVariable final String eventId) {
 
     return
         masterPlaylistService
@@ -64,7 +64,7 @@ public class PlaylistController {
 
   @RequestMapping(value = {"/matches/match/{eventId}/playlist/{fileSrcId}",
       "/highlight-shows/highlight/{eventId}/playlist/{fileSrcId}"}, method = RequestMethod.GET)
-  public ResponseEntity<String> fetchVariantPlaylist(@PathVariable final Long eventId,
+  public ResponseEntity<String> fetchVariantPlaylist(@PathVariable final String eventId,
       @PathVariable final Long fileSrcId) {
     return
         variantPlaylistService

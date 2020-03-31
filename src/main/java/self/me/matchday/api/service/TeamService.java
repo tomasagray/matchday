@@ -51,7 +51,7 @@ public class TeamService {
    * @param teamId The Team ID.
    * @return The requested Team, wrapped in an Optional.
    */
-  public Optional<TeamResource> fetchTeamById(@NotNull final Long teamId) {
+  public Optional<TeamResource> fetchTeamById(@NotNull final String teamId) {
 
     Log.i(LOG_TAG, String.format("Fetching Team with ID: %s from local database.", teamId));
     return
