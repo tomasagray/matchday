@@ -42,6 +42,7 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       RepresentationModelAssemblerSupport<Team, TeamResource> {
 
     private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
+    private static final LinkRelation EVENTS = LinkRelation.of("events");
 
     public TeamResourceAssembler() {
       super(TeamController.class, TeamResource.class);
@@ -62,6 +63,8 @@ public class TeamResource extends RepresentationModel<TeamResource> {
           linkTo(methodOn(TeamController.class).fetchTeamById(team.getTeamId())).withSelfRel());
       teamResource.add(linkTo(methodOn(TeamController.class).fetchTeamEmblemUrl(team.getTeamId()))
           .withRel(EMBLEM));
+      teamResource.add(linkTo(methodOn(TeamController.class).fetchEventsForTeam(team.getTeamId()))
+          .withRel(EVENTS));
 
       return teamResource;
     }
@@ -70,6 +73,7 @@ public class TeamResource extends RepresentationModel<TeamResource> {
     @Override
     public CollectionModel<TeamResource> toCollectionModel(
         @NotNull Iterable<? extends Team> teams) {
+
       final CollectionModel<TeamResource> teamResources = super.toCollectionModel(teams);
       // add a self link
       teamResources.add(linkTo(methodOn(TeamController.class).fetchAllTeams()).withSelfRel());

@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.resource.EventResource;
@@ -27,12 +26,12 @@ public class EventService {
 
   private static final String LOG_TAG = "EventService";
 
-  private MatchRepository matchRepository;
-  private HighlightShowRepository highlightShowRepository;
+  private final MatchRepository matchRepository;
+  private final HighlightShowRepository highlightShowRepository;
   private final EventRepository eventRepository;
   private final EventResourceAssembler eventResourceAssembler;
-  private MatchResourceAssembler matchResourceAssembler;
-  private HighlightResourceAssembler highlightResourceAssembler;
+  private final MatchResourceAssembler matchResourceAssembler;
+  private final HighlightResourceAssembler highlightResourceAssembler;
 
   @Autowired
   EventService(MatchRepository matchRepository,
@@ -49,6 +48,11 @@ public class EventService {
     this.highlightResourceAssembler = highlightResourceAssembler;
   }
 
+  /**
+   * Fetch the 3 most recent Events.
+   *
+   * @return A CollectionModel of Events.
+   */
   public Optional<CollectionModel<EventResource>> fetchFeaturedEvents() {
 
     Log.i(LOG_TAG, "Fetching featured Events.");
@@ -56,7 +60,7 @@ public class EventService {
 
     // Get latest 3 events from database
     final Optional<List<Event>> eventOptional = eventRepository
-        .fetchLatestEvents(PageRequest.of(0, 3));
+        .fetchLatestEvents(PageRequest.of(0, EVENT_COUNT));
     if (eventOptional.isPresent()) {
       final List<Event> events = eventOptional.get();
       return Optional.of(eventResourceAssembler.toCollectionModel(events));
@@ -104,6 +108,35 @@ public class EventService {
   }
 
   /**
+   * Retrieve all Events for a given Competition.
+   *
+   * @param competitionId The ID of the Competition.
+   * @return A CollectionModel containing all Events for the specified Competition.
+   */
+  public Optional<CollectionModel<EventResource>> fetchEventsForCompetition(
+      @NotNull final String competitionId) {
+
+    return
+        eventRepository
+            .fetchEventsByCompetition(competitionId)
+            .map(eventResourceAssembler::toCollectionModel);
+  }
+
+  /**
+   * Retrieve all Events associated with the specified Team.
+   *
+   * @param teamId The ID of the Team.
+   * @return A CollectionModel containing the Events.
+   */
+  public Optional<CollectionModel<EventResource>> fetchEventsForTeam(@NotNull final String teamId) {
+
+    return
+        eventRepository
+            .fetchEventsByTeam(teamId)
+            .map(eventResourceAssembler::toCollectionModel);
+  }
+
+  /**
    * Retrieve all Highlight Shows from the database.
    *
    * @return Optional collection model of highlight show resources.
@@ -125,6 +158,12 @@ public class EventService {
     }
   }
 
+  /**
+   * Retrieve a specific HighlightShow from the database.
+   *
+   * @param highlightShowId ID of the Highlight Show.
+   * @return The requested HighlightShow, or empty().
+   */
   public Optional<HighlightShowResource> fetchHighlightShow(@NotNull String highlightShowId) {
 
     Log.i(LOG_TAG, "Fetching Highlight Show for ID: " + highlightShowId);

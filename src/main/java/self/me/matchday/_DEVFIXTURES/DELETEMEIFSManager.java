@@ -15,7 +15,7 @@ public class DELETEMEIFSManager implements IFSManager {
   private static final String LOG_TAG = "FAKE_IFS_MANAGER";
 
   private FSUser user;
-  private Pattern urlMatcher = Pattern.compile("https://www.inclouddrive.com/file/.*");
+  private final Pattern urlMatcher = Pattern.compile("https://www.inclouddrive.com/file/.*");
 
   private static DELETEMEIFSManager INSTANCE;
   public static DELETEMEIFSManager getInstance() {

@@ -1,5 +1,6 @@
 package self.me.matchday.api.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
@@ -36,8 +37,11 @@ public class CompetitionService {
   public Optional<CollectionModel<CompetitionResource>> fetchAllCompetitions() {
 
     Log.i(LOG_TAG, "Retrieving all Competitions from database.");
+
     final List<Competition> competitions = competitionRepository.findAll();
     if (competitions.size() > 0) {
+      // Sort Competitions by name
+      competitions.sort(Comparator.comparing(Competition::getName));
       return Optional.of(competitionResourceAssembler.toCollectionModel(competitions));
     } else {
       Log.i(LOG_TAG, "Attempted to fetch all Competitions, but none returned");

@@ -142,9 +142,9 @@ public class ZKFEventParser implements IEventParser {
       try {
         final Matcher seasonMatcher = SEASON_PATTERN.matcher(competition);
         if (seasonMatcher.find()) {
-          final String[] seasonStrs = seasonMatcher.group().split("/");
-          startYear += Integer.parseInt(seasonStrs[0]);
-          endYear += Integer.parseInt(seasonStrs[1]);
+          final String[] seasonSplit = seasonMatcher.group().split("/");
+          startYear += Integer.parseInt(seasonSplit[0]);
+          endYear += Integer.parseInt(seasonSplit[1]);
         }
       } finally {
         this.season = new Season(startYear, endYear);
