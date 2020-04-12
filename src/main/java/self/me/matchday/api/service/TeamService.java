@@ -1,5 +1,6 @@
 package self.me.matchday.api.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +39,8 @@ public class TeamService {
 
     final List<Team> teams = teamRepository.findAll();
     if (teams.size() > 0) {
+      // Sort Teams by name
+      teams.sort(Comparator.comparing(Team::getName));
       return Optional.of(teamResourceAssembler.toCollectionModel(teams));
     } else {
       Log.d(LOG_TAG, "Attempted to fetch all Teams, but nothing found.");
@@ -58,5 +61,28 @@ public class TeamService {
         teamRepository
             .findById(teamId)
             .map(teamResourceAssembler::toModel);
+  }
+
+  /**
+   * Retrieve all Teams for a given Competition, specified by the competitionId.
+   *
+   * @param competitionId The ID of the Competition.
+   * @return All Teams which have Events in the given Competition.
+   */
+  public Optional<CollectionModel<TeamResource>> fetchTeamsByCompetitionId(
+      @NotNull final String competitionId) {
+
+    Log.i(LOG_TAG,
+        String.format("Fetching all Teams for Competition ID: %s from local database.", competitionId));
+
+    // Get home teams
+    final List<Team> teams = teamRepository.fetchHomeTeamsByCompetition(competitionId);
+    // Get away teams
+    final List<Team> awayTeams = teamRepository.fetchAwayTeamsByCompetition(competitionId);
+    // Combine results
+    teams.addAll(awayTeams);
+    // Sort by Team name
+    teams.sort(Comparator.comparing(Team::getName));
+    return Optional.of(teamResourceAssembler.toCollectionModel(teams));
   }
 }

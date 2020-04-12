@@ -1,5 +1,8 @@
 package self.me.matchday.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -83,7 +86,16 @@ public class EventResource extends RepresentationModel<EventResource> {
         final Match match = (Match) entity;
         eventResource.setHomeTeam(teamResourceAssembler.toModel(match.getHomeTeam()));
         eventResource.setAwayTeam(teamResourceAssembler.toModel(match.getAwayTeam()));
+        // add self link
+        eventResource.add(linkTo(methodOn(EventController.class).fetchMatchById(match.getEventId()))
+            .withSelfRel());
+      } else {
+        // it's a HighlightShow; add appropriate link
+        eventResource.add(
+            linkTo(methodOn(EventController.class).fetchHighlightById(entity.getEventId()))
+                .withSelfRel());
       }
+
       eventResource.setCompetition(competitionResourceAssembler.toModel(entity.getCompetition()));
       eventResource.setSeason(entity.getSeason());
       eventResource.setFixture(entity.getFixture());

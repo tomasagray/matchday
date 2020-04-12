@@ -93,6 +93,10 @@ public class MatchResource extends RepresentationModel<MatchResource> {
           .ifPresent(
               masterM3U -> matchResource.setPlaylists(playlistResourceAssembler.toModel(masterM3U))
           );
+      // attach self link
+      matchResource.add(
+          linkTo(methodOn(EventController.class).fetchMatchById(match.getEventId()))
+              .withSelfRel());
 
       return matchResource;
     }

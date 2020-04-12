@@ -43,6 +43,8 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       RepresentationModelAssemblerSupport<Competition, CompetitionResource> {
 
     private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
+    private static final LinkRelation TEAMS = LinkRelation.of("teams");
+    private static final LinkRelation EVENTS = LinkRelation.of("events");
 
     public CompetitionResourceAssembler() {
       super(CompetitionService.class, CompetitionResource.class);
@@ -63,6 +65,10 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       competitionResource.add(linkTo(methodOn(CompetitionController.class)
           .fetchCompetitionById(competition.getCompetitionId())).withSelfRel());
       competitionResource.add(linkTo(methodOn(CompetitionController.class)
+          .fetchCompetitionTeams(competition.getCompetitionId())).withRel(TEAMS));
+      competitionResource.add(linkTo(methodOn(CompetitionController.class)
+          .fetchCompetitionEvents(competition.getCompetitionId())).withRel(EVENTS));
+      competitionResource.add(linkTo(methodOn(CompetitionController.class)
           .fetchCompetitionEmblemUrl(competition.getCompetitionId())).withRel(EMBLEM));
 
       return competitionResource;
@@ -73,7 +79,12 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
     public CollectionModel<CompetitionResource> toCollectionModel(
         @NotNull Iterable<? extends Competition> competitions) {
 
-      return super.toCollectionModel(competitions);
+      final CollectionModel<CompetitionResource> competitionResources = super
+          .toCollectionModel(competitions);
+      // add a self link
+      competitionResources
+          .add(linkTo(methodOn(CompetitionController.class).fetchAllCompetitions()).withSelfRel());
+      return competitionResources;
     }
   }
 
