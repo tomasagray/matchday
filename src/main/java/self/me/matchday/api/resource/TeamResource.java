@@ -41,8 +41,9 @@ public class TeamResource extends RepresentationModel<TeamResource> {
   public static class TeamResourceAssembler extends
       RepresentationModelAssemblerSupport<Team, TeamResource> {
 
-    private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
     private static final LinkRelation EVENTS = LinkRelation.of("events");
+    private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
+    private static final LinkRelation FANART = LinkRelation.of("fanart");
 
     public TeamResourceAssembler() {
       super(TeamController.class, TeamResource.class);
@@ -54,16 +55,21 @@ public class TeamResource extends RepresentationModel<TeamResource> {
 
       final TeamResource teamResource = instantiateModel(team);
       // initialize resource
-      teamResource.setId(team.getTeamId());
+      final String teamId = team.getTeamId();
+      teamResource.setId(teamId);
       teamResource.setName(team.getName());
       teamResource.setAbbreviation(team.getAbbreviation());
       teamResource.setLocale(team.getLocale());
       // attach links
       teamResource.add(
-          linkTo(methodOn(TeamController.class).fetchTeamById(team.getTeamId())).withSelfRel());
-      teamResource.add(linkTo(methodOn(TeamController.class).fetchTeamEmblemUrl(team.getTeamId()))
+          linkTo(methodOn(TeamController.class).fetchTeamById(teamId)).withSelfRel());
+      // artwork
+      teamResource.add(linkTo(methodOn(TeamController.class).fetchTeamEmblem(teamId))
           .withRel(EMBLEM));
-      teamResource.add(linkTo(methodOn(TeamController.class).fetchEventsForTeam(team.getTeamId()))
+      teamResource.add(linkTo(methodOn(TeamController.class).fetchTeamFanart(teamId))
+          .withRel(FANART));
+      // events
+      teamResource.add(linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId))
           .withRel(EVENTS));
 
       return teamResource;
