@@ -478,7 +478,7 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
     static final Predicate<Element> isVideoLink =
         elem ->
             ("a".equals(elem.tagName()))
-                && (ICDData.getUrlMatcher().matcher(elem.attr("href")).find());
+                && (ICDData.getUrlMatcher(elem.attr("href")).find());
 
   }
 }

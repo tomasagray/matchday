@@ -6,6 +6,7 @@ package self.me.matchday.fileserver.inclouddrive;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +67,7 @@ public final class ICDData {
     return loginUrl;
   }
 
-  public static Pattern getUrlMatcher() {
-    return urlMatcher;
+  public static @NotNull Matcher getUrlMatcher(@NotNull final String data) {
+    return urlMatcher.matcher(data);
   }
 }

@@ -141,8 +141,7 @@ public class ICDManager implements IFSManager {
   // ===============================================================================================
   @Override
   public boolean acceptsUrl(@NotNull URL url) {
-    final Matcher matcher = ICDData.getUrlMatcher().matcher(url.toString());
-    return matcher.find();
+    return ICDData.getUrlMatcher(url.toString()).find();
   }
 
   /**

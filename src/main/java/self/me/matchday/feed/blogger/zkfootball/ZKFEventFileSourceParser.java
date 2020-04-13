@@ -233,12 +233,10 @@ public class ZKFEventFileSourceParser implements IEventFileSourceParser {
         elem -> {
           try {
             URL url = new URL(elem.attr("href"));
-            // todo: do not hardcode ICDManager
-            final Matcher urlMatcher = ICDData.getUrlMatcher().matcher(url.toString());
+            final Matcher urlMatcher = ICDData.getUrlMatcher(url.toString());
             // Perform link match test
             return ("a".equals(elem.tagName()) && urlMatcher.find());
-          } catch (MalformedURLException ignored) {
-          }
+          } catch (MalformedURLException ignored) { }
 
           return false;
         };

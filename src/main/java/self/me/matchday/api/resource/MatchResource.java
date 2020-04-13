@@ -107,8 +107,6 @@ public class MatchResource extends RepresentationModel<MatchResource> {
         @NotNull Iterable<? extends Match> matches) {
 
       final CollectionModel<MatchResource> matchResources = super.toCollectionModel(matches);
-
-      // TODO: Needed?
       // add a self link to collection
       matchResources.add(linkTo(methodOn(EventController.class).fetchAllMatches()).withSelfRel());
       return matchResources;
