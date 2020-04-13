@@ -2,15 +2,24 @@
   <dictionary name="Tomas">
     <words>
       <w>abbreviator</w>
+      <w>datajpa</w>
+      <w>downloadnow</w>
       <w>endlist</w>
+      <w>fanart</w>
       <w>galataman</w>
       <w>gman</w>
       <w>gson</w>
       <w>inclouddrive</w>
+      <w>inno</w>
+      <w>jdbc</w>
       <w>jsoup</w>
+      <w>khtml</w>
       <w>matchday</w>
       <w>mpegurl</w>
+      <w>signmein</w>
       <w>targetduration</w>
+      <w>ufmo</w>
+      <w>useraccess</w>
     </words>
   </dictionary>
 </component>

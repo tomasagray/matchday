@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
@@ -33,10 +34,13 @@ public class Team implements Serializable {
   // Fields
   @Id
   private final String teamId;
-
   private String name;
   private String abbreviation;
   private Locale locale;
+  @OneToOne
+  private Artwork emblem;
+  @OneToOne
+  private Artwork fanart;
 
   // Default constructor
   public Team() {
