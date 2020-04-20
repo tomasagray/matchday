@@ -28,8 +28,8 @@ class ICDCookieManager extends CookieManager {
   private static final URI DOMAIN = URI.create("." + ICDData.getDomain());
   private static final String USERDATA = "userdata";
 
-  // cookie persistence
   private final CookieService cookieService;
+
   @Autowired
   ICDCookieManager(@NotNull final CookieService cookieService) {
 
@@ -42,7 +42,7 @@ class ICDCookieManager extends CookieManager {
   }
 
 
-  /*
+  /**
    * Load previously saved cookie data.
    */
   private void loadCookies() {
@@ -75,7 +75,7 @@ class ICDCookieManager extends CookieManager {
     }
   }
 
-  /*
+  /**
    * Save cookie data to persistent storage for later
    * retrieval.
    */
