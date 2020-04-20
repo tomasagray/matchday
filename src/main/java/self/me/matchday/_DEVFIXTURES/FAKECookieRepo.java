@@ -19,7 +19,7 @@ public class FAKECookieRepo  {
   // =============================================================================================
   final String LOG_TAG = "CookieRepo";
   final String FILE_PATH =
-      "C:\\Users\\Tomas\\Code\\Source\\IdeaProjects\\Matchday\\src\\test\\resources\\self\\me\\matchday\\userdata.cookie";
+      "C:\\Users\\Tomas\\Code\\Source\\IdeaProjects\\Matchday\\src\\test\\resources\\userdata.cookie";
 
   public List<HttpCookie> findAll() {
     final List<FSPersistentCookie> fsPersistentCookies = new ArrayList<>();

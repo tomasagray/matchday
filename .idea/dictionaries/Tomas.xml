@@ -2,10 +2,12 @@
   <dictionary name="Tomas">
     <words>
       <w>abbreviator</w>
+      <w>accesstoken</w>
       <w>datajpa</w>
       <w>downloadnow</w>
       <w>endlist</w>
       <w>fanart</w>
+      <w>fileserver</w>
       <w>galataman</w>
       <w>gman</w>
       <w>gson</w>
