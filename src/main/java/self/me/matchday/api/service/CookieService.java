@@ -25,7 +25,7 @@ public class CookieService {
             .findAll()
             .stream()
             .map(FSPersistentCookie::toHttpCookie)
-            .collect(Collectors.toList());
+            .collect(Collectors.toList());*/
   }
 
   /**

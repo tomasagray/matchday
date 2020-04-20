@@ -7,6 +7,7 @@ package self.me.matchday.model;
 import java.net.URL;
 import java.util.Comparator;
 import java.util.regex.Pattern;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -26,7 +27,9 @@ public class EventFile {
   private EventPartIdentifier title;
   private URL externalUrl;
   // refreshed data
+  @Column(columnDefinition = "LONGTEXT")
   private URL internalUrl;
+  @Column(columnDefinition = "LONGTEXT")
   private String metadata;
 
   public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {

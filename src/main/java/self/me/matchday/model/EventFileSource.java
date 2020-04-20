@@ -50,7 +50,7 @@ public class EventFileSource {
   private int frameRate;
   private String audioCodec;
   private int audioChannels;
-  // For local DB
+  // TODO: Move to EventFile
   private Timestamp lastRefreshed = new Timestamp(0L);
 
   public String toString() {

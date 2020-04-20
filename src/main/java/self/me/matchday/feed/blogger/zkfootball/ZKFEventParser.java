@@ -26,8 +26,9 @@ public class ZKFEventParser implements IEventParser {
 
   // Part patterns
   private static final Pattern TITLE_SPLITTER = Pattern.compile(" - ");
-  private static final Pattern COMP_SEASON_PATTERN = Pattern.compile("[\\w ]+ \\d{2}/\\d{2}");
-  private static final Pattern SEASON_PATTERN = Pattern.compile("\\d{2}/\\d{2}");
+  private static final Pattern SEASON_PATTERN = Pattern.compile("\\d{2,4}/\\d{2}");
+  private static final Pattern COMP_SEASON_PATTERN =
+      Pattern.compile("[\\w ]+ " + SEASON_PATTERN.pattern());
   private static final Pattern TEAMS_PATTERN = Pattern.compile("[\\w ]+ [Vv][Ss].? [\\w]+");
   private static final Pattern FIXTURE_PATTERN = Pattern
       .compile("([Ss][Ee][Mm][Ii]-)?([Ff][Ii][Nn][Aa][Ll])|(Matchday \\d*)");
@@ -143,8 +144,11 @@ public class ZKFEventParser implements IEventParser {
         final Matcher seasonMatcher = SEASON_PATTERN.matcher(competition);
         if (seasonMatcher.find()) {
           final String[] seasonSplit = seasonMatcher.group().split("/");
-          startYear += Integer.parseInt(seasonSplit[0]);
-          endYear += Integer.parseInt(seasonSplit[1]);
+          int sy = Integer.parseInt(seasonSplit[0]);
+          int ey = Integer.parseInt(seasonSplit[1]);
+          // If years include millennia data, set start year; otherwise add
+          startYear = (sy > 100) ? sy : startYear + sy;
+          endYear = (ey > 100) ? ey : endYear + ey;
         }
       } finally {
         this.season = new Season(startYear, endYear);
@@ -158,7 +162,7 @@ public class ZKFEventParser implements IEventParser {
       }
 
       // Finally, set competition to first section of part
-      final Matcher competitionMatcher = Pattern.compile("\\d{2}/\\d{2}").matcher(competition);
+      final Matcher competitionMatcher = SEASON_PATTERN.matcher(competition);
       if (competitionMatcher.find()) {
         final String substring = competition
             .substring(0, competition.indexOf(competitionMatcher.group()));

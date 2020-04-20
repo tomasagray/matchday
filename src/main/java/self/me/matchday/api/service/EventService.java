@@ -34,8 +34,7 @@ public class EventService {
   private final HighlightResourceAssembler highlightResourceAssembler;
 
   @Autowired
-  EventService(MatchRepository matchRepository,
-      MatchResource.MatchResourceAssembler matchResourceAssembler,
+  EventService(MatchRepository matchRepository, MatchResourceAssembler matchResourceAssembler,
       EventRepository eventRepository, EventResourceAssembler eventResourceAssembler,
       HighlightShowRepository highlightShowRepository,
       HighlightResourceAssembler highlightResourceAssembler) {

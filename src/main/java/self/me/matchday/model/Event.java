@@ -39,9 +39,6 @@ public abstract class Event {
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Fixture fixture;
 
-  @Column(name = "title")
   protected String title;
-
-  @Column(name = "date")
   protected LocalDateTime date;
 }

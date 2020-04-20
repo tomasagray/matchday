@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import self.me.matchday._DEVFIXTURES.DELETEMEIFSManager;
 import self.me.matchday.fileserver.FSUser;
 import self.me.matchday.fileserver.IFSManager;
+import self.me.matchday.fileserver.inclouddrive.ICDManager;
+import self.me.matchday.util.Log;
 
 /**
  * Class to route requests for URL parsing (external -> internal decoding) to the appropriate File
@@ -17,12 +20,16 @@ import self.me.matchday.fileserver.IFSManager;
 @Service
 public class FileServerService {
 
+  private static final String LOG_TAG = "FileServerService";
+
   private final List<IFSManager> fileServerManagers = new ArrayList<>();
 
-  FileServerService() {
+  @Autowired
+  FileServerService(ICDManager icdManager) {
+
     // TODO: read FileServers from persistent storage
-    final boolean b = addFSManager(DELETEMEIFSManager.getInstance());
-//    fileServerManagers.add(ICDManager.getInstance());
+    Log.i(LOG_TAG, "Adding InCloudDrive FS manager: " + addFSManager(icdManager));
+//    final boolean b = addFSManager(DELETEMEIFSManager.getInstance());
   }
 
   public boolean addFSManager(@NotNull final IFSManager ifsManager) {
@@ -54,9 +61,10 @@ public class FileServerService {
       if(ifsManager.acceptsUrl(externalUrl)) {
         // this FS manager can handle this URL
         result = ifsManager.getDownloadURL(externalUrl);
+        // quit searching
+        break;
       }
     }
-
     return result;
   }
 }

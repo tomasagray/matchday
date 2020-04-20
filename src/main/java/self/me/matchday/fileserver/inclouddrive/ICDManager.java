@@ -55,7 +55,6 @@ public class ICDManager implements IFSManager {
     this.isLoggedIn = false;
   }
 
-
   // Login
   // ===============================================================================================
   /**
@@ -135,7 +134,6 @@ public class ICDManager implements IFSManager {
     return this.isLoggedIn;
   }
 
-
   // Download
   // ===============================================================================================
   @Override
@@ -157,8 +155,6 @@ public class ICDManager implements IFSManager {
     try {
       // Open a connection
       URLConnection connection = url.openConnection();
-
-      // todo: is manual cookie attachment needed?
       // Attach cookies
       connection.setRequestProperty("Cookie", cookieManager.getCookieString());
       // Connect to file server
@@ -177,10 +173,9 @@ public class ICDManager implements IFSManager {
     } catch (IOException e) {
       Log.e(LOG_TAG, "Could not parse download link from supplied URL: " + url, e);
     }
-
+    // Return extracted link
     return downloadLink;
   }
-
 
   // Server
   // ===============================================================================================
@@ -195,6 +190,7 @@ public class ICDManager implements IFSManager {
   @NotNull
   private HttpURLConnection setupICDPostConnection(@NotNull URL url, int dataSize)
       throws IOException {
+
     // Get an HTTP connection
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     // Set connection properties
@@ -221,7 +217,8 @@ public class ICDManager implements IFSManager {
    * @param loginData  An array of bytes to be written to the server.
    */
   private void postData(@NotNull HttpURLConnection connection, byte[] loginData) {
-    //   - POST login data to OutputStream
+
+    // POST login data to OutputStream
     try (OutputStream os = connection.getOutputStream()) {
       os.write(loginData);
     } catch (IOException e) {
@@ -238,6 +235,7 @@ public class ICDManager implements IFSManager {
    */
   @NotNull
   private String readServerResponse(URLConnection connection) throws IOException {
+
     StringBuilder response = new StringBuilder();
     try (InputStream is = connection.getInputStream()) {
       int i;
@@ -251,7 +249,6 @@ public class ICDManager implements IFSManager {
     // Assemble and return response
     return response.toString();
   }
-
 
   // Login
   // ===============================================================================================
@@ -287,6 +284,7 @@ public class ICDManager implements IFSManager {
    */
   @NotNull
   private static byte[] getLoginDataByteArray(@NotNull FSUser user) {
+
     // Container for data
     StringJoiner sj = new StringJoiner("&");
 
@@ -309,6 +307,7 @@ public class ICDManager implements IFSManager {
    */
   @NotNull
   private static String getURLComponent(@NotNull String key, @NotNull Object value) {
+
     StringBuilder sb = new StringBuilder();
     String charset = StandardCharsets.UTF_8.toString();
 
