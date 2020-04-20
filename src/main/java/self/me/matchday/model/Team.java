@@ -61,7 +61,7 @@ public class Team implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this);
+    return name.hashCode() * teamId.hashCode();
   }
 
   /**

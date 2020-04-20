@@ -81,7 +81,7 @@ public class Competition implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this);
+    return name.hashCode() * competitionId.hashCode();
   }
 
 }

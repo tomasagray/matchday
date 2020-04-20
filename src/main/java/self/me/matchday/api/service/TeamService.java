@@ -1,8 +1,13 @@
 package self.me.matchday.api.service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
@@ -76,13 +81,16 @@ public class TeamService {
         String.format("Fetching all Teams for Competition ID: %s from local database.", competitionId));
 
     // Get home teams
-    final List<Team> teams = teamRepository.fetchHomeTeamsByCompetition(competitionId);
+    final List<Team> homeTeams = teamRepository.fetchHomeTeamsByCompetition(competitionId);
     // Get away teams
     final List<Team> awayTeams = teamRepository.fetchAwayTeamsByCompetition(competitionId);
-    // Combine results
-    teams.addAll(awayTeams);
+    // Combine results in a Set<> to ensure no duplicates
+    Set<Team> teamSet = new LinkedHashSet<>(homeTeams);
+    teamSet.addAll(awayTeams);
+    // Convert back to a List<> for sorting
+    List<Team> teamList = new ArrayList<>(teamSet);
     // Sort by Team name
-    teams.sort(Comparator.comparing(Team::getName));
-    return Optional.of(teamResourceAssembler.toCollectionModel(teams));
+    teamList.sort(Comparator.comparing(Team::getName));
+    return Optional.of(teamResourceAssembler.toCollectionModel(teamList));
   }
 }

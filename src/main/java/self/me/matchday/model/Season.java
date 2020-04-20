@@ -103,6 +103,6 @@ public final class Season implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this);
+    return seasonId.hashCode() * startDate.hashCode() * endDate.hashCode();
   }
 }

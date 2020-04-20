@@ -76,6 +76,7 @@ public final class Fixture implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this);
+    int factor = (fixtureNumber == 0) ? 1 : fixtureNumber;
+    return fixtureId.hashCode() * title.hashCode() * factor;
   }
 }
