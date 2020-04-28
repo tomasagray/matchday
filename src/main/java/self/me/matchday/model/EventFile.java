@@ -8,17 +8,21 @@ import java.net.URL;
 import java.util.Comparator;
 import java.util.regex.Pattern;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.db.converter.VideoMetadataConverter;
 
 @Entity
 @Data
 @NoArgsConstructor
 public class EventFile {
+
+  private static double DEFAULT_DURATION = 3012.541956d;
 
   // Fields
   @Id
@@ -29,8 +33,9 @@ public class EventFile {
   // refreshed data
   @Column(columnDefinition = "LONGTEXT")
   private URL internalUrl;
+  @Convert(converter = VideoMetadataConverter.class)
   @Column(columnDefinition = "LONGTEXT")
-  private String metadata;
+  private VideoMetadata metadata;
 
   public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
 
@@ -40,9 +45,17 @@ public class EventFile {
     this.metadata = null;
   }
 
+  /**
+   * Returns the duration of this EventFile, in milliseconds.
+   *
+   * @return The duration of this EventFile (millis).
+   */
   public double getDuration() {
-    // TODO: get real file duration
-    return 3012.541956d;
+    if (getMetadata() != null) {
+      return getMetadata().getFormat().getDuration();
+    } else {
+      return DEFAULT_DURATION;
+    }
   }
 
   public String toString() {

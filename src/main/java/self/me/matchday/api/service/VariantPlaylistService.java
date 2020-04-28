@@ -63,13 +63,13 @@ public class VariantPlaylistService {
         if(eventFiles.size() > 0) {
           result = Optional.of(new VariantM3U(event, eventFiles));
         } else {
-          Log.d(LOG_TAG, "Could not create variant playlist; no EventFiles!");
+          Log.e(LOG_TAG, "Could not create variant playlist; no EventFiles!");
         }
       } else {
-        Log.d(LOG_TAG, "Could not create Variant Playlist; invalid File Source ID: " + fileSrcId);
+        Log.e(LOG_TAG, "Could not create Variant Playlist; invalid File Source ID: " + fileSrcId);
       }
     } else {
-      Log.d(LOG_TAG, "Could not create Variant Playlist; invalid Event ID: " + eventId);
+      Log.e(LOG_TAG, "Could not create Variant Playlist; invalid Event ID: " + eventId);
     }
 
     return result;

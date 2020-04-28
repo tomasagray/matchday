@@ -1,5 +1,6 @@
 package self.me.matchday.api.service;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -12,7 +13,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import javax.transaction.Transactional;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,7 @@ import self.me.matchday.db.EventFileSrcRepository;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventFileSorter;
 import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.VideoMetadata;
 import self.me.matchday.util.Log;
 
 @Service
@@ -32,13 +33,16 @@ public class EventFileService {
   // Fields
   private final ExecutorService executorService;
   private final FileServerService fileServerService;
+  private final VideoMetadataService videoMetadataService;
   private final EventFileSrcRepository fileSrcRepository;
 
   @Autowired
-  public EventFileService(FileServerService fileServerService,
+  public EventFileService(FileServerService fileServerService, VideoMetadataService videoMetadataService,
       EventFileSrcRepository fileSrcRepository) {
+
     this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     this.fileServerService = fileServerService;
+    this.videoMetadataService = videoMetadataService;
     this.fileSrcRepository = fileSrcRepository;
   }
 
@@ -60,7 +64,8 @@ public class EventFileService {
     eventFileSource.getEventFiles().forEach(
         eventFile ->
             futureEventFiles.add(
-                executorService.submit(new EventFileRefreshTask(fileServerService, eventFile))
+                executorService.submit(
+                    new EventFileRefreshTask(fileServerService, videoMetadataService, eventFile))
             )
     );
 
@@ -86,11 +91,14 @@ public class EventFileService {
   private static class EventFileRefreshTask implements Callable<EventFile> {
 
     private final FileServerService fileServerService;
+    private final VideoMetadataService videoMetadataService;
     private final EventFile eventFile;
 
-    public EventFileRefreshTask(@NotNull final FileServerService fileServerService,
+    public EventFileRefreshTask(FileServerService fileServerService, VideoMetadataService videoMetadataService,
         @NotNull final EventFile eventFile) {
+
       this.fileServerService = fileServerService;
+      this.videoMetadataService = videoMetadataService;
       this.eventFile = eventFile;
     }
 
@@ -103,21 +111,52 @@ public class EventFileService {
     public EventFile call() {
 
       Log.i(LOG_TAG, "Refreshing data for EventFile: " + eventFile);
-      final Optional<URL> downloadUrl = fileServerService
-          .getDownloadUrl(eventFile.getExternalUrl());
-      downloadUrl.ifPresent(url -> {
-        eventFile.setInternalUrl(url);
-        eventFile.setMetadata(getFileMetadata());
-      });
+      try {
+        final Optional<URL> downloadUrl =
+            fileServerService.getDownloadUrl(eventFile.getExternalUrl());
+        if (downloadUrl.isPresent()) {
+          final URL url = downloadUrl.get();
 
+          // Update remote (internal) URL
+          Log.i(LOG_TAG,
+              String.format("Successfully updated remote URL for EventFile: %s", eventFile));
+          eventFile.setInternalUrl(url);
+
+          // Update metadata
+          Log.i(LOG_TAG, "Refreshed EventFile metadata: " + refreshEventFileMetadata());
+
+        } else {
+          throw new IOException(
+              String.format("Could not parse remote URL for EventFile: %s", eventFile));
+        }
+      } catch (IOException e) {
+        Log.e(LOG_TAG, String.format("Could not refresh remote data for EventFile: %s", eventFile),
+            e);
+      }
+      // Return updated EventFile
       return eventFile;
     }
 
-    @NotNull
-    @Contract(pure = true)
-    private String getFileMetadata() {
-      // todo: update metadata (ex: duration)? - expensive!
-      return "";
+    /**
+     * Determines whether metadata needs to be refreshed, and sets updated data if it is valid.
+     *
+     * @return True/false If data updated
+     * @throws IOException If there is an error reading data
+     */
+    private boolean refreshEventFileMetadata() throws IOException {
+
+      // Update ONLY if metadata is null
+      if (eventFile.getMetadata() == null) {
+        final VideoMetadata videoMetadata = videoMetadataService
+            .readRemoteData(eventFile.getInternalUrl());
+        // Ensure metadata successfully updated
+        if (videoMetadata != null) {
+          eventFile.setMetadata(videoMetadata);
+          return true;
+        }
+      }
+      // Metadata NOT updated
+      return false;
     }
   }
 }

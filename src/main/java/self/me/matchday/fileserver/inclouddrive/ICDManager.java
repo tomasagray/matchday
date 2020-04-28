@@ -76,8 +76,12 @@ public class ICDManager implements IFSManager {
       // Connect
       connection.connect();
       // POST login data
-      postData(connection, loginData);
+      // POST login data to OutputStream
+      try (OutputStream os = connection.getOutputStream()) {
+        os.write(loginData);
+      }
 
+      // Read server response
       if (connection.getResponseCode() == HTTP_OK) {
         // Read response as a JSON object
         final JsonObject loginResponse =
@@ -90,9 +94,9 @@ public class ICDManager implements IFSManager {
           // Extract cookie from response, create userdata cookie
           cookieManager.saveUserDataCookie(loginResponse.get(USER_DATA_IDENTIFIER).getAsString());
           Log.i(LOG_TAG, "Successfully logged in user: " + user);
-
           // Login success!
           return true;
+
         } else {
           Log.e(
               LOG_TAG,
@@ -148,31 +152,28 @@ public class ICDManager implements IFSManager {
    * @return An Optional containing the DD URL, if found.
    */
   @Override
-  public Optional<URL> getDownloadURL(@NotNull URL url) {
+  public Optional<URL> getDownloadURL(@NotNull URL url) throws IOException {
+
     // By default, empty container
     Optional<URL> downloadLink = Optional.empty();
+    // Open a connection
+    URLConnection connection = url.openConnection();
+    // Attach cookies
+    connection.setRequestProperty("Cookie", cookieManager.getCookieString());
+    // Connect to file server
+    connection.connect();
 
-    try {
-      // Open a connection
-      URLConnection connection = url.openConnection();
-      // Attach cookies
-      connection.setRequestProperty("Cookie", cookieManager.getCookieString());
-      // Connect to file server
-      connection.connect();
-
-      // Read the page from the file server & DOM-ify it
-      Document filePage = Jsoup.parse(readServerResponse(connection));
-      // Get all <a> with the link identifier class
-      Elements elements = filePage.getElementsByClass(DOWNLOAD_LINK_IDENTIFIER);
-      // - If we got a hit
-      if (!elements.isEmpty()) {
-        // - Extract href from <a>
-        String theLink = elements.first().attr("href");
-        downloadLink = Optional.of(new URL(theLink));
-      }
-    } catch (IOException e) {
-      Log.e(LOG_TAG, "Could not parse download link from supplied URL: " + url, e);
+    // Read the page from the file server & DOM-ify it
+    Document filePage = Jsoup.parse(readServerResponse(connection));
+    // Get all <a> with the link identifier class
+    Elements elements = filePage.getElementsByClass(DOWNLOAD_LINK_IDENTIFIER);
+    // - If we got a hit
+    if (!elements.isEmpty()) {
+      // - Extract href from <a>
+      String theLink = elements.first().attr("href");
+      downloadLink = Optional.of(new URL(theLink));
     }
+
     // Return extracted link
     return downloadLink;
   }
@@ -208,22 +209,6 @@ public class ICDManager implements IFSManager {
 
     // Return the connection
     return connection;
-  }
-
-  /**
-   * Send data via a POST connection to the server.
-   *
-   * @param connection The connection to the server. <i>Must already be opened.</i>
-   * @param loginData  An array of bytes to be written to the server.
-   */
-  private void postData(@NotNull HttpURLConnection connection, byte[] loginData) {
-
-    // POST login data to OutputStream
-    try (OutputStream os = connection.getOutputStream()) {
-      os.write(loginData);
-    } catch (IOException e) {
-      Log.e(LOG_TAG, "Could not write login data to output stream!", e);
-    }
   }
 
   /**

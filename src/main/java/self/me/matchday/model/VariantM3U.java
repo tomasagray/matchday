@@ -33,7 +33,7 @@ public class VariantM3U extends M3UPlaylist {
   private static final String VERSION = "#EXT-X-VERSION:4";
   private static final String ALLOW_CACHE = "#EXT-X-ALLOW-CACHE:YES"; // allow clients to cache
   private static final String PLAYLIST_TYPE =
-      "#EXT-X-PLAYLIST-TYPE:EVENT"; // allows playlist to be updated
+      "#EXT-X-PLAYLIST-TYPE:VOD"; // allows playlist to be updated
   private static final String TARGET_DURATION =
       "#EXT-X-TARGETDURATION:"; // required; max duration in seconds
   private static final String PROGRAM_TIME =
