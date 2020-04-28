@@ -4,6 +4,7 @@
 
 package self.me.matchday.fileserver;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
@@ -41,5 +42,5 @@ public interface IFSManager {
    * @param url The external access URL for the file server.
    * @return The internal URL needed to access this file resource from the outside world.
    */
-  Optional<URL> getDownloadURL(@NotNull URL url);
+  Optional<URL> getDownloadURL(@NotNull URL url) throws IOException;
 }

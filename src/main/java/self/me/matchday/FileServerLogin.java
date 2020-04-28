@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
-import javax.naming.ldap.PagedResultsControl;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.SpringVersion;
 import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.fileserver.FSUser;
 import self.me.matchday.fileserver.inclouddrive.ICDUser;
@@ -30,6 +29,7 @@ public class FileServerLogin {
 
     this.fileServerService = fileServerService;
 
+    Log.i(LOG_TAG, "Spring Version: " + SpringVersion.getVersion());
     Log.i(LOG_TAG, "Initialize fileserver service...");
 
     return args -> {

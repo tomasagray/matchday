@@ -1,5 +1,6 @@
 package self.me.matchday.api.service;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +8,6 @@ import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import self.me.matchday._DEVFIXTURES.DELETEMEIFSManager;
 import self.me.matchday.fileserver.FSUser;
 import self.me.matchday.fileserver.IFSManager;
 import self.me.matchday.fileserver.inclouddrive.ICDManager;
@@ -52,7 +52,7 @@ public class FileServerService {
    * @param externalUrl The external-facing (public) URL
    * @return The internal (private) URL.
    */
-  public Optional<URL> getDownloadUrl(@NotNull final URL externalUrl) {
+  public Optional<URL> getDownloadUrl(@NotNull final URL externalUrl) throws IOException {
 
     // Result container
     Optional<URL> result = Optional.empty();

@@ -5,8 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import lombok.Data;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.http.MediaType;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data

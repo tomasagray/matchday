@@ -2,7 +2,6 @@ package self.me.matchday.api.service;
 
 import java.net.HttpCookie;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

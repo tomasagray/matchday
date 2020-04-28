@@ -10,7 +10,6 @@ package self.me.matchday.model;
 
 import java.io.Serializable;
 import java.util.Locale;
-import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
