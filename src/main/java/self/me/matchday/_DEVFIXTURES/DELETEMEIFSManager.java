@@ -2,6 +2,7 @@ package self.me.matchday._DEVFIXTURES;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ import self.me.matchday.util.Log;
 public class DELETEMEIFSManager implements IFSManager {
 
   private static final String LOG_TAG = "FAKE_IFS_MANAGER";
+  private static final Duration REFRESH_RATE = Duration.ofHours(4);
 
   private FSUser user;
   private final Pattern urlMatcher = Pattern.compile("https://www.inclouddrive.com/file/.*");
@@ -44,6 +46,11 @@ public class DELETEMEIFSManager implements IFSManager {
   @Override
   public boolean acceptsUrl(@NotNull URL url) {
     return true;
+  }
+
+  @Override
+  public Duration getRefreshRate() {
+    return REFRESH_RATE;
   }
 
   @Override

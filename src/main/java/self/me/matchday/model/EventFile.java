@@ -5,6 +5,7 @@
 package self.me.matchday.model;
 
 import java.net.URL;
+import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.regex.Pattern;
 import javax.persistence.Column;
@@ -30,12 +31,14 @@ public class EventFile {
   private Long eventFileId;
   private EventPartIdentifier title;
   private URL externalUrl;
+
   // refreshed data
   @Column(columnDefinition = "LONGTEXT")
   private URL internalUrl;
   @Convert(converter = VideoMetadataConverter.class)
   @Column(columnDefinition = "LONGTEXT")
   private VideoMetadata metadata;
+  private Timestamp lastRefreshed = new Timestamp(0L);
 
   public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
 

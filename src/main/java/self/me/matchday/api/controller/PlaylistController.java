@@ -66,6 +66,7 @@ public class PlaylistController {
       "/highlight-shows/highlight/{eventId}/playlist/{fileSrcId}"}, method = RequestMethod.GET)
   public ResponseEntity<String> fetchVariantPlaylist(@PathVariable final String eventId,
       @PathVariable final Long fileSrcId) {
+
     return
         variantPlaylistService
             .fetchVariantPlaylist(eventId, fileSrcId)

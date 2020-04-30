@@ -1,11 +1,14 @@
 package self.me.matchday.api.service;
 
+import java.awt.image.DataBufferUShort;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import self.me.matchday.fileserver.FSUser;
@@ -21,6 +24,7 @@ import self.me.matchday.util.Log;
 public class FileServerService {
 
   private static final String LOG_TAG = "FileServerService";
+  private static final Duration DEFAULT_REFRESH_RATE = Duration.ofHours(4);
 
   private final List<IFSManager> fileServerManagers = new ArrayList<>();
 
@@ -56,15 +60,47 @@ public class FileServerService {
 
     // Result container
     Optional<URL> result = Optional.empty();
-    // Determine correct FS manager
-    for (IFSManager ifsManager : fileServerManagers) {
-      if(ifsManager.acceptsUrl(externalUrl)) {
-        // this FS manager can handle this URL
-        result = ifsManager.getDownloadURL(externalUrl);
-        // quit searching
-        break;
-      }
+    // Get correct FS manager
+    final IFSManager managerForUrl = getManagerForUrl(externalUrl);
+    if (managerForUrl != null) {
+        // Use the FS manager to get the internal (download) URL
+        result = managerForUrl.getDownloadURL(externalUrl);
     }
     return result;
   }
+
+  /**
+   * Returns the recommended refresh rate for data associated with the given URL. If this cannot be
+   * determined from the URL, returns a default value instead.
+   *
+   * @param url The external URL for the fileserver
+   * @return The recommended refresh rate.
+   */
+  public Duration getFileServerRefreshRate(@NotNull final URL url) {
+
+    // Get the fileserver manager for this URL
+    final IFSManager ifsManager = getManagerForUrl(url);
+    // Return the recommended refresh rate for this FS manager
+    return (ifsManager != null) ? ifsManager.getRefreshRate() : DEFAULT_REFRESH_RATE;
+  }
+
+  /**
+   * Find the first registered file server manager which can decode the given URL.
+   *
+   * @param url The external URL
+   * @return The first registered fileserver manager which can handle the URL.
+   */
+  private @Nullable IFSManager getManagerForUrl(@NotNull final URL url) {
+
+    // Determine correct FS manager
+    for (IFSManager ifsManager: fileServerManagers) {
+      // Find first FS manager which can accept this URL
+      if (ifsManager.acceptsUrl(url)) {
+        return ifsManager;
+      }
+    }
+    // No registered manager matches this URL
+    return null;
+  }
+
 }

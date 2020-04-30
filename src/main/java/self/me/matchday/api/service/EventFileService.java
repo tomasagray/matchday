@@ -3,10 +3,13 @@ package self.me.matchday.api.service;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -17,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.EventFileSrcRepository;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventFileSorter;
 import self.me.matchday.model.EventFileSource;
@@ -56,18 +60,22 @@ public class EventFileService {
 
     Log.i(LOG_TAG, "Refreshing remote data for file source: " + eventFileSource);
 
+    // TODO: Ensure the order doesn't get messed up here
     // Final result container
-    final List<EventFile> refreshedEventFiles = new ArrayList<>();
+    final Set<EventFile> refreshedEventFiles = new LinkedHashSet<>();
     // Remote files container
-    final List<Future<EventFile>> futureEventFiles = new ArrayList<>();
+    final Set<Future<EventFile>> futureEventFiles = new LinkedHashSet<>();
     // Send each link to execute in its own thread
-    eventFileSource.getEventFiles().forEach(
-        eventFile ->
-            futureEventFiles.add(
-                executorService.submit(
-                    new EventFileRefreshTask(fileServerService, videoMetadataService, eventFile))
-            )
-    );
+    eventFileSource
+        .getEventFiles()
+        .stream()
+        .filter(this::shouldRefreshData)
+        .forEach(
+          eventFile ->
+              futureEventFiles.add(
+                  executorService.submit(
+                      new EventFileRefreshTask(fileServerService, videoMetadataService, eventFile)))
+        );
 
     // Retrieve results of remote fetch operation
     futureEventFiles.forEach(
@@ -81,11 +89,30 @@ public class EventFileService {
 
     Log.i(LOG_TAG, "URLs successfully refreshed: " + refreshedEventFiles.size());
     // Sort results
-    refreshedEventFiles.sort(new EventFileSorter());
+//    refreshedEventFiles.sort(new EventFileSorter());
     // Update file source & save to DB
     eventFileSource.setEventFiles(refreshedEventFiles);
-    eventFileSource.setLastRefreshed(Timestamp.from(Instant.now()));
     fileSrcRepository.saveAndFlush(eventFileSource);
+  }
+
+  /**
+   * Determine whether the data for the file should be refreshed.
+   *
+   * @param eventFile The EventFile with possibly stale data.
+   * @return True/false
+   */
+  public boolean shouldRefreshData(@NotNull final EventFile eventFile) {
+
+    // Last time this file's data refreshed
+    final Instant lastRefresh = eventFile.getLastRefreshed().toInstant();
+    final Instant now = Instant.now();
+    // Time since refresh
+    final Duration sinceRefresh = Duration.between(lastRefresh, now);
+    // Get recommended refresh rate
+    final Duration refreshRate =
+        fileServerService.getFileServerRefreshRate(eventFile.getExternalUrl());
+
+    return sinceRefresh.toMillis() > refreshRate.toMillis();
   }
 
   private static class EventFileRefreshTask implements Callable<EventFile> {

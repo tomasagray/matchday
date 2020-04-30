@@ -20,6 +20,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.StringJoiner;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +41,7 @@ import self.me.matchday.util.Log;
 public class ICDManager implements IFSManager {
 
   private static final String LOG_TAG = "ICDManager";
+  private static final Duration REFRESH_RATE = Duration.ofHours(4);
 
   // Fields
   private final ICDCookieManager cookieManager;
@@ -176,6 +178,11 @@ public class ICDManager implements IFSManager {
 
     // Return extracted link
     return downloadLink;
+  }
+
+  @Override
+  public Duration getRefreshRate() {
+    return REFRESH_RATE;
   }
 
   // Server

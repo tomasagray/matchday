@@ -1,9 +1,7 @@
 package self.me.matchday.api.service;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +19,6 @@ import self.me.matchday.util.Log;
 public class VariantPlaylistService {
 
   private static final String LOG_TAG = "VariantPlaylistService";
-
-  // todo: de-couple refresh timeout? may be different for different file servers.
-  private static final Duration REFRESH_RATE = Duration.ofHours(4);
 
   // JPA repositories
   private final EventRepository eventRepository;
@@ -44,6 +39,8 @@ public class VariantPlaylistService {
 
     Log.i(LOG_TAG, String
         .format("Fetching Variant Playlist for Event: %s, file source: %s ", eventId, fileSrcId));
+
+    // Result container
     Optional<VariantM3U> result = Optional.empty();
 
     // Get Event & EventFileSource
@@ -55,11 +52,10 @@ public class VariantPlaylistService {
       if (fileSourceOptional.isPresent()) {
         final EventFileSource eventFileSource = fileSourceOptional.get();
 
-        // Is the file data stale?
-        if (shouldRefreshFileData(eventFileSource)) {
-          eventFileService.refreshEventFileData(eventFileSource);
-        }
-        final List<EventFile> eventFiles = eventFileSource.getEventFiles();
+        // Refresh data for EventFiles
+        eventFileService.refreshEventFileData(eventFileSource);
+        // Retrieve fresh EventFiles
+        final Set<EventFile> eventFiles = eventFileSource.getEventFiles();
         if(eventFiles.size() > 0) {
           result = Optional.of(new VariantM3U(event, eventFiles));
         } else {
@@ -71,13 +67,7 @@ public class VariantPlaylistService {
     } else {
       Log.e(LOG_TAG, "Could not create Variant Playlist; invalid Event ID: " + eventId);
     }
-
+    // Return optional
     return result;
-  }
-
-  private boolean shouldRefreshFileData(@NotNull final EventFileSource eventFileSource) {
-    final Duration timeSinceRefresh = Duration
-        .between(eventFileSource.getLastRefreshed().toInstant(), Instant.now()).abs();
-    return timeSinceRefresh.toMillis() > REFRESH_RATE.toMillis();
   }
 }

@@ -21,8 +21,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,7 +87,7 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
           // Save HTML
           String metadata = token.html();
           // Video files for this source
-          List<EventFile> eventFiles = new ArrayList<>();
+          Set<EventFile> eventFiles = new LinkedHashSet<>();
 
           // Now, continue searching, this time for links,
           // until the next source or the end of the HTML
@@ -110,8 +112,8 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
             // Advance inner token
             innerToken = innerToken.nextElementSibling();
           }
-
-          final GManEventFileSource eventFileSource =
+          // Create an Event file source from the data
+          final EventFileSource eventFileSource =
               new GManEventFileSource(GManFileSourceMetadataParser.fromHTML(metadata), eventFiles);
 
           // Add match source to object
@@ -132,7 +134,7 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
 
     // Constructor
     GManEventFileSource(@NotNull final GManFileSourceMetadataParser metadata,
-        @NotNull final List<EventFile> eventFiles) {
+        @NotNull final Set<EventFile> eventFiles) {
       // Unpack builder object
       setChannel(metadata.channel);
       setSource(metadata.source);
@@ -148,7 +150,7 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
 
       // Initialize immutable List fields
       setLanguages(Collections.unmodifiableList(metadata.languages));
-      setEventFiles(Collections.unmodifiableList(eventFiles));
+      setEventFiles(Collections.unmodifiableSet(eventFiles));
     }
   }
 

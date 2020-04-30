@@ -49,6 +49,7 @@ public class MasterPlaylistService {
   public Optional<MasterM3U> fetchPlaylistById(@NotNull final String eventId) {
 
     Log.i(LOG_TAG, "Fetching Master Playlist for Event: " + eventId);
+
     Optional<MasterM3U> result = Optional.empty();
     // ensure valid Event ID
     if (eventRepository.findById(eventId).isPresent()) {

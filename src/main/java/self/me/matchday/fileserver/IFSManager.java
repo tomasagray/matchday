@@ -6,6 +6,7 @@ package self.me.matchday.fileserver;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,6 +37,13 @@ public interface IFSManager {
    * @return True/false.
    */
   boolean acceptsUrl(@NotNull final URL url);
+
+  /**
+   * Get the maximum age before data retrieved by this fileserver manager should be considered stale.
+   *
+   * @return The maximum age before data should be refreshed.
+   */
+  Duration getRefreshRate();
 
   /**
    * Extract download URL data from a given URL
