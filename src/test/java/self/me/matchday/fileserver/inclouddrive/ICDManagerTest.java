@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -86,7 +85,7 @@ class ICDManagerTest {
   @Test
   @Order(3)
   @DisplayName("Can translate an input URL into a download URL")
-  void getDownloadURL() {
+  void getDownloadURL() throws IOException {
 
     Log.i(LOG_TAG, String.format("Getting download link for: %s", FILE_LINK));
 
