@@ -10,9 +10,9 @@ package self.me.matchday.model;
 
 import java.io.Serializable;
 import java.util.Locale;
-import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +37,16 @@ public class Competition implements Serializable {
   private String name;
   private String abbreviation;
   private Locale locale;
+  @OneToOne
+  private Artwork emblem;
+  @OneToOne
+  private Artwork fanart;
+  @OneToOne
+  private Artwork monochromeEmblem;
+  @OneToOne
+  private Artwork landscape;
 
+  // TODO: Is this needed?
   // Default constructor
   public Competition() {
     this.competitionId = MD5String.generate();
@@ -72,7 +81,7 @@ public class Competition implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this);
+    return name.hashCode() * competitionId.hashCode();
   }
 
 }

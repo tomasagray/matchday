@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.controller.PlaylistController;
+import self.me.matchday.api.resource.PlaylistResource;
+import self.me.matchday.api.resource.PlaylistResource.PlaylistResourceAssembler;
 import self.me.matchday.db.EventRepository;
 import self.me.matchday.db.EventSourceRepository;
 import self.me.matchday.db.MasterM3URepository;
@@ -26,16 +28,33 @@ public class MasterPlaylistService {
   private static final String LOG_TAG = "MasterPlaylistService";
 
   private final EventRepository eventRepository;
-  private final MasterM3URepository masterM3URepository;
   private final EventSourceRepository eventSourceRepository;
+  private final MasterM3URepository masterM3URepository;
+  private final PlaylistResourceAssembler playlistResourceAssembler;
 
   @Autowired
-  MasterPlaylistService(EventRepository eventRepository, MasterM3URepository masterM3URepository,
-      EventSourceRepository eventSourceRepository) {
+  MasterPlaylistService(EventRepository eventRepository, EventSourceRepository eventSourceRepository,
+      MasterM3URepository masterM3URepository, PlaylistResourceAssembler playlistResourceAssembler) {
 
     this.eventRepository = eventRepository;
-    this.masterM3URepository = masterM3URepository;
     this.eventSourceRepository = eventSourceRepository;
+    this.masterM3URepository = masterM3URepository;
+    this.playlistResourceAssembler = playlistResourceAssembler;
+  }
+
+  /**
+   * Create and return a playlist resource for the given Event, which contains links to the master
+   * playlist, as well as any variants.
+   *
+   * @param eventId The ID of the Event
+   * @return An Optional<> containing a playlist resource, if a master playlist is found.
+   */
+  public Optional<PlaylistResource> fetchPlaylistResourceForEvent(@NotNull final String eventId) {
+
+    final Optional<MasterM3U> masterPlaylist = fetchMasterPlaylistForEvent(eventId);
+    return
+        masterPlaylist
+            .map(playlistResourceAssembler::toModel);
   }
 
   /**
@@ -46,9 +65,10 @@ public class MasterPlaylistService {
    * @param eventId The ID of the Event for which we want a playlist.
    * @return An Optional containing the playlist.
    */
-  public Optional<MasterM3U> fetchPlaylistById(@NotNull final String eventId) {
+  public Optional<MasterM3U> fetchMasterPlaylistForEvent(@NotNull final String eventId) {
 
     Log.i(LOG_TAG, "Fetching Master Playlist for Event: " + eventId);
+
     Optional<MasterM3U> result = Optional.empty();
     // ensure valid Event ID
     if (eventRepository.findById(eventId).isPresent()) {
@@ -99,8 +119,10 @@ public class MasterPlaylistService {
           // Get variant link
           final Link variantLink = linkTo(methodOn(PlaylistController.class)
               .fetchVariantPlaylist(eventId, eventFileSource.getEventFileSrcId())).withSelfRel();
+          // Add link to master playlist as a variant
           masterPlaylist.addVariant(eventFileSource, variantLink.toUri());
         });
+
         result = Optional.of(masterPlaylist);
 
       } else {

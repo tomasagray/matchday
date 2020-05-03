@@ -8,14 +8,6 @@
  */
 package self.me.matchday.feed.blogger.galataman;
 
-import static self.me.matchday.feed.blogger.galataman.GManEventFileSourceParser.GalatamanPattern.AV_DATA_DELIMITER;
-import static self.me.matchday.feed.blogger.galataman.GManEventFileSourceParser.GalatamanPattern.LANGUAGE_DELIMITER;
-import static self.me.matchday.feed.blogger.galataman.GManEventFileSourceParser.GalatamanPattern.METADATA_ITEM_DELIMITER;
-import static self.me.matchday.feed.blogger.galataman.GManEventFileSourceParser.GalatamanPattern.METADATA_KV_DELIMITER;
-import static self.me.matchday.feed.blogger.galataman.GManEventFileSourceParser.GalatamanPattern.START_OF_SOURCE;
-import static self.me.matchday.feed.blogger.galataman.GManEventFileSourceParser.GalatamanPattern.isSourceData;
-import static self.me.matchday.feed.blogger.galataman.GManEventFileSourceParser.GalatamanPattern.isVideoLink;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -51,13 +43,29 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
 
   private static final String LOG_TAG = "GManEventFileSourceParser";
 
+  // Entry parsing patterns
+  static final String START_OF_SOURCE = Pattern.compile("__*").pattern();
+  static final String METADATA_ITEM_DELIMITER =
+      Pattern.compile("<span style=\"color: blue;\">(\\[)?").pattern();
+  static final String METADATA_KV_DELIMITER =
+      Pattern.compile("(])?</span>:(<span [^>]*>)?").pattern();
+  static final String LANGUAGE_DELIMITER = Pattern.compile("[\\d.* ]|/").pattern();
+  static final String AV_DATA_DELIMITER = Pattern.compile("‖").pattern();
+  // Predicates
+  static final Predicate<Element> isSourceData =
+      elem -> ("b".equals(elem.tagName())) && (elem.text().contains("Channel"));
+  static final Predicate<Element> isVideoLink =
+      elem ->
+          ("a".equals(elem.tagName()))
+              && (ICDData.getUrlMatcher(elem.attr("href")).find());
+
   private final String html;
   private final List<EventFileSource> eventFileSources;
 
   public GManEventFileSourceParser(@NotNull final String html) {
     this.html = html;
     this.eventFileSources = new ArrayList<>();
-    parseMatchSources();
+    parseEventSources();
   }
 
   @Override
@@ -68,12 +76,11 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
   /**
    * Extracts match source data from this post.
    */
-  private void parseMatchSources() {
+  private void parseEventSources() {
 
     try {
       // DOM-ify HTML content for easy manipulation
       Document doc = Jsoup.parse(this.html);
-
       // Since this is a loosely structured document, we will use a token, starting at the first
       // source and looking for what we want along the way
       Element token = doc.getElementsMatchingOwnText(START_OF_SOURCE).first();
@@ -82,16 +89,13 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
       while (token != null) {
         // When we find a source
         if (isSourceData.test(token)) {
-          // Save HTML
-          String metadata = token.html();
-          // Video files for this source
-          List<EventFile> eventFiles = new ArrayList<>();
+          // Create an Event file source from the data
+          final EventFileSource eventFileSource =
+              new GManEventFileSource(GManFileSourceMetadataParser.fromHTML(token.html()));
 
-          // Now, continue searching, this time for links,
-          // until the next source or the end of the HTML
+          // Parse EventFiles (links) for this source
           Element innerToken = token.nextElementSibling();
           EventPartIdentifier partIdentifier = EventPartIdentifier.DEFAULT;
-
           while ((innerToken != null) && !(isSourceData.test(innerToken))) {
             // Look for a part identifier
             final String tokenHtml = innerToken.html();
@@ -102,38 +106,35 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
               // When we find a link to a video file, extract href attribute & add it to our
               // source's list of EventFiles, with an identifier (might be null)
               final URL url = new URL(innerToken.attr("href"));
-              eventFiles.add(
-                  new EventFile(partIdentifier, url)
-              );
+              // Create a new EventFile & add to collection
+              final EventFile eventFile = new EventFile(partIdentifier, url);
+              eventFileSource.getEventFiles().add(eventFile);
             }
-
             // Advance inner token
             innerToken = innerToken.nextElementSibling();
           }
 
-          final GManEventFileSource eventFileSource =
-              new GManEventFileSource(GManFileSourceMetadataParser.fromHTML(metadata), eventFiles);
-
-          // Add match source to object
+          // Add match source to collection
           this.eventFileSources.add(eventFileSource);
         }
 
         // Advance the search token
         token = token.nextElementSibling();
       }
-
     } catch (MalformedURLException e) {
       // Log the error
       Log.e(LOG_TAG, "There was a problem parsing a Galataman post", e);
     }
   }
 
+  /**
+   * Local implementation of EventFileSource which unpacks builder object.
+   */
   private static class GManEventFileSource extends EventFileSource {
 
     // Constructor
-    GManEventFileSource(@NotNull final GManFileSourceMetadataParser metadata,
-        @NotNull final List<EventFile> eventFiles) {
-      // Unpack builder object
+    GManEventFileSource(@NotNull final GManFileSourceMetadataParser metadata) {
+      // Unpack metadata builder object
       setChannel(metadata.channel);
       setSource(metadata.source);
       setApproximateDuration(metadata.duration);
@@ -145,14 +146,9 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
       setFrameRate(metadata.frameRate);
       setAudioCodec(metadata.audioCodec);
       setAudioChannels(metadata.audioChannels);
-
-      // Initialize immutable List fields
       setLanguages(Collections.unmodifiableList(metadata.languages));
-      setEventFiles(Collections.unmodifiableList(eventFiles));
     }
   }
-
-  // TODO: Make this more like ZKF example
 
   /**
    * Builder class to parse and create an EventSource from a GalatamanHDF post.
@@ -450,35 +446,5 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
         return "Key: " + this.key + ", Value: " + this.value;
       }
     }
-  }
-
-  /**
-   * Collection class of Patterns specific to the Galataman HDF Blog.
-   */
-  static class GalatamanPattern {
-
-    // Entry parsing patterns
-    static final String START_OF_SOURCE = Pattern.compile("__*").pattern();
-
-    static final String METADATA_ITEM_DELIMITER =
-        Pattern.compile("<span style=\"color: blue;\">(\\[)?").pattern();
-
-    static final String METADATA_KV_DELIMITER =
-        Pattern.compile("(])?</span>:(<span [^>]*>)?").pattern();
-
-    static final String LANGUAGE_DELIMITER = Pattern.compile("[\\d.* ]|/").pattern();
-
-    static final String AV_DATA_DELIMITER = Pattern.compile("‖").pattern();
-
-
-    // Predicates
-    static final Predicate<Element> isSourceData =
-        elem -> ("b".equals(elem.tagName())) && (elem.text().contains("Channel"));
-
-    static final Predicate<Element> isVideoLink =
-        elem ->
-            ("a".equals(elem.tagName()))
-                && (ICDData.getUrlMatcher().matcher(elem.attr("href")).find());
-
   }
 }

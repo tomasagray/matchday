@@ -5,8 +5,8 @@
 package self.me.matchday.model;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
@@ -33,7 +33,7 @@ public class VariantM3U extends M3UPlaylist {
   private static final String VERSION = "#EXT-X-VERSION:4";
   private static final String ALLOW_CACHE = "#EXT-X-ALLOW-CACHE:YES"; // allow clients to cache
   private static final String PLAYLIST_TYPE =
-      "#EXT-X-PLAYLIST-TYPE:EVENT"; // allows playlist to be updated
+      "#EXT-X-PLAYLIST-TYPE:VOD"; // allows playlist to be updated
   private static final String TARGET_DURATION =
       "#EXT-X-TARGETDURATION:"; // required; max duration in seconds
   private static final String PROGRAM_TIME =
@@ -48,11 +48,11 @@ public class VariantM3U extends M3UPlaylist {
   @JoinColumn(name = "eventId")
   private Event event;
   @OneToMany(targetEntity = MediaSegment.class, cascade = CascadeType.ALL)
-  private List<MediaSegment> mediaSegments = new ArrayList<>();
+  private Set<MediaSegment> mediaSegments = new LinkedHashSet<>();
   private double targetDuration;
   private boolean finalized = true;
 
-  public VariantM3U(@NotNull Event event, @NotNull List<EventFile> eventFiles) {
+  public VariantM3U(@NotNull Event event, @NotNull Set<EventFile> eventFiles) {
 
     // Generate playlist ID
     this.id = MD5String

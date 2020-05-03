@@ -5,19 +5,25 @@
 package self.me.matchday.model;
 
 import java.net.URL;
-import java.util.Comparator;
+import java.sql.Timestamp;
+import java.util.Objects;
 import java.util.regex.Pattern;
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.db.converter.VideoMetadataConverter;
 
 @Entity
 @Data
 @NoArgsConstructor
-public class EventFile {
+public class EventFile implements Comparable<EventFile> {
+
+  private static double DEFAULT_DURATION = 3012.541956d;
 
   // Fields
   @Id
@@ -26,8 +32,12 @@ public class EventFile {
   private EventPartIdentifier title;
   private URL externalUrl;
   // refreshed data
+  @Column(columnDefinition = "LONGTEXT")
   private URL internalUrl;
-  private String metadata;
+  @Convert(converter = VideoMetadataConverter.class)
+  @Column(columnDefinition = "LONGTEXT")
+  private VideoMetadata metadata;
+  private Timestamp lastRefreshed = new Timestamp(0L);
 
   public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
 
@@ -37,18 +47,48 @@ public class EventFile {
     this.metadata = null;
   }
 
+  /**
+   * Returns the duration of this EventFile, in milliseconds.
+   *
+   * @return The duration of this EventFile (millis).
+   */
   public double getDuration() {
-    // TODO: get real file duration
-    return 3012.541956d;
+    if (getMetadata() != null) {
+      return getMetadata().getFormat().getDuration();
+    } else {
+      return DEFAULT_DURATION;
+    }
   }
 
   public String toString() {
     return String.format("%s - %s", getTitle(), getExternalUrl().toString());
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof EventFile)) {
+      return false;
+    }
+    // Cast
+    final EventFile eventFile = (EventFile) obj;
+    return this.getEventFileId().equals(eventFile.getEventFileId());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects
+        .hash(getEventFileId(), getTitle(), getExternalUrl(), getInternalUrl(), getMetadata(),
+            getLastRefreshed());
+  }
+
+  @Override
+  public int compareTo(@NotNull EventFile test) {
+    return this.getTitle().order - test.getTitle().order;
+  }
+
   /**
    * Event part identifiers
-  */
+   */
   public enum EventPartIdentifier {
 
     DEFAULT("", "", -1),
@@ -76,6 +116,7 @@ public class EventFile {
 
     /**
      * Determines if the given String corresponds to an enumerated Event part identifier.
+     *
      * @param str The test String
      * @return True / false.
      */
@@ -90,8 +131,10 @@ public class EventFile {
 
     /**
      * Factory method to convert a String to an enumerated Event part identifier.
+     *
      * @param str The String to be converted.
-     * @return The enumerated value, or <b>DEFAULT</b> if the given String does not match any values.
+     * @return The enumerated value, or <b>DEFAULT</b> if the given String does not match any
+     * values.
      */
     public static EventPartIdentifier fromString(@NotNull String str) {
       // If the given String doesn't match
@@ -105,17 +148,6 @@ public class EventFile {
       }
 
       return result;
-    }
-  }
-
-  /**
-   * Sorts EventFiles into correct order.
-   */
-  public static class EventFileSorter implements Comparator<EventFile> {
-
-    @Override
-    public int compare(@NotNull EventFile f1, @NotNull EventFile f2) {
-      return f1.getTitle().order - f2.getTitle().order;
     }
   }
 }

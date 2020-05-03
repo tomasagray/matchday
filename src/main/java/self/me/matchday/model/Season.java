@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Objects;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -30,10 +29,12 @@ public final class Season implements Serializable {
   // Default parameters
   private static final int MILLENNIUM = 2_000;
   private static final int MAX_YEAR = 3_000;
+  private static final int MIN_YEAR = 1_900;
   private static final int DEFAULT_YEAR = -1;
   private static final int DEFAULT_START_DAY = 1;
   private static final int DEFAULT_END_DAY = 31;
-  private static final LocalDate START_DATE = LocalDate.of(DEFAULT_YEAR, Month.AUGUST, DEFAULT_START_DAY);
+  private static final LocalDate START_DATE = LocalDate
+      .of(DEFAULT_YEAR, Month.AUGUST, DEFAULT_START_DAY);
   private static final LocalDate END_DATE = LocalDate.of(DEFAULT_YEAR, Month.MAY, DEFAULT_END_DAY);
   private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
@@ -58,17 +59,18 @@ public final class Season implements Serializable {
    * DateTimeFormatException.
    *
    * @param startYear The beginning year of the season (ex.: 2019)
-   * @param endYear The end year of the season (ex: 2020)
+   * @param endYear   The end year of the season (ex: 2020)
    */
   public Season(final int startYear, final int endYear) {
     // Check for illegal dates
-    if (startYear < MILLENNIUM
-        || startYear > MAX_YEAR
-        || endYear < MILLENNIUM
-        || endYear > MAX_YEAR) {
-      throw new DateTimeParseException(
-          "The years must be within the range: 2000 - 3000", startYear + "/" + endYear, 0
-      );
+    if (startYear < MIN_YEAR || startYear > MAX_YEAR
+        || endYear < MIN_YEAR || endYear > MAX_YEAR) {
+
+      String msg =
+          String.format("The years must be within the range: 2000 - 3000; given: %s, %s",
+              startYear, endYear);
+      String data = String.format("%s/%s", startYear, endYear);
+      throw new DateTimeParseException(msg, data, 0);
     }
 
     this.startDate = LocalDate.from(START_DATE).withYear(startYear);
@@ -85,21 +87,21 @@ public final class Season implements Serializable {
 
   @Override
   public boolean equals(Object obj) {
-    if(obj == this) {
+    if (obj == this) {
       return true;
     }
-    if( !(obj instanceof Season) ) {
+    if (!(obj instanceof Season)) {
       return false;
     }
 
     // Cast for comparison
-    Season season = (Season)obj;
+    Season season = (Season) obj;
     return season.getStartDate().isEqual(this.getStartDate())
         && season.getEndDate().isEqual(this.getEndDate());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(this);
+    return seasonId.hashCode() * startDate.hashCode() * endDate.hashCode();
   }
 }

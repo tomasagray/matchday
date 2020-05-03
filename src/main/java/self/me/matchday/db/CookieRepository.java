@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.HttpCookie;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -35,6 +36,7 @@ public interface CookieRepository extends JpaRepository<FSPersistentCookie, Long
     @Id @GeneratedValue private Long cookieId;
     private String domain;
     private String name;
+    @Column(columnDefinition = "LONGTEXT")
     private String value;
     private int version;
     private String comment;

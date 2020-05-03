@@ -1,9 +1,10 @@
 package self.me.matchday.model;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.CascadeType;
@@ -28,7 +29,6 @@ public class EventFileSource {
   @Id
   @GeneratedValue
   private Long eventFileSrcId;
-
   // Fields
   private String channel;
   private String source;
@@ -37,7 +37,7 @@ public class EventFileSource {
   @ElementCollection
   private List<String> languages = new ArrayList<>();
   @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL)
-  private List<EventFile> eventFiles = new ArrayList<>();
+  private Set<EventFile> eventFiles = new TreeSet<>();
   // Media metadata
   private Resolution resolution;
   private String mediaContainer;
@@ -46,8 +46,6 @@ public class EventFileSource {
   private int frameRate;
   private String audioCodec;
   private int audioChannels;
-  // For local DB
-  private Timestamp lastRefreshed = new Timestamp(0L);
 
   public String toString() {
 

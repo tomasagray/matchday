@@ -81,11 +81,15 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
       highlightShowResource.setDate(entity.getDate());
       // attach playlist
       masterPlaylistService
-          .fetchPlaylistById(entity.getEventId())
+          .fetchMasterPlaylistForEvent(entity.getEventId())
           .ifPresent(
               masterM3U -> highlightShowResource
                   .setPlaylists(playlistResourceAssembler.toModel(masterM3U))
           );
+      // attach self link
+      highlightShowResource.add(
+          linkTo(methodOn(EventController.class).fetchHighlightById(entity.getEventId()))
+              .withSelfRel());
 
       return highlightShowResource;
     }
@@ -97,6 +101,8 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
 
       final CollectionModel<HighlightShowResource> highlightShowResources = super
           .toCollectionModel(entities);
+
+      // add self link
       highlightShowResources
           .add(linkTo(methodOn(EventController.class).fetchAllHighlights()).withSelfRel());
       return highlightShowResources;

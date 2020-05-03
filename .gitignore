@@ -2,3 +2,5 @@
 .gitignore
 .gradle/
 .idea/workspace.xml
+/lib/
+*.cookie

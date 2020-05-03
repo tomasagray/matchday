@@ -20,9 +20,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.regex.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -41,6 +41,7 @@ import self.me.matchday.util.Log;
 public class ICDManager implements IFSManager {
 
   private static final String LOG_TAG = "ICDManager";
+  private static final Duration REFRESH_RATE = Duration.ofHours(4);
 
   // Fields
   private final ICDCookieManager cookieManager;
@@ -55,7 +56,6 @@ public class ICDManager implements IFSManager {
     // Set default status to 'logged out'
     this.isLoggedIn = false;
   }
-
 
   // Login
   // ===============================================================================================
@@ -78,8 +78,12 @@ public class ICDManager implements IFSManager {
       // Connect
       connection.connect();
       // POST login data
-      postData(connection, loginData);
+      // POST login data to OutputStream
+      try (OutputStream os = connection.getOutputStream()) {
+        os.write(loginData);
+      }
 
+      // Read server response
       if (connection.getResponseCode() == HTTP_OK) {
         // Read response as a JSON object
         final JsonObject loginResponse =
@@ -92,9 +96,9 @@ public class ICDManager implements IFSManager {
           // Extract cookie from response, create userdata cookie
           cookieManager.saveUserDataCookie(loginResponse.get(USER_DATA_IDENTIFIER).getAsString());
           Log.i(LOG_TAG, "Successfully logged in user: " + user);
-
           // Login success!
           return true;
+
         } else {
           Log.e(
               LOG_TAG,
@@ -136,13 +140,11 @@ public class ICDManager implements IFSManager {
     return this.isLoggedIn;
   }
 
-
   // Download
   // ===============================================================================================
   @Override
   public boolean acceptsUrl(@NotNull URL url) {
-    final Matcher matcher = ICDData.getUrlMatcher().matcher(url.toString());
-    return matcher.find();
+    return ICDData.getUrlMatcher(url.toString()).find();
   }
 
   /**
@@ -152,37 +154,36 @@ public class ICDManager implements IFSManager {
    * @return An Optional containing the DD URL, if found.
    */
   @Override
-  public Optional<URL> getDownloadURL(@NotNull URL url) {
+  public Optional<URL> getDownloadURL(@NotNull URL url) throws IOException {
+
     // By default, empty container
     Optional<URL> downloadLink = Optional.empty();
+    // Open a connection
+    URLConnection connection = url.openConnection();
+    // Attach cookies
+    connection.setRequestProperty("Cookie", cookieManager.getCookieString());
+    // Connect to file server
+    connection.connect();
 
-    try {
-      // Open a connection
-      URLConnection connection = url.openConnection();
-
-      // todo: is manual cookie attachment needed?
-      // Attach cookies
-      connection.setRequestProperty("Cookie", cookieManager.getCookieString());
-      // Connect to file server
-      connection.connect();
-
-      // Read the page from the file server & DOM-ify it
-      Document filePage = Jsoup.parse(readServerResponse(connection));
-      // Get all <a> with the link identifier class
-      Elements elements = filePage.getElementsByClass(DOWNLOAD_LINK_IDENTIFIER);
-      // - If we got a hit
-      if (!elements.isEmpty()) {
-        // - Extract href from <a>
-        String theLink = elements.first().attr("href");
-        downloadLink = Optional.of(new URL(theLink));
-      }
-    } catch (IOException e) {
-      Log.e(LOG_TAG, "Could not parse download link from supplied URL: " + url, e);
+    // Read the page from the file server & DOM-ify it
+    Document filePage = Jsoup.parse(readServerResponse(connection));
+    // Get all <a> with the link identifier class
+    Elements elements = filePage.getElementsByClass(DOWNLOAD_LINK_IDENTIFIER);
+    // - If we got a hit
+    if (!elements.isEmpty()) {
+      // - Extract href from <a>
+      String theLink = elements.first().attr("href");
+      downloadLink = Optional.of(new URL(theLink));
     }
 
+    // Return extracted link
     return downloadLink;
   }
 
+  @Override
+  public Duration getRefreshRate() {
+    return REFRESH_RATE;
+  }
 
   // Server
   // ===============================================================================================
@@ -197,6 +198,7 @@ public class ICDManager implements IFSManager {
   @NotNull
   private HttpURLConnection setupICDPostConnection(@NotNull URL url, int dataSize)
       throws IOException {
+
     // Get an HTTP connection
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     // Set connection properties
@@ -217,21 +219,6 @@ public class ICDManager implements IFSManager {
   }
 
   /**
-   * Send data via a POST connection to the server.
-   *
-   * @param connection The connection to the server. <i>Must already be opened.</i>
-   * @param loginData  An array of bytes to be written to the server.
-   */
-  private void postData(@NotNull HttpURLConnection connection, byte[] loginData) {
-    //   - POST login data to OutputStream
-    try (OutputStream os = connection.getOutputStream()) {
-      os.write(loginData);
-    } catch (IOException e) {
-      Log.e(LOG_TAG, "Could not write login data to output stream!", e);
-    }
-  }
-
-  /**
    * Read the response from the server on a given connection
    *
    * @param connection The connection to read from
@@ -240,6 +227,7 @@ public class ICDManager implements IFSManager {
    */
   @NotNull
   private String readServerResponse(URLConnection connection) throws IOException {
+
     StringBuilder response = new StringBuilder();
     try (InputStream is = connection.getInputStream()) {
       int i;
@@ -253,7 +241,6 @@ public class ICDManager implements IFSManager {
     // Assemble and return response
     return response.toString();
   }
-
 
   // Login
   // ===============================================================================================
@@ -289,6 +276,7 @@ public class ICDManager implements IFSManager {
    */
   @NotNull
   private static byte[] getLoginDataByteArray(@NotNull FSUser user) {
+
     // Container for data
     StringJoiner sj = new StringJoiner("&");
 
@@ -311,6 +299,7 @@ public class ICDManager implements IFSManager {
    */
   @NotNull
   private static String getURLComponent(@NotNull String key, @NotNull Object value) {
+
     StringBuilder sb = new StringBuilder();
     String charset = StandardCharsets.UTF_8.toString();
 

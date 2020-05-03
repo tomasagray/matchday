@@ -7,7 +7,6 @@ package self.me.matchday.model;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
@@ -39,9 +38,6 @@ public abstract class Event {
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Fixture fixture;
 
-  @Column(name = "title")
   protected String title;
-
-  @Column(name = "date")
   protected LocalDateTime date;
 }

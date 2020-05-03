@@ -10,6 +10,7 @@ package self.me.matchday.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +29,7 @@ public class TextFileReader {
    * @throws IOException if the URL is invalid, or the source cannot be read
    */
   @NotNull
-  public static String readRemote(URL url) throws IOException {
+  public static String readRemote(@NotNull final URL url) throws IOException {
 
     try (BufferedReader reader =
         new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
@@ -48,12 +49,31 @@ public class TextFileReader {
    * @throws IOException if the file cannot be read.
    */
   @NotNull
-  public static String readLocal(Path uri) throws IOException {
+  public static String readLocal(@NotNull final Path uri) throws IOException {
 
     try (BufferedReader reader = Files.newBufferedReader(uri)) {
       // Container for the String data
       StringBuilder sb = new StringBuilder();
       // Add the data to the container
+      reader.lines().forEach(sb::append);
+      return sb.toString();
+    }
+  }
+
+  /**
+   * Read text data from an InputStream.
+   *
+   * @param is InputStream representing the text data
+   * @return A String
+   * @throws IOException If the data cannot be read.
+   */
+  @NotNull
+  public static String readStream(@NotNull final InputStream is) throws IOException {
+
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+      // Result container
+      StringBuilder sb = new StringBuilder();
+      // Read data
       reader.lines().forEach(sb::append);
       return sb.toString();
     }

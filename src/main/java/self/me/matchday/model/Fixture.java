@@ -5,7 +5,6 @@
 package self.me.matchday.model;
 
 import java.io.Serializable;
-import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -76,6 +75,7 @@ public final class Fixture implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this);
+    int factor = (fixtureNumber == 0) ? 1 : fixtureNumber;
+    return fixtureId.hashCode() * title.hashCode() * factor;
   }
 }

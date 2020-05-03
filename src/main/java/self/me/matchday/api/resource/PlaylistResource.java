@@ -23,6 +23,7 @@ import self.me.matchday.api.controller.PlaylistController;
 import self.me.matchday.db.EventFileSrcRepository;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.MasterM3U;
+import self.me.matchday.util.Log;
 
 @Data
 @Builder
@@ -32,17 +33,20 @@ import self.me.matchday.model.MasterM3U;
 @Relation(collectionRelation = "playlists")
 public class PlaylistResource extends RepresentationModel<PlaylistResource> {
 
+  private static final String LOG_TAG = "PlaylistResource";
   private static final LinkRelation MASTER_PLAYLIST = LinkRelation.of("master");
 
   @Component
   public static class PlaylistResourceAssembler extends
       RepresentationModelAssemblerSupport<MasterM3U, PlaylistResource> {
 
-    @Autowired
-    private EventFileSrcRepository eventFileSrcRepository;
+    private final EventFileSrcRepository eventFileSrcRepository;
 
-    PlaylistResourceAssembler() {
+    @Autowired
+    PlaylistResourceAssembler(EventFileSrcRepository eventFileSrcRepository) {
+
       super(EventController.class, PlaylistResource.class);
+      this.eventFileSrcRepository = eventFileSrcRepository;
     }
 
     @NotNull
@@ -56,10 +60,9 @@ public class PlaylistResource extends RepresentationModel<PlaylistResource> {
               .fetchMasterPlaylistById(masterM3U.getEventId()))
               .withRel(MASTER_PLAYLIST));
 
-      // add playlist variant links
-      final Optional<List<EventFileSource>> fileSourceOptional = eventFileSrcRepository
-          .findFileSourcesForEventId(masterM3U.getEventId());
-
+      // Add links to variants
+      final Optional<List<EventFileSource>> fileSourceOptional =
+          eventFileSrcRepository.findFileSourcesForEventId(masterM3U.getEventId());
       if (fileSourceOptional.isPresent()) {
         final List<EventFileSource> eventFileSources = fileSourceOptional.get();
         eventFileSources.forEach(eventFileSource ->
@@ -69,6 +72,9 @@ public class PlaylistResource extends RepresentationModel<PlaylistResource> {
                     .withRel(getFileSourceLinkRel(eventFileSource))
             )
         );
+      } else {
+        Log.d(LOG_TAG,
+            String.format("No variant playlists found for Event: %s", masterM3U.getEventId()));
       }
       return playlistResource;
     }

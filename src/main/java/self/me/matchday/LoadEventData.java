@@ -5,6 +5,7 @@
 package self.me.matchday;
 
 import java.net.URL;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.CommandLineRunner;
@@ -37,7 +38,8 @@ public class LoadEventData {
   private static final String LOG_TAG = "LoadEventData";
 
   private static final String LIVE_URL =
-      "http://192.168.0.101/soccer/testing/zkf_known_good.json";
+      "https://zkfootballmatch.blogspot.com/feeds/posts/default?alt=json"; // live URL
+//      "http://192.168.0.101/soccer/testing/zkf_known_good.json";  // safe copy
   private static final String LOCAL_URL =
       "http://192.168.0.101/soccer/testing/galataman_known_good.json";
 
@@ -88,23 +90,34 @@ public class LoadEventData {
 
   @Transactional
   private void saveEventSource(@NotNull EventSource eventSource) {
-//
 
     final Event event = eventSource.getEvent();
     Log.i(LOG_TAG, "Saving Competition: " + competitionRepository.save(event.getCompetition()));
-    Log.i(LOG_TAG, "Saving Season: " + seasonRepository.saveAndFlush(event.getSeason()) );
-    Log.i(LOG_TAG, "Saving Fixture: " + fixtureRepository.saveAndFlush(event.getFixture()) );
+    Log.i(LOG_TAG, "Saving Season: " + seasonRepository.saveAndFlush(event.getSeason()));
+    Log.i(LOG_TAG, "Saving Fixture: " + fixtureRepository.saveAndFlush(event.getFixture()));
 
-    if (event instanceof Match) {
-      final Match match = (Match) event;
-      Log.i(LOG_TAG, "Saving Team: " + teamRepository.save(match.getHomeTeam()) );
-      Log.i(LOG_TAG, "Saving Team: " + teamRepository.save(match.getAwayTeam()) );
-      Log.i(LOG_TAG, "Saving Match: " + matchRepository.save(match) );
+    if (getEventFileCount(eventSource) > 0) {
+      if (event instanceof Match) {
+        final Match match = (Match) event;
+        Log.i(LOG_TAG, "Saving Team: " + teamRepository.save(match.getHomeTeam()));
+        Log.i(LOG_TAG, "Saving Team: " + teamRepository.save(match.getAwayTeam()));
+        Log.i(LOG_TAG, "Saving Match: " + matchRepository.save(match));
+      } else {
+        final HighlightShow highlightShow = (HighlightShow) event;
+        Log.i(LOG_TAG, "Saving Highlight: " + highlightShowRepository.saveAndFlush(highlightShow));
+      }
+      // Finally, save EventSource
+      Log.i(LOG_TAG, "Saving EventSource: " + eventSourceRepository.saveAndFlush(eventSource));
     } else {
-      final HighlightShow highlightShow = (HighlightShow) event;
-      Log.i(LOG_TAG, "Saving Highlight: " + highlightShowRepository.saveAndFlush(highlightShow) );
+      Log.i(LOG_TAG, String.format("Event has no sources: %s; not saving to DB", event));
     }
-    // Finally, save EventSource
-    Log.i(LOG_TAG, "Saving EventSource: " + eventSourceRepository.saveAndFlush(eventSource));
+  }
+
+  private int getEventFileCount(@NotNull final EventSource eventSource) {
+
+    AtomicInteger total = new AtomicInteger();
+    eventSource.getEventFileSources()
+        .forEach(eventFileSource -> total.addAndGet(eventFileSource.getEventFiles().size()));
+    return total.get();
   }
 }

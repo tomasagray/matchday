@@ -1,9 +1,7 @@
 package self.me.matchday.api.service;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +20,10 @@ public class VariantPlaylistService {
 
   private static final String LOG_TAG = "VariantPlaylistService";
 
-  // todo: de-couple refresh timeout? may be different for different file servers.
-  private static final Duration REFRESH_RATE = Duration.ofHours(4);
-
   // JPA repositories
   private final EventRepository eventRepository;
   private final EventFileSrcRepository eventFileSrcRepository;
+  // Services
   private final EventFileService eventFileService;
 
   @Autowired
@@ -44,40 +40,40 @@ public class VariantPlaylistService {
 
     Log.i(LOG_TAG, String
         .format("Fetching Variant Playlist for Event: %s, file source: %s ", eventId, fileSrcId));
+
+    // Result container
     Optional<VariantM3U> result = Optional.empty();
 
-    // Get Event & EventFileSource
+    // Get Event
     final Optional<Event> eventOptional = eventRepository.findById(eventId);
-    if (eventOptional.isPresent()) {
+    // Get EventFileSource
+    final Optional<EventFileSource> fileSourceOptional = eventFileSrcRepository.findById(fileSrcId);
+    // Proceed only if all data is present
+    if (eventOptional.isPresent() && fileSourceOptional.isPresent()) {
+      // Get data
       final Event event = eventOptional.get();
-      final Optional<EventFileSource> fileSourceOptional =
-          eventFileSrcRepository.findFileSrcById(fileSrcId);
-      if (fileSourceOptional.isPresent()) {
-        final EventFileSource eventFileSource = fileSourceOptional.get();
+      final EventFileSource eventFileSource = fileSourceOptional.get();
+      // Refresh data for EventFiles
+      eventFileService.refreshEventFileData(eventFileSource);
+      // Retrieve fresh EventFiles
+      final Set<EventFile> eventFiles = eventFileSource.getEventFiles();
 
-        // Is the file data stale?
-        if (shouldRefreshFileData(eventFileSource)) {
-          eventFileService.refreshEventFileData(eventFileSource);
-        }
-        final List<EventFile> eventFiles = eventFileSource.getEventFiles();
-        if(eventFiles.size() > 0) {
-          result = Optional.of(new VariantM3U(event, eventFiles));
-        } else {
-          Log.d(LOG_TAG, "Could not create variant playlist; no EventFiles!");
-        }
+      // Create new Playlist & return
+      if (eventFiles.size() > 0) {
+        result = Optional.of(new VariantM3U(event, eventFiles));
+
       } else {
-        Log.d(LOG_TAG, "Could not create Variant Playlist; invalid File Source ID: " + fileSrcId);
+        Log.e(LOG_TAG,
+            String.format("Could not create variant playlist for EventFileSource: %s; no EventFiles!",
+                    eventFileSource));
       }
     } else {
-      Log.d(LOG_TAG, "Could not create Variant Playlist; invalid Event ID: " + eventId);
+      Log.e(LOG_TAG,
+          String.format("Could not create Variant Playlist; invalid Event ID: %s or "
+              + "EventFileSource ID: %s ", eventId, fileSrcId)
+          + eventId);
     }
-
+    // Return optional
     return result;
-  }
-
-  private boolean shouldRefreshFileData(@NotNull final EventFileSource eventFileSource) {
-    final Duration timeSinceRefresh = Duration
-        .between(eventFileSource.getLastRefreshed().toInstant(), Instant.now()).abs();
-    return timeSinceRefresh.toMillis() > REFRESH_RATE.toMillis();
   }
 }
