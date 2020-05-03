@@ -6,7 +6,7 @@ package self.me.matchday.model;
 
 import java.net.URL;
 import java.sql.Timestamp;
-import java.util.Comparator;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -21,7 +21,7 @@ import self.me.matchday.db.converter.VideoMetadataConverter;
 @Entity
 @Data
 @NoArgsConstructor
-public class EventFile {
+public class EventFile implements Comparable<EventFile> {
 
   private static double DEFAULT_DURATION = 3012.541956d;
 
@@ -31,7 +31,6 @@ public class EventFile {
   private Long eventFileId;
   private EventPartIdentifier title;
   private URL externalUrl;
-
   // refreshed data
   @Column(columnDefinition = "LONGTEXT")
   private URL internalUrl;
@@ -65,9 +64,31 @@ public class EventFile {
     return String.format("%s - %s", getTitle(), getExternalUrl().toString());
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof EventFile)) {
+      return false;
+    }
+    // Cast
+    final EventFile eventFile = (EventFile) obj;
+    return this.getEventFileId().equals(eventFile.getEventFileId());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects
+        .hash(getEventFileId(), getTitle(), getExternalUrl(), getInternalUrl(), getMetadata(),
+            getLastRefreshed());
+  }
+
+  @Override
+  public int compareTo(@NotNull EventFile test) {
+    return this.getTitle().order - test.getTitle().order;
+  }
+
   /**
    * Event part identifiers
-  */
+   */
   public enum EventPartIdentifier {
 
     DEFAULT("", "", -1),
@@ -95,6 +116,7 @@ public class EventFile {
 
     /**
      * Determines if the given String corresponds to an enumerated Event part identifier.
+     *
      * @param str The test String
      * @return True / false.
      */
@@ -109,8 +131,10 @@ public class EventFile {
 
     /**
      * Factory method to convert a String to an enumerated Event part identifier.
+     *
      * @param str The String to be converted.
-     * @return The enumerated value, or <b>DEFAULT</b> if the given String does not match any values.
+     * @return The enumerated value, or <b>DEFAULT</b> if the given String does not match any
+     * values.
      */
     public static EventPartIdentifier fromString(@NotNull String str) {
       // If the given String doesn't match
@@ -124,17 +148,6 @@ public class EventFile {
       }
 
       return result;
-    }
-  }
-
-  /**
-   * Sorts EventFiles into correct order.
-   */
-  public static class EventFileSorter implements Comparator<EventFile> {
-
-    @Override
-    public int compare(@NotNull EventFile f1, @NotNull EventFile f2) {
-      return f1.getTitle().order - f2.getTitle().order;
     }
   }
 }

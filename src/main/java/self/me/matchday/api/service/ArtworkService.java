@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
-import self.me.matchday.db.ArtworkRepository;
 import self.me.matchday.db.CompetitionRepository;
 import self.me.matchday.db.TeamRepository;
 import self.me.matchday.model.Artwork;
@@ -26,15 +25,12 @@ public class ArtworkService {
   private final static String DEFAULT_COMPETITION_EMBLEM = "image/emblem/default_competition_emblem.png";
   private final static String DEFAULT_COMPETITION_FANART = "image/fanart/default_competition_fanart.jpg";
 
-  private final ArtworkRepository artworkRepository;
   private final TeamRepository teamRepository;
   private final CompetitionRepository competitionRepository;
 
   @Autowired
-  public ArtworkService(ArtworkRepository artworkRepository, TeamRepository teamRepository,
-      CompetitionRepository competitionRepository) {
+  public ArtworkService(TeamRepository teamRepository, CompetitionRepository competitionRepository) {
 
-    this.artworkRepository = artworkRepository;
     this.teamRepository = teamRepository;
     this.competitionRepository = competitionRepository;
   }

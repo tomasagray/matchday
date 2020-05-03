@@ -22,12 +22,8 @@ public class FileServerLogin {
   private static final String TEST_URL = "https://www.inclouddrive.com/file/hNWYUjpoH6kFfkZ4C3aL-A/"
       + "20110423-valencia-real-madrid-1-eng-1080p.mkv";
 
-  private FileServerService fileServerService;
-
-//  @Bean
+  //  @Bean
   CommandLineRunner initFileServer(FileServerService fileServerService) {
-
-    this.fileServerService = fileServerService;
 
     Log.i(LOG_TAG, "Spring Version: " + SpringVersion.getVersion());
     Log.i(LOG_TAG, "Initialize fileserver service...");

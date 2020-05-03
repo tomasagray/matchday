@@ -46,6 +46,7 @@ public class Competition implements Serializable {
   @OneToOne
   private Artwork landscape;
 
+  // TODO: Is this needed?
   // Default constructor
   public Competition() {
     this.competitionId = MD5String.generate();

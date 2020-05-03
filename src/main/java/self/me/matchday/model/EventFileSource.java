@@ -2,9 +2,9 @@ package self.me.matchday.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.CascadeType;
@@ -37,7 +37,7 @@ public class EventFileSource {
   @ElementCollection
   private List<String> languages = new ArrayList<>();
   @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL)
-  private Set<EventFile> eventFiles = new LinkedHashSet<>();
+  private Set<EventFile> eventFiles = new TreeSet<>();
   // Media metadata
   private Resolution resolution;
   private String mediaContainer;
