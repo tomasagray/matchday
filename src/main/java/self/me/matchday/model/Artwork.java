@@ -9,18 +9,19 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class Artwork {
 
   @Id
   @GeneratedValue
-  private final Long id;
-  private final String filePath;
-  private final String fileName;
-  private final Long fileSize;
-  private final MediaType mediaType;
-  private final int width;
-  private final int height;
-  private final LocalDateTime created;
-  private final LocalDateTime modified;
+  private Long id;
+  private String filePath;
+  private String fileName;
+  private Long fileSize;
+  private String mediaType;
+  private int width;
+  private int height;
+  private LocalDateTime created;
+  private LocalDateTime modified;
 
 }

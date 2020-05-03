@@ -51,21 +51,26 @@ public class ArtworkService {
    */
   public Optional<byte[]> fetchTeamEmblem(@NotNull final String teamId) {
 
+    Log.i(LOG_TAG, String.format("Fetching emblem for Team: %s", teamId));
     // Get the Team
     final Optional<Team> teamOptional = teamRepository.findById(teamId);
     if (teamOptional.isPresent()) {
       try {
         final Artwork emblem = teamOptional.get().getEmblem();
         if (emblem != null) {
+          Log.i(LOG_TAG, String.format("Emblem found for Team: %s", teamId));
           // If emblem set, read & return
           return Optional.of(readArtworkFromDisk(emblem));
         } else {
+          Log.i(LOG_TAG, String.format("Emblem not found for Team: %s; returning default", teamId));
           // Return the default emblem instead
           return Optional.of(readDefaultArtworkFromDisk(DEFAULT_TEAM_EMBLEM));
         }
       } catch (IOException | NullPointerException e) {
         Log.e(LOG_TAG, "Could not read emblem image file for Team with ID: " + teamId, e);
       }
+    } else {
+      Log.e(LOG_TAG, String.format("Team %s not found in database", teamId));
     }
     // Artwork not found
     return Optional.empty();
@@ -229,9 +234,14 @@ public class ArtworkService {
 
     // Assemble full filepath
     String filepath = artwork.getFilePath() + artwork.getFileName();
+    Log.i(LOG_TAG, String.format("Attempting to read %s from disk", filepath));
     // Read image file from disk
-    final InputStream in = getClass().getResourceAsStream(filepath);
-    return StreamUtils.copyToByteArray(in);
+    final ClassPathResource resource = new ClassPathResource(filepath);
+    final InputStream in = resource.getInputStream();
+    byte[] artworkBytes = StreamUtils.copyToByteArray(in);
+
+    Log.i(LOG_TAG, String.format("Read %s bytes", artworkBytes.length));
+    return artworkBytes;
   }
 
   /**
