@@ -81,7 +81,7 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
       highlightShowResource.setDate(entity.getDate());
       // attach playlist
       masterPlaylistService
-          .fetchPlaylistById(entity.getEventId())
+          .fetchMasterPlaylistForEvent(entity.getEventId())
           .ifPresent(
               masterM3U -> highlightShowResource
                   .setPlaylists(playlistResourceAssembler.toModel(masterM3U))

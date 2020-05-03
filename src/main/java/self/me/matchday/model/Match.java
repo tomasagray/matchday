@@ -62,7 +62,6 @@ public class Match extends Event implements Serializable {
     this.competition = competition;
     this.date = date;
     this.season = season;
-    // todo: change this, fixture should be nullable
     this.fixture = fixture;
     this.eventId = generateMatchId();
   }

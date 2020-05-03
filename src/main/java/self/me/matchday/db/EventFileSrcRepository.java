@@ -14,10 +14,6 @@ import self.me.matchday.model.EventFileSource;
 public interface EventFileSrcRepository extends JpaRepository<EventFileSource, Long> {
 
   @Query("SELECT efs FROM EventSource es JOIN es.event ev JOIN es.eventFileSources efs "
-      + "WHERE efs.eventFileSrcId = :eventFileSrcId")
-  Optional<EventFileSource> findFileSrcById(@Param("eventFileSrcId") Long eventFileSrcId);
-
-  @Query("SELECT efs FROM EventSource es JOIN es.event ev JOIN es.eventFileSources efs "
       + "WHERE ev.eventId = :eventId")
   Optional<List<EventFileSource>> findFileSourcesForEventId(@Param("eventId") String eventId);
 }

@@ -19,10 +19,9 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.EventController;
+import self.me.matchday.api.controller.PlaylistController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
-import self.me.matchday.api.resource.PlaylistResource.PlaylistResourceAssembler;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
-import self.me.matchday.api.service.MasterPlaylistService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Fixture;
 import self.me.matchday.model.Match;
@@ -53,20 +52,14 @@ public class EventResource extends RepresentationModel<EventResource> {
   public static class EventResourceAssembler extends
       RepresentationModelAssemblerSupport<Event, EventResource> {
 
-    private final MasterPlaylistService masterPlaylistService;
-    private final PlaylistResourceAssembler playlistResourceAssembler;
     private final TeamResourceAssembler teamResourceAssembler;
     private final CompetitionResourceAssembler competitionResourceAssembler;
 
     @Autowired
-    public EventResourceAssembler(MasterPlaylistService masterPlaylistService,
-        PlaylistResourceAssembler playlistResourceAssembler,
-        TeamResourceAssembler teamResourceAssembler,
+    public EventResourceAssembler(TeamResourceAssembler teamResourceAssembler,
         CompetitionResourceAssembler competitionResourceAssembler) {
 
       super(EventController.class, EventResource.class);
-      this.masterPlaylistService = masterPlaylistService;
-      this.playlistResourceAssembler = playlistResourceAssembler;
       this.teamResourceAssembler = teamResourceAssembler;
       this.competitionResourceAssembler = competitionResourceAssembler;
     }
@@ -78,35 +71,40 @@ public class EventResource extends RepresentationModel<EventResource> {
       // Instantiate model
       final EventResource eventResource = instantiateModel(entity);
 
+      // Create Competition resource so links are included
+      final CompetitionResource competitionResource =
+          competitionResourceAssembler.toModel(entity.getCompetition());
       // populate DTO
       eventResource.setEventId(entity.getEventId());
       eventResource.setTitle(entity.getTitle());
+      eventResource.setCompetition(competitionResource);
+      eventResource.setSeason(entity.getSeason());
+      eventResource.setFixture(entity.getFixture());
+      eventResource.setDate(entity.getDate());
+      // Add link to playlist resource for this event
+      eventResource.add(
+          linkTo(methodOn(PlaylistController.class)
+              .fetchPlaylistResourceForEvent(entity.getEventId()))
+              .withRel("playlist"));
+
+      // Handle subtypes
       if (entity instanceof Match) {
         // Cast to Match
         final Match match = (Match) entity;
         eventResource.setHomeTeam(teamResourceAssembler.toModel(match.getHomeTeam()));
         eventResource.setAwayTeam(teamResourceAssembler.toModel(match.getAwayTeam()));
         // add self link
-        eventResource.add(linkTo(methodOn(EventController.class).fetchMatchById(match.getEventId()))
+        eventResource.add(linkTo(methodOn(EventController.class)
+            .fetchMatchById(match.getEventId()))
             .withSelfRel());
       } else {
-        // it's a HighlightShow; add appropriate link
+        // it's a HighlightShow; add self link
         eventResource.add(
-            linkTo(methodOn(EventController.class).fetchHighlightById(entity.getEventId()))
+            linkTo(methodOn(EventController.class)
+                .fetchHighlightById(entity.getEventId()))
                 .withSelfRel());
       }
-
-      eventResource.setCompetition(competitionResourceAssembler.toModel(entity.getCompetition()));
-      eventResource.setSeason(entity.getSeason());
-      eventResource.setFixture(entity.getFixture());
-      eventResource.setDate(entity.getDate());
-      // Set Master Playlist for this Event
-      masterPlaylistService
-          .fetchPlaylistById(entity.getEventId())
-          .ifPresent(
-              masterM3U -> eventResource.setPlaylists(playlistResourceAssembler.toModel(masterM3U))
-          );
-
+      // Return the finished product
       return eventResource;
     }
   }

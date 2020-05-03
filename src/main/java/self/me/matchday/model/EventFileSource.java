@@ -1,6 +1,5 @@
 package self.me.matchday.model;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -30,11 +29,6 @@ public class EventFileSource {
   @Id
   @GeneratedValue
   private Long eventFileSrcId;
-
-  public Long getEventFileSrcId() {
-    return eventFileSrcId;
-  }
-
   // Fields
   private String channel;
   private String source;

@@ -1,6 +1,5 @@
 package self.me.matchday.api.service;
 
-import java.awt.image.DataBufferUShort;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;

@@ -51,7 +51,7 @@ public class VideoMetadata {
 
     private int has_b_frames;
 
-    private String sample_aspect_ratio; // TODO Change to a Ratio/Fraction object
+    private String sample_aspect_ratio;
     private String display_aspect_ratio;
 
     private String pix_fmt;

@@ -89,7 +89,7 @@ public class MatchResource extends RepresentationModel<MatchResource> {
       matchResource.setDate(match.getDate());
       // Set Master Playlist for this Match
       masterPlaylistService
-          .fetchPlaylistById(match.getEventId())
+          .fetchMasterPlaylistForEvent(match.getEventId())
           .ifPresent(
               masterM3U -> matchResource.setPlaylists(playlistResourceAssembler.toModel(masterM3U))
           );

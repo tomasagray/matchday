@@ -23,6 +23,7 @@ public class VariantPlaylistService {
   // JPA repositories
   private final EventRepository eventRepository;
   private final EventFileSrcRepository eventFileSrcRepository;
+  // Services
   private final EventFileService eventFileService;
 
   @Autowired
@@ -43,29 +44,34 @@ public class VariantPlaylistService {
     // Result container
     Optional<VariantM3U> result = Optional.empty();
 
-    // Get Event & EventFileSource
+    // Get Event
     final Optional<Event> eventOptional = eventRepository.findById(eventId);
-    if (eventOptional.isPresent()) {
+    // Get EventFileSource
+    final Optional<EventFileSource> fileSourceOptional = eventFileSrcRepository.findById(fileSrcId);
+    // Proceed only if all data is present
+    if (eventOptional.isPresent() && fileSourceOptional.isPresent()) {
+      // Get data
       final Event event = eventOptional.get();
-      final Optional<EventFileSource> fileSourceOptional =
-          eventFileSrcRepository.findFileSrcById(fileSrcId);
-      if (fileSourceOptional.isPresent()) {
-        final EventFileSource eventFileSource = fileSourceOptional.get();
+      final EventFileSource eventFileSource = fileSourceOptional.get();
+      // Refresh data for EventFiles
+      eventFileService.refreshEventFileData(eventFileSource);
+      // Retrieve fresh EventFiles
+      final Set<EventFile> eventFiles = eventFileSource.getEventFiles();
 
-        // Refresh data for EventFiles
-        eventFileService.refreshEventFileData(eventFileSource);
-        // Retrieve fresh EventFiles
-        final Set<EventFile> eventFiles = eventFileSource.getEventFiles();
-        if(eventFiles.size() > 0) {
-          result = Optional.of(new VariantM3U(event, eventFiles));
-        } else {
-          Log.e(LOG_TAG, "Could not create variant playlist; no EventFiles!");
-        }
+      // Create new Playlist & return
+      if (eventFiles.size() > 0) {
+        result = Optional.of(new VariantM3U(event, eventFiles));
+
       } else {
-        Log.e(LOG_TAG, "Could not create Variant Playlist; invalid File Source ID: " + fileSrcId);
+        Log.e(LOG_TAG,
+            String.format("Could not create variant playlist for EventFileSource: %s; no EventFiles!",
+                    eventFileSource));
       }
     } else {
-      Log.e(LOG_TAG, "Could not create Variant Playlist; invalid Event ID: " + eventId);
+      Log.e(LOG_TAG,
+          String.format("Could not create Variant Playlist; invalid Event ID: %s or "
+              + "EventFileSource ID: %s ", eventId, fileSrcId)
+          + eventId);
     }
     // Return optional
     return result;

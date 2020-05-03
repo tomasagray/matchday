@@ -5,9 +5,7 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -20,9 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.EventFileSrcRepository;
-import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
-import self.me.matchday.model.EventFile.EventFileSorter;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.VideoMetadata;
 import self.me.matchday.util.Log;
@@ -88,8 +84,6 @@ public class EventFileService {
         });
 
     Log.i(LOG_TAG, "URLs successfully refreshed: " + refreshedEventFiles.size());
-    // Sort results
-//    refreshedEventFiles.sort(new EventFileSorter());
     // Update file source & save to DB
     eventFileSource.setEventFiles(refreshedEventFiles);
     fileSrcRepository.saveAndFlush(eventFileSource);
@@ -111,7 +105,7 @@ public class EventFileService {
     // Get recommended refresh rate
     final Duration refreshRate =
         fileServerService.getFileServerRefreshRate(eventFile.getExternalUrl());
-
+Log.d(LOG_TAG, String.format("Time since refresh: %s, Refresh rate: %s", sinceRefresh.toMillis(), refreshRate.toMillis()));
     return sinceRefresh.toMillis() > refreshRate.toMillis();
   }
 
@@ -148,9 +142,10 @@ public class EventFileService {
           Log.i(LOG_TAG,
               String.format("Successfully updated remote URL for EventFile: %s", eventFile));
           eventFile.setInternalUrl(url);
-
           // Update metadata
           Log.i(LOG_TAG, "Refreshed EventFile metadata: " + refreshEventFileMetadata());
+          // Update last refresh
+          eventFile.setLastRefreshed(Timestamp.from(Instant.now()));
 
         } else {
           throw new IOException(
