@@ -17,6 +17,7 @@ import self.me.matchday.db.EventRepository;
 import self.me.matchday.db.HighlightShowRepository;
 import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.HighlightShow;
 import self.me.matchday.model.Match;
 import self.me.matchday.util.Log;
@@ -25,6 +26,7 @@ import self.me.matchday.util.Log;
 public class EventService {
 
   private static final String LOG_TAG = "EventService";
+  private static final EventSorter EVENT_SORTER = new EventSorter();
 
   private final MatchRepository matchRepository;
   private final HighlightShowRepository highlightShowRepository;
@@ -45,6 +47,19 @@ public class EventService {
     this.matchResourceAssembler = matchResourceAssembler;
     this.highlightShowRepository = highlightShowRepository;
     this.highlightResourceAssembler = highlightResourceAssembler;
+  }
+
+  public Optional<CollectionModel<EventResource>> fetchAllEvents() {
+
+    Log.i(LOG_TAG, "Fetching latest Events...");
+
+    Optional<CollectionModel<EventResource>> result = Optional.empty();
+    final List<Event> events = eventRepository.findAll();
+    if (events.size() > 0) {
+      events.sort(EVENT_SORTER);
+      result = Optional.of(eventResourceAssembler.toCollectionModel(events));
+    }
+    return result;
   }
 
   /**
@@ -82,7 +97,7 @@ public class EventService {
 
     if (matches.size() > 0) {
       // Sort by date (descending)
-      matches.sort((match, t1) -> (match.getDate().compareTo(t1.getDate())) * -1);
+      matches.sort(EVENT_SORTER);
       // return DTOs
       return Optional.of(matchResourceAssembler.toCollectionModel(matches));
     } else {
@@ -148,7 +163,7 @@ public class EventService {
 
     if (highlightShows.size() > 0) {
       // Sort in reverse chronological order
-      highlightShows.sort((o1, o2) -> (o1.getDate().compareTo(o2.getDate())) * -1);
+      highlightShows.sort(EVENT_SORTER);
       // return DTO
       return Optional.of(highlightResourceAssembler.toCollectionModel(highlightShows));
     } else {

@@ -108,7 +108,10 @@ public class MatchResource extends RepresentationModel<MatchResource> {
 
       final CollectionModel<MatchResource> matchResources = super.toCollectionModel(matches);
       // add a self link to collection
-      matchResources.add(linkTo(methodOn(EventController.class).fetchAllMatches()).withSelfRel());
+      matchResources
+          .add(linkTo(methodOn(EventController.class)
+              .fetchAllMatches())
+              .withSelfRel());
       return matchResources;
     }
   }

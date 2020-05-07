@@ -28,6 +28,7 @@ public class RootController {
   }
 
   // Link relation identifiers
+  private static final LinkRelation EVENTS_REL = LinkRelation.of("events");
   private static final LinkRelation MATCHES_REL = LinkRelation.of("matches");
   private static final LinkRelation HIGHLIGHTS_REL = LinkRelation.of("highlights");
   private static final LinkRelation TEAMS_REL = LinkRelation.of("teams");
@@ -51,9 +52,10 @@ public class RootController {
     // Create root endpoint
     final RootResource rootResource = new RootResource();
     // Attach featured Events
-    eventService.fetchFeaturedEvents().ifPresent(rootResource::setFeaturedEvents);
+//    eventService.fetchFeaturedEvents().ifPresent(rootResource::setFeaturedEvents);
     EntityModel<RootResource> model = new EntityModel<>(rootResource);
-    // attach links to top-level controllers
+    // attach top-level links
+    model.add(linkTo(methodOn(EventController.class).fetchAllEvents()).withRel(EVENTS_REL));
     model.add(linkTo(methodOn(EventController.class).fetchAllMatches()).withRel(MATCHES_REL));
     model.add(linkTo(methodOn(EventController.class).fetchAllHighlights()).withRel(
         HIGHLIGHTS_REL));

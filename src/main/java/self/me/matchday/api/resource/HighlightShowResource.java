@@ -104,7 +104,9 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
 
       // add self link
       highlightShowResources
-          .add(linkTo(methodOn(EventController.class).fetchAllHighlights()).withSelfRel());
+          .add(linkTo(methodOn(EventController.class)
+              .fetchAllHighlights())
+              .withSelfRel());
       return highlightShowResources;
     }
   }

@@ -82,7 +82,10 @@ public class TeamResource extends RepresentationModel<TeamResource> {
 
       final CollectionModel<TeamResource> teamResources = super.toCollectionModel(teams);
       // add a self link
-      teamResources.add(linkTo(methodOn(TeamController.class).fetchAllTeams()).withSelfRel());
+      teamResources
+          .add(linkTo(methodOn(TeamController.class)
+              .fetchAllTeams())
+              .withSelfRel());
       return teamResources;
     }
   }

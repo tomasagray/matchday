@@ -95,7 +95,9 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
           .toCollectionModel(competitions);
       // add a self link
       competitionResources
-          .add(linkTo(methodOn(CompetitionController.class).fetchAllCompetitions()).withSelfRel());
+          .add(linkTo(methodOn(CompetitionController.class)
+              .fetchAllCompetitions())
+              .withSelfRel());
       return competitionResources;
     }
   }

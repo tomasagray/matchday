@@ -22,6 +22,7 @@ import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.controller.PlaylistController;
 import self.me.matchday.db.EventFileSrcRepository;
 import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.EventFileSource.Resolution;
 import self.me.matchday.model.MasterM3U;
 import self.me.matchday.util.Log;
 
@@ -34,7 +35,10 @@ import self.me.matchday.util.Log;
 public class PlaylistResource extends RepresentationModel<PlaylistResource> {
 
   private static final String LOG_TAG = "PlaylistResource";
+  // Default markers
   private static final LinkRelation MASTER_PLAYLIST = LinkRelation.of("master");
+  private static final String UNKNOWN_RESOLUTION = "res-unknown";
+  private static final String UNKNOWN_LANGUAGE = "lang-unknown";
 
   @Component
   public static class PlaylistResourceAssembler extends
@@ -60,11 +64,12 @@ public class PlaylistResource extends RepresentationModel<PlaylistResource> {
               .fetchMasterPlaylistById(masterM3U.getEventId()))
               .withRel(MASTER_PLAYLIST));
 
-      // Add links to variants
+      // Get the file sources for this Event
       final Optional<List<EventFileSource>> fileSourceOptional =
           eventFileSrcRepository.findFileSourcesForEventId(masterM3U.getEventId());
       if (fileSourceOptional.isPresent()) {
         final List<EventFileSource> eventFileSources = fileSourceOptional.get();
+        // Add links to variants
         eventFileSources.forEach(eventFileSource ->
             playlistResource.add(
                 linkTo(methodOn(PlaylistController.class)
@@ -89,8 +94,20 @@ public class PlaylistResource extends RepresentationModel<PlaylistResource> {
   @NotNull
   private static LinkRelation getFileSourceLinkRel(@NotNull final EventFileSource eventFileSource) {
 
-    final String resolution = eventFileSource.getResolution().toString().toLowerCase();
-    final String language = eventFileSource.getLanguages().get(0).toLowerCase();
-    return LinkRelation.of(String.format("%s_%s", resolution, language));
+    // Possible null fields
+    final Resolution resolution = eventFileSource.getResolution();
+    final List<String> languages = eventFileSource.getLanguages();
+    // Get the markers
+    final String resMarker =
+        (resolution != null)
+            ? resolution.toString().toLowerCase()
+            : UNKNOWN_RESOLUTION;
+    final String language =
+        ((languages != null) && (languages.size() != 0))
+            ? languages.get(0).toLowerCase()
+            : UNKNOWN_LANGUAGE;
+
+    // Return the formatted relation string
+    return LinkRelation.of(String.format("%s_%s", resMarker, language));
   }
 }

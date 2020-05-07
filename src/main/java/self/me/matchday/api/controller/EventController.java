@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import self.me.matchday.api.resource.EventResource;
 import self.me.matchday.api.resource.HighlightShowResource;
 import self.me.matchday.api.resource.MatchResource;
 import self.me.matchday.api.service.EventService;
@@ -24,6 +25,18 @@ public class EventController {
   EventController(EventService eventService) {
     this.eventService = eventService;
   }
+
+  @ResponseBody
+  @RequestMapping(value = "/events", method = RequestMethod.GET)
+  public ResponseEntity<CollectionModel<EventResource>> fetchAllEvents() {
+
+    return
+        eventService
+          .fetchAllEvents()
+          .map(ResponseEntity::ok)
+          .orElse(ResponseEntity.notFound().build());
+  }
+
 
   /**
    * Fetch all Matches from local DB and return as a response entity.
