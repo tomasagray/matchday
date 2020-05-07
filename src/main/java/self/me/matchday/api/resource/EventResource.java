@@ -14,6 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
@@ -106,6 +107,12 @@ public class EventResource extends RepresentationModel<EventResource> {
       }
       // Return the finished product
       return eventResource;
+    }
+
+    @Override
+    public @NotNull CollectionModel<EventResource> toCollectionModel(
+        @NotNull Iterable<? extends Event> entities) {
+      return super.toCollectionModel(entities);
     }
   }
 }
