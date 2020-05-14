@@ -6,3 +6,4 @@
 *.cookie
 *.csv
 /sandbox
+_DEVFIXTURES/
