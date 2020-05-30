@@ -3,7 +3,27 @@
 .gradle/
 .idea/workspace.xml
 /lib/
+
+# Development files
 *.cookie
 *.csv
+
+# Working/temporary files
+### MicrosoftOffice ###
+*.tmp
+# Word temporary
+~$*.doc*
+# Word Auto Backup File
+Backup of *.doc*
+# Excel temporary
+~$*.xls*
+# Excel Backup File
+*.xlk
+# PowerPoint temporary
+~$*.ppt*
+# Visio autosave temporary files
+*.~vsd*
+
+# Slush directories
 /sandbox
 _DEVFIXTURES/
