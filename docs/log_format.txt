@@ -1,0 +1,15 @@
+[date - time] LEVEL: pac.kag.e/LOG_TAG: 
+	"Log message"
+	Exception:
+	---------------------
+	<stacktrace>
+	
+	
+Log Class Structure
+-----------------------------------------------
+	- Tag
+	- Message
+	- Package
+	- Timestamp
+	- LEVEL
+	- Throwable
