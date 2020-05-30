@@ -3,10 +3,8 @@ package self.me.matchday.api.service;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -14,11 +12,9 @@ import org.springframework.stereotype.Service;
 import self.me.matchday.api.controller.PlaylistController;
 import self.me.matchday.api.resource.PlaylistResource;
 import self.me.matchday.api.resource.PlaylistResource.PlaylistResourceAssembler;
-import self.me.matchday.db.EventRepository;
-import self.me.matchday.db.EventSourceRepository;
 import self.me.matchday.db.MasterM3URepository;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.EventSource;
 import self.me.matchday.model.MasterM3U;
 import self.me.matchday.util.Log;
 
@@ -27,17 +23,15 @@ public class MasterPlaylistService {
 
   private static final String LOG_TAG = "MasterPlaylistService";
 
-  private final EventRepository eventRepository;
-  private final EventSourceRepository eventSourceRepository;
+  private final EventService eventService;
   private final MasterM3URepository masterM3URepository;
   private final PlaylistResourceAssembler playlistResourceAssembler;
 
   @Autowired
-  MasterPlaylistService(EventRepository eventRepository, EventSourceRepository eventSourceRepository,
+  MasterPlaylistService(EventService eventService,
       MasterM3URepository masterM3URepository, PlaylistResourceAssembler playlistResourceAssembler) {
 
-    this.eventRepository = eventRepository;
-    this.eventSourceRepository = eventSourceRepository;
+    this.eventService = eventService;
     this.masterM3URepository = masterM3URepository;
     this.playlistResourceAssembler = playlistResourceAssembler;
   }
@@ -71,7 +65,7 @@ public class MasterPlaylistService {
 
     Optional<MasterM3U> result = Optional.empty();
     // ensure valid Event ID
-    if (eventRepository.findById(eventId).isPresent()) {
+    if (eventService.fetchById(eventId).isPresent()) {
       // check DB for playlist
       final Optional<MasterM3U> playlistOptional = masterM3URepository.findByEventId(eventId);
       if (playlistOptional.isPresent()) {
@@ -97,19 +91,12 @@ public class MasterPlaylistService {
 
     Optional<MasterM3U> result = Optional.empty();
 
-    // Get EventSources for this Event
-    final Optional<List<EventSource>> eventSourceOptional =
-        eventSourceRepository.findSourcesForEvent(eventId);
-    if (eventSourceOptional.isPresent()) {
+    // Get the Event
+    final Optional<Event> eventOptional = eventService.fetchById(eventId);
+    if (eventOptional.isPresent()) {
 
-      // Collect all EventFileSources for this Event
-      final List<EventFileSource> eventFileSources =
-          eventSourceOptional
-              .get().stream()
-              .map(EventSource::getEventFileSources)
-              .flatMap(Collection::stream)
-              .collect(Collectors.toList());
-
+      // Get file sources for this event
+      final Set<EventFileSource> eventFileSources = eventOptional.get().getFileSources();
       if (eventFileSources.size() > 0) {
 
         // Create Master Playlist

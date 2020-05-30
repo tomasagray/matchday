@@ -30,6 +30,7 @@ class ICDCookieManager extends CookieManager {
 
   private final CookieService cookieService;
 
+  // TODO: Reverse dependency
   @Autowired
   ICDCookieManager(@NotNull final CookieService cookieService) {
 

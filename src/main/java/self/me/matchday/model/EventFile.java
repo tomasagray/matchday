@@ -16,7 +16,7 @@ import javax.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.db.converter.VideoMetadataConverter;
+import self.me.matchday.db.VideoMetadataConverter;
 
 @Entity
 @Data

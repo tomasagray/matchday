@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.resource.EventResource;
@@ -49,6 +48,10 @@ public class EventService {
     this.highlightResourceAssembler = highlightResourceAssembler;
   }
 
+  /* ===============================================================================================
+   * Getters
+   * ============================================================================================ */
+
   public Optional<CollectionModel<EventResource>> fetchAllEvents() {
 
     Log.i(LOG_TAG, "Fetching latest Events...");
@@ -62,26 +65,10 @@ public class EventService {
     return result;
   }
 
-  /**
-   * Fetch the 3 most recent Events.
-   *
-   * @return A CollectionModel of Events.
-   */
-  public Optional<CollectionModel<EventResource>> fetchFeaturedEvents() {
+  public Optional<Event> fetchById(@NotNull final String eventId) {
 
-    Log.i(LOG_TAG, "Fetching featured Events.");
-    final int EVENT_COUNT = 3;
-
-    // Get latest 3 events from DB
-    final Optional<List<Event>> eventOptional = eventRepository
-        .fetchLatestEvents(PageRequest.of(0, EVENT_COUNT));
-    if (eventOptional.isPresent()) {
-      final List<Event> events = eventOptional.get();
-      return Optional.of(eventResourceAssembler.toCollectionModel(events));
-    } else {
-      Log.i(LOG_TAG, "Attempted to retrieve featured Events, but none found.");
-      return Optional.empty();
-    }
+    return
+        eventRepository.findById(eventId);
   }
 
   /**
@@ -186,4 +173,37 @@ public class EventService {
             .findById(highlightShowId)
             .map(highlightResourceAssembler::toModel);
   }
+
+  /* ===============================================================================================
+   * Setters
+   * ============================================================================================ */
+
+  public Event saveEvent(@NotNull final Event event) {
+
+    return
+      eventRepository.saveAndFlush(event);
+  }
+
+//  /**
+//   * Fetch the 3 most recent Events.
+//   *
+//   * @return A CollectionModel of Events.
+//   */
+//  public Optional<CollectionModel<EventResource>> fetchFeaturedEvents() {
+//
+//    Log.i(LOG_TAG, "Fetching featured Events.");
+//    final int EVENT_COUNT = 3;
+//
+//    // Get latest 3 events from DB
+//    final Optional<List<Event>> eventOptional = eventRepository
+//        .fetchLatestEvents(PageRequest.of(0, EVENT_COUNT));
+//    if (eventOptional.isPresent()) {
+//      final List<Event> events = eventOptional.get();
+//      return Optional.of(eventResourceAssembler.toCollectionModel(events));
+//    } else {
+//      Log.i(LOG_TAG, "Attempted to retrieve featured Events, but none found.");
+//      return Optional.empty();
+//    }
+//  }
+
 }

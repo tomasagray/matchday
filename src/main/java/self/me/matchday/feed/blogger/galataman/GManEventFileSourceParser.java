@@ -24,13 +24,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import self.me.matchday.feed.IEventFileSourceParser;
 import self.me.matchday.feed.InvalidMetadataException;
 import self.me.matchday.fileserver.inclouddrive.ICDData;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
+import self.me.matchday.feed.IEventFileSourceParser;
 import self.me.matchday.util.Log;
 
 /**
@@ -42,22 +42,6 @@ import self.me.matchday.util.Log;
 public final class GManEventFileSourceParser implements IEventFileSourceParser {
 
   private static final String LOG_TAG = "GManEventFileSourceParser";
-
-  // Entry parsing patterns
-  static final String START_OF_SOURCE = Pattern.compile("__*").pattern();
-  static final String METADATA_ITEM_DELIMITER =
-      Pattern.compile("<span style=\"color: blue;\">(\\[)?").pattern();
-  static final String METADATA_KV_DELIMITER =
-      Pattern.compile("(])?</span>:(<span [^>]*>)?").pattern();
-  static final String LANGUAGE_DELIMITER = Pattern.compile("[\\d.* ]|/").pattern();
-  static final String AV_DATA_DELIMITER = Pattern.compile("‖").pattern();
-  // Predicates
-  static final Predicate<Element> isSourceData =
-      elem -> ("b".equals(elem.tagName())) && (elem.text().contains("Channel"));
-  static final Predicate<Element> isVideoLink =
-      elem ->
-          ("a".equals(elem.tagName()))
-              && (ICDData.getUrlMatcher(elem.attr("href")).find());
 
   private final String html;
   private final List<EventFileSource> eventFileSources;
@@ -83,12 +67,12 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
       Document doc = Jsoup.parse(this.html);
       // Since this is a loosely structured document, we will use a token, starting at the first
       // source and looking for what we want along the way
-      Element token = doc.getElementsMatchingOwnText(START_OF_SOURCE).first();
+      Element token = doc.getElementsMatchingOwnText(GManPatterns.START_OF_SOURCE).first();
 
       // Search until the end of the Document
       while (token != null) {
         // When we find a source
-        if (isSourceData.test(token)) {
+        if (GManPatterns.isSourceData.test(token)) {
           // Create an Event file source from the data
           final EventFileSource eventFileSource =
               new GManEventFileSource(GManFileSourceMetadataParser.fromHTML(token.html()));
@@ -96,13 +80,16 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
           // Parse EventFiles (links) for this source
           Element innerToken = token.nextElementSibling();
           EventPartIdentifier partIdentifier = EventPartIdentifier.DEFAULT;
-          while ((innerToken != null) && !(isSourceData.test(innerToken))) {
+          while ((innerToken != null) && !(GManPatterns.isSourceData.test(innerToken))) {
+
             // Look for a part identifier
             final String tokenHtml = innerToken.html();
             if (EventPartIdentifier.isPartIdentifier(tokenHtml)) {
+
               // Create an identifier for this part
               partIdentifier = EventPartIdentifier.fromString(tokenHtml);
-            } else if (isVideoLink.test(innerToken)) {
+            } else if (GManPatterns.isVideoLink.test(innerToken)) {
+
               // When we find a link to a video file, extract href attribute & add it to our
               // source's list of EventFiles, with an identifier (might be null)
               final URL url = new URL(innerToken.attr("href"));
@@ -113,11 +100,9 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
             // Advance inner token
             innerToken = innerToken.nextElementSibling();
           }
-
           // Add match source to collection
           this.eventFileSources.add(eventFileSource);
         }
-
         // Advance the search token
         token = token.nextElementSibling();
       }
@@ -151,7 +136,7 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
   }
 
   /**
-   * Builder class to parse and create an EventSource from a GalatamanHDF post.
+   * Builder class to parse and create an EventFileSource from a GalatamanHDF post.
    */
   private static final class GManFileSourceMetadataParser {
 
@@ -210,10 +195,10 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
       return
           // Break apart stream into individual data items,
           // based on patterns defined in the GalatamanPattern class...
-          Arrays.stream(data.split(METADATA_ITEM_DELIMITER))
+          Arrays.stream(data.split(GManPatterns.METADATA_ITEM_DELIMITER))
               .filter((item) -> !("".equals(item))) // ... eliminating any empty entries ...
               .map( // ... convert to a tuple ...
-                  (String item) -> new MetadataTuple(item, METADATA_KV_DELIMITER))
+                  (String item) -> new MetadataTuple(item, GManPatterns.METADATA_KV_DELIMITER))
               // ... finally, collect to a List and return
               .collect(Collectors.toList());
     }
@@ -272,7 +257,8 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
     @NotNull
     private List<String> parseLanguages(@NotNull String langStr) {
       // Split string based on delimiter
-      List<String> languages = new ArrayList<>(Arrays.asList(langStr.split(LANGUAGE_DELIMITER)));
+      List<String> languages = new ArrayList<>(
+          Arrays.asList(langStr.split(GManPatterns.LANGUAGE_DELIMITER)));
       // Remove empty entries
       languages.removeIf((lang) -> "".equals(lang.trim()));
       return languages;
@@ -293,7 +279,7 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
       final Pattern frameRatePattern = Pattern.compile("(\\d+)(fps)", Pattern.CASE_INSENSITIVE);
 
       // Split the string into data items & parse
-      for (String dataItem : videoMetadata.split(AV_DATA_DELIMITER)) {
+      for (String dataItem : videoMetadata.split(GManPatterns.AV_DATA_DELIMITER)) {
         // Clean up data
         dataItem = dataItem.trim();
         if (bitratePattern.matcher(dataItem).find()) {
@@ -323,7 +309,7 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
       final Pattern bitratePattern = Pattern.compile("(\\d+) (kbps)", Pattern.CASE_INSENSITIVE);
 
       try {
-        for (String dataItem : audioData.split(AV_DATA_DELIMITER)) {
+        for (String dataItem : audioData.split(GManPatterns.AV_DATA_DELIMITER)) {
 
           dataItem = dataItem.trim();
           // Parse channel data
@@ -446,5 +432,27 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
         return "Key: " + this.key + ", Value: " + this.value;
       }
     }
+  }
+
+  /**
+   * Container class for Galataman parsing patterns
+   */
+  private static final class GManPatterns {
+
+    // Entry parsing patterns
+    static final String START_OF_SOURCE = Pattern.compile("__*").pattern();
+    static final String METADATA_ITEM_DELIMITER =
+        Pattern.compile("<span style=\"color: blue;\">(\\[)?").pattern();
+    static final String METADATA_KV_DELIMITER =
+        Pattern.compile("(])?</span>:(<span [^>]*>)?").pattern();
+    static final String LANGUAGE_DELIMITER = Pattern.compile("[\\d.* ]|/").pattern();
+    static final String AV_DATA_DELIMITER = Pattern.compile("‖").pattern();
+    // Predicates
+    static final Predicate<Element> isSourceData =
+        elem -> ("b".equals(elem.tagName())) && (elem.text().contains("Channel"));
+    static final Predicate<Element> isVideoLink =
+        elem ->
+            ("a".equals(elem.tagName()))
+                && (ICDData.getUrlMatcher(elem.attr("href")).find());
   }
 }

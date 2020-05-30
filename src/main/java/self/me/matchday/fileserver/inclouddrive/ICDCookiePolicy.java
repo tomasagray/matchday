@@ -9,20 +9,21 @@ import java.net.HttpCookie;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Log;
 
 /**
  * The cookie policy to be used against the InCloudDrive file service.
  */
 class ICDCookiePolicy implements CookiePolicy {
+
   private static final String LOG_TAG = "ICDCookiePolicy";
 
   // Other InCloudDrive URLs
   private final String altURL;
 
   @Override
-  public boolean shouldAccept(URI uri, HttpCookie cookie) {
-    //        Log.d(LOG_TAG, "Checking uri: " + uri.toString());
+  public boolean shouldAccept(@NotNull final URI uri, @NotNull final HttpCookie cookie) {
 
     try {
       // Host name of URL to test

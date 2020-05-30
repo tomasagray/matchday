@@ -15,13 +15,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
-import self.me.matchday.feed.IEventFileSourceParser;
 import self.me.matchday.feed.blogger.InvalidBloggerPostException;
 import self.me.matchday.fileserver.inclouddrive.ICDData;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
+import self.me.matchday.feed.IEventFileSourceParser;
 import self.me.matchday.util.Log;
 
 /**

@@ -6,8 +6,6 @@ import javax.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import self.me.matchday.db.EventFileSrcRepository;
-import self.me.matchday.db.EventRepository;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
@@ -20,18 +18,13 @@ public class VariantPlaylistService {
 
   private static final String LOG_TAG = "VariantPlaylistService";
 
-  // JPA repositories
-  private final EventRepository eventRepository;
-  private final EventFileSrcRepository eventFileSrcRepository;
-  // Services
+  private final EventService eventService;
   private final EventFileService eventFileService;
 
   @Autowired
-  public VariantPlaylistService(EventRepository eventRepository,
-      EventFileSrcRepository eventFileSrcRepository, EventFileService eventFileService) {
+  public VariantPlaylistService(EventService eventService, EventFileService eventFileService) {
 
-    this.eventRepository = eventRepository;
-    this.eventFileSrcRepository = eventFileSrcRepository;
+    this.eventService = eventService;
     this.eventFileService = eventFileService;
   }
 
@@ -45,35 +38,60 @@ public class VariantPlaylistService {
     Optional<VariantM3U> result = Optional.empty();
 
     // Get Event
-    final Optional<Event> eventOptional = eventRepository.findById(eventId);
-    // Get EventFileSource
-    final Optional<EventFileSource> fileSourceOptional = eventFileSrcRepository.findById(fileSrcId);
-    // Proceed only if all data is present
-    if (eventOptional.isPresent() && fileSourceOptional.isPresent()) {
-      // Get data
+    final Optional<Event> eventOptional = eventService.fetchById(eventId);
+    if (eventOptional.isPresent()) {
+
       final Event event = eventOptional.get();
-      final EventFileSource eventFileSource = fileSourceOptional.get();
-      // Refresh data for EventFiles
-      eventFileService.refreshEventFileData(eventFileSource);
-      // Retrieve fresh EventFiles
-      final Set<EventFile> eventFiles = eventFileSource.getEventFiles();
+      final Optional<EventFileSource> fileSourceOptional = getEventFileSource(event, fileSrcId);
 
-      // Create new Playlist & return
-      if (eventFiles.size() > 0) {
-        result = Optional.of(new VariantM3U(event, eventFiles));
+      if (fileSourceOptional.isPresent()) {
+        final EventFileSource eventFileSource = fileSourceOptional.get();
 
-      } else {
-        Log.e(LOG_TAG,
-            String.format("Could not create variant playlist for EventFileSource: %s; no EventFiles!",
-                    eventFileSource));
+        if (eventFileSource.getEventFiles().size() > 0) {
+          // Refresh data for EventFiles
+          eventFileService.refreshEventFileData(eventFileSource);
+          // Retrieve fresh EventFiles
+          final Set<EventFile> eventFiles = eventFileSource.getEventFiles();
+          // Create new Playlist & return
+          result = Optional.of(new VariantM3U(event, eventFiles));
+
+        } else {
+          Log.e(LOG_TAG,
+              String
+                  .format(
+                      "Could not create variant playlist for EventFileSource: %s; no EventFiles!",
+                      eventFileSource));
+        }
       }
     } else {
       Log.e(LOG_TAG,
           String.format("Could not create Variant Playlist; invalid Event ID: %s or "
-              + "EventFileSource ID: %s ", eventId, fileSrcId)
-          + eventId);
+              + "EventFileSource ID: %s ", eventId, fileSrcId));
     }
     // Return optional
+    return result;
+  }
+
+  /**
+   * Get the specified EventFileSource from the given Event.
+   * @param event The Event which contains the file source
+   * @param fileSrcId The ID of the EventFileSource
+   * @return An optional containing the EventFileSource, or Optional.empty()
+   */
+  private Optional<EventFileSource> getEventFileSource(@NotNull final Event event,
+      @NotNull final Long fileSrcId) {
+
+    // Result container
+    Optional<EventFileSource> result = Optional.empty();
+    final Set<EventFileSource> fileSources = event.getFileSources();
+
+    // Find requested file source
+    for (EventFileSource fileSource : fileSources) {
+      if (fileSrcId.equals(fileSource.getEventFileSrcId())) {
+        // We have found our file source
+        result = Optional.of(fileSource);
+      }
+    }
     return result;
   }
 }

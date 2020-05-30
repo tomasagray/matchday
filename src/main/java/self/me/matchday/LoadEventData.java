@@ -5,28 +5,15 @@
 package self.me.matchday;
 
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.transaction.Transactional;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import self.me.matchday.db.CompetitionRepository;
-import self.me.matchday.db.EventSourceRepository;
-import self.me.matchday.db.FixtureRepository;
-import self.me.matchday.db.HighlightShowRepository;
-import self.me.matchday.db.MatchRepository;
-import self.me.matchday.db.SeasonRepository;
-import self.me.matchday.db.TeamRepository;
-import self.me.matchday.feed.IEventSourceParser;
-import self.me.matchday.feed.RemoteEventRepository;
+import self.me.matchday.api.service.EventService;
 import self.me.matchday.feed.blogger.Blogger;
-import self.me.matchday.feed.blogger.galataman.GalatamanPostParser;
-import self.me.matchday.feed.blogger.zkfootball.ZKFPostParser;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.EventSource;
-import self.me.matchday.model.HighlightShow;
-import self.me.matchday.model.Match;
+import self.me.matchday.feed.blogger.BloggerRepoFactory;
+import self.me.matchday.feed.blogger.galataman.GalatamanParserFactory;
+import self.me.matchday.feed.blogger.zkfootball.ZKFParserFactory;
+import self.me.matchday.model.RemoteEventRepository;
 import self.me.matchday.util.Log;
 
 /**
@@ -39,85 +26,30 @@ public class LoadEventData {
 
   private static final String LIVE_URL =
       "https://zkfootballmatch.blogspot.com/feeds/posts/default?alt=json"; // live URL
-//      "http://192.168.0.101/soccer/testing/zkf_known_good.json";  // safe copy
+  //      "http://192.168.0.101/soccer/testing/zkf_known_good.json";  // safe copy
   private static final String LOCAL_URL =
       "http://192.168.0.101/soccer/testing/galataman_known_good.json";
 
-  // Repos
-  private EventSourceRepository eventSourceRepository;
-  private CompetitionRepository competitionRepository;
-  private TeamRepository teamRepository;
-  private SeasonRepository seasonRepository;
-  private FixtureRepository fixtureRepository;
-  private MatchRepository matchRepository;
-  private HighlightShowRepository highlightShowRepository;
-
   @Bean
-  CommandLineRunner initEventSources(EventSourceRepository eventSourceRepository,
-      CompetitionRepository competitionRepository, TeamRepository teamRepository,
-      SeasonRepository seasonRepository, FixtureRepository fixtureRepository,
-      MatchRepository matchRepository, HighlightShowRepository highlightShowRepository) {
-
-    this.eventSourceRepository = eventSourceRepository;
-    this.competitionRepository = competitionRepository;
-    this.teamRepository = teamRepository;
-    this.seasonRepository = seasonRepository;
-    this.fixtureRepository = fixtureRepository;
-    this.matchRepository = matchRepository;
-    this.highlightShowRepository = highlightShowRepository;
+  CommandLineRunner initEventSources(EventService eventService) {
 
     return args -> {
 
-      // Create GalatamanHDF (test) repo
-      final Blogger gmanBlog = Blogger.fromUrl(new URL(LOCAL_URL));
-      final IEventSourceParser galatamanPostParser = new GalatamanPostParser();
-      final RemoteEventRepository gmanRepo = RemoteEventRepository
-          .fromBlogger(gmanBlog, galatamanPostParser);
+      // Create GMan repo
+      final Blogger gmanBlogger = Blogger.fromJson(new URL(LOCAL_URL));
+      final RemoteEventRepository gmanRepo =
+          BloggerRepoFactory.createRepository(gmanBlogger, new GalatamanParserFactory());
 
-      // Save EventSources to DB
-      gmanRepo.getEventSources().forEach(this::saveEventSource);
+      // Create ZKF repo
+      final Blogger zkfBlogger = Blogger.fromJson(new URL(LIVE_URL));
+      final RemoteEventRepository zkfRepo =
+          BloggerRepoFactory.createRepository(zkfBlogger, new ZKFParserFactory());
 
-      // Create ZKFootball (LIVE!) blog
-      final Blogger zkfBlog = Blogger.fromUrl(new URL(LIVE_URL));
-      final IEventSourceParser zkfPostParser = new ZKFPostParser();
-      final RemoteEventRepository zkfRepo = RemoteEventRepository
-          .fromBlogger(zkfBlog, zkfPostParser);
-
-      // Save latest EventSources
-      zkfRepo.getEventSources().forEach(this::saveEventSource);
+      // Save Events
+      gmanRepo.getEventStream()
+          .forEach(event -> Log.i(LOG_TAG, "Saving Event: " + eventService.saveEvent(event)));
+      zkfRepo.getEventStream()
+          .forEach(event -> Log.i(LOG_TAG, "Saving Event: " + eventService.saveEvent(event)));
     };
-  }
-
-  @Transactional
-  private void saveEventSource(@NotNull EventSource eventSource) {
-
-    final Event event = eventSource.getEvent();
-    Log.i(LOG_TAG, "Saving Competition: " + competitionRepository.save(event.getCompetition()));
-    Log.i(LOG_TAG, "Saving Season: " + seasonRepository.saveAndFlush(event.getSeason()));
-    Log.i(LOG_TAG, "Saving Fixture: " + fixtureRepository.saveAndFlush(event.getFixture()));
-
-    if (getEventFileCount(eventSource) > 0) {
-      if (event instanceof Match) {
-        final Match match = (Match) event;
-        Log.i(LOG_TAG, "Saving Team: " + teamRepository.save(match.getHomeTeam()));
-        Log.i(LOG_TAG, "Saving Team: " + teamRepository.save(match.getAwayTeam()));
-        Log.i(LOG_TAG, "Saving Match: " + matchRepository.save(match));
-      } else {
-        final HighlightShow highlightShow = (HighlightShow) event;
-        Log.i(LOG_TAG, "Saving Highlight: " + highlightShowRepository.saveAndFlush(highlightShow));
-      }
-      // Finally, save EventSource
-      Log.i(LOG_TAG, "Saving EventSource: " + eventSourceRepository.saveAndFlush(eventSource));
-    } else {
-      Log.i(LOG_TAG, String.format("Event has no sources: %s; not saving to DB", event));
-    }
-  }
-
-  private int getEventFileCount(@NotNull final EventSource eventSource) {
-
-    AtomicInteger total = new AtomicInteger();
-    eventSource.getEventFileSources()
-        .forEach(eventFileSource -> total.addAndGet(eventFileSource.getEventFiles().size()));
-    return total.get();
   }
 }

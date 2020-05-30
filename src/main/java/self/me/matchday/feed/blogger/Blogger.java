@@ -45,7 +45,7 @@ public class Blogger {
   // Factory
   @NotNull
   @Contract("_ -> new")
-  public static Blogger fromUrl(@NotNull final URL url) throws IOException {
+  public static Blogger fromJson(@NotNull final URL url) throws IOException {
     return
         new Blogger(url, new BloggerPostBuilder());
   }
@@ -72,6 +72,7 @@ public class Blogger {
 
   /**
    * Get the "feed" portion of the JSON object.
+   *
    * @return JsonObject An object representing the "feed" sub-object.
    */
   private JsonObject parseFeed() {
@@ -88,6 +89,7 @@ public class Blogger {
 
   /**
    * Get the top-level Blogger ID.
+   *
    * @return String representing the Blog's ID.
    */
   private String parseId() {
@@ -104,6 +106,7 @@ public class Blogger {
 
   /**
    * Extract the title of the blog.
+   *
    * @return String The blog title.
    */
   private String parseTitle() {
@@ -121,6 +124,7 @@ public class Blogger {
 
   /**
    * Get the version info as a String.
+   *
    * @return String The blog version.
    */
   private String parseVersion() {
@@ -137,6 +141,7 @@ public class Blogger {
 
   /**
    * Extract the author's name.
+   *
    * @return String The author's name.
    */
   private String parseAuthor() {
@@ -175,7 +180,9 @@ public class Blogger {
         JsonObject linkObj = lnk.getAsJsonObject();
         String linkType = linkObj.get("rel").getAsString();
 
-        if ("alternate".equals(linkType)) l = linkObj.get("href").getAsString();
+        if ("alternate".equals(linkType)) {
+          l = linkObj.get("href").getAsString();
+        }
       }
 
     } catch (NullPointerException e) {
@@ -194,28 +201,22 @@ public class Blogger {
 
     // Result container for entries
     List<BloggerPost> localEntries = new ArrayList<>();
+    // Get entries
+    JsonArray blogEntries = feed.get("entry").getAsJsonArray();
 
-    try {
-      JsonArray blogEntries = feed.get("entry").getAsJsonArray();
-
-      // Ensure the feed contains at least one entry
-      if (blogEntries.isJsonNull() || blogEntries.size() == 0)
-        throw new EmptyBloggerFeedException();
-
-      // Iterate over blogEntries
-      blogEntries.forEach(
-          (entry) -> {
-            // Ensure valid JSON;
-            if (entry.isJsonObject()) {
-              // Parse entry & add to collection
-              localEntries.add(postProcessor.parse(entry.getAsJsonObject()));
-            }
-          });
-
-    } catch (InvalidBloggerPostException e) {
-      // Rethrow as more intelligible exception
-      throw new InvalidBloggerFeedException("Error parsing blog entries", e);
+    // Ensure the feed contains at least one entry
+    if (blogEntries.isJsonNull() || blogEntries.size() == 0) {
+      throw new InvalidBloggerFeedException("Feed is empty");
     }
+    // Iterate over blogEntries
+    blogEntries.forEach(
+        (entry) -> {
+          // Ensure valid JSON;
+          if (entry.isJsonObject()) {
+            // Parse entry & add to collection
+            localEntries.add(postProcessor.parse(entry.getAsJsonObject()));
+          }
+        });
 
     // Return a Stream of BloggerPosts
     return localEntries.stream();
@@ -227,15 +228,15 @@ public class Blogger {
   public String toString() {
     return "[\n"
         + "\tTitle: "
-        + this.title
+        + getTitle()
         + "\n\tVersion: "
-        + this.version
+        + getVersion()
         + "\n\tAuthor: "
-        + this.author
+        + getAuthor()
         + "\n\tLink: "
-        + this.link
+        + getLink()
         + "\n\tEntries: "
-        + this.entries.count()
+        + getEntries().count()
         + "\n]";
   }
 }

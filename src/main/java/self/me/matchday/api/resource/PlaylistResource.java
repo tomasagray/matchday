@@ -7,6 +7,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +21,8 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.controller.PlaylistController;
-import self.me.matchday.db.EventFileSrcRepository;
+import self.me.matchday.api.service.EventService;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
 import self.me.matchday.model.MasterM3U;
@@ -44,13 +46,13 @@ public class PlaylistResource extends RepresentationModel<PlaylistResource> {
   public static class PlaylistResourceAssembler extends
       RepresentationModelAssemblerSupport<MasterM3U, PlaylistResource> {
 
-    private final EventFileSrcRepository eventFileSrcRepository;
+    private final EventService eventService;
 
     @Autowired
-    PlaylistResourceAssembler(EventFileSrcRepository eventFileSrcRepository) {
+    PlaylistResourceAssembler(EventService eventService) {
 
       super(EventController.class, PlaylistResource.class);
-      this.eventFileSrcRepository = eventFileSrcRepository;
+      this.eventService = eventService;
     }
 
     @NotNull
@@ -65,10 +67,11 @@ public class PlaylistResource extends RepresentationModel<PlaylistResource> {
               .withRel(MASTER_PLAYLIST));
 
       // Get the file sources for this Event
-      final Optional<List<EventFileSource>> fileSourceOptional =
-          eventFileSrcRepository.findFileSourcesForEventId(masterM3U.getEventId());
-      if (fileSourceOptional.isPresent()) {
-        final List<EventFileSource> eventFileSources = fileSourceOptional.get();
+      final Optional<Event> eventOptional = eventService.fetchById(masterM3U.getEventId());
+      if (eventOptional.isPresent()) {
+        final Event event = eventOptional.get();
+        final Set<EventFileSource> eventFileSources = event.getFileSources();
+
         // Add links to variants
         eventFileSources.forEach(eventFileSource ->
             playlistResource.add(

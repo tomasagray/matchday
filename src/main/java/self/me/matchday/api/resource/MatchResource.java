@@ -20,10 +20,9 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.EventController;
+import self.me.matchday.api.controller.PlaylistController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
-import self.me.matchday.api.resource.PlaylistResource.PlaylistResourceAssembler;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
-import self.me.matchday.api.service.MasterPlaylistService;
 import self.me.matchday.model.Fixture;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Season;
@@ -41,6 +40,8 @@ import self.me.matchday.model.Season;
 @JsonInclude(value = Include.NON_NULL)
 public class MatchResource extends RepresentationModel<MatchResource> {
 
+  // TODO: Is this class necessary? (Handled in EventResource?)
+
   private String id;
   private RepresentationModel<TeamResource> homeTeam;
   private RepresentationModel<TeamResource> awayTeam;
@@ -54,22 +55,16 @@ public class MatchResource extends RepresentationModel<MatchResource> {
   public static class MatchResourceAssembler extends
       RepresentationModelAssemblerSupport<Match, MatchResource> {
 
-    private final MasterPlaylistService masterPlaylistService;
     private final TeamResourceAssembler teamResourceAssembler;
     private final CompetitionResourceAssembler competitionResourceAssembler;
-    private final PlaylistResourceAssembler playlistResourceAssembler;
 
     @Autowired
-    public MatchResourceAssembler(MasterPlaylistService masterPlaylistService,
-        TeamResourceAssembler teamResourceAssembler,
-        CompetitionResourceAssembler competitionResourceAssembler,
-        PlaylistResourceAssembler playlistResourceAssembler) {
+    public MatchResourceAssembler(TeamResourceAssembler teamResourceAssembler,
+        CompetitionResourceAssembler competitionResourceAssembler) {
 
       super(EventController.class, MatchResource.class);
-      this.masterPlaylistService = masterPlaylistService;
       this.teamResourceAssembler = teamResourceAssembler;
       this.competitionResourceAssembler = competitionResourceAssembler;
-      this.playlistResourceAssembler = playlistResourceAssembler;
     }
 
     @NotNull
@@ -88,14 +83,14 @@ public class MatchResource extends RepresentationModel<MatchResource> {
       matchResource.setFixture(match.getFixture());
       matchResource.setDate(match.getDate());
       // Set Master Playlist for this Match
-      masterPlaylistService
-          .fetchMasterPlaylistForEvent(match.getEventId())
-          .ifPresent(
-              masterM3U -> matchResource.setPlaylists(playlistResourceAssembler.toModel(masterM3U))
-          );
+      matchResource.add(
+          linkTo(methodOn(PlaylistController.class)
+              .fetchPlaylistResourceForEvent(match.getEventId()))
+              .withRel("playlist"));
       // attach self link
       matchResource.add(
-          linkTo(methodOn(EventController.class).fetchMatchById(match.getEventId()))
+          linkTo(methodOn(EventController.class)
+              .fetchMatchById(match.getEventId()))
               .withSelfRel());
 
       return matchResource;

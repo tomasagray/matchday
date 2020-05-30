@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
  */
 @Entity
 @Data
-public class EventFileSource {
+public class EventFileSource implements Comparable<EventFileSource> {
 
   @Id
   @GeneratedValue
@@ -57,6 +57,19 @@ public class EventFileSource {
             String.join("/", getLanguages()),
             getEventFiles().size()
         );
+  }
+
+  @Override
+  public int compareTo(@NotNull EventFileSource entity) {
+
+    // If the resolutions are the same...
+    if (entity.getResolution().equals(getResolution())) {
+      // ... use audio channels
+      return getAudioChannels() - entity.getAudioChannels();
+    }
+
+    // Default behavior: compare by resolution
+    return getResolution().compareTo(entity.getResolution());
   }
 
   public enum Resolution {

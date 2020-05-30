@@ -20,9 +20,8 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.EventController;
+import self.me.matchday.api.controller.PlaylistController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
-import self.me.matchday.api.resource.PlaylistResource.PlaylistResourceAssembler;
-import self.me.matchday.api.service.MasterPlaylistService;
 import self.me.matchday.model.Fixture;
 import self.me.matchday.model.HighlightShow;
 import self.me.matchday.model.Season;
@@ -50,18 +49,12 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
       RepresentationModelAssemblerSupport<HighlightShow, HighlightShowResource> {
 
     private final CompetitionResourceAssembler competitionResourceAssembler;
-    private final MasterPlaylistService masterPlaylistService;
-    private final PlaylistResourceAssembler playlistResourceAssembler;
 
     @Autowired
-    public HighlightResourceAssembler(CompetitionResourceAssembler competitionResourceAssembler,
-        MasterPlaylistService masterPlaylistService,
-        PlaylistResourceAssembler playlistResourceAssembler) {
+    public HighlightResourceAssembler(CompetitionResourceAssembler competitionResourceAssembler) {
       super(EventController.class, HighlightShowResource.class);
 
       this.competitionResourceAssembler = competitionResourceAssembler;
-      this.masterPlaylistService = masterPlaylistService;
-      this.playlistResourceAssembler = playlistResourceAssembler;
     }
 
     @NotNull
@@ -79,13 +72,11 @@ public class HighlightShowResource extends RepresentationModel<HighlightShowReso
       highlightShowResource.setSeason(entity.getSeason());
       highlightShowResource.setFixture(entity.getFixture());
       highlightShowResource.setDate(entity.getDate());
-      // attach playlist
-      masterPlaylistService
-          .fetchMasterPlaylistForEvent(entity.getEventId())
-          .ifPresent(
-              masterM3U -> highlightShowResource
-                  .setPlaylists(playlistResourceAssembler.toModel(masterM3U))
-          );
+      // attach playlist link
+      highlightShowResource.add(
+          linkTo(methodOn(PlaylistController.class)
+              .fetchPlaylistResourceForEvent(entity.getEventId()))
+              .withRel("playlist"));
       // attach self link
       highlightShowResource.add(
           linkTo(methodOn(EventController.class).fetchHighlightById(entity.getEventId()))

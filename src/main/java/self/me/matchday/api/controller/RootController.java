@@ -3,29 +3,17 @@ package self.me.matchday.api.controller;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import lombok.Data;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.LinkRelation;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import self.me.matchday.api.resource.EventResource;
-import self.me.matchday.api.service.EventService;
 
 @RestController
 public class RootController {
-
-  private final EventService eventService;
-
-  @Autowired
-  public RootController(EventService eventService) {
-    this.eventService = eventService;
-  }
 
   // Link relation identifiers
   private static final LinkRelation EVENTS_REL = LinkRelation.of("events");
@@ -37,23 +25,15 @@ public class RootController {
   /**
    * Container for root endpoint.
    */
-  @Data
-  private static class RootResource {
+  private static class RootResource extends RepresentationModel<RootResource> {
 
-    private CollectionModel<EventResource> featuredEvents;
-    public void setFeaturedEvents(@NotNull CollectionModel<EventResource> featuredEvents) {
-      this.featuredEvents = featuredEvents;
-    }
   }
 
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public ResponseEntity<EntityModel<RootResource>> root() {
 
     // Create root endpoint
-    final RootResource rootResource = new RootResource();
-    // Attach featured Events
-//    eventService.fetchFeaturedEvents().ifPresent(rootResource::setFeaturedEvents);
-    EntityModel<RootResource> model = new EntityModel<>(rootResource);
+    EntityModel<RootResource> model = new EntityModel<>(new RootResource());
     // attach top-level links
     model.add(linkTo(methodOn(EventController.class).fetchAllEvents()).withRel(EVENTS_REL));
     model.add(linkTo(methodOn(EventController.class).fetchAllMatches()).withRel(MATCHES_REL));

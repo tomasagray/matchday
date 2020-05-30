@@ -49,22 +49,10 @@ public class BloggerPost {
   private String content;
   private String link;
 
-  // Default constructor, for JPA
-  /*public BloggerPost() {
-    bloggerPostID = null;
-    published = null;
-    lastUpdated = null;
-    categories = null;
-    title = null;
-    content = null;
-    link = null;
-  }*/
-
-  // Overridden methods
   @Override
   public String toString() {
-    // Ensure missing LocalDateTime fields do not
-    // cause NullPointerExceptions
+
+    // Ensure missing LocalDateTime fields do not cause NullPointerExceptions
     String nullSignifier = "{NULL}";
     String l_published = this.published != null ? this.published.toString() : nullSignifier;
     String l_updated = this.lastUpdated != null ? this.lastUpdated.toString() : nullSignifier;
@@ -106,12 +94,6 @@ public class BloggerPost {
     private LocalDateTime lastUpdated;
     private final List<String> categories = new ArrayList<>();
 
-    // Constructor
-//    private BloggerPostBuilder(JsonObject bloggerPost) {
-//      this.bloggerPost = bloggerPost;
-//    }
-
-    // Parsers for MANDATORY fields
     /**
      * Get the Post ID
      */
