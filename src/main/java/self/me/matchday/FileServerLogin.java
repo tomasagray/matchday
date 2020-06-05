@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.SpringVersion;
 import self.me.matchday.api.service.FileServerService;
@@ -22,7 +23,7 @@ public class FileServerLogin {
   private static final String TEST_URL = "https://www.inclouddrive.com/file/hNWYUjpoH6kFfkZ4C3aL-A/"
       + "20110423-valencia-real-madrid-1-eng-1080p.mkv";
 
-  //  @Bean
+  @Bean
   CommandLineRunner initFileServer(FileServerService fileServerService) {
 
     Log.i(LOG_TAG, "Spring Version: " + SpringVersion.getVersion());

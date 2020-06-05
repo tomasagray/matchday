@@ -5,9 +5,8 @@
 package self.me.matchday.model;
 
 import java.net.URL;
-import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -21,8 +20,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.model.EventFile.EventPartIdentifier;
 
-// Simple playlist
+// TODO: Do we need to save VariantM3U to DB?
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -48,31 +48,38 @@ public class VariantM3U extends M3UPlaylist {
   @JoinColumn(name = "eventId")
   private Event event;
   @OneToMany(targetEntity = MediaSegment.class, cascade = CascadeType.ALL)
-  private Set<MediaSegment> mediaSegments = new LinkedHashSet<>();
+  private Set<MediaSegment> mediaSegments = new TreeSet<>();
   private double targetDuration;
   private boolean finalized = true;
 
   public VariantM3U(@NotNull Event event, @NotNull Set<EventFile> eventFiles) {
 
-    // Generate playlist ID
-    this.id = MD5String
-        .fromData(event.getTitle() + "-" + eventFiles.stream().map(EventFile::toString)
-            .collect(Collectors.joining("-")));
-
     // Save Event metadata
     this.event = event;
+    // Generate playlist ID
+    this.id = MD5String
+        .fromData(
+            event + eventFiles
+                .stream()
+                .map(EventFile::toString)
+                .collect(Collectors.joining("-"))
+        );
+    // Add each event file as a URL in the playlist
+    eventFiles.forEach(this::createMediaSegment);
+  }
 
-    // Add each event file as a listing in the playlist
-    AtomicReference<Double> totalDuration = new AtomicReference<>(0.0d);
-    eventFiles.forEach(
-        eventFile -> {
-          final String partTitle = event.getTitle() + " - " + eventFile.getTitle().toString();
-          mediaSegments.add(
-              new MediaSegment(eventFile.getInternalUrl(), eventFile.getDuration(), partTitle));
-          // Add to total playlist length
-          totalDuration.updateAndGet(currTot -> currTot + eventFile.getDuration());
-        });
-    targetDuration = totalDuration.get();
+  /**
+   * Create a new MediaSegment (playlist URL entry) and update the target duration (total playlist
+   * time).
+   *
+   * @param eventFile The EventFile which represents the playlist entry
+   */
+  private void createMediaSegment(@NotNull EventFile eventFile) {
+
+    // Create a new MediaSegment & add to collection
+    this.mediaSegments.add(new MediaSegment(event.getTitle(), eventFile));
+    // Update total playlist duration
+    targetDuration += eventFile.getDuration();
   }
 
   /**
@@ -113,7 +120,6 @@ public class VariantM3U extends M3UPlaylist {
     if (isFinalized()) {
       sb.append(ENDLIST);
     }
-
     // Export playlist
     return sb.toString();
   }
@@ -124,38 +130,42 @@ public class VariantM3U extends M3UPlaylist {
    */
   @Entity
   @NoArgsConstructor
-  private static class MediaSegment {
+  private static class MediaSegment implements Comparable<MediaSegment> {
 
     @Id
     @GeneratedValue
     private Long id;
     private URL url;
-    private String title;
+    private String eventTitle;
+    private EventPartIdentifier partIdentifier;
     private double duration;
 
     @Contract(pure = true)
-    MediaSegment(@NotNull URL url, double duration) {
-      this.url = url;
-      this.duration = duration;
-    }
+    public MediaSegment(@NotNull String eventTitle, @NotNull EventFile eventFile) {
 
-    @Contract(pure = true)
-    public MediaSegment(@NotNull URL url, double duration, String title) {
-      this(url, duration);
-      this.title = title;
+      this.eventTitle = eventTitle;
+      this.url = eventFile.getInternalUrl();
+      this.duration = eventFile.getDuration();
+      this.partIdentifier = eventFile.getTitle();
     }
 
     @Override
     public String toString() {
-      // Print tag & duration
-      final StringBuilder sb = new StringBuilder(INF).append(this.duration).append(",");
-      if (this.title != null) {
-        sb.append(this.title);
-      }
-      // Print URL
-      sb.append("\n").append(this.url).append("\n");
 
-      return sb.toString();
+      return INF
+          + duration
+          + ","
+          + eventTitle
+          + " - "
+          + partIdentifier
+          + "\n"
+          + url
+          + "\n";
+    }
+
+    @Override
+    public int compareTo(@NotNull MediaSegment test) {
+      return this.partIdentifier.compareTo(test.partIdentifier);
     }
   }
 }
