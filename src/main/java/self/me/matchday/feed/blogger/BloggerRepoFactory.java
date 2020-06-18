@@ -32,7 +32,7 @@ public class BloggerRepoFactory extends RemoteEventRepoFactory {
     // Map the Blogger's BloggerPost stream to an Event stream...
     final Stream<Event> eventStream =
         blog
-            .getEntries()
+            .getPosts()
             .map(bloggerPost -> {
               // ... using the PostParser implementation
               final BloggerPostParser parser = parserFactory.createParser(bloggerPost);

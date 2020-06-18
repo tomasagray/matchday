@@ -13,11 +13,11 @@ package self.me.matchday.feed.blogger;
  */
 public class InvalidBloggerFeedException extends RuntimeException {
 
-  InvalidBloggerFeedException(String msg) {
+  public InvalidBloggerFeedException(String msg) {
     super(msg);
   }
 
-  InvalidBloggerFeedException(String msg, Exception e) {
+  public InvalidBloggerFeedException(String msg, Exception e) {
     super(msg, e);
   }
 }
