@@ -5,6 +5,8 @@
       <w>abithiw</w>
       <w>accesstoken</w>
       <w>appname</w>
+      <w>atleti</w>
+      <w>autowired</w>
       <w>cygpath</w>
       <w>datajpa</w>
       <w>developmentsecurityconfig</w>
@@ -13,6 +15,7 @@
       <w>endlist</w>
       <w>endlocal</w>
       <w>errorlevel</w>
+      <w>eventrepo</w>
       <w>fanart</w>
       <w>ffmpeg</w>
       <w>ffprobe</w>
@@ -25,6 +28,7 @@
       <w>icns</w>
       <w>inclouddrive</w>
       <w>inno</w>
+      <w>itemprop</w>
       <w>javacmd</w>
       <w>jdbc</w>
       <w>jsoup</w>
@@ -32,7 +36,9 @@
       <w>matchday</w>
       <w>mpegurl</w>
       <w>msys</w>
+      <w>noscript</w>
       <w>ourcygpattern</w>
+      <w>pojo</w>
       <w>propfind</w>
       <w>rootdirs</w>
       <w>rootdirsraw</w>
@@ -43,6 +49,7 @@
       <w>useraccess</w>
       <w>vsdx</w>
       <w>xdock</w>
+      <w>zkfootballmatches</w>
     </words>
   </dictionary>
 </component>
