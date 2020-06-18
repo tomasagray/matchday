@@ -2,13 +2,13 @@ package self.me.matchday.feed.blogger.galataman;
 
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.feed.blogger.BloggerPost;
-import self.me.matchday.feed.blogger.BloggerPostParser;
+import self.me.matchday.feed.blogger.BloggerPostEventSrcParser;
 import self.me.matchday.model.Event;
 import self.me.matchday.feed.IEventFileSourceParser;
 import self.me.matchday.feed.IEventParser;
 import self.me.matchday.feed.IEventSourceParser;
 
-public class GalatamanPostParser extends BloggerPostParser {
+public class GalatamanPostParser extends BloggerPostEventSrcParser {
 
   private final Event event;
 

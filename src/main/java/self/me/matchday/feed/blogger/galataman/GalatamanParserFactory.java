@@ -2,13 +2,13 @@ package self.me.matchday.feed.blogger.galataman;
 
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.feed.blogger.BloggerPost;
-import self.me.matchday.feed.blogger.BloggerPostParser;
-import self.me.matchday.feed.blogger.PostParserFactory;
+import self.me.matchday.feed.blogger.BloggerPostEventSrcParser;
+import self.me.matchday.feed.blogger.PostEventSrcParserFactory;
 
-public class GalatamanParserFactory extends PostParserFactory {
+public class GalatamanParserFactory extends PostEventSrcParserFactory {
 
   @Override
-  public BloggerPostParser createParser(@NotNull BloggerPost bloggerPost) {
+  public BloggerPostEventSrcParser createParser(@NotNull BloggerPost bloggerPost) {
     return new GalatamanPostParser(bloggerPost);
   }
 }

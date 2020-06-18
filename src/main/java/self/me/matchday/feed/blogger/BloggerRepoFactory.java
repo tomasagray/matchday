@@ -13,7 +13,7 @@ public class BloggerRepoFactory extends RemoteEventRepoFactory {
 
   @Contract("_, _ -> new")
   public static @NotNull RemoteEventRepository createRepository(@NotNull final Blogger blog,
-      @NotNull final PostParserFactory postParserFactory) {
+      @NotNull final PostEventSrcParserFactory postParserFactory) {
 
     return
         new BloggerRepoFactory(blog, postParserFactory)
@@ -27,7 +27,7 @@ public class BloggerRepoFactory extends RemoteEventRepoFactory {
    * @param parserFactory Abstract factory for Post Parsers
    */
   private BloggerRepoFactory(@NotNull final Blogger blog,
-      @NotNull final PostParserFactory parserFactory) {
+      @NotNull final PostEventSrcParserFactory parserFactory) {
 
     // Map the Blogger's BloggerPost stream to an Event stream...
     final Stream<Event> eventStream =
@@ -35,7 +35,7 @@ public class BloggerRepoFactory extends RemoteEventRepoFactory {
             .getPosts()
             .map(bloggerPost -> {
               // ... using the PostParser implementation
-              final BloggerPostParser parser = parserFactory.createParser(bloggerPost);
+              final BloggerPostEventSrcParser parser = parserFactory.createParser(bloggerPost);
               return parser.getEvent();
             });
 

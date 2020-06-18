@@ -2,7 +2,7 @@ package self.me.matchday.feed.blogger.zkfootball;
 
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.feed.blogger.BloggerPost;
-import self.me.matchday.feed.blogger.BloggerPostParser;
+import self.me.matchday.feed.blogger.BloggerPostEventSrcParser;
 import self.me.matchday.model.Event;
 import self.me.matchday.feed.IEventFileSourceParser;
 import self.me.matchday.feed.IEventParser;
@@ -12,7 +12,7 @@ import self.me.matchday.feed.IEventSourceParser;
  * Implementation of the BloggerPost parser, specific to the ZKFootball blog, found at:
  * https://zkfootballmatch.blogspot.com
  */
-public class ZKFPostParser extends BloggerPostParser {
+public class ZKFPostParser extends BloggerPostEventSrcParser {
 
   private final Event event;
 

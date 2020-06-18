@@ -62,14 +62,21 @@ public class EventFileSource implements Comparable<EventFileSource> {
   @Override
   public int compareTo(@NotNull EventFileSource entity) {
 
+    // Null resolutions are less-than by definition
+    if (entity.getResolution() == null) {
+      return -1;
+    }
+
     // If the resolutions are the same...
     if (entity.getResolution().equals(getResolution())) {
       // ... use audio channels
-      return getAudioChannels() - entity.getAudioChannels();
+      return
+          getAudioChannels() - entity.getAudioChannels();
     }
 
     // Default behavior: compare by resolution
-    return getResolution().compareTo(entity.getResolution());
+    return
+        getResolution().compareTo(entity.getResolution());
   }
 
   public enum Resolution {
