@@ -70,36 +70,28 @@ public class Match extends Event implements Serializable {
   @Override
   public String getTitle() {
 
-    final StringBuilder sb =
-        new StringBuilder(competition.getName())
-            .append(": ")
-            .append(homeTeam.getName())
-            .append(" vs. ")
-            .append(awayTeam.getName());
-
-    // Add fixture data, if available
-    if (fixture.getFixtureNumber() != 0) {
-      sb.append(String.format(" - %s %s", fixture.getTitle(), fixture.getFixtureNumber()));
-    }
-
-    return sb.toString();
+    return
+        competition
+          + ": "
+          + homeTeam
+          + " vs. "
+          + awayTeam
+          + ((fixture != null) ? ", " + fixture : "");
   }
 
   @NotNull
   @Override
   public String toString() {
     String str =
-        "Competition: " + competition + ", " + "Season: " + season + ", " + "Teams: " + homeTeam;
-    if (awayTeam != null) {
-      str += " vs. " + awayTeam;
-    }
-    str += ", " + "Fixture: " + fixture + ", ";
+        "Competition: " + getCompetition() +
+            ", " + "Season: " + getSeason() + ", " + "Teams: " + getHomeTeam() +
+            " vs. " + getAwayTeam() +
+            ", " + "Fixture: " + getFixture() + ", ";
     if (date != null) {
-      str += "Date: " + DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).format(date);
+      str += "Date: " + DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).format(getDate());
     } else {
       str += "Date is NULL!";
     }
-
     return str;
   }
 
@@ -154,12 +146,29 @@ public class Match extends Event implements Serializable {
   @NotNull
   private String generateMatchId() {
 
-    return MD5String.fromData(
-        this.homeTeam.getTeamId()
-            + this.awayTeam.getTeamId()
-            + this.competition.getCompetitionId()
-            + this.getSeason().getSeasonId()
-            + this.getFixture().getFixtureId()
-            + this.getDate().format(EVENT_ID_DATE_FORMATTER));
+    // Ensure no null exceptions
+    final String NULL = "NULL";
+    final String dateString =
+        (this.getDate() != null) ?
+            this.getDate().format(EVENT_ID_DATE_FORMATTER) :
+            NULL;
+    final String competition =
+        (this.getCompetition() != null) ?
+            this.getCompetition().getName() :
+            NULL;
+    final String homeTeam =
+        (this.getHomeTeam() != null) ?
+            this.getHomeTeam().getName() :
+            NULL;
+    final String awayTeam =
+        (this.getAwayTeam() != null) ?
+            this.getAwayTeam().getName() :
+            NULL;
+
+    return
+        MD5String.fromData(
+            String.format(
+                "%s%s%s%s%s%s", homeTeam, awayTeam, competition, this.getSeason(),
+                this.getFixture(), dateString));
   }
 }

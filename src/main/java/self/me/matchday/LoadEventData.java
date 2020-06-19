@@ -4,10 +4,13 @@
 
 package self.me.matchday;
 
+import java.io.IOException;
 import java.net.URL;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import self.me.matchday._DEVFIXTURES.URLs;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.feed.blogger.Blogger;
 import self.me.matchday.feed.blogger.BloggerFactory;
@@ -25,37 +28,33 @@ public class LoadEventData {
 
   private static final String LOG_TAG = "LoadEventData";
 
-  private static final String ZKF_JSON_LIVE =
-      "https://zkfootballmatch.blogspot.com/feeds/posts/default?alt=json";
-  // safe copy
-  private static final String ZKF_JSON_CACHED =
-      "http://192.168.0.101/soccer/testing/zkf_known_good.json";
-
-  private static final String GALATAMAN_JSON_CACHED =
-      "http://192.168.0.101/soccer/testing/galataman_known_good.json";
-  private static final String GALATAMAN_HTML_LIVE =
-      "https://galatamanhdfb.blogspot.com/search/label/EPL";
-
   @Bean
   CommandLineRunner initEventSources(EventService eventService) {
 
     return args -> {
-
-      // Create GMan repo
-      final Blogger gmanBlogger = BloggerFactory.fromHtml(new URL(GALATAMAN_HTML_LIVE));
-      final RemoteEventRepository gmanRepo =
-          BloggerRepoFactory.createRepository(gmanBlogger, new GalatamanParserFactory());
-
-      // Create ZKF repo
-      final Blogger zkfBlogger = BloggerFactory.fromJson(new URL(ZKF_JSON_LIVE));
-      final RemoteEventRepository zkfRepo =
-          BloggerRepoFactory.createRepository(zkfBlogger, new ZKFParserFactory());
-
-      // Save Events
-      gmanRepo.getEventStream()
-          .forEach(event -> Log.i(LOG_TAG, "Saving Event: " + eventService.saveEvent(event)));
-      zkfRepo.getEventStream()
-          .forEach(event -> Log.i(LOG_TAG, "Saving Event: " + eventService.saveEvent(event)));
+      saveEventStream(eventService, createGalatamanRepo(URLs.GMAN_HTML_KNOWN_GOOD));
+      saveEventStream(eventService, createGalatamanRepo(URLs.GMAN_HTML_KNOWN_GOOD_NEXT));
+//      saveEventStream(eventService, createZKFRepo(URLs.ZKF_JSON_LIVE));
     };
+  }
+
+  private void saveEventStream(EventService eventService,
+      @NotNull RemoteEventRepository repository) {
+
+    repository
+        .getEventStream()
+        .forEach(event -> Log.i(LOG_TAG, "Saving Event: " + eventService.saveEvent(event)));
+  }
+
+  private @NotNull RemoteEventRepository createZKFRepo(@NotNull final URL url) throws IOException {
+    // Create ZKF repo
+    final Blogger zkfBlogger = BloggerFactory.fromJson(url);
+    return BloggerRepoFactory.createRepository(zkfBlogger, new ZKFParserFactory());
+  }
+
+  private @NotNull RemoteEventRepository createGalatamanRepo(@NotNull final URL url) throws IOException {
+    // Create GMan repo
+    final Blogger gmanBlogger = BloggerFactory.fromHtml(url);
+    return BloggerRepoFactory.createRepository(gmanBlogger, new GalatamanParserFactory());
   }
 }

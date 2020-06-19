@@ -89,11 +89,15 @@ public class HighlightShow extends Event implements Serializable {
 
   private String generateHighlightShowId() {
 
+    final String dateString =
+        (this.getDate() != null) ?
+            this.getDate().format(EVENT_ID_DATE_FORMATTER) :
+            "NULL";
     return MD5String.fromData(
-        this.title
-            + this.getCompetition().getCompetitionId()
-            + this.getSeason().getSeasonId()
-            + this.getFixture().getFixtureId()
-            + this.getDate().format(EVENT_ID_DATE_FORMATTER));
+        this.getTitle()
+            + this.getCompetition()
+            + this.getSeason()
+            + this.getFixture()
+            + dateString);
   }
 }

@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Abbreviator;
 
@@ -25,6 +26,7 @@ import self.me.matchday.util.Abbreviator;
  * @author tomas
  */
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "Competitions")
 public class Competition implements Serializable {
@@ -46,18 +48,17 @@ public class Competition implements Serializable {
   @OneToOne
   private Artwork landscape;
 
-  // TODO: Is this needed?
-  // Default constructor
-  public Competition() {
-    this.competitionId = MD5String.generate();
+  public Competition(@NotNull final String name) {
+    // Automatically create an abbreviation
+    this(name, Abbreviator.abbreviate(name));
   }
 
-  public Competition(@NotNull String name) {
-    this.name = name.trim();
-    // Automatically create an abbreviation
-    this.abbreviation = Abbreviator.abbreviate(this.name);
+  public Competition(@NotNull final String name, @NotNull final String abbreviation) {
+
+    this.name = name;
+    this.abbreviation = abbreviation;
     // Generate ID
-    this.competitionId = MD5String.fromData(this.name);
+    this.competitionId = MD5String.fromData(this.name, this.abbreviation);
   }
 
   @Override
@@ -83,5 +84,4 @@ public class Competition implements Serializable {
   public int hashCode() {
     return name.hashCode() * competitionId.hashCode();
   }
-
 }

@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Log;
 
@@ -34,10 +35,13 @@ public class MD5String {
 
   /**
    * Generate an MD5 hash from a supplied data String.
-   * @param data Data to be hashed.
+   * @param dataItems Data to be hashed.
    * @return A 32-character MD5 hash String
    */
-  public static String fromData(@NotNull final String data) {
+  public static String fromData(@NotNull final String... dataItems) {
+
+    // Collate data
+    final String data = String.join("", dataItems);
     String hash = null;
 
     try {
