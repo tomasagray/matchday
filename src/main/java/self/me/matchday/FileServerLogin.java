@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.SpringVersion;
 import self.me.matchday.api.service.FileServerService;

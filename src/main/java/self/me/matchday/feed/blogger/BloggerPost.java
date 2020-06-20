@@ -8,21 +8,10 @@
  */
 package self.me.matchday.feed.blogger;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.util.Log;
 
 /**
  * Represents an individual, generic post on a Blogger blog. The constructor accepts either a Gson

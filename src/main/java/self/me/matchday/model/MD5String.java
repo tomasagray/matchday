@@ -12,7 +12,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Log;
 

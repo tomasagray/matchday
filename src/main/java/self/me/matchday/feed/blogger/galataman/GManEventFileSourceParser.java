@@ -11,27 +11,15 @@ package self.me.matchday.feed.blogger.galataman;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import self.me.matchday.feed.InvalidMetadataException;
-import self.me.matchday.fileserver.inclouddrive.ICDData;
+import self.me.matchday.feed.IEventFileSourceParser;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.EventFileSource.Resolution;
-import self.me.matchday.feed.IEventFileSourceParser;
-import self.me.matchday.util.Log;
 
 /**
  * Represents a specific source for an Event (for example: 1080i, Spanish), derived from the
@@ -41,15 +29,12 @@ import self.me.matchday.util.Log;
  */
 public final class GManEventFileSourceParser implements IEventFileSourceParser {
 
-  private static final String LOG_TAG = "GManEventFileSourceParser";
-
   private final String html;
   private final List<EventFileSource> eventFileSources;
 
   public GManEventFileSourceParser(@NotNull final String html) {
     this.html = html;
-    this.eventFileSources = new ArrayList<>();
-    parseEventSources();
+    this.eventFileSources = parseEventSources();
   }
 
   @Override
@@ -60,399 +45,57 @@ public final class GManEventFileSourceParser implements IEventFileSourceParser {
   /**
    * Extracts match source data from this post.
    */
-  private void parseEventSources() {
+  private @NotNull List<EventFileSource> parseEventSources() {
 
-    try {
-      // DOM-ify HTML content for easy manipulation
-      Document doc = Jsoup.parse(this.html);
-      // Since this is a loosely structured document, we will use a token, starting at the first
-      // source and looking for what we want along the way
-      Element token = doc.getElementsMatchingOwnText(GManPatterns.START_OF_SOURCE).first();
+    // Result container
+    final List<EventFileSource> fileSources = new ArrayList<>();
 
-      // Search until the end of the Document
-      while (token != null) {
-        // When we find a source
-        if (GManPatterns.isSourceData.test(token)) {
-          // Create an Event file source from the data
-          final EventFileSource eventFileSource =
-              new GManEventFileSource(GManFileSourceMetadataParser.fromHTML(token.html()));
+    // DOM-ify HTML content for easy manipulation
+    Document doc = Jsoup.parse(this.html);
+    // Since this is a loosely structured document, we will use a token, starting at the first
+    // source and looking for what we want along the way
+    Element token = doc.getElementsMatchingOwnText(GManPatterns.START_OF_SOURCE).first();
 
-          // Parse EventFiles (links) for this source
-          Element innerToken = token.nextElementSibling();
-          EventPartIdentifier partIdentifier = EventPartIdentifier.DEFAULT;
-          while ((innerToken != null) && !(GManPatterns.isSourceData.test(innerToken))) {
+    // Search until the end of the Document
+    while (token != null) {
+      // When we find a source
+      if (GManPatterns.isSourceData(token)) {
+        // Create an Event file source from the data
+        final EventFileSource eventFileSource =
+            GManFileSourceMetadataParser.createFileSource(token.html());
 
-            // Look for a part identifier
-            final String tokenHtml = innerToken.html();
-            if (EventPartIdentifier.isPartIdentifier(tokenHtml)) {
+        // Parse EventFiles (links) for this source
+        Element innerToken = token.nextElementSibling();
+        EventPartIdentifier partIdentifier = EventPartIdentifier.DEFAULT;
+        while ((innerToken != null) && !(GManPatterns.isSourceData(innerToken))) {
 
-              // Create an identifier for this part
-              partIdentifier = EventPartIdentifier.fromString(tokenHtml);
-            } else if (GManPatterns.isVideoLink.test(innerToken)) {
+          // Look for a part identifier
+          final String tokenHtml = innerToken.html();
+          if (EventPartIdentifier.isPartIdentifier(tokenHtml)) {
 
+            // Create an identifier for this part
+            partIdentifier = EventPartIdentifier.fromString(tokenHtml);
+          } else if (GManPatterns.isVideoLink(innerToken)) {
+            try {
               // When we find a link to a video file, extract href attribute & add it to our
               // source's list of EventFiles, with an identifier (might be null)
               final URL url = new URL(innerToken.attr("href"));
               // Create a new EventFile & add to collection
               final EventFile eventFile = new EventFile(partIdentifier, url);
               eventFileSource.getEventFiles().add(eventFile);
+            } catch (MalformedURLException ignore) {
             }
-            // Advance inner token
-            innerToken = innerToken.nextElementSibling();
           }
-          // Add match source to collection
-          this.eventFileSources.add(eventFileSource);
+          // Advance inner token
+          innerToken = innerToken.nextElementSibling();
         }
-        // Advance the search token
-        token = token.nextElementSibling();
+        // Add match source to collection
+        fileSources.add(eventFileSource);
       }
-    } catch (MalformedURLException e) {
-      // Log the error
-      Log.e(LOG_TAG, "There was a problem parsing a Galataman post", e);
-    }
-  }
-
-  /**
-   * Local implementation of EventFileSource which unpacks builder object.
-   */
-  private static class GManEventFileSource extends EventFileSource {
-
-    // Constructor
-    GManEventFileSource(@NotNull final GManFileSourceMetadataParser metadata) {
-      // Unpack metadata builder object
-      setChannel(metadata.channel);
-      setSource(metadata.source);
-      setApproximateDuration(metadata.duration);
-      setApproximateFileSize(metadata.size);
-      setResolution(metadata.resolution);
-      setMediaContainer(metadata.mediaContainer);
-      setBitrate(metadata.bitrate);
-      setVideoCodec(metadata.videoCodec);
-      setFrameRate(metadata.frameRate);
-      setAudioCodec(metadata.audioCodec);
-      setAudioChannels(metadata.audioChannels);
-      setLanguages(Collections.unmodifiableList(metadata.languages));
-    }
-  }
-
-  /**
-   * Builder class to parse and create an EventFileSource from a GalatamanHDF post.
-   */
-  private static final class GManFileSourceMetadataParser {
-
-    private static final String LOG_TAG = "GManEventFileSrc";
-
-    // Metadata identifiers
-    private static final String CHANNEL = "CHANNEL";
-    private static final String SOURCE = "SOURCE";
-    private static final String LANGUAGE = "LANGUAGE";
-    private static final String COMMENTARY = "COMMENTARY";
-    private static final String VIDEO = "VIDEO";
-    private static final String AUDIO = "AUDIO";
-    private static final String DURATION = "DURATION";
-    private static final String SIZE = "SIZE";
-    private static final String RESOLUTION = "RELEASE";
-
-    // Fields
-    private final String metadataStr;
-    private String channel;
-    private String source;
-    private final List<String> languages = new ArrayList<>();
-    private String mediaContainer;
-    private Long bitrate;
-    private String videoCodec;
-    private int frameRate;
-    private String audioCodec;
-    private int audioChannels;
-    private String duration;
-    private String size;
-    private Resolution resolution;
-
-    @NotNull
-    @Contract("_ -> new")
-    public static GManFileSourceMetadataParser fromHTML(@NotNull final String html) {
-      return new GManFileSourceMetadataParser(html);
+      // Advance the search token
+      token = token.nextElementSibling();
     }
 
-    // Constructor
-    private GManFileSourceMetadataParser(@NotNull String matchDataHTML) {
-      // Save raw metadata
-      this.metadataStr = matchDataHTML;
-      // Cleanup HTML, removing superfluous &nbsp; and parse data into items
-      parseDataItems(matchDataHTML.replace("&nbsp;", ""))
-          // Parse each data item
-          .forEach(this::parseDataItem);
-    }
-
-    /**
-     * Break the Event data string apart into parse-able chunks, and collect them into a List.
-     *
-     * @param data A String containing raw HTML to be parsed into metadata items concerning a
-     *             particular source.
-     * @return A List of key/value tuples, each representing a metadata item.
-     */
-    private List<MetadataTuple> parseDataItems(@NotNull String data) {
-      return
-          // Break apart stream into individual data items,
-          // based on patterns defined in the GalatamanPattern class...
-          Arrays.stream(data.split(GManPatterns.METADATA_ITEM_DELIMITER))
-              .filter((item) -> !("".equals(item))) // ... eliminating any empty entries ...
-              .map( // ... convert to a tuple ...
-                  (String item) -> new MetadataTuple(item, GManPatterns.METADATA_KV_DELIMITER))
-              // ... finally, collect to a List and return
-              .collect(Collectors.toList());
-    }
-
-    /**
-     * Examines a key/value pair to determine if they relate to a relevant metadata item (e.g.,
-     * Channel, Source, etc.)
-     *
-     * @param kv A key/value pair containing data about this source.
-     */
-    private void parseDataItem(@NotNull MetadataTuple kv) {
-      // Get the key
-      String key = kv.getKeyString();
-      // Clean up the value
-      String value = clean(kv.getValueString());
-
-      // Examine the key and assign the value to the correct metadata field
-      switch (key) {
-        case CHANNEL:
-          this.channel = value;
-          break;
-        case SOURCE:
-          this.source = value;
-          break;
-        case LANGUAGE:
-        case COMMENTARY:
-          this.languages.addAll(parseLanguages(value));
-          break;
-        case VIDEO:
-          parseVideoMetadata(value);
-          break;
-        case AUDIO:
-          parseAudioMetadata(value);
-          break;
-        case DURATION:
-          this.duration = value;
-          break;
-        case SIZE:
-          this.size = value.replace("~", "");
-          break;
-        case RESOLUTION:
-          this.resolution = parseResolution(value);
-          break;
-        default:
-          throw new InvalidMetadataException(
-              "Invalid key/value in Galataman Event File Source metadata: " + kv.toString());
-      }
-    }
-
-    /**
-     * Break apart a String into language names.
-     *
-     * @param langStr A String containing language names, separated by a delimiter configured in the
-     *                GalatamanPost class.
-     */
-    @NotNull
-    private List<String> parseLanguages(@NotNull String langStr) {
-      // Split string based on delimiter
-      List<String> languages = new ArrayList<>(
-          Arrays.asList(langStr.split(GManPatterns.LANGUAGE_DELIMITER)));
-      // Remove empty entries
-      languages.removeIf((lang) -> "".equals(lang.trim()));
-      return languages;
-    }
-
-    /**
-     * Split video data string apart.
-     *
-     * @param videoMetadata A String containing audio/video data items, separated by a delimiter
-     *                      configured in the GalatamanPost class.
-     */
-    private void parseVideoMetadata(@NotNull String videoMetadata) {
-
-      final long BITRATE_CONVERSION_FACTOR = 1_000_000L;
-      // Video patterns
-      final Pattern bitratePattern = Pattern.compile("[\\d.]+\\smbps", Pattern.CASE_INSENSITIVE);
-      final Pattern containerPattern = Pattern.compile("\\w\\.\\d+ \\w+");
-      final Pattern frameRatePattern = Pattern.compile("(\\d+)(fps)", Pattern.CASE_INSENSITIVE);
-
-      // Split the string into data items & parse
-      for (String dataItem : videoMetadata.split(GManPatterns.AV_DATA_DELIMITER)) {
-        // Clean up data
-        dataItem = dataItem.trim();
-        if (bitratePattern.matcher(dataItem).find()) {
-          final Matcher matcher = Pattern.compile("(\\d+)").matcher(dataItem);
-          if (matcher.find()) {
-            final String bitrate = matcher.group(1);
-            this.bitrate = Long.parseLong(bitrate) * BITRATE_CONVERSION_FACTOR;
-          }
-        } else if (containerPattern.matcher(dataItem).find()) {
-          // [video codec] [container]; ex: H.264 mkv
-          final String[] containerParts = dataItem.split(" ");
-          this.videoCodec = containerParts[0];
-          this.mediaContainer = containerParts[1].toUpperCase();
-        } else {
-          final Matcher matcher = frameRatePattern.matcher(dataItem);
-          if (matcher.find()) {
-            // Get digit
-            this.frameRate = Integer.parseInt(matcher.group(1));
-          }
-        }
-      }
-    }
-
-    private void parseAudioMetadata(@NotNull final String audioData) {
-
-      final Pattern channelPattern = Pattern.compile("([.\\d]+) (channels)");
-      final Pattern bitratePattern = Pattern.compile("(\\d+) (kbps)", Pattern.CASE_INSENSITIVE);
-
-      try {
-        for (String dataItem : audioData.split(GManPatterns.AV_DATA_DELIMITER)) {
-
-          dataItem = dataItem.trim();
-          // Parse channel data
-          if ("stereo".equals(dataItem)) {
-            this.audioChannels = 2;
-          } else if (channelPattern.matcher(dataItem).find()) {
-            // Get numerical component of channel data
-            final String[] channels = dataItem.split("channels");
-            // Split main & sub-woofer channels
-            final String[] split = channels[0].split("\\.");
-            for (String channel : split) {
-              // combine channels
-              this.audioChannels += Integer.parseInt(channel.trim());
-            }
-          } else if (!(bitratePattern.matcher(dataItem).find())) {
-            // Only other possibility is audio codec
-            this.audioCodec = dataItem.toUpperCase();
-          }
-        }
-      } catch (RuntimeException e) {
-        Log.d(LOG_TAG, "Error parsing audio metadata from String: " + audioData, e);
-      }
-    }
-
-    /**
-     * Determine the appropriate enumerated video resolution for this video source.
-     *
-     * @param resolution The String representing the video resolution
-     * @return An enumerated video resolution value.
-     */
-    private Resolution parseResolution(@NotNull String resolution) {
-      // Analyze resolution & return
-      if (Resolution.isResolution(resolution)) {
-        return Resolution.fromString(resolution);
-      } else {
-        Log.i(
-            LOG_TAG,
-            "Could not determine video resolution for file source: "
-                + metadataStr
-                + "; defaulting to SD");
-        return Resolution.R_SD;
-      }
-    }
-
-    /**
-     * Removes any remaining tags and special characters e.g., <br> , &nbsp;, etc.
-     *
-     * @param input A String in need of cleaning.
-     * @return The cleaned String.
-     */
-    @NotNull
-    private String clean(@NotNull String input) {
-      return input.replaceAll("<[^>]*>", "").trim();
-    }
-
-    /**
-     * A class representing a key/value pair for a metadata item.
-     */
-    public static class MetadataTuple {
-
-      private final String key;
-      private final String value;
-
-      public MetadataTuple(@NotNull String data, @NotNull String delimiter) {
-        // Split into (hopefully) key/value pairs
-        String[] kvPair = data.split(delimiter);
-
-        // Ensure we have a tuple
-        if (kvPair.length == 2) {
-          this.key = kvPair[0];
-          this.value = kvPair[1];
-        } else {
-          throw new InvalidMetadataException(
-              "Could not split " + data + " with splitter " + delimiter);
-        }
-      }
-
-      /**
-       * Returns the tuple key as an uppercase String.
-       *
-       * @return String The key of the tuple.
-       */
-      public String getKeyString() {
-        return this.key.toUpperCase();
-      }
-
-      /**
-       * Returns the tuple value
-       *
-       * @return String The value of the tuple.
-       */
-      public String getValueString() {
-        return this.value;
-      }
-
-      @Override
-      public boolean equals(Object o) {
-        if (o == this) {
-          return true;
-        }
-        if (!(o instanceof MetadataTuple)) {
-          return false;
-        }
-
-        MetadataTuple kv = (MetadataTuple) o;
-
-        return this.key.equals(kv.key) && this.value.equals(kv.value);
-      }
-
-      @Override
-      public int hashCode() {
-        int hash = 5;
-        hash = (19 * hash) + Objects.hashCode(this.key);
-        hash = (19 * hash) + Objects.hashCode(this.value);
-        return hash;
-      }
-
-      @Override
-      public String toString() {
-        return "Key: " + this.key + ", Value: " + this.value;
-      }
-    }
-  }
-
-  /**
-   * Container class for Galataman parsing patterns
-   */
-  private static final class GManPatterns {
-
-    // Entry parsing patterns
-    static final String START_OF_SOURCE = Pattern.compile("__*").pattern();
-    static final String METADATA_ITEM_DELIMITER =
-        Pattern.compile("<span style=\"color: blue;\">(\\[)?").pattern();
-    static final String METADATA_KV_DELIMITER =
-        Pattern.compile("(])?</span>:(<span [^>]*>)?").pattern();
-    static final String LANGUAGE_DELIMITER = Pattern.compile("[\\d.* ]|/").pattern();
-    static final String AV_DATA_DELIMITER = Pattern.compile("‖").pattern();
-    // Predicates
-    static final Predicate<Element> isSourceData =
-        elem -> ("b".equals(elem.tagName())) && (elem.text().contains("Channel"));
-    static final Predicate<Element> isVideoLink =
-        elem ->
-            ("a".equals(elem.tagName()))
-                && (ICDData.getUrlMatcher(elem.attr("href")).find());
+    return fileSources;
   }
 }

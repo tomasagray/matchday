@@ -1,10 +1,8 @@
 package self.me.matchday.model;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.CascadeType;
@@ -13,7 +11,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,20 +25,22 @@ import org.jetbrains.annotations.Nullable;
  */
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class EventFileSource implements Comparable<EventFileSource> {
 
   @Id
   @GeneratedValue
   private Long eventFileSrcId;
-  // Fields
   private String channel;
   private String source;
   private String approximateDuration;
   private String approximateFileSize;
   @ElementCollection
-  private List<String> languages = new ArrayList<>();
+  private List<String> languages;
   @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL)
-  private Set<EventFile> eventFiles = new TreeSet<>();
+  private Set<EventFile> eventFiles;
   // Media metadata
   private Resolution resolution;
   private String mediaContainer;
@@ -63,17 +66,15 @@ public class EventFileSource implements Comparable<EventFileSource> {
   public int compareTo(@NotNull EventFileSource entity) {
 
     // Null resolutions are less-than by definition
-    if (entity.getResolution() == null) {
+    if (getResolution() == null || entity.getResolution() == null) {
       return -1;
     }
-
     // If the resolutions are the same...
     if (entity.getResolution().equals(getResolution())) {
       // ... use audio channels
       return
           getAudioChannels() - entity.getAudioChannels();
     }
-
     // Default behavior: compare by resolution
     return
         getResolution().compareTo(entity.getResolution());

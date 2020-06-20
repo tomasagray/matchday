@@ -4,8 +4,6 @@
 
 package self.me.matchday.feed.blogger;
 
-import com.google.gson.JsonObject;
-
 public interface IBloggerPostBuilder {
 
   /**

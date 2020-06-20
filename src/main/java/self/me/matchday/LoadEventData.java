@@ -32,9 +32,12 @@ public class LoadEventData {
   CommandLineRunner initEventSources(EventService eventService) {
 
     return args -> {
+      saveEventStream(eventService, createGalatamanRepo(URLs.GMAN_HTML_LIVE));
+      saveEventStream(eventService, createGalatamanRepo(URLs.GMAN_HTML_LIVE_NEXT));
       saveEventStream(eventService, createGalatamanRepo(URLs.GMAN_HTML_KNOWN_GOOD));
       saveEventStream(eventService, createGalatamanRepo(URLs.GMAN_HTML_KNOWN_GOOD_NEXT));
-//      saveEventStream(eventService, createZKFRepo(URLs.ZKF_JSON_LIVE));
+      saveEventStream(eventService, createZKFRepo(URLs.ZKF_JSON_LIVE));
+      saveEventStream(eventService, createZKFRepo(URLs.ZKF_JSON_KNOWN_GOOD));
     };
   }
 
