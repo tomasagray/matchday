@@ -107,9 +107,9 @@ public class ZKFMetadataParser {
       if (bitrateMatcher.find()) {
         final int digit = Integer.parseInt(bitrateMatcher.group());
         // Parse conversion factor
-        if (ZKPatterns.mbpsPattern.matcher(bitrate).find()) {
+        if (ZKFPatterns.mbpsPattern.matcher(bitrate).find()) {
           this.bitrate = (digit * 1_000_000L);
-        } else if (ZKPatterns.kbpsPattern.matcher(bitrate).find()) {
+        } else if (ZKFPatterns.kbpsPattern.matcher(bitrate).find()) {
           this.bitrate = (digit * 1_000L);
         }
       }
@@ -121,7 +121,7 @@ public class ZKFMetadataParser {
         Log.d(LOG_TAG, String.format(
             "Could not parse EventFileSource bitrate from String: %s; defaulting to 4MBps",
             bitrate));
-        this.bitrate = ZKPatterns.DEFAULT_BITRATE;
+        this.bitrate = ZKFPatterns.DEFAULT_BITRATE;
       }
     }
   }
@@ -142,14 +142,14 @@ public class ZKFMetadataParser {
         if (part.contains("4096x2160")) {
           this.resolution = Resolution.R_4k;
           // 720 & 1080
-        } else if (ZKPatterns.resolutionPattern.matcher(part).find()) {
+        } else if (ZKFPatterns.resolutionPattern.matcher(part).find()) {
           this.resolution = Resolution.fromString(part);
         } else {
-          final Matcher frMatcher = ZKPatterns.frameRatePattern.matcher(part);
+          final Matcher frMatcher = ZKFPatterns.frameRatePattern.matcher(part);
           if (frMatcher.find()) {
             // Parse frame rate
             this.frameRate = Integer.parseInt(frMatcher.group(1));
-          } else if (ZKPatterns.containerPattern.matcher(part).find()) {
+          } else if (ZKFPatterns.containerPattern.matcher(part).find()) {
             this.mediaContainer = part.toUpperCase();
           }
         }

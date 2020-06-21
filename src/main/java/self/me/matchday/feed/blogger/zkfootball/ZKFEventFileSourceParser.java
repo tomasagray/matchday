@@ -58,7 +58,7 @@ public class ZKFEventFileSourceParser implements IEventFileSourceParser {
         eventFile.ifPresent(eventFiles::add);
 
         // EventFileSource
-      } else if (ZKPatterns.isMetadata(element.text())) {
+      } else if (ZKFPatterns.isMetadata(element.text())) {
         final EventFileSource fileSource =
             ZKFMetadataParser.createFileSource(element.select("span"));
         // Add EventFiles to the current EventFileSource

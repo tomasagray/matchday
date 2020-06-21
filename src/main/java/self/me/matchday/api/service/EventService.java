@@ -180,30 +180,12 @@ public class EventService {
 
   public Event saveEvent(@NotNull final Event event) {
 
+    // See if Event already exists in DB
+    final Optional<Event> eventOptional = fetchById(event.getEventId());
+    // Merge EventFileSources
+    eventOptional.ifPresent(value -> event.getFileSources().addAll(value.getFileSources()));
+    // Save to DB
     return
       eventRepository.saveAndFlush(event);
   }
-
-//  /**
-//   * Fetch the 3 most recent Events.
-//   *
-//   * @return A CollectionModel of Events.
-//   */
-//  public Optional<CollectionModel<EventResource>> fetchFeaturedEvents() {
-//
-//    Log.i(LOG_TAG, "Fetching featured Events.");
-//    final int EVENT_COUNT = 3;
-//
-//    // Get latest 3 events from DB
-//    final Optional<List<Event>> eventOptional = eventRepository
-//        .fetchLatestEvents(PageRequest.of(0, EVENT_COUNT));
-//    if (eventOptional.isPresent()) {
-//      final List<Event> events = eventOptional.get();
-//      return Optional.of(eventResourceAssembler.toCollectionModel(events));
-//    } else {
-//      Log.i(LOG_TAG, "Attempted to retrieve featured Events, but none found.");
-//      return Optional.empty();
-//    }
-//  }
-
 }

@@ -4,16 +4,20 @@
 
 package self.me.matchday.feed.blogger.galataman;
 
+import static self.me.matchday.feed.blogger.galataman.GManPatterns.COMP_PATTERN;
+import static self.me.matchday.feed.blogger.galataman.GManPatterns.DATE_PATTERN;
+import static self.me.matchday.feed.blogger.galataman.GManPatterns.DATE_TIME_FORMATTER;
+import static self.me.matchday.feed.blogger.galataman.GManPatterns.TEAMS_PATTERN;
+import static self.me.matchday.feed.blogger.zkfootball.ZKFPatterns.SEASON_PATTERN;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import self.me.matchday.feed.IEventParser;
-import self.me.matchday.feed.InvalidMetadataException;
+import self.me.matchday.feed.blogger.zkfootball.ZKFPatterns;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Fixture;
@@ -30,15 +34,6 @@ public class GalatamanEventParser implements IEventParser {
 
   private static final String LOG_TAG = "GalatamanEventParser";
 
-  // Patterns
-  private static final Pattern COMP_PATTERN = Pattern.compile("^(\\w+[^0-9])+ ");
-  private static final Pattern SEASON_PATTERN = Pattern.compile("\\d{2}/\\d{2}");
-  private static final Pattern FIXTURE_PATTERN = Pattern.compile("(Matchday) (\\d+)");
-  private static final Pattern TEAMS_PATTERN = Pattern.compile("(?U)([\\w ?]+) vs.? ([\\w ?]+)");
-  private static final Pattern DATE_PATTERN = Pattern.compile("\\d{2}/\\d{2}/\\d{4}");
-  private static final DateTimeFormatter DATE_TIME_FORMATTER =
-      DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
   // Fields
   private final String title;
   private final Competition competition;
@@ -53,7 +48,6 @@ public class GalatamanEventParser implements IEventParser {
   public GalatamanEventParser(@NotNull final String title) {
 
     this.title = title;
-
     // Determine each element of the Event metadata from title parts.
     this.competition = parseCompetitionData();
     this.season = parseSeasonData();
@@ -101,46 +95,37 @@ public class GalatamanEventParser implements IEventParser {
 
   private @NotNull Season parseSeasonData() {
 
-    final int MILLENNIUM = 2_000;
-    int startYear = MILLENNIUM, endYear = MILLENNIUM;
-    final String SEASON_SPLITTER = "/";
-
-    // Parse season
-    final Matcher seasonMatcher = SEASON_PATTERN.matcher(title);
-    if (seasonMatcher.find()) {
-      // Get season String
-      final String seasonString = seasonMatcher.group().trim();
-      // Parse season data
-      if (seasonString.contains(SEASON_SPLITTER)) {
-        final String[] years = seasonString.split(SEASON_SPLITTER);
-        // Ensure we have exactly 2 years
-        if (years.length != 2) {
-          throw new InvalidMetadataException(
-              String.format("Could not parse Season years from title: %s", title));
-        }
-        // Convert Strings to ints
-        startYear += Integer.parseInt(years[0]);
-        endYear += Integer.parseInt(years[1]);
-      } else {
-        startYear = Integer.parseInt(seasonString);
-        endYear = startYear + 1;
+    Season result = new Season();
+    final Matcher matcher = SEASON_PATTERN.matcher(title);
+    try {
+      if (matcher.find()) {
+        final int startYear = fixYear(Integer.parseInt(matcher.group(1)));
+        final int endYear = fixYear(Integer.parseInt(matcher.group(2)));
+        result = new Season(startYear, endYear);
       }
-      // Create Season
-      return new Season(startYear, endYear);
-    } else {
-      // Return a default Season
-      return new Season();
-    }
+    } catch (NumberFormatException ignore) {}
+
+    return result;
   }
 
-  private @Nullable Fixture parseFixtureData() {
+  private @NotNull Fixture parseFixtureData() {
 
-    // Parse fixture
-    final Matcher fixtureMatcher = FIXTURE_PATTERN.matcher(title);
-    return
-        fixtureMatcher.find() ?
-            new Fixture(fixtureMatcher.group(1), Integer.parseInt(fixtureMatcher.group(2))) :
-            null;
+    // Result container
+    Fixture result = new Fixture();
+    final Matcher matcher = ZKFPatterns.FIXTURE_PATTERN.matcher(title);
+
+    try {
+      if (matcher.find()) {
+        if (matcher.group(1) != null) {
+          result = new Fixture(matcher.group(1));
+        } else if (matcher.group(3) != null && matcher.group(4) != null) {
+          final String str = matcher.group(3).replace(matcher.group(4), "");
+          final int i = Integer.parseInt(str);
+          result = new Fixture(i);
+        }
+      }
+    } catch (NumberFormatException ignore) {}
+    return result;
   }
 
   private @NotNull LocalDateTime parseDateData() {

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Container class for variables specific to the ZKFootball Blogger blog, needed for parsing.
  */
-public class ZKPatterns {
+public class ZKFPatterns {
 
   // Selects the container elements for Event metadata
   public static final Pattern METADATA_PATTERN = Pattern
@@ -26,6 +26,13 @@ public class ZKPatterns {
       Pattern.compile("mb/sec", Pattern.CASE_INSENSITIVE);
   public static final Pattern kbpsPattern =
       Pattern.compile("kbps", Pattern.CASE_INSENSITIVE);
+
+  // Event patterns
+  public static final Pattern COMP_PATTERN = Pattern.compile("^([\\w\\s])+ ");
+  public static final Pattern SEASON_PATTERN = Pattern.compile(" (\\d{2,4})/(\\d{2,4}) ");
+  public static final Pattern FIXTURE_PATTERN =
+      Pattern.compile("((Semi-)?Final)|((J|(Matchday ))\\d+)");
+  public static final Pattern TEAMS_PATTERN = Pattern.compile("(?U)([\\w ?]+) vs.? ([\\w ?]+)");
 
   /**
    * Does the supplied text String contain EventFileSource metadata?

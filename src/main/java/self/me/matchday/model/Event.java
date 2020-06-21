@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -37,7 +38,7 @@ public abstract class Event {
   protected Season season;
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Fixture fixture;
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   protected final Set<EventFileSource> fileSources = new TreeSet<>();
   protected String title;
   protected LocalDateTime date;
@@ -49,14 +50,13 @@ public abstract class Event {
    * @return True/false if the collection was modified
    */
   public boolean addFileSources(@NotNull final Collection<EventFileSource> fileSources) {
-
     // Add all collection elements to set
     return this.fileSources.addAll(fileSources);
   }
 
   // Ensure consistent Event ID generation
   protected static final DateTimeFormatter EVENT_ID_DATE_FORMATTER =
-      DateTimeFormatter.ISO_LOCAL_DATE;
+      DateTimeFormatter.ofPattern("yyyy-MM-W");
 
   /**
    * Defines default Event sorting order - reverse chronological.

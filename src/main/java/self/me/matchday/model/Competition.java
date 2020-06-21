@@ -33,7 +33,6 @@ public class Competition implements Serializable {
 
   private static final long serialVersionUID = 123456L;   // for cross-platform serialization
 
-  // Fields
   @Id
   private String competitionId;
   private String name;
@@ -74,7 +73,6 @@ public class Competition implements Serializable {
     if( !(obj instanceof Competition) ) {
       return false;
     }
-
     // Cast for comparison
     Competition competition = (Competition)obj;
     return competition.getName().equals(this.getName());

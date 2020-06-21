@@ -33,7 +33,6 @@ public final class Fixture implements Serializable {
   private String title;
   private Integer fixtureNumber = 0;
 
-  // Default constructor
   public Fixture() {
     this.fixtureId = MD5String.generate();
   }
@@ -41,10 +40,15 @@ public final class Fixture implements Serializable {
     this.title = title.trim();
     this.fixtureId = MD5String.fromData(title);
   }
+  public Fixture(final int fixtureNumber) {
+    this.title = DEFAULT_TITLE;
+    this.fixtureNumber = fixtureNumber;
+    this.fixtureId = MD5String.fromData(title, fixtureNumber+"");
+  }
   public Fixture(@NotNull String title, int fixtureNumber) {
     this.title = title.trim();
     this.fixtureNumber = fixtureNumber;
-    this.fixtureId = MD5String.fromData(title + fixtureNumber);
+    this.fixtureId = MD5String.fromData(title, fixtureNumber+"");
   }
 
   @NotNull
