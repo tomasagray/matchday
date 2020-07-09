@@ -11,8 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.EventResource;
 import self.me.matchday.api.resource.TeamResource;
@@ -21,9 +22,8 @@ import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.TeamService;
 
 @RestController
+@RequestMapping(value = "/teams")
 public class TeamController {
-
-  private static final String LOG_TAG = "TeamController";
 
   private final TeamService teamService;
   private final EventService eventService;
@@ -43,7 +43,7 @@ public class TeamController {
    *
    * @return A List of Teams as an HttpEntity.
    */
-  @GetMapping("/teams")
+  @RequestMapping(value = "/", method = RequestMethod.GET)
   public ResponseEntity<CollectionModel<TeamResource>> fetchAllTeams() {
 
     return
@@ -59,7 +59,7 @@ public class TeamController {
    * @param teamId The Team ID (MD5 String)
    * @return The Team as an HttpEntity.
    */
-  @GetMapping("/teams/team/{teamId}")
+  @RequestMapping(value = "/team/{teamId}", method = RequestMethod.GET)
   public ResponseEntity<TeamResource> fetchTeamById(@PathVariable final String teamId) {
 
     return
@@ -75,7 +75,7 @@ public class TeamController {
    * @param teamId The ID of the Team.
    * @return A CollectionModel of Events.
    */
-  @GetMapping("/teams/team/{teamId}/events")
+  @RequestMapping(value = "/team/{teamId}/events", method = RequestMethod.GET)
   public ResponseEntity<CollectionModel<EventResource>> fetchEventsForTeam(
       @PathVariable final String teamId) {
 
@@ -96,9 +96,10 @@ public class TeamController {
    * @param teamId The ID of the Team
    * @return A byte array containing the image data; written to response body.
    */
-  @GetMapping(
-      value = "/teams/team/{teamId}/emblem",
-      produces = MediaType.IMAGE_PNG_VALUE
+  @RequestMapping(
+      value = "/team/{teamId}/emblem",
+      produces = MediaType.IMAGE_PNG_VALUE,
+      method = RequestMethod.GET
   )
   public ResponseEntity<byte[]> fetchTeamEmblem(@PathVariable final String teamId) {
 
@@ -119,9 +120,10 @@ public class TeamController {
    * @param teamId The ID of the Team.
    * @return A byte array of the image data.
    */
-  @GetMapping(
-      value = "/teams/team/{teamId}/fanart",
-      produces = MediaType.IMAGE_JPEG_VALUE
+  @RequestMapping(
+      value = "/team/{teamId}/fanart",
+      produces = MediaType.IMAGE_JPEG_VALUE,
+      method = RequestMethod.GET
   )
   public ResponseEntity<byte[]> fetchTeamFanart(@PathVariable final String teamId) {
 

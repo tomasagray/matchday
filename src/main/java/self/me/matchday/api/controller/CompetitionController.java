@@ -11,8 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.CompetitionResource;
 import self.me.matchday.api.resource.EventResource;
@@ -22,11 +23,9 @@ import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.TeamService;
 
-// TODO: Add route prefix annotation
 @RestController
+@RequestMapping(value = "/competitions")
 public class CompetitionController {
-
-  private static final String LOG_TAG = "CompetitionController";
 
   private final CompetitionService competitionService;
   private final TeamService teamService;
@@ -49,7 +48,7 @@ public class CompetitionController {
    *
    * @return All Competitions as an HttpEntity.
    */
-  @GetMapping("/competitions")
+  @RequestMapping(value = "/", method = RequestMethod.GET)
   public ResponseEntity<CollectionModel<CompetitionResource>> fetchAllCompetitions() {
     return
         competitionService
@@ -64,7 +63,7 @@ public class CompetitionController {
    * @param competitionId MD5 String ID for the desired Competition.
    * @return A Competition Resource.
    */
-  @GetMapping("/competitions/competition/{competitionId}")
+  @RequestMapping(value = "/competition/{competitionId}", method = RequestMethod.GET)
   public ResponseEntity<CompetitionResource> fetchCompetitionById(
       @PathVariable final String competitionId) {
 
@@ -81,7 +80,7 @@ public class CompetitionController {
    * @param competitionId The ID of the competition
    * @return A CollectionModel containing the Teams.
    */
-  @GetMapping("/competitions/competition/{competitionId}/teams")
+  @RequestMapping(value = "/competition/{competitionId}/teams", method = RequestMethod.GET)
   public ResponseEntity<CollectionModel<TeamResource>> fetchCompetitionTeams(
       @PathVariable final String competitionId) {
 
@@ -98,7 +97,7 @@ public class CompetitionController {
    * @param competitionId The ID of the Competition.
    * @return A ResponseEntity containing the CollectionModel of Events.
    */
-  @GetMapping("/competitions/competition/{competitionId}/events")
+  @RequestMapping(value = "/competition/{competitionId}/events", method = RequestMethod.GET)
   public ResponseEntity<CollectionModel<EventResource>> fetchCompetitionEvents(
       @PathVariable final String competitionId) {
 
@@ -119,9 +118,10 @@ public class CompetitionController {
    * @param competitionId The ID of the Competition.
    * @return A byte array of the image.
    */
-  @GetMapping(
-      value = "/competitions/competition/{competitionId}/emblem",
-      produces = MediaType.IMAGE_PNG_VALUE
+  @RequestMapping(
+      value = "/competition/{competitionId}/emblem",
+      produces = MediaType.IMAGE_PNG_VALUE,
+      method = RequestMethod.GET
   )
   public ResponseEntity<byte[]> fetchCompetitionEmblem(@PathVariable final String competitionId) {
 
@@ -142,9 +142,10 @@ public class CompetitionController {
    * @param competitionId The ID of the Competition
    * @return A byte array of the image data.
    */
-  @GetMapping(
-      value = "/competitions/competition/{competitionId}/fanart",
-      produces = MediaType.IMAGE_JPEG_VALUE
+  @RequestMapping(
+      value = "/competition/{competitionId}/fanart",
+      produces = MediaType.IMAGE_JPEG_VALUE,
+      method = RequestMethod.GET
   )
   public ResponseEntity<byte[]> fetchCompetitionFanart(@PathVariable final String competitionId) {
 
@@ -165,9 +166,10 @@ public class CompetitionController {
    * @param competitionId The ID of the Competition.
    * @return A byte array containing the image data.
    */
-  @GetMapping(
-      value = "/competitions/competition/{competitionId}/monochrome-emblem",
-      produces = MediaType.IMAGE_PNG_VALUE
+  @RequestMapping(
+      value = "/competition/{competitionId}/monochrome-emblem",
+      produces = MediaType.IMAGE_PNG_VALUE,
+      method = RequestMethod.GET
   )
   public ResponseEntity<byte[]> fetchCompetitionMonochromeEmblem(
       @PathVariable final String competitionId) {
@@ -189,9 +191,10 @@ public class CompetitionController {
    * @param competitionId The ID of the Competition.
    * @return A byte array containing the image data.
    */
-  @GetMapping(
-      value = "/competitions/competition/{competitionId}/landscape",
-      produces = MediaType.IMAGE_JPEG_VALUE
+  @RequestMapping(
+      value = "/competition/{competitionId}/landscape",
+      produces = MediaType.IMAGE_JPEG_VALUE,
+      method = RequestMethod.GET
   )
   public ResponseEntity<byte[]> fetchCompetitionLandscape(@PathVariable final String competitionId) {
 
