@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Refresh Tool</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="refresh.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<body>
+<div class="header">
+  <h1>Event Refresh Tool</h1>
+</div>
+
+<div id="body-container">
+  <div id="content-container">
+    <div id="tabs-container">
+      <ul id="tabs">
+        <li><a href="#tabs-1">General Refresh</a></li>
+        <li><a href="#tabs-2">Refresh on Label</a></li>
+        <li><a href="#tabs-3">Refresh by Date</a></li>
+      </ul>
+
+      <div id="tabs-1" class="refresh-tab">
+        <p>Click the button below for a general refresh.</p>
+        <div>
+          <div class="ajax-container">
+            <input type="button" id="general-refresh-button" class="ajax-button" value="Refresh">
+            <img src="spinner_32x32.gif" alt="Loading..." width="32" class="ajax-loader"/>
+          </div>
+        </div>
+      </div>
+      <div id="tabs-2" class="refresh-tab">
+        <label for="refresh-label"> Enter a label to refresh: </label>
+        <input type="text" name="refresh-label" id="refresh-label" maxlength="255"
+               placeholder="Label..."/>
+        <div class="ajax-container">
+          <input type="button" id="label-refresh-button" class="ajax-button" value="Refresh"/>
+          <img src="spinner_32x32.gif" alt="Loading..." width="32" class="ajax-loader"/>
+        </div>
+      </div>
+      <div id="tabs-3" class="refresh-tab">
+          <label for="datepicker">Select End Date (time will be 12:00AM)</label>
+          <input type="text" id="datepicker" name="datepicker" placeholder="Date...">
+        <div class="ajax-container">
+          <input type="button" id="date-refresh-button" class="ajax-button" value="Refresh"/>
+          <img src="spinner_32x32.gif" alt="Loading..." width="32" class="ajax-loader"/>
+        </div>
+      </div>
+    </div>
+    <div id="status">
+      <p id="total-events">Total Events: <span id="event-count" class="bold">~</span></p>
+      <div id="events"></div>
+    </div>
+  </div>
+</div>
+<script src="refresh.js" type="text/javascript"></script>
+</body>
+</html>
