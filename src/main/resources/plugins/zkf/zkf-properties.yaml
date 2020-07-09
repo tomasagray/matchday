@@ -1,0 +1,5 @@
+zkf-plugin:
+  id: 8bea449c-bd9f-11ea-b3de-0242ac130004
+  title: ZK Football Matches Parser
+  baseUrl: zkfootballmatch.blogspot.com
+  description: Processes Blogger posts from the ZK Football Matches blog into EventSources

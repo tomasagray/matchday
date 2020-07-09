@@ -1,5 +1,8 @@
 package self.me.matchday.api.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +18,7 @@ import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
 import self.me.matchday.db.EventRepository;
 import self.me.matchday.db.HighlightShowRepository;
 import self.me.matchday.db.MatchRepository;
+import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.HighlightShow;
@@ -178,14 +182,64 @@ public class EventService {
    * Setters
    * ============================================================================================ */
 
-  public Event saveEvent(@NotNull final Event event) {
+  /**
+   * Persist an Event; must pass validation, or will skip and make a note in logs.
+   *
+   * @param event The Event to be saved
+   */
+  public void saveEvent(@NotNull final Event event) {
 
-    // See if Event already exists in DB
-    final Optional<Event> eventOptional = fetchById(event.getEventId());
-    // Merge EventFileSources
-    eventOptional.ifPresent(value -> event.getFileSources().addAll(value.getFileSources()));
-    // Save to DB
+    if (isValidEvent(event)) {
+      // See if Event already exists in DB
+      final Optional<Event> eventOptional = fetchById(event.getEventId());
+      // Merge EventFileSources
+      eventOptional.ifPresent(value -> event.getFileSources().addAll(value.getFileSources()));
+      // Save to DB
+      Log.i(LOG_TAG, "Saving event: " + eventRepository.saveAndFlush(event));
+    } else {
+      Log.d(LOG_TAG, String.format("Event: %s was not saved to DB; invalid", event));
+    }
+  }
+
+  /**
+   * Ensure Event meets certain criteria.
+   *
+   * @param event The Event to be validated
+   * @return True/false - Is a valid Event
+   */
+  private boolean isValidEvent(final Event event) {
+
+    // Criteria
+    boolean titleValid = false,
+        competitionValid = false,
+        dateValid = false;
+    // Minimum date
+    final LocalDateTime MIN_DATE =
+        LocalDateTime.of(LocalDate.ofYearDay(1970, 1), LocalTime.MIN);
+
+    if (event != null) {
+      // Validate title
+      final String title = event.getTitle();
+      if (title != null && !("".equals(title))) {
+        titleValid = true;
+      }
+      // Validate Competition
+      final Competition competition = event.getCompetition();
+      if (competition != null) {
+        final String name = competition.getName();
+        if (name != null && !("".equals(name))) {
+          competitionValid = true;
+        }
+      }
+      // Validate date
+      final LocalDateTime date = event.getDate();
+      if (date != null && date.isAfter(MIN_DATE)) {
+        dateValid = true;
+      }
+    }
+
+    // Perform test
     return
-      eventRepository.saveAndFlush(event);
+        titleValid && competitionValid && dateValid;
   }
 }

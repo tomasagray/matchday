@@ -22,6 +22,7 @@ import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.TeamService;
 
+// TODO: Add route prefix annotation
 @RestController
 public class CompetitionController {
 

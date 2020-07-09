@@ -1,0 +1,6 @@
+plugin:
+  gman:
+    id: 1cf215c4-bd9f-11ea-b3de-0242ac130004
+    title: Galataman HDF Parser
+    baseUrl: galatamanhdfb.blogspot.com
+    description: Processes Blogger posts from the Galataman HDF blog into EventSources
