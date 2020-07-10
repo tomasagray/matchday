@@ -1,5 +1,0 @@
-plugin-blogger:
-  id:64d08bc8-bd9f-11ea-b3de-0242ac130004
-  title: Blogger
-  description: Reads a Blogger blog from either HTML or JSON sources, and makes it available to\
-  the containing application as a POJO. Implements the DataSourcePlugin<> interface.
