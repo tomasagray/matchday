@@ -18,7 +18,7 @@ class VideoMetadataServiceTest {
 
   private static final String LOG_TAG = "VideoMetadataServiceTest";
 
-  private static final String URL = "http://192.168.0.101/soccer/testing/videos/1st_half.ts";
+  private static final String URL = "http://192.168.0.101/stream2stream/rm-atleti-2019/1st_half.ts";
   private static URL TEST_URL;
   private static VideoMetadataService videoMetadataService;
   private static VideoMetadata videoMetadata;

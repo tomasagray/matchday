@@ -1,4 +1,4 @@
-package self.me.matchday.fileserver.inclouddrive;
+package self.me.matchday.plugin.fileserver.inclouddrive;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.fileserver.FSUser;
+import self.me.matchday.plugin.fileserver.FSUser;
 import self.me.matchday.io.TextFileReader;
 import self.me.matchday.util.Log;
 
@@ -25,7 +25,7 @@ import self.me.matchday.util.Log;
 @SpringBootTest
 @DisplayName("Testing for InCloudDrive fileserver manager")
 @TestMethodOrder(OrderAnnotation.class)
-class ICDManagerTest {
+class ICDPluginTest {
 
   private static final String LOG_TAG = "ICDMTest";
 
@@ -41,7 +41,7 @@ class ICDManagerTest {
       "https://d\\d+\\.inclouddrive.com/download.php\\?accesstoken=[\\w-]+";
 
   @Autowired
-  private ICDManager icdManager;
+  private ICDPlugin icdPlugin;
   private static FSUser fsUser;
 
   @BeforeAll
@@ -53,8 +53,7 @@ class ICDManagerTest {
     // Split login data
     final String[] loginData = loginDataString.split(",");
     // Create fileserver user
-    fsUser = new ICDUser(loginData[0], loginData[1]);
-
+    fsUser = new FSUser(loginData[0], loginData[1], true);
     // Create file URL
     FILE_URL = new URL(FILE_LINK);
   }
@@ -65,9 +64,9 @@ class ICDManagerTest {
   @DisplayName("Testing login function")
   void login() {
 
-    Log.i(LOG_TAG, "Testing login functionality");
+    Log.i(LOG_TAG, String.format("Testing login functionality with user: %s", fsUser));
     // Attempt login of user
-    final boolean login = icdManager.login(fsUser);
+    final boolean login = icdPlugin.login(fsUser);
     Log.i(LOG_TAG, "Login success: " + login);
     assertTrue(login);
   }
@@ -79,7 +78,7 @@ class ICDManagerTest {
 
     Log.i(LOG_TAG, String.format("Testing link: %s", FILE_LINK));
     // Perform test
-    assert icdManager.acceptsUrl(FILE_URL);
+    assert icdPlugin.acceptsUrl(FILE_URL);
   }
 
   @Test
@@ -90,7 +89,7 @@ class ICDManagerTest {
     Log.i(LOG_TAG, String.format("Getting download link for: %s", FILE_LINK));
 
     // Get download (direct) link
-    final Optional<URL> downloadURL = icdManager.getDownloadURL(FILE_URL);
+    final Optional<URL> downloadURL = icdPlugin.getDownloadURL(FILE_URL);
     // Primary test
     assertTrue(downloadURL.isPresent());
     downloadURL.ifPresent(url -> {
