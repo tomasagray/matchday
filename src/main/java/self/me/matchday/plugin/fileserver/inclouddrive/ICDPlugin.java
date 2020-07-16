@@ -2,12 +2,9 @@
  * Copyright © 2020, Tomás Gray. All rights reserved.
  */
 
-package self.me.matchday.fileserver.inclouddrive;
+package self.me.matchday.plugin.fileserver.inclouddrive;
 
 import static java.net.HttpURLConnection.HTTP_OK;
-import static self.me.matchday.fileserver.inclouddrive.ICDData.DOWNLOAD_LINK_IDENTIFIER;
-import static self.me.matchday.fileserver.inclouddrive.ICDData.USER_AGENT;
-import static self.me.matchday.fileserver.inclouddrive.ICDData.USER_DATA_IDENTIFIER;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -23,36 +20,43 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.UUID;
+import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import self.me.matchday.fileserver.FSUser;
-import self.me.matchday.fileserver.IFSManager;
 import self.me.matchday.io.JsonStreamReader;
+import self.me.matchday.plugin.fileserver.FSUser;
+import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.util.Log;
 
 /**
  * Implementation of file server management for the InCloudDrive file service.
  */
 @Component
-public class ICDManager implements IFSManager {
+public class ICDPlugin implements FileServerPlugin {
 
-  private static final String LOG_TAG = "ICDManager";
+  private static final String LOG_TAG = "ICDPlugin";
   private static final Duration REFRESH_RATE = Duration.ofHours(4);
 
-  // Fields
   private final ICDCookieManager cookieManager;
-  private ICDUser user;
-  private boolean isLoggedIn; // Current login status
+  private final ICDPluginProperties pluginProperties;
+  private final Pattern acceptUrlPattern;
+  private FSUser user;
+  private boolean isLoggedIn;
 
-  // Constructor
   @Autowired
-  public ICDManager(@NotNull final ICDCookieManager cookieManager) {
-    // Setup cookie management
+  public ICDPlugin(@NotNull final ICDCookieManager cookieManager,
+      @NotNull final ICDPluginProperties pluginProperties) {
+
     this.cookieManager = cookieManager;
+    this.pluginProperties = pluginProperties;
+
+    // Create URL pattern
+    acceptUrlPattern = Pattern.compile(pluginProperties.getUrlPattern());
     // Set default status to 'logged out'
     this.isLoggedIn = false;
   }
@@ -69,15 +73,16 @@ public class ICDManager implements IFSManager {
 
     // Create POST connection & attach request data
     try {
+
       // Get login data
       byte[] loginData = getLoginDataByteArray(fsUser);
+      final String loginUrl =
+          pluginProperties.getBaseUrl() + pluginProperties.getLoginUri();
       // Setup connection
       HttpURLConnection connection =
-          setupICDPostConnection(ICDData.getLoginURL(), loginData.length);
-
+          setupICDPostConnection(new URL(loginUrl), loginData.length);
       // Connect
       connection.connect();
-      // POST login data
       // POST login data to OutputStream
       try (OutputStream os = connection.getOutputStream()) {
         os.write(loginData);
@@ -92,9 +97,14 @@ public class ICDManager implements IFSManager {
         if (isLoginSuccessful(loginResponse)) {
           this.isLoggedIn = true;
           // Save user instance
-          this.user = (ICDUser)fsUser;
-          // Extract cookie from response, create userdata cookie
-          cookieManager.saveUserDataCookie(loginResponse.get(USER_DATA_IDENTIFIER).getAsString());
+          this.user = fsUser;
+          // Extract cookie from response
+          final String userdata =
+              loginResponse
+                  .get(pluginProperties.getUserDataIdentifier())
+                  .getAsString();
+          // Create userdata cookie
+          cookieManager.saveUserDataCookie(userdata);
           Log.i(LOG_TAG, "Successfully logged in user: " + user);
           // Login success!
           return true;
@@ -104,7 +114,7 @@ public class ICDManager implements IFSManager {
               LOG_TAG,
               String.format(
                   "Failed to login with user: %s; login response: %s",
-                  user,
+                  fsUser,
                   (loginResponse == null || loginResponse.isJsonNull())
                       ? null
                       : loginResponse.toString()));
@@ -144,7 +154,11 @@ public class ICDManager implements IFSManager {
   // ===============================================================================================
   @Override
   public boolean acceptsUrl(@NotNull URL url) {
-    return ICDData.getUrlMatcher(url.toString()).find();
+
+    return
+        acceptUrlPattern
+            .matcher(url.toString())
+            .find();
   }
 
   /**
@@ -168,7 +182,7 @@ public class ICDManager implements IFSManager {
     // Read the page from the file server & DOM-ify it
     Document filePage = Jsoup.parse(readServerResponse(connection));
     // Get all <a> with the link identifier class
-    Elements elements = filePage.getElementsByClass(DOWNLOAD_LINK_IDENTIFIER);
+    Elements elements = filePage.getElementsByClass(pluginProperties.getLinkIdentifier());
     // - If we got a hit
     if (!elements.isEmpty()) {
       // - Extract href from <a>
@@ -212,7 +226,7 @@ public class ICDManager implements IFSManager {
     connection.setRequestProperty(
         "Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
     // Set user agent (how we appear to server)
-    connection.setRequestProperty("User-Agent", USER_AGENT);
+    connection.setRequestProperty("User-Agent", pluginProperties.getUserAgent());
 
     // Return the connection
     return connection;
@@ -313,5 +327,23 @@ public class ICDManager implements IFSManager {
     }
 
     return sb.toString();
+  }
+
+  @Override
+  public UUID getPluginId() {
+    return
+        UUID.fromString(pluginProperties.getId());
+  }
+
+  @Override
+  public String getTitle() {
+    return
+        pluginProperties.getTitle();
+  }
+
+  @Override
+  public String getDescription() {
+    return
+        pluginProperties.getDescription();
   }
 }

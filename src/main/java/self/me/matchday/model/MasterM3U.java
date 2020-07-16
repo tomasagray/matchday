@@ -11,6 +11,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -46,7 +47,14 @@ public final class MasterM3U extends M3UPlaylist {
 
   public void addVariant(@NotNull final EventFileSource eventFileSource,
       @NotNull final URI playlistLink) {
-    variantPlaylistEntries.add(new VariantPlaylistEntry(eventFileSource, playlistLink));
+
+    // Create variant
+    final VariantPlaylistEntry playlistEntry =
+        new VariantPlaylistEntry(eventFileSource, playlistLink);
+    if (variantPlaylistEntries.size() == 0) {
+      playlistEntry.setDefault(true);
+    }
+    variantPlaylistEntries.add(playlistEntry);
   }
 
   /**
@@ -62,18 +70,27 @@ public final class MasterM3U extends M3UPlaylist {
     // Result container
     final StringBuilder stringBuilder = new StringBuilder(HEADER).append("\n");
 
-    // Organize file sources by video resolution
+    // Sort file sources by video resolution
     final TreeMap<Resolution, List<VariantPlaylistEntry>> variantPlaylistEntries =
         getVariantPlaylistEntries()
             .stream()
             .collect(groupingBy(VariantPlaylistEntry::getResolution, TreeMap::new, toList()));
 
+    AtomicBoolean first = new AtomicBoolean(true);
     variantPlaylistEntries.forEach(
         (resolution, variantPlaylists) -> {
           // Add each variant
           if (variantPlaylists.size() > 1) {
             variantPlaylists.forEach(
-                variantPlaylistEntry -> stringBuilder.append(variantPlaylistEntry).append("\n"));
+                variantPlaylistEntry -> {
+                  // Set first variant to default
+                  if (first.get()) {
+                    variantPlaylistEntry.setDefault(true);
+                    first.set(false);
+                  }
+                  // Add each variant to output String
+                  stringBuilder.append(variantPlaylistEntry).append("\n");
+                });
           }
           // Add default playlist for each resolution
           stringBuilder.append(variantPlaylists.get(0).getPlaylistIdentifier());
@@ -100,7 +117,6 @@ public final class MasterM3U extends M3UPlaylist {
     private static final String DEFAULT_TAG = "DEFAULT=";
     private static final String URI_TAG = "URI=";
 
-    // Fields
     @Id
     @GeneratedValue
     private Long id;
@@ -109,6 +125,7 @@ public final class MasterM3U extends M3UPlaylist {
     @ElementCollection
     private List<String> languages;
     private long bitrate;
+    private boolean isDefault;
 
     VariantPlaylistEntry(@NotNull EventFileSource eventFileSource, @NotNull URI playlistLink) {
       this.playlistLink = playlistLink;
@@ -130,7 +147,7 @@ public final class MasterM3U extends M3UPlaylist {
           + "\""
           + String.join("/", getLanguages())
           + "\","
-          // todo: add default status
+          + "DEFAULT=" + (isDefault ? "YES" : "NO") + ","
           + URI_TAG
           + "\""
           + getPlaylistLink()

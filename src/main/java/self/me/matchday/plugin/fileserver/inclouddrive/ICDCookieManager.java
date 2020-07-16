@@ -2,7 +2,7 @@
  * Copyright © 2020, Tomás Gray. All rights reserved.
  */
 
-package self.me.matchday.fileserver.inclouddrive;
+package self.me.matchday.plugin.fileserver.inclouddrive;
 
 import java.io.IOException;
 import java.net.CookieManager;
@@ -25,12 +25,11 @@ class ICDCookieManager extends CookieManager {
 
   private static final String LOG_TAG = "ICDCookieManager";
 
-  private static final URI DOMAIN = URI.create("." + ICDData.getDomain());
+  private static final URI DOMAIN = URI.create(".inclouddrive.com");
   private static final String USERDATA = "userdata";
 
   private final CookieService cookieService;
 
-  // TODO: Reverse dependency
   @Autowired
   ICDCookieManager(@NotNull final CookieService cookieService) {
 

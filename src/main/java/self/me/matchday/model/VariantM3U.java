@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -22,11 +20,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 
-// TODO: Do we need to save VariantM3U to DB?
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@Entity
 public class VariantM3U extends M3UPlaylist {
 
   // M3UPlaylist extended tags
@@ -128,13 +124,9 @@ public class VariantM3U extends M3UPlaylist {
    * Represents a single segment (record) in the playlist, which includes the URI of the media
    * resource, its duration in seconds and an optional title.
    */
-  @Entity
   @NoArgsConstructor
   private static class MediaSegment implements Comparable<MediaSegment> {
 
-    @Id
-    @GeneratedValue
-    private Long id;
     private URL url;
     private String eventTitle;
     private EventPartIdentifier partIdentifier;

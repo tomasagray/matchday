@@ -90,6 +90,7 @@ public class VariantPlaylistService {
       if (fileSrcId.equals(fileSource.getEventFileSrcId())) {
         // We have found our file source
         result = Optional.of(fileSource);
+        break;
       }
     }
     return result;

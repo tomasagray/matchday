@@ -2,19 +2,21 @@
  * Copyright © 2020, Tomás Gray. All rights reserved.
  */
 
-package self.me.matchday.fileserver;
+package self.me.matchday.plugin.fileserver;
 
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.plugin.Plugin;
 
 /**
  * Represents a file server management service. Can log-in/logout and translate download requests.
  */
-public interface IFSManager {
+public interface FileServerPlugin extends Plugin {
 
+  // TODO: Make this return a ResponseEntity<> of cookies/response
   /**
    *  Login to the file server
    */

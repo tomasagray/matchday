@@ -3,7 +3,7 @@ package self.me.matchday.plugin.datasource;
 import java.time.LocalDate;
 import self.me.matchday.model.Event;
 
-public interface EventParser {
+public interface EventMetadataParser {
 
   Event getEvent();
 

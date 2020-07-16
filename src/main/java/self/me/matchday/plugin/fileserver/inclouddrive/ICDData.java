@@ -2,28 +2,12 @@
  * Copyright © 2020, Tomás Gray. All rights reserved.
  */
 
-package self.me.matchday.fileserver.inclouddrive;
+package self.me.matchday.plugin.fileserver.inclouddrive;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.util.Log;
-
-/** Helper class to hold data relevant to file-server (url, options, etc.) */
+/** Helper class to hold data relevant to file-server (ICDUrl, options, etc.) */
 public final class ICDData {
-
+/*
   private static final String LOG_TAG = "ICDDataClass";
-
-  // File server login URL
-  private static URL loginUrl;
-
-  // User/access data
-  private static final int me = 0;
-  private static final String app = "br68ufmo5ej45ue1q10w68781069v666l2oh1j2ijt94";
-  private static final String accessToken = "";
 
   static final String DOWNLOAD_LINK_IDENTIFIER = "downloadnow";
   static final String USER_DATA_IDENTIFIER = "doz";
@@ -35,16 +19,25 @@ public final class ICDData {
       =
       "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
 
+  private static final String FILE_URL_PATTERN = "https://www.inclouddrive.com/file/.*";
+
+
+  // File server login URL
+  private static URL loginUrl;
+
+  // User/access data
+  private static final int me = 0;
+  private static final String app = "br68ufmo5ej45ue1q10w68781069v666l2oh1j2ijt94";
+  private static final String userAccess = "";
 
   // URL data
-  private static final String FILE_URL_PATTERN = "https://www.inclouddrive.com/file/.*";
   private static final Pattern urlMatcher = Pattern.compile(FILE_URL_PATTERN);
   private static final String protocol = "https://";
   private static final String domain = "inclouddrive.com";
   private static final String subDomain = "www";
   private static final String baseURL = protocol + subDomain + "." + domain + "/";
   private static final String loginString =
-      baseURL + "api/" + me + "/signmein?useraccess=" + accessToken + "&access_token=" + app;
+      baseURL + "api/" + me + "/signmein?useraccess=" + userAccess + "&access_token=" + app;
 
   // Initialize file server URL
   static
@@ -55,6 +48,9 @@ public final class ICDData {
       Log.e(LOG_TAG, "Error parsing InCloudDrive data!", e);
     }
   }
+
+
+
 
   @Contract(pure = true)
   public static String getDomain() {
@@ -69,5 +65,5 @@ public final class ICDData {
 
   public static @NotNull Matcher getUrlMatcher(@NotNull final String data) {
     return urlMatcher.matcher(data);
-  }
+  }*/
 }

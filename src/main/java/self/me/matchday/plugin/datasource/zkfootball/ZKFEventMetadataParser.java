@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import self.me.matchday.plugin.datasource.EventParser;
+import self.me.matchday.plugin.datasource.EventMetadataParser;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Fixture;
@@ -22,7 +22,7 @@ import self.me.matchday.model.Team;
  * Implementation of the Event data parser interface for the ZKFootball blog, found at:
  * https://zkfootballmatch.blogspot.com
  */
-public class ZKFEventParser implements EventParser {
+public class ZKFEventMetadataParser implements EventMetadataParser {
 
   private final String title;
   // Event components
@@ -33,7 +33,7 @@ public class ZKFEventParser implements EventParser {
   private Team homeTeam;
   private Team awayTeam;
 
-  public ZKFEventParser(@NotNull final String title, @NotNull final LocalDateTime date) {
+  public ZKFEventMetadataParser(@NotNull final String title, @NotNull final LocalDateTime date) {
 
     this.title = title;
     this.date = date;

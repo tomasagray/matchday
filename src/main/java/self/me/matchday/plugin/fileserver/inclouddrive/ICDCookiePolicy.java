@@ -2,7 +2,7 @@
  * Copyright © 2020, Tomás Gray. All rights reserved.
  */
 
-package self.me.matchday.fileserver.inclouddrive;
+package self.me.matchday.plugin.fileserver.inclouddrive;
 
 import java.net.CookiePolicy;
 import java.net.HttpCookie;
@@ -43,6 +43,6 @@ class ICDCookiePolicy implements CookiePolicy {
   }
 
   public ICDCookiePolicy() {
-    this.altURL = ICDData.getDomain();
+    this.altURL = "inclouddrive.com";
   }
 }

@@ -5,7 +5,7 @@ import self.me.matchday.plugin.datasource.blogger.BloggerPost;
 import self.me.matchday.plugin.datasource.blogger.BloggerPostParser;
 import self.me.matchday.model.Event;
 import self.me.matchday.plugin.datasource.EventFileSourceParser;
-import self.me.matchday.plugin.datasource.EventParser;
+import self.me.matchday.plugin.datasource.EventMetadataParser;
 import self.me.matchday.plugin.datasource.EventSourceParser;
 
 public class GalatamanPostParser extends BloggerPostParser {
@@ -16,11 +16,12 @@ public class GalatamanPostParser extends BloggerPostParser {
 
     super(bloggerPost);
     // Instantiate parsers
-    EventParser eventParser = new GalatamanEventParser(bloggerPost.getTitle());
+    EventMetadataParser eventMetadataParser =
+        new GalatamanEventMetadataParser(bloggerPost.getTitle());
     EventFileSourceParser fileSourceParser =
         new GManEventFileSourceParser(bloggerPost.getContent());
     // Get Event
-    event = EventSourceParser.createEvent(eventParser, fileSourceParser);
+    this.event = EventSourceParser.createEvent(eventMetadataParser, fileSourceParser);
   }
 
   @Override

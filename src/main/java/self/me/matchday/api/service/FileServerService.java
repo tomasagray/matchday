@@ -3,17 +3,14 @@ package self.me.matchday.api.service;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import self.me.matchday.fileserver.FSUser;
-import self.me.matchday.fileserver.IFSManager;
-import self.me.matchday.fileserver.inclouddrive.ICDManager;
-import self.me.matchday.util.Log;
+import self.me.matchday.plugin.fileserver.FSUser;
+import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
 /**
  * Class to route requests for URL parsing (external -> internal decoding) to the appropriate File
@@ -22,31 +19,28 @@ import self.me.matchday.util.Log;
 @Service
 public class FileServerService {
 
-  private static final String LOG_TAG = "FileServerService";
   private static final Duration DEFAULT_REFRESH_RATE = Duration.ofHours(4);
 
-  private final List<IFSManager> fileServerManagers = new ArrayList<>();
+  private final List<FileServerPlugin> fileServerPlugins;
 
   @Autowired
-  FileServerService(ICDManager icdManager) {
-
-    // TODO: read FileServers from persistent storage
-    Log.i(LOG_TAG, "Adding InCloudDrive FS manager: " + addFSManager(icdManager));
-//    final boolean b = addFSManager(DELETEMEIFSManager.getInstance());
-  }
-
-  public boolean addFSManager(@NotNull final IFSManager ifsManager) {
-    return this.fileServerManagers.add(ifsManager);
+  FileServerService(@NotNull final List<FileServerPlugin> fileServerPlugins) {
+    this.fileServerPlugins = fileServerPlugins;
   }
 
   /**
    * Log a file server user (FSUser) into the appropriate file server.
+   *
    * @param fsUser The User.
+   * @param index The index of the plugin within this service's list
    * @return Was login successful? (true/false)
    */
-  public boolean login(@NotNull final FSUser fsUser) {
-    // TODO: Implement login of user to correct file server!
-    return fileServerManagers.get(0).login(fsUser);
+  public boolean login(@NotNull final FSUser fsUser, final int index) {
+
+    return
+        fileServerPlugins
+            .get(index)
+            .login(fsUser);
   }
 
   /**
@@ -60,10 +54,10 @@ public class FileServerService {
     // Result container
     Optional<URL> result = Optional.empty();
     // Get correct FS manager
-    final IFSManager managerForUrl = getManagerForUrl(externalUrl);
-    if (managerForUrl != null) {
-        // Use the FS manager to get the internal (download) URL
-        result = managerForUrl.getDownloadURL(externalUrl);
+    final FileServerPlugin pluginForUrl = getPluginForUrl(externalUrl);
+    if (pluginForUrl != null) {
+        // Use the FS plugin to get the internal (download) URL
+        result = pluginForUrl.getDownloadURL(externalUrl);
     }
     return result;
   }
@@ -78,9 +72,12 @@ public class FileServerService {
   public Duration getFileServerRefreshRate(@NotNull final URL url) {
 
     // Get the fileserver manager for this URL
-    final IFSManager ifsManager = getManagerForUrl(url);
+    final FileServerPlugin fileServerPlugin = getPluginForUrl(url);
     // Return the recommended refresh rate for this FS manager
-    return (ifsManager != null) ? ifsManager.getRefreshRate() : DEFAULT_REFRESH_RATE;
+    return
+        (fileServerPlugin != null) ?
+            fileServerPlugin.getRefreshRate() :
+            DEFAULT_REFRESH_RATE;
   }
 
   /**
@@ -89,17 +86,16 @@ public class FileServerService {
    * @param url The external URL
    * @return The first registered fileserver manager which can handle the URL.
    */
-  private @Nullable IFSManager getManagerForUrl(@NotNull final URL url) {
+  private @Nullable FileServerPlugin getPluginForUrl(@NotNull final URL url) {
 
     // Determine correct FS manager
-    for (IFSManager ifsManager: fileServerManagers) {
+    for (FileServerPlugin fileServerPlugin : fileServerPlugins) {
       // Find first FS manager which can accept this URL
-      if (ifsManager.acceptsUrl(url)) {
-        return ifsManager;
+      if (fileServerPlugin.acceptsUrl(url)) {
+        return fileServerPlugin;
       }
     }
     // No registered manager matches this URL
     return null;
   }
-
 }

@@ -16,7 +16,7 @@ import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import self.me.matchday.plugin.datasource.EventParser;
+import self.me.matchday.plugin.datasource.EventMetadataParser;
 import self.me.matchday.plugin.datasource.zkfootball.ZKFPatterns;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
@@ -30,9 +30,9 @@ import self.me.matchday.util.Log;
 /**
  * Extract Event metadata (e.g., Teams, Competition, Fixture, etc.) from Galataman data.
  */
-public class GalatamanEventParser implements EventParser {
+public class GalatamanEventMetadataParser implements EventMetadataParser {
 
-  private static final String LOG_TAG = "GalatamanEventParser";
+  private static final String LOG_TAG = "GalatamanEventMetadataParser";
 
   // Fields
   private final String title;
@@ -45,7 +45,7 @@ public class GalatamanEventParser implements EventParser {
   private Team homeTeam;
   private Team awayTeam;
 
-  public GalatamanEventParser(@NotNull final String title) {
+  public GalatamanEventMetadataParser(@NotNull final String title) {
 
     this.title = title;
     // Determine each element of the Event metadata from title parts.

@@ -40,8 +40,6 @@ import self.me.matchday.model.Season;
 @JsonInclude(value = Include.NON_NULL)
 public class MatchResource extends RepresentationModel<MatchResource> {
 
-  // TODO: Is this class necessary? (Handled in EventResource?)
-
   private String id;
   private RepresentationModel<TeamResource> homeTeam;
   private RepresentationModel<TeamResource> awayTeam;
