@@ -2,6 +2,7 @@ package self.me.matchday.api.service;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import javax.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class VariantPlaylistService {
   }
 
   public Optional<VariantM3U> fetchVariantPlaylist(@NotNull final String eventId,
-      @NotNull final Long fileSrcId) {
+      @NotNull final UUID fileSrcId) {
 
     Log.i(LOG_TAG, String
         .format("Fetching Variant Playlist for Event: %s, file source: %s ", eventId, fileSrcId));
@@ -79,7 +80,7 @@ public class VariantPlaylistService {
    * @return An optional containing the EventFileSource, or Optional.empty()
    */
   private Optional<EventFileSource> getEventFileSource(@NotNull final Event event,
-      @NotNull final Long fileSrcId) {
+      @NotNull final UUID fileSrcId) {
 
     // Result container
     Optional<EventFileSource> result = Optional.empty();

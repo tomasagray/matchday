@@ -2,6 +2,7 @@ package self.me.matchday.api.controller;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -66,7 +67,7 @@ public class PlaylistController {
   @RequestMapping(value = {"/matches/match/{eventId}/playlist/{fileSrcId}",
       "/highlight-shows/highlight/{eventId}/playlist/{fileSrcId}"}, method = RequestMethod.GET)
   public ResponseEntity<String> fetchVariantPlaylist(@PathVariable final String eventId,
-      @PathVariable final Long fileSrcId) {
+      @PathVariable final UUID fileSrcId) {
 
     return
         variantPlaylistService

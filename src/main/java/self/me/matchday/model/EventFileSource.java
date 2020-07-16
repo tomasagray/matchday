@@ -3,6 +3,7 @@ package self.me.matchday.model;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.CascadeType;
@@ -15,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,8 +33,12 @@ import org.jetbrains.annotations.Nullable;
 public class EventFileSource implements Comparable<EventFileSource> {
 
   @Id
-  @GeneratedValue
-  private Long eventFileSrcId;
+  @GeneratedValue(generator = "UUID")
+  @GenericGenerator(
+      name = "UUID",
+      strategy = "org.hibernate.id.UUIDGenerator"
+  )
+  private UUID eventFileSrcId;
   private String channel;
   private String source;
   private String approximateDuration;
