@@ -43,26 +43,21 @@ public class VariantPlaylistService {
     if (eventOptional.isPresent()) {
 
       final Event event = eventOptional.get();
-      final Optional<EventFileSource> fileSourceOptional = getEventFileSource(event, fileSrcId);
+      final EventFileSource eventFileSource = event.getFileSource(fileSrcId);
+      if (eventFileSource.getEventFiles().size() > 0) {
+        // Refresh data for EventFiles
+        eventFileService.refreshEventFileData(eventFileSource);
+        // Retrieve fresh EventFiles
+        final Set<EventFile> eventFiles = eventFileSource.getEventFiles();
+        // Create new Playlist & return
+        result = Optional.of(new VariantM3U(event, eventFiles));
 
-      if (fileSourceOptional.isPresent()) {
-        final EventFileSource eventFileSource = fileSourceOptional.get();
-
-        if (eventFileSource.getEventFiles().size() > 0) {
-          // Refresh data for EventFiles
-          eventFileService.refreshEventFileData(eventFileSource);
-          // Retrieve fresh EventFiles
-          final Set<EventFile> eventFiles = eventFileSource.getEventFiles();
-          // Create new Playlist & return
-          result = Optional.of(new VariantM3U(event, eventFiles));
-
-        } else {
-          Log.e(LOG_TAG,
-              String
-                  .format(
-                      "Could not create variant playlist for EventFileSource: %s; no EventFiles!",
-                      eventFileSource));
-        }
+      } else {
+        Log.e(LOG_TAG,
+            String
+                .format(
+                    "Could not create variant playlist for EventFileSource: %s; no EventFiles!",
+                    eventFileSource));
       }
     } else {
       Log.e(LOG_TAG,
@@ -70,30 +65,6 @@ public class VariantPlaylistService {
               + "EventFileSource ID: %s ", eventId, fileSrcId));
     }
     // Return optional
-    return result;
-  }
-
-  /**
-   * Get the specified EventFileSource from the given Event.
-   * @param event The Event which contains the file source
-   * @param fileSrcId The ID of the EventFileSource
-   * @return An optional containing the EventFileSource, or Optional.empty()
-   */
-  private Optional<EventFileSource> getEventFileSource(@NotNull final Event event,
-      @NotNull final UUID fileSrcId) {
-
-    // Result container
-    Optional<EventFileSource> result = Optional.empty();
-    final Set<EventFileSource> fileSources = event.getFileSources();
-
-    // Find requested file source
-    for (EventFileSource fileSource : fileSources) {
-      if (fileSrcId.equals(fileSource.getEventFileSrcId())) {
-        // We have found our file source
-        result = Optional.of(fileSource);
-        break;
-      }
-    }
     return result;
   }
 }

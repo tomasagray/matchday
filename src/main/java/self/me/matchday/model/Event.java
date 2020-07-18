@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -52,6 +53,20 @@ public abstract class Event {
   public boolean addFileSources(@NotNull final Collection<EventFileSource> fileSources) {
     // Add all collection elements to set
     return this.fileSources.addAll(fileSources);
+  }
+
+  public EventFileSource getFileSource(@NotNull final UUID fileSrcId) {
+
+    // Search the collection of file sources for the ID
+    for (EventFileSource fileSrc : fileSources) {
+      if (fileSrc.getEventFileSrcId().equals(fileSrcId)) {
+        return fileSrc;
+      }
+    }
+
+    throw new
+        IllegalArgumentException(
+            String.format("EventFileSource ID was not found in Event: %s", eventId));
   }
 
   // Ensure consistent Event ID generation

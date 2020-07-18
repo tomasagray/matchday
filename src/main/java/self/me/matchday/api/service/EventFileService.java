@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.VideoMetadata;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.util.Log;
 
 @Service
@@ -183,11 +183,11 @@ public class EventFileService {
 
       // Update ONLY if metadata is null
       if (eventFile.getMetadata() == null) {
-        final VideoMetadata videoMetadata =
+        final FFmpegMetadata FFmpegMetadata =
             videoMetadataService.readRemoteData(eventFile.getInternalUrl());
         // Ensure metadata successfully updated
-        if (videoMetadata != null) {
-          eventFile.setMetadata(videoMetadata);
+        if (FFmpegMetadata != null) {
+          eventFile.setMetadata(FFmpegMetadata);
           return true;
         }
       }

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import self.me.matchday.model.VideoMetadata;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.util.Log;
 
 @Service
@@ -42,10 +42,10 @@ public class VideoMetadataService {
    * Fetches video file metadata using the local installation of FFMPEG.
    *
    * @param url The URL of the remote video file.
-   * @return A VideoMetadata object.
+   * @return A FFmpegMetadata object.
    * @throws IOException If the data cannot be read, or the FFPROBE executable cannot be found.
    */
-  public VideoMetadata readRemoteData(@NotNull final URL url) throws IOException {
+  public FFmpegMetadata readRemoteData(@NotNull final URL url) throws IOException {
 
     Log.i(LOG_TAG, String.format("Fetching metadata for file at URL: %s", url));
 
@@ -71,7 +71,7 @@ public class VideoMetadataService {
 
     // Ensure JSON is valid
     try {
-      return gson.fromJson(result, VideoMetadata.class);
+      return gson.fromJson(result, FFmpegMetadata.class);
     } catch (JsonSyntaxException e) {
       // Ensure invalid JSON is caught
       throw new IOException("Could not parse JSON from String", e);

@@ -16,7 +16,8 @@ import javax.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.db.VideoMetadataConverter;
+import self.me.matchday.db.FFmpegMetadataConverter;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 
 @Entity
 @Data
@@ -34,9 +35,9 @@ public class EventFile implements Comparable<EventFile> {
   // refreshed data
   @Column(columnDefinition = "LONGTEXT")
   private URL internalUrl;
-  @Convert(converter = VideoMetadataConverter.class)
+  @Convert(converter = FFmpegMetadataConverter.class)
   @Column(columnDefinition = "LONGTEXT")
-  private VideoMetadata metadata;
+  private FFmpegMetadata metadata;
   private Timestamp lastRefreshed = new Timestamp(0L);
 
   public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {

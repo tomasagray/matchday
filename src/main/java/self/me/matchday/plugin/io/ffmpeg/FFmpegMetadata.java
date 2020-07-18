@@ -1,11 +1,11 @@
-package self.me.matchday.model;
+package self.me.matchday.plugin.io.ffmpeg;
 
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
 
 @Data
-public class VideoMetadata {
+public class FFmpegMetadata {
 
   private FFmpegFormat format;
   private List<FFmpegStream> streams;
