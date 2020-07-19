@@ -13,12 +13,14 @@ public class ZKFPatterns {
       .compile("(channel:)|(language:)|(format:)|(bitrate:)|(size:)");
 
   // Format patterns
-  public static final Pattern resolutionPattern = Pattern
-      .compile("(720|1080)[pi]", Pattern.CASE_INSENSITIVE);
-  public static final Pattern frameRatePattern = Pattern
-      .compile("(\\d+)(fps)", Pattern.CASE_INSENSITIVE);
-  public static final Pattern containerPattern = Pattern
-      .compile("mkv|ts", Pattern.CASE_INSENSITIVE);
+  public static final Pattern resolutionPattern =
+      Pattern.compile("(720|1080)[pi]", Pattern.CASE_INSENSITIVE);
+  public static final Pattern frameRatePattern =
+      Pattern.compile("(\\d+)(fps)", Pattern.CASE_INSENSITIVE);
+  public static final Pattern containerPattern =
+      Pattern.compile("mkv|ts", Pattern.CASE_INSENSITIVE);
+  public static final Pattern FILE_SIZE_PATTERN =
+      Pattern.compile("([\\d.,]+) ([gmk]b)", Pattern.CASE_INSENSITIVE);
 
   // Bitrate patterns
   public static final Long DEFAULT_BITRATE = 4_000_000L;

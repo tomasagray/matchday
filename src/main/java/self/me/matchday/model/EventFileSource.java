@@ -42,7 +42,7 @@ public class EventFileSource implements Comparable<EventFileSource> {
   private String channel;
   private String source;
   private String approximateDuration;
-  private String approximateFileSize;
+  private Long fileSize;
   @ElementCollection
   private List<String> languages;
   @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL)

@@ -10,6 +10,7 @@ import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
+import self.me.matchday.model.FileSize;
 import self.me.matchday.util.Log;
 
 public class ZKFMetadataParser {
@@ -30,7 +31,7 @@ public class ZKFMetadataParser {
   private int frameRate;
   private String mediaContainer;
   private long bitrate;
-  private String approxFileSize;
+  private Long fileSize;
 
   public static EventFileSource createFileSource(@NotNull final Elements elements) {
     final ZKFMetadataParser parser = new ZKFMetadataParser(elements);
@@ -43,7 +44,7 @@ public class ZKFMetadataParser {
             .frameRate(parser.frameRate)
             .mediaContainer(parser.mediaContainer)
             .bitrate(parser.bitrate)
-            .approximateFileSize(parser.approxFileSize)
+            .fileSize(parser.fileSize)
             .eventFiles(new TreeSet<>())
             .build();
   }
@@ -88,7 +89,8 @@ public class ZKFMetadataParser {
 
         case SIZE:
           // Set file size from final element
-          this.approxFileSize = cleanMetadata(element.nextSibling().toString());
+          final String approxFileSize = cleanMetadata(element.nextSibling().toString());
+          this.fileSize = parseFileSize(approxFileSize);
           break;
       }
     });
@@ -170,6 +172,32 @@ public class ZKFMetadataParser {
     // capitalize first letter
     String Language = language.substring(0, 1).toUpperCase() + language.substring(1);
     this.languages.add(Language);
+  }
+
+  private Long parseFileSize(@NotNull final String data) {
+
+    Long result = null;
+
+    // Americanize
+    final String decimalData = data.replace(",", ".");
+
+    final Matcher matcher = ZKFPatterns.FILE_SIZE_PATTERN.matcher(decimalData);
+    if (matcher.find()) {
+      final float size = Float.parseFloat(matcher.group(1));
+      final String units = matcher.group(2).toUpperCase();
+      switch (units) {
+        case "GB":
+          result = FileSize.ofGigabytes(size);
+          break;
+        case "MB":
+          result = FileSize.ofMegabytes(size);
+          break;
+        case "KB":
+          result = FileSize.ofKilobytes(size);
+          break;
+      }
+    }
+    return result;
   }
 
   /**

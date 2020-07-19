@@ -11,7 +11,7 @@ import org.jsoup.nodes.Element;
  */
 public final class GManPatterns {
 
-  // Entry parsing patterns
+  // Video metadata (EventFileSource) patterns
   static final String START_OF_SOURCE = Pattern.compile("__*").pattern();
   static final String METADATA_ITEM_DELIMITER =
       Pattern.compile("<span style=\"color: blue;\">(\\[)?").pattern();
@@ -19,8 +19,10 @@ public final class GManPatterns {
       Pattern.compile("(])?</span>:(<span [^>]*>)?").pattern();
   static final String LANGUAGE_DELIMITER = Pattern.compile("[\\d.* ]|/").pattern();
   static final String AV_DATA_DELIMITER = Pattern.compile("‖").pattern();
+  static final Pattern FILE_SIZE_PATTERN =
+      Pattern.compile("~([\\d.]+)([gmk]b)", Pattern.CASE_INSENSITIVE);
 
-  // Event patterns
+  // Event metadata patterns
   public static final Pattern COMP_PATTERN = Pattern.compile("^([\\w\\s])+ ");
   public static final Pattern FIXTURE_PATTERN =
       Pattern.compile("((Semi-)?Final)|((J|(Matchday ))\\d+)");

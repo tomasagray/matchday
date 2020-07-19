@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.model.FileSize;
 import self.me.matchday.plugin.datasource.InvalidMetadataException;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
@@ -45,7 +46,7 @@ final class GManFileSourceMetadataParser {
   private String audioCodec;
   private int audioChannels;
   private String duration;
-  private String size;
+  private Long fileSize;
   private Resolution resolution;
 
   @NotNull
@@ -65,7 +66,7 @@ final class GManFileSourceMetadataParser {
             .audioCodec(parser.audioCodec)
             .audioChannels(parser.audioChannels)
             .approximateDuration(parser.duration)
-            .approximateFileSize(parser.size)
+            .fileSize(parser.fileSize)
             .resolution(parser.resolution)
             .eventFiles(new TreeSet<>())
             .build();
@@ -134,7 +135,7 @@ final class GManFileSourceMetadataParser {
         this.duration = value;
         break;
       case SIZE:
-        this.size = value.replace("~", "");
+        this.fileSize = parseFileSize(value);
         break;
       case RESOLUTION:
         this.resolution = parseResolution(value);
@@ -249,6 +250,33 @@ final class GManFileSourceMetadataParser {
               + "; defaulting to SD");
       return Resolution.R_SD;
     }
+  }
+
+  private Long parseFileSize(@NotNull final String fileSize) {
+
+    Long result = null;
+
+    // Americanize
+    final String decimalData = fileSize.replace(",",".");
+
+    final Matcher matcher = GManPatterns.FILE_SIZE_PATTERN.matcher(decimalData);
+    if (matcher.find()) {
+      final float size = Float.parseFloat(matcher.group(1));
+      final String units = matcher.group(2).toUpperCase();
+      // Create FileSize object
+      switch (units) {
+        case "GB":
+          result = FileSize.ofGigabytes(size);
+          break;
+        case "MB":
+          result = FileSize.ofMegabytes(size);
+          break;
+        case "KB":
+          result = FileSize.ofKilobytes(size);
+          break;
+      }
+    }
+    return result;
   }
 
   /**
