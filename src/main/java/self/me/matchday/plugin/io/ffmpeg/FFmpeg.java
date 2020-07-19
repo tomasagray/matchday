@@ -54,9 +54,6 @@ public class FFmpeg {
             .collect(Collectors.toList());
     final String inputArg =
         String.format("-i \"concat:%s\"", String.join("|", uriStrings));
-//    final String masterPlaylist =
-//        String.format("-master_pl_name \"%s\"",
-//            Paths.get(storage, MASTER_PL_NAME));
     final String segments =
         String.format("-hls_segment_filename \"%s\"",
             Paths.get(storage, DATA_DIR, SEGMENT_PATTERN));
@@ -69,7 +66,6 @@ public class FFmpeg {
     transcodeArgs.add("-acodec copy");
     transcodeArgs.add("-muxdelay 0");
     transcodeArgs.add("-f hls");
-//    transcodeArgs.add(masterPlaylist);
     transcodeArgs.add(segments);
     transcodeArgs.add(output);
 
