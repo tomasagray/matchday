@@ -39,15 +39,28 @@ public class VideoStreamingService {
 
     // Get the correct file source
     final EventFileSource fileSource = event.getFileSource(fileSrcId);
-    // TODO: Add file size check
-    // Collate URLs
-    final List<URI> uris = getEventFileSrcUris(fileSource);
-    // Get storage path
-    final Path storageLocation = diskManager
-        .createDirectories(event.getEventId(), fileSrcId.toString());
+    if (fileSource == null) {
+      Log.e(LOG_TAG,
+          String.format("Event %s does not contain EventFileSource with ID: %s", event, fileSrcId));
+      return;
+    }
 
-    // TODO: Return playlist
-    ffmpegPlugin.streamUris(uris, storageLocation);
+    // Check for adequate storage capacity
+    if (diskManager.isSpaceAvailable(fileSource.getFileSize())) {
+
+      // Collate URLs
+      final List<URI> uris = getEventFileSrcUris(fileSource);
+      // Get storage path
+      final Path storageLocation = diskManager
+          .createDirectories(event.getEventId(), fileSrcId.toString());
+
+      // TODO: Return playlist
+      ffmpegPlugin.streamUris(uris, storageLocation);
+    } else {
+      Log.i(LOG_TAG, String.format(
+          "Streaming request denied; inadequate storage capacity. (Requested: %s, Available: %s)",
+          fileSource.getFileSize(), diskManager.getFreeDiskSpace()));
+    }
   }
 
   private List<URI> getEventFileSrcUris(@NotNull final EventFileSource eventFileSource) {
@@ -55,14 +68,15 @@ public class VideoStreamingService {
         eventFileSource
             .getEventFiles()
             .stream()
-            .map(EventFile::getInternalUrl).map(url -> {
-          try {
-            return url.toURI();
-          } catch (URISyntaxException e) {
-            Log.e(LOG_TAG, String.format("Could not parse URL -> URI: %s", url), e);
-            return null;
-          }
-        })
+            .map(EventFile::getInternalUrl)
+            .map(url -> {
+                try {
+                  return url.toURI();
+                } catch (URISyntaxException e) {
+                  Log.e(LOG_TAG, String.format("Could not parse URL -> URI: %s", url), e);
+                  return null;
+                }
+            })
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
   }

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
 public class FFmpeg {
@@ -35,18 +36,9 @@ public class FFmpeg {
     // Create data directory
     Files.createDirectories(Paths.get(location.toString(), DATA_DIR));
 
-    // Create FFMPEG CLI command & return
-    return
-        new FFmpegTask(getTranscodeCmd(uris, location));
-  }
-
-  private @NotNull String getTranscodeCmd(@NotNull List<URI> uris,
-      @NotNull final Path storageLocation) {
-
-    final List<String> transcodeArgs = new ArrayList<>(baseArgs);
-    final String storage = storageLocation.toString();
-
-    // Assemble input string
+    // Assemble arguments
+    final String storage = location.toString();
+    final List<String> transcodeArgs = new ArrayList<>();
     final List<String> uriStrings =
         uris
             .stream()
@@ -54,14 +46,9 @@ public class FFmpeg {
             .collect(Collectors.toList());
     final String inputArg =
         String.format("-i \"concat:%s\"", String.join("|", uriStrings));
-//    final String masterPlaylist =
-//        String.format("-master_pl_name \"%s\"",
-//            Paths.get(storage, MASTER_PL_NAME));
     final String segments =
         String.format("-hls_segment_filename \"%s\"",
             Paths.get(storage, DATA_DIR, SEGMENT_PATTERN));
-    final String output =
-        String.format("\"%s\"", Paths.get(storage, DATA_DIR, SEGMENT_PL_NAME));
 
     // Add arguments
     transcodeArgs.add(inputArg);
@@ -69,12 +56,12 @@ public class FFmpeg {
     transcodeArgs.add("-acodec copy");
     transcodeArgs.add("-muxdelay 0");
     transcodeArgs.add("-f hls");
-//    transcodeArgs.add(masterPlaylist);
     transcodeArgs.add(segments);
-    transcodeArgs.add(output);
 
-    // Collate & return
-    return
-        String.join(" ", transcodeArgs);
+    // Create FFMPEG CLI command & return
+    final FFmpegTask transcodeTask
+        = new FFmpegTask(Strings.join(baseArgs, ' '), transcodeArgs);
+    transcodeTask.setOutputFile(Paths.get(storage, DATA_DIR, SEGMENT_PL_NAME).toFile());
+    return transcodeTask;
   }
 }
