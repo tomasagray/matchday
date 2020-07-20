@@ -1,5 +1,6 @@
 package self.me.matchday.plugin.io.ffmpeg;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
@@ -30,13 +31,15 @@ public class FFmpegPlugin implements Plugin {
     executor = Executors.newCachedThreadPool();
   }
 
-  public int streamUris(@NotNull final List<URI> uris, @NotNull final Path storageLocation)
+  public File streamUris(@NotNull final List<URI> uris, @NotNull final Path storageLocation)
       throws IOException {
 
     final FFmpegTask streamTask = ffmpeg.getStreamTask(uris, storageLocation);
-    // TODO: Make this interruptable
+    // Get playlist file location
+    File playlistFile = streamTask.getOutputFile();
+    // TODO: Make this interrupt-able
     executor.execute(streamTask);
-    return streamTask.getExitCode();
+    return playlistFile;
   }
 
   @Override

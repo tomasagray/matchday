@@ -33,9 +33,6 @@ public class FFmpeg {
   FFmpegTask getStreamTask(@NotNull List<URI> uris, @NotNull final Path location)
       throws IOException {
 
-    // Create data directory
-    Files.createDirectories(Paths.get(location.toString(), DATA_DIR));
-
     // Assemble arguments
     final String storage = location.toString();
     final List<String> transcodeArgs = new ArrayList<>();

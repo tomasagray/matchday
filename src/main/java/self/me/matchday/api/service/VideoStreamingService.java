@@ -1,5 +1,6 @@
 package self.me.matchday.api.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,6 +23,7 @@ import self.me.matchday.util.Log;
 public class VideoStreamingService {
 
   private static final String LOG_TAG = "VideoStreamingService";
+  private static final String VIDEO_ROOT = "videos";
 
   private final DiskManager diskManager;
   private final FFmpegPlugin ffmpegPlugin;
@@ -51,11 +53,13 @@ public class VideoStreamingService {
       // Collate URLs
       final List<URI> uris = getEventFileSrcUris(fileSource);
       // Get storage path
-      final Path storageLocation = diskManager
-          .createDirectories(event.getEventId(), fileSrcId.toString());
+      final Path storageLocation =
+              diskManager.createDirectories(VIDEO_ROOT, event.getEventId(), fileSrcId.toString());
 
       // TODO: Return playlist
-      ffmpegPlugin.streamUris(uris, storageLocation);
+      File playlist = ffmpegPlugin.streamUris(uris, storageLocation);
+      Log.i(LOG_TAG, String.format("Created playlist file: %s", playlist));
+
     } else {
       Log.i(LOG_TAG, String.format(
           "Streaming request denied; inadequate storage capacity. (Requested: %s, Available: %s)",

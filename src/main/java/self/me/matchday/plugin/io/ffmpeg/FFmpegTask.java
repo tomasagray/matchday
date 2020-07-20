@@ -1,6 +1,7 @@
 package self.me.matchday.plugin.io.ffmpeg;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -23,6 +24,9 @@ public class FFmpegTask implements Runnable {
   @SneakyThrows
   @Override
   public void run() {
+
+    // Create output directory
+    Files.createDirectories(outputFile.getParentFile().toPath());
 
     // Collate program arguments
     final String arguments = Strings.join(args, ' ');
