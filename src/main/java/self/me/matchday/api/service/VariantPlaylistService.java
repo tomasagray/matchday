@@ -1,7 +1,7 @@
 package self.me.matchday.api.service;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import javax.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +48,7 @@ public class VariantPlaylistService {
         // Refresh data for EventFiles
         eventFileService.refreshEventFileData(eventFileSource, true);
         // Retrieve fresh EventFiles
-        final Set<EventFile> eventFiles = eventFileSource.getEventFiles();
+        final List<EventFile> eventFiles = eventFileSource.getEventFiles();
         // Create new Playlist & return
         result = Optional.of(new VariantM3U(event, eventFiles));
 

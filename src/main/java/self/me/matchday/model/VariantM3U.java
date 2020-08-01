@@ -5,6 +5,7 @@
 package self.me.matchday.model;
 
 import java.net.URL;
+import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class VariantM3U extends M3UPlaylist {
   private boolean finalized = true;
 
   // TODO: Rewrite this class - remove Event dependency, move to builder class
-  public VariantM3U(@NotNull Event event, @NotNull Set<EventFile> eventFiles) {
+  public VariantM3U(@NotNull Event event, @NotNull Collection<EventFile> eventFiles) {
 
     // Save Event metadata
     this.event = event;

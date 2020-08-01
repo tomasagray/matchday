@@ -2,7 +2,6 @@ package self.me.matchday.model;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,7 +45,7 @@ public class EventFileSource implements Comparable<EventFileSource> {
   @ElementCollection
   private List<String> languages;
   @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL)
-  private Set<EventFile> eventFiles;
+  private List<EventFile> eventFiles;
   // Media metadata
   private Resolution resolution;
   private String mediaContainer;

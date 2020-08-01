@@ -2,8 +2,8 @@ package self.me.matchday.startup;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +36,7 @@ public class LoadTestEvent {
       firstHalf.setInternalUrl(firstHalfUrl);
       final EventFile secondHalf = new EventFile(EventPartIdentifier.SECOND_HALF, secondHalfUrl);
       secondHalf.setInternalUrl(secondHalfUrl);
-      final TreeSet<EventFile> eventFiles = new TreeSet<>();
+      final List<EventFile> eventFiles = new ArrayList<>();
       eventFiles.add(firstHalf);
       eventFiles.add(secondHalf);
 

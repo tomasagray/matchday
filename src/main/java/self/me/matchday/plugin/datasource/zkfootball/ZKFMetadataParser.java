@@ -2,7 +2,6 @@ package self.me.matchday.plugin.datasource.zkfootball;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +44,7 @@ public class ZKFMetadataParser {
             .mediaContainer(parser.mediaContainer)
             .bitrate(parser.bitrate)
             .fileSize(parser.fileSize)
-            .eventFiles(new TreeSet<>())
+            .eventFiles(new ArrayList<>())
             .build();
   }
 

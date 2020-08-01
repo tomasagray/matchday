@@ -4,16 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.FileSize;
-import self.me.matchday.plugin.datasource.InvalidMetadataException;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
+import self.me.matchday.model.FileSize;
+import self.me.matchday.plugin.datasource.InvalidMetadataException;
 import self.me.matchday.util.Log;
 
 /**
@@ -68,7 +67,7 @@ final class GManFileSourceMetadataParser {
             .approximateDuration(parser.duration)
             .fileSize(parser.fileSize)
             .resolution(parser.resolution)
-            .eventFiles(new TreeSet<>())
+            .eventFiles(new ArrayList<>())
             .build();
   }
 
