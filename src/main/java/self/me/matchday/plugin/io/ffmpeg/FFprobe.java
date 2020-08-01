@@ -32,7 +32,7 @@ public class FFprobe {
     );
   }
 
-  public FFmpegMetadata getMetadata(@NotNull final URI uri) throws IOException {
+  public FFmpegMetadata getFileMetadata(@NotNull final URI uri) throws IOException {
 
     // Result container
     String result;

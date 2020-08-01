@@ -1,5 +1,6 @@
 package self.me.matchday.plugin.io.ffmpeg;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
@@ -29,6 +30,13 @@ public class FFmpegPlugin implements Plugin {
     executor = Executors.newCachedThreadPool();
   }
 
+  /**
+   * Create an HLS stream from a given collection of URIs
+   *
+   * @param uris URI pointers to video data
+   * @param storageLocation The output location for stream data
+   * @return The path of the playlist file produced by FFMPEG
+   */
   public Path streamUris(@NotNull final List<URI> uris, @NotNull final Path storageLocation) {
 
     final FFmpegTask streamTask = ffmpeg.getHlsStreamTask(uris, storageLocation);
@@ -37,6 +45,19 @@ public class FFmpegPlugin implements Plugin {
     // TODO: Make this interrupt-able
     executor.execute(streamTask);
     return playlistFile;
+  }
+
+  /**
+   * Wrap the FFprobe metadata method
+   *
+   * @param uri The URI of the audio/video file
+   * @return An FFmpegMetadata object of the file's metadata, or null
+   * @throws IOException I/O problem
+   */
+  public FFmpegMetadata readFileMetadata(@NotNull final URI uri) throws IOException {
+
+    return
+        ffprobe.getFileMetadata(uri);
   }
 
   @Override

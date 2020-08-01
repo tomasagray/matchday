@@ -140,7 +140,7 @@ public class VideoStreamingService {
       if (diskManager.isSpaceAvailable(fileSource.getFileSize())) {
 
         // Refresh EventFile data (if necessary)
-        eventFileService.refreshEventFileData(fileSource);
+        eventFileService.refreshEventFileData(fileSource, false);
         // Collate URLs
         final List<URI> uris = getEventFileSrcUris(fileSource);
         // Create storage path

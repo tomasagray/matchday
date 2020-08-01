@@ -46,7 +46,7 @@ public class VariantPlaylistService {
       final EventFileSource eventFileSource = event.getFileSource(fileSrcId);
       if (eventFileSource.getEventFiles().size() > 0) {
         // Refresh data for EventFiles
-        eventFileService.refreshEventFileData(eventFileSource);
+        eventFileService.refreshEventFileData(eventFileSource, true);
         // Retrieve fresh EventFiles
         final Set<EventFile> eventFiles = eventFileSource.getEventFiles();
         // Create new Playlist & return

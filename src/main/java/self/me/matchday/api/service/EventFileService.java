@@ -1,6 +1,7 @@
 package self.me.matchday.api.service;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.util.Log;
 
 @Service
@@ -32,15 +34,15 @@ public class EventFileService {
   // Services
   private final ExecutorService executorService;
   private final FileServerService fileServerService;
-  private final VideoMetadataService videoMetadataService;
+  private final FFmpegPlugin ffmpegPlugin;
 
   @Autowired
   public EventFileService(FileServerService fileServerService,
-      VideoMetadataService videoMetadataService) {
+      FFmpegPlugin ffmpegPlugin) {
 
     this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     this.fileServerService = fileServerService;
-    this.videoMetadataService = videoMetadataService;
+    this.ffmpegPlugin = ffmpegPlugin;
   }
 
   /**
@@ -49,7 +51,7 @@ public class EventFileService {
    *
    * @param eventFileSource The File Source to be refreshed.
    */
-  public void refreshEventFileData(@NotNull EventFileSource eventFileSource) {
+  public void refreshEventFileData(@NotNull final EventFileSource eventFileSource, final boolean fetchMetadata) {
 
     Log.i(LOG_TAG, "Refreshing remote data for file source: " + eventFileSource);
 
@@ -64,8 +66,8 @@ public class EventFileService {
             eventFile ->
                 futureEventFiles.add(
                     executorService.submit(
-                        new EventFileRefreshTask(fileServerService, videoMetadataService,
-                            eventFile)))
+                        new EventFileRefreshTask(fileServerService, ffmpegPlugin,
+                            eventFile, fetchMetadata)))
         );
 
     // Retrieve results of remote fetch operation
@@ -126,15 +128,18 @@ public class EventFileService {
   private static class EventFileRefreshTask implements Callable<EventFile> {
 
     private final FileServerService fileServerService;
-    private final VideoMetadataService videoMetadataService;
+    private final FFmpegPlugin ffmpegPlugin;
     private final EventFile eventFile;
+    private final boolean fetchMetadata;
 
-    public EventFileRefreshTask(FileServerService fileServerService, VideoMetadataService videoMetadataService,
-        @NotNull EventFile eventFile) {
+    public EventFileRefreshTask(@NotNull final FileServerService fileServerService,
+        @NotNull final FFmpegPlugin ffmpegPlugin,
+        @NotNull final EventFile eventFile, final boolean fetchMetadata) {
 
       this.fileServerService = fileServerService;
-      this.videoMetadataService = videoMetadataService;
+      this.ffmpegPlugin = ffmpegPlugin;
       this.eventFile = eventFile;
+      this.fetchMetadata = fetchMetadata;
     }
 
     /**
@@ -157,16 +162,19 @@ public class EventFileService {
               String.format("Successfully updated remote URL for EventFile: %s", eventFile));
           eventFile.setInternalUrl(downloadUrl.get());
           // Update metadata
-          Log.i(LOG_TAG, "Refreshed EventFile metadata: " + refreshEventFileMetadata());
+          if (fetchMetadata) {
+            setEventFileMetadata();
+          }
           // Update last refresh
           eventFile.setLastRefreshed(Timestamp.from(Instant.now()));
 
         } else {
-          throw new IOException(
-              String.format("Could not parse remote URL for EventFile: %s", eventFile));
+          throw new
+              IOException(String.format("Could not parse remote URL for EventFile: %s", eventFile));
         }
-      } catch (IOException e) {
-        Log.e(LOG_TAG, String.format("Could not refresh remote data for EventFile: %s", eventFile),
+      } catch (Exception e) {
+        Log.e(LOG_TAG,
+            String.format("Could not refresh remote data for EventFile: %s", eventFile),
             e);
       }
       // Return updated EventFile
@@ -174,26 +182,22 @@ public class EventFileService {
     }
 
     /**
-     * Determines whether metadata needs to be refreshed, and sets updated data if it is valid.
+     * Retrieves video metadata for the EventFile associated with this task.
      *
-     * @return True/false If data updated
      * @throws IOException If there is an error reading data
      */
-    private boolean refreshEventFileMetadata() throws IOException {
+    private void setEventFileMetadata() throws Exception {
 
       // Update ONLY if metadata is null
-      // todo - use FFmpeg plugin
       if (eventFile.getMetadata() == null) {
-        final FFmpegMetadata FFmpegMetadata =
-            videoMetadataService.readRemoteData(eventFile.getInternalUrl());
+        final URI eventFileUri = eventFile.getInternalUrl().toURI();
+        final FFmpegMetadata ffmpegMetadata =
+            ffmpegPlugin.readFileMetadata(eventFileUri);
         // Ensure metadata successfully updated
-        if (FFmpegMetadata != null) {
-          eventFile.setMetadata(FFmpegMetadata);
-          return true;
+        if (ffmpegMetadata != null) {
+          eventFile.setMetadata(ffmpegMetadata);
         }
       }
-      // Metadata NOT updated
-      return false;
     }
   }
 }
