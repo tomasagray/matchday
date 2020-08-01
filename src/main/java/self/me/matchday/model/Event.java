@@ -66,7 +66,7 @@ public abstract class Event {
 
     throw new
         IllegalArgumentException(
-            String.format("EventFileSource ID was not found in Event: %s", eventId));
+            String.format("EventFileSource ID: %s was not found in Event: %s", fileSrcId, eventId));
   }
 
   // Ensure consistent Event ID generation

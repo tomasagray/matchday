@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class StaticResourcesConfig implements WebMvcConfigurer {
+public class AdminDashboardConfig implements WebMvcConfigurer {
 
   @Override
   public void addResourceHandlers(@NotNull ResourceHandlerRegistry registry) {

@@ -2,10 +2,10 @@ package self.me.matchday.db;
 
 import com.google.gson.Gson;
 import javax.persistence.AttributeConverter;
-import org.springframework.stereotype.Component;
+import javax.persistence.Converter;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 
-@Component
+@Converter
 public class FFmpegMetadataConverter implements AttributeConverter<FFmpegMetadata, String> {
 
   // Single Gson instance for all conversions

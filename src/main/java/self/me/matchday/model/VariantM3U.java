@@ -48,6 +48,7 @@ public class VariantM3U extends M3UPlaylist {
   private double targetDuration;
   private boolean finalized = true;
 
+  // TODO: Rewrite this class - remove Event dependency, move to builder class
   public VariantM3U(@NotNull Event event, @NotNull Set<EventFile> eventFiles) {
 
     // Save Event metadata

@@ -182,6 +182,7 @@ public class EventFileService {
     private boolean refreshEventFileMetadata() throws IOException {
 
       // Update ONLY if metadata is null
+      // todo - use FFmpeg plugin
       if (eventFile.getMetadata() == null) {
         final FFmpegMetadata FFmpegMetadata =
             videoMetadataService.readRemoteData(eventFile.getInternalUrl());

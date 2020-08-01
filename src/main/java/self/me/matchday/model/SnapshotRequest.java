@@ -33,16 +33,16 @@ public class SnapshotRequest {
   private String pageToken;
   private String status;
 
-  // Provide safe auto-unboxing
+  // Provide safe unboxing
   public int getMaxResults() {
     return (maxResults == null) ? 0 : maxResults;
   }
 
   public boolean isFetchImages() {
-    return (fetchImages == null) ? false : fetchImages;
+    return fetchImages != null && fetchImages;
   }
 
   public boolean isFetchBodies() {
-    return (fetchBodies == null) ? false : fetchBodies;
+    return fetchBodies != null && fetchBodies;
   }
 }

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.FileSize;
@@ -47,12 +46,6 @@ public class DiskManager {
     return root.getFreeSpace();
   }
 
-  public Path createDirectories(@NotNull final String... dirs) throws IOException {
-
-    return
-        Files.createDirectories(Paths.get(storageLocation.toString(), dirs));
-  }
-
   public Long getUsedSpace() throws IOException {
 
     return
@@ -75,5 +68,4 @@ public class DiskManager {
     }
     return parent;
   }
-
 }

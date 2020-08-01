@@ -56,6 +56,7 @@ public class EventService {
    * Getters
    * ============================================================================================ */
 
+  // TODO: Don't return CollectionModels or Resources - do that in controllers!
   public Optional<CollectionModel<EventResource>> fetchAllEvents() {
 
     Log.i(LOG_TAG, "Fetching latest Events...");
@@ -74,8 +75,6 @@ public class EventService {
     return
         eventRepository.findById(eventId);
   }
-
-  // TODO: Add get event file src by id
 
   /**
    * Retrieve all Matches from the repo (database) and assemble into a collection of resources.

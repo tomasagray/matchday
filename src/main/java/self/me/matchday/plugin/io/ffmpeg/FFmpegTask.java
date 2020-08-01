@@ -1,7 +1,7 @@
 package self.me.matchday.plugin.io.ffmpeg;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -14,7 +14,7 @@ public class FFmpegTask implements Runnable {
   private final String command;
   private final List<String> args;
   private int exitCode;
-  private File outputFile;
+  private Path outputFile;
 
   public FFmpegTask(@NotNull final String command, @NotNull final List<String> args) {
     this.command = command;
@@ -26,7 +26,7 @@ public class FFmpegTask implements Runnable {
   public void run() {
 
     // Create output directory
-    Files.createDirectories(outputFile.getParentFile().toPath());
+    Files.createDirectories(outputFile.getParent());
 
     // Collate program arguments
     final String arguments = Strings.join(args, ' ');
@@ -34,7 +34,7 @@ public class FFmpegTask implements Runnable {
     final Process process = Runtime.getRuntime().exec(execCommand);
     // Allow the process to finish executing
     process.waitFor();
-    exitCode = process.exitValue();
+    this.exitCode = process.exitValue();
     process.destroy();
   }
 }

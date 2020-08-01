@@ -14,11 +14,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.controller.PlaylistController;
 import self.me.matchday.api.service.EventService;
@@ -73,13 +75,30 @@ public class PlaylistResource extends RepresentationModel<PlaylistResource> {
         final Set<EventFileSource> eventFileSources = event.getFileSources();
 
         // Add links to variants
-        eventFileSources.forEach(eventFileSource ->
-            playlistResource.add(
-                linkTo(methodOn(PlaylistController.class)
-                    .fetchVariantPlaylist(masterM3U.getEventId(), eventFileSource.getEventFileSrcId()))
-                    .withRel(getFileSourceLinkRel(eventFileSource))
-            )
-        );
+        eventFileSources.forEach(eventFileSource -> {
+          // Add link to VariantM3Us
+          playlistResource.add(
+              linkTo(methodOn(PlaylistController.class)
+                  .fetchVariantPlaylist(masterM3U.getEventId(),
+                      eventFileSource.getEventFileSrcId()))
+                  .withRel(getFileSourceLinkRel(eventFileSource))
+          );
+
+          // Add link to ffmpeg stream
+          final String baseUrl =
+              ServletUriComponentsBuilder
+                  .fromCurrentContextPath()
+                  .build()
+                  .toUriString();
+          // TODO: Don't hardcode ffmpeg stream URL
+          final String streamUrl =
+              String.format(
+                  "Link: <%s/videos/%s/%s/playlist.m3u8>; rel=\"stream\"",
+                  baseUrl, event.getEventId(),
+                  eventFileSource.getEventFileSrcId()
+              );
+          playlistResource.add(Link.valueOf(streamUrl).withRel("stream"));
+        });
       } else {
         Log.d(LOG_TAG,
             String.format("No variant playlists found for Event: %s", masterM3U.getEventId()));
@@ -89,8 +108,8 @@ public class PlaylistResource extends RepresentationModel<PlaylistResource> {
   }
 
   /**
-   * Create a LinkRelation to refer to a given File Source
-   *  Format: <resolution>_<primary_language>
+   * Create a LinkRelation to refer to a given File Source Format: <resolution>_<primary_language>
+   *
    * @param eventFileSource The File Source for which we need a link relation
    * @return The link relation for this file source
    */
