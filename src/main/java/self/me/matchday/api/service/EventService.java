@@ -7,14 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Service;
-import self.me.matchday.api.resource.EventResource;
-import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
-import self.me.matchday.api.resource.HighlightShowResource;
-import self.me.matchday.api.resource.HighlightShowResource.HighlightResourceAssembler;
-import self.me.matchday.api.resource.MatchResource;
-import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
 import self.me.matchday.db.EventRepository;
 import self.me.matchday.db.HighlightShowRepository;
 import self.me.matchday.db.MatchRepository;
@@ -34,22 +27,14 @@ public class EventService {
   private final MatchRepository matchRepository;
   private final HighlightShowRepository highlightShowRepository;
   private final EventRepository eventRepository;
-  private final EventResourceAssembler eventResourceAssembler;
-  private final MatchResourceAssembler matchResourceAssembler;
-  private final HighlightResourceAssembler highlightResourceAssembler;
 
   @Autowired
-  EventService(MatchRepository matchRepository, MatchResourceAssembler matchResourceAssembler,
-      EventRepository eventRepository, EventResourceAssembler eventResourceAssembler,
-      HighlightShowRepository highlightShowRepository,
-      HighlightResourceAssembler highlightResourceAssembler) {
+  EventService(final MatchRepository matchRepository, final EventRepository eventRepository,
+      final HighlightShowRepository highlightShowRepository) {
 
     this.matchRepository = matchRepository;
     this.eventRepository = eventRepository;
-    this.eventResourceAssembler = eventResourceAssembler;
-    this.matchResourceAssembler = matchResourceAssembler;
     this.highlightShowRepository = highlightShowRepository;
-    this.highlightResourceAssembler = highlightResourceAssembler;
   }
 
   /* ===============================================================================================
@@ -57,17 +42,19 @@ public class EventService {
    * ============================================================================================ */
 
   // TODO: Don't return CollectionModels or Resources - do that in controllers!
-  public Optional<CollectionModel<EventResource>> fetchAllEvents() {
+  public Optional<List<Event>> fetchAllEvents() {
 
     Log.i(LOG_TAG, "Fetching latest Events...");
 
-    Optional<CollectionModel<EventResource>> result = Optional.empty();
+    // Fetch Events from database
     final List<Event> events = eventRepository.findAll();
+    // Sort Events
     if (events.size() > 0) {
       events.sort(EVENT_SORTER);
-      result = Optional.of(eventResourceAssembler.toCollectionModel(events));
+      return Optional.of(events);
     }
-    return result;
+    // None found
+    return Optional.empty();
   }
 
   public Optional<Event> fetchById(@NotNull final String eventId) {
@@ -81,17 +68,16 @@ public class EventService {
    *
    * @return Collection of assembled resources.
    */
-  public Optional<CollectionModel<MatchResource>> fetchAllMatches() {
+  public Optional<List<Match>> fetchAllMatches() {
 
     Log.i(LOG_TAG, "Fetching all Matches from database.");
     // Retrieve all matches from repo
     final List<Match> matches = matchRepository.findAll();
 
     if (matches.size() > 0) {
-      // Sort by date (descending)
+      // Sort by date (descending) & return
       matches.sort(EVENT_SORTER);
-      // return DTOs
-      return Optional.of(matchResourceAssembler.toCollectionModel(matches));
+      return Optional.of(matches);
     } else {
       Log.d(LOG_TAG, "Attempting to retrieve all Matches, but none found");
       return Optional.empty();
@@ -104,13 +90,12 @@ public class EventService {
    * @param matchId The ID of the match we want.
    * @return An optional containing the match resource, if it was found.
    */
-  public Optional<MatchResource> fetchMatch(@NotNull String matchId) {
+  public Optional<Match> fetchMatch(@NotNull String matchId) {
 
     Log.i(LOG_TAG, String.format("Fetching Match with ID: %s from the database.", matchId));
     return
         matchRepository
-            .findById(matchId)
-            .map(matchResourceAssembler::toModel);
+            .findById(matchId);
   }
 
   /**
@@ -119,13 +104,12 @@ public class EventService {
    * @param competitionId The ID of the Competition.
    * @return A CollectionModel containing all Events for the specified Competition.
    */
-  public Optional<CollectionModel<EventResource>> fetchEventsForCompetition(
+  public Optional<List<Event>> fetchEventsForCompetition(
       @NotNull final String competitionId) {
 
     return
         eventRepository
-            .fetchEventsByCompetition(competitionId)
-            .map(eventResourceAssembler::toCollectionModel);
+            .fetchEventsByCompetition(competitionId);
   }
 
   /**
@@ -134,12 +118,11 @@ public class EventService {
    * @param teamId The ID of the Team.
    * @return A CollectionModel containing the Events.
    */
-  public Optional<CollectionModel<EventResource>> fetchEventsForTeam(@NotNull final String teamId) {
+  public Optional<List<Event>> fetchEventsForTeam(@NotNull final String teamId) {
 
     return
         eventRepository
-            .fetchEventsByTeam(teamId)
-            .map(eventResourceAssembler::toCollectionModel);
+            .fetchEventsByTeam(teamId);
   }
 
   /**
@@ -147,7 +130,7 @@ public class EventService {
    *
    * @return Optional collection model of highlight show resources.
    */
-  public Optional<CollectionModel<HighlightShowResource>> fetchAllHighlightShows() {
+  public Optional<List<HighlightShow>> fetchAllHighlightShows() {
 
     Log.i(LOG_TAG, "Fetching all Highlight Shows from the database.");
     // Retrieve highlights from database
@@ -157,7 +140,7 @@ public class EventService {
       // Sort in reverse chronological order
       highlightShows.sort(EVENT_SORTER);
       // return DTO
-      return Optional.of(highlightResourceAssembler.toCollectionModel(highlightShows));
+      return Optional.of(highlightShows);
     } else {
       Log.d(LOG_TAG, "Attempting to retrieve all Highlight Shows, but none found");
       return Optional.empty();
@@ -170,13 +153,12 @@ public class EventService {
    * @param highlightShowId ID of the Highlight Show.
    * @return The requested HighlightShow, or empty().
    */
-  public Optional<HighlightShowResource> fetchHighlightShow(@NotNull String highlightShowId) {
+  public Optional<HighlightShow> fetchHighlightShow(@NotNull String highlightShowId) {
 
     Log.i(LOG_TAG, "Fetching Highlight Show for ID: " + highlightShowId);
     return
         highlightShowRepository
-            .findById(highlightShowId)
-            .map(highlightResourceAssembler::toModel);
+            .findById(highlightShowId);
   }
 
   /* ===============================================================================================

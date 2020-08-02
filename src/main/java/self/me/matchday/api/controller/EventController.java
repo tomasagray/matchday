@@ -9,8 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.EventResource;
-import self.me.matchday.api.resource.HighlightShowResource;
-import self.me.matchday.api.resource.MatchResource;
+import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.util.Log;
 
@@ -20,21 +19,24 @@ public class EventController {
   private static final String LOG_TAG = "EventController";
 
   private final EventService eventService;
+  private final EventResourceAssembler resourceAssembler;
 
   @Autowired
-  EventController(EventService eventService) {
+  EventController(final EventService eventService, final EventResourceAssembler resourceAssembler) {
     this.eventService = eventService;
+    this.resourceAssembler = resourceAssembler;
   }
 
   @ResponseBody
   @RequestMapping(value = "/events", method = RequestMethod.GET)
-  public ResponseEntity<CollectionModel<EventResource>> fetchAllEvents() {
+  public CollectionModel<EventResource> fetchAllEvents() {
 
+    eventService.fetchAllEvents();
     return
         eventService
           .fetchAllEvents()
-          .map(ResponseEntity::ok)
-          .orElse(ResponseEntity.notFound().build());
+          .map(resourceAssembler::toCollectionModel)
+          .orElse(null);
   }
 
 
@@ -45,13 +47,13 @@ public class EventController {
    */
   @RequestMapping(value = "/matches", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<CollectionModel<MatchResource>> fetchAllMatches() {
+  public CollectionModel<EventResource> fetchAllMatches() {
 
     return
         eventService
             .fetchAllMatches()
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.noContent().build());
+            .map(resourceAssembler::toCollectionModel)
+            .orElse(null);
   }
 
   /**
@@ -62,11 +64,12 @@ public class EventController {
    */
   @RequestMapping(value = "/matches/match/{matchId}", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<MatchResource> fetchMatchById(@PathVariable String matchId) {
+  public ResponseEntity<EventResource> fetchMatchById(@PathVariable String matchId) {
 
     return
         eventService
             .fetchMatch(matchId)
+            .map(resourceAssembler::toModel)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
   }
@@ -78,13 +81,13 @@ public class EventController {
    */
   @RequestMapping(value = "/highlight-shows", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<CollectionModel<HighlightShowResource>> fetchAllHighlights() {
+  public CollectionModel<EventResource> fetchAllHighlights() {
 
     return
         eventService
             .fetchAllHighlightShows()
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+            .map(resourceAssembler::toCollectionModel)
+            .orElse(null);
   }
 
   /**
@@ -95,13 +98,14 @@ public class EventController {
    */
   @RequestMapping(value = "/highlight-shows/highlight/{eventId}", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<HighlightShowResource> fetchHighlightById(@PathVariable String eventId) {
+  public ResponseEntity<EventResource> fetchHighlightById(@PathVariable String eventId) {
 
     Log.i(LOG_TAG, "Fetching Highlight Show with ID: " + eventId);
 
     return
         eventService
             .fetchHighlightShow(eventId)
+            .map(resourceAssembler::toModel)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
   }

@@ -4,9 +4,6 @@
 
 package self.me.matchday.api.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
@@ -16,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.CompetitionResource;
+import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.EventResource;
+import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
+import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.ArtworkService;
 import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.api.service.EventService;
@@ -28,17 +28,27 @@ import self.me.matchday.api.service.TeamService;
 public class CompetitionController {
 
   private final CompetitionService competitionService;
+  private final CompetitionResourceAssembler competitionResourceAssembler;
   private final TeamService teamService;
+  private final TeamResourceAssembler teamResourceAssembler;
   private final EventService eventService;
+  private final EventResourceAssembler eventResourceAssembler;
+  // TODO: Move these methods to artwork controller
   private final ArtworkService artworkService;
 
   @Autowired
-  public CompetitionController(CompetitionService competitionService, TeamService teamService,
-      EventService eventService, ArtworkService artworkService) {
+  public CompetitionController(final CompetitionService competitionService,
+      final CompetitionResourceAssembler competitionResourceAssembler,
+      final TeamService teamService, final TeamResourceAssembler teamResourceAssembler,
+      final EventService eventService, final EventResourceAssembler eventResourceAssembler,
+      final ArtworkService artworkService) {
 
     this.competitionService = competitionService;
+    this.competitionResourceAssembler = competitionResourceAssembler;
     this.teamService = teamService;
+    this.teamResourceAssembler = teamResourceAssembler;
     this.eventService = eventService;
+    this.eventResourceAssembler = eventResourceAssembler;
     this.artworkService = artworkService;
   }
 
@@ -49,12 +59,12 @@ public class CompetitionController {
    * @return All Competitions as an HttpEntity.
    */
   @RequestMapping(value = "/", method = RequestMethod.GET)
-  public ResponseEntity<CollectionModel<CompetitionResource>> fetchAllCompetitions() {
+  public CollectionModel<CompetitionResource> fetchAllCompetitions() {
     return
         competitionService
             .fetchAllCompetitions()
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+            .map(competitionResourceAssembler::toCollectionModel)
+            .orElse(null);
   }
 
   /**
@@ -70,6 +80,7 @@ public class CompetitionController {
     return
         competitionService
             .fetchCompetitionById(competitionId)
+            .map(competitionResourceAssembler::toModel)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
   }
@@ -81,14 +92,14 @@ public class CompetitionController {
    * @return A CollectionModel containing the Teams.
    */
   @RequestMapping(value = "/competition/{competitionId}/teams", method = RequestMethod.GET)
-  public ResponseEntity<CollectionModel<TeamResource>> fetchCompetitionTeams(
+  public CollectionModel<TeamResource> fetchCompetitionTeams(
       @PathVariable final String competitionId) {
 
     return
         teamService
             .fetchTeamsByCompetitionId(competitionId)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+            .map(teamResourceAssembler::toCollectionModel)
+            .orElse(null);
   }
 
   /**
@@ -98,18 +109,13 @@ public class CompetitionController {
    * @return A ResponseEntity containing the CollectionModel of Events.
    */
   @RequestMapping(value = "/competition/{competitionId}/events", method = RequestMethod.GET)
-  public ResponseEntity<CollectionModel<EventResource>> fetchCompetitionEvents(
-      @PathVariable final String competitionId) {
+  public CollectionModel<EventResource> fetchCompetitionEvents(@PathVariable final String competitionId) {
 
     return
         eventService
             .fetchEventsForCompetition(competitionId)
-            // add a self link to collection
-            .map(eventResources ->
-                eventResources.add(linkTo(methodOn(CompetitionController.class)
-                    .fetchCompetitionEvents(competitionId)).withSelfRel()))
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+            .map(eventResourceAssembler::toCollectionModel)
+            .orElse(null);
   }
 
   /**

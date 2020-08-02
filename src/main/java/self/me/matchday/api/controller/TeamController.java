@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.EventResource;
+import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
+import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.ArtworkService;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.TeamService;
@@ -26,15 +28,21 @@ import self.me.matchday.api.service.TeamService;
 public class TeamController {
 
   private final TeamService teamService;
+  private final TeamResourceAssembler teamResourceAssembler;
   private final EventService eventService;
+  private final EventResourceAssembler eventResourceAssembler;
   private final ArtworkService artworkService;
 
   @Autowired
-  public TeamController(TeamService teamService, EventService eventService,
-      ArtworkService artworkService) {
+  public TeamController(final TeamService teamService,
+      final TeamResourceAssembler teamResourceAssembler,
+      final EventService eventService, final EventResourceAssembler eventResourceAssembler,
+      final ArtworkService artworkService) {
 
     this.teamService = teamService;
+    this.teamResourceAssembler = teamResourceAssembler;
     this.eventService = eventService;
+    this.eventResourceAssembler = eventResourceAssembler;
     this.artworkService = artworkService;
   }
 
@@ -44,13 +52,13 @@ public class TeamController {
    * @return A List of Teams as an HttpEntity.
    */
   @RequestMapping(value = "/", method = RequestMethod.GET)
-  public ResponseEntity<CollectionModel<TeamResource>> fetchAllTeams() {
+  public CollectionModel<TeamResource> fetchAllTeams() {
 
     return
         teamService
             .fetchAllTeams()
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.noContent().build());
+            .map(teamResourceAssembler::toCollectionModel)
+            .orElse(null);
   }
 
   /**
@@ -65,6 +73,7 @@ public class TeamController {
     return
         teamService
             .fetchTeamById(teamId)
+            .map(teamResourceAssembler::toModel)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
   }
@@ -82,10 +91,14 @@ public class TeamController {
     return
         eventService
             .fetchEventsForTeam(teamId)
-            // add self link
+            .map(eventResourceAssembler::toCollectionModel)
+            // add self link to each EventResource
             .map(eventResources ->
-                eventResources.add(linkTo(methodOn(TeamController.class)
-                    .fetchEventsForTeam(teamId)).withSelfRel()))
+                eventResources
+                    .add(linkTo(
+                        methodOn(TeamController.class)
+                            .fetchEventsForTeam(teamId))
+                        .withSelfRel()))
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
   }
@@ -129,12 +142,12 @@ public class TeamController {
 
     return
         artworkService
-        .fetchTeamFanart(teamId)
-        .map(image ->
-            ResponseEntity
-                .ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(image))
-        .orElse(ResponseEntity.notFound().build());
+            .fetchTeamFanart(teamId)
+            .map(image ->
+                ResponseEntity
+                    .ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(image))
+            .orElse(ResponseEntity.notFound().build());
   }
 }

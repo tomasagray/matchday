@@ -8,10 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Service;
-import self.me.matchday.api.resource.TeamResource;
-import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.db.TeamRepository;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
@@ -22,13 +19,10 @@ public class TeamService {
   private static final String LOG_TAG = "TeamService";
 
   private final TeamRepository teamRepository;
-  private final TeamResourceAssembler teamResourceAssembler;
 
   @Autowired
-  public TeamService(TeamRepository teamRepository, TeamResourceAssembler teamResourceAssembler) {
-
+  public TeamService(@NotNull final TeamRepository teamRepository) {
     this.teamRepository = teamRepository;
-    this.teamResourceAssembler = teamResourceAssembler;
   }
 
   /**
@@ -36,7 +30,7 @@ public class TeamService {
    *
    * @return Optional containing a collection model of Team resources.
    */
-  public Optional<CollectionModel<TeamResource>> fetchAllTeams() {
+  public Optional<List<Team>> fetchAllTeams() {
 
     Log.i(LOG_TAG, "Fetching all Teams from local database.");
 
@@ -44,7 +38,7 @@ public class TeamService {
     if (teams.size() > 0) {
       // Sort Teams by name
       teams.sort(Comparator.comparing(Team::getName));
-      return Optional.of(teamResourceAssembler.toCollectionModel(teams));
+      return Optional.of(teams);
     } else {
       Log.d(LOG_TAG, "Attempted to fetch all Teams, but nothing found.");
       return Optional.empty();
@@ -57,13 +51,12 @@ public class TeamService {
    * @param teamId The Team ID.
    * @return The requested Team, wrapped in an Optional.
    */
-  public Optional<TeamResource> fetchTeamById(@NotNull final String teamId) {
+  public Optional<Team> fetchTeamById(@NotNull final String teamId) {
 
     Log.i(LOG_TAG, String.format("Fetching Team with ID: %s from the local database.", teamId));
     return
         teamRepository
-            .findById(teamId)
-            .map(teamResourceAssembler::toModel);
+            .findById(teamId);
   }
 
   /**
@@ -72,7 +65,7 @@ public class TeamService {
    * @param competitionId The ID of the Competition.
    * @return All Teams which have Events in the given Competition.
    */
-  public Optional<CollectionModel<TeamResource>> fetchTeamsByCompetitionId(
+  public Optional<List<Team>> fetchTeamsByCompetitionId(
       @NotNull final String competitionId) {
 
     Log.i(LOG_TAG,
@@ -82,6 +75,7 @@ public class TeamService {
     final List<Team> homeTeams = teamRepository.fetchHomeTeamsByCompetition(competitionId);
     // Get away teams
     final List<Team> awayTeams = teamRepository.fetchAwayTeamsByCompetition(competitionId);
+
     // Combine results in a Set<> to ensure no duplicates
     Set<Team> teamSet = new LinkedHashSet<>(homeTeams);
     teamSet.addAll(awayTeams);
@@ -89,6 +83,7 @@ public class TeamService {
     List<Team> teamList = new ArrayList<>(teamSet);
     // Sort by Team name
     teamList.sort(Comparator.comparing(Team::getName));
-    return Optional.of(teamResourceAssembler.toCollectionModel(teamList));
+
+    return Optional.of(teamList);
   }
 }
