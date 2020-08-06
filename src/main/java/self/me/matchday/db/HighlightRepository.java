@@ -6,9 +6,9 @@ package self.me.matchday.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.HighlightShow;
+import self.me.matchday.model.Highlight;
 
 @Repository
-public interface HighlightShowRepository extends JpaRepository<HighlightShow, String> {
+public interface HighlightRepository extends JpaRepository<Highlight, String> {
 
 }

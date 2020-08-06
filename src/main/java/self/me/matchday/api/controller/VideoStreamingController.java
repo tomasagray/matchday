@@ -20,8 +20,7 @@ import self.me.matchday.model.VariantM3U;
 import self.me.matchday.util.Log;
 
 @RestController
-@RequestMapping(value = {"/matches/match/{eventId}/video",
-    "/highlights/highlight/{eventId}/video"})
+@RequestMapping(value = "/events/event/{eventId}/video")
 public class VideoStreamingController {
 
   private final VideoStreamingService streamingService;

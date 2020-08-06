@@ -17,20 +17,20 @@ import org.jetbrains.annotations.NotNull;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "Highlights")
-public class HighlightShow extends Event implements Serializable {
+public class Highlight extends Event implements Serializable {
 
-  HighlightShow() {
+  Highlight() {
     this.eventId = MD5String.generate();
   }
 
-  private HighlightShow(
+  private Highlight(
       Competition competition, Season season, Fixture fixture, String title, LocalDateTime date) {
     this.competition = competition;
     this.season = season;
     this.fixture = fixture;
     this.title = title;
     this.date = date;
-    this.eventId = generateHighlightShowId();
+    this.eventId = generateHighlightId();
   }
 
   // Overrides
@@ -48,8 +48,8 @@ public class HighlightShow extends Event implements Serializable {
         + getFixture();
   }
 
-  /** A Builder class for this object. Returns a fully constructed HighlightShow object. */
-  public static class HighlightShowBuilder {
+  /** A Builder class for this object. Returns a fully constructed Highlight object. */
+  public static class HighlightBuilder {
 
     private Competition competition;
     private Season season;
@@ -57,37 +57,37 @@ public class HighlightShow extends Event implements Serializable {
     private String title;
     private LocalDateTime date;
 
-    public HighlightShowBuilder setCompetition(@NotNull Competition competition) {
+    public HighlightBuilder setCompetition(@NotNull Competition competition) {
       this.competition = competition;
       return this;
     }
 
-    public HighlightShowBuilder setSeason(@NotNull Season season) {
+    public HighlightBuilder setSeason(@NotNull Season season) {
       this.season = season;
       return this;
     }
 
-    public HighlightShowBuilder setFixture(@NotNull Fixture fixture) {
+    public HighlightBuilder setFixture(@NotNull Fixture fixture) {
       this.fixture = fixture;
       return this;
     }
 
-    public HighlightShowBuilder setTitle(@NotNull String title) {
+    public HighlightBuilder setTitle(@NotNull String title) {
       this.title = title;
       return this;
     }
 
-    public HighlightShowBuilder setDate(LocalDateTime date) {
+    public HighlightBuilder setDate(LocalDateTime date) {
       this.date = date;
       return this;
     }
 
-    public HighlightShow build() {
-      return new HighlightShow(this.competition, this.season, this.fixture, this.title, this.date);
+    public Highlight build() {
+      return new Highlight(this.competition, this.season, this.fixture, this.title, this.date);
     }
   }
 
-  private String generateHighlightShowId() {
+  private String generateHighlightId() {
 
     final String dateString =
         (this.getDate() != null) ?

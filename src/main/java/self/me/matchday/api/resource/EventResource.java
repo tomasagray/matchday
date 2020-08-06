@@ -21,6 +21,8 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.EventController;
+import self.me.matchday.api.controller.HighlightController;
+import self.me.matchday.api.controller.MatchController;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
@@ -39,15 +41,17 @@ import self.me.matchday.model.Season;
 @JsonInclude(value = Include.NON_NULL)
 public class EventResource extends RepresentationModel<EventResource> {
 
+  // TODO: Add MatchResource & HighlightResource
+
   private String eventId;
   private String title;
   private Season season;
   private Fixture fixture;
   private LocalDateTime date;
+  private RepresentationModel<CompetitionResource> competition;
   // Only for Matches
   private RepresentationModel<TeamResource> homeTeam;
   private RepresentationModel<TeamResource> awayTeam;
-  private RepresentationModel<CompetitionResource> competition;
 
   @Component
   public static class EventResourceAssembler extends
@@ -84,6 +88,8 @@ public class EventResource extends RepresentationModel<EventResource> {
       eventResource.setSeason(entity.getSeason());
       eventResource.setFixture(entity.getFixture());
       eventResource.setDate(entity.getDate());
+
+      // TODO: Make this handle correct subtype
       // Add link to playlist resource for this event
       eventResource.add(
           linkTo(methodOn(VideoStreamingController.class)
@@ -97,15 +103,16 @@ public class EventResource extends RepresentationModel<EventResource> {
         eventResource.setHomeTeam(teamResourceAssembler.toModel(match.getHomeTeam()));
         eventResource.setAwayTeam(teamResourceAssembler.toModel(match.getAwayTeam()));
         // add self link
-        eventResource.add(linkTo(methodOn(EventController.class)
-            .fetchMatchById(match.getEventId()))
+        eventResource.add(linkTo(
+            methodOn(MatchController.class)
+                .fetchMatchById(match.getEventId()))
             .withSelfRel());
       } else {
-        // it's a HighlightShow; add self link
-        eventResource.add(
-            linkTo(methodOn(EventController.class)
+        // it's a Highlight; add self link
+        eventResource.add(linkTo(
+            methodOn(HighlightController.class)
                 .fetchHighlightById(entity.getEventId()))
-                .withSelfRel());
+            .withSelfRel());
       }
       // Return the finished product
       return eventResource;

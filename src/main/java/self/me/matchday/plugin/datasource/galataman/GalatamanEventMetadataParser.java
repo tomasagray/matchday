@@ -16,12 +16,12 @@ import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import self.me.matchday.model.Highlight.HighlightBuilder;
 import self.me.matchday.plugin.datasource.EventMetadataParser;
 import self.me.matchday.plugin.datasource.zkfootball.ZKFPatterns;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Fixture;
-import self.me.matchday.model.HighlightShow;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Season;
 import self.me.matchday.model.Team;
@@ -75,7 +75,7 @@ public class GalatamanEventMetadataParser implements EventMetadataParser {
           .setDate(date)
           .build();
     } else {
-      return new HighlightShow.HighlightShowBuilder()
+      return new HighlightBuilder()
           .setCompetition(competition)
           .setSeason(season)
           .setFixture(fixture)

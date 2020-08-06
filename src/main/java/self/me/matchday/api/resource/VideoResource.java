@@ -53,7 +53,6 @@ public class VideoResource extends RepresentationModel<VideoResource> {
   public static class VideoResourceAssembler extends
       RepresentationModelAssemblerSupport<EventFileSource, VideoResource> {
 
-    // TODO: Not this; brittle
     @Getter
     @Setter
     private String eventId;

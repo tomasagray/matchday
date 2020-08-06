@@ -32,18 +32,31 @@ public class RootController {
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public ResponseEntity<EntityModel<RootResource>> root() {
 
-    // TODO: How to handle this correctly?
     // Create root endpoint
-    EntityModel<RootResource> model = EntityModel.of(new RootResource());
-    // attach top-level links
-    model.add(linkTo(methodOn(EventController.class).fetchAllEvents()).withRel(EVENTS_REL));
-    model.add(linkTo(methodOn(EventController.class).fetchAllMatches()).withRel(MATCHES_REL));
-    model.add(linkTo(methodOn(EventController.class).fetchAllHighlights()).withRel(
-        HIGHLIGHTS_REL));
-    model.add(linkTo(methodOn(TeamController.class).fetchAllTeams()).withRel(TEAMS_REL));
-    model.add(linkTo(methodOn(CompetitionController.class).fetchAllCompetitions()).withRel(
-        COMPETITIONS_REL));
+    EntityModel<RootResource> root = EntityModel.of(new RootResource());
 
-    return new ResponseEntity<>(model, HttpStatus.OK);
+    // attach top-level links
+    root.add(linkTo(
+        methodOn(EventController.class)
+            .fetchAllEvents())
+        .withRel(EVENTS_REL));
+    root.add(linkTo(
+        methodOn(MatchController.class)
+            .fetchAllMatches())
+        .withRel(MATCHES_REL));
+    root.add(linkTo(
+        methodOn(HighlightController.class)
+            .fetchAllHighlights())
+        .withRel(HIGHLIGHTS_REL));
+    root.add(linkTo(
+        methodOn(TeamController.class)
+            .fetchAllTeams())
+        .withRel(TEAMS_REL));
+    root.add(linkTo(
+        methodOn(CompetitionController.class)
+            .fetchAllCompetitions())
+        .withRel(COMPETITIONS_REL));
+
+    return new ResponseEntity<>(root, HttpStatus.OK);
   }
 }

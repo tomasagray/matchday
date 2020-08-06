@@ -11,14 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.EventFileSrcRepository;
 import self.me.matchday.db.EventRepository;
-import self.me.matchday.db.HighlightShowRepository;
-import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.HighlightShow;
-import self.me.matchday.model.Match;
 import self.me.matchday.util.Log;
 
 @Service
@@ -29,24 +25,18 @@ public class EventService {
 
   private final EventRepository eventRepository;
   private final EventFileSrcRepository fileSrcRepository;
-  private final MatchRepository matchRepository;
-  private final HighlightShowRepository highlightShowRepository;
 
   @Autowired
   EventService(final EventRepository eventRepository,
-      final EventFileSrcRepository fileSrcRepository,
-      final MatchRepository matchRepository,
-      final HighlightShowRepository highlightShowRepository) {
+      final EventFileSrcRepository fileSrcRepository) {
 
     this.eventRepository = eventRepository;
     this.fileSrcRepository = fileSrcRepository;
-    this.matchRepository = matchRepository;
-    this.highlightShowRepository = highlightShowRepository;
   }
 
-  /* ===============================================================================================
-   * Getters
-   * ============================================================================================ */
+  // ==============
+  // Getters
+  // ==============
 
   public Optional<List<Event>> fetchAllEvents() {
 
@@ -102,81 +92,9 @@ public class EventService {
             .fetchEventsByTeam(teamId);
   }
 
-  // TODO - Move to MatchService & HighlightService
-  /**
-   * Retrieve all Matches from the repo (database) and assemble into a collection of resources.
-   *
-   * @return Collection of assembled resources.
-   */
-  public Optional<List<Match>> fetchAllMatches() {
-
-    Log.i(LOG_TAG, "Fetching all Matches from database.");
-    // Retrieve all matches from repo
-    final List<Match> matches = matchRepository.findAll();
-
-    if (matches.size() > 0) {
-      // Sort by date (descending) & return
-      matches.sort(EVENT_SORTER);
-      return Optional.of(matches);
-    } else {
-      Log.d(LOG_TAG, "Attempting to retrieve all Matches, but none found");
-      return Optional.empty();
-    }
-  }
-
-  /**
-   * Retrieve a specific match from the local DB.
-   *
-   * @param matchId The ID of the match we want.
-   * @return An optional containing the match resource, if it was found.
-   */
-  public Optional<Match> fetchMatch(@NotNull String matchId) {
-
-    Log.i(LOG_TAG, String.format("Fetching Match with ID: %s from the database.", matchId));
-    return
-        matchRepository
-            .findById(matchId);
-  }
-
-  /**
-   * Retrieve all Highlight Shows from the database.
-   *
-   * @return Optional collection model of highlight show resources.
-   */
-  public Optional<List<HighlightShow>> fetchAllHighlightShows() {
-
-    Log.i(LOG_TAG, "Fetching all Highlight Shows from the database.");
-    // Retrieve highlights from database
-    final List<HighlightShow> highlightShows = highlightShowRepository.findAll();
-
-    if (highlightShows.size() > 0) {
-      // Sort in reverse chronological order
-      highlightShows.sort(EVENT_SORTER);
-      // return DTO
-      return Optional.of(highlightShows);
-    } else {
-      Log.d(LOG_TAG, "Attempting to retrieve all Highlight Shows, but none found");
-      return Optional.empty();
-    }
-  }
-
-  /**
-   * Retrieve a specific HighlightShow from the database.
-   *
-   * @param highlightShowId ID of the Highlight Show.
-   * @return The requested HighlightShow, or empty().
-   */
-  public Optional<HighlightShow> fetchHighlightShow(@NotNull String highlightShowId) {
-
-    Log.i(LOG_TAG, "Fetching Highlight Show for ID: " + highlightShowId);
-    return
-        highlightShowRepository
-            .findById(highlightShowId);
-  }
-
-  /* ===============================================================================================
-   * Setters
-   * ============================================================================================ */
+  // ==============
+  // Setters
+  // ==============
 
   /**
    * Persist an Event; must pass validation, or will skip and make a note in logs.
