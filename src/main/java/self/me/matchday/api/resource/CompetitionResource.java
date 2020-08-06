@@ -19,6 +19,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
+import self.me.matchday.api.controller.ArtworkController;
 import self.me.matchday.api.controller.CompetitionController;
 import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.model.Competition;
@@ -65,23 +66,38 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       competitionResource.setName(competition.getName());
       competitionResource.setAbbreviation(competition.getAbbreviation());
       competitionResource.setLocale(competition.getLocale());
-      // attach links
-      competitionResource.add(linkTo(methodOn(CompetitionController.class)
-          .fetchCompetitionById(competitionId)).withSelfRel());
+
+      // Attach links:
+      competitionResource.add(linkTo(
+          methodOn(CompetitionController.class)
+              .fetchCompetitionById(competitionId))
+          .withSelfRel());
+      // events
+      competitionResource.add(linkTo(
+          methodOn(CompetitionController.class)
+              .fetchCompetitionEvents(competitionId)).withRel(EVENTS));
       // teams
-      competitionResource.add(linkTo(methodOn(CompetitionController.class)
-          .fetchCompetitionTeams(competitionId)).withRel(TEAMS));
+      competitionResource.add(linkTo(
+          methodOn(CompetitionController.class)
+              .fetchCompetitionTeams(competitionId))
+          .withRel(TEAMS));
       // artwork
-      competitionResource.add(linkTo(methodOn(CompetitionController.class)
-          .fetchCompetitionEmblem(competitionId)).withRel(EMBLEM));
-      competitionResource.add(linkTo(methodOn(CompetitionController.class)
-          .fetchCompetitionFanart(competitionId)).withRel(FANART));
-      competitionResource.add(linkTo(methodOn(CompetitionController.class)
-          .fetchCompetitionMonochromeEmblem(competitionId)).withRel(MONOCHROME));
-      competitionResource.add(linkTo(methodOn(CompetitionController.class)
-          .fetchCompetitionLandscape(competitionId)).withRel(LANDSCAPE));
-      competitionResource.add(linkTo(methodOn(CompetitionController.class)
-          .fetchCompetitionEvents(competitionId)).withRel(EVENTS));
+      competitionResource.add(linkTo(
+          methodOn(ArtworkController.class)
+              .fetchCompetitionEmblem(competitionId))
+          .withRel(EMBLEM));
+      competitionResource.add(linkTo(
+          methodOn(ArtworkController.class)
+              .fetchCompetitionFanart(competitionId))
+          .withRel(FANART));
+      competitionResource.add(linkTo(
+          methodOn(ArtworkController.class)
+              .fetchCompetitionMonochromeEmblem(competitionId))
+          .withRel(MONOCHROME));
+      competitionResource.add(linkTo(
+          methodOn(ArtworkController.class)
+              .fetchCompetitionLandscape(competitionId))
+          .withRel(LANDSCAPE));
 
       return competitionResource;
     }

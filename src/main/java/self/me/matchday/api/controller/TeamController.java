@@ -9,7 +9,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +18,6 @@ import self.me.matchday.api.resource.EventResource;
 import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
-import self.me.matchday.api.service.ArtworkService;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.TeamService;
 
@@ -31,19 +29,16 @@ public class TeamController {
   private final TeamResourceAssembler teamResourceAssembler;
   private final EventService eventService;
   private final EventResourceAssembler eventResourceAssembler;
-  private final ArtworkService artworkService;
 
   @Autowired
   public TeamController(final TeamService teamService,
       final TeamResourceAssembler teamResourceAssembler,
-      final EventService eventService, final EventResourceAssembler eventResourceAssembler,
-      final ArtworkService artworkService) {
+      final EventService eventService, final EventResourceAssembler eventResourceAssembler) {
 
     this.teamService = teamService;
     this.teamResourceAssembler = teamResourceAssembler;
     this.eventService = eventService;
     this.eventResourceAssembler = eventResourceAssembler;
-    this.artworkService = artworkService;
   }
 
   /**
@@ -100,54 +95,6 @@ public class TeamController {
                             .fetchEventsForTeam(teamId))
                         .withSelfRel()))
             .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-  }
-
-  /**
-   * Publishes the Team emblem image to the API.
-   *
-   * @param teamId The ID of the Team
-   * @return A byte array containing the image data; written to response body.
-   */
-  @RequestMapping(
-      value = "/team/{teamId}/emblem",
-      produces = MediaType.IMAGE_PNG_VALUE,
-      method = RequestMethod.GET
-  )
-  public ResponseEntity<byte[]> fetchTeamEmblem(@PathVariable final String teamId) {
-
-    return
-        artworkService
-            .fetchTeamEmblem(teamId)
-            .map(image ->
-                ResponseEntity
-                    .ok()
-                    .contentType(MediaType.IMAGE_PNG)
-                    .body(image))
-            .orElse(ResponseEntity.notFound().build());
-  }
-
-  /**
-   * Publishes the fanart for the Team to the API, if available.
-   *
-   * @param teamId The ID of the Team.
-   * @return A byte array of the image data.
-   */
-  @RequestMapping(
-      value = "/team/{teamId}/fanart",
-      produces = MediaType.IMAGE_JPEG_VALUE,
-      method = RequestMethod.GET
-  )
-  public ResponseEntity<byte[]> fetchTeamFanart(@PathVariable final String teamId) {
-
-    return
-        artworkService
-            .fetchTeamFanart(teamId)
-            .map(image ->
-                ResponseEntity
-                    .ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(image))
             .orElse(ResponseEntity.notFound().build());
   }
 }
