@@ -37,8 +37,8 @@ public class EventFileService {
   private final FFmpegPlugin ffmpegPlugin;
 
   @Autowired
-  public EventFileService(FileServerService fileServerService,
-      FFmpegPlugin ffmpegPlugin) {
+  public EventFileService(final FileServerService fileServerService,
+      final FFmpegPlugin ffmpegPlugin) {
 
     this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     this.fileServerService = fileServerService;
@@ -51,7 +51,8 @@ public class EventFileService {
    *
    * @param eventFileSource The File Source to be refreshed.
    */
-  public void refreshEventFileData(@NotNull final EventFileSource eventFileSource, final boolean fetchMetadata) {
+  public void refreshEventFileData(@NotNull final EventFileSource eventFileSource,
+      final boolean fetchMetadata) {
 
     Log.i(LOG_TAG, "Refreshing remote data for file source: " + eventFileSource);
 
@@ -89,7 +90,7 @@ public class EventFileService {
    * @param eventFile The EventFile with possibly stale data.
    * @return True/false
    */
-  public boolean shouldRefreshData(@NotNull EventFile eventFile) {
+  private boolean shouldRefreshData(@NotNull EventFile eventFile) {
 
     // Last time this file's data refreshed
     final Instant lastRefresh = eventFile.getLastRefreshed().toInstant();

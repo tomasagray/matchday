@@ -1,4 +1,4 @@
-package self.me.matchday.db;
+package self.me.matchday.db.converter;
 
 import com.google.gson.Gson;
 import javax.persistence.AttributeConverter;

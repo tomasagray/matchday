@@ -1,4 +1,4 @@
-package self.me.matchday.db;
+package self.me.matchday.db.converter;
 
 import java.nio.file.Path;
 import javax.persistence.AttributeConverter;

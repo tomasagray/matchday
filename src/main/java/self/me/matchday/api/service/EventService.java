@@ -5,15 +5,18 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import self.me.matchday.db.EventFileSrcRepository;
 import self.me.matchday.db.EventRepository;
 import self.me.matchday.db.HighlightShowRepository;
 import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
+import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.HighlightShow;
 import self.me.matchday.model.Match;
 import self.me.matchday.util.Log;
@@ -24,16 +27,20 @@ public class EventService {
   private static final String LOG_TAG = "EventService";
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
+  private final EventRepository eventRepository;
+  private final EventFileSrcRepository fileSrcRepository;
   private final MatchRepository matchRepository;
   private final HighlightShowRepository highlightShowRepository;
-  private final EventRepository eventRepository;
 
   @Autowired
-  EventService(final MatchRepository matchRepository, final EventRepository eventRepository,
+  EventService(final EventRepository eventRepository,
+      final EventFileSrcRepository fileSrcRepository,
+      final MatchRepository matchRepository,
       final HighlightShowRepository highlightShowRepository) {
 
-    this.matchRepository = matchRepository;
     this.eventRepository = eventRepository;
+    this.fileSrcRepository = fileSrcRepository;
+    this.matchRepository = matchRepository;
     this.highlightShowRepository = highlightShowRepository;
   }
 
@@ -41,7 +48,6 @@ public class EventService {
    * Getters
    * ============================================================================================ */
 
-  // TODO: Don't return CollectionModels or Resources - do that in controllers!
   public Optional<List<Event>> fetchAllEvents() {
 
     Log.i(LOG_TAG, "Fetching latest Events...");
@@ -63,6 +69,40 @@ public class EventService {
         eventRepository.findById(eventId);
   }
 
+  public Optional<EventFileSource> fetchEventFileSrc(@NotNull final UUID fileSrcId) {
+
+    return
+        fileSrcRepository.findById(fileSrcId);
+  }
+
+  /**
+   * Retrieve all Events for a given Competition.
+   *
+   * @param competitionId The ID of the Competition.
+   * @return A CollectionModel containing all Events for the specified Competition.
+   */
+  public Optional<List<Event>> fetchEventsForCompetition(
+      @NotNull final String competitionId) {
+
+    return
+        eventRepository
+            .fetchEventsByCompetition(competitionId);
+  }
+
+  /**
+   * Retrieve all Events associated with the specified Team.
+   *
+   * @param teamId The ID of the Team.
+   * @return A CollectionModel containing the Events.
+   */
+  public Optional<List<Event>> fetchEventsForTeam(@NotNull final String teamId) {
+
+    return
+        eventRepository
+            .fetchEventsByTeam(teamId);
+  }
+
+  // TODO - Move to MatchService & HighlightService
   /**
    * Retrieve all Matches from the repo (database) and assemble into a collection of resources.
    *
@@ -96,33 +136,6 @@ public class EventService {
     return
         matchRepository
             .findById(matchId);
-  }
-
-  /**
-   * Retrieve all Events for a given Competition.
-   *
-   * @param competitionId The ID of the Competition.
-   * @return A CollectionModel containing all Events for the specified Competition.
-   */
-  public Optional<List<Event>> fetchEventsForCompetition(
-      @NotNull final String competitionId) {
-
-    return
-        eventRepository
-            .fetchEventsByCompetition(competitionId);
-  }
-
-  /**
-   * Retrieve all Events associated with the specified Team.
-   *
-   * @param teamId The ID of the Team.
-   * @return A CollectionModel containing the Events.
-   */
-  public Optional<List<Event>> fetchEventsForTeam(@NotNull final String teamId) {
-
-    return
-        eventRepository
-            .fetchEventsByTeam(teamId);
   }
 
   /**

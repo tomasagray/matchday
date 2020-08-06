@@ -3,16 +3,13 @@ package self.me.matchday.api.service;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
-import self.me.matchday.api.controller.PlaylistController;
-import self.me.matchday.api.resource.PlaylistResource;
-import self.me.matchday.api.resource.PlaylistResource.PlaylistResourceAssembler;
-import self.me.matchday.db.MasterM3URepository;
+import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.MasterM3U;
@@ -24,31 +21,10 @@ public class MasterPlaylistService {
   private static final String LOG_TAG = "MasterPlaylistService";
 
   private final EventService eventService;
-  private final MasterM3URepository masterM3URepository;
-  private final PlaylistResourceAssembler playlistResourceAssembler;
 
   @Autowired
-  MasterPlaylistService(EventService eventService,
-      MasterM3URepository masterM3URepository, PlaylistResourceAssembler playlistResourceAssembler) {
-
+  MasterPlaylistService(final EventService eventService) {
     this.eventService = eventService;
-    this.masterM3URepository = masterM3URepository;
-    this.playlistResourceAssembler = playlistResourceAssembler;
-  }
-
-  /**
-   * Create and return a playlist resource for the given Event, which contains links to the master
-   * playlist, as well as any variants.
-   *
-   * @param eventId The ID of the Event
-   * @return An Optional<> containing a playlist resource, if a master playlist is found.
-   */
-  public Optional<PlaylistResource> fetchPlaylistResourceForEvent(@NotNull final String eventId) {
-
-    final Optional<MasterM3U> masterPlaylist = fetchMasterPlaylistForEvent(eventId);
-    return
-        masterPlaylist
-            .map(playlistResourceAssembler::toModel);
   }
 
   /**
@@ -65,64 +41,50 @@ public class MasterPlaylistService {
 
     Optional<MasterM3U> result = Optional.empty();
     // ensure valid Event ID
-    if (eventService.fetchById(eventId).isPresent()) {
-      // check DB for playlist
-      final Optional<MasterM3U> playlistOptional = masterM3URepository.findByEventId(eventId);
-      if (playlistOptional.isPresent()) {
-        result = playlistOptional;
-      } else {
-        // if not found, create, save & return
-        final Optional<MasterM3U> masterPlaylist = createMasterPlaylist(eventId);
-        masterPlaylist.ifPresent(masterM3URepository::save);
-        result = masterPlaylist;
+    final Optional<Event> eventOptional = eventService.fetchById(eventId);
+    if (eventOptional.isPresent()) {
+
+      final Event event = eventOptional.get();
+      // Create master playlist for this Event
+      final MasterM3U masterPlaylist = createMasterPlaylist(event);
+      if (masterPlaylist != null) {
+        result = Optional.of(masterPlaylist);
       }
     }
-
     return result;
   }
 
   /**
    * Create a Master playlist (.m3u8) for the given Event.
    *
-   * @param eventId The ID of the Event for which this playlist will be created.
+   * @param event The Event for which this playlist will be created.
    * @return An Optional containing the Master playlist.
    */
-  private Optional<MasterM3U> createMasterPlaylist(@NotNull final String eventId) {
+  private MasterM3U createMasterPlaylist(@NotNull final Event event) {
 
-    Optional<MasterM3U> result = Optional.empty();
+    // Get file sources for this event
+    final Collection<EventFileSource> eventFileSources = event.getFileSources();
+    if (eventFileSources.size() > 0) {
+      // Create Master Playlist
+      final MasterM3U masterPlaylist = new MasterM3U();
+      // Add variants
+      eventFileSources.forEach(eventFileSource -> {
+        // Create variant link
+        final Link variantLink =
+            linkTo(methodOn(VideoStreamingController.class)
+                .getVariantPlaylist(event.getEventId(), eventFileSource.getEventFileSrcId()))
+                .withSelfRel();
+        // Add variant to master playlist
+        masterPlaylist.addVariant(
+            eventFileSource.getResolution(),
+            eventFileSource.getLanguages(),
+            eventFileSource.getBitrate(),
+            variantLink.toUri());
+      });
 
-    // Get the Event
-    final Optional<Event> eventOptional = eventService.fetchById(eventId);
-    if (eventOptional.isPresent()) {
-
-      // Get file sources for this event
-      final Set<EventFileSource> eventFileSources = eventOptional.get().getFileSources();
-      if (eventFileSources.size() > 0) {
-
-        // Create Master Playlist
-        final MasterM3U masterPlaylist = new MasterM3U(eventId);
-        // Add variants
-        eventFileSources.forEach(eventFileSource -> {
-          // Get variant link
-          final Link variantLink = linkTo(methodOn(PlaylistController.class)
-              .fetchVariantPlaylist(eventId, eventFileSource.getEventFileSrcId())).withSelfRel();
-          // Add link to master playlist as a variant
-          masterPlaylist.addVariant(eventFileSource, variantLink.toUri());
-        });
-
-        result = Optional.of(masterPlaylist);
-
-      } else {
-        Log.i(LOG_TAG, String
-            .format("Did not generate playlist for Event with ID: %s; no file sources.", eventId));
-      }
-    } else {
-      // Playlist generation failed
-      Log.i(LOG_TAG, String
-          .format("Could not generate Master Playlist for Event with ID: %s; no EventSources",
-              eventId));
+      return masterPlaylist;
     }
-
-    return result;
+    // No variants - nothing to play
+    return null;
   }
 }

@@ -31,7 +31,6 @@ public class EventController {
   @RequestMapping(value = "/events", method = RequestMethod.GET)
   public CollectionModel<EventResource> fetchAllEvents() {
 
-    eventService.fetchAllEvents();
     return
         eventService
           .fetchAllEvents()

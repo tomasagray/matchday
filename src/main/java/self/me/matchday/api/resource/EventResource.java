@@ -15,12 +15,13 @@ import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.EventController;
-import self.me.matchday.api.controller.PlaylistController;
+import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.model.Event;
@@ -40,18 +41,19 @@ public class EventResource extends RepresentationModel<EventResource> {
 
   private String eventId;
   private String title;
+  private Season season;
+  private Fixture fixture;
+  private LocalDateTime date;
   // Only for Matches
   private RepresentationModel<TeamResource> homeTeam;
   private RepresentationModel<TeamResource> awayTeam;
   private RepresentationModel<CompetitionResource> competition;
-  private RepresentationModel<PlaylistResource> playlists;
-  private Season season;
-  private Fixture fixture;
-  private LocalDateTime date;
 
   @Component
   public static class EventResourceAssembler extends
       RepresentationModelAssemblerSupport<Event, EventResource> {
+
+    private final static LinkRelation VIDEO_LINK = LinkRelation.of("video");
 
     private final TeamResourceAssembler teamResourceAssembler;
     private final CompetitionResourceAssembler competitionResourceAssembler;
@@ -84,9 +86,9 @@ public class EventResource extends RepresentationModel<EventResource> {
       eventResource.setDate(entity.getDate());
       // Add link to playlist resource for this event
       eventResource.add(
-          linkTo(methodOn(PlaylistController.class)
-              .fetchPlaylistResourceForEvent(entity.getEventId()))
-              .withRel("playlist"));
+          linkTo(methodOn(VideoStreamingController.class)
+              .getVideoResources(entity.getEventId()))
+              .withRel(VIDEO_LINK));
 
       // Handle subtypes
       if (entity instanceof Match) {

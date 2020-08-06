@@ -32,8 +32,9 @@ public class RootController {
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public ResponseEntity<EntityModel<RootResource>> root() {
 
+    // TODO: How to handle this correctly?
     // Create root endpoint
-    EntityModel<RootResource> model = new EntityModel<>(new RootResource());
+    EntityModel<RootResource> model = EntityModel.of(new RootResource());
     // attach top-level links
     model.add(linkTo(methodOn(EventController.class).fetchAllEvents()).withRel(EVENTS_REL));
     model.add(linkTo(methodOn(EventController.class).fetchAllMatches()).withRel(MATCHES_REL));

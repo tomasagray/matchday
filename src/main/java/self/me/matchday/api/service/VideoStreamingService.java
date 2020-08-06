@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -54,6 +55,18 @@ public class VideoStreamingService {
     this.eventFileService = eventFileService;
     this.videoResourcesConfig = videoResourcesConfig;
     this.playlistLocatorRepo = playlistLocatorRepo;
+  }
+
+  public Optional<Collection<EventFileSource>> fetchEventFileSources(@NotNull final String eventId) {
+
+    final Optional<Event> eventOptional = eventService.fetchById(eventId);
+    if (eventOptional.isPresent()) {
+      final Event event = eventOptional.get();
+      return
+          Optional.of(event.getFileSources());
+    }
+    // Event not found
+    return Optional.empty();
   }
 
   /**

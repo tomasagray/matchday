@@ -5,25 +5,17 @@
 package self.me.matchday.model;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 public class VariantM3U extends M3UPlaylist {
 
   // M3UPlaylist extended tags
@@ -38,30 +30,12 @@ public class VariantM3U extends M3UPlaylist {
   private static final String MEDIA_SEQUENCE = "#EXT-X-MEDIA-SEQUENCE:"; // should begin at 0
   private static final String ENDLIST = "#EXT-X-ENDLIST"; // end of the playlist
 
-  // Fields
-  @Id
-  private String id;
-  @ManyToOne(targetEntity = Event.class)
-  @JoinColumn(name = "eventId")
-  private Event event;
-  @OneToMany(targetEntity = MediaSegment.class, cascade = CascadeType.ALL)
-  private Set<MediaSegment> mediaSegments = new TreeSet<>();
+  private List<MediaSegment> mediaSegments = new ArrayList<>();
   private double targetDuration;
   private boolean finalized = true;
 
-  // TODO: Rewrite this class - remove Event dependency, move to builder class
-  public VariantM3U(@NotNull Event event, @NotNull Collection<EventFile> eventFiles) {
+  public VariantM3U(@NotNull Collection<EventFile> eventFiles) {
 
-    // Save Event metadata
-    this.event = event;
-    // Generate playlist ID
-    this.id = MD5String
-        .fromData(
-            event + eventFiles
-                .stream()
-                .map(EventFile::toString)
-                .collect(Collectors.joining("-"))
-        );
     // Add each event file as a URL in the playlist
     eventFiles.forEach(this::createMediaSegment);
   }
@@ -75,7 +49,7 @@ public class VariantM3U extends M3UPlaylist {
   private void createMediaSegment(@NotNull EventFile eventFile) {
 
     // Create a new MediaSegment & add to collection
-    this.mediaSegments.add(new MediaSegment(event.getTitle(), eventFile));
+    this.mediaSegments.add(new MediaSegment(eventFile));
     // Update total playlist duration
     targetDuration += eventFile.getDuration();
   }
@@ -90,7 +64,7 @@ public class VariantM3U extends M3UPlaylist {
   public String toString() {
 
     // Container
-    StringBuilder sb =
+    StringBuilder builder =
         new StringBuilder(HEADER)
             .append("\n")
             // hardcoded fields
@@ -104,8 +78,6 @@ public class VariantM3U extends M3UPlaylist {
             .append(TARGET_DURATION)
             .append(getTargetDuration())
             .append("\n")
-            .append(PROGRAM_TIME)
-            .append(event.getDate())
             .append("\n")
             // Start at 0
             .append(MEDIA_SEQUENCE)
@@ -113,34 +85,34 @@ public class VariantM3U extends M3UPlaylist {
             .append("\n");
 
     // Print each MediaSegment
-    mediaSegments.forEach(sb::append);
+    mediaSegments.forEach(builder::append);
     // Are we done with this playlist?
     if (isFinalized()) {
-      sb.append(ENDLIST);
+      builder
+          .append(ENDLIST)
+          .append("\n");
     }
     // Export playlist
-    return sb.toString();
+    return builder.toString();
   }
 
   /**
    * Represents a single segment (record) in the playlist, which includes the URI of the media
    * resource, its duration in seconds and an optional title.
    */
-  @NoArgsConstructor
-  private static class MediaSegment implements Comparable<MediaSegment> {
+  private static class MediaSegment {
 
-    private URL url;
-    private String eventTitle;
-    private EventPartIdentifier partIdentifier;
-    private double duration;
+    private final String title;
+    private final URL url;
+    private final double duration;
 
     @Contract(pure = true)
-    public MediaSegment(@NotNull String eventTitle, @NotNull EventFile eventFile) {
+    public MediaSegment(@NotNull final EventFile eventFile) {
 
-      this.eventTitle = eventTitle;
+      final EventPartIdentifier title = eventFile.getTitle();
+      this.title = (title != null) ? title.toString() : null;
       this.url = eventFile.getInternalUrl();
       this.duration = eventFile.getDuration();
-      this.partIdentifier = eventFile.getTitle();
     }
 
     @Override
@@ -149,17 +121,10 @@ public class VariantM3U extends M3UPlaylist {
       return INF
           + duration
           + ","
-          + eventTitle
-          + " - "
-          + partIdentifier
+          + title
           + "\n"
           + url
           + "\n";
-    }
-
-    @Override
-    public int compareTo(@NotNull MediaSegment test) {
-      return this.partIdentifier.compareTo(test.partIdentifier);
     }
   }
 }

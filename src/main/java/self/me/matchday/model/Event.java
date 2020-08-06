@@ -6,10 +6,10 @@ package self.me.matchday.model;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.List;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -40,7 +40,7 @@ public abstract class Event {
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Fixture fixture;
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  protected final Set<EventFileSource> fileSources = new TreeSet<>();
+  protected final List<EventFileSource> fileSources = new ArrayList<>();
   protected String title;
   protected LocalDateTime date;
 

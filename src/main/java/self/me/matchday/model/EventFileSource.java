@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.logging.log4j.util.Strings;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -33,10 +34,7 @@ public class EventFileSource implements Comparable<EventFileSource> {
 
   @Id
   @GeneratedValue(generator = "UUID")
-  @GenericGenerator(
-      name = "UUID",
-      strategy = "org.hibernate.id.UUIDGenerator"
-  )
+  @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
   private UUID eventFileSrcId;
   private String channel;
   private String source;
@@ -57,12 +55,14 @@ public class EventFileSource implements Comparable<EventFileSource> {
 
   public String toString() {
 
+    final List<String> languages = getLanguages();
+    final String language = (languages == null) ? null : Strings.join(languages, '/');
     return
         String.format(
             "%s (%s) - %s, %s files",
             getChannel(),
             getResolution(),
-            String.join("/", getLanguages()),
+            language,
             getEventFiles().size()
         );
   }

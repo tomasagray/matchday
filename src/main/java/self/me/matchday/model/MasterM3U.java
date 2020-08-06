@@ -12,45 +12,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.persistence.CascadeType;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.EventFileSource.Resolution;
 
-@Entity
 @Data
-@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public final class MasterM3U extends M3UPlaylist {
 
   private static final String LOG_TAG = "MasterM3U";
 
-  @Id
-  @GeneratedValue
-  private Long id;
-  private String eventId;
-  @OneToMany(cascade = CascadeType.ALL)
-  private List<VariantPlaylistEntry> variantPlaylistEntries;
+  private final List<VariantPlaylistEntry> variantPlaylistEntries = new ArrayList<>();
 
-  public MasterM3U(@NotNull String eventId) {
-
-    this.eventId = eventId;
-    this.variantPlaylistEntries = new ArrayList<>();
-  }
-
-  public void addVariant(@NotNull final EventFileSource eventFileSource,
+  public void addVariant(@NotNull final Resolution resolution,
+      @NotNull final List<String> languages, final long bitrate,
       @NotNull final URI playlistLink) {
 
     // Create variant
     final VariantPlaylistEntry playlistEntry =
-        new VariantPlaylistEntry(eventFileSource, playlistLink);
+        new VariantPlaylistEntry(resolution, languages, bitrate, playlistLink);
     if (variantPlaylistEntries.size() == 0) {
       playlistEntry.setDefault(true);
     }
@@ -70,16 +53,16 @@ public final class MasterM3U extends M3UPlaylist {
     // Result container
     final StringBuilder stringBuilder = new StringBuilder(HEADER).append("\n");
 
-    // Sort file sources by video resolution
+    // Group file sources by video resolution & sort within resolution
     final TreeMap<Resolution, List<VariantPlaylistEntry>> variantPlaylistEntries =
         getVariantPlaylistEntries()
             .stream()
             .collect(groupingBy(VariantPlaylistEntry::getResolution, TreeMap::new, toList()));
 
+    // Add each variant to output String
     AtomicBoolean first = new AtomicBoolean(true);
     variantPlaylistEntries.forEach(
         (resolution, variantPlaylists) -> {
-          // Add each variant
           if (variantPlaylists.size() > 1) {
             variantPlaylists.forEach(
                 variantPlaylistEntry -> {
@@ -92,7 +75,7 @@ public final class MasterM3U extends M3UPlaylist {
                   stringBuilder.append(variantPlaylistEntry).append("\n");
                 });
           }
-          // Add default playlist for each resolution
+          // Specify default playlist for each resolution
           stringBuilder.append(variantPlaylists.get(0).getPlaylistIdentifier());
         });
 
@@ -101,7 +84,6 @@ public final class MasterM3U extends M3UPlaylist {
 
   @Data
   @NoArgsConstructor
-  @Entity
   public static class VariantPlaylistEntry {
 
     private static final int BITRATE_INDEX = 0;
@@ -117,21 +99,20 @@ public final class MasterM3U extends M3UPlaylist {
     private static final String DEFAULT_TAG = "DEFAULT=";
     private static final String URI_TAG = "URI=";
 
-    @Id
-    @GeneratedValue
-    private Long id;
     private URI playlistLink;
     private Resolution resolution;
-    @ElementCollection
     private List<String> languages;
     private long bitrate;
     private boolean isDefault;
 
-    VariantPlaylistEntry(@NotNull EventFileSource eventFileSource, @NotNull URI playlistLink) {
+    VariantPlaylistEntry(@NotNull final Resolution resolution,
+        @NotNull final List<String> languages, final long bitrate,
+        @NotNull final URI playlistLink) {
+
+      this.resolution = resolution;
+      this.languages = languages;
+      this.bitrate = bitrate;
       this.playlistLink = playlistLink;
-      this.resolution = eventFileSource.getResolution();
-      this.languages = new ArrayList<>(eventFileSource.getLanguages());
-      this.bitrate = eventFileSource.getBitrate();
     }
 
     @Override

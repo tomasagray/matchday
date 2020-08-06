@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import self.me.matchday.db.PathConverter;
+import self.me.matchday.db.converter.PathConverter;
 
 @Entity
 @Data
