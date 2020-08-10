@@ -20,6 +20,7 @@ import self.me.matchday.plugin.datasource.EventFileSourceParser;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
+import self.me.matchday.util.BeanLocator;
 
 /**
  * Represents a specific source for an Event (for example: 1080i, Spanish), derived from the
@@ -29,10 +30,14 @@ import self.me.matchday.model.EventFileSource;
  */
 public final class GManEventFileSourceParser implements EventFileSourceParser {
 
+  private final GManPatterns gManPatterns;
   private final String html;
   private final List<EventFileSource> eventFileSources;
 
   public GManEventFileSourceParser(@NotNull final String html) {
+
+    // Get pattern instance
+    this.gManPatterns = BeanLocator.getBean(GManPatterns.class);
     this.html = html;
     this.eventFileSources = parseEventSources();
   }
@@ -54,12 +59,12 @@ public final class GManEventFileSourceParser implements EventFileSourceParser {
     Document doc = Jsoup.parse(this.html);
     // Since this is a loosely structured document, we will use a token, starting at the first
     // source and looking for what we want along the way
-    Element token = doc.getElementsMatchingOwnText(GManPatterns.START_OF_SOURCE).first();
+    Element token = doc.getElementsMatchingOwnText(gManPatterns.getStartOfMetadata()).first();
 
     // Search until the end of the Document
     while (token != null) {
       // When we find a source
-      if (GManPatterns.isSourceData(token)) {
+      if (gManPatterns.isSourceData(token)) {
         // Create an Event file source from the data
         final EventFileSource eventFileSource =
             GManFileSourceMetadataParser.createFileSource(token.html());
@@ -67,7 +72,7 @@ public final class GManEventFileSourceParser implements EventFileSourceParser {
         // Parse EventFiles (links) for this source
         Element innerToken = token.nextElementSibling();
         EventPartIdentifier partIdentifier = EventPartIdentifier.DEFAULT;
-        while ((innerToken != null) && !(GManPatterns.isSourceData(innerToken))) {
+        while ((innerToken != null) && !(gManPatterns.isSourceData(innerToken))) {
 
           // Look for a part identifier
           final String tokenHtml = innerToken.html();
@@ -75,7 +80,7 @@ public final class GManEventFileSourceParser implements EventFileSourceParser {
 
             // Create an identifier for this part
             partIdentifier = EventPartIdentifier.fromString(tokenHtml);
-          } else if (GManPatterns.isVideoLink(innerToken)) {
+          } else if (gManPatterns.isVideoLink(innerToken)) {
             try {
               // When we find a link to a video file, extract href attribute & add it to our
               // source's list of EventFiles, with an identifier (might be null)

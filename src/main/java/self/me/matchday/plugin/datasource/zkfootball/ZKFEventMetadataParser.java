@@ -1,14 +1,10 @@
 package self.me.matchday.plugin.datasource.zkfootball;
 
-import static self.me.matchday.plugin.datasource.zkfootball.ZKFPatterns.COMP_PATTERN;
-import static self.me.matchday.plugin.datasource.zkfootball.ZKFPatterns.FIXTURE_PATTERN;
-import static self.me.matchday.plugin.datasource.zkfootball.ZKFPatterns.SEASON_PATTERN;
-import static self.me.matchday.plugin.datasource.zkfootball.ZKFPatterns.TEAMS_PATTERN;
-
 import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import self.me.matchday.util.BeanLocator;
 import self.me.matchday.plugin.datasource.EventMetadataParser;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
@@ -24,8 +20,9 @@ import self.me.matchday.model.Team;
  */
 public class ZKFEventMetadataParser implements EventMetadataParser {
 
-  private final String title;
+  private final ZKFPatterns zkfPatterns;
   // Event components
+  private final String title;
   private final Competition competition;
   private final Season season;
   private final Fixture fixture;
@@ -34,6 +31,9 @@ public class ZKFEventMetadataParser implements EventMetadataParser {
   private Team awayTeam;
 
   public ZKFEventMetadataParser(@NotNull final String title, @NotNull final LocalDateTime date) {
+
+    // Get pattern container
+    this.zkfPatterns = BeanLocator.getBean(ZKFPatterns.class);
 
     this.title = title;
     this.date = date;
@@ -70,7 +70,7 @@ public class ZKFEventMetadataParser implements EventMetadataParser {
 
   private @Nullable Competition parseCompetition() {
 
-    final Matcher matcher = COMP_PATTERN.matcher(title);
+    final Matcher matcher = zkfPatterns.getCompetitionMatcher(this.title);
     return
         matcher.find() ? new Competition(matcher.group().trim()) : null;
   }
@@ -78,7 +78,7 @@ public class ZKFEventMetadataParser implements EventMetadataParser {
   private Season parseSeason() {
 
     Season result = new Season();
-    final Matcher matcher = SEASON_PATTERN.matcher(title);
+    final Matcher matcher = zkfPatterns.getSeasonMatcher(this.title);
     try {
       if (matcher.find()) {
         final int startYear = fixYear(Integer.parseInt(matcher.group(1)));
@@ -94,7 +94,7 @@ public class ZKFEventMetadataParser implements EventMetadataParser {
 
     // Result container
     Fixture result = null;
-    final Matcher matcher = FIXTURE_PATTERN.matcher(title);
+    final Matcher matcher = zkfPatterns.getFixtureMatcher(this.title);
 
     try {
       if (matcher.find()) {
@@ -112,7 +112,7 @@ public class ZKFEventMetadataParser implements EventMetadataParser {
 
   private void parseTeams() {
 
-    final Matcher matcher = TEAMS_PATTERN.matcher(title);
+    final Matcher matcher = zkfPatterns.getTeamsMatcher(title);
     if (matcher.find()) {
       homeTeam = new Team(matcher.group(1).trim());
       awayTeam = new Team(matcher.group(2).trim());

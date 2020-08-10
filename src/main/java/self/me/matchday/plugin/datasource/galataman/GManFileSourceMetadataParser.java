@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +12,7 @@ import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
 import self.me.matchday.model.FileSize;
 import self.me.matchday.plugin.datasource.InvalidMetadataException;
+import self.me.matchday.util.BeanLocator;
 import self.me.matchday.util.Log;
 
 /**
@@ -33,6 +33,7 @@ final class GManFileSourceMetadataParser {
   private static final String SIZE = "SIZE";
   private static final String RESOLUTION = "RELEASE";
 
+  private final GManPatterns gManPatterns;
   // Fields
   private final String metadataStr;
   private String channel;
@@ -73,6 +74,10 @@ final class GManFileSourceMetadataParser {
 
   // Constructor
   private GManFileSourceMetadataParser(@NotNull String matchDataHTML) {
+
+    // Get patterns instance
+    this.gManPatterns = BeanLocator.getBean(GManPatterns.class);
+
     // Save raw metadata
     this.metadataStr = matchDataHTML;
     // Cleanup HTML, removing superfluous &nbsp; and parse data into items
@@ -92,10 +97,11 @@ final class GManFileSourceMetadataParser {
     return
         // Break apart stream into individual data items,
         // based on patterns defined in the GalatamanPattern class...
-        Arrays.stream(data.split(GManPatterns.METADATA_ITEM_DELIMITER))
-            .filter((item) -> !("".equals(item))) // ... eliminating any empty entries ...
-            .map( // ... convert to a tuple ...
-                (String item) -> new MetadataTuple(item, GManPatterns.METADATA_KV_DELIMITER))
+        Arrays.stream(data.split(gManPatterns.getMetadataDelimiter()))
+            // ... eliminating any empty entries ...
+            .filter((item) -> !("".equals(item)))
+            // ... convert to a tuple ...
+            .map((String item) -> new MetadataTuple(item, gManPatterns.getMetadataKvDelimiter()))
             // ... finally, collect to a List and return
             .collect(Collectors.toList());
   }
@@ -155,7 +161,7 @@ final class GManFileSourceMetadataParser {
   private List<String> parseLanguages(@NotNull String langStr) {
     // Split string based on delimiter
     List<String> languages = new ArrayList<>(
-        Arrays.asList(langStr.split(GManPatterns.LANGUAGE_DELIMITER)));
+        Arrays.asList(langStr.split(gManPatterns.getLanguageDelimiter())));
     // Remove empty entries
     languages.removeIf((lang) -> "".equals(lang.trim()));
     return languages;
@@ -169,29 +175,25 @@ final class GManFileSourceMetadataParser {
    */
   private void parseVideoMetadata(@NotNull String videoMetadata) {
 
-    final long BITRATE_CONVERSION_FACTOR = 1_000_000L;
-    // Video patterns
-    final Pattern bitratePattern = Pattern.compile("[\\d.]+\\smbps", Pattern.CASE_INSENSITIVE);
-    final Pattern containerPattern = Pattern.compile("\\w\\.\\d+ \\w+");
-    final Pattern frameRatePattern = Pattern.compile("(\\d+)(fps)", Pattern.CASE_INSENSITIVE);
-
     // Split the string into data items & parse
-    for (String dataItem : videoMetadata.split(GManPatterns.AV_DATA_DELIMITER)) {
+    for (String dataItem : videoMetadata.split(gManPatterns.getAvDataDelimiter())) {
       // Clean up data
       dataItem = dataItem.trim();
-      if (bitratePattern.matcher(dataItem).find()) {
-        final Matcher matcher = Pattern.compile("(\\d+)").matcher(dataItem);
-        if (matcher.find()) {
-          final String bitrate = matcher.group(1);
-          this.bitrate = Long.parseLong(bitrate) * BITRATE_CONVERSION_FACTOR;
-        }
-      } else if (containerPattern.matcher(dataItem).find()) {
+
+      // Test for bitrate data
+      final Matcher bitrateMatcher = gManPatterns.getBitrateMatcher(dataItem);
+      if (bitrateMatcher.find()) {
+        final String bitrate = bitrateMatcher.group(1);
+        this.bitrate = Long.parseLong(bitrate) * gManPatterns.getBitrateConversionFactor();
+
+      } else if (gManPatterns.getContainerMatcher(dataItem).find()) {
         // [video codec] [container]; ex: H.264 mkv
         final String[] containerParts = dataItem.split(" ");
         this.videoCodec = containerParts[0];
         this.mediaContainer = containerParts[1].toUpperCase();
+
       } else {
-        final Matcher matcher = frameRatePattern.matcher(dataItem);
+        final Matcher matcher = gManPatterns.getFramerateMatcher(dataItem);
         if (matcher.find()) {
           // Get digit
           this.frameRate = Integer.parseInt(matcher.group(1));
@@ -202,17 +204,14 @@ final class GManFileSourceMetadataParser {
 
   private void parseAudioMetadata(@NotNull final String audioData) {
 
-    final Pattern channelPattern = Pattern.compile("([.\\d]+) (channels)");
-    final Pattern bitratePattern = Pattern.compile("(\\d+) (kbps)", Pattern.CASE_INSENSITIVE);
-
     try {
-      for (String dataItem : audioData.split(GManPatterns.AV_DATA_DELIMITER)) {
+      for (String dataItem : audioData.split(gManPatterns.getAvDataDelimiter())) {
 
         dataItem = dataItem.trim();
         // Parse channel data
         if ("stereo".equals(dataItem)) {
           this.audioChannels = 2;
-        } else if (channelPattern.matcher(dataItem).find()) {
+        } else if (gManPatterns.getChannelMatcher(dataItem).find()) {
           // Get numerical component of channel data
           final String[] channels = dataItem.split("channels");
           // Split main & sub-woofer channels
@@ -221,7 +220,7 @@ final class GManFileSourceMetadataParser {
             // combine channels
             this.audioChannels += Integer.parseInt(channel.trim());
           }
-        } else if (!(bitratePattern.matcher(dataItem).find())) {
+        } else if (!(gManPatterns.getBitrateMatcher(dataItem).find())) {
           // Only other possibility is audio codec
           this.audioCodec = dataItem.toUpperCase();
         }
@@ -238,6 +237,7 @@ final class GManFileSourceMetadataParser {
    * @return An enumerated video resolution value.
    */
   private Resolution parseResolution(@NotNull String resolution) {
+
     // Analyze resolution & return
     if (Resolution.isResolution(resolution)) {
       return Resolution.fromString(resolution);
@@ -256,9 +256,9 @@ final class GManFileSourceMetadataParser {
     Long result = null;
 
     // Americanize
-    final String decimalData = fileSize.replace(",",".");
+    final String decimalData = fileSize.replace(",", ".");
 
-    final Matcher matcher = GManPatterns.FILE_SIZE_PATTERN.matcher(decimalData);
+    final Matcher matcher = gManPatterns.getFilesizeMatcher(decimalData);
     if (matcher.find()) {
       final float size = Float.parseFloat(matcher.group(1));
       final String units = matcher.group(2).toUpperCase();
@@ -286,7 +286,10 @@ final class GManFileSourceMetadataParser {
    */
   @NotNull
   private String clean(@NotNull String input) {
-    return input.replaceAll("<[^>]*>", "").trim();
+    return
+        input
+            .replaceAll("<[^>]*>", "")
+            .trim();
   }
 
   /**

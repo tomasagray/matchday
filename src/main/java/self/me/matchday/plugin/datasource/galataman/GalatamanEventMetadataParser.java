@@ -4,27 +4,22 @@
 
 package self.me.matchday.plugin.datasource.galataman;
 
-import static self.me.matchday.plugin.datasource.galataman.GManPatterns.COMP_PATTERN;
-import static self.me.matchday.plugin.datasource.galataman.GManPatterns.DATE_PATTERN;
-import static self.me.matchday.plugin.datasource.galataman.GManPatterns.DATE_TIME_FORMATTER;
-import static self.me.matchday.plugin.datasource.galataman.GManPatterns.TEAMS_PATTERN;
-import static self.me.matchday.plugin.datasource.zkfootball.ZKFPatterns.SEASON_PATTERN;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import self.me.matchday.model.Highlight.HighlightBuilder;
-import self.me.matchday.plugin.datasource.EventMetadataParser;
-import self.me.matchday.plugin.datasource.zkfootball.ZKFPatterns;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Fixture;
+import self.me.matchday.model.Highlight.HighlightBuilder;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Season;
 import self.me.matchday.model.Team;
+import self.me.matchday.plugin.datasource.EventMetadataParser;
+import self.me.matchday.util.BeanLocator;
 import self.me.matchday.util.Log;
 
 /**
@@ -33,8 +28,11 @@ import self.me.matchday.util.Log;
 public class GalatamanEventMetadataParser implements EventMetadataParser {
 
   private static final String LOG_TAG = "GalatamanEventMetadataParser";
+  public static final DateTimeFormatter DATE_TIME_FORMATTER =
+      DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-  // Fields
+  private final GManPatterns gManPatterns;
+  // Metadata
   private final String title;
   private final Competition competition;
   private final Season season;
@@ -46,6 +44,9 @@ public class GalatamanEventMetadataParser implements EventMetadataParser {
   private Team awayTeam;
 
   public GalatamanEventMetadataParser(@NotNull final String title) {
+
+    // Get patterns instance
+    this.gManPatterns = BeanLocator.getBean(GManPatterns.class);
 
     this.title = title;
     // Determine each element of the Event metadata from title parts.
@@ -88,7 +89,7 @@ public class GalatamanEventMetadataParser implements EventMetadataParser {
   private @Nullable Competition parseCompetitionData() {
 
     // Get "competition" substring
-    final Matcher matcher = COMP_PATTERN.matcher(title);
+    final Matcher matcher = gManPatterns.getCompetitionMatcher(title);
     return
         matcher.find() ? new Competition(matcher.group().trim()) : null;
   }
@@ -96,7 +97,7 @@ public class GalatamanEventMetadataParser implements EventMetadataParser {
   private @NotNull Season parseSeasonData() {
 
     Season result = new Season();
-    final Matcher matcher = SEASON_PATTERN.matcher(title);
+    final Matcher matcher = gManPatterns.getSeasonMatcher(title);
     try {
       if (matcher.find()) {
         final int startYear = fixYear(Integer.parseInt(matcher.group(1)));
@@ -112,7 +113,7 @@ public class GalatamanEventMetadataParser implements EventMetadataParser {
 
     // Result container
     Fixture result = new Fixture();
-    final Matcher matcher = ZKFPatterns.FIXTURE_PATTERN.matcher(title);
+    final Matcher matcher = gManPatterns.getFixtureMatcher(title);
 
     try {
       if (matcher.find()) {
@@ -133,7 +134,7 @@ public class GalatamanEventMetadataParser implements EventMetadataParser {
     // Result container
     LocalDateTime result = LocalDateTime.now();
     try {
-      final Matcher dateMatcher = DATE_PATTERN.matcher(title);
+      final Matcher dateMatcher = gManPatterns.getDateMatcher(title);
       if (dateMatcher.find()) {
         result =
             LocalDate
@@ -154,7 +155,7 @@ public class GalatamanEventMetadataParser implements EventMetadataParser {
   private boolean setupTeams() {
 
     // Determine if there are teams
-    final Matcher teamMatcher = TEAMS_PATTERN.matcher(title);
+    final Matcher teamMatcher = gManPatterns.getTeamsMatcher(title);
     if (teamMatcher.find()) {
       this.homeTeam = new Team(teamMatcher.group(1).trim());
       this.awayTeam = new Team(teamMatcher.group(2).trim());

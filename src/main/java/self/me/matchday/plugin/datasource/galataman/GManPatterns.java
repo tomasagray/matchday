@@ -1,50 +1,133 @@
 package self.me.matchday.plugin.datasource.galataman;
 
-import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Element;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 /**
  * Container class for Galataman parsing patterns
  */
-public final class GManPatterns {
+@Data
+@Configuration
+@PropertySource("classpath:plugins/gman/gman.patterns.properties")
+@ConfigurationProperties(prefix = "gman.patterns")
+public class GManPatterns {
 
-  // Video metadata (EventFileSource) patterns
-  static final String START_OF_SOURCE = Pattern.compile("__*").pattern();
-  static final String METADATA_ITEM_DELIMITER =
-      Pattern.compile("<span style=\"color: blue;\">(\\[)?").pattern();
-  static final String METADATA_KV_DELIMITER =
-      Pattern.compile("(])?</span>:(<span [^>]*>)?").pattern();
-  static final String LANGUAGE_DELIMITER = Pattern.compile("[\\d.* ]|/").pattern();
-  static final String AV_DATA_DELIMITER = Pattern.compile("‖").pattern();
-  static final Pattern FILE_SIZE_PATTERN =
-      Pattern.compile("~([\\d.]+)([gmk]b)", Pattern.CASE_INSENSITIVE);
+  // Video metadata
+  private String startOfMetadata;
+  private String metadataDelimiter;
+  private String metadataKvDelimiter;
+  private String languageDelimiter;
+  private String filesize;
+  private String channel;
+  private String bitrate;
+  private Long bitrateConversionFactor;
+  private String container;
+  private String framerate;
 
-  // Event metadata patterns
-  public static final Pattern COMP_PATTERN = Pattern.compile("^([\\w\\s])+ ");
-  public static final Pattern FIXTURE_PATTERN =
-      Pattern.compile("((Semi-)?Final)|((J|(Matchday ))\\d+)");
-  public static final Pattern TEAMS_PATTERN = Pattern.compile("(?U)([\\w ?]+) vs.? ([\\w ?]+)");
-  public static final Pattern DATE_PATTERN = Pattern.compile("\\d{2}/\\d{2}/\\d{4}");
-  public static final DateTimeFormatter DATE_TIME_FORMATTER =
-      DateTimeFormatter.ofPattern("dd/MM/yyyy");
+  // Event metadata
+  private String competition;
+  private String fixture;
+  private String teams;
+  private String date;
+  private String season;
+  private String fileLink;
 
-  // File link pattern
-  private static final Pattern FILE_URL_PATTERN =
-      Pattern.compile("https://www.inclouddrive.com/file/.*");
+  public String getAvDataDelimiter() {
+    return
+        Pattern.compile("‖").pattern();
+  }
 
-  // Predicates
-  static boolean isSourceData(@NotNull final Element elem) {
+  public Matcher getFilesizeMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(filesize, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public Matcher getChannelMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(channel, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public Matcher getBitrateMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(bitrate, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public Matcher getContainerMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(container, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public Matcher getFramerateMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(framerate, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public Matcher getFileLinkMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(fileLink, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public Matcher getCompetitionMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(competition, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public Matcher getSeasonMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(season, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public Matcher getFixtureMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(fixture, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public Matcher getDateMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(date, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public Matcher getTeamsMatcher(@NotNull final String data) {
+    return
+        Pattern
+            .compile(teams, Pattern.CASE_INSENSITIVE)
+            .matcher(data);
+  }
+
+  public boolean isSourceData(@NotNull final Element elem) {
     return ("b".equals(elem.tagName())) && (elem.text().contains("Channel"));
   }
 
-  static boolean isVideoLink(@NotNull final Element elem) {
+  public boolean isVideoLink(@NotNull final Element elem) {
 
     final String href = elem.attr("href");
-    final Matcher matcher = FILE_URL_PATTERN.matcher(href);
     return
-        ("a".equals(elem.tagName())) && (matcher.find());
+        ("a".equals(elem.tagName())) && (getFileLinkMatcher(href).find());
   }
 }

@@ -13,10 +13,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
-import self.me.matchday.plugin.datasource.EventFileSourceParser;
+import self.me.matchday.util.BeanLocator;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
+import self.me.matchday.plugin.datasource.EventFileSourceParser;
 
 /**
  * Implementation of the Event File Source parser, specific to the ZKFootball blog, found at:
@@ -24,10 +25,14 @@ import self.me.matchday.model.EventFileSource;
  */
 public class ZKFEventFileSourceParser implements EventFileSourceParser {
 
+  private final ZKFPatterns zkfPatterns;
   private final String html;
   private final List<EventFileSource> fileSources;
 
   public ZKFEventFileSourceParser(@NotNull final String html) {
+
+    // Get pattern container class instantiation
+    this.zkfPatterns = BeanLocator.getBean(ZKFPatterns.class);
     this.html = html;
     this.fileSources = parseEventFileSources();
   }
@@ -58,7 +63,7 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
         eventFile.ifPresent(eventFiles::add);
 
         // EventFileSource
-      } else if (ZKFPatterns.isMetadata(element.text())) {
+      } else if (zkfPatterns.isMetadata(element.text())) {
         final EventFileSource fileSource =
             ZKFMetadataParser.createFileSource(element.select("span"));
         // Add EventFiles to the current EventFileSource
