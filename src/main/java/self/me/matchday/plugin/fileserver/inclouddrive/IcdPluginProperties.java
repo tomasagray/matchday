@@ -16,7 +16,7 @@ import self.me.matchday.plugin.PluginProperties;
 @Configuration
 @PropertySource("classpath:plugins/icd/icd.properties")
 @ConfigurationProperties(prefix = "plugin.icd")
-public class ICDPluginProperties extends PluginProperties {
+public class IcdPluginProperties extends PluginProperties {
 
   private String urlPattern;
   private String linkIdentifier;
@@ -24,6 +24,7 @@ public class ICDPluginProperties extends PluginProperties {
   @Value("${plugin.icd.user-agent.mac}")    // mac & win versions in properties file
   private String userAgent;
   private ICDUrl url;
+  private int defaultRefreshRate;
 
   public String getBaseUrl() {
     return url.getBaseUrl();

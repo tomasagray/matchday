@@ -4,13 +4,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.SpringVersion;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.api.service.FileServerService;
-import self.me.matchday.plugin.fileserver.FSUser;
 import self.me.matchday.io.TextFileReader;
+import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 @Configuration
@@ -21,7 +23,7 @@ public class FileServerLogin {
   private static final String TEST_URL = "https://www.inclouddrive.com/file/hNWYUjpoH6kFfkZ4C3aL-A/"
       + "20110423-valencia-real-madrid-1-eng-1080p.mkv";
 
-//  @Bean
+  //  @Bean
   CommandLineRunner initFileServer(FileServerService fileServerService) {
 
     Log.i(LOG_TAG, "Spring Version: " + SpringVersion.getVersion());
@@ -33,7 +35,7 @@ public class FileServerLogin {
       final URL testURL = new URL(TEST_URL);
       // Attempt to translate URL with saved cookies
       final Optional<URL> downloadUrl = fileServerService.getDownloadUrl(testURL);
-      if(downloadUrl.isPresent()) {
+      if (downloadUrl.isPresent()) {
         // Good to go!
         Log.i(LOG_TAG, "Page translation successful; already logged in.");
         return;
@@ -56,10 +58,14 @@ public class FileServerLogin {
     // Create fileserver user
     final String username = loginData[0];
     final String password = loginData[1];
-    FSUser fsUser = new FSUser(username, password, true);
+    FileServerUser fileServerUser = new FileServerUser(username, password);
 
     // Login to fileserver
-    Log.i(LOG_TAG, String.format("Logging in with user: %s", fsUser));
-    return fileServerService.login(fsUser, 0);
+    Log.i(LOG_TAG, String.format("Logging in with user: %s", fileServerUser));
+    final ClientResponse response =
+        fileServerService
+            .login(fileServerUser, UUID.fromString("93161276-6c59-428d-adbe-74a5232f1647"));
+
+    return response.statusCode().is2xxSuccessful();
   }
 }
