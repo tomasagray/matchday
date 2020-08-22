@@ -1,0 +1,36 @@
+body {
+  margin: 0;
+  background-color: #eee;
+  color: #454545;
+  font-family: "Roboto Light", Noto Sans, sans-serif;
+}
+h1 {
+  margin: 0;
+}
+h3, h4 {
+  color: #666;
+}
+label {
+  display: block;
+  margin-bottom: 2em;
+}
+.header {
+  display: flex;
+  background-color: #4c8bf5;
+  color: ghostwhite;
+  font-weight: bolder;
+  font-size: 1.2rem;
+  padding: 10px;
+}
+
+#body-container {
+  display: flex;
+  justify-content: center;
+  margin: 1.5em;
+}
+#content-container {
+  display: flex;
+  width: 60%;
+  flex-direction: column;
+  justify-items: center;
+}

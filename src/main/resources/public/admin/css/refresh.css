@@ -1,27 +1,6 @@
-body {
-  margin: 0;
-  background-color: #eee;
-  color: #454545;
-  font-family: "Roboto Light", Noto Sans, sans-serif;
-}
-h1 {
-  margin: 0;
-}
-label {
-  display: block;
-  margin-bottom: 2em;
-}
 .ui-widget {
   color: #454545;
   font-family: "Roboto Light", Noto Sans, sans-serif;
-}
-.header {
-  display: flex;
-  background-color: #4c8bf5;
-  color: ghostwhite;
-  font-weight: bolder;
-  font-size: 1.2rem;
-  padding: 10px;
 }
 p.match-title-container {
   color: #858585;
@@ -33,17 +12,7 @@ span.match-title {
 .ui-tabs-panel {
   background-color: ghostwhite;
 }
-#body-container {
-  display: flex;
-  justify-content: center;
-  margin: 1.5em;
-}
-#content-container {
-  display: flex;
-  width: 60%;
-  flex-direction: column;
-  justify-items: center;
-}
+
 #tabs-container {
   padding: 0;
   border: 0;
