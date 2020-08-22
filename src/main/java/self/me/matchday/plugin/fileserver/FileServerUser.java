@@ -71,7 +71,7 @@ public class FileServerUser {
   }
 
   public void setCookies(@NotNull final Collection<SecureCookie> cookies) {
-    this.cookies = cookies;
+    this.cookies.addAll(cookies);
   }
 
   public void clearCookies() {
