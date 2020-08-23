@@ -30,7 +30,8 @@ public class Highlight extends Event implements Serializable {
     this.fixture = fixture;
     this.title = title;
     this.date = date;
-    this.eventId = generateHighlightId();
+    this.eventId =
+        MD5String.fromData(competition, season, fixture, title,date);
   }
 
   // Overrides
@@ -85,19 +86,5 @@ public class Highlight extends Event implements Serializable {
     public Highlight build() {
       return new Highlight(this.competition, this.season, this.fixture, this.title, this.date);
     }
-  }
-
-  private String generateHighlightId() {
-
-    final String dateString =
-        (this.getDate() != null) ?
-            this.getDate().format(EVENT_ID_DATE_FORMATTER) :
-            "NULL";
-    return MD5String.fromData(
-        this.getTitle()
-            + this.getCompetition()
-            + this.getSeason()
-            + this.getFixture()
-            + dateString);
   }
 }

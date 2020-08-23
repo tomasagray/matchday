@@ -63,7 +63,8 @@ public class Match extends Event implements Serializable {
     this.date = date;
     this.season = season;
     this.fixture = fixture;
-    this.eventId = generateMatchId();
+    this.eventId =
+        MD5String.fromData(homeTeam, awayTeam, competition, date, season, fixture);
   }
 
   @NotNull
@@ -141,34 +142,5 @@ public class Match extends Event implements Serializable {
     public Match build() {
       return new Match(homeTeam, awayTeam, competition, season, fixture, date);
     }
-  }
-
-  @NotNull
-  private String generateMatchId() {
-
-    // Ensure no null exceptions
-    final String NULL = "NULL";
-    final String dateString =
-        (this.getDate() != null) ?
-            this.getDate().format(EVENT_ID_DATE_FORMATTER) :
-            NULL;
-    final String competition =
-        (this.getCompetition() != null) ?
-            this.getCompetition().getName() :
-            NULL;
-    final String homeTeam =
-        (this.getHomeTeam() != null) ?
-            this.getHomeTeam().getName() :
-            NULL;
-    final String awayTeam =
-        (this.getAwayTeam() != null) ?
-            this.getAwayTeam().getName() :
-            NULL;
-
-    return
-        MD5String.fromData(
-            String.format(
-                "%s%s%s%s%s%s", homeTeam, awayTeam, competition, this.getSeason(),
-                this.getFixture(), dateString));
   }
 }

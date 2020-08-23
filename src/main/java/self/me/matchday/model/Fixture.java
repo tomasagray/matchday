@@ -43,12 +43,12 @@ public final class Fixture implements Serializable {
   public Fixture(final int fixtureNumber) {
     this.title = DEFAULT_TITLE;
     this.fixtureNumber = fixtureNumber;
-    this.fixtureId = MD5String.fromData(title, fixtureNumber+"");
+    this.fixtureId = MD5String.fromData(title, fixtureNumber);
   }
   public Fixture(@NotNull String title, int fixtureNumber) {
     this.title = title.trim();
     this.fixtureNumber = fixtureNumber;
-    this.fixtureId = MD5String.fromData(title, fixtureNumber+"");
+    this.fixtureId = MD5String.fromData(title, fixtureNumber);
   }
 
   @NotNull

@@ -50,7 +50,7 @@ public final class Season implements Serializable {
   public Season() {
     this.startDate = LocalDate.from(START_DATE).withYear(LocalDate.now().getYear());
     this.endDate = this.startDate.plusYears(1);
-    this.seasonId = MD5String.fromData(this.startDate.toString());
+    this.seasonId = MD5String.fromData(this.startDate);
   }
 
   /**
@@ -75,7 +75,7 @@ public final class Season implements Serializable {
 
     this.startDate = LocalDate.from(START_DATE).withYear(startYear);
     this.endDate = LocalDate.from(END_DATE).withYear(endYear);
-    this.seasonId = MD5String.fromData(this.startDate.toString());
+    this.seasonId = MD5String.fromData(this.startDate);
   }
 
   @NotNull

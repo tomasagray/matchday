@@ -12,6 +12,10 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Log;
 
@@ -20,28 +24,54 @@ import self.me.matchday.util.Log;
  *
  * @author tomas
  */
+@SuppressWarnings("ConstantConditions")
 public class MD5String {
 
   private static final String LOG_TAG = "MD5String";
   private static final String DIGEST_ALGORITHM = "MD5";
   private static final int HASH_LEN = 32;
 
+  private final String hash;
+
   public static String generate() {
     // Create a random String for MD5 computation
-    final String generateData = Instant.now().toString() + Math.random();
-    return fromData(generateData);
+    return
+        new MD5String(Instant.now().toString(), Math.random()).toString();
+  }
+
+  public static String fromData(@NotNull final Object... data) {
+    return
+        new MD5String(data).toString();
+  }
+
+  @Override
+  public String toString() {
+    return this.hash;
+  }
+
+  private MD5String(@NotNull final Object... data) {
+    this.hash = generateHash(data);
   }
 
   /**
    * Generate an MD5 hash from a supplied data String.
+   *
    * @param dataItems Data to be hashed.
    * @return A 32-character MD5 hash String
    */
-  public static String fromData(@NotNull final String... dataItems) {
+  private String generateHash(@NotNull final Object... dataItems) {
+
+    // Result container
+    String hash = null;
 
     // Collate data
-    final String data = String.join("", dataItems);
-    String hash = null;
+    final List<String> strings =
+        Arrays
+            .stream(dataItems)
+            .filter(Objects::nonNull)
+            .map(Object::toString)
+            .collect(Collectors.toList());
+    final String data = String.join("", strings);
 
     try {
       MessageDigest md = MessageDigest.getInstance(DIGEST_ALGORITHM);

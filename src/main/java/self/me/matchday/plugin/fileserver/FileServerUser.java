@@ -43,7 +43,7 @@ public class FileServerUser {
 
   public FileServerUser(@NotNull final String userName, @NotNull final String password) {
 
-    this.userId = MD5String.fromData(userName, "");
+    this.userId = MD5String.fromData(userName);
     this.userName = userName;
     this.password = password;
   }

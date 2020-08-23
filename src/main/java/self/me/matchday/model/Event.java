@@ -48,11 +48,10 @@ public abstract class Event {
    * Encapsulates the file source TreeSet<> logic.
    *
    * @param fileSources A Collection<> of EventFileSources
-   * @return True/false if the collection was modified
    */
-  public boolean addFileSources(@NotNull final Collection<EventFileSource> fileSources) {
+  public void addFileSources(@NotNull final Collection<EventFileSource> fileSources) {
     // Add all collection elements to set
-    return this.fileSources.addAll(fileSources);
+    this.fileSources.addAll(fileSources);
   }
 
   public EventFileSource getFileSource(@NotNull final UUID fileSrcId) {
