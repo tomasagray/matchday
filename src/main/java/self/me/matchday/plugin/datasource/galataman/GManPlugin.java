@@ -6,12 +6,12 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import self.me.matchday.plugin.datasource.blogger.BloggerParserPlugin;
-import self.me.matchday.plugin.datasource.blogger.BloggerPlugin;
-import self.me.matchday.plugin.datasource.blogger.BloggerPlugin.FetchMode;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
+import self.me.matchday.plugin.datasource.blogger.BloggerParserPlugin;
+import self.me.matchday.plugin.datasource.blogger.BloggerPlugin;
+import self.me.matchday.plugin.datasource.blogger.BloggerPlugin.FetchMode;
 import self.me.matchday.util.Log;
 
 @Component

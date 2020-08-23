@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.io.JsonStreamReader;
 import self.me.matchday.plugin.datasource.blogger.Blogger;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
-import self.me.matchday.plugin.datasource.blogger.parser.BloggerBuilder;
 import self.me.matchday.plugin.datasource.blogger.InvalidBloggerFeedException;
-import self.me.matchday.io.JsonStreamReader;
+import self.me.matchday.plugin.datasource.blogger.parser.BloggerBuilder;
 
 public class JsonBloggerBuilder implements BloggerBuilder {
 

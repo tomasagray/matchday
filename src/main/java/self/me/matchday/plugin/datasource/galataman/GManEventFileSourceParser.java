@@ -16,10 +16,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import self.me.matchday.plugin.datasource.EventFileSourceParser;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
+import self.me.matchday.plugin.datasource.EventFileSourceParser;
 import self.me.matchday.util.BeanLocator;
 
 /**

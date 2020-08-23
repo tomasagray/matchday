@@ -24,8 +24,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
-import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
+import self.me.matchday.plugin.fileserver.FileServerUser;
 
 @Component
 public class IcdPlugin implements FileServerPlugin {

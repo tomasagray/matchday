@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.db.FileServerUserRepo;
 import self.me.matchday.model.SecureCookie;
-import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
+import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 /**

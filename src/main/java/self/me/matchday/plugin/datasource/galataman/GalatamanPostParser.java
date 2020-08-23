@@ -1,12 +1,12 @@
 package self.me.matchday.plugin.datasource.galataman;
 
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.plugin.datasource.blogger.BloggerPost;
-import self.me.matchday.plugin.datasource.blogger.BloggerPostParser;
 import self.me.matchday.model.Event;
 import self.me.matchday.plugin.datasource.EventFileSourceParser;
 import self.me.matchday.plugin.datasource.EventMetadataParser;
 import self.me.matchday.plugin.datasource.EventSourceParser;
+import self.me.matchday.plugin.datasource.blogger.BloggerPost;
+import self.me.matchday.plugin.datasource.blogger.BloggerPostParser;
 
 public class GalatamanPostParser extends BloggerPostParser {
 

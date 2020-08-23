@@ -21,8 +21,8 @@ import self.me.matchday.api.resource.FileServerUserResource.UserResourceAssemble
 import self.me.matchday.api.resource.MessageResource;
 import self.me.matchday.api.resource.MessageResource.MessageResourceAssembler;
 import self.me.matchday.api.service.FileServerService;
-import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
+import self.me.matchday.plugin.fileserver.FileServerUser;
 
 @RestController
 @RequestMapping(value = "/file-servers")

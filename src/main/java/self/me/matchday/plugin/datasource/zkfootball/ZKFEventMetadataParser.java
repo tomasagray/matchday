@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import self.me.matchday.util.BeanLocator;
-import self.me.matchday.plugin.datasource.EventMetadataParser;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Fixture;
@@ -13,6 +11,8 @@ import self.me.matchday.model.Highlight.HighlightBuilder;
 import self.me.matchday.model.Match.MatchBuilder;
 import self.me.matchday.model.Season;
 import self.me.matchday.model.Team;
+import self.me.matchday.plugin.datasource.EventMetadataParser;
+import self.me.matchday.util.BeanLocator;
 
 /**
  * Implementation of the Event data parser interface for the ZKFootball blog, found at:

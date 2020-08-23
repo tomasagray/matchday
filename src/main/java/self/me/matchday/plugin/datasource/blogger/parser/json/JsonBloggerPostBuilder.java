@@ -12,8 +12,8 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
-import self.me.matchday.plugin.datasource.blogger.parser.BloggerPostBuilder;
 import self.me.matchday.plugin.datasource.blogger.InvalidBloggerPostException;
+import self.me.matchday.plugin.datasource.blogger.parser.BloggerPostBuilder;
 import self.me.matchday.util.Log;
 
 /**

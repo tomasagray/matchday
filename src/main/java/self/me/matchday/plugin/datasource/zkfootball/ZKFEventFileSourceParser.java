@@ -13,11 +13,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
-import self.me.matchday.util.BeanLocator;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.plugin.datasource.EventFileSourceParser;
+import self.me.matchday.util.BeanLocator;
 
 /**
  * Implementation of the Event File Source parser, specific to the ZKFootball blog, found at:

@@ -9,8 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
-import self.me.matchday.plugin.datasource.blogger.parser.BloggerPostBuilder;
 import self.me.matchday.plugin.datasource.blogger.InvalidBloggerPostException;
+import self.me.matchday.plugin.datasource.blogger.parser.BloggerPostBuilder;
 
 public class HtmlBloggerPostBuilder implements BloggerPostBuilder {
 

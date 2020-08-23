@@ -14,9 +14,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import self.me.matchday.io.TextFileReader;
 import self.me.matchday.plugin.datasource.blogger.Blogger;
-import self.me.matchday.plugin.datasource.blogger.parser.BloggerBuilder;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
 import self.me.matchday.plugin.datasource.blogger.InvalidBloggerFeedException;
+import self.me.matchday.plugin.datasource.blogger.parser.BloggerBuilder;
 import self.me.matchday.util.URLQueryDecoder;
 
 public class HtmlBloggerBuilder implements BloggerBuilder {

@@ -7,10 +7,10 @@ import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
-import self.me.matchday.util.BeanLocator;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
 import self.me.matchday.model.FileSize;
+import self.me.matchday.util.BeanLocator;
 import self.me.matchday.util.Log;
 
 public class ZKFMetadataParser {
