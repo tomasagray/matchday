@@ -2,8 +2,6 @@ package self.me.matchday.plugin.datasource.blogger.parser.html;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.plugin.datasource.blogger.parser.BloggerUrlBuilder;
 
@@ -20,14 +18,7 @@ public class HtmlUrlBuilder extends BloggerUrlBuilder {
   @Override
   public URL buildUrl() throws MalformedURLException {
 
-    // Concat labels
-    final String label =
-        (labels == null) ? "" :
-            String.join("/", labels);
-    // Format optional query strings
-    final String labelQuery =
-        "".equals(label) ? "" :
-            String.format(LABEL_PATTERN, URLEncoder.encode(label, StandardCharsets.UTF_8));
+    final String labelQuery = getLabelQuery(LABEL_PATTERN);
     final String dateQuery =
         (endDate == null) ? "" :
             String.format(DATE_PATTERN, endDate.format(DATE_TIME_FORMATTER));
@@ -35,4 +26,5 @@ public class HtmlUrlBuilder extends BloggerUrlBuilder {
     // Build URL & return
     return new URL(String.format(BASE_URL_PATTERN, baseUrl, labelQuery, dateQuery));
   }
+
 }

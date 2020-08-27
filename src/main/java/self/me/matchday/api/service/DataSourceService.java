@@ -40,7 +40,7 @@ public class DataSourceService {
                 .getData()
                 .forEach(eventService::saveEvent);
 
-          } catch (IOException e) {
+          } catch (IOException | RuntimeException e) {
             Log.e(LOG_TAG,
                 String.format("Could not refresh data from plugin: %s with SnapshotRequest: %s",
                     plugin.getTitle(), snapshotRequest), e);

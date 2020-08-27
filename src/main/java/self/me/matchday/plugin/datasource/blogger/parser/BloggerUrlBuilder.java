@@ -2,10 +2,13 @@ package self.me.matchday.plugin.datasource.blogger.parser;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.web.util.UriUtils;
 
 public abstract class BloggerUrlBuilder {
 
@@ -73,5 +76,20 @@ public abstract class BloggerUrlBuilder {
   }
 
   public abstract URL buildUrl() throws MalformedURLException;
+
+  protected @NotNull String getLabelQuery(@NotNull final String labelPattern) {
+    // Concat labels
+    if (labels == null) {
+      return "";
+    } else {
+      final String concatLabels =
+          labels
+              .stream()
+              .map(label -> UriUtils.encode(label, StandardCharsets.UTF_8))
+              .collect(Collectors.joining("/"));
+      return
+          String.format(labelPattern, concatLabels);
+    }
+  }
 
 }
