@@ -4,8 +4,8 @@ $(function () {
   $("#datepicker").datepicker();
 });
 
-const $_refreshUrl = "http://192.168.0.104:8081/data-sources/refresh/all";
-const $_getDataUrl = "http://192.168.0.104:8081/events";
+const $_refreshUrl = "/data-sources/refresh/all";
+const $_getDataUrl = "/events";
 const $headers = {
   'Content-Type': "application/json"
 }

@@ -1,4 +1,4 @@
-const $baseUrl = "http://localhost:8081/file-servers/";
+const $baseUrl = "/file-servers/";
 
 $loadServers = function() {
   $.ajax({
