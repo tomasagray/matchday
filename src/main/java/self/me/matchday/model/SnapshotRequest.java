@@ -2,7 +2,6 @@ package self.me.matchday.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,15 +21,14 @@ public class SnapshotRequest {
 
   @JsonFormat(pattern = DATE_PATTERN)
   @DateTimeFormat(pattern = DATE_PATTERN)
-  private  LocalDateTime endDate;
+  private LocalDateTime endDate;
   @JsonFormat(pattern = DATE_PATTERN)
   @DateTimeFormat(pattern = DATE_PATTERN)
-  private  LocalDateTime startDate;
-  // Boxed fields
+  private LocalDateTime startDate;
   private boolean fetchBodies;
   private boolean fetchImages;
   private int maxResults;
-  private List<String> labels = new ArrayList<>();
+  private List<String> labels;
   private String orderBy;
   private String pageToken;
   private String status;
