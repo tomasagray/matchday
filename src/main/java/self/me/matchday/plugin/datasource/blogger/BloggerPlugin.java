@@ -3,7 +3,6 @@ package self.me.matchday.plugin.datasource.blogger;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.UUID;
 import lombok.Data;
 import org.jetbrains.annotations.Contract;
@@ -102,7 +101,7 @@ public class BloggerPlugin implements DataSourcePlugin<Blogger> {
     return
         bloggerBuilderFactory
           .getBloggerUrlBuilder(baseUrl)
-            .labels(Arrays.asList(snapshotRequest.getLabels()))
+            .labels(snapshotRequest.getLabels())
             .endDate(snapshotRequest.getEndDate())
             .startDate(snapshotRequest.getStartDate())
             .maxResults(snapshotRequest.getMaxResults())

@@ -2,6 +2,8 @@ package self.me.matchday.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,24 +27,12 @@ public class SnapshotRequest {
   @DateTimeFormat(pattern = DATE_PATTERN)
   private  LocalDateTime startDate;
   // Boxed fields
-  private Boolean fetchBodies;
-  private Boolean fetchImages;
-  private Integer maxResults;
-  private String[] labels;
+  private boolean fetchBodies;
+  private boolean fetchImages;
+  private int maxResults;
+  private List<String> labels = new ArrayList<>();
   private String orderBy;
   private String pageToken;
   private String status;
 
-  // Provide safe unboxing
-  public int getMaxResults() {
-    return (maxResults == null) ? 0 : maxResults;
-  }
-
-  public boolean isFetchImages() {
-    return fetchImages != null && fetchImages;
-  }
-
-  public boolean isFetchBodies() {
-    return fetchBodies != null && fetchBodies;
-  }
 }
