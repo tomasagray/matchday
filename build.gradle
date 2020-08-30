@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '2.2.4.RELEASE'
+	id 'org.springframework.boot' version '2.3.2.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
 }
@@ -35,10 +35,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-json'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+	// MySQL
+	implementation 'mysql:mysql-connector-java'
+
+	// Development
 	implementation 'org.flywaydb:flyway-core'
 	runtimeOnly 'com.h2database:h2'
+	// Remove to eliminate reflective access warning per:
+	// 		https://stackoverflow.com/a/61007739/4871490
+	runtimeOnly 'org.springframework.boot:spring-boot-devtools'
 
 	// Testing
 	def jupiter_version = "5.6.2"
