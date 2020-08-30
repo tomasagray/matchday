@@ -12,7 +12,7 @@ import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.util.Log;
 
 /**
- * Class to pre-populate database with data from remote Galataman source.
+ * Class to refresh database with data from all remote sources on startup.
  */
 @Configuration
 public class InitEventData {
