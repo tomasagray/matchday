@@ -25,9 +25,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -40,12 +43,10 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import self.me.matchday.config.VideoResourcesConfig;
-import self.me.matchday.db.VideoPlaylistLocatorRepo;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.VideoStreamPlaylistLocator;
-import self.me.matchday.model.VideoStreamPlaylistLocator.VideoStreamPlaylistId;
 import self.me.matchday.plugin.io.diskmanager.DiskManager;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.util.Log;
@@ -60,23 +61,24 @@ public class VideoStreamingService {
   private final EventService eventService;
   private final EventFileService eventFileService;
   private final VideoResourcesConfig videoResourcesConfig;
-  private final VideoPlaylistLocatorRepo playlistLocatorRepo;
+  private final PlaylistLocatorService playlistLocatorService;
 
   @Autowired
   public VideoStreamingService(final DiskManager diskManager, final FFmpegPlugin ffmpegPlugin,
       final EventService eventService, final EventFileService eventFileService,
       final VideoResourcesConfig videoResourcesConfig,
-      final VideoPlaylistLocatorRepo playlistLocatorRepo) {
+      final PlaylistLocatorService playlistLocatorService) {
 
     this.diskManager = diskManager;
     this.ffmpegPlugin = ffmpegPlugin;
     this.eventService = eventService;
     this.eventFileService = eventFileService;
     this.videoResourcesConfig = videoResourcesConfig;
-    this.playlistLocatorRepo = playlistLocatorRepo;
+    this.playlistLocatorService = playlistLocatorService;
   }
 
-  public Optional<Collection<EventFileSource>> fetchEventFileSources(@NotNull final String eventId) {
+  public Optional<Collection<EventFileSource>> fetchEventFileSources(
+      @NotNull final String eventId) {
 
     final Optional<Event> eventOptional = eventService.fetchById(eventId);
     if (eventOptional.isPresent()) {
@@ -91,7 +93,7 @@ public class VideoStreamingService {
   /**
    * Read playlist file from disk and return as a String
    *
-   * @param eventId The ID of the Event of this video data
+   * @param eventId   The ID of the Event of this video data
    * @param fileSrcId The ID of the video data variant (EventFileSource)
    * @return The playlist as a String
    */
@@ -102,7 +104,7 @@ public class VideoStreamingService {
 
     // Get data to locate playlist file on disk
     final Optional<VideoStreamPlaylistLocator> locatorOptional =
-        playlistLocatorRepo.findById(new VideoStreamPlaylistId(eventId, fileSrcId));
+        playlistLocatorService.getPlaylistLocator(eventId, fileSrcId);
     if (locatorOptional.isPresent()) {
 
       // Get ref to playlist file
@@ -127,7 +129,7 @@ public class VideoStreamingService {
   /**
    * Read video segment (.ts) data from disk
    *
-   * @param eventId The ID of the Event for this video data
+   * @param eventId   The ID of the Event for this video data
    * @param fileSrcId The ID of the video variant (EventFileSource)
    * @param segmentId The filename of the requested segment (.ts extension assumed)
    * @return The video data as a Resource
@@ -137,8 +139,10 @@ public class VideoStreamingService {
       @NotNull final String segmentId) {
 
     final Optional<VideoStreamPlaylistLocator> locatorOptional =
-        playlistLocatorRepo.findById(new VideoStreamPlaylistId(eventId, fileSrcId));
+        playlistLocatorService.getPlaylistLocator(eventId, fileSrcId);
     if (locatorOptional.isPresent()) {
+
+      // Get path to video data
       final Path playlistPath = locatorOptional.get().getPlaylistPath();
       // Get playlist parent directory
       final Path playlistRoot = playlistPath.getParent();
@@ -151,10 +155,10 @@ public class VideoStreamingService {
   }
 
   /**
-   * Use the local installation of FFMPEG, via the FFmpeg plugin, to stream video data from a
-   * remote source to local disk.
+   * Use the local installation of FFMPEG, via the FFmpeg plugin, to stream video data from a remote
+   * source to local disk.
    *
-   * @param eventId The ID of the Event for this video data
+   * @param eventId   The ID of the Event for this video data
    * @param fileSrcId The ID of the video variant
    * @throws IOException If there is a problem creating video stream files
    */
@@ -188,19 +192,52 @@ public class VideoStreamingService {
         Log.i(LOG_TAG, String.format("Created playlist file: %s", playlistPath));
 
         // Create playlist locator & save to DB
-        final VideoStreamPlaylistLocator playlistLocator =
-            new VideoStreamPlaylistLocator(
-                new VideoStreamPlaylistId(eventId, fileSrcId),
-                playlistPath);
-        playlistLocatorRepo.save(playlistLocator);
+        playlistLocatorService.createNewPlaylistLocator(eventId, fileSrcId, playlistPath);
 
       } else {
         Log.i(LOG_TAG,
             String.format("Streaming request denied; inadequate storage capacity. "
                     + "(Requested: %s, Available: %s)",
-            fileSource.getFileSize(), diskManager.getFreeDiskSpace()));
+                fileSource.getFileSize(), diskManager.getFreeDiskSpace()));
       }
     }
+  }
+
+
+  /**
+   * Delete video data, including playlist & containing directory, from disk.
+   *
+   * @param playlistLocator The playlist locator for the video data
+   * @throws IOException If any problems with deleting data
+   */
+  public void deleteVideoData(@NotNull final VideoStreamPlaylistLocator playlistLocator)
+      throws IOException {
+
+    final Path playlistPath = playlistLocator.getPlaylistPath();
+    // Ensure path points to a playlist file
+    if (!playlistPath.endsWith(".m3u8")) {
+      throw new IOException(
+          "Invalid playlist path; playlist locator does not point to a playlist!");
+    }
+
+    Log.i(LOG_TAG, "Deleting video data associated with playlist locator:\n" + playlistLocator);
+
+    // Get directory of playlist file
+    final Path videoDataDir = playlistPath.getParent();
+    // Delete all contents of video data directory
+    Files.walkFileTree(videoDataDir, new SimpleFileVisitor<>() {
+      @Override
+      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        Files.delete(file);
+        return FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+        Files.delete(dir);
+        return FileVisitResult.CONTINUE;
+      }
+    });
   }
 
   /**

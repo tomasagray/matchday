@@ -60,8 +60,8 @@ public class VideoStreamingController {
   }
 
   @RequestMapping(value = "/", method = RequestMethod.GET)
-  public ResponseEntity<CollectionModel<VideoResource>> getVideoResources(
-      @PathVariable final String eventId) {
+  public ResponseEntity<CollectionModel<VideoResource>>
+    getVideoResources(@PathVariable final String eventId) {
 
     // Set EventID for resource assembler
     resourceAssembler.setEventId(eventId);
