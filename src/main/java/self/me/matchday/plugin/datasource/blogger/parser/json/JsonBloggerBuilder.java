@@ -221,6 +221,7 @@ public class JsonBloggerBuilder implements BloggerBuilder {
   public Blogger getBlogger() throws IOException {
 
     // Read the blog
+    // todo - don't use this class
     final JsonObject json = JsonStreamReader.readRemote(url);
     this.feed = parseFeed(json);
     // Parse the blog metadata

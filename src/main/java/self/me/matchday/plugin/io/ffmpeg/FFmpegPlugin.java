@@ -76,6 +76,7 @@ public class FFmpegPlugin implements Plugin {
    *
    */
   public void interruptStreamTasks() {
+    // todo - implement streaming interruption
     threadGroup.interrupt();
   }
 
