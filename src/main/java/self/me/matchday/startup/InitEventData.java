@@ -22,6 +22,7 @@ package self.me.matchday.startup;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.util.Log;
@@ -38,9 +39,17 @@ public class InitEventData {
 
 
   @Bean
-  CommandLineRunner initialEventDataLoad(DataSourceService dataSourceService) {
+  CommandLineRunner initialEventDataLoad(final DataSourceService dataSourceService,
+      final Environment env) {
 
     return args -> {
+      final String property = env.getProperty("startup-refresh");
+      if (property == null) {
+        return;
+      }
+
+      Log.i(LOG_TAG, "Startup refresh CLI option set; performing initial Event data refresh...");
+
       // Create empty Snapshot request
       final SnapshotRequest snapshotRequest = SnapshotRequest.builder().build();
       Log.i(LOG_TAG, String.format(INIT_MSG, snapshotRequest));
