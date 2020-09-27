@@ -55,6 +55,12 @@ dependencies {
 	testCompile "org.junit.jupiter:junit-jupiter-params:$jupiter_version"
 }
 
+bootRun {
+	if (project.hasProperty('args')) {
+		args project.args.split(',' as Closure)
+	}
+}
+
 test {
 	useJUnitPlatform()
 }
