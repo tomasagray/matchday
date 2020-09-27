@@ -49,6 +49,7 @@ import self.me.matchday.plugin.fileserver.FileServerUser;
 @Component
 public class IcdPlugin implements FileServerPlugin {
 
+  public static final String USER_AGENT_HEADER = "User-Agent";
   // Dependencies
   private final IcdPluginProperties pluginProperties;
   private final WebClient webClient;
@@ -85,6 +86,7 @@ public class IcdPlugin implements FileServerPlugin {
         webClient
             .post()
             .uri(loginUrl)
+            .header(USER_AGENT_HEADER, pluginProperties.getUserAgent())
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .bodyValue(loginData)
             .exchange()
@@ -120,6 +122,7 @@ public class IcdPlugin implements FileServerPlugin {
         webClient
             .get()
             .uri(url.toString())
+            .header(USER_AGENT_HEADER, pluginProperties.getUserAgent())
             .cookies(requestCookies -> {
               // Map cookies
               cookies.forEach(cookie -> requestCookies.add(cookie.getName(), cookie.getValue()));
