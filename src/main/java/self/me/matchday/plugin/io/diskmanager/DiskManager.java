@@ -19,13 +19,15 @@
 
 package self.me.matchday.plugin.io.diskmanager;
 
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+import self.me.matchday.model.FileSize;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
-import self.me.matchday.model.FileSize;
 
 @Component
 public class DiskManager {
@@ -33,6 +35,7 @@ public class DiskManager {
   private static final Long MIN_FREE_DISK_SPACE = FileSize.ofGigabytes(40);
   private static final Long MAX_DISK_CONSUMPTION = FileSize.ofGigabytes(300);
 
+  @Getter
   private final Path storageLocation;
   private final Path fileSystemRoot;
 
