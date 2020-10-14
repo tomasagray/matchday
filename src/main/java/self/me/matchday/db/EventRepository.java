@@ -19,26 +19,28 @@
 
 package self.me.matchday.db;
 
-import java.util.List;
-import java.util.Optional;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Event;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface EventRepository extends JpaRepository<Event, String> {
 
-  /**
+  /*
    * Retrieve the latest <i>n</i> Events.
    *
    * @param pageable A Pageable object specifying how many Events to return.
    * @return A list of Events.
    */
+  /*
   @Query(value = "SELECT ev FROM Event ev ORDER BY date DESC")
   Optional<List<Event>> fetchLatestEvents(Pageable pageable);
+   */
 
   /**
    * Retrieve all Events associated with the specified competition.
