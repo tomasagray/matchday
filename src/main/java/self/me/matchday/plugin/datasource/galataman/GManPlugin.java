@@ -19,43 +19,63 @@
 
 package self.me.matchday.plugin.datasource.galataman;
 
-import java.io.IOException;
-import java.util.UUID;
-import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.plugin.datasource.blogger.BloggerParserPlugin;
+import self.me.matchday.plugin.datasource.DataSourcePlugin;
+import self.me.matchday.plugin.datasource.blogger.Blogger;
 import self.me.matchday.plugin.datasource.blogger.BloggerPlugin;
 import self.me.matchday.plugin.datasource.blogger.BloggerPlugin.FetchMode;
+import self.me.matchday.plugin.datasource.bloggerparser.EventFileSourceParser;
+import self.me.matchday.plugin.datasource.bloggerparser.EventMetadataParser;
 import self.me.matchday.util.Log;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 @Component
-public class GManPlugin extends BloggerParserPlugin {
+public class GManPlugin implements DataSourcePlugin<Stream<Event>>/* extends BloggerParserPlugin*/ {
 
   private static final String LOG_TAG = "GManPlugin";
 
+  private final BloggerPlugin bloggerPlugin;
   private final GmanPluginProperties pluginProperties;
 
-  @Autowired
-  public GManPlugin(@NotNull final BloggerPlugin bloggerPlugin,
-      @NotNull final GmanPluginProperties pluginProperties) {
 
-    // Instantiate plugin with correct post parser
-    super(bloggerPlugin, new GalatamanParserFactory());
+  protected final EventMetadataParser eventMetadataParser;
+  protected final EventFileSourceParser fileSourceParser;
+
+  @Autowired
+  public GManPlugin(
+      final BloggerPlugin bloggerPlugin,
+      final GmanPluginProperties pluginProperties,
+      final GManPatterns gManPatterns,
+      final EventMetadataParser eventMetadataParser,
+      final GManEventFileSourceParser fileSourceParser) {
+
+    // Pass dependencies to super class
+//    super(gManPatterns, eventMetadataParser, fileSourceParser);
+    this.eventMetadataParser = eventMetadataParser;
+    this.fileSourceParser = fileSourceParser;
+    this.eventMetadataParser.setBloggerParserPatterns(gManPatterns);
+
+
     this.pluginProperties = pluginProperties;
-    // Setup Blogger plugin
+    this.bloggerPlugin = bloggerPlugin;
+    // Configure Blogger plugin
     this.bloggerPlugin.setBaseUrl(this.pluginProperties.getBaseUrl());
     this.bloggerPlugin.setFetchMode(FetchMode.HTML);
   }
 
   @Override
   public UUID getPluginId() {
-    return
-        UUID.fromString(pluginProperties.getId());
+    return UUID.fromString(pluginProperties.getId());
   }
 
   @Override
@@ -72,12 +92,32 @@ public class GManPlugin extends BloggerParserPlugin {
   public @NotNull Snapshot<Stream<Event>> getSnapshot(@NotNull SnapshotRequest snapshotRequest)
       throws IOException {
 
-    Log.i(LOG_TAG,
-        String.format("Refreshing Galataman HDF [@ %s] data with Snapshot:\n%s\n",
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Refreshing Galataman HDF [@ %s] data with Snapshot:\n%s\n",
             pluginProperties.getBaseUrl(), snapshotRequest));
+
     return
-        bloggerPlugin
-            .getSnapshot(snapshotRequest)
-            .map(this::getEventStream);
+            bloggerPlugin
+                    .getSnapshot(snapshotRequest)
+                    .map(this::getEventStream);
+  }
+
+
+  protected Stream<Event> getEventStream(@NotNull final Blogger blogger) {
+    return blogger
+            .getPosts()
+            .map(
+                    bloggerPost -> {
+                      // Parse Event
+                      final Event event = eventMetadataParser.getEvent(bloggerPost.getTitle());
+                      // ParseEvent file sources & add to Event
+                      final List<EventFileSource> eventFileSources =
+                              fileSourceParser.getEventFileSources(bloggerPost.getContent());
+                      event.addFileSources(eventFileSources);
+                      // Return completed Event
+                      return event;
+                    });
   }
 }

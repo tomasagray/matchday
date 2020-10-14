@@ -17,25 +17,23 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- *  All code written by Tomás Gray unless otherwise noted.
- *  May not be reproduced without written consent from the above.
- */
 package self.me.matchday.plugin.datasource.galataman;
+
+import org.jetbrains.annotations.NotNull;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import self.me.matchday.model.EventFile;
+import self.me.matchday.model.EventFile.EventPartIdentifier;
+import self.me.matchday.model.EventFileSource;
+import self.me.matchday.plugin.datasource.bloggerparser.EventFileSourceParser;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import org.jetbrains.annotations.NotNull;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import self.me.matchday.model.EventFile;
-import self.me.matchday.model.EventFile.EventPartIdentifier;
-import self.me.matchday.model.EventFileSource;
-import self.me.matchday.plugin.datasource.EventFileSourceParser;
-import self.me.matchday.util.BeanLocator;
 
 /**
  * Represents a specific source for an Event (for example: 1080i, Spanish), derived from the
@@ -43,35 +41,30 @@ import self.me.matchday.util.BeanLocator;
  *
  * @author tomas
  */
+@Component
 public final class GManEventFileSourceParser implements EventFileSourceParser {
 
   private final GManPatterns gManPatterns;
-  private final String html;
-  private final List<EventFileSource> eventFileSources;
 
-  public GManEventFileSourceParser(@NotNull final String html) {
-
-    // Get pattern instance
-    this.gManPatterns = BeanLocator.getBean(GManPatterns.class);
-    this.html = html;
-    this.eventFileSources = parseEventSources();
+  public GManEventFileSourceParser(@Autowired final GManPatterns gManPatterns) {
+    this.gManPatterns = gManPatterns;
   }
 
   @Override
-  public List<EventFileSource> getEventFileSources() {
-    return eventFileSources;
+  public List<EventFileSource> getEventFileSources(@NotNull final String html) {
+    return parseEventSources(html);
   }
 
   /**
    * Extracts match source data from this post.
    */
-  private @NotNull List<EventFileSource> parseEventSources() {
+  private @NotNull List<EventFileSource> parseEventSources(@NotNull final String html) {
 
     // Result container
     final List<EventFileSource> fileSources = new ArrayList<>();
 
     // DOM-ify HTML content for easy manipulation
-    Document doc = Jsoup.parse(this.html);
+    Document doc = Jsoup.parse(html);
     // Since this is a loosely structured document, we will use a token, starting at the first
     // source and looking for what we want along the way
     Element token = doc.getElementsMatchingOwnText(gManPatterns.getStartOfMetadata()).first();
