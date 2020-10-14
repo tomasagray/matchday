@@ -19,20 +19,10 @@
 
 package self.me.matchday.api.resource;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.LinkRelation;
@@ -43,6 +33,11 @@ import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
+
+import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @NoArgsConstructor
@@ -92,7 +87,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
       // Add metadata
       videoResource.channel = entity.getChannel();
       videoResource.source = entity.getSource();
-      videoResource.languages = (languages.size() > 0) ? languages : null;
+      videoResource.languages = (languages != null && languages.size() > 0) ? languages : null;
       videoResource.resolution = (resolution != null) ? resolution.toString() : null;
       videoResource.mediaContainer = entity.getMediaContainer();
       videoResource.bitrate = entity.getBitrate();
