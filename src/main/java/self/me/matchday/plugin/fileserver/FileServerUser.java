@@ -19,18 +19,18 @@
 
 package self.me.matchday.plugin.fileserver;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import javax.persistence.CascadeType;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import lombok.Data;
 import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.MD5String;
 import self.me.matchday.model.SecureCookie;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Represents a file server user
@@ -46,7 +46,6 @@ public class FileServerUser {
   private String email;
   private boolean loggedIn;
   private String serverId;
-  @ElementCollection
   @OneToMany(targetEntity = SecureCookie.class, cascade = CascadeType.ALL, orphanRemoval = true)
   private Collection<SecureCookie> cookies = new ArrayList<>();
 

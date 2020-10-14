@@ -19,6 +19,9 @@
 
 package self.me.matchday.plugin.datasource.blogger.parser;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.web.util.UriUtils;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -26,13 +29,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.web.util.UriUtils;
 
 public abstract class BloggerUrlBuilder {
 
   public static final DateTimeFormatter DATE_TIME_FORMATTER =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
   protected final String baseUrl;
   protected LocalDateTime endDate;

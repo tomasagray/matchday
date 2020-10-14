@@ -17,12 +17,14 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource;
+package self.me.matchday.plugin.datasource.bloggerparser;
+
+import org.jetbrains.annotations.NotNull;
+import self.me.matchday.model.EventFileSource;
 
 import java.util.List;
-import self.me.matchday.model.EventFileSource;
 
 public interface EventFileSourceParser {
 
-  List<EventFileSource> getEventFileSources();
+  List<EventFileSource> getEventFileSources(@NotNull final String html);
 }

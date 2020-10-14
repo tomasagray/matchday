@@ -19,10 +19,6 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.UUID;
 import lombok.Data;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -39,96 +35,104 @@ import self.me.matchday.plugin.datasource.blogger.parser.html.HtmlBuilderFactory
 import self.me.matchday.plugin.datasource.blogger.parser.json.JsonBuilderFactory;
 import self.me.matchday.util.Log;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.UUID;
+
 @Data
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class BloggerPlugin implements DataSourcePlugin<Blogger> {
 
-  private static final String LOG_TAG = "BloggerPlugin";
+    private static final String LOG_TAG = "BloggerPlugin";
 
-  public enum FetchMode {
-    JSON, HTML,
-  }
-
-  @Autowired
-  private BloggerPluginProperties properties;
-  private String baseUrl;
-  private FetchMode fetchMode;
-  private BloggerBuilderFactory bloggerBuilderFactory;
-
-  /**
-   * Supply the correct abstract factory implementation depending on the plugin setting.
-   *
-   * @param fetchMode What type of data is the plugin going to attempt to fetch?
-   */
-  public void setFetchMode(@NotNull final FetchMode fetchMode) {
-
-    if (fetchMode == FetchMode.JSON) {
-      bloggerBuilderFactory = new JsonBuilderFactory();
-    } else if (fetchMode == FetchMode.HTML) {
-      bloggerBuilderFactory = new HtmlBuilderFactory();
+    public enum FetchMode {
+        JSON, HTML,
     }
-  }
 
-  @Override
-  public UUID getPluginId() {
-    return UUID.fromString(properties.getId());
-  }
+    private final BloggerPluginProperties properties;
+    private String baseUrl;
+    private FetchMode fetchMode;
+    private BloggerBuilderFactory bloggerBuilderFactory;
 
-  @Override
-  public String getTitle() {
-    return properties.getTitle();
-  }
+    public BloggerPlugin(@Autowired BloggerPluginProperties pluginProperties) {
+        this.properties = pluginProperties;
+    }
 
-  @Override
-  public String getDescription() {
-    return properties.getDescription();
-  }
+    /**
+     * Supply the correct abstract factory implementation depending on the plugin setting.
+     *
+     * @param fetchMode What type of data is the plugin going to attempt to fetch?
+     */
+    public void setFetchMode(@NotNull final FetchMode fetchMode) {
 
-  /**
-   * Get an instantaneous view (a Snapshot) of a Blogger blog.
-   *
-   * @param snapshotRequest The request data
-   * @return A Snapshot of the Blogger
-   * @throws IOException If the data cannot be read or parsed
-   */
-  @Override
-  @Contract("_ -> new")
-  public @NotNull Snapshot<Blogger> getSnapshot(@NotNull final SnapshotRequest snapshotRequest)
-      throws IOException {
+        if (fetchMode == FetchMode.JSON) {
+            bloggerBuilderFactory = new JsonBuilderFactory();
+        } else if (fetchMode == FetchMode.HTML) {
+            bloggerBuilderFactory = new HtmlBuilderFactory();
+        }
+    }
 
-    // Get the required URL from the request data
-    final URL url = getUrlFromRequest(snapshotRequest);
-    Log.i(LOG_TAG, String.format("Getting Blogger snapshot from URL: %s", url));
-    final BloggerBuilder bloggerBuilder = bloggerBuilderFactory.getBloggerBuilder(url);
-    // Create a Blogger Snapshot & return
-    return
-        new Snapshot<>(bloggerBuilder.getBlogger());
-  }
+    @Override
+    public UUID getPluginId() {
+        return UUID.fromString(properties.getId());
+    }
 
-  /**
-   * Use the BloggerUrlBuilder implementation to parse a Snapshot request into the appropriate
-   * URL type.
-   *
-   * @param snapshotRequest The request data
-   * @return A formatted Blogger URL
-   * @throws MalformedURLException If the URL is invalid
-   */
-  private @NotNull URL getUrlFromRequest(@NotNull SnapshotRequest snapshotRequest)
-      throws MalformedURLException {
+    @Override
+    public String getTitle() {
+        return properties.getTitle();
+    }
 
-    return
-        bloggerBuilderFactory
-          .getBloggerUrlBuilder(baseUrl)
-            .labels(snapshotRequest.getLabels())
-            .endDate(snapshotRequest.getEndDate())
-            .startDate(snapshotRequest.getStartDate())
-            .maxResults(snapshotRequest.getMaxResults())
-            .pageToken(snapshotRequest.getPageToken())
-            .fetchImages(snapshotRequest.isFetchImages())
-            .fetchBodies(snapshotRequest.isFetchBodies())
-            .orderBy(snapshotRequest.getOrderBy())
-            .status(snapshotRequest.getStatus())
-            .buildUrl();
-  }
+    @Override
+    public String getDescription() {
+        return properties.getDescription();
+    }
+
+    /**
+     * Get an instantaneous view (a Snapshot) of a Blogger blog.
+     *
+     * @param snapshotRequest The request data
+     * @return A Snapshot of the Blogger
+     * @throws IOException If the data cannot be read or parsed
+     */
+    @Override
+    @Contract("_ -> new")
+    public @NotNull Snapshot<Blogger> getSnapshot(@NotNull final SnapshotRequest snapshotRequest)
+            throws IOException {
+
+        // Get the required URL from the request data
+        final URL url = getUrlFromRequest(snapshotRequest);
+        Log.i(LOG_TAG, String.format("Getting Blogger snapshot from URL: %s", url));
+        final BloggerBuilder bloggerBuilder = bloggerBuilderFactory.getBloggerBuilder(url);
+        // Create a Blogger Snapshot & return
+        return
+                new Snapshot<>(bloggerBuilder.getBlogger());
+    }
+
+    /**
+     * Use the BloggerUrlBuilder implementation to parse a Snapshot request into the appropriate
+     * URL type.
+     *
+     * @param snapshotRequest The request data
+     * @return A formatted Blogger URL
+     * @throws MalformedURLException If the URL is invalid
+     */
+    private @NotNull URL getUrlFromRequest(@NotNull SnapshotRequest snapshotRequest)
+            throws MalformedURLException {
+
+        return
+                bloggerBuilderFactory
+                        .getBloggerUrlBuilder(baseUrl)
+                        .labels(snapshotRequest.getLabels())
+                        .endDate(snapshotRequest.getEndDate())
+                        .startDate(snapshotRequest.getStartDate())
+                        .maxResults(snapshotRequest.getMaxResults())
+                        .pageToken(snapshotRequest.getPageToken())
+                        .fetchImages(snapshotRequest.isFetchImages())
+                        .fetchBodies(snapshotRequest.isFetchBodies())
+                        .orderBy(snapshotRequest.getOrderBy())
+                        .status(snapshotRequest.getStatus())
+                        .buildUrl();
+    }
 }

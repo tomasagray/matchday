@@ -21,13 +21,18 @@ package self.me.matchday.plugin.datasource.blogger.parser;
 
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
 
+import java.util.regex.Pattern;
+
 public interface BloggerPostBuilder {
 
-  /**
-   *  Create a <b>BloggerPost</b>
-   *
-   * @return A fully parsed BloggerPost object.
-   */
-  BloggerPost getBloggerPost();
+    Pattern bloggerIdPattern = Pattern.compile("^tag:blogger.com,1999:blog-(\\d+)$");
+    Pattern postIdPattern = Pattern.compile("^tag:blogger.com,1999:blog-(\\d+).post-(\\d+)$");
+
+    /**
+     * Create a <b>BloggerPost</b>
+     *
+     * @return A fully parsed BloggerPost object.
+     */
+    BloggerPost getBloggerPost();
 
 }
