@@ -19,37 +19,41 @@
 
 package self.me.matchday.plugin.datasource.zkfootball;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import self.me.matchday.plugin.datasource.bloggerparser.BloggerParserPatterns;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Container class for variables specific to the ZKFootball Blogger blog, needed for parsing.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Configuration
 @PropertySource("classpath:plugins/zkf/zkf.patterns.properties")
 @ConfigurationProperties(prefix = "zkf.patterns")
-public class ZKFPatterns {
+public class ZKFPatterns extends BloggerParserPatterns {
 
   // Video metadata
   private String metadata;
   private String resolution;
   private String framerate;
   private String container;
-  private String filesize;
+//  private String filesize;
   private long defaultBitrate;
   private String mbps;
   private String kbps;
   // Event metadata
-  private String competition;
-  private String season;
-  private String fixture;
-  private String teams;
+//  private String competition;
+//  private String season;
+//  private String fixture;
+//  private String teams;
 
   /**
    * Does the supplied text String contain EventFileSource metadata?
@@ -86,12 +90,12 @@ public class ZKFPatterns {
             .matcher(data);
   }
 
-  public Matcher getFilesizeMatcher(@NotNull final String data) {
-    return
-        Pattern
-            .compile(filesize, Pattern.CASE_INSENSITIVE)
-            .matcher(data);
-  }
+//  public Matcher getFilesizeMatcher(@NotNull final String data) {
+//    return
+//        Pattern
+//            .compile(filesize, Pattern.CASE_INSENSITIVE)
+//            .matcher(data);
+//  }
 
   public Matcher getMbpsMatcher(@NotNull final String data) {
     return
@@ -106,32 +110,28 @@ public class ZKFPatterns {
             .compile(kbps, Pattern.CASE_INSENSITIVE)
             .matcher(data);
   }
-
-  public Matcher getCompetitionMatcher(@NotNull final String data) {
-    return
-        Pattern
-            .compile(competition, Pattern.CASE_INSENSITIVE)
-            .matcher(data);
-  }
-
-  public Matcher getSeasonMatcher(@NotNull final String data) {
-    return
-        Pattern
-            .compile(season, Pattern.CASE_INSENSITIVE)
-            .matcher(data);
-  }
-
-  public Matcher getFixtureMatcher(@NotNull final String data) {
-    return
-        Pattern
-            .compile(fixture, Pattern.CASE_INSENSITIVE)
-            .matcher(data);
-  }
-
-  public Matcher getTeamsMatcher(@NotNull final String data) {
-    return
-        Pattern
-            .compile(teams, Pattern.CASE_INSENSITIVE)
-            .matcher(data);
-  }
+//
+//  public Matcher getCompetitionMatcher(@NotNull final String data) {
+//    return
+//            super.getCompetitionMatcher(data);
+//  }
+//
+//  public Matcher getSeasonMatcher(@NotNull final String data) {
+//    return
+//        Pattern
+//            .compile(season, Pattern.CASE_INSENSITIVE)
+//            .matcher(data);
+//  }
+//
+//  public Matcher getFixtureMatcher(@NotNull final String data) {
+//    return
+//            super.getFixtureMatcher(data);
+//  }
+//
+//  public Matcher getTeamsMatcher(@NotNull final String data) {
+//    return
+//        Pattern
+//            .compile(teams, Pattern.CASE_INSENSITIVE)
+//            .matcher(data);
+//  }
 }

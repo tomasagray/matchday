@@ -19,10 +19,6 @@
 
 package self.me.matchday.plugin.datasource.zkfootball;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
@@ -32,9 +28,14 @@ import self.me.matchday.model.FileSize;
 import self.me.matchday.util.BeanLocator;
 import self.me.matchday.util.Log;
 
-public class ZKFMetadataParser {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-  private static final String LOG_TAG = "ZKFMetadataParser";
+public class ZKFFileSourceMetadataParser {
+
+  private static final String LOG_TAG = "ZKFFileSourceMetadataParser";
 
   // Metadata tags
   private static final String CHANNEL = "channel:";
@@ -45,7 +46,7 @@ public class ZKFMetadataParser {
 
   public static EventFileSource createFileSource(@NotNull final Elements elements) {
 
-    final ZKFMetadataParser parser = new ZKFMetadataParser(elements);
+    final ZKFFileSourceMetadataParser parser = new ZKFFileSourceMetadataParser(elements);
     return
         EventFileSource
             .builder()
@@ -69,7 +70,7 @@ public class ZKFMetadataParser {
   private long bitrate;
   private Long fileSize;
 
-  private ZKFMetadataParser(@NotNull final Elements elements) {
+  private ZKFFileSourceMetadataParser(@NotNull final Elements elements) {
 
     // Get pattern container
     this.zkfPatterns = BeanLocator.getBean(ZKFPatterns.class);

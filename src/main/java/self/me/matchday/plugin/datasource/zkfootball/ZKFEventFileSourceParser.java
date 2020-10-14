@@ -19,41 +19,34 @@
 
 package self.me.matchday.plugin.datasource.zkfootball;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.plugin.datasource.EventFileSourceParser;
-import self.me.matchday.util.BeanLocator;
+import self.me.matchday.plugin.datasource.bloggerparser.EventFileSourceParser;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 
 /**
  * Implementation of the Event File Source parser, specific to the ZKFootball blog, found at:
  * https://zkfootballmatch.blogspot.com
  */
+@Component
 public class ZKFEventFileSourceParser implements EventFileSourceParser {
 
   private final ZKFPatterns zkfPatterns;
-  private final String html;
-  private final List<EventFileSource> fileSources;
 
-  public ZKFEventFileSourceParser(@NotNull final String html) {
-
-    // Get pattern container class instantiation
-    this.zkfPatterns = BeanLocator.getBean(ZKFPatterns.class);
-    this.html = html;
-    this.fileSources = parseEventFileSources();
+  public ZKFEventFileSourceParser(@Autowired final ZKFPatterns zkfPatterns) {
+    this.zkfPatterns = zkfPatterns;
   }
 
   /**
@@ -61,7 +54,7 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
    *
    * @return A List<> of EventFileSources (may be empty)
    */
-  private @NotNull List<EventFileSource> parseEventFileSources() {
+  private @NotNull List<EventFileSource> parseEventFileSources(@NotNull final String html) {
 
     // Prevent XSS attacks & parse HTML
     final String content = Jsoup.clean(html, Whitelist.basic());
@@ -84,7 +77,7 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
         // EventFileSource
       } else if (zkfPatterns.isMetadata(element.text())) {
         final EventFileSource fileSource =
-            ZKFMetadataParser.createFileSource(element.select("span"));
+            ZKFFileSourceMetadataParser.createFileSource(element.select("span"));
         // Add EventFiles to the current EventFileSource
         fileSource.getEventFiles().addAll(eventFiles);
         // Add to collection
@@ -127,7 +120,7 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
   }
 
   @Override
-  public List<EventFileSource> getEventFileSources() {
-    return this.fileSources;
+  public List<EventFileSource> getEventFileSources(@NotNull final String html) {
+    return parseEventFileSources(html);
   }
 }
