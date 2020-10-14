@@ -19,12 +19,13 @@
 
 package self.me.matchday.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Class to handle logging functionality.
@@ -110,7 +111,7 @@ public final class Log {
    */
   public static void e(String tag, String msg, Throwable exception) {
     LogEntry log = new LogEntry(tag, msg, Instant.now(), Level.ERROR, exception);
-    print_log_entry(log);
+    print_error(log, exception);
   }
 
   /**
@@ -133,7 +134,7 @@ public final class Log {
    */
   public static void d(String tag, String msg, Throwable exception) {
     LogEntry log = new LogEntry(tag, msg, Instant.now(), Level.DEBUG, exception);
-    print_log_entry(log);
+    print_error(log, exception);
   }
 
   /**
@@ -179,7 +180,7 @@ public final class Log {
    */
   public static void v(String tag, String msg, Throwable exception) {
     LogEntry log = new LogEntry(tag, msg, Instant.now(), Level.VERBOSE, exception);
-    print_log_entry(log);
+    print_error(log, exception);
   }
 
   /**
@@ -211,6 +212,11 @@ public final class Log {
    * @param logEntry The log entry to display.
    */
   private static void print_log_entry(@NotNull LogEntry logEntry) {
-    System.out.println(logEntry.toString());
+    System.out.println(logEntry);
+  }
+
+  private static void print_error(@NotNull final LogEntry logEntry, @NotNull final Throwable throwable) {
+    System.out.println(logEntry);
+    throwable.printStackTrace();
   }
 }

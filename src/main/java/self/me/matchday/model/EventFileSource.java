@@ -19,17 +19,6 @@
 
 package self.me.matchday.model;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.persistence.CascadeType;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,6 +28,13 @@ import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import javax.persistence.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents a collection of files which compose an Event. Includes metadata describing the media
@@ -59,7 +55,7 @@ public class EventFileSource implements Comparable<EventFileSource> {
   private String source;
   private String approximateDuration;
   private Long fileSize;
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
   private List<String> languages;
   @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL)
   private List<EventFile> eventFiles;

@@ -23,19 +23,16 @@
  */
 package self.me.matchday.model;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 /**
  * Class representing a match (game) between two teams (home & away) in a given Competition on a
@@ -65,7 +62,7 @@ public class Match extends Event implements Serializable {
   }
 
   @Contract(pure = true)
-  public Match(
+  private Match(
       Team homeTeam,
       Team awayTeam,
       Competition competition,
@@ -134,7 +131,7 @@ public class Match extends Event implements Serializable {
       return this;
     }
 
-    public MatchBuilder setCompetition(Competition competition) {
+    public MatchBuilder setCompetition(@NotNull final Competition competition) {
       this.competition = competition;
       return this;
     }

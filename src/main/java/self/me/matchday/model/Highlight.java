@@ -19,13 +19,14 @@
 
 package self.me.matchday.model;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
+
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /** A highlight show, week in review or other non-Match televised Event. */
 @Data
@@ -34,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 @Table(name = "Highlights")
 public class Highlight extends Event implements Serializable {
 
-  Highlight() {
+  public Highlight() {
     this.eventId = MD5String.generate();
   }
 
