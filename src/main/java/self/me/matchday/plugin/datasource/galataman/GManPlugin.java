@@ -40,13 +40,12 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Component
-public class GManPlugin implements DataSourcePlugin<Stream<Event>>/* extends BloggerParserPlugin*/ {
+public class GManPlugin implements DataSourcePlugin<Stream<Event>> {
 
   private static final String LOG_TAG = "GManPlugin";
 
   private final BloggerPlugin bloggerPlugin;
   private final GmanPluginProperties pluginProperties;
-
 
   protected final EventMetadataParser eventMetadataParser;
   protected final EventFileSourceParser fileSourceParser;
@@ -59,12 +58,9 @@ public class GManPlugin implements DataSourcePlugin<Stream<Event>>/* extends Blo
       final EventMetadataParser eventMetadataParser,
       final GManEventFileSourceParser fileSourceParser) {
 
-    // Pass dependencies to super class
-//    super(gManPatterns, eventMetadataParser, fileSourceParser);
     this.eventMetadataParser = eventMetadataParser;
     this.fileSourceParser = fileSourceParser;
     this.eventMetadataParser.setBloggerParserPatterns(gManPatterns);
-
 
     this.pluginProperties = pluginProperties;
     this.bloggerPlugin = bloggerPlugin;
@@ -98,26 +94,22 @@ public class GManPlugin implements DataSourcePlugin<Stream<Event>>/* extends Blo
             "Refreshing Galataman HDF [@ %s] data with Snapshot:\n%s\n",
             pluginProperties.getBaseUrl(), snapshotRequest));
 
-    return
-            bloggerPlugin
-                    .getSnapshot(snapshotRequest)
-                    .map(this::getEventStream);
+    return bloggerPlugin.getSnapshot(snapshotRequest).map(this::getEventStream);
   }
-
 
   protected Stream<Event> getEventStream(@NotNull final Blogger blogger) {
     return blogger
-            .getPosts()
-            .map(
-                    bloggerPost -> {
-                      // Parse Event
-                      final Event event = eventMetadataParser.getEvent(bloggerPost.getTitle());
-                      // ParseEvent file sources & add to Event
-                      final List<EventFileSource> eventFileSources =
-                              fileSourceParser.getEventFileSources(bloggerPost.getContent());
-                      event.addFileSources(eventFileSources);
-                      // Return completed Event
-                      return event;
-                    });
+        .getPosts()
+        .map(
+            bloggerPost -> {
+              // Parse Event
+              final Event event = eventMetadataParser.getEvent(bloggerPost.getTitle());
+              // ParseEvent file sources & add to Event
+              final List<EventFileSource> eventFileSources =
+                  fileSourceParser.getEventFileSources(bloggerPost.getContent());
+              event.addFileSources(eventFileSources);
+              // Return completed Event
+              return event;
+            });
   }
 }

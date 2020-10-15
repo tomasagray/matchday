@@ -19,19 +19,12 @@
 
 package self.me.matchday.api.controller;
 
-import java.util.Collection;
-import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.api.resource.FileServerResource;
 import self.me.matchday.api.resource.FileServerResource.FileServerResourceAssembler;
@@ -43,11 +36,12 @@ import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 
+import java.util.Collection;
+import java.util.UUID;
+
 @RestController
 @RequestMapping(value = "/file-servers")
 public class FileServerController {
-
-//  private static final String LOG_TAG = "FileServerController";
 
   private final FileServerService fileServerService;
   private final FileServerResourceAssembler serverResourceAssembler;

@@ -44,9 +44,17 @@ import java.util.*;
 public class ZKFEventFileSourceParser implements EventFileSourceParser {
 
   private final ZKFPatterns zkfPatterns;
+  private final ZKFFileSourceMetadataParser metadataParser;
 
-  public ZKFEventFileSourceParser(@Autowired final ZKFPatterns zkfPatterns) {
+  @Autowired
+  public ZKFEventFileSourceParser(final ZKFPatterns zkfPatterns, final ZKFFileSourceMetadataParser metadataParser) {
     this.zkfPatterns = zkfPatterns;
+    this.metadataParser = metadataParser;
+  }
+
+  @Override
+  public List<EventFileSource> getEventFileSources(@NotNull final String html) {
+    return parseEventFileSources(html);
   }
 
   /**
@@ -76,8 +84,9 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
 
         // EventFileSource
       } else if (zkfPatterns.isMetadata(element.text())) {
-        final EventFileSource fileSource =
-            ZKFFileSourceMetadataParser.createFileSource(element.select("span"));
+
+        // Create a file source from data
+        final EventFileSource fileSource = metadataParser.createFileSource(element.select("span"));
         // Add EventFiles to the current EventFileSource
         fileSource.getEventFiles().addAll(eventFiles);
         // Add to collection
@@ -117,10 +126,5 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
       sibling = sibling.nextElementSibling();
     }
     return result;
-  }
-
-  @Override
-  public List<EventFileSource> getEventFileSources(@NotNull final String html) {
-    return parseEventFileSources(html);
   }
 }

@@ -40,7 +40,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Component
-public class ZKFPlugin implements DataSourcePlugin<Stream<Event>> /*extends BloggerParserPlugin*/ {
+public class ZKFPlugin implements DataSourcePlugin<Stream<Event>> {
 
   private static final String LOG_TAG = "ZKFPlugin";
 

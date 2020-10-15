@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -45,9 +45,15 @@ import java.util.List;
 public final class GManEventFileSourceParser implements EventFileSourceParser {
 
   private final GManPatterns gManPatterns;
+  private final GManFileSourceMetadataParser fileSourceMetadataParser;
 
-  public GManEventFileSourceParser(@Autowired final GManPatterns gManPatterns) {
+  @Autowired
+  public GManEventFileSourceParser(
+      final GManPatterns gManPatterns,
+      final GManFileSourceMetadataParser fileSourceMetadataParser) {
+
     this.gManPatterns = gManPatterns;
+    this.fileSourceMetadataParser = fileSourceMetadataParser;
   }
 
   @Override
@@ -55,9 +61,7 @@ public final class GManEventFileSourceParser implements EventFileSourceParser {
     return parseEventSources(html);
   }
 
-  /**
-   * Extracts match source data from this post.
-   */
+  /** Extracts match source data from this post. */
   private @NotNull List<EventFileSource> parseEventSources(@NotNull final String html) {
 
     // Result container
@@ -73,9 +77,10 @@ public final class GManEventFileSourceParser implements EventFileSourceParser {
     while (token != null) {
       // When we find a source
       if (gManPatterns.isSourceData(token)) {
+
         // Create an Event file source from the data
         final EventFileSource eventFileSource =
-            GManFileSourceMetadataParser.createFileSource(token.html());
+            fileSourceMetadataParser.createFileSource(token.html());
 
         // Parse EventFiles (links) for this source
         Element innerToken = token.nextElementSibling();

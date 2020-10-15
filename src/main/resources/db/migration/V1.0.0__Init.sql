@@ -1,3 +1,4 @@
+
 -- Artwork
 CREATE TABLE IF NOT EXISTS `matchday`.`artwork` (
   `id` BIGINT NOT NULL,
