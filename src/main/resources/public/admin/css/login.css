@@ -1,5 +1,5 @@
 label {
-  margin: 5px 0px;
+  margin: 5px 0;
 }
 
 ul {
@@ -8,7 +8,7 @@ ul {
 }
 
 input[type="text"] {
-  padding-bottom: ;
+  padding-bottom: 5px;
   margin-bottom: 2em;
   display: inline;
 }
@@ -36,7 +36,7 @@ input[type="text"] {
   .server.selected {
     background-color: deepskyblue;
     border: 1px solid #666;
-    color: #black;
+    color: black;
   }
     .server.selected:hover {
       background-color: skyblue;

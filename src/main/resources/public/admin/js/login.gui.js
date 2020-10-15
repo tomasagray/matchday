@@ -50,7 +50,7 @@ $(document).on('click', '.user', function() {
     "serverId": $serverId
   };
   // Toggle login
-  if ($loggedIn == true) {
+  if ($loggedIn === 'true') {
     // Logout
     console.log("Logging out", $user);
     $logoutUser($user, $setUserLoggedOut, $(this));

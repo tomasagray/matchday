@@ -14,7 +14,7 @@ $loadServers = function() {
       $('#server-list').html("");
 
       // Add servers to list
-      $servers.forEach(function(server, index) {
+      $servers.forEach(function(server) {
         let $listItem =
            '<li class="server" data-id="' +  server.id + '">' +
              server.title +
@@ -52,10 +52,10 @@ $loadServerUsers = function($serverId) {
       // Get data
       let $users = data._embedded.users;
       // Add each user to list
-      $users.forEach(function($user, index) {
+      $users.forEach(function($user) {
         // Determine if logged in checkbox should be checked
-        let $checked = ($user.loggedIn == true ? 'checked' : '');
-        let $loggedInClass = ($user.loggedIn == true ? ' logged-in' : ' logged-out');
+        let $checked = ($user.loggedIn === true ? 'checked' : '');
+        let $loggedInClass = ($user.loggedIn === true ? ' logged-in' : ' logged-out');
         $('#user-list').append(
           '<li class="user' + $loggedInClass + '" ' +
           'data-user-id="' + $user.id + '" ' +
@@ -101,7 +101,7 @@ $loginUser = function($user) {
     // Update user table
     $loadServerUsers($user.serverId);
 
-    $message = {
+    let $message = {
       status: 200,
       responseJSON: data
     };
