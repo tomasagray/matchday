@@ -23,15 +23,16 @@
  */
 package self.me.matchday.model;
 
-import java.io.Serializable;
-import java.util.Locale;
+import lombok.Data;
+import org.jetbrains.annotations.NotNull;
+import self.me.matchday.util.Abbreviator;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import lombok.Data;
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.util.Abbreviator;
+import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * Represents a football team.
@@ -88,12 +89,15 @@ public class Team implements Serializable {
   public boolean equals(Object obj) {
     if (obj == this) {
       return true;
+    } else if (obj == null) {
+      return false;
     } else if (!(obj instanceof Team)) {
       return false;
     }
 
     // Cast for comparison
     final Team team = (Team) obj;
-    return team.getName().equals(this.getName()) && team.getLocale().equals(this.getLocale());
+    return
+            team.getName().equals(this.getName());
   }
 }

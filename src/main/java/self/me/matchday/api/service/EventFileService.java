@@ -19,6 +19,16 @@
 
 package self.me.matchday.api.service;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import self.me.matchday.model.EventFile;
+import self.me.matchday.model.EventFileSource;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
+import self.me.matchday.util.Log;
+
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -28,20 +38,7 @@ import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import javax.transaction.Transactional;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import self.me.matchday.model.EventFile;
-import self.me.matchday.model.EventFileSource;
-import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
-import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
-import self.me.matchday.util.Log;
+import java.util.concurrent.*;
 
 @Service
 @Transactional
@@ -132,7 +129,7 @@ public class EventFileService {
 
     // Find the EventFile that needs updating
     eventFileSource.getEventFiles().forEach(ef -> {
-      if (ef.getEventFileId().equals(eventFile.getEventFileId())) {
+      if (eventFile.getEventFileId().equals(ef.getEventFileId())) {
         // Copy data
         ef.setInternalUrl(eventFile.getInternalUrl());
         ef.setMetadata(eventFile.getMetadata());
@@ -190,7 +187,7 @@ public class EventFileService {
 
         } else {
           throw new
-              IOException(String.format("Could not parse remote URL for EventFile: %s", eventFile));
+              IOException(String.format("Could not get remote URL for EventFile: %s", eventFile));
         }
       } catch (Exception e) {
         Log.e(LOG_TAG,

@@ -100,7 +100,7 @@ public class ZKFPlugin implements DataSourcePlugin<Stream<Event>> {
   }
 
 
-  protected Stream<Event> getEventStream(@NotNull final Blogger blogger) {
+  private Stream<Event> getEventStream(@NotNull final Blogger blogger) {
     return blogger
             .getPosts()
             .map(

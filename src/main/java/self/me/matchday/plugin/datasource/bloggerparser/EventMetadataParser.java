@@ -40,11 +40,9 @@ public class EventMetadataParser {
 
   private static final String LOG_TAG = "EventMetadataParser";
   private static final DateTimeFormatter DATE_TIME_FORMATTER =
-          DateTimeFormatter.ofPattern("dd/MM/yyyy");
+      DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-  @Getter
-  @Setter
-  private BloggerParserPatterns bloggerParserPatterns;
+  @Getter @Setter private BloggerParserPatterns bloggerParserPatterns;
 
   public Event getEvent(@NotNull final String title) {
     return parseEventFromTitle(title);
@@ -63,24 +61,22 @@ public class EventMetadataParser {
     if (teamMatcher.find()) {
       final Team homeTeam = new Team(teamMatcher.group(1).trim());
       final Team awayTeam = new Team(teamMatcher.group(2).trim());
-      return
-              new Match.MatchBuilder()
-                      .setHomeTeam(homeTeam)
-                      .setAwayTeam(awayTeam)
-                      .setCompetition(competition)
-                      .setSeason(season)
-                      .setFixture(fixture)
-                      .setDate(date)
-                      .build();
+      return new Match.MatchBuilder()
+          .setHomeTeam(homeTeam)
+          .setAwayTeam(awayTeam)
+          .setCompetition(competition)
+          .setSeason(season)
+          .setFixture(fixture)
+          .setDate(date)
+          .build();
     } else {
-      return
-              new Highlight.HighlightBuilder()
-                      .setCompetition(competition)
-                      .setSeason(season)
-                      .setFixture(fixture)
-                      .setTitle(title)
-                      .setDate(date)
-                      .build();
+      return new Highlight.HighlightBuilder()
+          .setCompetition(competition)
+          .setSeason(season)
+          .setFixture(fixture)
+          .setTitle(title)
+          .setDate(date)
+          .build();
     }
   }
 
@@ -89,12 +85,11 @@ public class EventMetadataParser {
     // Get "competition" substring
     final Matcher matcher = bloggerParserPatterns.getCompetitionMatcher(title);
     if (matcher.find()) {
-      return
-              new Competition(matcher.group().trim());
+      return new Competition(matcher.group().trim());
     }
     // else...
-    throw new
-            InvalidBloggerPostException(String.format("%s could not parse title: %s", LOG_TAG, title));
+    throw new InvalidBloggerPostException(
+        String.format("%s could not parse title: %s", LOG_TAG, title));
   }
 
   private @NotNull Season parseSeasonData(@NotNull final String title) {
@@ -141,16 +136,15 @@ public class EventMetadataParser {
     try {
       final Matcher dateMatcher = bloggerParserPatterns.getDateMatcher(title);
       if (dateMatcher.find()) {
-        result =
-                LocalDate
-                        .parse(dateMatcher.group(1), DATE_TIME_FORMATTER)
-                        .atStartOfDay();
+        result = LocalDate.parse(dateMatcher.group(1), DATE_TIME_FORMATTER).atStartOfDay();
       }
     } catch (RuntimeException exception) {
-      Log.e(LOG_TAG,
-              String.format("Could not parse Event date from post title: [%s]; defaulting to current datetime", title),
-              exception
-      );
+      Log.e(
+          LOG_TAG,
+          String.format(
+              "Could not parse Event date from post title: [%s]; defaulting to current datetime",
+              title),
+          exception);
     }
     return result;
   }
@@ -169,13 +163,7 @@ public class EventMetadataParser {
     final int CURRENT_YEAR = LocalDate.now().getYear() % CENTURY;
 
     if (year < CENTURY) {
-      if (year <= CURRENT_YEAR) {
-        // 20xx
-        return year + MILLENNIUM;
-      } else {
-        // 19xx
-        return year + MILLENNIUM - CENTURY;
-      }
+      return year + MILLENNIUM;
     }
     // No changes necessary
     return year;

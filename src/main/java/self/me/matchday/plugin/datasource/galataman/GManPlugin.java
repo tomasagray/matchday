@@ -97,7 +97,7 @@ public class GManPlugin implements DataSourcePlugin<Stream<Event>> {
     return bloggerPlugin.getSnapshot(snapshotRequest).map(this::getEventStream);
   }
 
-  protected Stream<Event> getEventStream(@NotNull final Blogger blogger) {
+  private Stream<Event> getEventStream(@NotNull final Blogger blogger) {
     return blogger
         .getPosts()
         .map(

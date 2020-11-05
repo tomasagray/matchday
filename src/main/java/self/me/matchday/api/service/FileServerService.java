@@ -19,15 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.io.IOException;
-import java.net.URL;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +32,12 @@ import self.me.matchday.model.SecureCookie;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
+
+import java.io.IOException;
+import java.net.URL;
+import java.time.Duration;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Class to route requests for URL parsing (external -> internal decoding) to the appropriate File
@@ -245,15 +242,15 @@ public class FileServerService {
       if (downloadUser != null) {
         // Decrypt user cookies
         final List<HttpCookie> httpCookies =
-            downloadUser
-                .getCookies()
-                .stream()
+            downloadUser.getCookies().stream()
                 .map(secureDataService::decryptData)
                 .map(SecureCookie::toSpringCookie)
                 .collect(Collectors.toList());
         // Use the FS plugin to get the internal (download) URL
         result = pluginForUrl.getDownloadURL(externalUrl, httpCookies);
       }
+    } else {
+      throw new IOException("Could not find plugin matching URL: " + externalUrl);
     }
     return result;
   }
