@@ -1,0 +1,92 @@
+{
+  "__COMMENT": "'$t' key values replaced with 'text' for easier parsing",
+  "version": "1.0",
+  "encoding": "UTF-8",
+  "entry": {
+    "xmlns": "http://www.w3.org/2005/Atom",
+    "xmlns$blogger": "http://schemas.google.com/blogger/2008",
+    "xmlns$georss": "http://www.georss.org/georss",
+    "xmlns$gd": "http://schemas.google.com/g/2005",
+    "xmlns$thr": "http://purl.org/syndication/thread/1.0",
+    "id": {
+      "text": "tag:blogger.com,1999:blog-3680033414698042036.post-830287824721606564"
+    },
+    "published": {
+      "text": "2020-10-07T21:49:00.001+02:00"
+    },
+    "updated": {
+      "text": "2020-10-07T21:49:17.008+02:00"
+    },
+    "category": [
+      {
+        "scheme": "http://www.blogger.com/atom/ns#",
+        "term": "Austria National Team"
+      },
+      {
+        "scheme": "http://www.blogger.com/atom/ns#",
+        "term": "Friendly matches"
+      },
+      {
+        "scheme": "http://www.blogger.com/atom/ns#",
+        "term": "Greece National Team"
+      }
+    ],
+    "title": {
+      "type": "text",
+      "text": "International Friendly - Austria vs Greece - 07\/10\/2020"
+    },
+    "content": {
+      "type": "html",
+      "text": "\u003Cp\u003E\u0026nbsp;\u003Ca href=\"https:\/\/imgbox.com\/nYScMV6i\" style=\"background-color: #fafafa; color: #920504; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" target=\"_blank\"\u003E\u003Cimg alt=\"\" border=\"0\" src=\"https:\/\/images2.imgbox.com\/c0\/61\/nYScMV6i_o.jpg\" style=\"border: 0px; max-width: 100%;\" \/\u003E\u003C\/a\u003E\u003C\/p\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cb style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\"\u003E\u003Cspan style=\"font-size: large;\"\u003EInternational Friendly - 07\/10\/2020\u003C\/span\u003E\u003C\/b\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cspan style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: x-large; text-align: center;\"\u003E\u003Cb\u003EAustria vs Greece\u003C\/b\u003E\u003C\/span\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cspan\u003E\u003Ca name='more'\u003E\u003C\/a\u003E\u003C\/span\u003E\u003Cspan style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: small; text-align: center;\"\u003E\u003Cbr \/\u003E\u003Cbr \/\u003E\u003Cimg alt=\"\" border=\"0\" src=\"http:\/\/i.imgur.com\/zSRcd6q.png\" style=\"border: 0px; max-width: 100%;\" \/\u003E\u003Cbr \/\u003E\u003Cbr \/\u003E\u003Cb\u003E1st half\u003C\/b\u003E\u003Cbr \/\u003E\u003Ca href=\"https:\/\/www.inclouddrive.com\/file\/jbzO0YWphOf54wDPkav5CA\/20201007-austria-greece-1-ger-720p50.mkv\" style=\"color: black; text-decoration-line: none;\" target=\"_blank\"\u003Ehttps:\/\/www.inclouddrive.com\/file\/jb...ger-720p50.mkv\u003C\/a\u003E\u003Cbr \/\u003E\u003Cbr \/\u003E\u003Cb\u003E2nd half\u003C\/b\u003E\u003Cbr \/\u003E\u003Cbr \/\u003E\u003Cbr \/\u003E\u003Cspan style=\"font-family: \u0026quot;Franklin Gothic Medium\u0026quot;;\"\u003E\u003Cb\u003E\u003Cbr \/\u003E\u003Cspan style=\"color: green;\"\u003Echannel:\u003C\/span\u003E\u0026nbsp;ORF Eins HD\u003Cbr \/\u003E\u003Cspan style=\"color: green;\"\u003Elanguage:\u003C\/span\u003E\u0026nbsp;\u003Cspan style=\"color: red;\"\u003E\u003Cb\u003Egerman\u003C\/b\u003E\u003C\/span\u003E\u003Cbr \/\u003E\u003Cspan style=\"color: green;\"\u003Eformat:\u003C\/span\u003E\u0026nbsp;720p 50FPS mkv\u003Cbr \/\u003E\u003Cspan style=\"color: green;\"\u003Ebitrate:\u003C\/span\u003E\u0026nbsp;4 MB\/sec\u003Cbr \/\u003E\u003Cspan style=\"color: green;\"\u003Esize:\u003C\/span\u003E\u0026nbsp;3,5 GB\u003Cbr \/\u003E\u003C\/b\u003E\u003C\/span\u003E\u003C\/span\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Ca href=\"https:\/\/imgbox.com\/zs3IV2yv\" style=\"background-color: #fafafa; color: black; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center; text-decoration-line: none;\" target=\"_blank\"\u003E\u003Cimg alt=\"\" border=\"0\" src=\"https:\/\/images2.imgbox.com\/98\/76\/zs3IV2yv_o.jpg\" style=\"border: 0px; max-width: 100%;\" \/\u003E\u003C\/a\u003E\u003Cspan style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\"\u003E\u003C\/span\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Ca href=\"https:\/\/imgbox.com\/7wjj6Znd\" style=\"background-color: #fafafa; color: black; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center; text-decoration-line: none;\" target=\"_blank\"\u003E\u003Cimg alt=\"\" border=\"0\" src=\"https:\/\/images2.imgbox.com\/64\/35\/7wjj6Znd_o.jpg\" style=\"border: 0px; max-width: 100%;\" \/\u003E\u003C\/a\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cspan style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\"\u003E________________________\u003C\/span\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cb style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\"\u003E\u003Cspan style=\"font-size: large;\"\u003EInternational Friendly - 07\/10\/2020\u003C\/span\u003E\u003C\/b\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cspan style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: x-large; text-align: center;\"\u003E\u003Cb\u003EAustria vs Greece\u003C\/b\u003E\u003C\/span\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cspan style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: small; text-align: center;\"\u003E\u003Cbr \/\u003E\u003Cbr \/\u003E\u003Cimg alt=\"\" border=\"0\" src=\"http:\/\/i.imgur.com\/zSRcd6q.png\" style=\"border: 0px; max-width: 100%;\" \/\u003E\u003Cbr \/\u003E\u003Cbr \/\u003E\u003Cb\u003E1st half\u003C\/b\u003E\u003Cbr \/\u003E\u003Ca href=\"https:\/\/www.inclouddrive.com\/file\/fgdEOxJcMU20hb1CoJnP9A\/20201007-Austria-vs-Greece-1-eng-720p60.mkv\" style=\"color: black; text-decoration-line: none;\" target=\"_blank\"\u003Ehttps:\/\/www.inclouddrive.com\/file\/fg...eng-720p60.mkv\u003C\/a\u003E\u003Cbr \/\u003E\u003Cbr \/\u003E\u003Cb\u003E2nd half\u003C\/b\u003E\u003Cbr \/\u003E\u003Cbr \/\u003E\u003Cbr \/\u003E\u003Cspan style=\"font-family: \u0026quot;Franklin Gothic Medium\u0026quot;;\"\u003E\u003Cb\u003E\u003Cbr \/\u003E\u003Cspan style=\"color: green;\"\u003Echannel:\u003C\/span\u003E\u0026nbsp;ESPN\u003Cbr \/\u003E\u003Cspan style=\"color: green;\"\u003Elanguage:\u003C\/span\u003E\u0026nbsp;\u003Cspan style=\"color: red;\"\u003E\u003Cb\u003Eenglish\u003C\/b\u003E\u003C\/span\u003E\u003Cbr \/\u003E\u003Cspan style=\"color: green;\"\u003Eformat:\u003C\/span\u003E\u0026nbsp;720p 60FPS mkv\u003Cbr \/\u003E\u003Cspan style=\"color: green;\"\u003Ebitrate:\u003C\/span\u003E\u0026nbsp;7 MB\/sec\u003Cbr \/\u003E\u003Cspan style=\"color: green;\"\u003Esize:\u003C\/span\u003E\u0026nbsp;6 GB\u003Cbr \/\u003E\u003C\/b\u003E\u003C\/span\u003E\u003C\/span\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E\u003Ca href=\"https:\/\/imgbox.com\/8jUMy2mg\" style=\"background-color: #fafafa; color: black; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center; text-decoration-line: none;\" target=\"_blank\"\u003E\u003Cimg alt=\"\" border=\"0\" src=\"https:\/\/images2.imgbox.com\/70\/1d\/8jUMy2mg_o.jpg\" style=\"border: 0px; max-width: 100%;\" \/\u003E\u003C\/a\u003E\u003Cspan style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\"\u003E\u0026nbsp;\u003C\/span\u003E\u003Ca href=\"https:\/\/imgbox.com\/9G7EwoD1\" style=\"background-color: #fafafa; color: black; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center; text-decoration-line: none;\" target=\"_blank\"\u003E\u003Cimg alt=\"\" border=\"0\" src=\"https:\/\/images2.imgbox.com\/b3\/24\/9G7EwoD1_o.jpg\" style=\"border: 0px; max-width: 100%;\" \/\u003E\u003C\/a\u003E\u003Cspan style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\"\u003E\u0026nbsp;\u003C\/span\u003E\u003Ca href=\"https:\/\/imgbox.com\/tDjYF96M\" style=\"background-color: #fafafa; color: black; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center; text-decoration-line: none;\" target=\"_blank\"\u003E\u003Cimg alt=\"\" border=\"0\" src=\"https:\/\/images2.imgbox.com\/b4\/4a\/tDjYF96M_o.jpg\" style=\"border: 0px; max-width: 100%;\" \/\u003E\u003C\/a\u003E\u003Cbr style=\"background-color: #fafafa; color: #333333; font-family: Verdana, Arial, Tahoma, Calibri, Geneva, sans-serif; font-size: 13px; text-align: center;\" \/\u003E"
+    },
+    "link": [
+      {
+        "rel": "replies",
+        "type": "application/atom+xml",
+        "href": "http:\/\/zkfullmatchvideos.blogspot.com\/feeds\/830287824721606564\/comments\/default",
+        "title": "Post Comments"
+      },
+      {
+        "rel": "replies",
+        "type": "text/html",
+        "href": "http:\/\/zkfullmatchvideos.blogspot.com\/2020\/10\/international-friendly-austria-vs.html#comment-form",
+        "title": "0 Comments"
+      },
+      {
+        "rel": "edit",
+        "type": "application/atom+xml",
+        "href": "http:\/\/www.blogger.com\/feeds\/3680033414698042036\/posts\/default\/830287824721606564"
+      },
+      {
+        "rel": "self",
+        "type": "application/atom+xml",
+        "href": "http:\/\/www.blogger.com\/feeds\/3680033414698042036\/posts\/default\/830287824721606564"
+      },
+      {
+        "rel": "alternate",
+        "type": "text/html",
+        "href": "http:\/\/zkfullmatchvideos.blogspot.com\/2020\/10\/international-friendly-austria-vs.html",
+        "title": "International Friendly - Austria vs Greece - 07\/10\/2020"
+      }
+    ],
+    "author": [
+      {
+        "name": {
+          "text": "Unknown"
+        },
+        "email": {
+          "text": "noreply@blogger.com"
+        },
+        "gd$image": {
+          "rel": "http://schemas.google.com/g/2005#thumbnail",
+          "width": "16",
+          "height": "16",
+          "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
+        }
+      }
+    ],
+    "thr$total": {
+      "text": "0"
+    }
+  }
+}

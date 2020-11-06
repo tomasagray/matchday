@@ -1,0 +1,117 @@
+/*
+ * Copyright (c) 2020. 
+ *
+ * This file is part of Matchday.
+ *
+ * Matchday is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Matchday is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package self.me.matchday.plugin.io.ffmpeg;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import self.me.matchday.MatchdayApplication;
+import self.me.matchday.util.ResourceFileReader;
+import self.me.matchday.util.Log;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DisplayName("FFmpegTest - Test the creation of FFmpegTask HLS streaming task")
+class FFmpegTest {
+
+    // Test constants
+    private static final String LOG_TAG = "FFmpegTest";
+    private static final String FFMPEG_EXE = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe";
+    private static final String DEFAULT_ARGS = " -v quiet -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
+
+    // Test resources
+    private static FFmpegTask hlsStreamTask;
+    private static String storageLocation;
+
+    @BeforeAll
+    static void setUp() throws URISyntaxException, IOException {
+
+        FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);
+
+        // Read configuration resources
+        final Map<String, String> resources =
+                ResourceFileReader.readPropertiesResource(MatchdayApplication.class, "video-resources.properties");
+
+        // Create URLs
+        final List<URI> urls =
+                List.of(
+                        new URI("http://192.168.0.101/stream2stream/barca-rm-2009/1.ts"),
+                        new URI("http://192.168.0.101/stream2stream/barca-rm-2009/2.ts"));
+        storageLocation = resources.get("video-resources.file-storage-location") + "\\test_out";
+
+        hlsStreamTask = ffmpeg.getHlsStreamTask(urls, Path.of(storageLocation));
+    }
+
+    @Test
+    @DisplayName("Ensure task has correct # of arguments")
+    void minArgLength() {
+
+        // Test params
+        final int minArgLength = 7;
+
+        // Retrieve data from task
+        final List<String> args = hlsStreamTask.getArgs();
+
+        // Test
+        Log.i(LOG_TAG, "Testing args: " + args);
+        assertThat(args.size()).isGreaterThan(minArgLength);
+    }
+
+    @Test
+    @DisplayName("Check command format")
+    void testCommandFormat() {
+
+        final String expectedCommand = String.format("\"%s\"%s", FFMPEG_EXE, DEFAULT_ARGS);
+        final String actualCommand = hlsStreamTask.getCommand();
+
+        Log.i(LOG_TAG, "Testing command: " + actualCommand);
+        assertThat(actualCommand).isEqualTo(expectedCommand);
+    }
+
+    @Test
+    @DisplayName("Verify output path")
+    void outputPath() {
+
+        String playlistPath = FFmpegTest.storageLocation + "\\playlist.m3u8";
+        final Path expectedOutputPath = Path.of(playlistPath);
+        final Path actualOutputPath = hlsStreamTask.getOutputFile();
+
+        Log.i(LOG_TAG, "Testing output path: " + actualOutputPath);
+        assertThat(actualOutputPath).isEqualByComparingTo(expectedOutputPath);
+    }
+
+    @Test
+    @DisplayName("Verify correct exit code")
+    void exitCode() {
+
+        final int expectedExitCode = 0;
+        final int actualExitCode = hlsStreamTask.getExitCode();
+
+        Log.i(LOG_TAG, "Testing exit code: " + actualExitCode);
+        assertThat(actualExitCode).isEqualTo(expectedExitCode);
+    }
+}
