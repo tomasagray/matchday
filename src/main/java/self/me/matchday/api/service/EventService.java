@@ -19,12 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +29,13 @@ import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.util.Log;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class EventService {
