@@ -136,6 +136,17 @@ public class EventService {
   }
 
   /**
+   * Delete the given Event from the database
+   *
+   * @param event The Event to delete
+   */
+  public void deleteEvent(@NotNull final Event event) {
+
+    Log.i(LOG_TAG, "Deleting Event with ID: " + event.getEventId());
+    eventRepository.delete(event);
+  }
+
+  /**
    * Ensure Event meets certain criteria.
    *
    * @param event The Event to be validated

@@ -122,7 +122,7 @@ public class FileServerService {
                 .collect(Collectors.toList());
 
         // Login user
-        fileServerUser.setLoggedIn(serverId, cookies);
+        fileServerUser.loginToServer(serverId, cookies);
         // Save user to repo
         userRepo.save(fileServerUser);
         Log.i(LOG_TAG, "Login SUCCESSFUL with user: " + fileServerUser);

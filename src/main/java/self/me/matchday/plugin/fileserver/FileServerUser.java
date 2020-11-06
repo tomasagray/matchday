@@ -25,10 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.MD5String;
 import self.me.matchday.model.SecureCookie;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -46,7 +43,7 @@ public class FileServerUser {
   private String email;
   private boolean loggedIn;
   private String serverId;
-  @OneToMany(targetEntity = SecureCookie.class, cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(targetEntity = SecureCookie.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private Collection<SecureCookie> cookies = new ArrayList<>();
 
   // default constructor
@@ -69,8 +66,8 @@ public class FileServerUser {
    * @param serverId The ID of the Server this User is logged into
    * @param cookies Any cookies returned with login response
    */
-  public void setLoggedIn(@NotNull final String serverId,
-      @NotNull final Collection<SecureCookie> cookies) {
+  public void loginToServer(@NotNull final String serverId,
+                            @NotNull final Collection<SecureCookie> cookies) {
 
     setUserId(MD5String.fromData(this.userName, serverId));
     setServerId(serverId);
@@ -85,15 +82,13 @@ public class FileServerUser {
   }
 
   public void setCookies(@NotNull final Collection<SecureCookie> cookies) {
+    // ensure empty cookie jar
+    clearCookies();
     this.cookies.addAll(cookies);
   }
 
   public void clearCookies() {
     this.cookies.clear();
-  }
-
-  private void setLoggedIn(boolean loggedIn) {
-    this.loggedIn = loggedIn;
   }
 
   @Override
