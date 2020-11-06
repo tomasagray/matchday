@@ -1,3 +1,8 @@
+# ========================= SENSITIVE DATA =========================
+logins.xlsx
+# ========================= END SENSITIVE DATA =========================
+
+
 # Created by .ignore support plugin (hsz.mobi)
 .gitignore
 .gradle/
@@ -26,15 +31,19 @@ Backup of *.doc*
 *.~vsd*
 
 # Slush directories
-/sandbox
+/research
 _DEVFIXTURES/
 
 # Test resources
 /test/resources
+/test/secure_resources
+**/test/data
+/src/test/data/video_test/
+
 # Video processing
 **/public/videos/**
+/vid_out/**
 
 # Compiler output
 /build/
 /out/
-

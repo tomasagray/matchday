@@ -21,7 +21,7 @@ repositories {
 dependencies {
 	// Lombok
     compile group: 'org.jetbrains', name: 'annotations', version: '16.0.2'
-    compileOnly 'org.projectlombok:lombok'
+    implementation 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     
     // Feed parsing
