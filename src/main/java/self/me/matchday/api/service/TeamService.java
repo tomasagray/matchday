@@ -19,18 +19,14 @@
 
 package self.me.matchday.api.service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.TeamRepository;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
+
+import java.util.*;
 
 @Service
 public class TeamService {
@@ -105,4 +101,43 @@ public class TeamService {
 
     return Optional.of(teamList);
   }
+
+  /**
+   * Saves the given Team to the database, if it is valid
+   *
+   * @param team The Team to persist
+   * @return The (now Spring-managed) Team, or null if invalid data was passed
+   */
+  public Team saveTeam(@NotNull final Team team) {
+
+    if (isValidTeam(team)) {
+      teamRepository.saveAndFlush(team);
+      return team;
+    }
+    // invalid data...
+    return null;
+  }
+
+  /**
+   * Delete a Team from the database with the specified ID
+   *
+   * @param teamId The ID of the Team to delete
+   */
+  public void deleteTeamById(@NotNull final String teamId) {
+
+    Log.i(LOG_TAG, String.format("Deleting Team with ID: %s from database", teamId));
+    teamRepository.deleteById(teamId);
+  }
+
+  /**
+   * Team data validation
+   *
+   * @param team The Team to validate
+   * @return true/false
+   */
+  private boolean isValidTeam(@NotNull final Team team) {
+
+    return team.getName() != null;
+  }
 }
+

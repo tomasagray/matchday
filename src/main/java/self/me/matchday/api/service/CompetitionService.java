@@ -19,15 +19,16 @@
 
 package self.me.matchday.api.service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.CompetitionRepository;
 import self.me.matchday.model.Competition;
 import self.me.matchday.util.Log;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CompetitionService {
@@ -74,5 +75,44 @@ public class CompetitionService {
     return
         competitionRepository
             .findById(competitionId);
+  }
+
+
+  /**
+   * Saves the given Competition to the database, if it is valid
+   *
+   * @param competition The Competition to persist
+   * @return The (now Spring-managed) Competition, or null if it was not saved
+   */
+  public Competition saveCompetition(@NotNull final Competition competition) {
+
+    if (isValidCompetition(competition)) {
+      competitionRepository.saveAndFlush(competition);
+      return competition;
+    }
+    // invalid data...
+    return null;
+  }
+
+  /**
+   * Delete the Competition specified by the given ID from the database
+   *
+   * @param competitionId The ID of the Competition to delete
+   */
+  public void deleteCompetitionById(@NotNull final String competitionId) {
+
+    Log.i(LOG_TAG, String.format("Deleting Competition with ID: [%s] from database", competitionId));
+    competitionRepository.deleteById(competitionId);
+  }
+
+  /**
+   * Data validation for Competition objects
+   *
+   * @param competition The Competition to scrutinize
+   * @return true/false
+   */
+  private boolean isValidCompetition(@NotNull final Competition competition) {
+
+    return competition.getName() != null;
   }
 }
