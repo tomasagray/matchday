@@ -19,10 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +26,10 @@ import self.me.matchday.db.VideoPlaylistLocatorRepo;
 import self.me.matchday.model.VideoStreamPlaylistLocator;
 import self.me.matchday.model.VideoStreamPlaylistLocator.VideoStreamPlaylistId;
 import self.me.matchday.util.Log;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PlaylistLocatorService {
@@ -62,7 +62,7 @@ public class PlaylistLocatorService {
    * @return An Optional of the playlist locator
    */
   public Optional<VideoStreamPlaylistLocator> getPlaylistLocator(@NotNull final String eventId,
-      @NotNull final UUID fileSrcId) {
+      @NotNull final String fileSrcId) {
 
     // Create an ID to find the playlist
     final VideoStreamPlaylistId playlistId = new VideoStreamPlaylistId(eventId, fileSrcId);
@@ -79,7 +79,7 @@ public class PlaylistLocatorService {
    * @return The newly created VideoStreamPlaylistLocator
    */
   public VideoStreamPlaylistLocator createNewPlaylistLocator(@NotNull final String eventId,
-      @NotNull final UUID fileSrcId, @NotNull final Path playlistPath) {
+      @NotNull final String fileSrcId, @NotNull final Path playlistPath) {
 
     // Create locator ID
     final VideoStreamPlaylistId playlistId = new VideoStreamPlaylistId(eventId, fileSrcId);

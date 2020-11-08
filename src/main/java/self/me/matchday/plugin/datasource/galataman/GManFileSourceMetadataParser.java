@@ -76,7 +76,6 @@ final class GManFileSourceMetadataParser {
             .approximateDuration(metadata.duration)
             .fileSize(metadata.fileSize)
             .resolution(metadata.resolution)
-            .eventFiles(new ArrayList<>())
             .build();
   }
 
@@ -84,7 +83,7 @@ final class GManFileSourceMetadataParser {
 
     // fields
     private final String metadataStr;
-    private final List<String> languages = new ArrayList<>();
+    private String languages;
     private String channel;
     private String source;
     private String mediaContainer;
@@ -155,7 +154,7 @@ final class GManFileSourceMetadataParser {
           break;
         case LANGUAGE:
         case COMMENTARY:
-          this.languages.addAll(parseLanguages(value));
+          this.languages = parseLanguages(value);
           break;
         case VIDEO:
           parseVideoMetadata(value);
@@ -184,13 +183,13 @@ final class GManFileSourceMetadataParser {
      * @param langStr A String containing language names, separated by a delimiter configured in the
      *     GalatamanPost class.
      */
-    private @NotNull List<String> parseLanguages(@NotNull String langStr) {
+    private @NotNull String parseLanguages(@NotNull String langStr) {
       // Split string based on delimiter
       List<String> languages =
           new ArrayList<>(Arrays.asList(langStr.split(gManPatterns.getLanguageDelimiter())));
       // Remove empty entries
       languages.removeIf((lang) -> "".equals(lang.trim()));
-      return languages;
+      return String.join(", ", languages);
     }
 
     /**

@@ -49,11 +49,11 @@ public class Match extends Event implements Serializable {
   private static final long serialVersionUID = 123456L; // for cross-platform serialization
 
   @ManyToOne(targetEntity = Team.class, cascade = CascadeType.MERGE)
-  @JoinColumn(name = "homeTeamId")
+  @JoinColumn(name = "home_team_id")
   private Team homeTeam;
 
   @ManyToOne(targetEntity = Team.class, cascade = CascadeType.MERGE)
-  @JoinColumn(name = "awayTeamId")
+  @JoinColumn(name = "away_team_id")
   private Team awayTeam;
 
   // Default constructor

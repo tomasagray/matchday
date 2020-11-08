@@ -20,7 +20,6 @@
 package self.me.matchday.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Entity;
@@ -30,7 +29,6 @@ import java.time.LocalDateTime;
 
 /** A highlight show, week in review or other non-Match televised Event. */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "Highlights")
 public class Highlight extends Event implements Serializable {
@@ -46,8 +44,7 @@ public class Highlight extends Event implements Serializable {
     this.fixture = fixture;
     this.title = title;
     this.date = date;
-    this.eventId =
-        MD5String.fromData(competition, season, fixture, title,date);
+    this.eventId = MD5String.fromData(competition, season, fixture, title, date);
   }
 
   // Overrides
@@ -63,6 +60,19 @@ public class Highlight extends Event implements Serializable {
         + getSeason().getEndDate().getYear()
         + "), "
         + getFixture();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (!(o instanceof Highlight)) {
+      return false;
+    }
+    // Cast for comparison
+    final Highlight highlight = (Highlight) o;
+    return this.getEventId().equals(highlight.getEventId())
+        && this.getCompetition().equals(highlight.getCompetition())
+        && this.getFixture().equals(highlight.getFixture())
+        && this.getSeason().equals(highlight.getSeason());
   }
 
   /** A Builder class for this object. Returns a fully constructed Highlight object. */

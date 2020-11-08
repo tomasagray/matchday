@@ -19,19 +19,20 @@
 
 package self.me.matchday.model;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import self.me.matchday.model.EventFileSource.Resolution;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.EventFileSource.Resolution;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -43,8 +44,8 @@ public final class MasterM3U extends M3UPlaylist {
   private final List<VariantPlaylistEntry> variantPlaylistEntries = new ArrayList<>();
 
   public void addVariant(@NotNull final Resolution resolution,
-      @NotNull final List<String> languages, final long bitrate,
-      @NotNull final URI playlistLink) {
+                         final String languages, final long bitrate,
+                         @NotNull final URI playlistLink) {
 
     // Create variant
     final VariantPlaylistEntry playlistEntry =
@@ -116,13 +117,13 @@ public final class MasterM3U extends M3UPlaylist {
 
     private URI playlistLink;
     private Resolution resolution;
-    private List<String> languages;
+    private String languages;
     private long bitrate;
     private boolean isDefault;
 
     VariantPlaylistEntry(@NotNull final Resolution resolution,
-        @NotNull final List<String> languages, final long bitrate,
-        @NotNull final URI playlistLink) {
+                         final String languages, final long bitrate,
+                         @NotNull final URI playlistLink) {
 
       this.resolution = resolution;
       this.languages = languages;

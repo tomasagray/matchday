@@ -19,17 +19,17 @@
 
 package self.me.matchday.model;
 
-import java.io.Serializable;
-import java.nio.file.Path;
-import java.util.UUID;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import self.me.matchday.db.converter.PathConverter;
+
+import javax.persistence.Convert;
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import java.io.Serializable;
+import java.nio.file.Path;
 
 @Entity
 @Data
@@ -43,7 +43,7 @@ public class VideoStreamPlaylistLocator {
   @Embeddable
   public static class VideoStreamPlaylistId implements Serializable {
     private String eventId;
-    private UUID fileSrcId;
+    private String fileSrcId;
   }
 
   @EmbeddedId

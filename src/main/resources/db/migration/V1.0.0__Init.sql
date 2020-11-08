@@ -114,7 +114,7 @@ COLLATE = utf8mb4_0900_ai_ci;
 
 -- EventFileSource
 CREATE TABLE IF NOT EXISTS `matchday`.`event_file_source` (
-  `event_file_src_id` BINARY(255) NOT NULL,
+  `event_file_src_id` VARCHAR(255) NOT NULL,
   `approximate_duration` VARCHAR(255) NULL DEFAULT NULL,
   `audio_channels` INT NOT NULL,
   `audio_codec` VARCHAR(255) NULL DEFAULT NULL,
@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS `matchday`.`event_file_source` (
   `channel` VARCHAR(255) NULL DEFAULT NULL,
   `file_size` BIGINT NULL DEFAULT NULL,
   `frame_rate` INT NOT NULL,
+  `languages` VARCHAR(255) NULL DEFAULT NULL,
   `media_container` VARCHAR(255) NULL DEFAULT NULL,
   `resolution` INT NULL DEFAULT NULL,
   `source` VARCHAR(255) NULL DEFAULT NULL,
@@ -134,7 +135,7 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- EventFileSources
 CREATE TABLE IF NOT EXISTS `matchday`.`event_file_sources` (
   `event_event_id` VARCHAR(255) NOT NULL,
-  `file_sources_event_file_src_id` BINARY(255) NOT NULL,
+  `file_sources_event_file_src_id` VARCHAR(255) NOT NULL,
   UNIQUE INDEX `UK_dakuu81r709vh0k1qo4bcejrt` (`file_sources_event_file_src_id` ASC) VISIBLE,
   INDEX `FK32qvdypbk57j8h2syo7flmh4q` (`event_event_id` ASC) VISIBLE,
   CONSTRAINT `FK32qvdypbk57j8h2syo7flmh4q`
@@ -162,7 +163,7 @@ COLLATE = utf8mb4_0900_ai_ci;
 
 -- EventFileSource EventFiles
 CREATE TABLE IF NOT EXISTS `matchday`.`event_file_source_event_files` (
-  `event_file_source_event_file_src_id` BINARY(255) NOT NULL,
+  `event_file_source_event_file_src_id` VARCHAR(255) NOT NULL,
   `event_files_event_file_id` BIGINT NOT NULL,
   UNIQUE INDEX `UK_jxn8qvuddf4hm03b1u0dn2uob` (`event_files_event_file_id` ASC) VISIBLE,
   INDEX `FKa8sd7dsyggnmcjo1p2q5svmsv` (`event_file_source_event_file_src_id` ASC) VISIBLE,
@@ -177,16 +178,16 @@ DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 -- EventFileSource Languages
-CREATE TABLE IF NOT EXISTS `matchday`.`event_file_source_languages` (
-  `event_file_source_event_file_src_id` BINARY(255) NOT NULL,
-  `languages` VARCHAR(255) NULL DEFAULT NULL,
-  INDEX `FK2ien3eb5kd785730gakh2wcmp` (`event_file_source_event_file_src_id` ASC) VISIBLE,
-  CONSTRAINT `FK2ien3eb5kd785730gakh2wcmp`
-    FOREIGN KEY (`event_file_source_event_file_src_id`)
-    REFERENCES `matchday`.`event_file_source` (`event_file_src_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+# CREATE TABLE IF NOT EXISTS `matchday`.`event_file_source_languages` (
+#   `event_file_source_event_file_src_id` BINARY(255) NOT NULL,
+#   `languages` VARCHAR(255) NULL DEFAULT NULL,
+#   INDEX `FK2ien3eb5kd785730gakh2wcmp` (`event_file_source_event_file_src_id` ASC) VISIBLE,
+#   CONSTRAINT `FK2ien3eb5kd785730gakh2wcmp`
+#     FOREIGN KEY (`event_file_source_event_file_src_id`)
+#     REFERENCES `matchday`.`event_file_source` (`event_file_src_id`))
+# ENGINE = InnoDB
+# DEFAULT CHARACTER SET = utf8mb4
+# COLLATE = utf8mb4_0900_ai_ci;
 
 -- Highlights
 CREATE TABLE IF NOT EXISTS `matchday`.`highlights` (
@@ -268,7 +269,7 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- VideoStreamLocator
 CREATE TABLE IF NOT EXISTS `matchday`.`video_stream_playlist_locator` (
   `event_id` VARCHAR(255) NOT NULL,
-  `file_src_id` BINARY(255) NOT NULL,
+  `file_src_id` VARCHAR(255) NOT NULL,
   `playlist_path` VARCHAR(255) NULL DEFAULT NULL,
   PRIMARY KEY (`event_id`, `file_src_id`))
 ENGINE = InnoDB

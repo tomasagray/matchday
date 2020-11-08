@@ -19,11 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-import java.util.Collection;
-import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -33,6 +28,12 @@ import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.MasterM3U;
 import self.me.matchday.util.Log;
+
+import java.util.Collection;
+import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 public class MasterPlaylistService {
@@ -87,19 +88,23 @@ public class MasterPlaylistService {
       // Create Master Playlist
       final MasterM3U masterPlaylist = new MasterM3U();
       // Add variants
-      eventFileSources.forEach(eventFileSource -> {
-        // Create variant link
-        final Link variantLink =
-            linkTo(methodOn(VideoStreamingController.class)
-                .getVariantPlaylist(event.getEventId(), eventFileSource.getEventFileSrcId()))
-                .withSelfRel();
-        // Add variant to master playlist
-        masterPlaylist.addVariant(
-            eventFileSource.getResolution(),
-            eventFileSource.getLanguages(),
-            eventFileSource.getBitrate(),
-            variantLink.toUri());
-      });
+      eventFileSources.forEach(
+          eventFileSource -> {
+            // Create variant link
+            final Link variantLink =
+                linkTo(
+                        methodOn(VideoStreamingController.class)
+                            .getVariantPlaylist(
+                                event.getEventId(),
+                                eventFileSource.getEventFileSrcId()))
+                    .withSelfRel();
+            // Add variant to master playlist
+            masterPlaylist.addVariant(
+                eventFileSource.getResolution(),
+                eventFileSource.getLanguages(),
+                eventFileSource.getBitrate(),
+                variantLink.toUri());
+          });
 
       return masterPlaylist;
     }

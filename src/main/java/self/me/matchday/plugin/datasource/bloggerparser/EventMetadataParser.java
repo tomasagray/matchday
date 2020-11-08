@@ -160,7 +160,6 @@ public class EventMetadataParser {
     // Constants
     final int MILLENNIUM = 2_000;
     final int CENTURY = 100;
-    final int CURRENT_YEAR = LocalDate.now().getYear() % CENTURY;
 
     if (year < CENTURY) {
       return year + MILLENNIUM;

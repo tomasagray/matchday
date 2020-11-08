@@ -34,8 +34,6 @@ import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
 
-import java.util.List;
-
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -55,7 +53,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 
   private String channel;
   private String source;
-  private List<String> languages;
+  private String languages;
   private String resolution;
   private String mediaContainer;
   private Long bitrate;
@@ -81,13 +79,12 @@ public class VideoResource extends RepresentationModel<VideoResource> {
       final VideoResource videoResource = instantiateModel(entity);
 
       // Nullables
-      final List<String> languages = entity.getLanguages();
       final Resolution resolution = entity.getResolution();
 
       // Add metadata
       videoResource.channel = entity.getChannel();
       videoResource.source = entity.getSource();
-      videoResource.languages = (languages != null && languages.size() > 0) ? languages : null;
+      videoResource.languages = entity.getLanguages();
       videoResource.resolution = (resolution != null) ? resolution.toString() : null;
       videoResource.mediaContainer = entity.getMediaContainer();
       videoResource.bitrate = entity.getBitrate();
@@ -96,10 +93,11 @@ public class VideoResource extends RepresentationModel<VideoResource> {
       videoResource.audioCodec = entity.getAudioCodec();
 
       // Add link to remote stream (no transcoding)
-      videoResource.add(linkTo(
-          methodOn(VideoStreamingController.class)
-              .getVariantPlaylist(eventId, entity.getEventFileSrcId()))
-          .withRel(DIRECT_STREAM));
+      videoResource.add(
+          linkTo(
+                  methodOn(VideoStreamingController.class)
+                      .getVariantPlaylist(eventId, entity.getEventFileSrcId()))
+              .withRel(DIRECT_STREAM));
 
       // Add link to local stream (transcoded to local disk)
       videoResource.add(linkTo(

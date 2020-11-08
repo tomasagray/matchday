@@ -19,7 +19,6 @@
 
 package self.me.matchday.api.controller;
 
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.CollectionModel;
@@ -88,7 +87,7 @@ public class VideoStreamingController {
   @RequestMapping(value = "/playlist/variant/{fileSrcId}", method = RequestMethod.GET,
       produces = "application/x-mpeg-url")
   public ResponseEntity<String> getVariantPlaylist(@PathVariable final String eventId,
-      @PathVariable final UUID fileSrcId) {
+      @PathVariable final String fileSrcId) {
 
     Log.i("VideoStreamingController",
         String.format("Getting variant playlist for Event: %s, File Source: %s",
@@ -104,7 +103,7 @@ public class VideoStreamingController {
 
   @RequestMapping(value = "/stream/{fileSrcId}/playlist.m3u8", method = RequestMethod.GET)
   public ResponseEntity<String> getStreamPlaylist(@PathVariable("eventId") String eventId,
-      @PathVariable("fileSrcId") UUID fileSrcId) {
+      @PathVariable("fileSrcId") String fileSrcId) {
 
     final String playlistFile = streamingService.readPlaylistFile(eventId, fileSrcId);
     return
@@ -116,7 +115,7 @@ public class VideoStreamingController {
   @RequestMapping(value = "/stream/{fileSrcId}/{segmentId}.ts", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<Resource> getSegmentFile(@PathVariable("eventId") String eventId,
-      @PathVariable("fileSrcId") UUID fileSrcId, @PathVariable("segmentId") String segmentId) {
+      @PathVariable("fileSrcId") String fileSrcId, @PathVariable("segmentId") String segmentId) {
 
     final Resource videoSegmentResource =
         streamingService.getVideoSegmentResource(eventId, fileSrcId, segmentId);

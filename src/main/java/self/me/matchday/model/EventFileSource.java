@@ -23,16 +23,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.logging.log4j.util.Strings;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,17 +47,16 @@ import java.util.regex.Pattern;
 public class EventFileSource implements Comparable<EventFileSource> {
 
   @Id
-  @GeneratedValue(generator = "UUID")
-  @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-  private UUID eventFileSrcId;
+  @GeneratedValue(generator = "system-uuid")
+  @GenericGenerator(name = "system-uuid", strategy = "org.hibernate.id.UUIDGenerator")
+  private String eventFileSrcId;
   private String channel;
   private String source;
   private String approximateDuration;
   private Long fileSize;
-  @ElementCollection(fetch = FetchType.EAGER)
-  private List<String> languages;
-  @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL)
-  private List<EventFile> eventFiles;
+  private String languages;
+  @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private final List<EventFile> eventFiles = new ArrayList<>();
   // Media metadata
   private Resolution resolution;
   private String mediaContainer;
@@ -70,16 +68,26 @@ public class EventFileSource implements Comparable<EventFileSource> {
 
   public String toString() {
 
-    final List<String> languages = getLanguages();
-    final String language = (languages == null) ? null : Strings.join(languages, '/');
     return
         String.format(
             "%s (%s) - %s, %s files",
             getChannel(),
             getResolution(),
-            language,
+            getLanguages(),
             getEventFiles().size()
         );
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (!(o instanceof EventFileSource)) {
+      return false;
+    }
+    // Cast for comparison
+    final EventFileSource eventFileSource = (EventFileSource) o;
+    return this.getChannel().equals(eventFileSource.getChannel())
+            && this.getLanguages().equals(eventFileSource.getLanguages())
+            && this.getResolution().equals(eventFileSource.getResolution());
   }
 
   @Override

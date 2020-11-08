@@ -19,13 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +26,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
 import self.me.matchday.util.Log;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 @NoArgsConstructor
@@ -85,7 +85,7 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
               fileSrcId != null && !("".equals(fileSrcId))) {
 
             // Stream video files to local disk
-            videoStreamingService.createVideoStream(eventId, UUID.fromString(fileSrcId));
+            videoStreamingService.createVideoStream(eventId, fileSrcId);
             // Ensure playlist creation has begun
             Thread.sleep(PROCESS_DELAY);
           }

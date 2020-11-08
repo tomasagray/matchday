@@ -19,24 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -50,6 +32,17 @@ import self.me.matchday.model.VideoStreamPlaylistLocator;
 import self.me.matchday.plugin.io.diskmanager.DiskManager;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.util.Log;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class VideoStreamingService {
@@ -97,7 +90,7 @@ public class VideoStreamingService {
    * @param fileSrcId The ID of the video data variant (EventFileSource)
    * @return The playlist as a String
    */
-  public String readPlaylistFile(@NotNull final String eventId, @NotNull final UUID fileSrcId) {
+  public String readPlaylistFile(@NotNull final String eventId, @NotNull final String fileSrcId) {
 
     // Result container
     final StringBuilder result = new StringBuilder();
@@ -135,7 +128,7 @@ public class VideoStreamingService {
    * @return The video data as a Resource
    */
   public Resource getVideoSegmentResource(@NotNull final String eventId,
-      @NotNull final UUID fileSrcId,
+      @NotNull final String fileSrcId,
       @NotNull final String segmentId) {
 
     final Optional<VideoStreamPlaylistLocator> locatorOptional =
@@ -162,7 +155,7 @@ public class VideoStreamingService {
    * @param fileSrcId The ID of the video variant
    * @throws IOException If there is a problem creating video stream files
    */
-  public void createVideoStream(@NotNull final String eventId, @NotNull final UUID fileSrcId)
+  public void createVideoStream(@NotNull final String eventId, @NotNull final String fileSrcId)
       throws IOException {
 
     // Get the event from database
@@ -184,7 +177,8 @@ public class VideoStreamingService {
             Files.createDirectories(Paths.get(
                 videoResourcesConfig.getFileStorageLocation(),
                 videoResourcesConfig.getVideoStorageDirname(),
-                event.getEventId(), fileSrcId.toString()
+                event.getEventId(),
+                fileSrcId
             ));
 
         // Start FFMPEG transcoding job

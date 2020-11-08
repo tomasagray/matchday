@@ -19,17 +19,16 @@
 
 package self.me.matchday.api.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import javax.transaction.Transactional;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.VariantM3U;
 import self.me.matchday.util.Log;
+
+import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -48,7 +47,7 @@ public class VariantPlaylistService {
     this.eventFileService = eventFileService;
   }
 
-  public Optional<VariantM3U> fetchVariantPlaylist(@NotNull final UUID fileSrcId) {
+  public Optional<VariantM3U> fetchVariantPlaylist(final String fileSrcId) {
 
     Log.i(LOG_TAG, String
         .format("Fetching Variant Playlist for Event file source: %s ", fileSrcId));

@@ -35,7 +35,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class EventService {
@@ -79,7 +78,7 @@ public class EventService {
         eventRepository.findById(eventId);
   }
 
-  public Optional<EventFileSource> fetchEventFileSrc(@NotNull final UUID fileSrcId) {
+  public Optional<EventFileSource> fetchEventFileSrc(final String fileSrcId) {
 
     return
         fileSrcRepository.findById(fileSrcId);

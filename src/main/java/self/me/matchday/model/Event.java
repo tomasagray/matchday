@@ -19,23 +19,16 @@
 
 package self.me.matchday.model;
 
+import lombok.Data;
+import org.jetbrains.annotations.NotNull;
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import lombok.Data;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * A sporting Event; could be a Match (game), highlight show, trophy celebration, group selection,
@@ -69,7 +62,14 @@ public abstract class Event {
     this.fileSources.addAll(fileSources);
   }
 
-  public EventFileSource getFileSource(@NotNull final UUID fileSrcId) {
+  /**
+   * Retrieve a particular file source from this Event
+   *
+   * @param fileSrcId The ID of the file source
+   * @return the requested file source
+   * @throws IllegalArgumentException if the requested file source is not associated with this Event
+   */
+  public EventFileSource getFileSource(final @NotNull String fileSrcId) {
 
     // Search the collection of file sources for the ID
     for (EventFileSource fileSrc : fileSources) {
@@ -81,6 +81,19 @@ public abstract class Event {
     throw new
         IllegalArgumentException(
             String.format("EventFileSource ID: %s was not found in Event: %s", fileSrcId, eventId));
+  }
+
+  @Override
+  public boolean equals(Object o) {
+
+    if (!(o instanceof Event)) {
+      return false;
+    }
+
+    // Cast for comparison
+    final Event event = (Event) o;
+    return this.getEventId().equals(event.getEventId())
+            && this.getTitle().equals(event.getTitle());
   }
 
   // Ensure consistent Event ID generation

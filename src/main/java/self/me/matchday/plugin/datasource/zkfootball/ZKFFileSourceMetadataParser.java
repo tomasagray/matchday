@@ -64,14 +64,13 @@ public class ZKFFileSourceMetadataParser {
         .mediaContainer(metadata.mediaContainer)
         .bitrate(metadata.bitrate)
         .fileSize(metadata.fileSize)
-        .eventFiles(new ArrayList<>())
         .build();
   }
 
   private static class ZKFFileMetadata {
 
     private String channel;
-    private List<String> languages = new ArrayList<>();
+    private String languages;
     private Resolution resolution;
     private int frameRate;
     private String mediaContainer;
@@ -140,7 +139,7 @@ public class ZKFFileSourceMetadataParser {
      * @param element The HTML containing language data
      * @return A collection of language Strings
      */
-    private List<String> parseLanguages(@NotNull final Element element) {
+    private String parseLanguages(@NotNull final Element element) {
 
       // Result container
       final List<String> languages = new ArrayList<>();
@@ -159,7 +158,7 @@ public class ZKFFileSourceMetadataParser {
         Log.i(LOG_TAG, "Error parsing language data from Element: " + element, e);
       }
 
-      return languages;
+      return String.join(", ", languages);
     }
 
     /**
