@@ -19,9 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -34,15 +31,20 @@ import self.me.matchday.model.Competition;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Optional;
+
 @Service
 public class ArtworkService {
 
   private static final String LOG_TAG = "ArtworkService";
 
   // Default artwork paths
+  private final static String DEFAULT_FANART = "image/fanart/default_fanart.jpg";
   private final static String DEFAULT_TEAM_EMBLEM = "image/emblem/default_team_emblem.png";
   private final static String DEFAULT_COMPETITION_EMBLEM = "image/emblem/default_competition_emblem.png";
-  private final static String DEFAULT_COMPETITION_FANART = "image/fanart/default_competition_fanart.jpg";
+  private final static String DEFAULT_COMPETITION_LANDSCAPE = "image/landscape/default_competition_landscape.jpg";
 
   private final TeamRepository teamRepository;
   private final CompetitionRepository competitionRepository;
@@ -108,6 +110,9 @@ public class ArtworkService {
         if (fanart != null) {
           // Read image data & return
           return Optional.of(readArtworkFromDisk(fanart));
+        } else {
+          // return default artwork if none set
+          return Optional.of(readDefaultArtworkFromDisk(DEFAULT_FANART));
         }
       } catch (IOException e) {
         Log.e(LOG_TAG, "Could not read fanart data for Team with ID: " + teamId, e);
@@ -167,7 +172,7 @@ public class ArtworkService {
           return Optional.of(readArtworkFromDisk(fanart));
         } else {
           // Read & return default fanart
-          return Optional.of(readDefaultArtworkFromDisk(DEFAULT_COMPETITION_FANART));
+          return Optional.of(readDefaultArtworkFromDisk(DEFAULT_FANART));
         }
       } catch (IOException e) {
         Log.e(LOG_TAG,
@@ -226,6 +231,9 @@ public class ArtworkService {
         if (landscape != null) {
           // read landscape art from disk & return
           return Optional.of(readArtworkFromDisk(landscape));
+        } else {
+          // return default artwork if none set
+          return Optional.of(readDefaultArtworkFromDisk(DEFAULT_COMPETITION_LANDSCAPE));
         }
       } catch (IOException e) {
         Log.e(LOG_TAG,
