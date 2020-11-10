@@ -182,7 +182,7 @@ public class VideoStreamingService {
             ));
 
         // Start FFMPEG transcoding job
-        Path playlistPath = ffmpegPlugin.streamUris(uris, storageLocation);
+        Path playlistPath = ffmpegPlugin.streamUris(uris, storageLocation).getOutputFile();
         Log.i(LOG_TAG, String.format("Created playlist file: %s", playlistPath));
 
         // Create playlist locator & save to DB

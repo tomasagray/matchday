@@ -19,20 +19,17 @@
 
 package self.me.matchday.model;
 
-import java.net.URL;
-import java.sql.Timestamp;
-import java.util.Objects;
-import java.util.regex.Pattern;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.FFmpegMetadataConverter;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
+
+import javax.persistence.*;
+import java.net.URL;
+import java.sql.Timestamp;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 @Entity
 @Data
@@ -69,7 +66,7 @@ public class EventFile implements Comparable<EventFile> {
    * @return The duration of this EventFile (millis).
    */
   public double getDuration() {
-    if (getMetadata() != null) {
+    if (getMetadata() != null && getMetadata().getFormat() != null) {
       return getMetadata().getFormat().getDuration();
     } else {
       return DEFAULT_DURATION;

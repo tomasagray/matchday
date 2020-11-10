@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -19,14 +19,15 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
+import org.apache.logging.log4j.util.Strings;
+import org.jetbrains.annotations.NotNull;
+
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.util.Strings;
-import org.jetbrains.annotations.NotNull;
 
 public class FFmpeg {
 
@@ -36,11 +37,12 @@ public class FFmpeg {
   private final List<String> baseArgs;
 
   FFmpeg(@NotNull final String execPath) {
-    this.baseArgs = List.of(
-        String.format("\"%s\"", execPath),
-        "-v quiet", "-y",
-        "-protocol_whitelist concat,file,http,https,tcp,tls,crypto"
-    );
+    this.baseArgs =
+        List.of(
+            String.format("\"%s\"", execPath),
+            "-v quiet",
+            "-y",
+            "-protocol_whitelist concat,file,http,https,tcp,tls,crypto");
   }
 
   FFmpegTask getHlsStreamTask(@NotNull List<URI> uris, @NotNull final Path location) {
@@ -48,15 +50,9 @@ public class FFmpeg {
     // Assemble arguments
     final String storage = location.toString();
     final List<String> transcodeArgs = new ArrayList<>();
-    final List<String> uriStrings =
-        uris
-            .stream()
-            .map(URI::toString)
-            .collect(Collectors.toList());
-    final String inputArg =
-        String.format("-i \"concat:%s\"", String.join("|", uriStrings));
-    final String segments =
-        String.format("\"%s\"", Paths.get(storage, SEGMENT_PATTERN));
+    final List<String> uriStrings = uris.stream().map(URI::toString).collect(Collectors.toList());
+    final String inputArg = String.format("-i \"concat:%s\"", String.join("|", uriStrings));
+    final String segments = String.format("\"%s\"", Paths.get(storage, SEGMENT_PATTERN));
 
     // Add arguments
     transcodeArgs.add(inputArg);
@@ -69,9 +65,7 @@ public class FFmpeg {
     transcodeArgs.add(segments);
 
     // Create FFMPEG CLI command & return
-    final FFmpegTask transcodeTask =
-        new FFmpegTask(Strings.join(baseArgs, ' '), transcodeArgs);
-    transcodeTask.setOutputFile(Paths.get(storage, SEGMENT_PL_NAME));
-    return transcodeTask;
+    return new FFmpegTask(
+        Strings.join(baseArgs, ' '), transcodeArgs, Paths.get(storage, SEGMENT_PL_NAME));
   }
 }

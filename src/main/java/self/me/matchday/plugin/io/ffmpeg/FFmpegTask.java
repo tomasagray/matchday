@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -19,41 +19,62 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 import lombok.Data;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.util.Log;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 @Data
 public class FFmpegTask implements Runnable {
 
   private final String command;
   private final List<String> args;
-  private int exitCode;
-  private Path outputFile;
+  private final Path outputFile;
+  private Process process;
 
-  public FFmpegTask(@NotNull final String command, @NotNull final List<String> args) {
+  public FFmpegTask(
+      @NotNull final String command,
+      @NotNull final List<String> args,
+      @NotNull final Path outputFile) {
+
     this.command = command;
     this.args = args;
+    this.outputFile = outputFile;
   }
 
   @SneakyThrows
   @Override
   public void run() {
 
-    // Create output directory
-    Files.createDirectories(outputFile.getParent());
+    try {
+      // Create output directory
+      Files.createDirectories(outputFile.getParent());
+      // Collate program arguments
+      final String arguments = Strings.join(args, ' ');
+      final String execCommand = String.format("%s %s \"%s\"", command, arguments, outputFile);
+      process = Runtime.getRuntime().exec(execCommand);
+      // Allow the process to finish executing
+      process.waitFor();
+      process.destroy();
+    } catch (InterruptedException e) {
+      if (process != null) {
+        Log.i("FFmpegTask", String.format("Streaming task with PID: %s interrupted", process.pid()));
+      }
+    }
+  }
 
-    // Collate program arguments
-    final String arguments = Strings.join(args, ' ');
-    final String execCommand = String.format("%s %s \"%s\"", command, arguments, outputFile);
-    final Process process = Runtime.getRuntime().exec(execCommand);
-    // Allow the process to finish executing
-    process.waitFor();
-    this.exitCode = process.exitValue();
-    process.destroy();
+  public boolean kill() {
+
+    // Ensure process exists
+    if (process != null) {
+      // Ensure process is dead
+      return !(process.destroyForcibly().isAlive());
+    }
+    return true;
   }
 }
