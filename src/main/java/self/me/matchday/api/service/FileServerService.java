@@ -140,34 +140,34 @@ public class FileServerService {
     return response;
   }
 
-  public ClientResponse logout(@NotNull final FileServerUser userData, @NotNull final UUID pluginId) {
+  public ClientResponse logout(@NotNull final FileServerUser user, @NotNull final UUID pluginId) {
 
     final StringJoiner failureMessage = new StringJoiner(" ");
     failureMessage.add("User logout failed:");
 
     // Find required user
-    final Optional<FileServerUser> userOptional = userRepo.findById(userData.getUserId());
+    final Optional<FileServerUser> userOptional = userRepo.findById(user.getUserId());
     if (userOptional.isPresent()) {
-      final FileServerUser fileServerUser = userOptional.get();
+      final FileServerUser userData = userOptional.get();
       // Validate server ID
-      if (fileServerUser.getServerId().equals(pluginId.toString())) {
+      if (userData.getServerId().equals(pluginId.toString())) {
         // Perform logout request
-        fileServerUser.setLoggedOut();
+        user.setLoggedOut();
         // Save data
-        userRepo.save(fileServerUser);
+        userRepo.saveAndFlush(user);
 
-        Log.i(LOG_TAG, String.format("Logged out user: %s", fileServerUser));
+        Log.i(LOG_TAG, String.format("Logged out user: %s", userData));
 
         return
             ClientResponse
                 .create(HttpStatus.OK)
-                .body(String.format("User %s successfully logged out", fileServerUser.getUserName()))
+                .body(String.format("User %s successfully logged out", userData.getUserName()))
                 .build();
       } else {
         failureMessage.add("Invalid server ID");
       }
     } else {
-      failureMessage.add(String.format("User with ID: %s not found", userData.getUserId()));
+      failureMessage.add(String.format("User with ID: %s not found", user.getUserId()));
     }
 
     // Logout failed
@@ -182,9 +182,9 @@ public class FileServerService {
 
     // Get complete user data
     final Optional<FileServerUser> userOptional = userRepo.findById(fileServerUser.getUserId());
-    if (userOptional.isPresent()) {
+    if (userOptional.isPresent() && fileServerUser.equals(userOptional.get())) {
       Log.i(LOG_TAG, String.format("Re-logging in user: %s", fileServerUser));
-      return login(userOptional.get(), pluginId);
+      return login(fileServerUser, pluginId);
     }
 
     return
@@ -248,6 +248,8 @@ public class FileServerService {
                 .collect(Collectors.toList());
         // Use the FS plugin to get the internal (download) URL
         result = pluginForUrl.getDownloadURL(externalUrl, httpCookies);
+      } else {
+        throw new IOException("No logged in user could download requested URL: " + externalUrl);
       }
     } else {
       throw new IOException("Could not find plugin matching URL: " + externalUrl);

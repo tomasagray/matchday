@@ -26,6 +26,7 @@ import self.me.matchday.model.MD5String;
 import self.me.matchday.model.SecureCookie;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -34,13 +35,13 @@ import java.util.Collection;
  */
 @Data
 @Entity
-public class FileServerUser {
+public class FileServerUser implements Serializable {
 
   @Id
   private String userId;
   private final String userName;
   private final String password;
-  private String email;
+  private final String email;
   private boolean loggedIn;
   private String serverId;
   @OneToMany(targetEntity = SecureCookie.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -48,14 +49,14 @@ public class FileServerUser {
 
   // default constructor
   public FileServerUser() {
-    this.userName = null;
+    this.userName = this.email = null;
     this.password = null;
   }
 
   public FileServerUser(@NotNull final String userName, @NotNull final String password) {
 
     this.userId = MD5String.fromData(userName);
-    this.userName = userName;
+    this.userName = this.email = userName;
     this.password = password;
   }
 
@@ -98,5 +99,19 @@ public class FileServerUser {
             "Username: %s, Password: *****, Logged in: %s, Email: %s, Server ID: %s, Cookies: %s",
             getUserName(), isLoggedIn(), getEmail(), getServerId(),
             Strings.join(cookies, ','));
+  }
+
+  @Override
+  public boolean equals(final Object object) {
+    if (!(object instanceof FileServerUser)) {
+      return false;
+    }
+    // Cast for comparison
+    final FileServerUser fileServerUser = (FileServerUser) object;
+    return
+            this.getUserName().equals(fileServerUser.getUserName()) &&
+                    this.getPassword().equals(fileServerUser.getPassword()) &&
+                    this.getEmail().equals(fileServerUser.getEmail());
+
   }
 }
