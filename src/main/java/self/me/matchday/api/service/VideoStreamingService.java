@@ -57,8 +57,11 @@ public class VideoStreamingService {
   private final PlaylistLocatorService playlistLocatorService;
 
   @Autowired
-  public VideoStreamingService(final DiskManager diskManager, final FFmpegPlugin ffmpegPlugin,
-      final EventService eventService, final EventFileService eventFileService,
+  public VideoStreamingService(
+      final DiskManager diskManager,
+      final FFmpegPlugin ffmpegPlugin,
+      final EventService eventService,
+      final EventFileService eventFileService,
       final VideoResourcesConfig videoResourcesConfig,
       final PlaylistLocatorService playlistLocatorService) {
 
@@ -76,8 +79,7 @@ public class VideoStreamingService {
     final Optional<Event> eventOptional = eventService.fetchById(eventId);
     if (eventOptional.isPresent()) {
       final Event event = eventOptional.get();
-      return
-          Optional.of(event.getFileSources());
+      return Optional.of(event.getFileSources());
     }
     // Event not found
     return Optional.empty();
@@ -86,7 +88,7 @@ public class VideoStreamingService {
   /**
    * Read playlist file from disk and return as a String
    *
-   * @param eventId   The ID of the Event of this video data
+   * @param eventId The ID of the Event of this video data
    * @param fileSrcId The ID of the video data variant (EventFileSource)
    * @return The playlist as a String
    */
@@ -106,14 +108,14 @@ public class VideoStreamingService {
       try (final BufferedReader fileReader = new BufferedReader(new FileReader(playlistFile))) {
         String line;
         while ((line = fileReader.readLine()) != null) {
-          result
-              .append(line)
-              .append("\n");
+          result.append(line).append("\n");
         }
       } catch (IOException e) {
-        Log.e(LOG_TAG,
-            String.format("Unable to read playlist file; EventID: %s, FileSrcID: %s",
-                eventId, fileSrcId), e);
+        Log.e(
+            LOG_TAG,
+            String.format(
+                "Unable to read playlist file; EventID: %s, FileSrcID: %s", eventId, fileSrcId),
+            e);
       }
     }
     return result.toString();
@@ -122,12 +124,13 @@ public class VideoStreamingService {
   /**
    * Read video segment (.ts) data from disk
    *
-   * @param eventId   The ID of the Event for this video data
+   * @param eventId The ID of the Event for this video data
    * @param fileSrcId The ID of the video variant (EventFileSource)
    * @param segmentId The filename of the requested segment (.ts extension assumed)
    * @return The video data as a Resource
    */
-  public Resource getVideoSegmentResource(@NotNull final String eventId,
+  public Resource getVideoSegmentResource(
+      @NotNull final String eventId,
       @NotNull final String fileSrcId,
       @NotNull final String segmentId) {
 
@@ -140,8 +143,7 @@ public class VideoStreamingService {
       // Get playlist parent directory
       final Path playlistRoot = playlistPath.getParent();
       final String segmentFilename = String.format("%s.ts", segmentId);
-      return
-          new FileSystemResource(Paths.get(playlistRoot.toString(), segmentFilename));
+      return new FileSystemResource(Paths.get(playlistRoot.toString(), segmentFilename));
     }
     // Resource not found
     return null;
@@ -151,12 +153,15 @@ public class VideoStreamingService {
    * Use the local installation of FFMPEG, via the FFmpeg plugin, to stream video data from a remote
    * source to local disk.
    *
-   * @param eventId   The ID of the Event for this video data
+   * @param eventId The ID of the Event for this video data
    * @param fileSrcId The ID of the video variant
    * @throws IOException If there is a problem creating video stream files
    */
-  public void createVideoStream(@NotNull final String eventId, @NotNull final String fileSrcId)
-      throws IOException {
+  public Optional<VideoStreamPlaylistLocator> createVideoStream(
+      @NotNull final String eventId, @NotNull final String fileSrcId) throws IOException {
+
+    // Result container
+    Optional<VideoStreamPlaylistLocator> result = Optional.empty();
 
     // Get the event from database
     final Optional<Event> eventOptional = eventService.fetchById(eventId);
@@ -174,27 +179,43 @@ public class VideoStreamingService {
         final List<URI> uris = getEventFileSrcUris(fileSource);
         // Create storage path
         final Path storageLocation =
-            Files.createDirectories(Paths.get(
-                videoResourcesConfig.getFileStorageLocation(),
-                videoResourcesConfig.getVideoStorageDirname(),
-                event.getEventId(),
-                fileSrcId
-            ));
+            Files.createDirectories(
+                Paths.get(
+                    videoResourcesConfig.getFileStorageLocation(),
+                    videoResourcesConfig.getVideoStorageDirname(),
+                    event.getEventId(),
+                    fileSrcId));
 
         // Start FFMPEG transcoding job
         Path playlistPath = ffmpegPlugin.streamUris(uris, storageLocation).getOutputFile();
         Log.i(LOG_TAG, String.format("Created playlist file: %s", playlistPath));
 
         // Create playlist locator & save to DB
-        playlistLocatorService.createNewPlaylistLocator(eventId, fileSrcId, playlistPath);
+        result =
+            Optional.of(
+                playlistLocatorService.createNewPlaylistLocator(eventId, fileSrcId, playlistPath));
 
       } else {
-        Log.i(LOG_TAG,
-            String.format("Streaming request denied; inadequate storage capacity. "
+        Log.i(
+            LOG_TAG,
+            String.format(
+                "Streaming request denied; inadequate storage capacity. "
                     + "(Requested: %s, Available: %s)",
                 fileSource.getFileSize(), diskManager.getFreeDiskSpace()));
       }
     }
+
+    return result;
+  }
+
+  /**
+   * Destroy all currently-running video streaming tasks
+   *
+   */
+  public void killAllStreamingTasks() {
+
+    Log.i(LOG_TAG, String.format("Killing %s streaming tasks", ffmpegPlugin.getStreamingTaskCount()));
+    ffmpegPlugin.interruptAllStreamTasks();
   }
 
 
@@ -209,9 +230,11 @@ public class VideoStreamingService {
 
     final Path playlistPath = playlistLocator.getPlaylistPath();
     // Ensure path points to a playlist file
-    if (!playlistPath.endsWith(".m3u8")) {
+    if (!playlistPath.endsWith("playlist.m3u8")) {
       throw new IOException(
-          "Invalid playlist path; playlist locator does not point to a playlist!");
+          String.format(
+              "Invalid playlist path; playlist locator: %s does not point to a playlist!",
+              playlistPath));
     }
 
     Log.i(LOG_TAG, "Deleting video data associated with playlist locator:\n" + playlistLocator);
@@ -219,19 +242,25 @@ public class VideoStreamingService {
     // Get directory of playlist file
     final Path videoDataDir = playlistPath.getParent();
     // Delete all contents of video data directory
-    Files.walkFileTree(videoDataDir, new SimpleFileVisitor<>() {
-      @Override
-      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        Files.delete(file);
-        return FileVisitResult.CONTINUE;
-      }
+    Files.walkFileTree(
+        videoDataDir,
+        new SimpleFileVisitor<>() {
+          @Override
+          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+              throws IOException {
+            Files.delete(file);
+            return FileVisitResult.CONTINUE;
+          }
 
-      @Override
-      public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        Files.delete(dir);
-        return FileVisitResult.CONTINUE;
-      }
-    });
+          @Override
+          public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            Files.delete(dir);
+            return FileVisitResult.CONTINUE;
+          }
+        });
+
+    // Delete playlist locator from database
+    playlistLocatorService.deletePlaylistLocator(playlistLocator.getPlaylistId());
   }
 
   /**
@@ -242,12 +271,10 @@ public class VideoStreamingService {
    */
   private List<URI> getEventFileSrcUris(@NotNull final EventFileSource eventFileSource) {
 
-    return
-        eventFileSource
-            .getEventFiles()
-            .stream()
-            .map(EventFile::getInternalUrl)
-            .map(url -> {
+    return eventFileSource.getEventFiles().stream()
+        .map(EventFile::getInternalUrl)
+        .map(
+            url -> {
               try {
                 return url.toURI();
               } catch (URISyntaxException e) {
@@ -255,7 +282,7 @@ public class VideoStreamingService {
                 return null;
               }
             })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
   }
 }

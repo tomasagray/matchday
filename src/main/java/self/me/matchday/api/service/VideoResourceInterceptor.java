@@ -25,12 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
+import self.me.matchday.model.VideoStreamPlaylistLocator;
 import self.me.matchday.util.Log;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,8 +45,7 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
   private static final Pattern DATA_PATH_PATTERN =
       Pattern.compile("[\\w\\\\/]+(\\w{32})[\\\\/]([\\w-]{32,36})[\\\\/][\\w]+.m3u8");
 
-  @Autowired
-  VideoStreamingService videoStreamingService;
+  @Autowired private VideoStreamingService videoStreamingService;
   private String fileStorageLocation;
 
   public VideoResourceInterceptor(@NotNull final String fileStorageLocation) {
@@ -63,8 +64,10 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
    */
   @Override
   @Transactional
-  public boolean preHandle(@NotNull final HttpServletRequest request,
-      @NotNull final HttpServletResponse response, @NotNull final Object handler) {
+  public boolean preHandle(
+      @NotNull final HttpServletRequest request,
+      @NotNull final HttpServletResponse response,
+      @NotNull final Object handler) {
 
     final String servletPath = request.getServletPath();
 
@@ -81,18 +84,29 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
           final String eventId = pathMatcher.group(1);
           final String fileSrcId = pathMatcher.group(2);
           // Validate parameters
-          if (eventId != null && !("".equals(eventId)) &&
-              fileSrcId != null && !("".equals(fileSrcId))) {
+          if (eventId != null
+              && !("".equals(eventId))
+              && fileSrcId != null
+              && !("".equals(fileSrcId))) {
 
             // Stream video files to local disk
-            videoStreamingService.createVideoStream(eventId, fileSrcId);
+            final Optional<VideoStreamPlaylistLocator> playlistOptional =
+                videoStreamingService.createVideoStream(eventId, fileSrcId);
+            playlistOptional.ifPresent(
+                playlistLocator ->
+                    Log.i(
+                        LOG_TAG,
+                        "Created video stream at: "
+                            + playlistLocator.getPlaylistPath().toAbsolutePath()));
+
             // Ensure playlist creation has begun
             Thread.sleep(PROCESS_DELAY);
           }
         }
       }
     } catch (Exception e) {
-      Log.e(LOG_TAG,
+      Log.e(
+          LOG_TAG,
           String.format("Error streaming video files; request URI: %s", request.getRequestURI()),
           e);
     }
