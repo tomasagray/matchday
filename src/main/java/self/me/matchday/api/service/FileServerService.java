@@ -220,6 +220,26 @@ public class FileServerService {
         userRepo.findById(userId);
   }
 
+  /**
+   * Delete a user from the database
+   *
+   * @param userId The ID of the user to delete
+   */
+  public void deleteUser(@NotNull final String userId) {
+
+    // Ensure user is in DB
+    final Optional<FileServerUser> userOptional = userRepo.findById(userId);
+    if (userOptional.isPresent()) {
+
+      final FileServerUser fileServerUser = userOptional.get();
+      Log.i(LOG_TAG, "Deleting user: " + fileServerUser);
+      userRepo.delete(fileServerUser);
+
+    } else {
+      Log.i(LOG_TAG, String.format("User: %s not found", userId));
+    }
+  }
+
   // === Downloads ===
 
   /**
@@ -231,8 +251,6 @@ public class FileServerService {
    */
   public Optional<URL> getDownloadUrl(@NotNull final URL externalUrl) throws IOException {
 
-    // Result container
-    Optional<URL> result = Optional.empty();
     // Get correct FS manager
     final FileServerPlugin pluginForUrl = getPluginForUrl(externalUrl);
     if (pluginForUrl != null) {
@@ -247,14 +265,13 @@ public class FileServerService {
                 .map(SecureCookie::toSpringCookie)
                 .collect(Collectors.toList());
         // Use the FS plugin to get the internal (download) URL
-        result = pluginForUrl.getDownloadURL(externalUrl, httpCookies);
+        return pluginForUrl.getDownloadURL(externalUrl, httpCookies);
       } else {
         throw new IOException("No logged in user could download requested URL: " + externalUrl);
       }
     } else {
       throw new IOException("Could not find plugin matching URL: " + externalUrl);
     }
-    return result;
   }
 
   /**
