@@ -25,10 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * A sporting Event; could be a Match (game), highlight show, trophy celebration, group selection,
@@ -48,7 +45,7 @@ public abstract class Event {
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Fixture fixture;
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  protected final List<EventFileSource> fileSources = new ArrayList<>();
+  protected final Set<EventFileSource> fileSources = new HashSet<>();
   protected String title;
   protected LocalDateTime date;
 
@@ -94,6 +91,14 @@ public abstract class Event {
     final Event event = (Event) o;
     return this.getEventId().equals(event.getEventId())
             && this.getTitle().equals(event.getTitle());
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 11;
+    hash = 31 * hash + eventId.hashCode();
+    hash = 31 * hash + ((title != null) ? title.hashCode() : 0);
+    return hash;
   }
 
   // Ensure consistent Event ID generation

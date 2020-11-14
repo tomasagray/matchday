@@ -75,6 +75,16 @@ public class Highlight extends Event implements Serializable {
         && this.getSeason().equals(highlight.getSeason());
   }
 
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 31 * hash + eventId.hashCode();
+    hash = 31 * hash + ((competition != null) ? competition.hashCode() : 0);
+    hash = 31 * hash + ((fixture != null) ? fixture.hashCode() : 0);
+    hash = 31 * hash + ((season != null) ? season.hashCode() : 0);
+    return hash;
+  }
+
   /** A Builder class for this object. Returns a fully constructed Highlight object. */
   public static class HighlightBuilder {
 

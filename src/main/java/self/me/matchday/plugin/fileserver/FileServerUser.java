@@ -114,4 +114,13 @@ public class FileServerUser implements Serializable {
                     this.getEmail().equals(fileServerUser.getEmail());
 
   }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 31 * hash + userName.hashCode();
+    hash = 31 * hash + password.hashCode();
+    hash = 31 * hash + ((email != null) ? email.hashCode() : 0);
+    return hash;
+  }
 }

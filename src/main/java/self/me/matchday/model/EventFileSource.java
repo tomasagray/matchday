@@ -46,68 +46,7 @@ import java.util.regex.Pattern;
 @NoArgsConstructor
 public class EventFileSource implements Comparable<EventFileSource> {
 
-  @Id
-  @GeneratedValue(generator = "system-uuid")
-  @GenericGenerator(name = "system-uuid", strategy = "org.hibernate.id.UUIDGenerator")
-  private String eventFileSrcId;
-  private String channel;
-  private String source;
-  private String approximateDuration;
-  private Long fileSize;
-  private String languages;
-  @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private final List<EventFile> eventFiles = new ArrayList<>();
-  // Media metadata
-  private Resolution resolution;
-  private String mediaContainer;
-  private Long bitrate;
-  private String videoCodec;
-  private int frameRate;
-  private String audioCodec;
-  private int audioChannels;
-
-  public String toString() {
-
-    return
-        String.format(
-            "%s (%s) - %s, %s files",
-            getChannel(),
-            getResolution(),
-            getLanguages(),
-            getEventFiles().size()
-        );
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (!(o instanceof EventFileSource)) {
-      return false;
-    }
-    // Cast for comparison
-    final EventFileSource eventFileSource = (EventFileSource) o;
-    return this.getChannel().equals(eventFileSource.getChannel())
-            && this.getLanguages().equals(eventFileSource.getLanguages())
-            && this.getResolution().equals(eventFileSource.getResolution());
-  }
-
-  @Override
-  public int compareTo(@NotNull EventFileSource entity) {
-
-    // Null resolutions are less-than by definition
-    if (getResolution() == null || entity.getResolution() == null) {
-      return -1;
-    }
-    // If the resolutions are the same...
-    if (entity.getResolution().equals(getResolution())) {
-      // ... use audio channels
-      return
-          getAudioChannels() - entity.getAudioChannels();
-    }
-    // Default behavior: compare by resolution
-    return
-        getResolution().compareTo(entity.getResolution());
-  }
-
+  /** Video resolution classes */
   public enum Resolution {
     R_4k("4K", 3840, 2160),
     R_1080p("1080p", 1920, 1080),
@@ -160,7 +99,7 @@ public class EventFileSource implements Comparable<EventFileSource> {
      *
      * @param str The String to be converted.
      * @return The Resolution value, or <b>null</b> if the given String does not match an enumerated
-     * value.
+     *     value.
      */
     @Nullable
     @Contract(pure = true)
@@ -170,5 +109,75 @@ public class EventFileSource implements Comparable<EventFileSource> {
           .findFirst()
           .orElse(null);
     }
+  }
+
+  @Id
+  @GeneratedValue(generator = "system-uuid")
+  @GenericGenerator(name = "system-uuid", strategy = "org.hibernate.id.UUIDGenerator")
+  private String eventFileSrcId;
+
+  private String channel;
+  private String source;
+  private String approximateDuration;
+  private Long fileSize;
+  private String languages;
+
+  @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private final List<EventFile> eventFiles = new ArrayList<>();
+  // Media metadata
+  private Resolution resolution;
+  private String mediaContainer;
+  private Long bitrate;
+  private String videoCodec;
+  private int frameRate;
+  private String audioCodec;
+
+  private int audioChannels;
+
+  public String toString() {
+
+    return String.format(
+        "%s (%s) - %s, %s files",
+        getChannel(), getResolution(), getLanguages(), getEventFiles().size());
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (!(o instanceof EventFileSource)) {
+      return false;
+    }
+    // Cast for comparison
+    final EventFileSource eventFileSource = (EventFileSource) o;
+    return this.getChannel() != null
+        && this.getChannel().equals(eventFileSource.getChannel())
+        && this.getLanguages() != null
+        && this.getLanguages().equals(eventFileSource.getLanguages())
+        && this.getResolution() != null
+        && this.getResolution().equals(eventFileSource.getResolution());
+  }
+
+  @Override
+  public int compareTo(@NotNull EventFileSource entity) {
+
+    // Null resolutions are less-than by definition
+    if (getResolution() == null || entity.getResolution() == null) {
+      return -1;
+    }
+    // If the resolutions are the same...
+    if (entity.getResolution().equals(getResolution())) {
+      // ... use audio channels
+      return getAudioChannels() - entity.getAudioChannels();
+    }
+    // Default behavior: compare by resolution
+    return getResolution().compareTo(entity.getResolution());
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 31 * hash + ((channel != null) ? channel.hashCode() : 0);
+    hash = 31 * hash + ((languages != null) ? languages.hashCode() : 0);
+    hash = 31 * hash + ((resolution != null) ? resolution.hashCode() : 0);
+    return hash;
   }
 }
