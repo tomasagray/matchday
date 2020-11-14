@@ -19,7 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -27,30 +26,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.db.FileServerUserRepo;
+import self.me.matchday.CreateTestData;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.SecureCookie;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.util.Log;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Duration;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static self.me.matchday.model.EventFileSource.Resolution.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -60,109 +47,32 @@ class EventFileServiceTest {
   private static final String LOG_TAG = "EventFileServiceTest";
 
   // Test resources
-  private static EventFileSource testEventFileSrc;
   private static EventFileService eventFileService;
-  private static FileServerUserRepo userRepo;
-  private static FileServerUser testUser;
+  private static FileServerPlugin testFileServerPlugin;
+  private static FileServerService fileServerService;
 
-  private static class TestEventFileServicePlugin implements FileServerPlugin {
-
-    private static final Pattern urlPattern =
-        Pattern.compile("http[s]?://192.168.0.101/stream2stream/[\\w-/.]*");
-
-    private final UUID pluginId;
-
-    TestEventFileServicePlugin() {
-      pluginId = UUID.randomUUID();
-    }
-
-    @Override
-    public @NotNull ClientResponse login(@NotNull FileServerUser user) {
-      return ClientResponse.create(HttpStatus.OK).build();
-    }
-
-    @Override
-    public boolean acceptsUrl(@NotNull URL url) {
-      return urlPattern.matcher(url.toString()).find();
-    }
-
-    @Override
-    public @NotNull Duration getRefreshRate() {
-      return Duration.ofDays(1_000L);
-    }
-
-    @Override
-    public Optional<URL> getDownloadURL(@NotNull URL url, @NotNull Collection<HttpCookie> cookies) {
-      return
-              Optional.of(url);
-    }
-
-    @Override
-    public UUID getPluginId() {
-      return pluginId;
-    }
-
-    @Override
-    public String getTitle() {
-      return "Test file server plugin";
-    }
-
-    @Override
-    public String getDescription() {
-      return null;
-    }
-  }
+  private static EventFileSource testEventFileSrc;
+  private static FileServerUser testFileServerUser;
 
   @BeforeAll
   static void setUp(
-          @Autowired final EventFileService eventFileService,
-          @Autowired final FileServerService fileServerService,
-          @Autowired final FileServerUserRepo userRepo)
-      throws MalformedURLException {
+      @Autowired final EventFileService eventFileService,
+      @Autowired final FileServerService fileServerService) {
 
     EventFileServiceTest.eventFileService = eventFileService;
-    EventFileServiceTest.userRepo = userRepo;
+    EventFileServiceTest.fileServerService = fileServerService;
 
     // Create & register test file server plugin
-    final TestEventFileServicePlugin testFileServerPlugin = new TestEventFileServicePlugin();
-    fileServerService.getFileServerPlugins().add(testFileServerPlugin);
+    EventFileServiceTest.testFileServerPlugin = CreateTestData.createTestFileServerPlugin();
+    EventFileServiceTest.testFileServerUser = CreateTestData.createTestFileServerUser();
 
-    // Login test user to file server plugin
-    testUser = new FileServerUser("test", "test");
-    testUser.loginToServer(
-            testFileServerPlugin.getPluginId().toString(),
-            List.of(new SecureCookie("test name", "test val")));
-    userRepo.save(testUser);
+    fileServerService.getFileServerPlugins().add(testFileServerPlugin);
+    fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
 
     // Create test EventFileSource
-    testEventFileSrc = createTestEventFileSrc();
+    testEventFileSrc = CreateTestData.createTestEventFileSource();
   }
 
-  private static EventFileSource createTestEventFileSrc() throws MalformedURLException {
-
-    // Create test EventFiles
-    final EventFile firstHalf =
-        new EventFile(
-            EventFile.EventPartIdentifier.FIRST_HALF,
-            new URL("http://192.168.0.101/stream2stream/barca-rm-2009/1.ts"));
-    // normally done by Spring
-    firstHalf.setEventFileId(Long.MAX_VALUE - 1);
-
-    final EventFile secondHalf =
-        new EventFile(
-            EventFile.EventPartIdentifier.SECOND_HALF,
-            new URL("http://192.168.0.101/stream2stream/barca-rm-2009/2.ts"));
-    secondHalf.setEventFileId(Long.MAX_VALUE - 2);
-
-    return
-            EventFileSource
-                    .builder()
-                    .channel("Test Channel")
-                    .resolution(R_1080p)
-                    .languages(List.of("Spanish"))
-                    .eventFiles(List.of(firstHalf, secondHalf))
-                    .build();
-  }
 
   @Test
   @DisplayName("Refresh data for a test EventFile")
@@ -173,9 +83,15 @@ class EventFileServiceTest {
 
     // Perform tests
     final List<EventFile> eventFiles = testEventFileSrc.getEventFiles();
+    assertThat(eventFiles).isNotNull().isNotEmpty();
+
     eventFiles.forEach(
         eventFile -> {
-          Log.i(LOG_TAG, String.format("Checking EventFile: %s, internal URL: %s", eventFile, eventFile.getInternalUrl()));
+          Log.i(
+              LOG_TAG,
+              String.format(
+                  "Checking EventFile: %s, internal URL: %s",
+                  eventFile, eventFile.getInternalUrl()));
 
           final FFmpegMetadata metadata = eventFile.getMetadata();
           assertThat(eventFile.getInternalUrl()).isNotNull();
@@ -185,9 +101,10 @@ class EventFileServiceTest {
 
   @AfterAll
   static void tearDown() {
+
     // Remove test user from repo
-    Log.i(LOG_TAG, "Deleting test user: " + testUser);
-    userRepo.delete(testUser);
+    Log.i(LOG_TAG, "Deleting test user: " + testFileServerUser);
+    fileServerService.deleteUser(testFileServerUser.getUserId());
+    fileServerService.getFileServerPlugins().clear();
   }
 }
-

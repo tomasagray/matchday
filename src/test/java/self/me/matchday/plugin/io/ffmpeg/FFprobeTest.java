@@ -33,7 +33,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// TODO - Is this an integration test?
 @DisplayName("FFprobeTest - Test the functionality of the FFprobe plugin")
 @TestMethodOrder(OrderAnnotation.class)
 class FFprobeTest {

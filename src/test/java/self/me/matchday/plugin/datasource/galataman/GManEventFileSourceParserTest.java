@@ -123,9 +123,9 @@ class GManEventFileSourceParserTest {
   @DisplayName("Validate language parsing")
   void testSourceLanguages() {
 
-    final List<String> actualLanguages1 = firstSource.getLanguages();
-    final List<String> actualLanguages2 = secondSource.getLanguages();
-    final List<String> expectedLanguages = List.of("German");
+    final String actualLanguages1 = firstSource.getLanguages();
+    final String actualLanguages2 = secondSource.getLanguages();
+    final String expectedLanguages = "German";
 
     Log.i(LOG_TAG, String.format("Testing source languages: %s, %s", actualLanguages1, actualLanguages2));
     assertThat(actualLanguages1).isEqualTo(expectedLanguages);

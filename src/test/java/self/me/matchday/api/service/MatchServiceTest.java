@@ -27,12 +27,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import self.me.matchday.CreateTestData;
 import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,33 +47,45 @@ class MatchServiceTest {
   private static final String LOG_TAG = "MatchServiceTest";
 
   private static MatchService matchService;
+  private static EventService eventService;
+  private static CompetitionService competitionService;
+  private static TeamService teamService;
+
+  // Test data
   private static Competition testCompetition;
   private static Team testTeam;
   private static Match testMatch;
-  private static EventService eventService;
 
   @BeforeAll
-  static void setUp(@Autowired final MatchService matchService, @Autowired final EventService eventService) {
+  static void setUp(
+      @Autowired final MatchService matchService,
+      @Autowired final EventService eventService,
+      @Autowired final CompetitionService competitionService,
+      @Autowired final TeamService teamService) {
 
     MatchServiceTest.matchService = matchService;
     MatchServiceTest.eventService = eventService;
+    MatchServiceTest.competitionService = competitionService;
+    MatchServiceTest.teamService = teamService;
 
-    testCompetition = new Competition("TEST COMPETITION");
-    testTeam = new Team("TEST TEAM");
-    testMatch =
-            new Match.MatchBuilder()
-                    .setDate(LocalDateTime.now())
-                    .setCompetition(testCompetition)
-                    .setHomeTeam(testTeam)
-                    .build();
-    eventService.saveEvent(testMatch);
+    final Match match = CreateTestData.createTestMatch();
+    eventService.saveEvent(match);
+
+    // Get managed copy
+    final Optional<Event> testEventOptional = eventService.fetchById(match.getEventId());
+    assertThat(testEventOptional).isPresent();
+
+    MatchServiceTest.testMatch = (Match) testEventOptional.get();
+    MatchServiceTest.testCompetition = testMatch.getCompetition();
+    MatchServiceTest.testTeam = testMatch.getHomeTeam();
+
   }
 
   @Test
   @DisplayName("Test fetching all Matches from database")
   void fetchAllMatches() {
 
-    final int expectedMatchCount = 1;  // minimum
+    final int expectedMatchCount = 1; // minimum
     final Optional<List<Match>> optionalMatches = matchService.fetchAllMatches();
     assertThat(optionalMatches).isPresent();
 
@@ -93,16 +106,20 @@ class MatchServiceTest {
     final Optional<Match> optionalMatch = matchService.fetchMatch(testMatchId);
 
     assertThat(optionalMatch).isPresent();
-    optionalMatch.ifPresent(match -> {
-      Log.i(LOG_TAG, "Got match: " + match);
-      assertThat(match.getHomeTeam()).isEqualTo(testTeam);
-      assertThat(match.getCompetition()).isEqualTo(testCompetition);
-    });
+    optionalMatch.ifPresent(
+        match -> {
+          Log.i(LOG_TAG, "Got match: " + match);
+          assertThat(match.getHomeTeam()).isEqualTo(testTeam);
+          assertThat(match.getCompetition()).isEqualTo(testCompetition);
+        });
   }
 
   @AfterAll
   static void tearDown() {
+
     // delete test event
     eventService.deleteEvent(testMatch);
+    competitionService.deleteCompetitionById(testCompetition.getCompetitionId());
+    teamService.deleteTeamById(testTeam.getTeamId());
   }
 }

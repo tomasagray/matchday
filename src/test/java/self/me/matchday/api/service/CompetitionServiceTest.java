@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,20 +42,30 @@ class CompetitionServiceTest {
 
   private static final String LOG_TAG = "CompetitionServiceTest";
 
-  // Test constants
   // Test resources
   private static CompetitionService competitionService;
+  private static Competition testCompetition;
 
   @BeforeAll
   static void setUp(@Autowired final CompetitionService service) {
     competitionService = service;
+
+    // Add test data to DB
+    testCompetition = new Competition("Competition Service Test Competition");
+    competitionService.saveCompetition(testCompetition);
+  }
+
+  @AfterAll
+  static void tearDown() {
+    // delete test data from DB
+    competitionService.deleteCompetitionById(testCompetition.getCompetitionId());
   }
 
   @Test
   @DisplayName("Verify retrieval of ALL competitions from database")
   void fetchAllCompetitions() {
 
-    final int MIN_REQUIRED_COMPETITIONS = 10;
+    final int MIN_REQUIRED_COMPETITIONS = 1;
 
     final Optional<List<Competition>> competitionsOptional =
         competitionService.fetchAllCompetitions();
@@ -69,21 +80,20 @@ class CompetitionServiceTest {
   @DisplayName("Validate retrieval of a single competition from database")
   void fetchCompetitionById() {
 
-    final String TEST_COMPETITION_ID = "ed58c4376cc9990841bc18a81859b545";
+    final String testCompetitionId = testCompetition.getCompetitionId();
 
     final Optional<Competition> competitionOptional =
-        competitionService.fetchCompetitionById(TEST_COMPETITION_ID);
+        competitionService.fetchCompetitionById(testCompetitionId);
     assertThat(competitionOptional.isPresent()).isTrue();
 
-    final Competition expectedCompetition = new Competition("La Liga");
     final Competition actualCompetition = competitionOptional.get();
     Log.i(
         LOG_TAG,
         String.format(
             "Using ID: %s, retrieved competition from database:\n%s",
-            TEST_COMPETITION_ID, actualCompetition));
+            testCompetitionId, actualCompetition));
 
-    assertThat(actualCompetition).isEqualTo(expectedCompetition);
+    assertThat(actualCompetition).isEqualTo(testCompetition);
 
   }
 }

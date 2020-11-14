@@ -19,11 +19,15 @@
 
 package self.me.matchday.api.service;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import self.me.matchday.CreateTestData;
 import self.me.matchday.model.*;
 import self.me.matchday.util.Log;
 
@@ -32,162 +36,199 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static self.me.matchday.model.EventFileSource.Resolution.R_1080p;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for Event service")
 class EventServiceTest {
 
-    private static final String LOG_TAG = "EventServiceTest";
+  private static final String LOG_TAG = "EventServiceTest";
 
-    // Test params
-    // Test resources
-    private static EventService eventService;
-    private static Match testMatch;
-    private static EventFileSource testFileSource;
-    private static Competition testCompetition;
-    private static Team testTeam;
+  // Test params
+  // Test resources
+  private static EventService eventService;
+  private static CompetitionService competitionService;
+  private static TeamService teamService;
 
-    @BeforeAll
-    static void setUp(@Autowired final EventService eventService) {
+  // Test data
+  private static Match testMatch;
+  private static EventFileSource testFileSource;
+  private static Competition testCompetition;
+  private static Team testTeam;
 
-        EventServiceTest.eventService = eventService;
+  @BeforeAll
+  static void setUp(@Autowired final EventService eventService,
+                    @Autowired final CompetitionService competitionService,
+                    @Autowired final TeamService teamService) {
 
-        // Create & save test match & EventFileSource
-        testCompetition = new Competition("TEST COMPETITION");
-        testTeam = new Team("TEST TEAM");
-        testMatch =
-                new Match.MatchBuilder()
-                        .setDate(LocalDateTime.now())
-                        .setCompetition(testCompetition)
-                        .setHomeTeam(testTeam)
-                        .build();
+    EventServiceTest.eventService = eventService;
+    EventServiceTest.competitionService = competitionService;
+    EventServiceTest.teamService = teamService;
 
-        testFileSource =
-                EventFileSource
-                    .builder()
-                    .channel("Test Channel")
-                    .resolution(R_1080p)
-                    .languages(List.of("English"))
-                    .build();
-        testMatch.getFileSources().add(testFileSource);
-//        eventService.saveEvent(testMatch);
+    Match match = CreateTestData.createTestMatch();
+    eventService.saveEvent(match);
+    // Get managed copy
+    final Optional<Event> eventOptional = eventService.fetchById(match.getEventId());
+    assertThat(eventOptional).isPresent();
 
-//
-//        try {
-//            Thread.sleep(10000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+    testMatch = (Match) eventOptional.get();
+    testCompetition = testMatch.getCompetition();
+    testTeam = testMatch.getHomeTeam();
+
+    final Optional<EventFileSource> fileSourceOptional = testMatch.getFileSources().stream().findFirst();
+    assertThat(fileSourceOptional).isPresent();
+    testFileSource = fileSourceOptional.get();
 
 
-        Log.i(LOG_TAG,
-                String.format("Saved Event w/ID: %s, Competition ID: %s, Team ID: %s; EventFileSrcID: %s",
-                        testMatch.getEventId(), testCompetition, testTeam, testFileSource.getEventFileSrcId()));
-    }
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Saved Event w/ID: %s, Competition ID: %s, Team ID: %s; EventFileSrcID: %s",
+            testMatch.getEventId(),
+                testCompetition,
+                testTeam,
+                testFileSource.getEventFileSrcId()));
+  }
 
-    @Test
-    @DisplayName("Ensure fetchAllEvents() returns all Events; at least @MIN_EVENT_COUNT")
-    void fetchAllEvents() {
 
-        final int expectedEventCount = 130;
-        final Optional<List<Event>> eventsOptional = eventService.fetchAllEvents();
-        assertThat(eventsOptional).isPresent();
+  @Test
+  @DisplayName("Ensure fetchAllEvents() returns all Events; at least @MIN_EVENT_COUNT")
+  void fetchAllEvents() {
 
-        eventsOptional.ifPresent(events -> {
-            // Perform tests
-            final int actualEventCount = events.size();
-            Log.i(LOG_TAG, String.format("Testing Event count: expected: %s, actual: %s", expectedEventCount, actualEventCount));
-            assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
+    final int expectedEventCount = 1;   // minimum
+    final Optional<List<Event>> eventsOptional = eventService.fetchAllEvents();
+    assertThat(eventsOptional).isPresent();
+
+    eventsOptional.ifPresent(
+        events -> {
+          // Perform tests
+          final int actualEventCount = events.size();
+          Log.i(
+              LOG_TAG,
+              String.format(
+                  "Testing Event count: expected: %s, actual: %s",
+                  expectedEventCount, actualEventCount));
+          assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
         });
-    }
+  }
 
-    @Test
-    @DisplayName("Ensure a specific Event can be recalled from database")
-    void fetchById() {
+  @Test
+  @DisplayName("Ensure a specific Event can be recalled from database")
+  void fetchById() {
 
-        // Fetch data from database
-        final Optional<Event> eventOptional = eventService.fetchById(testMatch.getEventId());
-        assertThat(eventOptional).isPresent();
+    // Fetch data from database
+    final Optional<Event> eventOptional = eventService.fetchById(testMatch.getEventId());
+    assertThat(eventOptional).isPresent();
 
-        eventOptional.ifPresent(event -> assertThat(event).isEqualTo(testMatch));
-    }
+    eventOptional.ifPresent(event -> assertThat(event).isEqualTo(testMatch));
+  }
 
-    @Test
-    @DisplayName("Ensure a specific Event file source can be recalled from database")
-    void fetchEventFileSrc() {
+  @Test
+  @DisplayName("Ensure a specific Event file source can be recalled from database")
+  void fetchEventFileSrc() {
 
-        Log.i(LOG_TAG, "Test EventFileSource ID: " + testFileSource.getEventFileSrcId());
-        // skipped for now
-    }
+    // Get test event from DB
+    final Optional<Event> eventOptional = eventService.fetchById(testMatch.getEventId());
+    assertThat(eventOptional).isPresent();
+    final Event event = eventOptional.get();
+    // Get test file source
+    final Optional<EventFileSource> testFileSrcOptional = event.getFileSources().stream().findFirst();
+    assertThat(testFileSrcOptional).isPresent();
+    // Get file source ID
+    final EventFileSource testFileSource = testFileSrcOptional.get();
+    final String testFileSourceId = testFileSource.getEventFileSrcId();
+    Log.i(LOG_TAG, "Test EventFileSource ID: " + testFileSourceId);
 
-    @Test
-    @DisplayName("Ensure fetches Events for a given Competition")
-    void fetchEventsForCompetition() {
+    final Optional<EventFileSource> fileSourceOptional =
+            eventService.fetchEventFileSrc(testFileSourceId);
+    assertThat(fileSourceOptional).isPresent();
 
-        // Minimum expected events
-        final int expectedEventCount = 5;
+    fileSourceOptional.ifPresent(eventFileSource -> {
+      Log.i(LOG_TAG, "Retrieved file source from database: " + eventFileSource);
+      assertThat(eventFileSource).isEqualTo(EventServiceTest.testFileSource);
+    });
+  }
 
-        // Fetch Events for La Liga
-        final Optional<List<Event>> optionalEvents =
-                eventService.fetchEventsForCompetition("ed58c4376cc9990841bc18a81859b545");
+  @Test
+  @DisplayName("Ensure fetches Events for a given Competition")
+  void fetchEventsForCompetition() {
 
-        assertThat(optionalEvents).isPresent();
+    // Minimum expected events
+    final int expectedEventCount = 1;
 
-        optionalEvents.ifPresent(events -> assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount));
-    }
+    // Fetch Events for La Liga
+    final Optional<List<Event>> optionalEvents =
+        eventService.fetchEventsForCompetition(testCompetition.getCompetitionId());
 
-    @Test
-    @DisplayName("Ensure fetches all Events for specified Team")
-    void fetchEventsForTeam() {
+    assertThat(optionalEvents).isPresent();
 
-        // Minimum expected Events
-        final int expectedEventCount = 1;
+    optionalEvents.ifPresent(
+        events -> assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount));
+  }
 
-        // Fetch Events for Team:
-        final Optional<List<Event>> optionalEvents =
-                eventService.fetchEventsForTeam("9891739094756d2605946c867b32ad28");
-        assertThat(optionalEvents).isPresent();
+  @Test
+  @DisplayName("Ensure fetches all Events for specified Team")
+  void fetchEventsForTeam() {
 
-        optionalEvents.ifPresent(events -> assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount));
-    }
+    // Minimum expected Events
+    final int expectedEventCount = 1;
 
-    @Test
-    @DisplayName("Ensure an Event can be saved to the database")
-    @Disabled
-    void saveEvent() {
+    // Fetch Events for Team:
+    final Optional<List<Event>> optionalEvents =
+        eventService.fetchEventsForTeam(testTeam.getTeamId());
+    assertThat(optionalEvents).isPresent();
 
-        final Match testMatch = new Match();
-        testMatch.setEventId("TEST_ID");
+    optionalEvents.ifPresent(
+        events -> assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount));
+  }
 
-        // Save test Event to DB
-        eventService.saveEvent(testMatch);
-        // Retrieve saved Event from DB
-        final Optional<Event> optionalEvent = eventService.fetchById("TEST_ID");
-        assertThat(optionalEvent).isPresent();
+  @Test
+  @DisplayName("Ensure an Event can be saved to the database & then deleted")
+  void saveAndDeleteEvent() {
 
-        optionalEvent.ifPresent(event -> {
-            Log.i(LOG_TAG, "Retrieved test Event: " + event);
-            assertThat(event).isEqualTo(testMatch);
+    // Create test data
+    final Match saveEvent = new Match.MatchBuilder()
+            .setCompetition(testCompetition)
+            .setHomeTeam(testTeam)
+            .setAwayTeam(testTeam)
+            .setDate(LocalDateTime.now())
+            .build();
+    final Optional<List<Event>> optionalEvents = eventService.fetchAllEvents();
+    assertThat(optionalEvents).isPresent();
+    final List<Event> events = optionalEvents.get();
+    final int initialEventCount = events.size();
+
+    // Save test Event to DB
+    eventService.saveEvent(saveEvent);
+    // Retrieve saved Event from DB
+    final Optional<Event> optionalEvent = eventService.fetchById(saveEvent.getEventId());
+
+    // Test retrieved Event
+    assertThat(optionalEvent).isPresent();
+    optionalEvent.ifPresent(
+        event -> {
+          Log.i(LOG_TAG, "Retrieved test Event: " + event);
+          assertThat(event).isEqualTo(saveEvent);
         });
-    }
 
-    @Test
-    void deleteEvent() {
-        eventService.deleteEvent(testMatch);
-    }
+    // Delete test data
+    eventService.deleteEvent(saveEvent);
+
+    // Verify Event count has returned to previous of test
+    final Optional<List<Event>> optionalEventsPostTest = eventService.fetchAllEvents();
+    assertThat(optionalEventsPostTest).isPresent();
+    final List<Event> postTestEvents = optionalEventsPostTest.get();
+    final int postTestEventCount = postTestEvents.size();
+
+    assertThat(postTestEventCount).isEqualTo(initialEventCount);
+  }
 
   @AfterAll
   static void tearDown() {
 
-      final Optional<Event> optionalEvent = eventService.fetchById(testMatch.getEventId());
-      optionalEvent.ifPresent(event -> {
-          Log.i(LOG_TAG, "Saved Event is: " + event);
-          Log.i(LOG_TAG, "Saved EventFileSource ID is: " + event.getFileSources().get(0).getEventFileSrcId());
-      });
-      Log.i(LOG_TAG, "Deleting test Event w/ID: " + testMatch.getEventId());
-        eventService.deleteEvent(testMatch);
+    // delete test data
+    eventService.deleteEvent(testMatch);
+    competitionService.deleteCompetitionById(testCompetition.getCompetitionId());
+    teamService.deleteTeamById(testTeam.getTeamId());
   }
-
 }

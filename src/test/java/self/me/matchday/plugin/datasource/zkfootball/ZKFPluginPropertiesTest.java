@@ -81,7 +81,7 @@ class ZKFPluginPropertiesTest {
   void testBaseUrl() {
 
     final String actualBaseUrl = pluginProperties.getBaseUrl();
-    final String expectedBaseUrl = "zkfullmatchvideos.blogspot.com";
+    final String expectedBaseUrl = "fb11710500.blogspot.com";
 
     Log.i(LOG_TAG, "Testing plugin base URL: " + actualBaseUrl);
     assertThat(actualBaseUrl).isNotNull().isNotEmpty().isEqualTo(expectedBaseUrl);

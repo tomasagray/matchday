@@ -57,7 +57,7 @@ class GManPluginTest {
   void testSnapshot() throws IOException {
 
     // test constants
-    final int MIN_FILE_SOURCE_COUNT = 2;
+    final int MIN_FILE_SOURCE_COUNT = 1;
 
     // Create test SnapshotRequest
     final SnapshotRequest testSnapshotRequest = SnapshotRequest.builder().build();
@@ -97,6 +97,6 @@ class GManPluginTest {
     final int expectedEventCount = 5;
 
     Log.i(LOG_TAG, String.format("Found %s Events", actualEventCount));
-    assertThat(actualEventCount).isEqualTo(expectedEventCount);
+    assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
   }
 }

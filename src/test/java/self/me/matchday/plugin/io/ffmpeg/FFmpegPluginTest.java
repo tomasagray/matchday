@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -40,6 +40,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,138 +51,164 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestMethodOrder(OrderAnnotation.class)
 class FFmpegPluginTest {
 
-    private static final String LOG_TAG = "FFmpegPluginTest";
+  private static final String LOG_TAG = "FFmpegPluginTest";
 
-    // Test constants
-    private static final String STORAGE_LOCATION = "src/test/data/video_test";
-    private static final String TEST_URI = "http://192.168.0.101/stream2stream/barca-rm-2009/1.ts";
-    private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
-    // Test resources
-    private static File storageLocation;
-    private static FFmpegPlugin ffmpegPlugin;
-    private static URI testUri;
-    private static FFmpegMetadata expectedMetadata;
+  // Test constants
+  private static final String STORAGE_LOCATION = "src/test/data/video_test";
+  private static final String TEST_URI = "http://192.168.0.101/stream2stream/barca-rm-2009/1.ts";
+  private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
+  // Test resources
+  private static File storageLocation;
+  private static FFmpegPlugin ffmpegPlugin;
+  private static URI testUri;
+  private static FFmpegMetadata expectedMetadata;
 
-    @BeforeAll
-    static void setUp(@Autowired FFmpegPlugin plugin) throws IOException {
+  @BeforeAll
+  static void setUp(@Autowired FFmpegPlugin plugin) throws IOException {
 
-        // Get FFMPEG instance
-        ffmpegPlugin = plugin;
+    // Get FFMPEG instance
+    ffmpegPlugin = plugin;
 
-        try {
-            // Get video storage location
-            storageLocation = new File(STORAGE_LOCATION);
-            Log.i(LOG_TAG, "Got storage path: " + storageLocation.getAbsolutePath());
+    try {
+      // Get video storage location
+      storageLocation = new File(STORAGE_LOCATION);
+      Log.i(LOG_TAG, "Got storage path: " + storageLocation.getAbsolutePath());
 
-            // Create directory if not exists
-            if (!storageLocation.exists()) {
-                final boolean mkdir = storageLocation.mkdir();
-                Log.i(LOG_TAG, String.format("Created directory: [%s] ? : %s", storageLocation, mkdir));
-            }
+      // Create directory if not exists
+      if (!storageLocation.exists()) {
+        final boolean mkdir = storageLocation.mkdir();
+        Log.i(LOG_TAG, String.format("Created directory: [%s] ? : %s", storageLocation, mkdir));
+      }
 
-            // Parse test URL
-            testUri = new URI(TEST_URI);
+      // Parse test URL
+      testUri = new URI(TEST_URI);
 
-        } catch (NullPointerException | URISyntaxException e) {
-            e.printStackTrace();
-            throw new IOException("Error reading test video storage location!", e);
-        }
-
-        // Read test metadata & deserialize
-        List<String> sampleMetadata =
-                ResourceFileReader.readTextResource(FFprobeTest.class, SAMPLE_METADATA_JSON);
-        // Parse JSON to object
-        expectedMetadata = new Gson().fromJson(String.join(" ", sampleMetadata), FFmpegMetadata.class);
+    } catch (NullPointerException | URISyntaxException e) {
+      e.printStackTrace();
+      throw new IOException("Error reading test video storage location!", e);
     }
 
-    @Test
-    @Order(1)
-    @DisplayName("Test that plugin can stream remote data to correct path in required time")
-    void streamUris() throws InterruptedException {
+    // Read test metadata & deserialize
+    List<String> sampleMetadata =
+        ResourceFileReader.readTextResource(FFprobeTest.class, SAMPLE_METADATA_JSON);
+    // Parse JSON to object
+    expectedMetadata = new Gson().fromJson(String.join(" ", sampleMetadata), FFmpegMetadata.class);
+  }
 
-        // Setup test data
-        final Path streamingPath = ffmpegPlugin.streamUris(List.of(testUri), storageLocation.toPath());
-        Log.i(LOG_TAG,
-                String.format("Began streaming to path: [%s] at time: %s",
-                        streamingPath.toAbsolutePath(), Instant.now()));
+  @Test
+  @Order(1)
+  @DisplayName("Test that plugin can stream remote data to correct path in required time")
+  void streamUris() throws InterruptedException {
 
-        // Test data
-        final int minExpectedFileCount = 10;
-        int actualFileCount = 0;
+    // Setup test data
+    final Path streamingPath = ffmpegPlugin.streamUris(List.of(testUri), storageLocation.toPath()).getOutputFile();
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Began streaming to path: [%s] at time: %s",
+            streamingPath.toAbsolutePath(), Instant.now()));
 
-        final Duration timeout = Duration.ofSeconds(30);
-        final int fileCheckCycleSecs = 5;
-        boolean filesFound = false;
-        Duration elapsed = Duration.ZERO;
-        Instant start = Instant.now();
+    // Test data
+    final int minExpectedFileCount = 10;
+    int actualFileCount = 0;
 
-        while (!filesFound && elapsed.compareTo(timeout) < 0) {
+    final Duration timeout = Duration.ofSeconds(30);
+    boolean filesFound = false;
+    Duration elapsed = Duration.ZERO;
+    Instant start = Instant.now();
 
-            // Wait...
-            Thread.sleep(fileCheckCycleSecs * 1_000L);
-            // Check file count
-            actualFileCount = streamingPath.getParent().toFile().list().length;
-            Log.i(LOG_TAG, String.format("Found %s files on current sleep cycle...", actualFileCount));
-            if (actualFileCount >= minExpectedFileCount) {
-                filesFound = true;
-            }
-            elapsed = Duration.between(start, Instant.now());
-        }
+    // Wait for FFMPEG to do its thing...
+    Thread.sleep(5_000L);
 
-        // perform test
-        assertThat(actualFileCount).isGreaterThanOrEqualTo(minExpectedFileCount);
+    // Check file count
+    while (!filesFound && elapsed.compareTo(timeout) < 0) {
 
+      actualFileCount = streamingPath.getParent().toFile().list().length;
+      Log.i(LOG_TAG, String.format("Found %s files on current sleep cycle...", actualFileCount));
+      if (actualFileCount >= minExpectedFileCount) {
+        Log.i(LOG_TAG, "That's enough for testing...");
+        filesFound = true;
+      }
+      elapsed = Duration.between(start, Instant.now());
     }
 
-    @Test
-    @Order(2)
-    @DisplayName("Verify that previously started streaming tasks can be successfully interrupted")
-    void interruptStreamTasks() {
+    // perform test
+    assertThat(actualFileCount).isGreaterThanOrEqualTo(minExpectedFileCount);
+  }
 
-        Log.i(LOG_TAG, "Attempting to interrupt streaming tasks at time: " + Instant.now());
-        ffmpegPlugin.interruptStreamTasks();
+  @Test
+  @Order(2)
+  @DisplayName("Verify that all previously started streaming tasks can be successfully interrupted")
+  void interruptAllStreamTasks() {
 
-    }
+    final int streamingTaskCount = ffmpegPlugin.getStreamingTaskCount();
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Attempting to interrupt %s streaming tasks at time: %s",
+            streamingTaskCount, LocalDateTime.now()));
+    ffmpegPlugin.interruptAllStreamTasks();
 
-    @Test
-    @Order(3)
-    @DisplayName("Validate reading & parsing of remote video file metadata")
-    void readFileMetadata() throws IOException {
+    final int actualStreamingTaskCount = ffmpegPlugin.getStreamingTaskCount();
+    assertThat(actualStreamingTaskCount).isEqualTo(0);
+  }
 
-        final FFmpegMetadata actualMetadata = ffmpegPlugin.readFileMetadata(testUri);
-        Log.i(LOG_TAG, "Validating metadata read from file at URL: " + testUri);
+  @Test
+  @Order(3)
+  @DisplayName("Validate that a particular streaming task can be interrupted")
+  void killStreamingTask() throws InterruptedException {
 
-        assertThat(actualMetadata).isEqualTo(expectedMetadata);
-    }
+    // Start a new task
+    final FFmpegTask streamingTask = ffmpegPlugin.streamUris(List.of(testUri), storageLocation.toPath());
+    Log.i(LOG_TAG, "Created streaming task to: " + streamingTask.getOutputFile());
+    // Wait...
+    Thread.sleep(5_000L);
 
-    @AfterAll
-    @DisplayName("Test teardown")
-    static void tearDown() throws IOException, InterruptedException {
+    ffmpegPlugin.interruptStreamingTask(streamingTask.getOutputFile().toString());
 
-        // Ensure all streaming tasks are stopped
-        ffmpegPlugin.interruptStreamTasks();
+    assertThat(ffmpegPlugin.getStreamingTaskCount()).isEqualTo(0);
+  }
 
-        // Allow time for the process to die
-        Thread.sleep(15 * 1_000);
+  @Test
+  @Order(4)
+  @DisplayName("Validate reading & parsing of remote video file metadata")
+  void readFileMetadata() throws IOException {
 
-        // Clean up files generated by testing
-        Log.i(LOG_TAG, "Cleaning up test data...");
-        Files.walkFileTree(storageLocation.toPath(), new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                return doDelete(file);
-            }
+    final FFmpegMetadata actualMetadata = ffmpegPlugin.readFileMetadata(testUri);
+    Log.i(LOG_TAG, "Validating metadata read from file at URL: " + testUri);
 
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                return doDelete(dir);
-            }
+    assertThat(actualMetadata).isEqualTo(expectedMetadata);
+  }
 
-            private FileVisitResult doDelete(Path path) throws IOException {
-                Log.i(LOG_TAG, "Deleting file: " + path.toAbsolutePath());
-                Files.delete(path);
-                return FileVisitResult.CONTINUE;
-            }
+  @AfterAll
+  @DisplayName("Test teardown")
+  static void tearDown() throws IOException {
+
+    // Ensure all streaming tasks are stopped
+    ffmpegPlugin.interruptAllStreamTasks();
+
+    // Clean up files generated by testing
+    Log.i(LOG_TAG, "Cleaning up test data...");
+    Files.walkFileTree(
+        storageLocation.toPath(),
+        new SimpleFileVisitor<>() {
+          @Override
+          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+              throws IOException {
+            return doDelete(file);
+          }
+
+          @Override
+          public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            return doDelete(dir);
+          }
+
+          @SuppressWarnings("SameReturnValue")
+          private FileVisitResult doDelete(Path path) throws IOException {
+            Log.i(LOG_TAG, "Deleting file: " + path.toAbsolutePath());
+            Files.delete(path);
+            return FileVisitResult.CONTINUE;
+          }
         });
-    }
+  }
 }

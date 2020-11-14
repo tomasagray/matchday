@@ -103,15 +103,4 @@ class FFmpegTest {
         Log.i(LOG_TAG, "Testing output path: " + actualOutputPath);
         assertThat(actualOutputPath).isEqualByComparingTo(expectedOutputPath);
     }
-
-    @Test
-    @DisplayName("Verify correct exit code")
-    void exitCode() {
-
-        final int expectedExitCode = 0;
-        final int actualExitCode = hlsStreamTask.getExitCode();
-
-        Log.i(LOG_TAG, "Testing exit code: " + actualExitCode);
-        assertThat(actualExitCode).isEqualTo(expectedExitCode);
-    }
 }

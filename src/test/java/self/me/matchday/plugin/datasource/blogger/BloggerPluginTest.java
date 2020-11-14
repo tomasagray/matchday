@@ -33,10 +33,12 @@ import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -91,6 +93,8 @@ class BloggerPluginTest {
     @DisplayName("Validate Snapshot request handling")
     void testSnapshot() throws IOException {
 
+        final int expectedPostCount = 5;
+
         // Create SnapshotRequest
         final SnapshotRequest snapshotRequest =
                 SnapshotRequest
@@ -104,15 +108,13 @@ class BloggerPluginTest {
         final Snapshot<Blogger> snapshot = bloggerPlugin.getSnapshot(snapshotRequest);
         // Extract result
         final Instant actualTimestamp = snapshot.getTimestamp();
-        final Blogger actualData = snapshot.getData();
-
         final Instant expectedTimestamp = Instant.now();
+        final Blogger actualData = snapshot.getData();
         final String expectedTitle = "GaLaTaMaN HD Football: Barcelona";
-        final int expectedPostCount = 4;
 
         Log.i(LOG_TAG, "Testing snapshot: " + actualData);
         Log.i(LOG_TAG, "Testing snapshot timestamp: " + actualTimestamp);
-        assertThat(actualTimestamp).isEqualTo(expectedTimestamp);
+        assertThat(actualTimestamp).isCloseTo(expectedTimestamp, within(5, ChronoUnit.SECONDS));
         assertThat(actualData.getPostCount()).isEqualTo(expectedPostCount);
         assertThat(actualData.getTitle()).isEqualTo(expectedTitle);
     }

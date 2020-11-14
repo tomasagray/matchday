@@ -157,10 +157,10 @@ class ZKFEventFileSourceParserTest {
   @DisplayName("Validate language parsing")
   void testSourceLanguages() {
 
-    final List<String> actualLanguages1 = firstSource.getLanguages();
-    final List<String> actualLanguages2 = secondSource.getLanguages();
-    final List<String> expectedLanguages1 = List.of("German");
-    final List<String> expectedLanguages2 = List.of("English");
+    final String actualLanguages1 = firstSource.getLanguages();
+    final String actualLanguages2 = secondSource.getLanguages();
+    final String expectedLanguages1 = "German";
+    final String expectedLanguages2 = "English";
 
     Log.i(LOG_TAG, String.format("Testing source languages: %s, %s", actualLanguages1, actualLanguages2));
     assertThat(actualLanguages1).isEqualTo(expectedLanguages1);

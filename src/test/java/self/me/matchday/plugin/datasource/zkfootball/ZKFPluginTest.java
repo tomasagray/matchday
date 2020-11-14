@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -43,54 +43,50 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Validate ZKF plugin operation")
 class ZKFPluginTest {
 
-    private static final String LOG_TAG = "ZKFPluginTest";
+  private static final String LOG_TAG = "ZKFPluginTest";
 
-    private static ZKFPlugin zkfPlugin;
+  private static ZKFPlugin zkfPlugin;
 
-    @BeforeAll
-    static void setUp(@Autowired final ZKFPlugin plugin) {
-        zkfPlugin = plugin;
-    }
+  @BeforeAll
+  static void setUp(@Autowired final ZKFPlugin plugin) {
+    zkfPlugin = plugin;
+  }
 
-    @Test
-    @DisplayName("Validate snapshot handling")
-    void getEventStream() throws IOException {
+  @Test
+  @DisplayName("Validate snapshot handling")
+  void getEventStream() throws IOException {
 
-        // test constants
-        final int MIN_FILE_SOURCE_COUNT = 1;
+    // test constants
+    final String testTeam = "Napoli";
 
     // Create test SnapshotRequest
-    final SnapshotRequest testSnapshotRequest = SnapshotRequest.builder().labels(List.of("Liverpool")).build();
+    final SnapshotRequest testSnapshotRequest =
+        SnapshotRequest.builder().labels(List.of(testTeam)).build();
 
-        // Get Snapshot of Galataman blog
-        final Snapshot<Stream<Event>> actualSnapshot = zkfPlugin.getSnapshot(testSnapshotRequest);
-        final Stream<Event> actualSnapshotData = actualSnapshot.getData();
+    // Get Snapshot of Galataman blog
+    final Snapshot<Stream<Event>> actualSnapshot = zkfPlugin.getSnapshot(testSnapshotRequest);
+    final Stream<Event> actualSnapshotData = actualSnapshot.getData();
 
-        Log.i(LOG_TAG, "Testing snapshot data...");
+    Log.i(LOG_TAG, "Testing snapshot data...");
 
-        AtomicInteger eventCounter = new AtomicInteger();
-        actualSnapshotData.forEach(event -> {
-            final String eventTitle = event.getTitle();
-            Log.i(LOG_TAG, "Validating Event title: " + eventTitle);
+    AtomicInteger eventCounter = new AtomicInteger();
+    actualSnapshotData.forEach(
+        event -> {
+          Log.i(LOG_TAG, "Validating Event: " + event);
 
-            // Validate each Event
-            assertThat(eventTitle)
-                    .isNotNull()
-                    .isNotEmpty();
-
-            assertThat(event.getCompetition()).isNotNull();
-            assertThat(event.getSeason()).isNotNull();
-            assertThat(event.getFixture()).isNotNull();
-            assertThat(event.getFileSources().size())
-                    .isGreaterThanOrEqualTo(MIN_FILE_SOURCE_COUNT);
-            eventCounter.getAndIncrement();
+          // Validate each Event
+          assertThat(event.getTitle()).isNotNull().isNotEmpty();
+          assertThat(event.getCompetition()).isNotNull();
+          assertThat(event.getSeason()).isNotNull();
+          assertThat(event.getFixture()).isNotNull();
+          eventCounter.getAndIncrement();
         });
 
-        // Validate Event count
-        final int actualEventCount = eventCounter.get();
-        final int expectedEventCount = 25;
+    // Validate Event count
+    final int actualEventCount = eventCounter.get();
+    final int expectedEventCount = 25;
 
-        Log.i(LOG_TAG, String.format("Found %s Events", actualEventCount));
-        assertThat(actualEventCount).isEqualTo(expectedEventCount);
-    }
+    Log.i(LOG_TAG, String.format("Found %s Events", actualEventCount));
+    assertThat(actualEventCount).isEqualTo(expectedEventCount);
+  }
 }

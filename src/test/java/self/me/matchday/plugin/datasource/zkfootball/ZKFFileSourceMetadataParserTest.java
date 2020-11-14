@@ -36,7 +36,6 @@ import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -112,8 +111,8 @@ class ZKFFileSourceMetadataParserTest {
   @DisplayName("Validate commentary language parsing")
   void testLanguages() {
 
-    final List<String> actualLanguages = testFileSource.getLanguages();
-    final List<String> expectedLanguages = List.of("English");
+    final String actualLanguages = testFileSource.getLanguages();
+    final String expectedLanguages = "English";
 
     Log.i(LOG_TAG, "Testing commentary languages: " + actualLanguages);
     assertThat(actualLanguages).isEqualTo(expectedLanguages);

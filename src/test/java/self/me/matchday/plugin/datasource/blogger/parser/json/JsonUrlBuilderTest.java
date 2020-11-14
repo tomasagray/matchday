@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -19,7 +19,6 @@
 
 package self.me.matchday.plugin.datasource.blogger.parser.json;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import self.me.matchday.util.Log;
@@ -33,50 +32,42 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JsonUrlBuilderTest {
 
+  private static final String LOG_TAG = "JsonUrlBuilderTest";
 
-    private static final String LOG_TAG = "JsonUrlBuilderTest";
+  // Test constants
+  private static final String SEARCH_TERM = "Barcelona";
+  private static final String BASE_URL = "zkfullmatchvideos.blogspot.com";
+  public static final String SEARCH_DATETIME = "2020-10-05T14:46:00";
 
-    // Test constants
-    private static final String SEARCH_TERM = "Barcelona";
-    private static final String BASE_URL = "zkfullmatchvideos.blogspot.com";
-    public static final String SEARCH_DATETIME = "2020-10-05T14:46:00";
+  @Test
+  @DisplayName("Validate label search URL formatting")
+  void testLabelSearch() throws MalformedURLException {
 
-    @BeforeAll
-    static void setUp() {
-    }
+    final URL actualUrl = new JsonUrlBuilder(BASE_URL).labels(List.of(SEARCH_TERM)).buildUrl();
+    final String expectedLink =
+        String.format(
+            "https://zkfullmatchvideos.blogspot.com/feeds/posts/default?alt=json&q=%s",
+            SEARCH_TERM);
+    final URL expectedUrl = new URL(expectedLink);
 
-    @Test
-    @DisplayName("Validate label search URL formatting")
-    void testLabelSearch() throws MalformedURLException {
+    Log.i(LOG_TAG, "Testing URL: " + actualUrl);
+    assertThat(actualUrl).isEqualTo(expectedUrl);
+  }
 
-        final URL actualUrl =
-                new JsonUrlBuilder(BASE_URL)
-                        .labels(List.of(SEARCH_TERM))
-                        .buildUrl();
-        final String expectedLink =
-                String.format("https://zkfullmatchvideos.blogspot.com/feeds/posts/default?alt=json&q=%s", SEARCH_TERM);
-        final URL expectedUrl = new URL(expectedLink);
+  @Test
+  @DisplayName("Validate date search URL formatting")
+  void testDateSearch() throws MalformedURLException {
 
-        Log.i(LOG_TAG, "Testing URL: " + actualUrl);
-        assertThat(actualUrl).isEqualTo(expectedUrl);
-    }
+    final LocalDateTime testDateTime = LocalDateTime.parse(SEARCH_DATETIME);
+    final URL actualUrl = new JsonUrlBuilder(BASE_URL).endDate(testDateTime).buildUrl();
+    final URL expectedUrl =
+        new URL(
+            "https://zkfullmatchvideos.blogspot.com/feeds/posts/default?alt=json&updated-max="
+                + SEARCH_DATETIME);
 
-    @Test
-    @DisplayName("Validate date search URL formatting")
-    void testDateSearch() throws MalformedURLException {
+    Log.i(LOG_TAG, "Testing URL: " + actualUrl);
+    assertThat(actualUrl).isEqualTo(expectedUrl);
+  }
 
-        final LocalDateTime testDateTime = LocalDateTime.parse(SEARCH_DATETIME);
-        final URL actualUrl =
-                new JsonUrlBuilder(BASE_URL)
-                        .endDate(testDateTime)
-                        .buildUrl();
-        final URL expectedUrl =
-                new URL("https://zkfullmatchvideos.blogspot.com/feeds/posts/default?alt=json&updated-max=" +
-                        SEARCH_DATETIME);
-
-        Log.i(LOG_TAG, "Testing URL: " + actualUrl);
-        assertThat(actualUrl).isEqualTo(expectedUrl);
-    }
-
-    // TODO: Write tests for other types of searches
+  // TODO: Write tests for other types of searches
 }
