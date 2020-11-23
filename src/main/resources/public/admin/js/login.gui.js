@@ -47,10 +47,12 @@ $(document).on('click', '.user', function() {
   // Construct data
   let $user = {
     "userId": $userId,
-    "serverId": $serverId
+    "serverId": $serverId,
+    "loggedIn": $loggedIn,
   };
+
   // Toggle login
-  if ($loggedIn === 'true') {
+  if ($loggedIn === true) {
     // Logout
     console.log("Logging out", $user);
     $logoutUser($user, $setUserLoggedOut, $(this));
@@ -71,7 +73,7 @@ $(document).on('click', '#login-button', function() {
 
   // Construct user object
   let $user = {
-    "userName": $username,
+    "username": $username,
     "password": $password,
     "serverId": $serverId
   };

@@ -19,7 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,19 +48,34 @@ public class FileServerService {
   private static final String LOG_TAG = "FileServerService";
   private static final Duration DEFAULT_REFRESH_RATE = Duration.ofHours(4);
 
-  @Getter
   private final List<FileServerPlugin> fileServerPlugins;
   private final FileServerUserRepo userRepo;
   private final SecureDataService secureDataService;
+  private final UserValidationService userValidationService;
+  private final NetscapeCookiesService cookiesService;
 
   @Autowired
-  FileServerService(@NotNull final List<FileServerPlugin> fileServerPlugins,
-      @NotNull final FileServerUserRepo userRepo,
-      @NotNull final SecureDataService secureDataService) {
+  FileServerService(
+      final List<FileServerPlugin> fileServerPlugins,
+      final FileServerUserRepo userRepo,
+      final SecureDataService secureDataService,
+      final UserValidationService userValidationService,
+      final NetscapeCookiesService cookiesService) {
 
     this.fileServerPlugins = fileServerPlugins;
     this.userRepo = userRepo;
     this.secureDataService = secureDataService;
+    this.userValidationService = userValidationService;
+    this.cookiesService = cookiesService;
+  }
+
+  /**
+   * Get all registered file server plugins
+   *
+   * @return a List<> of file server plugins
+   */
+  public List<FileServerPlugin> getFileServerPlugins() {
+    return this.fileServerPlugins;
   }
 
   /**
@@ -73,15 +87,11 @@ public class FileServerService {
   public Optional<FileServerPlugin> getPluginById(@Nullable final UUID plugId) {
 
     final FileServerPlugin serverPlugin =
-        fileServerPlugins
-            .stream()
+        fileServerPlugins.stream()
             .collect(Collectors.toMap(FileServerPlugin::getPluginId, plugin -> plugin))
             .get(plugId);
 
-    return
-        (serverPlugin != null) ?
-            Optional.of(serverPlugin) :
-            Optional.empty();
+    return (serverPlugin != null) ? Optional.of(serverPlugin) : Optional.empty();
   }
 
   // === Login ===
@@ -89,57 +99,129 @@ public class FileServerService {
   /**
    * Log a file server user (FileServerUser) into the appropriate file server.
    *
-   * @param fileServerUser   The User.
+   * @param user The User.
    * @param pluginId The pluginId of the fileserver plugin
    * @return Was login successful? (true/false)
    */
-  public ClientResponse login(@NotNull final FileServerUser fileServerUser, @NotNull final UUID pluginId) {
+  public ClientResponse login(@NotNull final FileServerUser user, @NotNull final UUID pluginId) {
 
     // Result container
-    ClientResponse response;
+    HttpStatus status = HttpStatus.BAD_REQUEST;
+    String message = "";
 
-    // Find required plugin
-    final Optional<FileServerPlugin> pluginOptional = getPluginById(pluginId);
-    if (pluginOptional.isPresent()) {
+    if (userValidationService.isValidUserData(user.getUsername(), user.getPassword())) {
+      // Validate login data
+      final Optional<FileServerPlugin> pluginOptional = getPluginById(pluginId);
+      if (pluginOptional.isPresent()) {
 
-      final FileServerPlugin fileServerPlugin = pluginOptional.get();
+        final FileServerPlugin serverPlugin = pluginOptional.get();
+        Log.i(LOG_TAG, "Found plugin with ID: " + pluginId);
 
-      Log.i(LOG_TAG, "Found plugin with ID: " + pluginId);
-      response = fileServerPlugin.login(fileServerUser);
+        final ClientResponse loginResponse = serverPlugin.login(user);
+        // If login successful
+        if (loginResponse.statusCode().is2xxSuccessful()) {
 
-      // If login successful
-      if (response.statusCode().is2xxSuccessful()) {
+          // Extract cookies
+          final List<SecureCookie> cookies =
+              loginResponse.cookies().values().stream()
+                  .flatMap(Collection::stream)
+                  .map(SecureCookie::fromSpringCookie)
+                  .collect(Collectors.toList());
 
-        final String serverId = fileServerPlugin.getPluginId().toString();
-        // Extract cookies
-        final List<SecureCookie> cookies =
-            response
-                .cookies()
-                .values()
-                .stream()
-                .flatMap(Collection::stream)
-                .map(SecureCookie::fromSpringCookie)
-                .collect(Collectors.toList());
+          // Login user to server
+          user.setLoggedIntoServer(serverPlugin.getPluginId().toString(), cookies);
+          // Save user to repo
+          userRepo.save(user);
+          Log.i(LOG_TAG, "Login SUCCESSFUL with user: " + user);
 
-        // Login user
-        fileServerUser.loginToServer(serverId, cookies);
-        // Save user to repo
-        userRepo.save(fileServerUser);
-        Log.i(LOG_TAG, "Login SUCCESSFUL with user: " + fileServerUser);
+          // Return successful response
+          status = HttpStatus.OK;
+          message =
+              String.format(
+                  "User: %s successfully logged into file server: %s", user.getUsername(), serverPlugin.getTitle());
+        } else {
+          return loginResponse;
+        }
+      } else {
+        // Plugin not found; bad request
+        message = String.format("File server plugin not found: %s", pluginId);
       }
     } else {
-      // Plugin not found; bad request
-      response =
-          ClientResponse
-              .create(HttpStatus.BAD_REQUEST)
-              .body(String.format("Invalid plugin ID: %s", pluginId))
-              .build();
+      message = "Invalid user data passed: " + user;
     }
 
     // Return login response
-    return response;
+    return ClientResponse.create(status).body(message).build();
   }
 
+  /**
+   * Login a user to a file server using previously gathered cookies
+   *
+   * @param pluginId The ID of the file server
+   * @param username The user to be logged in
+   * @param password The user's password
+   * @param cookieData A collection of cookies necessary to access secure parts of the server
+   * @return The response
+   */
+  public ClientResponse loginWithCookies(
+      @NotNull final UUID pluginId,
+      final String username,
+      final String password,
+      final String cookieData) {
+
+    // Result containers
+    HttpStatus status = HttpStatus.BAD_REQUEST;
+    String message;
+
+    // Parse cookies
+    final List<SecureCookie> cookies =
+        cookiesService.parseNetscapeCookies(cookieData).stream()
+            .map(SecureCookie::fromSpringCookie)
+            .collect(Collectors.toList());
+
+    // Validate user data
+    if (userValidationService.isValidUserData(username, password)) {
+      // Validate cookies
+      if (!cookies.isEmpty()) {
+        // Validate plugin ID
+        final Optional<FileServerPlugin> pluginOptional = getPluginById(pluginId);
+        if (pluginOptional.isPresent()) {
+          final FileServerPlugin serverPlugin = pluginOptional.get();
+
+          // Prepare user
+          final FileServerUser user = new FileServerUser(username, password);
+
+          // Login user to appropriate server
+          user.setLoggedIntoServer(serverPlugin.getPluginId().toString(), cookies);
+          // Save to repo
+          userRepo.save(user);
+
+          // Return successful response
+          status = HttpStatus.OK;
+          message =
+              String.format(
+                  "User: %s successfully logged into file server: %s",
+                  user.getUsername(), serverPlugin.getTitle());
+
+        } else {
+          message = String.format("File server ID: %s NOT FOUND", pluginId);
+        }
+      } else {
+        message = "Not cookies supplied with login request";
+      }
+    } else {
+      message = "Invalid user data for user: " + username;
+    }
+    return ClientResponse.create(status).body(message).build();
+  }
+
+  /**
+   * Log a user out of a given file server
+   *
+   * @param user The user to be logged out
+   * @param pluginId The ID of the plugin for the file server
+   * @return The response from the file server upon logging out
+   */
   public ClientResponse logout(@NotNull final FileServerUser user, @NotNull final UUID pluginId) {
 
     final StringJoiner failureMessage = new StringJoiner(" ");
@@ -152,17 +234,15 @@ public class FileServerService {
       // Validate server ID
       if (userData.getServerId().equals(pluginId.toString())) {
         // Perform logout request
-        user.setLoggedOut();
+        userData.setLoggedOut();
         // Save data
-        userRepo.saveAndFlush(user);
+        userRepo.saveAndFlush(userData);
 
         Log.i(LOG_TAG, String.format("Logged out user: %s", userData));
 
-        return
-            ClientResponse
-                .create(HttpStatus.OK)
-                .body(String.format("User %s successfully logged out", userData.getUserName()))
-                .build();
+        return ClientResponse.create(HttpStatus.OK)
+            .body(String.format("User %s successfully logged out", userData.getUsername()))
+            .build();
       } else {
         failureMessage.add("Invalid server ID");
       }
@@ -171,27 +251,39 @@ public class FileServerService {
     }
 
     // Logout failed
-    return
-        ClientResponse
-            .create(HttpStatus.BAD_REQUEST)
-            .body(failureMessage.toString())
-            .build();
+    return ClientResponse.create(HttpStatus.BAD_REQUEST).body(failureMessage.toString()).build();
   }
 
-  public ClientResponse relogin(@NotNull final FileServerUser fileServerUser, @NotNull final UUID pluginId) {
+  /**
+   * Re-login a user which is already registered with the specified plugin.
+   *
+   * @param user The user to be re-logged in
+   * @param pluginId The ID of the file server plugin
+   * @return The login response
+   */
+  public ClientResponse relogin(@NotNull final FileServerUser user, @NotNull final UUID pluginId) {
+
+    String message;
 
     // Get complete user data
-    final Optional<FileServerUser> userOptional = userRepo.findById(fileServerUser.getUserId());
-    if (userOptional.isPresent() && fileServerUser.equals(userOptional.get())) {
-      Log.i(LOG_TAG, String.format("Re-logging in user: %s", fileServerUser));
-      return login(fileServerUser, pluginId);
+    final Optional<FileServerUser> userOptional = userRepo.findById(user.getUserId());
+    if (userOptional.isPresent()) {
+      final FileServerUser fileServerUser = userOptional.get();
+      if (!fileServerUser.isLoggedIn()) {
+
+        Log.i(LOG_TAG, String.format("Re-logging in user: %s", fileServerUser));
+        return login(fileServerUser, pluginId);
+
+      } else {
+        message = String.format("User: %s already logged in", user.getUsername());
+      }
+    } else {
+      message = String.format("Relogin failed: User %s not found", user.getUsername());
     }
 
-    return
-        ClientResponse
-            .create(HttpStatus.BAD_REQUEST)
-            .body(String.format("Relogin failed: User %s not found", fileServerUser.getUserName()))
-            .build();
+    return ClientResponse.create(HttpStatus.BAD_REQUEST)
+        .body(message)
+        .build();
   }
 
   // === Users ===
@@ -204,8 +296,7 @@ public class FileServerService {
    */
   public Optional<List<FileServerUser>> getAllServerUsers(@NotNull final UUID pluginId) {
 
-    return
-        userRepo.fetchAllUsersForServer(pluginId.toString());
+    return userRepo.fetchAllUsersForServer(pluginId.toString());
   }
 
   /**
@@ -216,8 +307,7 @@ public class FileServerService {
    */
   public Optional<FileServerUser> getUserById(@NotNull final String userId) {
 
-    return
-        userRepo.findById(userId);
+    return userRepo.findById(userId);
   }
 
   /**
@@ -286,10 +376,7 @@ public class FileServerService {
     // Get the fileserver manager for this URL
     final FileServerPlugin fileServerPlugin = getPluginForUrl(url);
     // Return the recommended refresh rate for this FS manager
-    return
-        (fileServerPlugin != null) ?
-            fileServerPlugin.getRefreshRate() :
-            DEFAULT_REFRESH_RATE;
+    return (fileServerPlugin != null) ? fileServerPlugin.getRefreshRate() : DEFAULT_REFRESH_RATE;
   }
 
   /**
@@ -323,8 +410,7 @@ public class FileServerService {
     if (userOptional.isPresent()) {
       final List<FileServerUser> users = userOptional.get();
       // Return the download user
-      return
-          users.get(0);
+      return users.get(0);
     }
     // No logged in users for this plugin
     return null;

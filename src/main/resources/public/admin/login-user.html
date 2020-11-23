@@ -27,7 +27,7 @@
 
     <div id="addUserContainer" class="container">
       <h3>Add User</h3>
-      <form name="login" id="login">
+      <form name="login-form" id="login-form">
         <div id="userdata-container">
           <div id="username-container">
             <label for="username">Username:</label>
@@ -36,6 +36,13 @@
           <div id="password-container">
             <label for="password">Password:</label>
             <input type="password" id="password" maxlength="64"/>
+          </div>
+          <br style="clear: both"/>
+          <div id="cookies-container">
+            <label for="cookie-file">Cookies:
+              <span style="font-size: small; font-weight: lighter">(Netscape cookies.txt)</span>
+            </label>
+            <input type="file" name="cookie-file" id="cookie-file" accept=".txt"/>
           </div>
         </div>
 

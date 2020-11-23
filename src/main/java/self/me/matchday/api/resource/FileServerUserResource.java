@@ -19,18 +19,10 @@
 
 package self.me.matchday.api.resource;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.util.Collection;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
@@ -39,6 +31,11 @@ import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.FileServerController;
 import self.me.matchday.model.SecureCookie;
 import self.me.matchday.plugin.fileserver.FileServerUser;
+
+import java.util.Collection;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -69,7 +66,7 @@ public class FileServerUserResource extends RepresentationModel<FileServerUserRe
 
       final FileServerUserResource resource = instantiateModel(entity);
       resource.setId(entity.getUserId());
-      resource.setUsername(entity.getUserName());
+      resource.setUsername(entity.getUsername());
       resource.setEmail(entity.getEmail());
       resource.setLoggedIn(entity.isLoggedIn());
       resource.setCookies(entity.getCookies());

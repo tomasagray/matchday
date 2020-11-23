@@ -1,5 +1,6 @@
 label {
   margin: 5px 0;
+  font-weight: bold;
 }
 
 ul {
@@ -7,6 +8,7 @@ ul {
   padding: 0;
 }
 
+textarea,
 input[type="text"] {
   padding-bottom: 5px;
   margin-bottom: 2em;
@@ -68,6 +70,10 @@ input[type="text"] {
 #password-container {
   float: right;
   padding-left: 4em;
+}
+
+#cookie-text {
+  display: block;
 }
 
 #login-button-container {
