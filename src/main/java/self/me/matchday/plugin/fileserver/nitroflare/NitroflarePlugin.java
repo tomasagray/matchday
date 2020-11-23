@@ -19,15 +19,6 @@
 
 package self.me.matchday.plugin.fileserver.nitroflare;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -42,6 +33,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 import self.me.matchday.model.MD5String;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
+
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Component
 public class NitroflarePlugin implements FileServerPlugin {
@@ -164,7 +165,7 @@ public class NitroflarePlugin implements FileServerPlugin {
   private String getLoginRequestString(@NotNull final FileServerUser fileServerUser) {
 
     // Encode username
-    final String username = URLEncoder.encode(fileServerUser.getUserName(), StandardCharsets.UTF_8);
+    final String username = URLEncoder.encode(fileServerUser.getUsername(), StandardCharsets.UTF_8);
     // Generate random token
     final String token = MD5String.generate();
     // Return formatted request String

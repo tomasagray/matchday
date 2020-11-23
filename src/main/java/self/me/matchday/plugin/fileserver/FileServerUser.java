@@ -30,47 +30,48 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-/**
- * Represents a file server user
- */
+/** Represents a file server user */
 @Data
 @Entity
 public class FileServerUser implements Serializable {
 
-  @Id
-  private String userId;
-  private final String userName;
+  @Id private String userId;
+  private final String username;
   private final String password;
   private final String email;
   private boolean loggedIn;
   private String serverId;
-  @OneToMany(targetEntity = SecureCookie.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+
+  @OneToMany(
+      targetEntity = SecureCookie.class,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.EAGER)
   private Collection<SecureCookie> cookies = new ArrayList<>();
 
   // default constructor
   public FileServerUser() {
-    this.userName = this.email = null;
+    this.username = this.email = null;
     this.password = null;
   }
 
-  public FileServerUser(@NotNull final String userName, @NotNull final String password) {
+  public FileServerUser(@NotNull final String username, @NotNull final String password) {
 
-    this.userId = MD5String.fromData(userName);
-    this.userName = this.email = userName;
+    this.userId = MD5String.fromData(username);
+    this.username = this.email = username;
     this.password = password;
   }
 
   /**
-   * Set the user to logged in - set boolean, cookies, server ID and object
-   * ID for JPA storage
+   * Set the user to logged in - set boolean, cookies, server ID and object ID for JPA storage
    *
    * @param serverId The ID of the Server this User is logged into
    * @param cookies Any cookies returned with login response
    */
-  public void loginToServer(@NotNull final String serverId,
-                            @NotNull final Collection<SecureCookie> cookies) {
+  public void setLoggedIntoServer(
+      @NotNull final String serverId, @NotNull final Collection<SecureCookie> cookies) {
 
-    setUserId(MD5String.fromData(this.userName, serverId));
+    setUserId(MD5String.fromData(this.username, serverId));
     setServerId(serverId);
     setCookies(cookies);
     setLoggedIn(true);
@@ -94,31 +95,32 @@ public class FileServerUser implements Serializable {
 
   @Override
   public String toString() {
-    return
-        String.format(
-            "Username: %s, Password: *****, Logged in: %s, Email: %s, Server ID: %s, Cookies: %s",
-            getUserName(), isLoggedIn(), getEmail(), getServerId(),
-            Strings.join(cookies, ','));
+    return String.format(
+        "Username: %s, Password: *****, Logged in: %s, Email: %s, Server ID: %s, Cookies: %s",
+        getUsername(), isLoggedIn(), getEmail(), getServerId(), Strings.join(cookies, ','));
   }
 
   @Override
   public boolean equals(final Object object) {
+
     if (!(object instanceof FileServerUser)) {
       return false;
     }
     // Cast for comparison
     final FileServerUser fileServerUser = (FileServerUser) object;
-    return
-            this.getUserName().equals(fileServerUser.getUserName()) &&
-                    this.getPassword().equals(fileServerUser.getPassword()) &&
-                    this.getEmail().equals(fileServerUser.getEmail());
+    final String username = (this.getUsername() != null) ? this.getUsername() : "";
+    final String password = (this.getPassword() != null) ? this.getPassword() : "";
+    final String email = (this.getEmail() != null) ? this.getEmail() : "";
 
+    return username.equals(fileServerUser.getUsername())
+        && password.equals(fileServerUser.getPassword())
+        && email.equals(fileServerUser.getEmail());
   }
 
   @Override
   public int hashCode() {
     int hash = 7;
-    hash = 31 * hash + userName.hashCode();
+    hash = 31 * hash + username.hashCode();
     hash = 31 * hash + password.hashCode();
     hash = 31 * hash + ((email != null) ? email.hashCode() : 0);
     return hash;

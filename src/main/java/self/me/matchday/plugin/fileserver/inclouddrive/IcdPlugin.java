@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -21,17 +21,6 @@ package self.me.matchday.plugin.fileserver.inclouddrive;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.UUID;
-import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -45,6 +34,18 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.StringJoiner;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Component
 public class IcdPlugin implements FileServerPlugin {
@@ -93,16 +94,12 @@ public class IcdPlugin implements FileServerPlugin {
             .block();
 
     // Correct response & return
-    return
-        correctIcdResponse(response);
+    return correctIcdResponse(response);
   }
 
   @Override
   public boolean acceptsUrl(@NotNull URL url) {
-    return
-        acceptsUrlPattern
-            .matcher(url.toString())
-            .find();
+    return acceptsUrlPattern.matcher(url.toString()).find();
   }
 
   @Override
@@ -111,8 +108,8 @@ public class IcdPlugin implements FileServerPlugin {
   }
 
   @Override
-  public Optional<URL> getDownloadURL(@NotNull URL url,
-      @NotNull final Collection<HttpCookie> cookies) throws IOException {
+  public Optional<URL> getDownloadURL(
+      @NotNull URL url, @NotNull final Collection<HttpCookie> cookies) throws IOException {
 
     // Result container
     Optional<URL> result = Optional.empty();
@@ -123,10 +120,12 @@ public class IcdPlugin implements FileServerPlugin {
             .get()
             .uri(url.toString())
             .header(USER_AGENT_HEADER, pluginProperties.getUserAgent())
-            .cookies(requestCookies -> {
-              // Map cookies
-              cookies.forEach(cookie -> requestCookies.add(cookie.getName(), cookie.getValue()));
-            })
+            .cookies(
+                requestCookies -> {
+                  // Map cookies
+                  cookies.forEach(
+                      cookie -> requestCookies.add(cookie.getName(), cookie.getValue()));
+                })
             .exchange()
             .block();
 
@@ -183,7 +182,7 @@ public class IcdPlugin implements FileServerPlugin {
       // Extract result & message
       final String result = icdMessage.getResult();
       message = icdMessage.getMessage();
-      trueStatus = response.statusCode();    // default
+      trueStatus = response.statusCode(); // default
 
       // Correct response code - is it really an error?
       if (response.statusCode().is2xxSuccessful() && result.equals("error")) {
@@ -196,13 +195,11 @@ public class IcdPlugin implements FileServerPlugin {
     }
 
     // Return corrected response
-    return
-        ClientResponse
-            .create(trueStatus)
-            .headers(httpHeaders -> httpHeaders.addAll(response.headers().asHttpHeaders()))
-            .cookies(cookies -> cookies.addAll(response.cookies()))
-            .body(message)
-            .build();
+    return ClientResponse.create(trueStatus)
+        .headers(httpHeaders -> httpHeaders.addAll(response.headers().asHttpHeaders()))
+        .cookies(cookies -> cookies.addAll(response.cookies()))
+        .body(message)
+        .build();
   }
 
   /**
@@ -244,7 +241,7 @@ public class IcdPlugin implements FileServerPlugin {
     // data String container
     sj.add(getURLComponent("password", user.getPassword()));
     sj.add("keep=1");
-    sj.add(getURLComponent("email", user.getUserName()));
+    sj.add(getURLComponent("email", user.getUsername()));
 
     // Assemble and return String data as a byte array
     return sj.toString().getBytes(StandardCharsets.UTF_8);
@@ -253,15 +250,15 @@ public class IcdPlugin implements FileServerPlugin {
   /**
    * Helper method for getLoginDataByteArray. URL encodes a given object.
    *
-   * @param key   The key used to retrieve the Object
+   * @param key The key used to retrieve the Object
    * @param value The object to be encoded
    * @return URL encoded String.
    */
-  private @NotNull String getURLComponent(@NotNull String key, @NotNull Object value) {
+  private @NotNull String getURLComponent(@NotNull final String key, final Object value) {
 
-    return
-        URLEncoder.encode(key, StandardCharsets.UTF_8)
-            + "="
-            + URLEncoder.encode(value.toString(), StandardCharsets.UTF_8);
+    final String k = URLEncoder.encode(key, StandardCharsets.UTF_8);
+    final String v =
+        (value != null) ? URLEncoder.encode(value.toString(), StandardCharsets.UTF_8) : "";
+    return k + "=" + v;
   }
 }
