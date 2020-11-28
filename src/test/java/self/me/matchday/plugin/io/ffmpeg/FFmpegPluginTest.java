@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import self.me.matchday.CreateTestData;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -55,13 +56,12 @@ class FFmpegPluginTest {
 
   // Test constants
   private static final String STORAGE_LOCATION = "src/test/data/video_test";
-  private static final String TEST_URI = "http://192.168.0.101/stream2stream/barca-rm-2009/1.ts";
   private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
   // Test resources
   private static File storageLocation;
   private static FFmpegPlugin ffmpegPlugin;
-  private static URI testUri;
   private static FFmpegMetadata expectedMetadata;
+  private static URI testUri;
 
   @BeforeAll
   static void setUp(@Autowired FFmpegPlugin plugin) throws IOException {
@@ -80,8 +80,8 @@ class FFmpegPluginTest {
         Log.i(LOG_TAG, String.format("Created directory: [%s] ? : %s", storageLocation, mkdir));
       }
 
-      // Parse test URL
-      testUri = new URI(TEST_URI);
+      // initialize test URI
+      testUri = CreateTestData.FIRST_HALF_URL.toURI();
 
     } catch (NullPointerException | URISyntaxException e) {
       e.printStackTrace();

@@ -22,11 +22,11 @@ package self.me.matchday.plugin.io.ffmpeg;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import self.me.matchday.util.ResourceFileReader;
+import self.me.matchday.CreateTestData;
 import self.me.matchday.util.Log;
+import self.me.matchday.util.ResourceFileReader;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,6 @@ class FFprobeTest {
 
     // Test constants
     private static final String FFPROBE_PATH = "plugin.ffmpeg.ffprobe-location";
-    private static final String TEST_URI = "http://192.168.0.101/stream2stream/barca-rm-2009/1.ts";
     private static final String FFMPEG_PROPERTIES = "plugins\\ffmpeg\\ffmpeg.properties";
     private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
 
@@ -80,7 +79,7 @@ class FFprobeTest {
     void testGetFileMetadata() throws URISyntaxException, IOException {
 
         Log.i(LOG_TAG, "Reading file data...");
-        FFmpegMetadata actualMetadata = ffProbe.getFileMetadata(new URI(TEST_URI));
+    FFmpegMetadata actualMetadata = ffProbe.getFileMetadata(CreateTestData.FIRST_HALF_URL.toURI());
 
         Log.i(LOG_TAG, "Testing metadata for correctness...");
         assertThat(actualMetadata).isNotNull();

@@ -26,11 +26,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
+import self.me.matchday.TestFileServerPlugin;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.VideoStreamPlaylistLocator;
-import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
@@ -65,11 +65,12 @@ class VideoStreamingServiceTest {
 
   @BeforeAll
   static void setUp(
-      @Autowired final VideoStreamingService streamingService,
-      @Autowired final EventService eventService,
-      @Autowired final CompetitionService competitionService,
-      @Autowired final TeamService teamService,
-      @Autowired final FileServerService fileServerService) {
+          @Autowired final VideoStreamingService streamingService,
+          @Autowired final EventService eventService,
+          @Autowired final CompetitionService competitionService,
+          @Autowired final TeamService teamService,
+          @Autowired final FileServerService fileServerService,
+          @Autowired final TestFileServerPlugin testFileServerPlugin) {
 
     VideoStreamingServiceTest.streamingService = streamingService;
     VideoStreamingServiceTest.eventService = eventService;
@@ -78,10 +79,11 @@ class VideoStreamingServiceTest {
     VideoStreamingServiceTest.fileServerService = fileServerService;
 
     // Create test file server plugin & register
-    final FileServerPlugin testFileServerPlugin = CreateTestData.createTestFileServerPlugin();
+
+    // Create test user & login
     testFileServerUser = CreateTestData.createTestFileServerUser();
-    fileServerService.getFileServerPlugins().add(testFileServerPlugin);
     fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
+    assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Create test data
     final Match match = CreateTestData.createTestMatch();
@@ -104,7 +106,6 @@ class VideoStreamingServiceTest {
     teamService.deleteTeamById(testMatch.getHomeTeam().getTeamId());
 
     fileServerService.deleteUser(testFileServerUser.getUserId());
-    fileServerService.getFileServerPlugins().clear();
   }
 
   @Test

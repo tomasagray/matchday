@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -22,6 +22,7 @@ package self.me.matchday.plugin.datasource.blogger.parser.json;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import self.me.matchday.CreateTestData;
 import self.me.matchday.plugin.datasource.blogger.Blogger;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
 import self.me.matchday.util.Log;
@@ -35,95 +36,95 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JsonBloggerBuilderTest {
 
-    private static final String LOG_TAG = "JsonBloggerBuilderTest";
+  private static final String LOG_TAG = "JsonBloggerBuilderTest";
 
-    // Test constants
-    private static final String TEST_URL = "http://192.168.0.101/matchday-testing/zkf.json";
-    private static Blogger blogger;
+  private static Blogger blogger;
 
-    @BeforeAll
-    static void setUp() throws IOException {
+  @BeforeAll
+  static void setUp() throws IOException {
 
-        // Create parser
-        JsonBloggerBuilder bloggerBuilder = new JsonBloggerBuilder(new URL(TEST_URL), new JsonPostBuilderFactory());
-        // Get Blogger from remote source
-        blogger = bloggerBuilder.getBlogger();
-    }
+    // Create parser
+    JsonBloggerBuilder bloggerBuilder =
+        new JsonBloggerBuilder(CreateTestData.ZKF_JSON_URL, new JsonPostBuilderFactory());
+    // Get Blogger from remote source
+    blogger = bloggerBuilder.getBlogger();
+  }
 
-    @Test
-    @DisplayName("Verify blog ID")
-    void testBloggerId() {
+  @Test
+  @DisplayName("Verify blog ID")
+  void testBloggerId() {
 
-        final String actualBlogId = blogger.getBlogId();
-        final String expectedBlogId = "3404769062477783101";
+    final String actualBlogId = blogger.getBlogId();
+    final String expectedBlogId = "3404769062477783101";
 
-        Log.i(LOG_TAG, "Testing blog ID: " + actualBlogId);
-        assertThat(actualBlogId).isEqualTo(expectedBlogId);
-    }
+    Log.i(LOG_TAG, "Testing blog ID: " + actualBlogId);
+    assertThat(actualBlogId).isEqualTo(expectedBlogId);
+  }
 
-    @Test
-    @DisplayName("Verify blog title parsing")
-    void testTitle() {
+  @Test
+  @DisplayName("Verify blog title parsing")
+  void testTitle() {
 
-        final String actualTitle = blogger.getTitle();
-        final String expectedTitle = "zkfootballmatches";
+    final String actualTitle = blogger.getTitle();
+    final String expectedTitle = "zkfootballmatches";
 
-        Log.i(LOG_TAG, "Testing blog title: " + actualTitle);
-        assertThat(actualTitle).isEqualTo(expectedTitle);
-    }
+    Log.i(LOG_TAG, "Testing blog title: " + actualTitle);
+    assertThat(actualTitle).isEqualTo(expectedTitle);
+  }
 
-    @Test
-    @DisplayName("Validate Blogger link parsing")
-    void testLink() throws MalformedURLException {
+  @Test
+  @DisplayName("Validate Blogger link parsing")
+  void testLink() throws MalformedURLException {
 
-        final String actualLink = blogger.getLink();
-        final String expectedLink = "https://zkfootballmatch.blogspot.com/";
+    final String actualLink = blogger.getLink();
+    final String expectedLink = "https://zkfootballmatch.blogspot.com/";
 
-        Log.i(LOG_TAG, "Testing Blogger link: " + actualLink);
-        // Validate URL
-        final URL actualUrl = new URL(actualLink);
-        final URL expectedUrl = new URL(expectedLink);
+    Log.i(LOG_TAG, "Testing Blogger link: " + actualLink);
+    // Validate URL
+    final URL actualUrl = new URL(actualLink);
+    final URL expectedUrl = new URL(expectedLink);
 
-        assertThat(actualUrl).isEqualTo(expectedUrl);
-    }
+    assertThat(actualUrl).isEqualTo(expectedUrl);
+  }
 
-    @Test
-    @DisplayName("Validate Blogger author")
-    void testAuthor() {
+  @Test
+  @DisplayName("Validate Blogger author")
+  void testAuthor() {
 
-        final String actualAuthor = blogger.getAuthor();
-        final String expectedAuthor = "zkfootballmatches";
+    final String actualAuthor = blogger.getAuthor();
+    final String expectedAuthor = "zkfootballmatches";
 
-        Log.i(LOG_TAG, "Testing Blogger author: " + actualAuthor);
-        assertThat(actualAuthor).isEqualTo(expectedAuthor);
-    }
+    Log.i(LOG_TAG, "Testing Blogger author: " + actualAuthor);
+    assertThat(actualAuthor).isEqualTo(expectedAuthor);
+  }
 
-    @Test
-    @DisplayName("Validate Blogger version")
-    void testVersion() {
+  @Test
+  @DisplayName("Validate Blogger version")
+  void testVersion() {
 
-        final String actualVersion = blogger.getVersion();
-        final String expectedVersion = "1.0";
+    final String actualVersion = blogger.getVersion();
+    final String expectedVersion = "1.0";
 
-        Log.i(LOG_TAG, "Testing Blogger version: " + actualVersion);
-        assertThat(actualVersion).isEqualTo(expectedVersion);
-    }
+    Log.i(LOG_TAG, "Testing Blogger version: " + actualVersion);
+    assertThat(actualVersion).isEqualTo(expectedVersion);
+  }
 
-    @Test
-    @DisplayName("Validate Blogger posts")
-    void testPosts() {
+  @Test
+  @DisplayName("Validate Blogger posts")
+  void testPosts() {
 
-        final long actualPostCount = blogger.getPostCount();
-        final long expectedPostCount = 25;
-        final Stream<BloggerPost> actualPosts = blogger.getPosts();
+    final long actualPostCount = blogger.getPostCount();
+    final long expectedPostCount = 25;
+    final Stream<BloggerPost> actualPosts = blogger.getPosts();
 
-        Log.i(LOG_TAG, String.format("Testing Blogger posts, found %s posts", actualPostCount));
-        assertThat(actualPostCount).isEqualTo(expectedPostCount);
-        actualPosts.forEach(bloggerPost -> {
-            // Test each post
-            final String postTitle = bloggerPost.getTitle();
-            Log.i(LOG_TAG, "Testing post title: " + postTitle);
-            assertThat(postTitle).isNotEmpty();
+    Log.i(LOG_TAG, String.format("Testing Blogger posts, found %s posts", actualPostCount));
+    assertThat(actualPostCount).isEqualTo(expectedPostCount);
+    actualPosts.forEach(
+        bloggerPost -> {
+          // Test each post
+          final String postTitle = bloggerPost.getTitle();
+          Log.i(LOG_TAG, "Testing post title: " + postTitle);
+          assertThat(postTitle).isNotEmpty();
         });
-    }
+  }
 }

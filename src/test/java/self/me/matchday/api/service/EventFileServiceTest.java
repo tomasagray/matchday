@@ -28,9 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
+import self.me.matchday.TestFileServerPlugin;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.util.Log;
@@ -48,7 +48,6 @@ class EventFileServiceTest {
 
   // Test resources
   private static EventFileService eventFileService;
-  private static FileServerPlugin testFileServerPlugin;
   private static FileServerService fileServerService;
 
   private static EventFileSource testEventFileSrc;
@@ -56,18 +55,18 @@ class EventFileServiceTest {
 
   @BeforeAll
   static void setUp(
-      @Autowired final EventFileService eventFileService,
-      @Autowired final FileServerService fileServerService) {
+          @Autowired final EventFileService eventFileService,
+          @Autowired final FileServerService fileServerService,
+          @Autowired final TestFileServerPlugin testFileServerPlugin) {
 
     EventFileServiceTest.eventFileService = eventFileService;
     EventFileServiceTest.fileServerService = fileServerService;
 
     // Create & register test file server plugin
-    EventFileServiceTest.testFileServerPlugin = CreateTestData.createTestFileServerPlugin();
+    // Create test user & login
     EventFileServiceTest.testFileServerUser = CreateTestData.createTestFileServerUser();
-
-    fileServerService.getFileServerPlugins().add(testFileServerPlugin);
     fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
+    assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Create test EventFileSource
     testEventFileSrc = CreateTestData.createTestEventFileSource();
@@ -105,6 +104,5 @@ class EventFileServiceTest {
     // Remove test user from repo
     Log.i(LOG_TAG, "Deleting test user: " + testFileServerUser);
     fileServerService.deleteUser(testFileServerUser.getUserId());
-    fileServerService.getFileServerPlugins().clear();
   }
 }

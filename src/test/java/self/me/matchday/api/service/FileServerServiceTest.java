@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -30,12 +31,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.CreateTestData;
+import self.me.matchday.TestFileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
@@ -52,17 +53,17 @@ class FileServerServiceTest {
   private static final String LOG_TAG = "FileServerServiceTest";
 
   private static FileServerService fileServerService;
-  private static CreateTestData.TestFileServerPlugin testFileServerPlugin;
+  private static TestFileServerPlugin testFileServerPlugin;
   private static FileServerUser testFileServerUser;
 
   @BeforeAll
-  static void setUp(@Autowired final FileServerService fileServerService) {
+  static void setUp(@Autowired final FileServerService fileServerService,
+                    @Autowired final TestFileServerPlugin testFileServerPlugin) {
 
     FileServerServiceTest.fileServerService = fileServerService;
-    testFileServerPlugin = CreateTestData.createTestFileServerPlugin();
+    FileServerServiceTest.testFileServerPlugin = testFileServerPlugin;
+
     testFileServerUser = CreateTestData.createTestFileServerUser();
-    // Add test plugin
-    fileServerService.getFileServerPlugins().add(testFileServerPlugin);
   }
 
   @AfterAll
@@ -70,11 +71,12 @@ class FileServerServiceTest {
 
     // delete test data
     fileServerService.deleteUser(testFileServerUser.getUserId());
-    final Optional<FileServerUser> userOptional = fileServerService.getUserById(testFileServerUser.getUserId());
+    final Optional<FileServerUser> userOptional =
+        fileServerService.getUserById(testFileServerUser.getUserId());
     assertThat(userOptional).isNotPresent();
-    fileServerService.getFileServerPlugins().clear();
   }
 
+  // === Management ===
   @Test
   @DisplayName("Test retrieval of registered file server plugin by ID")
   void getPluginById() {
@@ -95,6 +97,41 @@ class FileServerServiceTest {
   }
 
   @Test
+  @DisplayName("Validate retrieval of all file server plugins")
+  void getFileServerPlugins() {
+
+    final List<FileServerPlugin> fileServerPlugins = fileServerService.getFileServerPlugins();
+
+    final int expectedPluginCount = 3;
+    final int actualPluginCount = fileServerPlugins.size();
+
+    assertThat(actualPluginCount).isEqualTo(expectedPluginCount);
+    assertThat(fileServerPlugins).contains(testFileServerPlugin);
+  }
+
+  @Test
+  @DisplayName("Test enabling & disabling of plugin")
+  void testPluginEnableAndDisable() {
+
+    final UUID testPluginId = testFileServerPlugin.getPluginId();
+
+    // test default enable
+    Log.i(LOG_TAG, "Verifying plugin is enabled by default...");
+    assertThat(fileServerService.isPluginEnabled(testPluginId)).isTrue();
+
+    // test disable
+    Log.i(LOG_TAG, "Verifying plugin can be disabled...");
+    fileServerService.disablePlugin(testPluginId);
+    assertThat(fileServerService.isPluginEnabled(testPluginId)).isFalse();
+
+    // test re-enable
+    Log.i(LOG_TAG, "Verifying plugin can be re-enabled...");
+    fileServerService.enablePlugin(testPluginId);
+    assertThat(fileServerService.isPluginEnabled(testPluginId)).isTrue();
+  }
+
+  // === Server interaction ===
+  @Test
   @DisplayName("Validate login, logout & re-login functionality of file server service")
   void loginAndLogout() {
 
@@ -110,19 +147,52 @@ class FileServerServiceTest {
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Logout
-    final ClientResponse logoutResponse = fileServerService.logout(testFileServerUser, testPluginId);
+    final ClientResponse logoutResponse =
+        fileServerService.logout(testFileServerUser, testPluginId);
     assertThat(logoutResponse.statusCode().is2xxSuccessful()).isTrue();
-    assertThat(testFileServerUser.isLoggedIn()).isFalse();
+    // Get fresh managed copy
+    final FileServerUser userAfterLogout = getFreshManagedUser();
+    assertThat(userAfterLogout.isLoggedIn()).isFalse();
 
     // Re-login
     fileServerService.relogin(testFileServerUser, testPluginId);
-    assertThat(testFileServerUser.isLoggedIn()).isTrue();
+    final FileServerUser userAfterReLogin = getFreshManagedUser();
+    assertThat(userAfterReLogin.isLoggedIn()).isTrue();
 
     // Cleanup
     fileServerService.logout(testFileServerUser, testPluginId);
-    assertThat(testFileServerUser.isLoggedIn()).isFalse();
   }
 
+  @Test
+  @DisplayName("Validate plugin internal URL extraction")
+  void getDownloadUrl() throws IOException {
+
+    // Ensure user is logged in
+    fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
+
+    final Optional<URL> optionalURL =
+        fileServerService.getDownloadUrl(CreateTestData.FIRST_HALF_URL);
+    assertThat(optionalURL.isPresent()).isTrue();
+
+    optionalURL.ifPresent(
+        url -> {
+          Log.i(LOG_TAG, "Got download URL from plugin: " + url);
+          assertThat(url).isNotNull();
+        });
+  }
+
+  @Test
+  @DisplayName("Validate plugin refresh rate retrieval in plugin service")
+  void getFileServerRefreshRate() {
+
+    final Duration actualServerRefreshRate =
+        fileServerService.getFileServerRefreshRate(CreateTestData.FIRST_HALF_URL);
+    final Duration expectedServerRefreshRate = testFileServerPlugin.getRefreshRate();
+
+    assertThat(actualServerRefreshRate).isEqualTo(expectedServerRefreshRate);
+  }
+
+  // === Users ===
   @Test
   @DisplayName("Validate retrieval of all users from server")
   void getAllServerUsers() {
@@ -156,52 +226,18 @@ class FileServerServiceTest {
         fileServerService.getUserById(testFileServerUser.getUserId());
     assertThat(userOptional.isPresent()).isTrue();
 
-    userOptional.ifPresent(fileServerUser -> {
-      Log.i(LOG_TAG, "Retrieved user from plugin: " + fileServerUser);
-      assertThat(fileServerUser).isEqualTo(testFileServerUser);
-    });
+    userOptional.ifPresent(
+        fileServerUser -> {
+          Log.i(LOG_TAG, "Retrieved user from plugin: " + fileServerUser);
+          assertThat(fileServerUser).isEqualTo(testFileServerUser);
+        });
   }
 
-  @Test
-  @DisplayName("Validate plugin URL routing")
-  void getDownloadUrl() throws IOException {
-
-    final URL testUrl = new URL("http://192.168.0.101/stream2stream/barca-rm-2009/1.ts");
-
-    // Ensure user is logged in
-    fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
-
-    final Optional<URL> optionalURL = fileServerService.getDownloadUrl(testUrl);
-    assertThat(optionalURL.isPresent()).isTrue();
-
-    optionalURL.ifPresent(url -> {
-      Log.i(LOG_TAG, "Got download URL from plugin: " + url);
-      assertThat(url).isNotNull();
-    });
-  }
-
-  @Test
-  @DisplayName("Validate plugin refresh rate retrieval in plugin service")
-  void getFileServerRefreshRate() throws MalformedURLException {
-
-    final URL testUrl = new URL("http://192.168.0.101/stream2stream/barca-rm-2009/1.ts");
-    final Duration actualServerRefreshRate = fileServerService.getFileServerRefreshRate(testUrl);
-    final Duration expectedServerRefreshRate = testFileServerPlugin.getRefreshRate();
-
-    assertThat(actualServerRefreshRate).isEqualTo(expectedServerRefreshRate);
-
-  }
-
-  @Test
-  @DisplayName("Validate retrieval of all file server plugins")
-  void getFileServerPlugins() {
-
-    final List<FileServerPlugin> fileServerPlugins = fileServerService.getFileServerPlugins();
-
-    final int expectedPluginCount = 3;
-    final int actualPluginCount = fileServerPlugins.size();
-
-    assertThat(actualPluginCount).isEqualTo(expectedPluginCount);
-    assertThat(fileServerPlugins).contains(testFileServerPlugin);
+  @NotNull
+  private FileServerUser getFreshManagedUser() {
+    final Optional<FileServerUser> afterLogoutOptional =
+        fileServerService.getUserById(testFileServerUser.getUserId());
+    assertThat(afterLogoutOptional).isPresent();
+    return afterLogoutOptional.get();
   }
 }

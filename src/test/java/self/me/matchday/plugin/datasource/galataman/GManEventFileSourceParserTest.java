@@ -75,7 +75,7 @@ class GManEventFileSourceParserTest {
     assertThat(testFileSources).isNotNull();
 
     final int actualFileSourceCount = testFileSources.size();
-    final int expectedFileSourceCount = 2;
+    final int expectedFileSourceCount = 3;
 
     Log.i(LOG_TAG, "Testing file source count: " + actualFileSourceCount);
     assertThat(actualFileSourceCount).isEqualTo(expectedFileSourceCount);
@@ -87,7 +87,7 @@ class GManEventFileSourceParserTest {
   void testEventFileSourceCount() {
 
     final int actualFileSourceCount = testFileSources.size();
-    final int expectedFileSourceCount = 2;
+    final int expectedFileSourceCount = 3;
 
     Log.i(LOG_TAG, "Testing file source count: " + actualFileSourceCount);
     assertThat(actualFileSourceCount).isEqualTo(expectedFileSourceCount);
@@ -99,11 +99,12 @@ class GManEventFileSourceParserTest {
 
     final String actualChannel1 = firstSource.getChannel();
     final String actualChannel2 = secondSource.getChannel();
-    final String expectedChannel = "Das Erste HD";
+    final String expectedChannel1 = "Sky Sports HD";
+    final String expectedChannel2 = "TVE La 1 HD";
 
     Log.i(LOG_TAG, String.format("Testing source channels: %s, %s", actualChannel1, actualChannel2));
-    assertThat(actualChannel1).isEqualTo(expectedChannel);
-    assertThat(actualChannel2).isEqualTo(expectedChannel);
+    assertThat(actualChannel1).isEqualTo(expectedChannel1);
+    assertThat(actualChannel2).isEqualTo(expectedChannel2);
   }
 
   @Test
@@ -112,11 +113,12 @@ class GManEventFileSourceParserTest {
 
     final Resolution actualResolution1 = firstSource.getResolution();
     final Resolution actualResolution2 = secondSource.getResolution();
-    final Resolution expectedResolution = Resolution.R_720p;
+    final Resolution expectedResolution1 = Resolution.R_1080p;
+    final Resolution expectedResolution2 = Resolution.R_1080i;
 
     Log.i(LOG_TAG, String.format("Testing source resolutions: %s, %s", actualResolution1, actualResolution2));
-    assertThat(actualResolution1).isEqualTo(expectedResolution);
-    assertThat(actualResolution2).isEqualTo(expectedResolution);
+    assertThat(actualResolution1).isEqualTo(expectedResolution1);
+    assertThat(actualResolution2).isEqualTo(expectedResolution2);
   }
 
   @Test
@@ -125,18 +127,19 @@ class GManEventFileSourceParserTest {
 
     final String actualLanguages1 = firstSource.getLanguages();
     final String actualLanguages2 = secondSource.getLanguages();
-    final String expectedLanguages = "German";
+    final String expectedLanguages1 = "English";
+    final String expectedLanguages2 = "Spanish";
 
     Log.i(LOG_TAG, String.format("Testing source languages: %s, %s", actualLanguages1, actualLanguages2));
-    assertThat(actualLanguages1).isEqualTo(expectedLanguages);
-    assertThat(actualLanguages2).isEqualTo(expectedLanguages);
+    assertThat(actualLanguages1).isEqualTo(expectedLanguages1);
+    assertThat(actualLanguages2).isEqualTo(expectedLanguages2);
   }
 
   @Test
   @DisplayName("Validate event file parsing")
   void testSourceFiles() {
 
-    final int expectedFileCount = 1;
+    final int expectedFileCount = 2;
     final List<EventFile> actualEventFiles1 = firstSource.getEventFiles();
     final List<EventFile> actualEventFiles2 = secondSource.getEventFiles();
 

@@ -28,11 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
+import self.me.matchday.TestFileServerPlugin;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.VariantM3U;
-import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
@@ -58,11 +58,12 @@ class VariantPlaylistServiceTest {
 
   @BeforeAll
   static void setUp(
-      @Autowired final VariantPlaylistService playlistService,
-      @Autowired final EventService eventService,
-      @Autowired final FileServerService fileServerService,
-      @Autowired final CompetitionService competitionService,
-      @Autowired final TeamService teamService) {
+          @Autowired final VariantPlaylistService playlistService,
+          @Autowired final EventService eventService,
+          @Autowired final FileServerService fileServerService,
+          @Autowired final CompetitionService competitionService,
+          @Autowired final TeamService teamService,
+          @Autowired final TestFileServerPlugin testFileServerPlugin) {
 
     VariantPlaylistServiceTest.playlistService = playlistService;
     VariantPlaylistServiceTest.eventService = eventService;
@@ -70,10 +71,9 @@ class VariantPlaylistServiceTest {
     VariantPlaylistServiceTest.competitionService = competitionService;
     VariantPlaylistServiceTest.teamService = teamService;
 
-    // Register test file server plugin & user
-    final FileServerPlugin testFileServerPlugin = CreateTestData.createTestFileServerPlugin();
+    // Register test file server plugin
+    // Create test user & login
     testFileServerUser = CreateTestData.createTestFileServerUser();
-    fileServerService.getFileServerPlugins().add(testFileServerPlugin);
     fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
 
     // Create & save test data
@@ -95,7 +95,6 @@ class VariantPlaylistServiceTest {
     competitionService.deleteCompetitionById(testMatch.getCompetition().getCompetitionId());
     teamService.deleteTeamById(testMatch.getHomeTeam().getTeamId());
     fileServerService.deleteUser(testFileServerUser.getUserId());
-    fileServerService.getFileServerPlugins().clear();
   }
 
   @Test

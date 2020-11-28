@@ -101,7 +101,7 @@
 
     ],
     "format": {
-        "filename": "http://192.168.0.101/stream2stream/barca-rm-2009/1.ts",
+        "filename": "http://192.168.0.101/matchday-testing/video/barca-rm-2009/1.ts",
         "nb_streams": 2,
         "nb_programs": 1,
         "format_name": "mpegts",

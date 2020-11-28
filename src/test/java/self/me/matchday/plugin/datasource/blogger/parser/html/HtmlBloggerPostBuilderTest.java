@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -39,101 +39,102 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("HtmlBloggerPostBuilderTest - Verify HTML Blogger post parser")
 class HtmlBloggerPostBuilderTest {
 
-    private static final String LOG_TAG = "HtmlBloggerPostBuilderTest";
+  private static final String LOG_TAG = "HtmlBloggerPostBuilderTest";
 
-    // Test resources
-    private static BloggerPost bloggerPost;
+  // Test resources
+  private static BloggerPost bloggerPost;
 
-    @BeforeAll
-    static void setUp() throws IOException {
+  @BeforeAll
+  static void setUp() throws IOException {
 
-        // Read test data
-        final String html =
-                Strings.join(
-                        ResourceFileReader.readTextResource(HtmlBloggerPostBuilderTest.class, "gman_post.html"))
-                        .with(" ");
-        // Parse to DOM
-        final Document document = Jsoup.parse(html);
-        // Get BloggerPost
-        bloggerPost = new HtmlBloggerPostBuilder(document).getBloggerPost();
-    }
+    // Read test data
+    final String html =
+        Strings.join(
+                ResourceFileReader.readTextResource(
+                    HtmlBloggerPostBuilderTest.class, "gman_post.html"))
+            .with(" ");
+    // Parse to DOM
+    final Document document = Jsoup.parse(html);
+    // Get BloggerPost
+    bloggerPost = new HtmlBloggerPostBuilder(document).getBloggerPost();
+  }
 
-    @Test
-    @DisplayName("Verify valid Blogger post ID")
-    void testPostId() {
+  @Test
+  @DisplayName("Verify valid Blogger post ID")
+  void testPostId() {
 
-        final String actualPostId = bloggerPost.getBloggerPostID();
-        final Pattern requiredPattern = Pattern.compile("\\d{19}");
+    final String actualPostId = bloggerPost.getBloggerPostID();
+    final Pattern requiredPattern = Pattern.compile("\\d{19}");
 
-        Log.i(LOG_TAG, "Testing Blogger post ID: " + actualPostId);
-        assertThat(actualPostId).matches(requiredPattern);
-    }
+    Log.i(LOG_TAG, "Testing Blogger post ID: " + actualPostId);
+    assertThat(actualPostId).matches(requiredPattern);
+  }
 
-    @Test
-    @DisplayName("Verify correct categories")
-    void testCategories() {
+  @Test
+  @DisplayName("Verify correct categories")
+  void testCategories() {
 
-        final List<String> actualCategories = bloggerPost.getCategories();
-        final List<String> expectedCategories = List.of("Bundesliga", "Sportschau");
+    final List<String> actualCategories = bloggerPost.getCategories();
+    final List<String> expectedCategories = List.of("UEFA Nations League");
 
-        Log.i(LOG_TAG, "Testing categories: " + actualCategories);
-        assertThat(actualCategories).isEqualTo(expectedCategories);
-    }
-    @Test
-    @DisplayName("Verify content")
-    void testContent() {
+    Log.i(LOG_TAG, "Testing categories: " + actualCategories);
+    assertThat(actualCategories).isEqualTo(expectedCategories);
+  }
 
-        // Parse content
-        final String content = bloggerPost.getContent();
-        final Document document = Jsoup.parse(content);
+  @Test
+  @DisplayName("Verify content")
+  void testContent() {
 
-        final int actualElementCount = document.getAllElements().size();
-        final int expectedElementCount = 105;
+    // Parse content
+    final String content = bloggerPost.getContent();
+    final Document document = Jsoup.parse(content);
 
-        Log.i(LOG_TAG, "Testing post content: " + content);
-        assertThat(actualElementCount).isEqualTo(expectedElementCount);
-    }
+    final int actualElementCount = document.getAllElements().size();
+    final int expectedElementCount = 169;
 
-    @Test
-    @DisplayName("Verify published date")
-    void testPublished() {
+    Log.i(LOG_TAG, "Testing post content: " + content);
+    assertThat(actualElementCount).isEqualTo(expectedElementCount);
+  }
 
-        final LocalDateTime actualPublished = bloggerPost.getPublished();
+  @Test
+  @DisplayName("Verify published date")
+  void testPublished() {
 
-        Log.i(LOG_TAG, "Testing post publish date: " + actualPublished);
-        assertThat(actualPublished).isNull();
-    }
+    final LocalDateTime actualPublished = bloggerPost.getPublished();
 
-    @Test
-    @DisplayName("Verify updated date")
-    void testUpdated() {
+    Log.i(LOG_TAG, "Testing post publish date: " + actualPublished);
+    assertThat(actualPublished).isNull();
+  }
 
-        final LocalDateTime lastUpdated = bloggerPost.getLastUpdated();
+  @Test
+  @DisplayName("Verify updated date")
+  void testUpdated() {
 
-        Log.i(LOG_TAG, "Testing post last updated date: " + lastUpdated);
-        assertThat(lastUpdated).isNull();
-    }
+    final LocalDateTime lastUpdated = bloggerPost.getLastUpdated();
 
-    @Test
-    @DisplayName("Verify post link")
-    void testLink() {
+    Log.i(LOG_TAG, "Testing post last updated date: " + lastUpdated);
+    assertThat(lastUpdated).isNull();
+  }
 
-        final String actualLink = bloggerPost.getLink();
-        final String expectedLink =
-                "https://galatamanhdfb.blogspot.com/2020/06/bundesliga-1920-matchday-32-sportschau_13.html";
+  @Test
+  @DisplayName("Verify post link")
+  void testLink() {
 
-        Log.i(LOG_TAG, "Testing post link: " + actualLink);
-        assertThat(actualLink).isEqualTo(expectedLink);
-    }
+    final String actualLink = bloggerPost.getLink();
+    final String expectedLink = "http://localhost/test-url/";
 
-    @Test
-    @DisplayName("Verify post title")
-    void testTitle() {
+    Log.i(LOG_TAG, "Testing post link: " + actualLink);
+    assertThat(actualLink).isEqualTo(expectedLink);
+  }
 
-        final String actualTitle = bloggerPost.getTitle();
-        final String expectedTitle = "Bundesliga 19/20 - Matchday 32 - Sportschau - 17/06/2020";
+  @Test
+  @DisplayName("Verify post title")
+  void testTitle() {
 
-        Log.i(LOG_TAG, "Testing post title: " + actualTitle);
-        assertThat(actualTitle).isEqualTo(expectedTitle);
-    }
+    final String actualTitle = bloggerPost.getTitle();
+    final String expectedTitle = "UEFA Nations League 20/21 - Spain vs Germany - 17/11/2020";
+
+    Log.i(LOG_TAG, "Testing post title: " + actualTitle);
+    assertThat(actualTitle).isEqualTo(expectedTitle);
+  }
 }

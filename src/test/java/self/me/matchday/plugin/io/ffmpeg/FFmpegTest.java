@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -22,6 +22,7 @@ package self.me.matchday.plugin.io.ffmpeg;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import self.me.matchday.CreateTestData;
 import self.me.matchday.MatchdayApplication;
 import self.me.matchday.util.ResourceFileReader;
 import self.me.matchday.util.Log;
@@ -38,69 +39,69 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("FFmpegTest - Test the creation of FFmpegTask HLS streaming task")
 class FFmpegTest {
 
-    // Test constants
-    private static final String LOG_TAG = "FFmpegTest";
-    private static final String FFMPEG_EXE = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe";
-    private static final String DEFAULT_ARGS = " -v quiet -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
+  // Test constants
+  private static final String LOG_TAG = "FFmpegTest";
+  private static final String FFMPEG_EXE = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe";
+  private static final String DEFAULT_ARGS =
+      " -v quiet -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
 
-    // Test resources
-    private static FFmpegTask hlsStreamTask;
-    private static String storageLocation;
+  // Test resources
+  private static FFmpegTask hlsStreamTask;
+  private static String storageLocation;
 
-    @BeforeAll
-    static void setUp() throws URISyntaxException, IOException {
+  @BeforeAll
+  static void setUp() throws URISyntaxException, IOException {
 
-        FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);
+    FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);
 
-        // Read configuration resources
-        final Map<String, String> resources =
-                ResourceFileReader.readPropertiesResource(MatchdayApplication.class, "video-resources.properties");
+    // Read configuration resources
+    final Map<String, String> resources =
+        ResourceFileReader.readPropertiesResource(
+            MatchdayApplication.class, "video-resources.properties");
 
-        // Create URLs
-        final List<URI> urls =
-                List.of(
-                        new URI("http://192.168.0.101/stream2stream/barca-rm-2009/1.ts"),
-                        new URI("http://192.168.0.101/stream2stream/barca-rm-2009/2.ts"));
-        storageLocation = resources.get("video-resources.file-storage-location") + "\\test_out";
+    // Create URLs
+    final List<URI> urls =
+        List.of(CreateTestData.FIRST_HALF_URL.toURI(), CreateTestData.SECOND_HALF_URL.toURI());
+    storageLocation = resources.get("video-resources.file-storage-location") + "\\test_out";
 
-        hlsStreamTask = ffmpeg.getHlsStreamTask(urls, Path.of(storageLocation));
-    }
+    hlsStreamTask = ffmpeg.getHlsStreamTask(urls, Path.of(storageLocation));
+  }
 
-    @Test
-    @DisplayName("Ensure task has correct # of arguments")
-    void minArgLength() {
+  @Test
+  @DisplayName("Ensure task has correct # of arguments")
+  void minArgLength() {
 
-        // Test params
-        final int minArgLength = 7;
+    // Test params
+    final int minArgLength = 7;
 
-        // Retrieve data from task
-        final List<String> args = hlsStreamTask.getArgs();
+    // Retrieve data from task
+    final List<String> args = hlsStreamTask.getArgs();
 
-        // Test
-        Log.i(LOG_TAG, "Testing args: " + args);
-        assertThat(args.size()).isGreaterThan(minArgLength);
-    }
+    // Test
+    Log.i(LOG_TAG, "Testing args: " + args);
+    assertThat(args.size()).isGreaterThan(minArgLength);
+  }
 
-    @Test
-    @DisplayName("Check command format")
-    void testCommandFormat() {
+  @Test
+  @DisplayName("Check command format")
+  void testCommandFormat() {
 
-        final String expectedCommand = String.format("\"%s\"%s", FFMPEG_EXE, DEFAULT_ARGS);
-        final String actualCommand = hlsStreamTask.getCommand();
+    final String expectedCommand = String.format("\"%s\"%s", FFMPEG_EXE, DEFAULT_ARGS);
+    final String actualCommand = hlsStreamTask.getCommand();
 
-        Log.i(LOG_TAG, "Testing command: " + actualCommand);
-        assertThat(actualCommand).isEqualTo(expectedCommand);
-    }
+    Log.i(LOG_TAG, "Testing command: " + actualCommand);
+    assertThat(actualCommand).isEqualTo(expectedCommand);
+  }
 
-    @Test
-    @DisplayName("Verify output path")
-    void outputPath() {
+  @Test
+  @DisplayName("Verify output path")
+  void outputPath() {
 
-        String playlistPath = FFmpegTest.storageLocation + "\\playlist.m3u8";
-        final Path expectedOutputPath = Path.of(playlistPath);
-        final Path actualOutputPath = hlsStreamTask.getOutputFile();
+    String playlistPath = FFmpegTest.storageLocation + "\\playlist.m3u8";
+    final Path expectedOutputPath = Path.of(playlistPath);
+    final Path actualOutputPath = hlsStreamTask.getOutputFile();
 
-        Log.i(LOG_TAG, "Testing output path: " + actualOutputPath);
-        assertThat(actualOutputPath).isEqualByComparingTo(expectedOutputPath);
-    }
+    Log.i(LOG_TAG, "Testing output path: " + actualOutputPath);
+    assertThat(actualOutputPath).isEqualByComparingTo(expectedOutputPath);
+  }
 }
