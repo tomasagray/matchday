@@ -19,26 +19,25 @@
 
 package self.me.matchday.api.resource;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.FileServerController;
+import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
+
+import java.util.UUID;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -53,28 +52,37 @@ public class FileServerResource extends RepresentationModel<FileServerResource> 
   private UUID id;
   private String title;
   private String description;
+  private boolean isEnabled;
 
   @Component
   public static class FileServerResourceAssembler extends
       RepresentationModelAssemblerSupport<FileServerPlugin, FileServerResource> {
 
-    public FileServerResourceAssembler() {
+    private final FileServerService fileServerService;
+
+    public FileServerResourceAssembler(@Autowired final FileServerService fileServerService) {
       super(FileServerController.class, FileServerResource.class);
+      this.fileServerService = fileServerService;
     }
 
     @Override
-    public @NotNull FileServerResource toModel(@NotNull final FileServerPlugin entity) {
+    public @NotNull FileServerResource toModel(@NotNull final FileServerPlugin plugin) {
 
-      FileServerResource resource = instantiateModel(entity);
+      FileServerResource resource = instantiateModel(plugin);
+
+      // is currently active?
+      final boolean isEnabled = fileServerService.isPluginEnabled(plugin.getPluginId());
+
       // Add data
-      resource.setId(entity.getPluginId());
-      resource.setTitle(entity.getTitle());
-      resource.setDescription(entity.getDescription());
+      resource.setId(plugin.getPluginId());
+      resource.setTitle(plugin.getTitle());
+      resource.setDescription(plugin.getDescription());
+      resource.setEnabled(isEnabled);
 
       // Add HATEOAS self link
       resource.add(linkTo(
           methodOn(FileServerController.class)
-              .getFileServerById(entity.getPluginId()))
+              .getFileServerById(plugin.getPluginId()))
           .withSelfRel());
 
       return resource;

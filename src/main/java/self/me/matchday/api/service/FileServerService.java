@@ -49,6 +49,7 @@ public class FileServerService {
   private static final Duration DEFAULT_REFRESH_RATE = Duration.ofHours(4);
 
   private final List<FileServerPlugin> fileServerPlugins;
+  private final List<FileServerPlugin> enabledPlugins = new ArrayList<>();
   private final FileServerUserRepo userRepo;
   private final SecureDataService secureDataService;
   private final UserValidationService userValidationService;
@@ -63,11 +64,15 @@ public class FileServerService {
       final NetscapeCookiesService cookiesService) {
 
     this.fileServerPlugins = fileServerPlugins;
+    // Default: all plugins enabled
+    this.enabledPlugins.addAll(fileServerPlugins);
     this.userRepo = userRepo;
     this.secureDataService = secureDataService;
     this.userValidationService = userValidationService;
     this.cookiesService = cookiesService;
   }
+
+  // === Plugin management ===
 
   /**
    * Get all registered file server plugins
@@ -76,6 +81,25 @@ public class FileServerService {
    */
   public List<FileServerPlugin> getFileServerPlugins() {
     return this.fileServerPlugins;
+  }
+
+  /**
+   * Determine if a given plugin is currently active
+   *
+   * @param pluginId ID of the plugin
+   * @return True/false Is the plugin currently active?
+   */
+  public boolean isPluginEnabled(@NotNull final UUID pluginId) {
+
+    boolean enabledContains = false;
+    // determine if any plugin in the enabled list matches given ID
+    for (FileServerPlugin plugin : enabledPlugins) {
+      if (pluginId.equals(plugin.getPluginId())) {
+        enabledContains = true;
+        break;
+      }
+    }
+    return enabledContains;
   }
 
   /**
@@ -94,6 +118,45 @@ public class FileServerService {
     return (serverPlugin != null) ? Optional.of(serverPlugin) : Optional.empty();
   }
 
+  /**
+   * Disable a specific file server plugin
+   *
+   * @param pluginId The ID of the plugin
+   * @return True/false - was the plugin disabled
+   */
+  public boolean disablePlugin(@NotNull final UUID pluginId) {
+
+    final Optional<FileServerPlugin> pluginOptional = getPluginById(pluginId);
+    if (pluginOptional.isPresent()) {
+      final FileServerPlugin fileServerPlugin = pluginOptional.get();
+      // Remove from enabled plugins list
+      return enabledPlugins.remove(fileServerPlugin);
+    } else {
+      Log.i(LOG_TAG, "Requested to disable non-existent plugin: " + pluginId);
+      return false;
+    }
+  }
+
+  /**
+   * Enable a previously disabled file server plugin
+   *
+   * @param pluginId The ID of the plugin to enable
+   * @return True/false - if the plugin was successfully enabled
+   */
+  public boolean enablePlugin(@NotNull final UUID pluginId) {
+
+    // Retrieve requested plugin
+    final Optional<FileServerPlugin> pluginOptional = getPluginById(pluginId);
+    if (pluginOptional.isPresent()) {
+      final FileServerPlugin fileServerPlugin = pluginOptional.get();
+      // Add to enabled plugins
+      return enabledPlugins.add(fileServerPlugin);
+    } else {
+      Log.i(LOG_TAG, "Requested to enable non-existent plugin: " + pluginId);
+      return false;
+    }
+  }
+
   // === Login ===
 
   /**
@@ -107,7 +170,7 @@ public class FileServerService {
 
     // Result container
     HttpStatus status = HttpStatus.BAD_REQUEST;
-    String message = "";
+    String message;
 
     if (userValidationService.isValidUserData(user.getUsername(), user.getPassword())) {
       // Validate login data
@@ -138,8 +201,14 @@ public class FileServerService {
           status = HttpStatus.OK;
           message =
               String.format(
-                  "User: %s successfully logged into file server: %s", user.getUsername(), serverPlugin.getTitle());
+                  "User: %s successfully logged into file server: %s",
+                  user.getUsername(), serverPlugin.getTitle());
         } else {
+          Log.i(
+              LOG_TAG,
+              String.format(
+                  "Login request was DENIED for user: %s @ server: %s",
+                  user.getUsername(), serverPlugin.getTitle()));
           return loginResponse;
         }
       } else {
@@ -281,9 +350,7 @@ public class FileServerService {
       message = String.format("Relogin failed: User %s not found", user.getUsername());
     }
 
-    return ClientResponse.create(HttpStatus.BAD_REQUEST)
-        .body(message)
-        .build();
+    return ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build();
   }
 
   // === Users ===
@@ -342,7 +409,7 @@ public class FileServerService {
   public Optional<URL> getDownloadUrl(@NotNull final URL externalUrl) throws IOException {
 
     // Get correct FS manager
-    final FileServerPlugin pluginForUrl = getPluginForUrl(externalUrl);
+    final FileServerPlugin pluginForUrl = getEnabledPluginForUrl(externalUrl);
     if (pluginForUrl != null) {
       // Get a logged in user
       final FileServerUser downloadUser = getDownloadUser(pluginForUrl.getPluginId());
@@ -374,7 +441,7 @@ public class FileServerService {
   public Duration getFileServerRefreshRate(@NotNull final URL url) {
 
     // Get the fileserver manager for this URL
-    final FileServerPlugin fileServerPlugin = getPluginForUrl(url);
+    final FileServerPlugin fileServerPlugin = getEnabledPluginForUrl(url);
     // Return the recommended refresh rate for this FS manager
     return (fileServerPlugin != null) ? fileServerPlugin.getRefreshRate() : DEFAULT_REFRESH_RATE;
   }
@@ -385,9 +452,10 @@ public class FileServerService {
    * @param url The external URL
    * @return The first registered fileserver manager which can handle the URL.
    */
-  private @Nullable FileServerPlugin getPluginForUrl(@NotNull final URL url) {
+  private @Nullable FileServerPlugin getEnabledPluginForUrl(@NotNull final URL url) {
 
-    for (final FileServerPlugin plugin : this.fileServerPlugins) {
+    // search only ENABLED plugins
+    for (final FileServerPlugin plugin : this.enabledPlugins) {
       if (plugin.acceptsUrl(url)) {
         return plugin;
       }

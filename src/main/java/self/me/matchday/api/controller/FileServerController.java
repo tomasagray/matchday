@@ -22,6 +22,7 @@ package self.me.matchday.api.controller;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -145,7 +146,8 @@ public class FileServerController {
     final String cookieData = readPostTextData(cookies);
 
     // Login via file server service
-    final ClientResponse response = fileServerService.loginWithCookies(fileServerId, username, password, cookieData);
+    final ClientResponse response =
+        fileServerService.loginWithCookies(fileServerId, username, password, cookieData);
     final String messageText = getResponseMessage(response);
     final MessageResource message = messageResourceAssembler.toModel(messageText);
 
@@ -192,6 +194,57 @@ public class FileServerController {
     return ResponseEntity.status(response.statusCode())
         .contentType(MediaType.APPLICATION_JSON)
         .body(messageResource);
+  }
+
+  // === Plugin management ===
+  @RequestMapping(
+      value = "/file-server/{id}/disable",
+      method = {RequestMethod.POST, RequestMethod.GET},
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public @ResponseBody ResponseEntity<MessageResource> disableFileServerPlugin(
+      @PathVariable("id") final UUID pluginId) {
+
+    ResponseEntity<MessageResource> response;
+
+    Log.i(LOG_TAG, "Attempting to disable file server plugin: " + pluginId);
+    if (fileServerService.disablePlugin(pluginId)) {
+      response =
+          ResponseEntity.status(HttpStatus.OK)
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(messageResourceAssembler.toModel("Successfully disabled plugin with ID: " + pluginId));
+    } else {
+      response =
+          ResponseEntity.status(HttpStatus.BAD_REQUEST)
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(messageResourceAssembler.toModel("Could not disable plugin with ID: " + pluginId));
+    }
+    return response;
+  }
+
+  @RequestMapping(
+      value = "/file-server/{id}/enable",
+      method = {RequestMethod.POST, RequestMethod.GET},
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<MessageResource> enableFileServerPlugin(
+      @PathVariable("id") final UUID pluginId) {
+
+    ResponseEntity<MessageResource> response;
+
+    Log.i(LOG_TAG, "Attempting to enable file server plugin with ID: " + pluginId);
+    if (fileServerService.enablePlugin(pluginId)) {
+      response =
+              ResponseEntity.status(HttpStatus.OK)
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(messageResourceAssembler.toModel("Enabled file server plugin with ID: " + pluginId));
+    } else {
+      response =
+              ResponseEntity.status(HttpStatus.BAD_REQUEST)
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(messageResourceAssembler.toModel("Could not enable file server plugin with ID: " + pluginId));
+    }
+    return  response;
   }
 
   // === Helpers ===
