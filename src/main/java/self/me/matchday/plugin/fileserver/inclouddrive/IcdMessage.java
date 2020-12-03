@@ -25,6 +25,8 @@ import lombok.Data;
 public class IcdMessage {
 
   private String result;
+  private String userid;
   private String message;
+  private String doz;
 
 }

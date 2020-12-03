@@ -29,13 +29,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -46,11 +50,19 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 public class IcdPlugin implements FileServerPlugin {
 
+  public static final String LOG_TAG = "IcdPlugin";
+
+  // Constants
   public static final String USER_AGENT_HEADER = "User-Agent";
+  public static final String USERDATA_COOKIE_NAME = "userdata";
+  public static final int COOKIE_MAX_DAYS = 10;
+  public static final String COOKIE_DOMAIN = ".inclouddrive.com";
+
   // Dependencies
   private final IcdPluginProperties pluginProperties;
   private final WebClient webClient;
@@ -77,24 +89,75 @@ public class IcdPlugin implements FileServerPlugin {
   @Override
   public @NotNull ClientResponse login(@NotNull FileServerUser user) {
 
+    // Result container
+    ClientResponse result;
+
     // Get login URL as a String
     final String loginUrl = pluginProperties.getLoginUri();
     // Translate to raw byte array
     byte[] loginData = getLoginDataByteArray(user);
 
-    // Attempt to login & return response
-    final ClientResponse response =
-        webClient
-            .post()
-            .uri(loginUrl)
-            .header(USER_AGENT_HEADER, pluginProperties.getUserAgent())
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .bodyValue(loginData)
-            .exchange()
-            .block();
+    try {
+      // Attempt to login & return response
+      final ClientResponse response =
+          webClient
+              .post()
+              .uri(loginUrl)
+              .header(USER_AGENT_HEADER, pluginProperties.getUserAgent())
+              .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+              .bodyValue(loginData)
+              .exchange()
+              .block();
 
-    // Correct response & return
-    return correctIcdResponse(response);
+      // Null response
+      if (response == null) {
+        result =
+            ClientResponse.create(HttpStatus.BAD_REQUEST)
+                .body("Login failed! No response from server (response was null)")
+                .build();
+      }
+      // Login attempt "successful"...
+      else if (response.statusCode().is2xxSuccessful()) {
+
+        // Parse response body
+        final String responseBody = response.bodyToMono(String.class).block();
+        final IcdMessage icdMessage = gson.fromJson(responseBody, IcdMessage.class);
+
+        // Check for hidden error
+        if ("error".equals(icdMessage.getResult())) {
+          // It's actually an error, correct response & return
+          return ClientResponse.from(response)
+              .statusCode(HttpStatus.BAD_REQUEST)
+              .body(icdMessage.getMessage())
+              .build();
+        }
+
+        // Extract login cookie
+        final String userData = URLEncoder.encode(icdMessage.getDoz(), StandardCharsets.UTF_8);
+        final ResponseCookie userDataCookie =
+            ResponseCookie.from(USERDATA_COOKIE_NAME, userData)
+                .maxAge(Duration.ofDays(COOKIE_MAX_DAYS))
+                .path("/")
+                .domain(COOKIE_DOMAIN)
+                .secure(true)
+                .build();
+        // Add user data cookie to response
+        result =
+            ClientResponse.from(response)
+                .cookies(cookies -> cookies.add(USERDATA_COOKIE_NAME, userDataCookie))
+                .build();
+      } else {
+        result = response;
+      }
+    } catch (JsonSyntaxException | NullPointerException e) {
+      // Return useful response to end user
+      final String message =
+          String.format("Could not parse response from InCloudDrive: %s", e.getMessage());
+      // Return corrected response
+      result = ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build();
+    }
+    // Return finalized result
+    return result;
   }
 
   @Override
@@ -111,40 +174,15 @@ public class IcdPlugin implements FileServerPlugin {
   public Optional<URL> getDownloadURL(
       @NotNull URL url, @NotNull final Collection<HttpCookie> cookies) throws IOException {
 
-    // Result container
-    Optional<URL> result = Optional.empty();
-
-    // Get page via GET request
-    final ClientResponse response =
-        webClient
-            .get()
-            .uri(url.toString())
-            .header(USER_AGENT_HEADER, pluginProperties.getUserAgent())
-            .cookies(
-                requestCookies -> {
-                  // Map cookies
-                  cookies.forEach(
-                      cookie -> requestCookies.add(cookie.getName(), cookie.getValue()));
-                })
-            .exchange()
-            .block();
-
-    if (response != null) {
-      // Extract body
-      final String body = response.bodyToMono(String.class).block();
-
-      if (body != null) {
-        // Parse the returned HTML and get download link
-        result = parseDownloadPage(body);
-      }
-    }
-
-    // Return parsing result
-    return result;
+    // Create connection to ICD server
+    final HttpURLConnection connection = createHttpConnection(url, cookies);
+    // Read download page from connection
+    final String downloadPage = readDownloadPage(connection);
+    // Parse result & return
+    return parseDownloadPage(downloadPage);
   }
 
   // === Plugin ===
-
   @Override
   public UUID getPluginId() {
     return UUID.fromString(pluginProperties.getId());
@@ -163,43 +201,55 @@ public class IcdPlugin implements FileServerPlugin {
   // === Helpers ===
 
   /**
-   * Extract message body & correct response code from ICD response.
+   * Create & initialize an HTTP GET connection to the InCloudDrive file server.
    *
-   * @param response The raw response from InCloudDrive
-   * @return A corrected ClientResponse
+   * @param url The URL to which we want to connect
+   * @param cookies Any cookies necessary for authentication
+   * @return An initialized HttpURLConnection
+   * @throws IOException If connecting goes awry
    */
-  private @NotNull ClientResponse correctIcdResponse(final ClientResponse response) {
+  private @NotNull HttpURLConnection createHttpConnection(
+      @NotNull URL url, Collection<HttpCookie> cookies) throws IOException {
 
-    // Result containers
-    HttpStatus trueStatus;
-    String message;
+    // Create HttpConnection
+    final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    connection.setRequestMethod("GET");
 
-    try {
-      // Parse response body
-      final String responseBody = response.bodyToMono(String.class).block();
-      final IcdMessage icdMessage = gson.fromJson(responseBody, IcdMessage.class);
+    // set headers
+    connection.setRequestProperty(USER_AGENT_HEADER, pluginProperties.getUserAgent());
+    // combine cookies & set as request header
+    final String cookieHeader =
+        cookies.stream()
+            .map(cookie -> String.format("%s=%s", cookie.getName(), cookie.getValue()))
+            .collect(Collectors.joining("; "));
+    connection.setRequestProperty("Cookie", cookieHeader);
+    // Return initialized connection
+    return connection;
+  }
 
-      // Extract result & message
-      final String result = icdMessage.getResult();
-      message = icdMessage.getMessage();
-      trueStatus = response.statusCode(); // default
+  /**
+   * Read text data from a URLConnection
+   *
+   * @param connection The URL connection
+   * @return A String containing data read from above connection
+   * @throws IOException If there are problems reading data
+   */
+  private String readDownloadPage(@NotNull final HttpURLConnection connection) throws IOException {
 
-      // Correct response code - is it really an error?
-      if (response.statusCode().is2xxSuccessful() && result.equals("error")) {
-        // Yes!
-        trueStatus = HttpStatus.FORBIDDEN;
-      }
-    } catch (JsonSyntaxException | NullPointerException e) {
-      trueStatus = HttpStatus.BAD_GATEWAY;
-      message = "Invalid response from server";
+    // Result container
+    final StringBuilder result = new StringBuilder();
+
+    // connect
+    connection.connect();
+    // read data
+    final BufferedReader reader =
+            new BufferedReader(new InputStreamReader(connection.getInputStream()));
+    String line;
+    while ((line = reader.readLine()) != null) {
+      result.append(line).append("\n");
     }
-
-    // Return corrected response
-    return ClientResponse.create(trueStatus)
-        .headers(httpHeaders -> httpHeaders.addAll(response.headers().asHttpHeaders()))
-        .cookies(cookies -> cookies.addAll(response.cookies()))
-        .body(message)
-        .build();
+    // collate & return
+    return result.toString();
   }
 
   /**
@@ -232,7 +282,7 @@ public class IcdPlugin implements FileServerPlugin {
    * @param user The user that will be logged into the file server
    * @return An array of bytes of the URL encoded String
    */
-  private @NotNull byte[] getLoginDataByteArray(@NotNull FileServerUser user) {
+  private byte[] getLoginDataByteArray(@NotNull FileServerUser user) {
 
     // Container for data
     StringJoiner sj = new StringJoiner("&");
@@ -261,4 +311,54 @@ public class IcdPlugin implements FileServerPlugin {
         (value != null) ? URLEncoder.encode(value.toString(), StandardCharsets.UTF_8) : "";
     return k + "=" + v;
   }
+
+
+  // Saved for possible later use
+
+//  private Optional<URL> webClientReadDownloadPage(
+//      @NotNull URL url, @NotNull Collection<HttpCookie> cookies, Optional<URL> result)
+//      throws MalformedURLException {
+//    // Get page via GET request
+//    final ClientResponse response =
+//        webClient
+//            .get()
+//            .uri(url.toString())
+//            .header(USER_AGENT_HEADER, pluginProperties.getUserAgent())
+//            .cookies(
+//                requestCookies -> {
+//                  // Map cookies
+//                  cookies.forEach(
+//                      cookie -> {
+//                        Log.i(
+//                            LOG_TAG,
+//                            String.format(
+//                                "Adding cookie: %s, value:\n%s",
+//                                cookie.getName(), cookie.getValue()));
+//                        requestCookies.add(cookie.getName(), cookie.getValue());
+//                      });
+//                  // Add file ref cookie
+//                  final String fileRefUrl =
+//                      URLEncoder.encode(
+//                          url.toString().replace("https://", ""), StandardCharsets.UTF_8);
+//                  requestCookies.add("icdreffile", fileRefUrl);
+//                  Log.i(LOG_TAG, "Request cookies:\n" + requestCookies);
+//                })
+//            .exchange()
+//            .block();
+//
+//    if (response != null && response.statusCode().is2xxSuccessful()) {
+//      // Extract body
+//      final String body = response.bodyToMono(String.class).block();
+//
+//      Log.i("IcdPlugin", "Read response from ICD server:\n" + body);
+//
+//      if (body != null) {
+//        // Parse the returned HTML and get download link
+//        result = parseDownloadPage(body);
+//      }
+//    } else {
+//      Log.e("IcdPlugin", "Could not get download link from supplied URL: " + url);
+//    }
+//    return result;
+//  }
 }
