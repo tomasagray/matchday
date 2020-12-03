@@ -19,6 +19,7 @@
 
 package self.me.matchday.plugin.io.diskmanager;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -29,6 +30,7 @@ import self.me.matchday.plugin.PluginProperties;
 @ConfigurationProperties(prefix = "plugin.disk-manager")
 public class DiskManagerProperties extends PluginProperties {
 
+  @Value("${video-resources.file-storage-location}")
   private String storageLocation;
 
   public String getStorageLocation() {

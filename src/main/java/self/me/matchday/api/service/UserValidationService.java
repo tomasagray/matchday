@@ -54,7 +54,7 @@ public class UserValidationService {
 
     final Pattern passwordPattern = Pattern.compile(PASSWORD_REGEX);
     final boolean isValid = (password != null) && passwordPattern.matcher(password).find();
-    Log.i("UserValidation", String.format("Password: %s is valid? %s", password, isValid));
+    Log.i("UserValidation", String.format("Password is valid? %s", isValid));
     return isValid;
   }
 }

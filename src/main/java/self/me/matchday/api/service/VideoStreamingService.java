@@ -21,10 +21,10 @@ package self.me.matchday.api.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import self.me.matchday.config.VideoResourcesConfig;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
@@ -41,7 +41,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,12 +52,15 @@ public class VideoStreamingService {
 
   private static final String LOG_TAG = "VideoStreamingService";
 
+  // Spring dependencies
   private final DiskManager diskManager;
   private final FFmpegPlugin ffmpegPlugin;
   private final EventService eventService;
   private final EventFileService eventFileService;
-  private final VideoResourcesConfig videoResourcesConfig;
   private final PlaylistLocatorService playlistLocatorService;
+  // Configuration
+  @Value("${video-resources.file-storage-location}")
+  private String fileStorageLocation;
 
   @Autowired
   public VideoStreamingService(
@@ -62,14 +68,12 @@ public class VideoStreamingService {
       final FFmpegPlugin ffmpegPlugin,
       final EventService eventService,
       final EventFileService eventFileService,
-      final VideoResourcesConfig videoResourcesConfig,
       final PlaylistLocatorService playlistLocatorService) {
 
     this.diskManager = diskManager;
     this.ffmpegPlugin = ffmpegPlugin;
     this.eventService = eventService;
     this.eventFileService = eventFileService;
-    this.videoResourcesConfig = videoResourcesConfig;
     this.playlistLocatorService = playlistLocatorService;
   }
 
@@ -94,6 +98,11 @@ public class VideoStreamingService {
    */
   public String readPlaylistFile(@NotNull final String eventId, @NotNull final String fileSrcId) {
 
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Attempting to read playlist file for Event: %s, File Source: %s", eventId, fileSrcId));
+
     // Result container
     final StringBuilder result = new StringBuilder();
 
@@ -117,6 +126,11 @@ public class VideoStreamingService {
                 "Unable to read playlist file; EventID: %s, FileSrcID: %s", eventId, fileSrcId),
             e);
       }
+    } else {
+      Log.d(
+          LOG_TAG,
+          String.format(
+              "No playlist locator found for Event: %s, File Source: %s", eventId, fileSrcId));
     }
     return result.toString();
   }
@@ -180,11 +194,7 @@ public class VideoStreamingService {
         // Create storage path
         final Path storageLocation =
             Files.createDirectories(
-                Paths.get(
-                    videoResourcesConfig.getFileStorageLocation(),
-                    videoResourcesConfig.getVideoStorageDirname(),
-                    event.getEventId(),
-                    fileSrcId));
+                Paths.get(this.fileStorageLocation, event.getEventId(), fileSrcId));
 
         // Start FFMPEG transcoding job
         Path playlistPath = ffmpegPlugin.streamUris(uris, storageLocation).getOutputFile();
@@ -208,16 +218,13 @@ public class VideoStreamingService {
     return result;
   }
 
-  /**
-   * Destroy all currently-running video streaming tasks
-   *
-   */
+  /** Destroy all currently-running video streaming tasks */
   public void killAllStreamingTasks() {
 
-    Log.i(LOG_TAG, String.format("Killing %s streaming tasks", ffmpegPlugin.getStreamingTaskCount()));
+    Log.i(
+        LOG_TAG, String.format("Killing %s streaming tasks", ffmpegPlugin.getStreamingTaskCount()));
     ffmpegPlugin.interruptAllStreamTasks();
   }
-
 
   /**
    * Delete video data, including playlist & containing directory, from disk.

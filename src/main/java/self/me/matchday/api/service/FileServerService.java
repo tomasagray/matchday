@@ -452,7 +452,7 @@ public class FileServerService {
    * @param url The external URL
    * @return The first registered fileserver manager which can handle the URL.
    */
-  private @Nullable FileServerPlugin getEnabledPluginForUrl(@NotNull final URL url) {
+  public @Nullable FileServerPlugin getEnabledPluginForUrl(@NotNull final URL url) {
 
     // search only ENABLED plugins
     for (final FileServerPlugin plugin : this.enabledPlugins) {

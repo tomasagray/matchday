@@ -19,9 +19,9 @@
 
 package self.me.matchday.api.service;
 
-import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -37,19 +37,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-@NoArgsConstructor
 public class VideoResourceInterceptor implements HandlerInterceptor {
 
-  private static final String LOG_TAG = "Interceptor";
-  private static final Long PROCESS_DELAY = 1_000L;
-  private static final Pattern DATA_PATH_PATTERN =
-      Pattern.compile("[\\w\\\\/]+(\\w{32})[\\\\/]([\\w-]{32,36})[\\\\/][\\w]+.m3u8");
+  private static final String LOG_TAG = "VideoResourceInterceptor";
+  private static final Long PROCESS_DELAY = 3_000L;
 
-  @Autowired private VideoStreamingService videoStreamingService;
+  @Value("${video-resources.video-stream-path-pattern}")
+  private Pattern urlPattern;
+  @Value("${video-resources.file-storage-location}")
   private String fileStorageLocation;
+  private final VideoStreamingService videoStreamingService;
 
-  public VideoResourceInterceptor(@NotNull final String fileStorageLocation) {
-    this.fileStorageLocation = fileStorageLocation;
+  public VideoResourceInterceptor(@Autowired final VideoStreamingService videoStreamingService) {
+    this.videoStreamingService = videoStreamingService;
   }
 
   /**
@@ -70,10 +70,11 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
       @NotNull final Object handler) {
 
     final String servletPath = request.getServletPath();
+    Log.i(LOG_TAG, LOG_TAG + " caught request at path: " + servletPath);
 
     try {
       // Validate request path
-      final Matcher pathMatcher = DATA_PATH_PATTERN.matcher(servletPath);
+      final Matcher pathMatcher = urlPattern.matcher(servletPath);
       if (pathMatcher.find()) {
 
         // Get playlist file path
@@ -92,17 +93,24 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
             // Stream video files to local disk
             final Optional<VideoStreamPlaylistLocator> playlistOptional =
                 videoStreamingService.createVideoStream(eventId, fileSrcId);
-            playlistOptional.ifPresent(
-                playlistLocator ->
-                    Log.i(
-                        LOG_TAG,
-                        "Created video stream at: "
-                            + playlistLocator.getPlaylistPath().toAbsolutePath()));
-
+            if (playlistOptional.isPresent()) {
+              VideoStreamPlaylistLocator playlistLocator = playlistOptional.get();
+              Log.i(
+                  LOG_TAG,
+                  "Created video stream at: " + playlistLocator.getPlaylistPath().toAbsolutePath());
+            } else {
+              Log.d(
+                  LOG_TAG,
+                  String.format(
+                      "Could not create playlist for Event: %s, File Source: %s",
+                      eventId, fileSrcId));
+            }
             // Ensure playlist creation has begun
             Thread.sleep(PROCESS_DELAY);
           }
         }
+      } else {
+        Log.e(LOG_TAG, "Could not extract necessary data from servlet path: " + servletPath);
       }
     } catch (Exception e) {
       Log.e(

@@ -21,14 +21,15 @@ package self.me.matchday.config;
 
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import self.me.matchday.api.service.VideoResourceInterceptor;
+import self.me.matchday.util.Log;
 
 @Configuration
 @EnableWebMvc
@@ -37,24 +38,21 @@ import self.me.matchday.api.service.VideoResourceInterceptor;
 @Data
 public class VideoResourcesConfig implements WebMvcConfigurer {
 
+  private VideoResourceInterceptor videoResourceInterceptor;
+  private String videoStreamInterceptPattern;
   private String fileStorageLocation;
-  private String videoStorageDirname;
+
+  public VideoResourcesConfig(@Autowired final VideoResourceInterceptor videoResourceInterceptor) {
+    this.videoResourceInterceptor = videoResourceInterceptor;
+  }
 
   @Override
   public void addInterceptors(@NotNull final InterceptorRegistry registry) {
 
-    registry
-        .addInterceptor(createVideoResourceInterceptor())
-        .addPathPatterns(String.format("/%s/**/playlist.m3u8", videoStorageDirname));
-  }
+    Log.i(
+        "VideoResourcesConfig",
+        "Adding Interceptor for path matching pattern:" + videoStreamInterceptPattern);
 
-  /**
-   * Ensure instance of interceptor is managed by Spring
-   *
-   * @return A VideoResourceInterceptor instance
-   */
-  @Bean
-  public VideoResourceInterceptor createVideoResourceInterceptor() {
-    return new VideoResourceInterceptor(fileStorageLocation);
+    registry.addInterceptor(videoResourceInterceptor).addPathPatterns(videoStreamInterceptPattern);
   }
 }
