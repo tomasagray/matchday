@@ -27,13 +27,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.model.Competition;
-import self.me.matchday.model.Fixture;
+import self.me.matchday.CreateTestData;
 import self.me.matchday.model.Highlight;
-import self.me.matchday.model.Season;
 import self.me.matchday.util.Log;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,17 +59,7 @@ class HighlightServiceTest {
     HighlightServiceTest.competitionService = competitionService;
 
     // Create test data
-    final Competition testCompetition = new Competition("TEST COMPETITION");
-    final Fixture testFixture = new Fixture(1);
-    final Season testSeason = new Season();
-    HighlightServiceTest.testHighlight =
-        new Highlight.HighlightBuilder()
-            .setTitle("Test Highlight Show")
-            .setCompetition(testCompetition)
-            .setFixture(testFixture)
-            .setSeason(testSeason)
-            .setDate(LocalDateTime.now())
-            .build();
+   HighlightServiceTest.testHighlight = CreateTestData.createHighlightShow();
 
     // Add test highlight show to DB
     HighlightServiceTest.eventService.saveEvent(testHighlight);

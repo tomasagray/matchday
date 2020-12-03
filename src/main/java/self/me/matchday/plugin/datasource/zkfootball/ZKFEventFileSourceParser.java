@@ -141,9 +141,10 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
     Element sibling = element.nextElementSibling();
 
     // Find the next a[href] after the current element, but ending at the next part
-    while (sibling != null && !(EventPartIdentifier.isPartIdentifier(element.ownText()))) {
+    while (sibling != null && !(EventPartIdentifier.isPartIdentifier(sibling.ownText()))) {
       if ("a".equalsIgnoreCase(sibling.tagName())) {
         result = Optional.of(sibling);
+        break;
       }
       // advance token
       sibling = sibling.nextElementSibling();

@@ -27,7 +27,8 @@ import self.me.matchday.util.Log;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import static self.me.matchday.model.EventFileSource.Resolution.R_1080p;
@@ -44,8 +45,10 @@ public class CreateTestData {
 
   public static final Pattern URL_PATTERN =
       Pattern.compile("http[s]?://192.168.0.101/matchday-testing/[\\w./-]*");
+  private static final Random numGen = new Random();
 
   // initialize URLs
+
   static {
     try {
       FIRST_HALF_URL = new URL("http://192.168.0.101/matchday-testing/video/barca-rm-2009/1.ts");
@@ -60,7 +63,8 @@ public class CreateTestData {
     }
   }
 
-  // ======================================== EVENTS =============================================================
+
+  // ======================================== EVENTS =======================================================
 
   public static Match createTestMatch() {
     // Create & save test match & EventFileSource
@@ -71,6 +75,7 @@ public class CreateTestData {
             .setDate(LocalDateTime.now())
             .setCompetition(testCompetition)
             .setHomeTeam(testTeam)
+            .setAwayTeam(testTeam)
             .build();
 
     // Create file source & event files
@@ -82,14 +87,32 @@ public class CreateTestData {
     return testMatch;
   }
 
+  public static Highlight createHighlightShow() {
+
+    // Create test highlight show
+    final String title = "Test Highlight Show " + numGen.nextInt();
+    final Competition testCompetition = createTestCompetition();
+    final Fixture testFixture = new Fixture(numGen.nextInt(34));
+    final Season testSeason = new Season();
+
+    return
+            new Highlight.HighlightBuilder()
+                    .setTitle(title)
+                    .setCompetition(testCompetition)
+                    .setFixture(testFixture)
+                    .setSeason(testSeason)
+                    .setDate(LocalDateTime.now())
+                    .build();
+  }
+
   @NotNull
   public static Competition createTestCompetition() {
-    return new Competition("TEST COMPETITION");
+    return new Competition("TEST COMPETITION " + numGen.nextInt());
   }
 
   @NotNull
   public static Team createTestTeam() {
-    return new Team("TEST TEAM");
+    return new Team("TEST TEAM " + numGen.nextInt());
   }
 
   public static EventFileSource createTestEventFileSource() {
@@ -119,15 +142,13 @@ public class CreateTestData {
     return List.of(preMatch, firstHalf, secondHalf, postMatch);
   }
 
-
   // =============================================== FILE SERVER ===============================================
 
   public static FileServerUser createTestFileServerUser() {
 
-    final Random r = new Random();
     // ensure different userdata each time
-    final String username = String.format("user-%s@server.com", r.nextInt(Integer.MAX_VALUE));
-    final String password = String.format("password-%s", r.nextInt(Integer.MAX_VALUE));
+    final String username = String.format("user-%s@server.com", numGen.nextInt(Integer.MAX_VALUE));
+    final String password = String.format("password-%s", numGen.nextInt(Integer.MAX_VALUE));
     return new FileServerUser(username, password);
   }
 }

@@ -94,7 +94,7 @@ class GManPluginTest {
 
     // Validate Event count
     final int actualEventCount = eventCounter.get();
-    final int expectedEventCount = 5;
+    final int expectedEventCount = 3;
 
     Log.i(LOG_TAG, String.format("Found %s Events", actualEventCount));
     assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);

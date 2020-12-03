@@ -73,7 +73,6 @@ class ResourceFileReaderTest {
         assertThat(gManPatterns.getBitrateConversionFactor()).isNotEqualTo(0);
         assertThat(gManPatterns.getChannel()).isNotNull();
         assertThat(gManPatterns.getContainer()).isNotNull();
-        assertThat(gManPatterns.getFileLink()).isNotNull();
         assertThat(gManPatterns.getFramerate()).isNotNull();
         assertThat(gManPatterns.getStartOfMetadata()).isNotNull();
         assertThat(gManPatterns.getMetadataKvDelimiter()).isNotNull();

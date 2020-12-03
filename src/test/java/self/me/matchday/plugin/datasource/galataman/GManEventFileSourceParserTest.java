@@ -139,7 +139,7 @@ class GManEventFileSourceParserTest {
   @DisplayName("Validate event file parsing")
   void testSourceFiles() {
 
-    final int expectedFileCount = 2;
+    final int expectedFileCount = 4;
     final List<EventFile> actualEventFiles1 = firstSource.getEventFiles();
     final List<EventFile> actualEventFiles2 = secondSource.getEventFiles();
 

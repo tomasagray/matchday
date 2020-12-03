@@ -23,22 +23,24 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.model.FileSize;
 import self.me.matchday.util.Log;
-import self.me.matchday.util.ResourceFileReader;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
 @DisplayName("DiskManagerTest - Verify DiskManager plugin")
 class DiskManagerTest {
 
     // Test constants
     private static final String LOG_TAG = "DiskManagerTest";
-    public static final String PLUGIN_PROPERTIES = "plugins\\disk-manager\\disk-manager.properties";
-    public static final String STORAGE_LOCATION = "plugin.disk-manager.storage-location";
 
     // Test criteria
     private static final Long SPACE_ENOUGH_FOR = FileSize.ofGigabytes(1);
@@ -47,18 +49,8 @@ class DiskManagerTest {
     private static DiskManager diskManager;
 
     @BeforeAll
-    static void setUp() throws IOException {
-
-        // Create properties
-        final DiskManagerProperties pluginProperties = new DiskManagerProperties();
-        // Read properties from disk
-        Map<String, String> resources =
-                ResourceFileReader.readPropertiesResource(pluginProperties.getClass(), PLUGIN_PROPERTIES);
-        // Setup properties
-        pluginProperties.setStorageLocation(resources.get(STORAGE_LOCATION));
-
-        // Setup plugin instance
-        diskManager = new DiskManager(pluginProperties);
+    static void setUp(@Autowired final DiskManager diskManager) {
+        DiskManagerTest.diskManager = diskManager;
     }
 
     @Test

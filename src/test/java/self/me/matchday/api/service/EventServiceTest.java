@@ -67,6 +67,7 @@ class EventServiceTest {
 
     Match match = CreateTestData.createTestMatch();
     eventService.saveEvent(match);
+
     // Get managed copy
     final Optional<Event> eventOptional = eventService.fetchById(match.getEventId());
     assertThat(eventOptional).isPresent();

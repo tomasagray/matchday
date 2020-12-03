@@ -19,7 +19,6 @@
 
 package self.me.matchday.plugin.datasource.galataman;
 
-import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,6 +48,7 @@ class GManPatternsTest {
     }
 
     @Test
+    @DisplayName("Validate A/V delimiter is the correct character sequence")
     void testAvDataDelimiter() {
 
         final String actualAVDelimiter = gManPatterns.getAvDataDelimiter();
@@ -63,6 +63,7 @@ class GManPatternsTest {
     }
 
     @Test
+    @DisplayName("Validate channel pattern correctly parses audio channels")
     void testChannelMatcher() {
 
         final String TEST_CHANNEL = "5.1 channels";
@@ -77,11 +78,12 @@ class GManPatternsTest {
         // test pattern
         final Matcher surroundChannelMatcher = gManPatterns.getChannelMatcher(TEST_CHANNEL);
         final boolean channelFound = surroundChannelMatcher.find();
-        assertThat(channelFound);
+        assertThat(channelFound).isTrue();
         assertThat(surroundChannelMatcher.group(1)).isEqualTo("5.1");
     }
 
     @Test
+    @DisplayName("Validate bitrate pattern correctly parses video bitrate")
     void testBitrateMatcher() {
 
         final String TEST_MBPS = "4 Mbps";
@@ -97,11 +99,12 @@ class GManPatternsTest {
         // test pattern
         final boolean foundMbps = gManPatterns.getBitrateMatcher(TEST_MBPS).find();
         final boolean foundKbps = gManPatterns.getBitrateMatcher(TEST_KBPS).find();
-        assertThat(foundMbps);
-        assertThat(foundKbps);
+        assertThat(foundMbps).isTrue();
+        assertThat(foundKbps).isTrue();
     }
 
     @Test
+    @DisplayName("Validate video container pattern parses video container")
     void testContainerMatcher() {
 
         final String TEST_CONTAINER = "H.264 mkv";
@@ -115,10 +118,11 @@ class GManPatternsTest {
 
         // test pattern
         final boolean foundContainer = gManPatterns.getContainerMatcher(TEST_CONTAINER).find();
-        assertThat(foundContainer);
+        assertThat(foundContainer).isTrue();
     }
 
     @Test
+    @DisplayName("Ensure video framerate pattern correctly parses framerate")
     void testFramerateMatcher() {
 
         final String TEST_FPS = "25fps";
@@ -132,28 +136,11 @@ class GManPatternsTest {
 
         // test pattern
         final boolean foundFps = gManPatterns.getFramerateMatcher(TEST_FPS).find();
-        assertThat(foundFps);
+        assertThat(foundFps).isTrue();
     }
 
     @Test
-    void testFileLinkMatcher() {
-
-        final String TEST_URL =
-                "https://www.inclouddrive.com/file/sIQ_tGzZEEtFHCYxYzNbYQ/20201014-england-denmark-0-eng-720p.mkv";
-
-        final String actualFileLink = gManPatterns.getFileLink();
-        Log.i(LOG_TAG, "Testing file link pattern: " + actualFileLink);
-
-        assertThat(actualFileLink)
-                .isNotNull()
-                .isNotEmpty();
-
-        // test pattern
-        final boolean linkMatches = gManPatterns.getFileLinkMatcher(TEST_URL).find();
-        assertThat(linkMatches);
-    }
-
-    @Test
+    @DisplayName("Validate bitrate conversion factor correctly converts bitrate units")
     void testBitrateConversionFactor() {
 
         final Long actualBitrateConversionFactor = gManPatterns.getBitrateConversionFactor();
@@ -161,28 +148,5 @@ class GManPatternsTest {
 
         Log.i(LOG_TAG, "Testing bitrate conversion factor: " + actualBitrateConversionFactor);
         assertThat(actualBitrateConversionFactor).isEqualTo(expectedBitrateConversionFactor);
-    }
-
-    @Test
-    void isSourceData() {
-
-        final Element TEST_ELEMENT = new Element("b").text("Channel");
-
-        Log.i(LOG_TAG, "Testing source data detection pattern");
-        final boolean isSourceData = gManPatterns.isSourceData(TEST_ELEMENT);
-        assertThat(isSourceData);
-    }
-
-    @Test
-    void isVideoLink() {
-
-        final Element TEST_ELEMENT =
-                new Element("a")
-                        .attr("href",
-                                "https://www.inclouddrive.com/file/NbNS8pAecuwb2UZZo8VVWg/20201014-england-denmark-1-eng-720p.mkv");
-
-        Log.i(LOG_TAG, "Testing video link detection");
-        final boolean isVideoLink = gManPatterns.isVideoLink(TEST_ELEMENT);
-        assertThat(isVideoLink);
     }
 }
