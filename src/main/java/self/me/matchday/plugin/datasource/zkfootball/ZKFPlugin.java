@@ -58,15 +58,12 @@ public class ZKFPlugin implements DataSourcePlugin<Stream<Event>> {
       final EventMetadataParser eventMetadataParser,
       final ZKFEventFileSourceParser fileSourceParser) {
 
-    // Pass dependencies to super class
-    //    super(zkfPatterns, eventMetadataParser, fileSourceParser);
     this.eventMetadataParser = eventMetadataParser;
-
     this.eventMetadataParser.setBloggerParserPatterns(zkfPatterns);
     this.fileSourceParser = fileSourceParser;
     this.pluginProperties = pluginProperties;
-
     this.bloggerPlugin = bloggerPlugin;
+
     // Setup Blogger plugin
     this.bloggerPlugin.setBaseUrl(pluginProperties.getBaseUrl());
     this.bloggerPlugin.setFetchMode(FetchMode.JSON);
@@ -99,20 +96,25 @@ public class ZKFPlugin implements DataSourcePlugin<Stream<Event>> {
     return bloggerPlugin.getSnapshot(snapshotRequest).map(this::getEventStream);
   }
 
-
+  /**
+   * Get a Stream<> of Events from a Blogger blog
+   *
+   * @param blogger The blog instance
+   * @return A Stream of Events
+   */
   private Stream<Event> getEventStream(@NotNull final Blogger blogger) {
     return blogger
-            .getPosts()
-            .map(
-                    bloggerPost -> {
-                      // Parse Event
-                      final Event event = eventMetadataParser.getEvent(bloggerPost.getTitle());
-                      // ParseEvent file sources & add to Event
-                      final List<EventFileSource> eventFileSources =
-                              fileSourceParser.getEventFileSources(bloggerPost.getContent());
-                      event.addFileSources(eventFileSources);
-                      // Return completed Event
-                      return event;
-                    });
+        .getPosts()
+        .map(
+            bloggerPost -> {
+              // Parse Event
+              final Event event = eventMetadataParser.getEvent(bloggerPost.getTitle());
+              // ParseEvent file sources & add to Event
+              final List<EventFileSource> eventFileSources =
+                  fileSourceParser.getEventFileSources(bloggerPost.getContent());
+              event.addFileSources(eventFileSources);
+              // Return completed Event
+              return event;
+            });
   }
 }

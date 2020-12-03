@@ -22,7 +22,6 @@ package self.me.matchday.plugin.datasource.galataman;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
-import org.jsoup.nodes.Element;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -51,7 +50,6 @@ public class GManPatterns extends BloggerParserPatterns {
   private Long bitrateConversionFactor;
   private String container;
   private String framerate;
-  private String fileLink;
 
   public String getAvDataDelimiter() {
     return
@@ -86,21 +84,4 @@ public class GManPatterns extends BloggerParserPatterns {
             .matcher(data);
   }
 
-  public Matcher getFileLinkMatcher(@NotNull final String data) {
-    return
-        Pattern
-            .compile(fileLink, Pattern.CASE_INSENSITIVE)
-            .matcher(data);
-  }
-
-  public boolean isSourceData(@NotNull final Element elem) {
-    return ("b".equals(elem.tagName())) && (elem.text().contains("Channel"));
-  }
-
-  public boolean isVideoLink(@NotNull final Element elem) {
-
-    final String href = elem.attr("href");
-    return
-        ("a".equals(elem.tagName())) && (getFileLinkMatcher(href).find());
-  }
 }

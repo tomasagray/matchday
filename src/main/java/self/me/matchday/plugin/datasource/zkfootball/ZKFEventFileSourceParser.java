@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -27,10 +27,12 @@ import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.plugin.datasource.bloggerparser.EventFileSourceParser;
+import self.me.matchday.util.Log;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,13 +45,20 @@ import java.util.*;
 @Component
 public class ZKFEventFileSourceParser implements EventFileSourceParser {
 
+  private static final String LOG_TAG = "ZKFEventFileSourceParser";
+
   private final ZKFPatterns zkfPatterns;
   private final ZKFFileSourceMetadataParser metadataParser;
+  private final FileServerService fileServerService;
 
-  @Autowired
-  public ZKFEventFileSourceParser(final ZKFPatterns zkfPatterns, final ZKFFileSourceMetadataParser metadataParser) {
+  public ZKFEventFileSourceParser(
+      @Autowired final ZKFPatterns zkfPatterns,
+      @Autowired final ZKFFileSourceMetadataParser metadataParser,
+      @Autowired final FileServerService fileServerService) {
+
     this.zkfPatterns = zkfPatterns;
     this.metadataParser = metadataParser;
+    this.fileServerService = fileServerService;
   }
 
   @Override
@@ -75,52 +84,66 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
 
     // Get all potential metadata identifiers
     final Elements elements = dom.select("b");
-    elements.forEach(element -> {
+    elements.forEach(
+        element -> {
+          final String elementText = element.ownText();
+          // EventFile
+          if (EventPartIdentifier.isPartIdentifier(elementText)) {
 
-      // EventFile
-      if (EventPartIdentifier.isPartIdentifier(element.ownText())) {
-        final Optional<EventFile> eventFile = getEventFile(element);
-        eventFile.ifPresent(eventFiles::add);
+            // Get part identifier
+            final EventPartIdentifier partIdentifier = EventPartIdentifier.fromString(elementText);
+            final Optional<Element> linkOptional = getNextLink(element);
+            linkOptional.ifPresent(
+                link -> {
+                  // Get link href
+                  final String href = link.attr("href");
+                  // Attempt to parse
+                  try {
+                    final URL url = new URL(href);
+                    // Ensure link is one the server can parse
+                    if (fileServerService.isVideoLink(url)) {
+                      // Create EventFile & add to collection
+                      final EventFile eventFile = new EventFile(partIdentifier, url);
+                      eventFiles.add(eventFile);
+                    }
+                  } catch (MalformedURLException e) {
+                    Log.e(LOG_TAG, "Found a link, but could not parse it: " + href, e);
+                  }
+                });
+          }
+          // EventFileSource
+          else if (zkfPatterns.isMetadata(element.text())) {
 
-        // EventFileSource
-      } else if (zkfPatterns.isMetadata(element.text())) {
-
-        // Create a file source from data
-        final EventFileSource fileSource = metadataParser.createFileSource(element.select("span"));
-        // Add EventFiles to the current EventFileSource
-        fileSource.getEventFiles().addAll(eventFiles);
-        // Add to collection
-        fileSources.add(fileSource);
-        // Reset EventFiles container
-        eventFiles.clear();
-      }
-    });
+            // Create a file source from data
+            final EventFileSource fileSource =
+                metadataParser.createFileSource(element.select("span"));
+            // Add EventFiles to the current EventFileSource
+            fileSource.getEventFiles().addAll(eventFiles);
+            // Add to collection
+            fileSources.add(fileSource);
+            // Reset EventFiles container
+            eventFiles.clear();
+          }
+        });
 
     return fileSources;
   }
 
   /**
-   * Given a DOM structure element, attempt to parse an EventFile
+   * Given a DOM structure element, find the next link (A) after it in the DOM structure
    *
-   * @param element The DOM element which may contain an EventFile
-   * @return An Optional<> which may contain an EventFile
+   * @param element The DOM element containing an Event part identifier
+   * @return An Optional which contains the link, if it was found
    */
-  private Optional<EventFile> getEventFile(@NotNull final Element element) {
+  private Optional<Element> getNextLink(@NotNull final Element element) {
 
-    Optional<EventFile> result = Optional.empty();
-    final String ownText = element.ownText();
-    final EventPartIdentifier partIdentifier = EventPartIdentifier.fromString(ownText);
-
-    // Find the next a[href] after the current element
+    Optional<Element> result = Optional.empty();
     Element sibling = element.nextElementSibling();
-    while (sibling != null) {
-      if ("a".equals(sibling.tag().getName())) {
-        // Extract link href
-        final String href = sibling.attr("href");
-        try {
-          result = Optional.of(new EventFile(partIdentifier, new URL(href)));
-        } catch (MalformedURLException ignore) {}
-        break;  // only find one link
+
+    // Find the next a[href] after the current element, but ending at the next part
+    while (sibling != null && !(EventPartIdentifier.isPartIdentifier(element.ownText()))) {
+      if ("a".equalsIgnoreCase(sibling.tagName())) {
+        result = Optional.of(sibling);
       }
       // advance token
       sibling = sibling.nextElementSibling();
