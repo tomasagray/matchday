@@ -19,18 +19,10 @@
 
 package self.me.matchday.api.resource;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
@@ -45,10 +37,12 @@ import self.me.matchday.api.controller.MatchController;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.Fixture;
-import self.me.matchday.model.Match;
-import self.me.matchday.model.Season;
+import self.me.matchday.model.*;
+
+import java.time.LocalDateTime;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @Builder
@@ -119,8 +113,14 @@ public class EventResource extends RepresentationModel<EventResource> {
       if (entity instanceof Match) {
         // Cast to Match
         final Match match = (Match) entity;
-        eventResource.setHomeTeam(teamResourceAssembler.toModel(match.getHomeTeam()));
-        eventResource.setAwayTeam(teamResourceAssembler.toModel(match.getAwayTeam()));
+        final Team homeTeam = match.getHomeTeam();
+        final Team awayTeam = match.getAwayTeam();
+        if (homeTeam != null) {
+          eventResource.setHomeTeam(teamResourceAssembler.toModel(homeTeam));
+        }
+        if (awayTeam != null) {
+          eventResource.setAwayTeam(teamResourceAssembler.toModel(awayTeam));
+        }
         // add self link
         eventResource.add(linkTo(
             methodOn(MatchController.class)
