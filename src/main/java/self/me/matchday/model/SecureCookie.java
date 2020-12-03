@@ -19,15 +19,17 @@
 
 package self.me.matchday.model;
 
-import java.time.Duration;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.time.Duration;
 
 /**
  * Wraps Spring's HttpCookie & ResponseCookie classes for JPA persistence
@@ -41,6 +43,7 @@ public class SecureCookie {
   private Long id;
   // HttpCookie
   private final String name;
+  @Column(columnDefinition = "LONGTEXT")
   private final String value;
   // ResponseCookie
   @Nullable
@@ -55,8 +58,8 @@ public class SecureCookie {
   private String sameSite;
 
   public SecureCookie() {
-    this.name = "null";
-    this.value = "null";
+    this.name = null;
+    this.value = null;
   }
 
   public SecureCookie(@NotNull final String name, @NotNull final String value) {
@@ -89,6 +92,12 @@ public class SecureCookie {
     return secureCookie;
   }
 
+  /**
+   * Map a SecureCookie back to a Spring HttpCookie
+   *
+   * @param secureCookie The SecureCookie to be converted to a Spring cookie
+   * @return A Spring HttpCookie
+   */
   public static HttpCookie toSpringCookie(@NotNull final SecureCookie secureCookie) {
 
     // If secure cookie is a response cookie
