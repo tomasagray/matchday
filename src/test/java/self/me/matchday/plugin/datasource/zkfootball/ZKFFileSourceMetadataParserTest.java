@@ -32,6 +32,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
 import self.me.matchday.model.FileSize;
+import self.me.matchday.model.MD5String;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -49,7 +50,7 @@ class ZKFFileSourceMetadataParserTest {
   private static EventFileSource testFileSource;
 
   @BeforeAll
-  static void setUp(@Autowired final ZKFFileSourceMetadataParser metadataParser)
+  static void setUp(@Autowired final ZKFPatterns zkfPatterns)
       throws IOException {
 
     final String metadataHtml =
@@ -60,7 +61,9 @@ class ZKFFileSourceMetadataParserTest {
 
     // Parse test data
     final Document document = Jsoup.parse(metadataHtml);
-    testFileSource = metadataParser.createFileSource(document.getAllElements());
+    final ZKFFileMetadata fileMetadata = new ZKFFileMetadata(document.getAllElements(), zkfPatterns);
+    testFileSource = EventFileSource.createEventFileSource(fileMetadata, MD5String.generate());
+
   }
 
   @Test

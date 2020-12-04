@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -81,7 +82,10 @@ class FFmpegPluginTest {
       }
 
       // initialize test URI
-      testUri = CreateTestData.FIRST_HALF_URL.toURI();
+      final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
+      assertThat(firstHalfUrl).isNotNull();
+      final String baseUrl = firstHalfUrl.toString().replaceAll("\\?[\\w]*=[\\w]*", "");
+      testUri = new URI(baseUrl);
 
     } catch (NullPointerException | URISyntaxException e) {
       e.printStackTrace();
@@ -101,7 +105,8 @@ class FFmpegPluginTest {
   void streamUris() throws InterruptedException {
 
     // Setup test data
-    final Path streamingPath = ffmpegPlugin.streamUris(List.of(testUri), storageLocation.toPath()).getOutputFile();
+    final Path streamingPath =
+        ffmpegPlugin.streamUris(List.of(testUri), storageLocation.toPath()).getOutputFile();
     Log.i(
         LOG_TAG,
         String.format(
@@ -159,7 +164,8 @@ class FFmpegPluginTest {
   void killStreamingTask() throws InterruptedException {
 
     // Start a new task
-    final FFmpegTask streamingTask = ffmpegPlugin.streamUris(List.of(testUri), storageLocation.toPath());
+    final FFmpegTask streamingTask =
+        ffmpegPlugin.streamUris(List.of(testUri), storageLocation.toPath());
     Log.i(LOG_TAG, "Created streaming task to: " + streamingTask.getOutputFile());
     // Wait...
     Thread.sleep(5_000L);

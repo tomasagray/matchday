@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
+import self.me.matchday.model.MD5String;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -46,7 +47,7 @@ class GManFileSourceMetadataParserTest {
   private static EventFileSource testFileSource;
 
   @BeforeAll
-  static void setUp(@Autowired final GManFileSourceMetadataParser fileSourceMetadataParser)
+  static void setUp(@Autowired final GManPatterns patterns)
       throws IOException {
 
     // Read test data file
@@ -59,7 +60,8 @@ class GManFileSourceMetadataParserTest {
     Log.i(LOG_TAG, "Read test data:\n" + postHtml);
 
     // Create test data
-    testFileSource = fileSourceMetadataParser.createFileSource(postHtml);
+    final GManFileMetadata metadata = new GManFileMetadata(postHtml, patterns);
+    testFileSource = EventFileSource.createEventFileSource(metadata, MD5String.generate());
   }
 
   @Test

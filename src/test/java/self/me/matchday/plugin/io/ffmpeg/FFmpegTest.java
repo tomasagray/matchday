@@ -30,6 +30,7 @@ import self.me.matchday.util.Log;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -60,8 +61,13 @@ class FFmpegTest {
             MatchdayApplication.class, "video-resources.properties");
 
     // Create URLs
+    final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
+    final URL secondHalfUrl = CreateTestData.getSecondHalfUrl();
+    assertThat(firstHalfUrl).isNotNull();
+    assertThat(secondHalfUrl).isNotNull();
+
     final List<URI> urls =
-        List.of(CreateTestData.FIRST_HALF_URL.toURI(), CreateTestData.SECOND_HALF_URL.toURI());
+        List.of(firstHalfUrl.toURI(), secondHalfUrl.toURI());
     storageLocation = resources.get("video-resources.file-storage-location") + "\\test_out";
 
     hlsStreamTask = ffmpeg.getHlsStreamTask(urls, Path.of(storageLocation));

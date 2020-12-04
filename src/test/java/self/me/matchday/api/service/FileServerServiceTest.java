@@ -170,8 +170,11 @@ class FileServerServiceTest {
     // Ensure user is logged in
     fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
 
+    final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
+    assertThat(firstHalfUrl).isNotNull();
+
     final Optional<URL> optionalURL =
-        fileServerService.getDownloadUrl(CreateTestData.FIRST_HALF_URL);
+        fileServerService.getDownloadUrl(firstHalfUrl);
     assertThat(optionalURL.isPresent()).isTrue();
 
     optionalURL.ifPresent(
@@ -185,8 +188,11 @@ class FileServerServiceTest {
   @DisplayName("Validate plugin refresh rate retrieval in plugin service")
   void getFileServerRefreshRate() {
 
+    final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
+    assertThat(firstHalfUrl).isNotNull();
+
     final Duration actualServerRefreshRate =
-        fileServerService.getFileServerRefreshRate(CreateTestData.FIRST_HALF_URL);
+        fileServerService.getFileServerRefreshRate(firstHalfUrl);
     final Duration expectedServerRefreshRate = testFileServerPlugin.getRefreshRate();
 
     assertThat(actualServerRefreshRate).isEqualTo(expectedServerRefreshRate);

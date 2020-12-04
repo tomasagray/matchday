@@ -19,6 +19,7 @@
 
 package self.me.matchday;
 
+import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.*;
 import self.me.matchday.plugin.fileserver.FileServerUser;
@@ -31,28 +32,19 @@ import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static self.me.matchday.model.EventFileSource.Resolution.R_1080p;
 
 public class CreateTestData {
 
   private static final String LOG_TAG = "CreateTestData";
 
-  public static URL FIRST_HALF_URL;
-  public static URL SECOND_HALF_URL;
   public static URL GMAN_HTML;
   public static URL ZKF_JSON_URL;
   public static URL NITROFLARE_DL_URL;
 
-  public static final Pattern URL_PATTERN =
-      Pattern.compile("http[s]?://192.168.0.101/matchday-testing/[\\w./-]*");
-  private static final Random numGen = new Random();
-
-  // initialize URLs
-
   static {
     try {
-      FIRST_HALF_URL = new URL("http://192.168.0.101/matchday-testing/video/barca-rm-2009/1.ts");
-      SECOND_HALF_URL = new URL("http://192.168.0.101/matchday-testing/video/barca-rm-2009/2.ts");
       GMAN_HTML = new URL("http://192.168.0.101/matchday-testing/gman.html");
       ZKF_JSON_URL = new URL("http://192.168.0.101/matchday-testing/zkf.json");
       NITROFLARE_DL_URL =
@@ -63,8 +55,11 @@ public class CreateTestData {
     }
   }
 
+  public static final Pattern URL_PATTERN =
+      Pattern.compile("http[s]?://192.168.0.101/matchday-testing/[\\w./-]*");
+  private static final Random numGen = new Random();
 
-  // ======================================== EVENTS =======================================================
+  // ================ EVENTS ======================
 
   public static Match createTestMatch() {
     // Create & save test match & EventFileSource
@@ -76,6 +71,8 @@ public class CreateTestData {
             .setCompetition(testCompetition)
             .setHomeTeam(testTeam)
             .setAwayTeam(testTeam)
+            .setFixture(new Fixture(1))
+            .setSeason(new Season())
             .build();
 
     // Create file source & event files
@@ -95,14 +92,13 @@ public class CreateTestData {
     final Fixture testFixture = new Fixture(numGen.nextInt(34));
     final Season testSeason = new Season();
 
-    return
-            new Highlight.HighlightBuilder()
-                    .setTitle(title)
-                    .setCompetition(testCompetition)
-                    .setFixture(testFixture)
-                    .setSeason(testSeason)
-                    .setDate(LocalDateTime.now())
-                    .build();
+    return new Highlight.HighlightBuilder()
+        .setTitle(title)
+        .setCompetition(testCompetition)
+        .setFixture(testFixture)
+        .setSeason(testSeason)
+        .setDate(LocalDateTime.now())
+        .build();
   }
 
   @NotNull
@@ -116,8 +112,10 @@ public class CreateTestData {
   }
 
   public static EventFileSource createTestEventFileSource() {
+
     final EventFileSource fileSource =
         EventFileSource.builder()
+            .eventFileSrcId(MD5String.generate())
             .channel("Event Service Test Channel")
             .resolution(R_1080p)
             .languages("English")
@@ -128,21 +126,53 @@ public class CreateTestData {
     return fileSource;
   }
 
+  @SneakyThrows
   public static @NotNull List<EventFile> createTestEventFiles() {
 
-    final EventFile preMatch =
-        new EventFile(EventFile.EventPartIdentifier.PRE_MATCH, FIRST_HALF_URL);
+    URL preMatchUrl = getFirstHalfUrl();
+    URL firstHalfUrl = getFirstHalfUrl();
+    URL secondHalfUrl = getSecondHalfUrl();
+    URL postMatchUrl = getSecondHalfUrl();
+
+    assertThat(preMatchUrl).isNotNull();
+    assertThat(firstHalfUrl).isNotNull();
+    assertThat(secondHalfUrl).isNotNull();
+    assertThat(postMatchUrl).isNotNull();
+
+    final EventFile preMatch = new EventFile(EventFile.EventPartIdentifier.PRE_MATCH, preMatchUrl);
     final EventFile firstHalf =
-        new EventFile(EventFile.EventPartIdentifier.FIRST_HALF, SECOND_HALF_URL);
+        new EventFile(EventFile.EventPartIdentifier.FIRST_HALF, firstHalfUrl);
     final EventFile secondHalf =
-        new EventFile(EventFile.EventPartIdentifier.SECOND_HALF, FIRST_HALF_URL);
+        new EventFile(EventFile.EventPartIdentifier.SECOND_HALF, secondHalfUrl);
     final EventFile postMatch =
-        new EventFile(EventFile.EventPartIdentifier.POST_MATCH, FIRST_HALF_URL);
+        new EventFile(EventFile.EventPartIdentifier.POST_MATCH, postMatchUrl);
 
     return List.of(preMatch, firstHalf, secondHalf, postMatch);
   }
 
-  // =============================================== FILE SERVER ===============================================
+  public static URL getFirstHalfUrl() {
+
+    try {
+      final String seed = "?rSeed=" + MD5String.generate();
+      return new URL("http://192.168.0.101/matchday-testing/video/barca-rm-2009/1.ts" + seed);
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public static URL getSecondHalfUrl() {
+
+    try {
+      final String seed = "?rSeed=" + MD5String.generate();
+      return new URL("http://192.168.0.101/matchday-testing/video/barca-rm-2009/2.ts" + seed);
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  // ====================== FILE SERVER ==============================
 
   public static FileServerUser createTestFileServerUser() {
 

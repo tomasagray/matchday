@@ -27,9 +27,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import self.me.matchday.CreateTestData;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
+import self.me.matchday.model.Match;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -60,8 +62,11 @@ class GManEventFileSourceParserTest {
             .with("\n");
     Log.i(LOG_TAG, "Read file source test data:\n" + postHtml);
 
+    // Create test event
+    final Match testMatch = CreateTestData.createTestMatch();
+
     // Parse test data
-    testFileSources = fileSourceParser.getEventFileSources(postHtml);
+    testFileSources = fileSourceParser.getEventFileSources(testMatch, postHtml);
     Log.i(LOG_TAG, "Parsed file source data: " + testFileSources);
     firstSource = testFileSources.get(0);
     secondSource = testFileSources.get(1);

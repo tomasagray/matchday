@@ -57,10 +57,6 @@ class ZKFPatternsTest {
 
     final Matcher competitionMatcher = zkfPatterns.getCompetitionMatcher(TEST_TITLE);
     assertThat(competitionMatcher.find()).isTrue();
-
-//    final Competition actualCompetition = new Competition(competitionMatcher.group(1));
-//    final Competition expectedCompetition = new Competition("La Liga");
-//    assertThat(actualCompetition).isEqualTo(expectedCompetition);
   }
 
   @Test

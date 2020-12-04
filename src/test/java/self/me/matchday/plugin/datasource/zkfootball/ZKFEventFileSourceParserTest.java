@@ -29,9 +29,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import self.me.matchday.CreateTestData;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
+import self.me.matchday.model.Match;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -107,7 +109,10 @@ class ZKFEventFileSourceParserTest {
     final Gson gson = new Gson();
     final TestBloggerPost zkfPost = gson.fromJson(zkfPostData, TestBloggerPost.class);
     final String text = zkfPost.getEntry().getContent().getText();
-    testFileSources = fileSourceParser.getEventFileSources(text);
+
+    // Create test event
+    final Match testMatch = CreateTestData.createTestMatch();
+    testFileSources = fileSourceParser.getEventFileSources(testMatch, text);
 
     assertThat(testFileSources).isNotNull();
     Log.i(LOG_TAG, "Parsed file source data: " + testFileSources);
