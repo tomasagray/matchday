@@ -22,8 +22,6 @@ package self.me.matchday.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +41,6 @@ import java.util.regex.Pattern;
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 public class EventFileSource implements Comparable<EventFileSource> {
 
   /** Video resolution classes */
@@ -111,15 +108,10 @@ public class EventFileSource implements Comparable<EventFileSource> {
     }
   }
 
-  @Id
-  @GeneratedValue(generator = "system-uuid")
-  @GenericGenerator(name = "system-uuid", strategy = "org.hibernate.id.UUIDGenerator")
-  private String eventFileSrcId;
-
+  @Id private final String eventFileSrcId;
   private String channel;
   private String source;
   private String approximateDuration;
-  private Long fileSize;
   private String languages;
 
   @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -127,12 +119,66 @@ public class EventFileSource implements Comparable<EventFileSource> {
   // Media metadata
   private Resolution resolution;
   private String mediaContainer;
-  private Long bitrate;
   private String videoCodec;
-  private int frameRate;
   private String audioCodec;
-
+  private Long bitrate;
+  private Long fileSize;
+  private int frameRate;
   private int audioChannels;
+
+  public static EventFileSource createEventFileSource(@NotNull final FileSourceMetadata metadata) {
+
+    // Extract metadata
+    final String channel = metadata.getChannel();
+    final String languages = metadata.getLanguages();
+    final Resolution resolution = metadata.getResolution();
+    final String mediaContainer = metadata.getMediaContainer();
+    final String audioCodec = metadata.getAudioCodec();
+    final String approximateDuration = metadata.getApproximateDuration();
+    final String source = metadata.getSource();
+    final String videoCodec = metadata.getVideoCodec();
+    final long bitrate = metadata.getBitrate();
+    final Long fileSize = metadata.getFileSize();
+    final int frameRate = metadata.getFrameRate();
+    final int audioChannels = metadata.getAudioChannels();
+
+    // Create file source ID
+    final String id =
+        MD5String.fromData(
+            channel,
+            languages,
+            resolution,
+            mediaContainer,
+            audioCodec,
+            approximateDuration,
+            source,
+            videoCodec,
+            bitrate,
+            fileSize,
+            frameRate,
+            audioChannels);
+
+    // Create file source & return
+    return EventFileSource.builder()
+        .eventFileSrcId(id)
+        .channel(channel)
+        .languages(languages)
+        .resolution(resolution)
+        .mediaContainer(mediaContainer)
+        .audioCodec(audioCodec)
+        .approximateDuration(approximateDuration)
+        .source(source)
+        .videoCodec(videoCodec)
+        .bitrate(bitrate)
+        .fileSize(fileSize)
+        .frameRate(frameRate)
+        .audioChannels(audioChannels)
+        .build();
+  }
+
+  public EventFileSource() {
+    this.eventFileSrcId = null;
+  }
 
   public String toString() {
 

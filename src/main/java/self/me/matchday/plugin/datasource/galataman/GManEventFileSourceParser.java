@@ -49,17 +49,14 @@ public final class GManEventFileSourceParser implements EventFileSourceParser {
   public static final String LOG_TAG = "GManEventFileSourceParser";
 
   private final GManPatterns gManPatterns;
-  private final GManFileSourceMetadataParser fileSourceMetadataParser;
   private final FileServerService fileServerService;
 
   @Autowired
   public GManEventFileSourceParser(
       final GManPatterns gManPatterns,
-      final GManFileSourceMetadataParser fileSourceMetadataParser,
       final FileServerService fileServerService) {
 
     this.gManPatterns = gManPatterns;
-    this.fileSourceMetadataParser = fileSourceMetadataParser;
     // injected from main application
     this.fileServerService = fileServerService;
   }
@@ -86,9 +83,10 @@ public final class GManEventFileSourceParser implements EventFileSourceParser {
       // When we find a source
       if (isSourceData(token)) {
 
+        // Parse metadata
+        final GManFileMetadata metadata = new GManFileMetadata(token.html(), gManPatterns);
         // Create an Event file source from the data
-        final EventFileSource eventFileSource =
-            fileSourceMetadataParser.createFileSource(token.html());
+        final EventFileSource eventFileSource = EventFileSource.createEventFileSource(metadata);
 
         // Parse EventFiles (links) for this source
         Element innerToken = token.nextElementSibling();

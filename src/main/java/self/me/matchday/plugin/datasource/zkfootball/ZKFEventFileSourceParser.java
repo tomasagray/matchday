@@ -48,16 +48,13 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
   private static final String LOG_TAG = "ZKFEventFileSourceParser";
 
   private final ZKFPatterns zkfPatterns;
-  private final ZKFFileSourceMetadataParser metadataParser;
   private final FileServerService fileServerService;
 
   public ZKFEventFileSourceParser(
       @Autowired final ZKFPatterns zkfPatterns,
-      @Autowired final ZKFFileSourceMetadataParser metadataParser,
       @Autowired final FileServerService fileServerService) {
 
     this.zkfPatterns = zkfPatterns;
-    this.metadataParser = metadataParser;
     this.fileServerService = fileServerService;
   }
 
@@ -114,13 +111,18 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
           // EventFileSource
           else if (zkfPatterns.isMetadata(element.text())) {
 
+            // Get metadata elements from DOM
+            final Elements data = element.select("span");
+
+            // Parse metadata
+            final ZKFFileMetadata metadata = new ZKFFileMetadata(data, zkfPatterns);
             // Create a file source from data
-            final EventFileSource fileSource =
-                metadataParser.createFileSource(element.select("span"));
+            final EventFileSource fileSource = EventFileSource.createEventFileSource(metadata);
             // Add EventFiles to the current EventFileSource
             fileSource.getEventFiles().addAll(eventFiles);
             // Add to collection
             fileSources.add(fileSource);
+
             // Reset EventFiles container
             eventFiles.clear();
           }

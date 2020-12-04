@@ -129,8 +129,7 @@ public class EventFileService {
 
     // Find the EventFile that needs updating
     eventFileSource.getEventFiles().forEach(ef -> {
-      final Long eventFileId = eventFile.getEventFileId();
-      if (eventFileId != null && eventFileId.equals(ef.getEventFileId())) {
+      if (eventFile.equals(ef)) {
         // Copy data
         ef.setInternalUrl(eventFile.getInternalUrl());
         ef.setMetadata(eventFile.getMetadata());

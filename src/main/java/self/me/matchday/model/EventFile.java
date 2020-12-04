@@ -38,18 +38,19 @@ public class EventFile implements Comparable<EventFile> {
 
   private static double DEFAULT_DURATION = 3012.541956d;
 
+  //  @GeneratedValue
+  //  private Long eventFileId;
   // Fields
-  @Id
-  @GeneratedValue
-  private Long eventFileId;
+  @Id private URL externalUrl;
   private EventPartIdentifier title;
-  private URL externalUrl;
   // refreshed data
   @Column(columnDefinition = "LONGTEXT")
   private URL internalUrl;
+
   @Convert(converter = FFmpegMetadataConverter.class)
   @Column(columnDefinition = "LONGTEXT")
   private FFmpegMetadata metadata;
+
   private Timestamp lastRefreshed = new Timestamp(0L);
 
   public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
@@ -84,14 +85,13 @@ public class EventFile implements Comparable<EventFile> {
     }
     // Cast
     final EventFile eventFile = (EventFile) obj;
-    return this.getEventFileId().equals(eventFile.getEventFileId());
+    return this.getExternalUrl().equals(eventFile.getExternalUrl());
   }
 
   @Override
   public int hashCode() {
-    return Objects
-        .hash(getEventFileId(), getTitle(), getExternalUrl(), getInternalUrl(), getMetadata(),
-            getLastRefreshed());
+    return Objects.hash(
+        getTitle(), getExternalUrl(), getInternalUrl(), getMetadata(), getLastRefreshed());
   }
 
   @Override
@@ -99,11 +99,8 @@ public class EventFile implements Comparable<EventFile> {
     return this.getTitle().order - test.getTitle().order;
   }
 
-  /**
-   * Event part identifiers
-   */
+  /** Event part identifiers */
   public enum EventPartIdentifier {
-
     DEFAULT("", "", -1),
     PRE_MATCH("Pre-Match", "^[Pp][Rr][Ee][- ][Mm][Aa][Tt][Cc][Hh]$", 0),
     FIRST_HALF("1st Half", "1 ?[Ss][Tt] [Hh][Aa][Ll][Ff]", 1),
@@ -147,7 +144,7 @@ public class EventFile implements Comparable<EventFile> {
      *
      * @param str The String to be converted.
      * @return The enumerated value, or <b>DEFAULT</b> if the given String does not match any
-     * values.
+     *     values.
      */
     public static EventPartIdentifier fromString(@NotNull String str) {
       // If the given String doesn't match
