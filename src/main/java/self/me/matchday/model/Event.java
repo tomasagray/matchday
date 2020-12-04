@@ -63,8 +63,7 @@ public abstract class Event {
    * Retrieve a particular file source from this Event
    *
    * @param fileSrcId The ID of the file source
-   * @return the requested file source
-   * @throws IllegalArgumentException if the requested file source is not associated with this Event
+   * @return the requested file source, or null if not found
    */
   public EventFileSource getFileSource(final @NotNull String fileSrcId) {
 
@@ -74,10 +73,7 @@ public abstract class Event {
         return fileSrc;
       }
     }
-
-    throw new
-        IllegalArgumentException(
-            String.format("EventFileSource ID: %s was not found in Event: %s", fileSrcId, eventId));
+    return null;
   }
 
   @Override

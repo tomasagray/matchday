@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -47,7 +47,8 @@ public class VideoStreamingController {
   private final VariantPlaylistService variantPlaylistService;
 
   @Autowired
-  public VideoStreamingController(final VideoStreamingService streamingService,
+  public VideoStreamingController(
+      final VideoStreamingService streamingService,
       final VideoResourceAssembler resourceAssembler,
       final MasterPlaylistService masterPlaylistService,
       final VariantPlaylistService variantPlaylistService) {
@@ -59,69 +60,75 @@ public class VideoStreamingController {
   }
 
   @RequestMapping(value = "/", method = RequestMethod.GET)
-  public ResponseEntity<CollectionModel<VideoResource>>
-    getVideoResources(@PathVariable final String eventId) {
+  public ResponseEntity<CollectionModel<VideoResource>> getVideoResources(
+      @PathVariable final String eventId) {
 
     // Set EventID for resource assembler
     resourceAssembler.setEventId(eventId);
-    return
-        streamingService
-            .fetchEventFileSources(eventId)
-            .map(resourceAssembler::toCollectionModel)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    return streamingService
+        .fetchEventFileSources(eventId)
+        .map(resourceAssembler::toCollectionModel)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
-  @RequestMapping(value = "/playlist/master", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/playlist/master",
+      method = RequestMethod.GET,
       produces = "application/x-mpeg-url")
   public ResponseEntity<String> getMasterPlaylist(@PathVariable final String eventId) {
 
-    return
-        masterPlaylistService
-            .fetchMasterPlaylistForEvent(eventId)
-            .map(MasterM3U::toString)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    return masterPlaylistService
+        .fetchMasterPlaylistForEvent(eventId)
+        .map(MasterM3U::toString)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
-  @RequestMapping(value = "/playlist/variant/{fileSrcId}", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/playlist/variant/{fileSrcId}",
+      method = RequestMethod.GET,
       produces = "application/x-mpeg-url")
-  public ResponseEntity<String> getVariantPlaylist(@PathVariable final String eventId,
-      @PathVariable final String fileSrcId) {
+  public ResponseEntity<String> getVariantPlaylist(
+      @PathVariable final String eventId, @PathVariable final String fileSrcId) {
 
-    Log.i("VideoStreamingController",
-        String.format("Getting variant playlist for Event: %s, File Source: %s",
-            eventId, fileSrcId));
+    Log.i(
+        "VideoStreamingController",
+        String.format(
+            "Getting variant playlist for Event: %s, File Source: %s", eventId, fileSrcId));
 
-    return
-        variantPlaylistService
-            .fetchVariantPlaylist(fileSrcId)
-            .map(VariantM3U::toString)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    return variantPlaylistService
+        .fetchVariantPlaylist(fileSrcId)
+        .map(VariantM3U::toString)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
-  @RequestMapping(value = "/stream/{fileSrcId}/playlist.m3u8", method = RequestMethod.GET)
-  public ResponseEntity<String> getStreamPlaylist(@PathVariable("eventId") String eventId,
-      @PathVariable("fileSrcId") String fileSrcId) {
+  @RequestMapping(
+      value = "/stream/{fileSrcId}/playlist.m3u8",
+      method = RequestMethod.GET)
+  public ResponseEntity<String> getStreamPlaylist(
+      @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
     final String playlistFile = streamingService.readPlaylistFile(eventId, fileSrcId);
-    return
-        playlistFile != null && !("".equals(playlistFile)) ?
-            ResponseEntity.ok(playlistFile) :
-            ResponseEntity.notFound().build();
+    return playlistFile != null && !("".equals(playlistFile))
+        ? ResponseEntity.ok(playlistFile)
+        : ResponseEntity.notFound().build();
   }
 
-  @RequestMapping(value = "/stream/{fileSrcId}/{segmentId}.ts", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/stream/{fileSrcId}/{segmentId}.ts",
+      method = RequestMethod.GET,
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity<Resource> getSegmentFile(@PathVariable("eventId") String eventId,
-      @PathVariable("fileSrcId") String fileSrcId, @PathVariable("segmentId") String segmentId) {
+  public ResponseEntity<Resource> getSegmentFile(
+      @PathVariable("eventId") String eventId,
+      @PathVariable("fileSrcId") String fileSrcId,
+      @PathVariable("segmentId") String segmentId) {
 
     final Resource videoSegmentResource =
         streamingService.getVideoSegmentResource(eventId, fileSrcId, segmentId);
-    return
-        videoSegmentResource != null ?
-            ResponseEntity.ok(videoSegmentResource) :
-            ResponseEntity.notFound().build();
+    return videoSegmentResource != null
+        ? ResponseEntity.ok(videoSegmentResource)
+        : ResponseEntity.notFound().build();
   }
 }

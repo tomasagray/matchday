@@ -113,6 +113,15 @@ public class VideoStreamingService {
 
       // Get ref to playlist file
       final File playlistFile = locatorOptional.get().getPlaylistPath().toFile();
+      if (!playlistFile.exists()) {
+        Log.i(LOG_TAG, "Playlist file not found at path: " + playlistFile);
+        return null;
+      }
+      if (!playlistFile.canRead()) {
+        Log.i(LOG_TAG, "Playlist could not be opened for reading: " + playlistFile);
+        return null;
+      }
+
       // Read playlist file
       try (final BufferedReader fileReader = new BufferedReader(new FileReader(playlistFile))) {
         String line;
@@ -132,6 +141,8 @@ public class VideoStreamingService {
           String.format(
               "No playlist locator found for Event: %s, File Source: %s", eventId, fileSrcId));
     }
+
+    Log.i(LOG_TAG, String.format("Read: %s bytes for playlist of event: %s", result.length(), eventId));
     return result.toString();
   }
 
@@ -185,34 +196,43 @@ public class VideoStreamingService {
       // Get the correct file source
       final EventFileSource fileSource = event.getFileSource(fileSrcId);
       // Check for adequate storage capacity
-      if (diskManager.isSpaceAvailable(fileSource.getFileSize())) {
+      if (fileSource != null) {
+        if (diskManager.isSpaceAvailable(fileSource.getFileSize())) {
 
-        // Refresh EventFile data (if necessary)
-        eventFileService.refreshEventFileData(fileSource, false);
-        // Collate URLs
-        final List<URI> uris = getEventFileSrcUris(fileSource);
-        // Create storage path
-        final Path storageLocation =
-            Files.createDirectories(
-                Paths.get(this.fileStorageLocation, event.getEventId(), fileSrcId));
+          // Refresh EventFile data (if necessary)
+          eventFileService.refreshEventFileData(fileSource, false);
+          // Collate URLs
+          final List<URI> uris = getEventFileSrcUris(fileSource);
+          // Create storage path
+          final Path storageLocation =
+              Files.createDirectories(
+                  Paths.get(this.fileStorageLocation, event.getEventId(), fileSrcId));
 
-        // Start FFMPEG transcoding job
-        Path playlistPath = ffmpegPlugin.streamUris(uris, storageLocation).getOutputFile();
-        Log.i(LOG_TAG, String.format("Created playlist file: %s", playlistPath));
+          // Start FFMPEG transcoding job
+          Path playlistPath = ffmpegPlugin.streamUris(uris, storageLocation).getOutputFile();
+          Log.i(LOG_TAG, String.format("Created playlist file: %s", playlistPath));
 
-        // Create playlist locator & save to DB
-        result =
-            Optional.of(
-                playlistLocatorService.createNewPlaylistLocator(eventId, fileSrcId, playlistPath));
+          // Create playlist locator & save to DB
+          final VideoStreamPlaylistLocator playlistLocator =
+              playlistLocatorService.createNewPlaylistLocator(eventId, fileSrcId, playlistPath);
+          // Return locator
+          result = Optional.of(playlistLocator);
 
+        } else {
+          Log.i(
+              LOG_TAG,
+              String.format(
+                  "Streaming request denied; inadequate storage capacity. "
+                      + "(Requested: %s, Available: %s)",
+                  fileSource.getFileSize(), diskManager.getFreeDiskSpace()));
+        }
       } else {
         Log.i(
             LOG_TAG,
-            String.format(
-                "Streaming request denied; inadequate storage capacity. "
-                    + "(Requested: %s, Available: %s)",
-                fileSource.getFileSize(), diskManager.getFreeDiskSpace()));
+            String.format("File Source with ID: %s not found in Event: %s", fileSrcId, eventId));
       }
+    } else {
+      Log.i(LOG_TAG, "Event not found: " + eventId);
     }
 
     return result;

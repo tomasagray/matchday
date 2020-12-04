@@ -30,8 +30,7 @@ import self.me.matchday.util.Log;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,12 +43,19 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
 
   @Value("${video-resources.video-stream-path-pattern}")
   private Pattern urlPattern;
+
   @Value("${video-resources.file-storage-location}")
   private String fileStorageLocation;
-  private final VideoStreamingService videoStreamingService;
 
-  public VideoResourceInterceptor(@Autowired final VideoStreamingService videoStreamingService) {
+  private final VideoStreamingService videoStreamingService;
+  private final PlaylistLocatorService playlistLocatorService;
+
+  public VideoResourceInterceptor(
+      @Autowired final VideoStreamingService videoStreamingService,
+      @Autowired final PlaylistLocatorService playlistLocatorService) {
+
     this.videoStreamingService = videoStreamingService;
+    this.playlistLocatorService = playlistLocatorService;
   }
 
   /**
@@ -77,46 +83,52 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
       final Matcher pathMatcher = urlPattern.matcher(servletPath);
       if (pathMatcher.find()) {
 
-        // Get playlist file path
-        final File playlist = Paths.get(fileStorageLocation, servletPath).toFile();
-        // Determine if playlist exists
-        if (!playlist.exists()) {
-          // Extract parameters from path
-          final String eventId = pathMatcher.group(1);
-          final String fileSrcId = pathMatcher.group(2);
-          // Validate parameters
-          if (eventId != null
-              && !("".equals(eventId))
-              && fileSrcId != null
-              && !("".equals(fileSrcId))) {
+        // Extract parameters from path
+        final String eventId = pathMatcher.group(1);
+        final String fileSrcId = pathMatcher.group(2);
 
-            // Stream video files to local disk
-            final Optional<VideoStreamPlaylistLocator> playlistOptional =
-                videoStreamingService.createVideoStream(eventId, fileSrcId);
-            if (playlistOptional.isPresent()) {
-              VideoStreamPlaylistLocator playlistLocator = playlistOptional.get();
-              Log.i(
-                  LOG_TAG,
-                  "Created video stream at: " + playlistLocator.getPlaylistPath().toAbsolutePath());
-            } else {
-              Log.d(
-                  LOG_TAG,
-                  String.format(
-                      "Could not create playlist for Event: %s, File Source: %s",
-                      eventId, fileSrcId));
-            }
-            // Ensure playlist creation has begun
-            Thread.sleep(PROCESS_DELAY);
-          }
+        // Get playlist locator
+        final Optional<VideoStreamPlaylistLocator> locatorOptional =
+            playlistLocatorService.getPlaylistLocator(eventId, fileSrcId);
+        if (locatorOptional.isPresent()) {
+          // video has already begun streaming
+          Log.i(
+              LOG_TAG,
+              String.format(
+                  "Found playlist locator: %s; video has begun streaming", locatorOptional.get()));
+          return true;
         }
+
+        // Stream video files to local disk
+        Log.i(LOG_TAG, String.format("Creating video stream for event: %s, file source: %s", eventId, fileSrcId));
+        final Optional<VideoStreamPlaylistLocator> playlistOptional =
+            videoStreamingService.createVideoStream(eventId, fileSrcId);
+
+        if (playlistOptional.isPresent()) {
+          VideoStreamPlaylistLocator playlistLocator = playlistOptional.get();
+          final Path playlistPath = playlistLocator.getPlaylistPath().toAbsolutePath();
+          Log.i(LOG_TAG, "Created video stream at: " + playlistPath);
+
+        } else {
+          Log.d(
+              LOG_TAG,
+              String.format(
+                  "Could not create playlist for Event: %s, File Source: %s", eventId, fileSrcId));
+        }
+        // Ensure playlist creation has begun
+        Log.i(LOG_TAG, "Waiting for stream head start...");
+        Thread.sleep(PROCESS_DELAY);
+
       } else {
         Log.e(LOG_TAG, "Could not extract necessary data from servlet path: " + servletPath);
+        return false;
       }
-    } catch (Exception e) {
+    } catch (Throwable e) {
       Log.e(
           LOG_TAG,
           String.format("Error streaming video files; request URI: %s", request.getRequestURI()),
           e);
+      return false;
     }
     // Continue processing request
     return true;
