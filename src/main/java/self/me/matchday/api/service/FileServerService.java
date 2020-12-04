@@ -33,7 +33,6 @@ import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.*;
@@ -406,7 +405,7 @@ public class FileServerService {
    * @param url The URL under question
    * @return True/false
    */
-  public boolean isVideoLink(@NotNull final URL url) throws MalformedURLException {
+  public boolean isVideoLink(@NotNull final URL url) {
 
     // Use each plugin to examine URL
     final List<FileServerPlugin> fileServerPlugins = getFileServerPlugins();

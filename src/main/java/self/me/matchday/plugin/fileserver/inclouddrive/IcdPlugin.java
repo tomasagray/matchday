@@ -55,8 +55,6 @@ import java.util.stream.Collectors;
 @Component
 public class IcdPlugin implements FileServerPlugin {
 
-  public static final String LOG_TAG = "IcdPlugin";
-
   // Constants
   public static final String USER_AGENT_HEADER = "User-Agent";
   public static final String USERDATA_COOKIE_NAME = "userdata";

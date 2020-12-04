@@ -84,6 +84,6 @@ public class NetscapeCookiesService {
   }
 
   private boolean toBoolean(@NotNull final String str) {
-    return "TRUE".equals(str.trim().toUpperCase());
+    return "TRUE".equalsIgnoreCase(str.trim());
   }
 }
