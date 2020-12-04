@@ -111,7 +111,7 @@ public class ZKFPlugin implements DataSourcePlugin<Stream<Event>> {
               final Event event = eventMetadataParser.getEvent(bloggerPost.getTitle());
               // ParseEvent file sources & add to Event
               final List<EventFileSource> eventFileSources =
-                  fileSourceParser.getEventFileSources(bloggerPost.getContent());
+                  fileSourceParser.getEventFileSources(event, bloggerPost.getContent());
               event.addFileSources(eventFileSources);
               // Return completed Event
               return event;

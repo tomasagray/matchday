@@ -28,6 +28,7 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
@@ -59,8 +60,10 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
   }
 
   @Override
-  public List<EventFileSource> getEventFileSources(@NotNull final String html) {
-    return parseEventFileSources(html);
+  public List<EventFileSource> getEventFileSources(
+      @NotNull final Event event, @NotNull final String html) {
+
+    return parseEventFileSources(html, event.getEventId());
   }
 
   /**
@@ -68,7 +71,8 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
    *
    * @return A List<> of EventFileSources (may be empty)
    */
-  private @NotNull List<EventFileSource> parseEventFileSources(@NotNull final String html) {
+  private @NotNull List<EventFileSource> parseEventFileSources(
+      @NotNull final String html, @NotNull final String eventId) {
 
     // Prevent XSS attacks & parse HTML
     final String content = Jsoup.clean(html, Whitelist.basic());
@@ -117,7 +121,7 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
             // Parse metadata
             final ZKFFileMetadata metadata = new ZKFFileMetadata(data, zkfPatterns);
             // Create a file source from data
-            final EventFileSource fileSource = EventFileSource.createEventFileSource(metadata);
+            final EventFileSource fileSource = EventFileSource.createEventFileSource(metadata, eventId);
             // Add EventFiles to the current EventFileSource
             fileSource.getEventFiles().addAll(eventFiles);
             // Add to collection

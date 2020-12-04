@@ -26,6 +26,7 @@ import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
@@ -53,8 +54,7 @@ public final class GManEventFileSourceParser implements EventFileSourceParser {
 
   @Autowired
   public GManEventFileSourceParser(
-      final GManPatterns gManPatterns,
-      final FileServerService fileServerService) {
+      final GManPatterns gManPatterns, final FileServerService fileServerService) {
 
     this.gManPatterns = gManPatterns;
     // injected from main application
@@ -62,12 +62,14 @@ public final class GManEventFileSourceParser implements EventFileSourceParser {
   }
 
   @Override
-  public List<EventFileSource> getEventFileSources(@NotNull final String html) {
-    return parseEventSources(html);
+  public List<EventFileSource> getEventFileSources(
+      @NotNull final Event event, @NotNull final String html) {
+    return parseEventSources(event.getEventId(), html);
   }
 
   /** Extracts match source data from this post. */
-  private @NotNull List<EventFileSource> parseEventSources(@NotNull final String html) {
+  private @NotNull List<EventFileSource> parseEventSources(
+      @NotNull final String eventId, @NotNull final String html) {
 
     // Result container
     final List<EventFileSource> fileSources = new ArrayList<>();
@@ -86,7 +88,8 @@ public final class GManEventFileSourceParser implements EventFileSourceParser {
         // Parse metadata
         final GManFileMetadata metadata = new GManFileMetadata(token.html(), gManPatterns);
         // Create an Event file source from the data
-        final EventFileSource eventFileSource = EventFileSource.createEventFileSource(metadata);
+        final EventFileSource eventFileSource =
+            EventFileSource.createEventFileSource(metadata, eventId);
 
         // Parse EventFiles (links) for this source
         Element innerToken = token.nextElementSibling();

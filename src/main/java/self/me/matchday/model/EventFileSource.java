@@ -126,7 +126,8 @@ public class EventFileSource implements Comparable<EventFileSource> {
   private int frameRate;
   private int audioChannels;
 
-  public static EventFileSource createEventFileSource(@NotNull final FileSourceMetadata metadata) {
+  public static EventFileSource createEventFileSource(
+      @NotNull final FileSourceMetadata metadata, @NotNull final String eventId) {
 
     // Extract metadata
     final String channel = metadata.getChannel();
@@ -145,6 +146,7 @@ public class EventFileSource implements Comparable<EventFileSource> {
     // Create file source ID
     final String id =
         MD5String.fromData(
+            eventId,
             channel,
             languages,
             resolution,

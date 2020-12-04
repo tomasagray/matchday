@@ -20,11 +20,12 @@
 package self.me.matchday.plugin.datasource.bloggerparser;
 
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
 
 import java.util.List;
 
 public interface EventFileSourceParser {
 
-  List<EventFileSource> getEventFileSources(@NotNull final String html);
+  List<EventFileSource> getEventFileSources(@NotNull final Event event, @NotNull final String html);
 }
