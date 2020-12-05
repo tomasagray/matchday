@@ -1,18 +1,17 @@
 # ========================= SENSITIVE DATA =========================
-logins.xlsx
+/secure_data
+**/test/secure_resources/
 # ========================= END SENSITIVE DATA =========================
-
 
 # Created by .ignore support plugin (hsz.mobi)
 .gitignore
 .gradle/
-.idea/workspace.xml
 /lib/
+/.idea/
 
 # Development files
 *.cookie
 *.csv
-/.idea/
 
 # Working/temporary files
 ### MicrosoftOffice ###
@@ -34,15 +33,8 @@ Backup of *.doc*
 /research
 _DEVFIXTURES/
 
-# Test resources
-/test/resources
-/test/secure_resources
+# Test output
 **/test/data
-/src/test/data/video_test/
-
-# Video processing
-**/public/videos/**
-/vid_out/**
 
 # Compiler output
 /build/

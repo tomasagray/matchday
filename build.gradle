@@ -19,7 +19,10 @@ repositories {
 }
 
 dependencies {
+
+	// Annotations
     implementation 'org.jetbrains:annotations:19.0.0'
+	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 
     // Lombok
     compile group: 'org.jetbrains', name: 'annotations', version: '16.0.2'
@@ -43,8 +46,7 @@ dependencies {
 	// Development
 	implementation 'org.flywaydb:flyway-core'
 	runtimeOnly 'com.h2database:h2'
-	// Remove to eliminate reflective access warning per:
-	// 		https://stackoverflow.com/a/61007739/4871490
+	// Remove to eliminate reflective access warning per: https://stackoverflow.com/a/61007739/4871490
 	runtimeOnly 'org.springframework.boot:spring-boot-devtools'
 
 	// Testing
