@@ -58,6 +58,8 @@ class FFmpegPluginTest {
   // Test constants
   private static final String STORAGE_LOCATION = "src/test/data/video_test";
   private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
+  public static final int MIN_EXPECTED_FILE_COUNT = 100;
+
   // Test resources
   private static File storageLocation;
   private static FFmpegPlugin ffmpegPlugin;
@@ -114,7 +116,6 @@ class FFmpegPluginTest {
             streamingPath.toAbsolutePath(), Instant.now()));
 
     // Test data
-    final int minExpectedFileCount = 10;
     int actualFileCount = 0;
 
     final Duration timeout = Duration.ofSeconds(30);
@@ -122,15 +123,16 @@ class FFmpegPluginTest {
     Duration elapsed = Duration.ZERO;
     Instant start = Instant.now();
 
-    // Wait for FFMPEG to do its thing...
-    Thread.sleep(5_000L);
 
     // Check file count
     while (!filesFound && elapsed.compareTo(timeout) < 0) {
 
+      // Wait for FFMPEG to do its thing...
+      Thread.sleep(50_000L);
+
       actualFileCount = streamingPath.getParent().toFile().list().length;
       Log.i(LOG_TAG, String.format("Found %s files on current sleep cycle...", actualFileCount));
-      if (actualFileCount >= minExpectedFileCount) {
+      if (actualFileCount >= MIN_EXPECTED_FILE_COUNT) {
         Log.i(LOG_TAG, "That's enough for testing...");
         filesFound = true;
       }
@@ -138,7 +140,7 @@ class FFmpegPluginTest {
     }
 
     // perform test
-    assertThat(actualFileCount).isGreaterThanOrEqualTo(minExpectedFileCount);
+    assertThat(actualFileCount).isGreaterThanOrEqualTo(MIN_EXPECTED_FILE_COUNT);
   }
 
   @Test
@@ -187,7 +189,6 @@ class FFmpegPluginTest {
   }
 
   @AfterAll
-  @DisplayName("Test teardown")
   static void tearDown() throws IOException {
 
     // Ensure all streaming tasks are stopped

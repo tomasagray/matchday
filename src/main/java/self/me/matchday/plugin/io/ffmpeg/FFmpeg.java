@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,12 +37,13 @@ public class FFmpeg {
   private static final String SEGMENT_PATTERN = "segment_%05d.ts";
 
   private final List<String> baseArgs;
+  @Getter @Setter boolean loggingEnabled = true;
 
   FFmpeg(@NotNull final String execPath) {
     this.baseArgs =
         List.of(
             String.format("\"%s\"", execPath),
-            "-v quiet",
+            "-v info",
             "-y",
             "-protocol_whitelist concat,file,http,https,tcp,tls,crypto");
   }
@@ -49,6 +52,7 @@ public class FFmpeg {
 
     // Assemble arguments
     final String storage = location.toString();
+    final Path outputFile = Paths.get(storage, SEGMENT_PL_NAME);
     final List<String> transcodeArgs = new ArrayList<>();
     final List<String> uriStrings = uris.stream().map(URI::toString).collect(Collectors.toList());
     final String inputArg = String.format("-i \"concat:%s\"", String.join("|", uriStrings));
@@ -65,7 +69,11 @@ public class FFmpeg {
     transcodeArgs.add(segments);
 
     // Create FFMPEG CLI command & return
-    return new FFmpegTask(
-        Strings.join(baseArgs, ' '), transcodeArgs, Paths.get(storage, SEGMENT_PL_NAME));
+    return FFmpegTask.builder()
+        .command(Strings.join(baseArgs, ' '))
+        .args(transcodeArgs)
+        .outputFile(outputFile)
+        .loggingEnabled(loggingEnabled)
+        .build();
   }
 }

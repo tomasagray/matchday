@@ -44,7 +44,7 @@ class FFmpegTest {
   private static final String LOG_TAG = "FFmpegTest";
   private static final String FFMPEG_EXE = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe";
   private static final String DEFAULT_ARGS =
-      " -v quiet -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
+      " -v info -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
 
   // Test resources
   private static FFmpegTask hlsStreamTask;
@@ -89,7 +89,7 @@ class FFmpegTest {
   }
 
   @Test
-  @DisplayName("Check command format")
+  @DisplayName("Check command default format")
   void testCommandFormat() {
 
     final String expectedCommand = String.format("\"%s\"%s", FFMPEG_EXE, DEFAULT_ARGS);
