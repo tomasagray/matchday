@@ -27,6 +27,7 @@ import self.me.matchday.model.VariantM3U;
 import self.me.matchday.util.Log;
 
 import javax.transaction.Transactional;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,10 +62,12 @@ public class VariantPlaylistService {
 
       final EventFileSource eventFileSource = eventOptional.get();
       if (eventFileSource.getEventFiles().size() > 0) {
+
         // Refresh data for EventFiles
         eventFileService.refreshEventFileData(eventFileSource, true);
-        // Retrieve fresh EventFiles
+        // Retrieve fresh EventFiles & sort
         final List<EventFile> eventFiles = eventFileSource.getEventFiles();
+        Collections.sort(eventFiles);
         // Create new Playlist & return
         result = Optional.of(new VariantM3U(eventFiles));
 

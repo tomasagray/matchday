@@ -41,10 +41,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -298,7 +295,10 @@ public class VideoStreamingService {
    */
   private List<URI> getEventFileSrcUris(@NotNull final EventFileSource eventFileSource) {
 
-    return eventFileSource.getEventFiles().stream()
+    // Ensure URIs are returned in correct order
+    final List<EventFile> eventFiles = eventFileSource.getEventFiles();
+    Collections.sort(eventFiles);
+    return eventFiles.stream()
         .map(EventFile::getInternalUrl)
         .map(
             url -> {
