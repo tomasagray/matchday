@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -19,18 +19,10 @@
 
 package self.me.matchday.api.resource;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.util.Locale;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.LinkRelation;
@@ -40,8 +32,12 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.ArtworkController;
 import self.me.matchday.api.controller.CompetitionController;
-import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.model.Competition;
+
+import java.util.Locale;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @Builder
@@ -59,8 +55,8 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
   private Locale locale;
 
   @Component
-  public static class CompetitionResourceAssembler extends
-      RepresentationModelAssemblerSupport<Competition, CompetitionResource> {
+  public static class CompetitionResourceAssembler
+      extends RepresentationModelAssemblerSupport<Competition, CompetitionResource> {
 
     private static final LinkRelation TEAMS = LinkRelation.of("teams");
     private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
@@ -70,7 +66,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
     private static final LinkRelation EVENTS = LinkRelation.of("events");
 
     public CompetitionResourceAssembler() {
-      super(CompetitionService.class, CompetitionResource.class);
+      super(CompetitionController.class, CompetitionResource.class);
     }
 
     @NotNull
@@ -87,36 +83,30 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       competitionResource.setLocale(competition.getLocale());
 
       // Attach links:
-      competitionResource.add(linkTo(
-          methodOn(CompetitionController.class)
-              .fetchCompetitionById(competitionId))
-          .withSelfRel());
+      competitionResource.add(
+          linkTo(methodOn(CompetitionController.class).fetchCompetitionById(competitionId))
+              .withSelfRel());
       // events
-      competitionResource.add(linkTo(
-          methodOn(CompetitionController.class)
-              .fetchCompetitionEvents(competitionId)).withRel(EVENTS));
+      competitionResource.add(
+          linkTo(methodOn(CompetitionController.class).fetchCompetitionEvents(competitionId))
+              .withRel(EVENTS));
       // teams
-      competitionResource.add(linkTo(
-          methodOn(CompetitionController.class)
-              .fetchCompetitionTeams(competitionId))
-          .withRel(TEAMS));
+      competitionResource.add(
+          linkTo(methodOn(CompetitionController.class).fetchCompetitionTeams(competitionId))
+              .withRel(TEAMS));
       // artwork
-      competitionResource.add(linkTo(
-          methodOn(ArtworkController.class)
-              .fetchCompetitionEmblem(competitionId))
-          .withRel(EMBLEM));
-      competitionResource.add(linkTo(
-          methodOn(ArtworkController.class)
-              .fetchCompetitionFanart(competitionId))
-          .withRel(FANART));
-      competitionResource.add(linkTo(
-          methodOn(ArtworkController.class)
-              .fetchCompetitionMonochromeEmblem(competitionId))
-          .withRel(MONOCHROME));
-      competitionResource.add(linkTo(
-          methodOn(ArtworkController.class)
-              .fetchCompetitionLandscape(competitionId))
-          .withRel(LANDSCAPE));
+      competitionResource.add(
+          linkTo(methodOn(ArtworkController.class).fetchCompetitionEmblem(competitionId))
+              .withRel(EMBLEM));
+      competitionResource.add(
+          linkTo(methodOn(ArtworkController.class).fetchCompetitionFanart(competitionId))
+              .withRel(FANART));
+      competitionResource.add(
+          linkTo(methodOn(ArtworkController.class).fetchCompetitionMonochromeEmblem(competitionId))
+              .withRel(MONOCHROME));
+      competitionResource.add(
+          linkTo(methodOn(ArtworkController.class).fetchCompetitionLandscape(competitionId))
+              .withRel(LANDSCAPE));
 
       return competitionResource;
     }
@@ -126,15 +116,12 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
     public CollectionModel<CompetitionResource> toCollectionModel(
         @NotNull Iterable<? extends Competition> competitions) {
 
-      final CollectionModel<CompetitionResource> competitionResources = super
-          .toCollectionModel(competitions);
+      final CollectionModel<CompetitionResource> competitionResources =
+          super.toCollectionModel(competitions);
       // add a self link
-      competitionResources
-          .add(linkTo(methodOn(CompetitionController.class)
-              .fetchAllCompetitions())
-              .withSelfRel());
+      competitionResources.add(
+          linkTo(methodOn(CompetitionController.class).fetchAllCompetitions()).withSelfRel());
       return competitionResources;
     }
   }
-
 }

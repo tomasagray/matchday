@@ -19,9 +19,7 @@
 
 package self.me.matchday.api.service;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Stream;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,41 +29,133 @@ import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 import self.me.matchday.util.Log;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 @Service
 public class DataSourceService {
 
   private static final String LOG_TAG = "DataSourceService";
 
-  private final List<DataSourcePlugin<Stream<Event>>> dataSourcePlugins;
+  @Getter private final Set<DataSourcePlugin<Stream<Event>>> dataSourcePlugins;
+  @Getter private final Set<DataSourcePlugin<Stream<Event>>> enabledPlugins = new HashSet<>();
   private final EventService eventService;
 
   @Autowired
-  DataSourceService(@NotNull final List<DataSourcePlugin<Stream<Event>>> dataSourcePlugins,
+  DataSourceService(
+      @NotNull final Set<DataSourcePlugin<Stream<Event>>> dataSourcePlugins,
       @NotNull final EventService eventService) {
 
     this.dataSourcePlugins = dataSourcePlugins;
+    // all enabled by default
+    this.enabledPlugins.addAll(dataSourcePlugins);
     this.eventService = eventService;
   }
 
+  /**
+   * Refresh all data sources (Event source plugins) with the given Snapshot
+   *
+   * @param snapshotRequest Refresh request details
+   * @return The SnapshotRequest, for additional processing
+   */
   public SnapshotRequest refreshDataSources(@NotNull final SnapshotRequest snapshotRequest) {
 
     // Refresh each data source plugin
-    dataSourcePlugins
-        .forEach(plugin -> {
+    enabledPlugins.forEach(
+        plugin -> {
           try {
             final Snapshot<Stream<Event>> snapshot = plugin.getSnapshot(snapshotRequest);
             // Save Snapshot data to database
-            snapshot
-                .getData()
-                .forEach(eventService::saveEvent);
+            snapshot.getData().forEach(eventService::saveEvent);
 
           } catch (IOException | RuntimeException e) {
-            Log.e(LOG_TAG,
-                String.format("Could not refresh data from plugin: %s with SnapshotRequest: %s",
-                    plugin.getTitle(), snapshotRequest), e);
+            Log.e(
+                LOG_TAG,
+                String.format(
+                    "Could not refresh data from plugin: %s with SnapshotRequest: %s",
+                    plugin.getTitle(), snapshotRequest),
+                e);
           }
         });
 
     return snapshotRequest;
+  }
+
+  /**
+   * Returns an Optional containing the requested plugin, if it exists
+   *
+   * @param pluginId The ID of the requested plugin
+   * @return An Optional which may contain the requested plugin
+   */
+  public Optional<DataSourcePlugin<Stream<Event>>> getDataSourcePlugin(
+      @NotNull final UUID pluginId) {
+
+    return dataSourcePlugins.stream()
+        .filter(plugin -> pluginId.equals(plugin.getPluginId()))
+        .findFirst();
+  }
+
+  /**
+   * Set a plugin at 'enabled' (active) by adding it to the enabledPlugins List
+   *
+   * @param pluginId The ID of the plugin
+   * @return True/false if the plugin was successfully enabled
+   */
+  public boolean enablePlugin(@NotNull final UUID pluginId) {
+
+    Log.i(LOG_TAG, "Attempting to enable plugin: " + pluginId);
+
+    // Find requested plugin
+    final Optional<DataSourcePlugin<Stream<Event>>> pluginOptional =
+        dataSourcePlugins.stream()
+            .filter(plugin -> pluginId.equals(plugin.getPluginId()))
+            .findFirst();
+    if (pluginOptional.isPresent()) {
+      // Plugin found; enable
+      final boolean added = enabledPlugins.add(pluginOptional.get());
+      Log.i(LOG_TAG, String.format("Successfully enabled plugin: %s? %s", pluginId, added));
+      return added;
+    } else {
+      Log.i(LOG_TAG, "Could not find plugin with ID: " + pluginId);
+    }
+    return false;
+  }
+
+  /**
+   * Disable the given plugin, so it is excluded from data refresh requests
+   *
+   * @param pluginId The ID of the data plugin to disable
+   * @return True/false if the given plugin was successfully disabled
+   */
+  public boolean disablePlugin(@NotNull final UUID pluginId) {
+
+    Log.i(LOG_TAG, "Attempting to disable plugin: " + pluginId);
+
+    // Find the requested plugin
+    final Optional<DataSourcePlugin<Stream<Event>>> pluginOptional =
+        enabledPlugins.stream().filter(plugin -> pluginId.equals(plugin.getPluginId())).findFirst();
+    if (pluginOptional.isPresent()) {
+      // Remove from enabled plugins
+      final boolean removed = enabledPlugins.remove(pluginOptional.get());
+      Log.i(LOG_TAG, String.format("Disabled plugin: %s? %s", pluginId, removed));
+      return removed;
+    } else {
+      Log.i(LOG_TAG, "Could not find plugin with ID: " + pluginId);
+    }
+    return false;
+  }
+
+  /**
+   * Determine if a given plugin is currently enabled (active)
+   *
+   * @param pluginId The ID of the plugin
+   * @return true/false if currently active
+   */
+  public boolean isPluginEnabled(@NotNull final UUID pluginId) {
+    return enabledPlugins.stream().anyMatch(plugin -> pluginId.equals(plugin.getPluginId()));
   }
 }
