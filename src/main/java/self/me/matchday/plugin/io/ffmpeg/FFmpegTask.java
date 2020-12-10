@@ -26,12 +26,14 @@ import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Log;
 
-import java.io.*;
+import java.io.File;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -42,23 +44,12 @@ public class FFmpegTask implements Runnable {
       DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
 
   private final String command;
-  private final List<String> args;
+  private final List<String> transcodeArgs;
+  private final List<URI> uris;
   private final Path outputFile;
   private final boolean loggingEnabled;
   private Process process;
   private FFmpegLogAdapter logAdapter;
-
-  /*public FFmpegTask(
-      @NotNull final String command,
-      @NotNull final List<String> args,
-      @NotNull final Path outputFile,
-      final boolean loggingEnabled) {
-
-    this.command = command;
-    this.args = args;
-    this.outputFile = outputFile;
-    this.loggingEnabled = loggingEnabled;
-  }*/
 
   @SneakyThrows
   @Override
@@ -70,8 +61,10 @@ public class FFmpegTask implements Runnable {
       Files.createDirectories(dataDir);
 
       // Collate program arguments
-      final String arguments = Strings.join(args, ' ');
-      String execCommand = String.format("%s %s \"%s\"", command, arguments, outputFile);
+      final String inputs = getInputString();
+      final String arguments = Strings.join(transcodeArgs, ' ');
+      String execCommand = String.format("%s %s %s \"%s\"", command, inputs, arguments, outputFile);
+      Log.i(LOG_TAG, "Executing shell command:\n" + execCommand);
 
       // Execute FFmpeg task
       process = Runtime.getRuntime().exec(execCommand);
@@ -111,6 +104,18 @@ public class FFmpegTask implements Runnable {
       return !(process.destroyForcibly().isAlive());
     }
     return true;
+  }
+
+  /**
+   * Returns a formatted String containing the input portion of the FFMPEG command
+   *
+   * @return The input portion of the FFMPEG command
+   */
+  private String getInputString() {
+
+    // todo : if (needs concat.txt) ?
+    final List<String> uriStrings = uris.stream().map(URI::toString).collect(Collectors.toList());
+    return String.format("-i \"concat:%s\"", String.join("|", uriStrings));
   }
 
   /**

@@ -81,11 +81,11 @@ class FFmpegTest {
     final int minArgLength = 7;
 
     // Retrieve data from task
-    final List<String> args = hlsStreamTask.getArgs();
+    final List<String> args = hlsStreamTask.getTranscodeArgs();
 
     // Test
     Log.i(LOG_TAG, "Testing args: " + args);
-    assertThat(args.size()).isGreaterThan(minArgLength);
+    assertThat(args.size()).isGreaterThanOrEqualTo(minArgLength);
   }
 
   @Test

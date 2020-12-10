@@ -29,7 +29,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FFmpeg {
 
@@ -54,12 +53,9 @@ public class FFmpeg {
     final String storage = location.toString();
     final Path outputFile = Paths.get(storage, SEGMENT_PL_NAME);
     final List<String> transcodeArgs = new ArrayList<>();
-    final List<String> uriStrings = uris.stream().map(URI::toString).collect(Collectors.toList());
-    final String inputArg = String.format("-i \"concat:%s\"", String.join("|", uriStrings));
     final String segments = String.format("\"%s\"", Paths.get(storage, SEGMENT_PATTERN));
 
     // Add arguments
-    transcodeArgs.add(inputArg);
     transcodeArgs.add("-vcodec copy");
     transcodeArgs.add("-acodec copy");
     transcodeArgs.add("-muxdelay 0");
@@ -71,7 +67,8 @@ public class FFmpeg {
     // Create FFMPEG CLI command & return
     return FFmpegTask.builder()
         .command(Strings.join(baseArgs, ' '))
-        .args(transcodeArgs)
+        .uris(uris)
+        .transcodeArgs(transcodeArgs)
         .outputFile(outputFile)
         .loggingEnabled(loggingEnabled)
         .build();
