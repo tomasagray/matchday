@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
 import self.me.matchday.model.VideoStreamPlaylistLocator;
+import self.me.matchday.util.FileCheckTask;
 import self.me.matchday.util.Log;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,13 +40,10 @@ import java.util.regex.Pattern;
 public class VideoResourceInterceptor implements HandlerInterceptor {
 
   private static final String LOG_TAG = "VideoResourceInterceptor";
-  private static final Long PROCESS_DELAY = 3_000L;
+  private static final long FILE_CHECK_DELAY = 250;
 
   @Value("${video-resources.video-stream-path-pattern}")
   private Pattern urlPattern;
-
-  @Value("${video-resources.file-storage-location}")
-  private String fileStorageLocation;
 
   private final VideoStreamingService videoStreamingService;
   private final PlaylistLocatorService playlistLocatorService;
@@ -109,15 +107,24 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
           final Path playlistPath = playlistLocator.getPlaylistPath().toAbsolutePath();
           Log.i(LOG_TAG, "Created video stream at: " + playlistPath);
 
+          // Ensure playlist creation has begun
+          Log.i(LOG_TAG, "Waiting for stream head start...");
+          final FileCheckTask fileCheckTask = new FileCheckTask(playlistPath.toFile(), FILE_CHECK_DELAY);
+          // Start checking
+          fileCheckTask.start();
+          // Wait until task finishes or times out
+          fileCheckTask.join();
+          final boolean fileFound = fileCheckTask.isFileFound();
+          Log.i(LOG_TAG, "Playlist file found? " + fileFound);
+          // If file not found, tell Spring to stop processing request
+          return fileFound;
+
         } else {
           Log.d(
               LOG_TAG,
               String.format(
                   "Could not create playlist for Event: %s, File Source: %s", eventId, fileSrcId));
         }
-        // Ensure playlist creation has begun
-        Log.i(LOG_TAG, "Waiting for stream head start...");
-        Thread.sleep(PROCESS_DELAY);
 
       } else {
         Log.e(LOG_TAG, "Could not extract necessary data from servlet path: " + servletPath);
