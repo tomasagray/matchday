@@ -42,7 +42,7 @@ public class FFmpegPlugin implements Plugin {
   private final FFprobe ffprobe;
 
   private final ThreadGroup threadGroup;
-  private final Hashtable<String, FFmpegTask> streamingTasks = new Hashtable<>();
+  private final Hashtable<Path, FFmpegTask> streamingTasks = new Hashtable<>();
 
   @Autowired
   public FFmpegPlugin(@NotNull final FFmpegPluginProperties pluginProperties) {
@@ -64,24 +64,37 @@ public class FFmpegPlugin implements Plugin {
    */
   public FFmpegTask streamUris(@NotNull final List<URI> uris, @NotNull final Path storageLocation) {
 
+    // Get absolute path for task key
+    final Path absolutePath = storageLocation.toAbsolutePath();
+
+    // Check if a task is already working in path
+    final FFmpegTask prevTask = streamingTasks.get(absolutePath);
+    if (prevTask != null) {
+      if (prevTask.isAlive()) {
+        // Task is already present and alive; abort
+        Log.i(LOG_TAG, String.format("Streaming task already begun for path: %s", absolutePath));
+        return prevTask;
+      } else {
+        // Previous task has finished; remove from list & continue
+        streamingTasks.remove(absolutePath);
+      }
+    }
+
     // Create the streaming task
     final FFmpegTask streamTask = ffmpeg.getHlsStreamTask(uris, storageLocation);
 
     // Create thread for task
     final Thread thread = new Thread(threadGroup, streamTask);
+    // Add to collection
+    streamingTasks.put(absolutePath, streamTask);
     // Start streaming task
     thread.start();
-    // Add to collection
-    streamingTasks.put(streamTask.getOutputFile().toString(), streamTask);
 
     // Return playlist file path
     return streamTask;
   }
 
-  /**
-   * Cancels all streaming tasks running in the background
-   *
-   */
+  /** Cancels all streaming tasks running in the background */
   public void interruptAllStreamTasks() {
 
     // kill each task
@@ -95,22 +108,25 @@ public class FFmpegPlugin implements Plugin {
     threadGroup.interrupt();
   }
 
-  public void interruptStreamingTask(@NotNull final String outputPath) {
+  public void interruptStreamingTask(@NotNull final Path outputPath) {
 
+    // Get absolute path for task key
+    final Path absolutePath = outputPath.toAbsolutePath();
     // Get requested task
-    final FFmpegTask streamingTask = streamingTasks.get(outputPath);
+    final FFmpegTask streamingTask = streamingTasks.get(absolutePath);
     if (streamingTask != null) {
       // kill task
-      Log.i(LOG_TAG, "Killing streaming task to file: " + outputPath);
+      Log.i(LOG_TAG, "Killing streaming task to file: " + absolutePath);
       final boolean processKilled = streamingTask.kill();
-      Log.i(LOG_TAG, String.format("Streaming task to [%s] killed: %s", outputPath, processKilled));
+      Log.i(
+          LOG_TAG, String.format("Streaming task to [%s] killed: %s", absolutePath, processKilled));
       if (processKilled) {
         // remove from task list
-        streamingTasks.remove(outputPath);
+        streamingTasks.remove(absolutePath);
       }
     }
 
-    Log.i(LOG_TAG, "No task found for output file: " + outputPath);
+    Log.i(LOG_TAG, "No task found for output file: " + absolutePath);
   }
 
   public int getStreamingTaskCount() {
@@ -126,14 +142,12 @@ public class FFmpegPlugin implements Plugin {
    */
   public FFmpegMetadata readFileMetadata(@NotNull final URI uri) throws IOException {
 
-    return
-        ffprobe.getFileMetadata(uri);
+    return ffprobe.getFileMetadata(uri);
   }
 
   @Override
   public UUID getPluginId() {
-    return
-        UUID.fromString(pluginProperties.getId());
+    return UUID.fromString(pluginProperties.getId());
   }
 
   @Override

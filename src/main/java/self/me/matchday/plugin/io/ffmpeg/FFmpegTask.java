@@ -21,6 +21,7 @@ package self.me.matchday.plugin.io.ffmpeg;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
@@ -35,9 +36,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
-public class FFmpegTask implements Runnable {
+public class FFmpegTask extends Thread {
 
   public static final String LOG_TAG = "FFmpegTask";
   private static final DateTimeFormatter LOGFILE_TIMESTAMP_FORMATTER =

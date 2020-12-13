@@ -57,29 +57,30 @@ public class PlaylistLocatorService {
   /**
    * Find a VideoStreamPlaylistLocator in the database.
    *
-   * @param eventId   The ID of the Event for this playlist
+   * @param eventId The ID of the Event for this playlist
    * @param fileSrcId The File Source ID for this playlist
    * @return An Optional of the playlist locator
    */
-  public Optional<VideoStreamPlaylistLocator> getPlaylistLocator(@NotNull final String eventId,
-      @NotNull final String fileSrcId) {
+  public Optional<VideoStreamPlaylistLocator> getPlaylistLocator(
+      @NotNull final String eventId, @NotNull final String fileSrcId) {
 
     // Create an ID to find the playlist
     final VideoStreamPlaylistId playlistId = new VideoStreamPlaylistId(eventId, fileSrcId);
-    return
-        playlistLocatorRepo.findById(playlistId);
+    return playlistLocatorRepo.findById(playlistId);
   }
 
   /**
    * Creates a new VideoStreamPlaylistLocator and saves it to database.
    *
-   * @param eventId      The ID of the Event for this playlist
-   * @param fileSrcId    The ID of the File Source for this playlist
+   * @param eventId The ID of the Event for this playlist
+   * @param fileSrcId The ID of the File Source for this playlist
    * @param playlistPath The path to the playlist file
    * @return The newly created VideoStreamPlaylistLocator
    */
-  public VideoStreamPlaylistLocator createNewPlaylistLocator(@NotNull final String eventId,
-      @NotNull final String fileSrcId, @NotNull final Path playlistPath) {
+  public VideoStreamPlaylistLocator createNewPlaylistLocator(
+      @NotNull final String eventId,
+      @NotNull final String fileSrcId,
+      @NotNull final Path playlistPath) {
 
     // Create locator ID
     final VideoStreamPlaylistId playlistId = new VideoStreamPlaylistId(eventId, fileSrcId);
@@ -87,7 +88,7 @@ public class PlaylistLocatorService {
     final VideoStreamPlaylistLocator playlistLocator =
         new VideoStreamPlaylistLocator(playlistId, playlistPath);
     // Save locator to database
-    Log.i(LOG_TAG, "Saving playlist locator: " + playlistLocatorRepo.save(playlistLocator));
+    Log.i(LOG_TAG, "Saving playlist locator: " + playlistLocatorRepo.saveAndFlush(playlistLocator));
 
     return playlistLocator;
   }

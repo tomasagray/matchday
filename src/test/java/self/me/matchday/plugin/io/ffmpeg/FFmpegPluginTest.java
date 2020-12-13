@@ -172,7 +172,7 @@ class FFmpegPluginTest {
     // Wait...
     Thread.sleep(5_000L);
 
-    ffmpegPlugin.interruptStreamingTask(streamingTask.getOutputFile().toString());
+    ffmpegPlugin.interruptStreamingTask(storageLocation.toPath());
 
     assertThat(ffmpegPlugin.getStreamingTaskCount()).isEqualTo(0);
   }

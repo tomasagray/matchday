@@ -35,26 +35,26 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Transactional
 public class EventFileService {
 
   private static final String LOG_TAG = "EventFileService";
-
   private static final int THREAD_POOL_SIZE = 12;
+
+  private final List<EventFileSource> lockedFileSources = new ArrayList<>();
   // Services
   private final ExecutorService executorService;
   private final FileServerService fileServerService;
   private final FFmpegPlugin ffmpegPlugin;
 
   @Autowired
-  public EventFileService(final FileServerService fileServerService,
-      final FFmpegPlugin ffmpegPlugin) {
+  public EventFileService(
+      final FileServerService fileServerService, final FFmpegPlugin ffmpegPlugin) {
 
     this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     this.fileServerService = fileServerService;
@@ -66,38 +66,59 @@ public class EventFileService {
    * Updates EventFiles in the local database.
    *
    * @param eventFileSource The File Source to be refreshed.
+   * @return True if any EventFile data was modified, or false if not
    */
-  public void refreshEventFileData(@NotNull final EventFileSource eventFileSource,
-      final boolean fetchMetadata) {
+  public boolean refreshEventFileData(
+      @NotNull final EventFileSource eventFileSource, final boolean fetchMetadata) {
 
+    // Ensure each file source can only be updated once at a time
+    if (lockedFileSources.contains(eventFileSource)) {
+      Log.i(
+          LOG_TAG,
+          String.format(
+              "Refresh request denied for EventFileSource: %s; file source is locked (already being refreshed?)",
+              eventFileSource.getEventFileSrcId()));
+      return false;
+    }
+
+    // Number of files actually updated by request
+    final AtomicInteger updatedFileCount = new AtomicInteger();
     Log.i(LOG_TAG, "Refreshing remote data for file source: " + eventFileSource);
+    // Lock file source
+    lockedFileSources.add(eventFileSource);
 
-    // Remote files container
-    final Set<Future<EventFile>> futureEventFiles = new LinkedHashSet<>();
-    // Send each link which needs to be updated to execute in its own thread
-    eventFileSource
-        .getEventFiles()
-        .stream()
-        .filter(this::shouldRefreshData)
-        .forEach(
-            eventFile ->
-                futureEventFiles.add(
-                    executorService.submit(
-                        new EventFileRefreshTask(fileServerService, ffmpegPlugin,
-                            eventFile, fetchMetadata)))
-        );
+    try {
+      // Remote files container
+      final Set<Future<EventFile>> futureEventFiles = new LinkedHashSet<>();
+      // Send each link which needs to be updated to execute in its own thread
+      eventFileSource.getEventFiles().stream()
+          .filter(this::shouldRefreshData)
+          .forEach(
+              eventFile ->
+                  futureEventFiles.add(
+                      executorService.submit(
+                          new EventFileRefreshTask(
+                              fileServerService, ffmpegPlugin, eventFile, fetchMetadata))));
 
-    // Retrieve results of remote fetch operation
-    futureEventFiles.forEach(
-        eventFileFuture -> {
-          try {
-            final EventFile eventFile = eventFileFuture.get();
-            // Update managed version
-            mergeEventFile(eventFileSource, eventFile);
-          } catch (InterruptedException | ExecutionException e) {
-            Log.d(LOG_TAG, "Could not fetch remote file " + eventFileFuture, e);
-          }
-        });
+      Log.i(LOG_TAG, String.format("Refreshing data for: %s EventFiles", futureEventFiles.size()));
+      // Retrieve results of remote fetch operation
+      futureEventFiles.forEach(
+          eventFileFuture -> {
+            try {
+              final EventFile eventFile = eventFileFuture.get();
+              updatedFileCount.incrementAndGet();
+              // Update managed version
+              mergeEventFile(eventFileSource, eventFile);
+            } catch (InterruptedException | ExecutionException e) {
+              Log.d(LOG_TAG, "Could not fetch remote file data for " + eventFileFuture, e);
+            }
+          });
+    } finally {
+      // Unlock file source
+      lockedFileSources.remove(eventFileSource);
+    }
+    // If any files were actually updated, return true
+    return updatedFileCount.get() > 0;
   }
 
   /**
@@ -122,20 +143,23 @@ public class EventFileService {
    * Update the managed EventFile with data retrieved from the remote task.
    *
    * @param eventFileSource The EvenFileSource with the managed version of the EventFile
-   * @param eventFile       The updated (refreshed) EventFile data
+   * @param eventFile The updated (refreshed) EventFile data
    */
-  private void mergeEventFile(@NotNull EventFileSource eventFileSource,
-      @NotNull EventFile eventFile) {
+  private void mergeEventFile(
+      @NotNull EventFileSource eventFileSource, @NotNull EventFile eventFile) {
 
     // Find the EventFile that needs updating
-    eventFileSource.getEventFiles().forEach(ef -> {
-      if (eventFile.equals(ef)) {
-        // Copy data
-        ef.setInternalUrl(eventFile.getInternalUrl());
-        ef.setMetadata(eventFile.getMetadata());
-        ef.setLastRefreshed(eventFile.getLastRefreshed());
-      }
-    });
+    eventFileSource
+        .getEventFiles()
+        .forEach(
+            ef -> {
+              if (eventFile.equals(ef)) {
+                // Copy data
+                ef.setInternalUrl(eventFile.getInternalUrl());
+                ef.setMetadata(eventFile.getMetadata());
+                ef.setLastRefreshed(eventFile.getLastRefreshed());
+              }
+            });
   }
 
   /**
@@ -149,9 +173,11 @@ public class EventFileService {
     private final EventFile eventFile;
     private final boolean fetchMetadata;
 
-    public EventFileRefreshTask(@NotNull final FileServerService fileServerService,
+    public EventFileRefreshTask(
+        @NotNull final FileServerService fileServerService,
         @NotNull final FFmpegPlugin ffmpegPlugin,
-        @NotNull final EventFile eventFile, final boolean fetchMetadata) {
+        @NotNull final EventFile eventFile,
+        final boolean fetchMetadata) {
 
       this.fileServerService = fileServerService;
       this.ffmpegPlugin = ffmpegPlugin;
@@ -175,7 +201,8 @@ public class EventFileService {
 
         if (downloadUrl.isPresent()) {
           // Update remote (internal) URL
-          Log.i(LOG_TAG,
+          Log.i(
+              LOG_TAG,
               String.format("Successfully updated remote URL for EventFile: %s", eventFile));
           eventFile.setInternalUrl(downloadUrl.get());
           // Update metadata
@@ -186,11 +213,12 @@ public class EventFileService {
           eventFile.setLastRefreshed(Timestamp.from(Instant.now()));
 
         } else {
-          throw new
-              IOException(String.format("Could not get remote URL for EventFile: %s", eventFile));
+          throw new IOException(
+              String.format("Could not get remote URL for EventFile: %s", eventFile));
         }
       } catch (Exception e) {
-        Log.e(LOG_TAG,
+        Log.e(
+            LOG_TAG,
             String.format("Could not refresh remote data for EventFile: %s", eventFile),
             e);
       }
@@ -208,8 +236,7 @@ public class EventFileService {
       // Update ONLY if metadata is null
       if (eventFile.getMetadata() == null) {
         final URI eventFileUri = eventFile.getInternalUrl().toURI();
-        final FFmpegMetadata ffmpegMetadata =
-            ffmpegPlugin.readFileMetadata(eventFileUri);
+        final FFmpegMetadata ffmpegMetadata = ffmpegPlugin.readFileMetadata(eventFileUri);
         // Ensure metadata successfully updated
         if (ffmpegMetadata != null) {
           eventFile.setMetadata(ffmpegMetadata);

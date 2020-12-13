@@ -139,7 +139,9 @@ public class VideoStreamingService {
               "No playlist locator found for Event: %s, File Source: %s", eventId, fileSrcId));
     }
 
-    Log.i(LOG_TAG, String.format("Read: %s bytes for playlist of event: %s", result.length(), eventId));
+    Log.i(
+        LOG_TAG,
+        String.format("Read: %s bytes for playlist of event: %s", result.length(), eventId));
     return result.toString();
   }
 
@@ -197,7 +199,12 @@ public class VideoStreamingService {
         if (diskManager.isSpaceAvailable(fileSource.getFileSize())) {
 
           // Refresh EventFile data (if necessary)
-          eventFileService.refreshEventFileData(fileSource, false);
+          final boolean dataRefreshed = eventFileService.refreshEventFileData(fileSource, false);
+          if (dataRefreshed) {
+            // Flush changes to database
+            eventService.saveEvent(event);
+          }
+
           // Collate URLs
           final List<URI> uris = getEventFileSrcUris(fileSource);
           // Create storage path
