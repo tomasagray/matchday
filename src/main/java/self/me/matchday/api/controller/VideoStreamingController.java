@@ -59,7 +59,9 @@ public class VideoStreamingController {
     this.variantPlaylistService = variantPlaylistService;
   }
 
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @RequestMapping(
+      value = {"", "/"},
+      method = RequestMethod.GET)
   public ResponseEntity<CollectionModel<VideoResource>> getVideoResources(
       @PathVariable final String eventId) {
 
@@ -104,9 +106,7 @@ public class VideoStreamingController {
         .orElse(ResponseEntity.notFound().build());
   }
 
-  @RequestMapping(
-      value = "/stream/{fileSrcId}/playlist.m3u8",
-      method = RequestMethod.GET)
+  @RequestMapping(value = "/stream/{fileSrcId}/playlist.m3u8", method = RequestMethod.GET)
   public ResponseEntity<String> getStreamPlaylist(
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 

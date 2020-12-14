@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -39,8 +39,8 @@ public class MatchController {
   private final EventResourceAssembler resourceAssembler;
 
   @Autowired
-  public MatchController(final MatchService matchService,
-      final EventResourceAssembler resourceAssembler) {
+  public MatchController(
+      final MatchService matchService, final EventResourceAssembler resourceAssembler) {
 
     this.matchService = matchService;
     this.resourceAssembler = resourceAssembler;
@@ -51,15 +51,13 @@ public class MatchController {
    *
    * @return A List of Matches as an HttpEntity.
    */
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @RequestMapping(
+      value = {"", "/"},
+      method = RequestMethod.GET)
   @ResponseBody
   public CollectionModel<EventResource> fetchAllMatches() {
 
-    return
-        matchService
-            .fetchAllMatches()
-            .map(resourceAssembler::toCollectionModel)
-            .orElse(null);
+    return matchService.fetchAllMatches().map(resourceAssembler::toCollectionModel).orElse(null);
   }
 
   /**
@@ -72,11 +70,10 @@ public class MatchController {
   @ResponseBody
   public ResponseEntity<EventResource> fetchMatchById(@PathVariable String matchId) {
 
-    return
-        matchService
-            .fetchMatch(matchId)
-            .map(resourceAssembler::toModel)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    return matchService
+        .fetchMatch(matchId)
+        .map(resourceAssembler::toModel)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 }

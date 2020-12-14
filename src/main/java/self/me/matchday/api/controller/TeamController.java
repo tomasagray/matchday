@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -19,9 +19,6 @@
 
 package self.me.matchday.api.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +33,9 @@ import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.TeamService;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 @RequestMapping(value = "/teams")
 public class TeamController {
@@ -46,9 +46,11 @@ public class TeamController {
   private final EventResourceAssembler eventResourceAssembler;
 
   @Autowired
-  public TeamController(final TeamService teamService,
+  public TeamController(
+      final TeamService teamService,
       final TeamResourceAssembler teamResourceAssembler,
-      final EventService eventService, final EventResourceAssembler eventResourceAssembler) {
+      final EventService eventService,
+      final EventResourceAssembler eventResourceAssembler) {
 
     this.teamService = teamService;
     this.teamResourceAssembler = teamResourceAssembler;
@@ -61,14 +63,12 @@ public class TeamController {
    *
    * @return A List of Teams as an HttpEntity.
    */
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @RequestMapping(
+      value = {"", "/"},
+      method = RequestMethod.GET)
   public CollectionModel<TeamResource> fetchAllTeams() {
 
-    return
-        teamService
-            .fetchAllTeams()
-            .map(teamResourceAssembler::toCollectionModel)
-            .orElse(null);
+    return teamService.fetchAllTeams().map(teamResourceAssembler::toCollectionModel).orElse(null);
   }
 
   /**
@@ -80,12 +80,11 @@ public class TeamController {
   @RequestMapping(value = "/team/{teamId}", method = RequestMethod.GET)
   public ResponseEntity<TeamResource> fetchTeamById(@PathVariable final String teamId) {
 
-    return
-        teamService
-            .fetchTeamById(teamId)
-            .map(teamResourceAssembler::toModel)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    return teamService
+        .fetchTeamById(teamId)
+        .map(teamResourceAssembler::toModel)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
   /**
@@ -98,18 +97,16 @@ public class TeamController {
   public ResponseEntity<CollectionModel<EventResource>> fetchEventsForTeam(
       @PathVariable final String teamId) {
 
-    return
-        eventService
-            .fetchEventsForTeam(teamId)
-            .map(eventResourceAssembler::toCollectionModel)
-            // add self link to each EventResource
-            .map(eventResources ->
-                eventResources
-                    .add(linkTo(
-                        methodOn(TeamController.class)
-                            .fetchEventsForTeam(teamId))
+    return eventService
+        .fetchEventsForTeam(teamId)
+        .map(eventResourceAssembler::toCollectionModel)
+        // add self link to each EventResource
+        .map(
+            eventResources ->
+                eventResources.add(
+                    linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId))
                         .withSelfRel()))
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 }

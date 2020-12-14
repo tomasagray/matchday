@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -48,10 +48,13 @@ public class CompetitionController {
   private final EventResourceAssembler eventResourceAssembler;
 
   @Autowired
-  public CompetitionController(final CompetitionService competitionService,
+  public CompetitionController(
+      final CompetitionService competitionService,
       final CompetitionResourceAssembler competitionResourceAssembler,
-      final TeamService teamService, final TeamResourceAssembler teamResourceAssembler,
-      final EventService eventService, final EventResourceAssembler eventResourceAssembler) {
+      final TeamService teamService,
+      final TeamResourceAssembler teamResourceAssembler,
+      final EventService eventService,
+      final EventResourceAssembler eventResourceAssembler) {
 
     this.competitionService = competitionService;
     this.competitionResourceAssembler = competitionResourceAssembler;
@@ -61,19 +64,19 @@ public class CompetitionController {
     this.eventResourceAssembler = eventResourceAssembler;
   }
 
-
   /**
    * Provide all Competitions to the API.
    *
    * @return All Competitions as an HttpEntity.
    */
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @RequestMapping(
+      value = {"", "/"},
+      method = RequestMethod.GET)
   public CollectionModel<CompetitionResource> fetchAllCompetitions() {
-    return
-        competitionService
-            .fetchAllCompetitions()
-            .map(competitionResourceAssembler::toCollectionModel)
-            .orElse(null);
+    return competitionService
+        .fetchAllCompetitions()
+        .map(competitionResourceAssembler::toCollectionModel)
+        .orElse(null);
   }
 
   /**
@@ -86,12 +89,11 @@ public class CompetitionController {
   public ResponseEntity<CompetitionResource> fetchCompetitionById(
       @PathVariable final String competitionId) {
 
-    return
-        competitionService
-            .fetchCompetitionById(competitionId)
-            .map(competitionResourceAssembler::toModel)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    return competitionService
+        .fetchCompetitionById(competitionId)
+        .map(competitionResourceAssembler::toModel)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
   /**
@@ -104,11 +106,10 @@ public class CompetitionController {
   public CollectionModel<TeamResource> fetchCompetitionTeams(
       @PathVariable final String competitionId) {
 
-    return
-        teamService
-            .fetchTeamsByCompetitionId(competitionId)
-            .map(teamResourceAssembler::toCollectionModel)
-            .orElse(null);
+    return teamService
+        .fetchTeamsByCompetitionId(competitionId)
+        .map(teamResourceAssembler::toCollectionModel)
+        .orElse(null);
   }
 
   /**
@@ -118,12 +119,12 @@ public class CompetitionController {
    * @return A ResponseEntity containing the CollectionModel of Events.
    */
   @RequestMapping(value = "/competition/{competitionId}/events", method = RequestMethod.GET)
-  public CollectionModel<EventResource> fetchCompetitionEvents(@PathVariable final String competitionId) {
+  public CollectionModel<EventResource> fetchCompetitionEvents(
+      @PathVariable final String competitionId) {
 
-    return
-        eventService
-            .fetchEventsForCompetition(competitionId)
-            .map(eventResourceAssembler::toCollectionModel)
-            .orElse(null);
+    return eventService
+        .fetchEventsForCompetition(competitionId)
+        .map(eventResourceAssembler::toCollectionModel)
+        .orElse(null);
   }
 }
