@@ -40,6 +40,9 @@ import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.model.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -67,16 +70,17 @@ public class EventResource extends RepresentationModel<EventResource> {
   private RepresentationModel<TeamResource> awayTeam;
 
   @Component
-  public static class EventResourceAssembler extends
-      RepresentationModelAssemblerSupport<Event, EventResource> {
+  public static class EventResourceAssembler
+      extends RepresentationModelAssemblerSupport<Event, EventResource> {
 
-    private final static LinkRelation VIDEO_LINK = LinkRelation.of("video");
+    private static final LinkRelation VIDEO_LINK = LinkRelation.of("video");
 
     private final TeamResourceAssembler teamResourceAssembler;
     private final CompetitionResourceAssembler competitionResourceAssembler;
 
     @Autowired
-    public EventResourceAssembler(TeamResourceAssembler teamResourceAssembler,
+    public EventResourceAssembler(
+        TeamResourceAssembler teamResourceAssembler,
         CompetitionResourceAssembler competitionResourceAssembler) {
 
       super(EventController.class, EventResource.class);
@@ -105,8 +109,7 @@ public class EventResource extends RepresentationModel<EventResource> {
       // TODO: Make this handle correct subtype
       // Add link to playlist resource for this event
       eventResource.add(
-          linkTo(methodOn(VideoStreamingController.class)
-              .getVideoResources(entity.getEventId()))
+          linkTo(methodOn(VideoStreamingController.class).getVideoResources(entity.getEventId()))
               .withRel(VIDEO_LINK));
 
       // Handle subtypes
@@ -122,16 +125,14 @@ public class EventResource extends RepresentationModel<EventResource> {
           eventResource.setAwayTeam(teamResourceAssembler.toModel(awayTeam));
         }
         // add self link
-        eventResource.add(linkTo(
-            methodOn(MatchController.class)
-                .fetchMatchById(match.getEventId()))
-            .withSelfRel());
+        eventResource.add(
+            linkTo(methodOn(MatchController.class).fetchMatchById(match.getEventId()))
+                .withSelfRel());
       } else {
         // it's a Highlight; add self link
-        eventResource.add(linkTo(
-            methodOn(HighlightController.class)
-                .fetchHighlightById(entity.getEventId()))
-            .withSelfRel());
+        eventResource.add(
+            linkTo(methodOn(HighlightController.class).fetchHighlightById(entity.getEventId()))
+                .withSelfRel());
       }
       // Return the finished product
       return eventResource;
@@ -141,13 +142,15 @@ public class EventResource extends RepresentationModel<EventResource> {
     public @NotNull CollectionModel<EventResource> toCollectionModel(
         @NotNull Iterable<? extends Event> entities) {
 
+      // Sort Events
+      final List<? extends Event> sortedEvents =
+          StreamSupport.stream(entities.spliterator(), false)
+              .sorted(new Event.EventSorter())
+              .collect(Collectors.toList());
       // Instantiate from super method
-      final CollectionModel<EventResource> eventResources = super.toCollectionModel(entities);
+      final CollectionModel<EventResource> eventResources = super.toCollectionModel(sortedEvents);
       // Add self link
-      eventResources
-          .add(linkTo(methodOn(EventController.class)
-              .fetchAllEvents())
-              .withSelfRel());
+      eventResources.add(linkTo(methodOn(EventController.class).fetchAllEvents()).withSelfRel());
 
       return eventResources;
     }

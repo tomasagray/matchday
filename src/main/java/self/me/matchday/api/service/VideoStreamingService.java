@@ -194,8 +194,9 @@ public class VideoStreamingService {
       final Event event = eventOptional.get();
       // Get the correct file source
       final EventFileSource fileSource = event.getFileSource(fileSrcId);
-      // Check for adequate storage capacity
-      if (fileSource != null) {
+      // Ensure valid file source
+      if (fileSource != null && fileSource.getEventFiles().size() > 0) {
+        // Check for adequate storage capacity
         if (diskManager.isSpaceAvailable(fileSource.getFileSize())) {
 
           // Refresh EventFile data (if necessary)
