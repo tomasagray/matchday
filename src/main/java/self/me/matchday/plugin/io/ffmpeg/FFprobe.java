@@ -21,6 +21,8 @@ package self.me.matchday.plugin.io.ffmpeg;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,64 +31,77 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 
 public class FFprobe {
 
-  private final List<String> args;
+  private final List<String> baseArgs;
   private final Gson gson;
+  private String result;
+  private int processResult;
 
   public FFprobe(@NotNull final String execPath) {
 
     // Create JSON parser
     this.gson = new Gson();
     // Setup global CLI arguments
-    args = List.of(
-        execPath,
-        "-hide_banner",
-        "-print_format json",
-        "-show_streams",
-        "-show_format",
-        "-show_chapters"
-    );
+    baseArgs =
+        List.of(
+            execPath,
+            "-hide_banner",
+            "-print_format json",
+            "-show_streams",
+            "-show_format",
+            "-show_chapters");
   }
 
+  /**
+   * Retrieve metadata from an audio/video file
+   *
+   * @param uri The file resource pointer
+   * @return The file metadata
+   * @throws IOException If the metadata could not be read or parsed
+   */
   public FFmpegMetadata getFileMetadata(@NotNull final URI uri) throws IOException {
 
-    // Result container
-    String result;
-    // Args for this job
-    List<String> processArgs = new ArrayList<>(args);
-    // Add remote URL to job args
-    processArgs.add(uri.toString());
-
-    // Create process for job
-    final String cmd = String.join(" ", processArgs);
-    Process p = Runtime.getRuntime().exec(cmd);
-    int processResult;
-
-    // Fetch remote data
-    try (InputStream is = p.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-      // Read data and collect as a String
-      result =
-          reader
-              .lines()
-              .collect(Collectors.joining(""));
-    } finally {
-      processResult = p.exitValue();
-      // Ensure process closed
-      p.destroy();
-    }
-
-    // Ensure JSON is valid
     try {
-      return
-          gson.fromJson(result, FFmpegMetadata.class);
+      // Read remote file metadata
+      readFileMetadata(uri);
+      // Parse data from JSON to metadata object
+      return gson.fromJson(result, FFmpegMetadata.class);
 
     } catch (JsonSyntaxException e) {
       throw new IOException(
           String.format("Could not parse JSON from String, exit value: %s", processResult), e);
+    }
+  }
+
+  /**
+   * Read audio/video file metadata from a URI
+   *
+   * @param uri The URI of the video file
+   * @throws IOException If there is an error reading data
+   */
+  private void readFileMetadata(@NotNull final URI uri) throws IOException {
+
+    // Assemble args for this job
+    List<String> processArgs = new ArrayList<>(baseArgs);
+    // Add remote URL to job args
+    processArgs.add(uri.toString());
+    // Create process for job
+    final String cmd = String.join(" ", processArgs);
+    Process process = Runtime.getRuntime().exec(cmd);
+
+    // Fetch remote data
+    try (InputStream is = process.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+
+      // Read data and collect as a String
+      result = reader.lines().collect(Collectors.joining(""));
+
+    } finally {
+      // Ensure process closed
+      processResult = process.exitValue();
+      process.destroy();
     }
   }
 }

@@ -25,7 +25,7 @@ import self.me.matchday.util.Log;
 
 import java.io.*;
 
-/** Read FFmpegTask output and write to a file on disk */
+/** Read FFmpegSingleStreamTask output and write to a file on disk */
 class FFmpegLogAdapter extends Thread {
 
   private static final String LOG_TAG = "FFmpegLogAdapter";

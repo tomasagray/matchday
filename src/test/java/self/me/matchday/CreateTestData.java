@@ -129,10 +129,10 @@ public class CreateTestData {
   @SneakyThrows
   public static @NotNull List<EventFile> createTestEventFiles() {
 
-    URL preMatchUrl = getFirstHalfUrl();
+    URL preMatchUrl = getPreMatchUrl();
     URL firstHalfUrl = getFirstHalfUrl();
     URL secondHalfUrl = getSecondHalfUrl();
-    URL postMatchUrl = getSecondHalfUrl();
+    URL postMatchUrl = getPreMatchUrl();
 
     assertThat(preMatchUrl).isNotNull();
     assertThat(firstHalfUrl).isNotNull();
@@ -150,11 +150,23 @@ public class CreateTestData {
     return List.of(preMatch, firstHalf, secondHalf, postMatch);
   }
 
+  public static URL getPreMatchUrl() {
+    try {
+      final String seed = "?rSeed=" + MD5String.generate();
+      return new URL(
+          "http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_0-1080.mkv"
+              + seed);
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
   public static URL getFirstHalfUrl() {
 
     try {
       final String seed = "?rSeed=" + MD5String.generate();
-      return new URL("http://192.168.0.101/matchday-testing/video/barca-rm-2009/1.ts" + seed);
+      return new URL("http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_1-1080.mkv" + seed);
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
@@ -165,7 +177,7 @@ public class CreateTestData {
 
     try {
       final String seed = "?rSeed=" + MD5String.generate();
-      return new URL("http://192.168.0.101/matchday-testing/video/barca-rm-2009/2.ts" + seed);
+      return new URL("http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_2-1080.mkv" + seed);
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }

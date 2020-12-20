@@ -19,10 +19,14 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import java.util.List;
-import java.util.Map;
 import lombok.Data;
 
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Represents audio/video file metadata returned by FFPROBE
+ */
 @Data
 public class FFmpegMetadata {
 

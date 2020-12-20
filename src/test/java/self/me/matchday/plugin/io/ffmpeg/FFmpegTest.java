@@ -37,7 +37,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("FFmpegTest - Test the creation of FFmpegTask HLS streaming task")
+@DisplayName("FFmpegTest - Test the creation of FFmpegSingleStreamTask HLS streaming task")
 class FFmpegTest {
 
   // Test constants
@@ -47,7 +47,7 @@ class FFmpegTest {
       " -v info -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
 
   // Test resources
-  private static FFmpegTask hlsStreamTask;
+  private static FFmpegStreamTask hlsStreamTask;
   private static String storageLocation;
 
   @BeforeAll
