@@ -97,7 +97,7 @@ public class GManPlugin implements DataSourcePlugin<Stream<Event>> {
     return bloggerPlugin.getSnapshot(snapshotRequest).map(this::getEventStream);
   }
 
-  // todo - extract
+  // todo - extract getEventStream() to super class - code duplication
   private Stream<Event> getEventStream(@NotNull final Blogger blogger) {
     return blogger
         .getPosts()

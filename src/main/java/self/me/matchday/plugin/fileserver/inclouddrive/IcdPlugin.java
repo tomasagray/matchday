@@ -241,7 +241,7 @@ public class IcdPlugin implements FileServerPlugin {
     connection.connect();
     // read data
     final BufferedReader reader =
-            new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        new BufferedReader(new InputStreamReader(connection.getInputStream()));
     String line;
     while ((line = reader.readLine()) != null) {
       result.append(line).append("\n");
@@ -309,54 +309,4 @@ public class IcdPlugin implements FileServerPlugin {
         (value != null) ? URLEncoder.encode(value.toString(), StandardCharsets.UTF_8) : "";
     return k + "=" + v;
   }
-
-
-  // Saved for possible later use
-
-//  private Optional<URL> webClientReadDownloadPage(
-//      @NotNull URL url, @NotNull Collection<HttpCookie> cookies, Optional<URL> result)
-//      throws MalformedURLException {
-//    // Get page via GET request
-//    final ClientResponse response =
-//        webClient
-//            .get()
-//            .uri(url.toString())
-//            .header(USER_AGENT_HEADER, pluginProperties.getUserAgent())
-//            .cookies(
-//                requestCookies -> {
-//                  // Map cookies
-//                  cookies.forEach(
-//                      cookie -> {
-//                        Log.i(
-//                            LOG_TAG,
-//                            String.format(
-//                                "Adding cookie: %s, value:\n%s",
-//                                cookie.getName(), cookie.getValue()));
-//                        requestCookies.add(cookie.getName(), cookie.getValue());
-//                      });
-//                  // Add file ref cookie
-//                  final String fileRefUrl =
-//                      URLEncoder.encode(
-//                          url.toString().replace("https://", ""), StandardCharsets.UTF_8);
-//                  requestCookies.add("icdreffile", fileRefUrl);
-//                  Log.i(LOG_TAG, "Request cookies:\n" + requestCookies);
-//                })
-//            .exchange()
-//            .block();
-//
-//    if (response != null && response.statusCode().is2xxSuccessful()) {
-//      // Extract body
-//      final String body = response.bodyToMono(String.class).block();
-//
-//      Log.i("IcdPlugin", "Read response from ICD server:\n" + body);
-//
-//      if (body != null) {
-//        // Parse the returned HTML and get download link
-//        result = parseDownloadPage(body);
-//      }
-//    } else {
-//      Log.e("IcdPlugin", "Could not get download link from supplied URL: " + url);
-//    }
-//    return result;
-//  }
 }
