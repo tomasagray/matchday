@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -48,8 +48,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class VideoResource extends RepresentationModel<VideoResource> {
 
   private static final LinkRelation MASTER_PLAYLIST = LinkRelation.of("direct_master");
-  private static final LinkRelation DIRECT_STREAM = LinkRelation.of("direct_stream");
+  private static final LinkRelation VARIANT_PLAYLIST = LinkRelation.of("direct_variant");
   private static final LinkRelation TRANSCODE_STREAM = LinkRelation.of("transcode_stream");
+  private static final LinkRelation TRANSCODE_PLS_STREAM = LinkRelation.of("transcode_pls_stream");
 
   private String channel;
   private String source;
@@ -62,12 +63,10 @@ public class VideoResource extends RepresentationModel<VideoResource> {
   private String audioCodec;
 
   @Component
-  public static class VideoResourceAssembler extends
-      RepresentationModelAssemblerSupport<EventFileSource, VideoResource> {
+  public static class VideoResourceAssembler
+      extends RepresentationModelAssemblerSupport<EventFileSource, VideoResource> {
 
-    @Getter
-    @Setter
-    private String eventId;
+    @Getter @Setter private String eventId;
 
     public VideoResourceAssembler() {
       super(VideoStreamingController.class, VideoResource.class);
@@ -78,7 +77,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 
       final VideoResource videoResource = instantiateModel(entity);
 
-      // Nullables
+      final String fileSrcId = entity.getEventFileSrcId();
       final Resolution resolution = entity.getResolution();
 
       // Add metadata
@@ -92,19 +91,24 @@ public class VideoResource extends RepresentationModel<VideoResource> {
       videoResource.videoCodec = entity.getVideoCodec();
       videoResource.audioCodec = entity.getAudioCodec();
 
-      // Add link to remote stream (no transcoding)
+      // remote stream (no transcoding)
+      videoResource.add(
+          linkTo(methodOn(VideoStreamingController.class).getVariantPlaylist(eventId, fileSrcId))
+              .withRel(VARIANT_PLAYLIST));
+
+      // local stream (transcoded to local disk)
       videoResource.add(
           linkTo(
                   methodOn(VideoStreamingController.class)
-                      .getVariantPlaylist(eventId, entity.getEventFileSrcId()))
-              .withRel(DIRECT_STREAM));
+                      .getVideoStreamPlaylist(eventId, fileSrcId))
+              .withRel(TRANSCODE_STREAM));
 
-      // Add link to local stream (transcoded to local disk)
-      videoResource.add(linkTo(
-          methodOn(VideoStreamingController.class)
-              .getStreamPlaylist(eventId, entity.getEventFileSrcId()))
-          .withRel(TRANSCODE_STREAM));
-
+      // locally transcoded stream (.pls format)
+      videoResource.add(
+          linkTo(
+                  methodOn(VideoStreamingController.class)
+                      .getVideoStreamPlsPlaylist(eventId, fileSrcId))
+              .withRel(TRANSCODE_PLS_STREAM));
       return videoResource;
     }
 
@@ -115,10 +119,9 @@ public class VideoResource extends RepresentationModel<VideoResource> {
       final CollectionModel<VideoResource> videoResources = super.toCollectionModel(entities);
 
       // Add link to master playlist
-      videoResources.add(linkTo(
-          methodOn(VideoStreamingController.class)
-              .getMasterPlaylist(eventId))
-          .withRel(MASTER_PLAYLIST));
+      videoResources.add(
+          linkTo(methodOn(VideoStreamingController.class).getMasterPlaylist(eventId))
+              .withRel(MASTER_PLAYLIST));
       return videoResources;
     }
   }

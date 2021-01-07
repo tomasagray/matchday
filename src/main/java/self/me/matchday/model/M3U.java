@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -17,15 +17,15 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db;
+package self.me.matchday.model;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import self.me.matchday.model.VideoStreamPlaylistLocator;
-import self.me.matchday.model.VideoStreamPlaylistLocator.VideoStreamPlaylistId;
+/**
+ * Represents an extended M3U playlist, UTF-8 encoded (.m3u8)
+ */
+public abstract class M3U {
 
-@Repository
-public interface VideoPlaylistLocatorRepo extends
-    JpaRepository<VideoStreamPlaylistLocator, VideoStreamPlaylistId> {
+  // Standard tags
+  protected static final String HEADER = "#EXTM3U";
+  protected static final String INF = "#EXTINF:";
 
 }

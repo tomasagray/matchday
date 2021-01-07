@@ -33,13 +33,15 @@ import self.me.matchday.api.resource.VideoResource.VideoResourceAssembler;
 import self.me.matchday.api.service.MasterPlaylistService;
 import self.me.matchday.api.service.VariantPlaylistService;
 import self.me.matchday.api.service.VideoStreamingService;
+import self.me.matchday.model.M3UPlaylist;
 import self.me.matchday.model.MasterM3U;
-import self.me.matchday.model.VariantM3U;
 import self.me.matchday.util.Log;
 
 @RestController
 @RequestMapping(value = "/events/event/{eventId}/video")
 public class VideoStreamingController {
+
+  public static final String MEDIA_TYPE_MPEG_URL = "application/x-mpeg-url";
 
   private final VideoStreamingService streamingService;
   private final VideoResourceAssembler resourceAssembler;
@@ -74,59 +76,91 @@ public class VideoStreamingController {
         .orElse(ResponseEntity.notFound().build());
   }
 
+
+    @RequestMapping(
+        value = "/playlist/master",
+        method = RequestMethod.GET,
+        produces = MEDIA_TYPE_MPEG_URL)
+    public ResponseEntity<String> getMasterPlaylist(@PathVariable final String eventId) {
+
+      return masterPlaylistService
+          .fetchMasterPlaylistForEvent(eventId)
+          .map(MasterM3U::toString)
+          .map(ResponseEntity::ok)
+          .orElse(ResponseEntity.notFound().build());
+    }
+
+    @RequestMapping(
+        value = "/playlist/variant/{fileSrcId}",
+        method = RequestMethod.GET,
+        produces = MEDIA_TYPE_MPEG_URL)
+    public ResponseEntity<String> getVariantPlaylist(
+        @PathVariable final String eventId, @PathVariable final String fileSrcId) {
+
+      Log.i(
+          "VideoStreamingController",
+          String.format(
+              "Getting variant playlist for Event: %s, File Source: %s", eventId, fileSrcId));
+
+      return variantPlaylistService
+          .fetchVariantPlaylist(fileSrcId)
+          .map(M3UPlaylist::toString)
+          .map(ResponseEntity::ok)
+          .orElse(ResponseEntity.notFound().build());
+    }
+
   @RequestMapping(
-      value = "/playlist/master",
+      value = "/stream/{fileSrcId}/playlist.m3u8",
       method = RequestMethod.GET,
-      produces = "application/x-mpeg-url")
-  public ResponseEntity<String> getMasterPlaylist(@PathVariable final String eventId) {
-
-    return masterPlaylistService
-        .fetchMasterPlaylistForEvent(eventId)
-        .map(MasterM3U::toString)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-  }
-
-  @RequestMapping(
-      value = "/playlist/variant/{fileSrcId}",
-      method = RequestMethod.GET,
-      produces = "application/x-mpeg-url")
-  public ResponseEntity<String> getVariantPlaylist(
-      @PathVariable final String eventId, @PathVariable final String fileSrcId) {
-
-    Log.i(
-        "VideoStreamingController",
-        String.format(
-            "Getting variant playlist for Event: %s, File Source: %s", eventId, fileSrcId));
-
-    return variantPlaylistService
-        .fetchVariantPlaylist(fileSrcId)
-        .map(VariantM3U::toString)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-  }
-
-  @RequestMapping(value = "/stream/{fileSrcId}/playlist.m3u8", method = RequestMethod.GET)
-  public ResponseEntity<String> getStreamPlaylist(
+      produces = "application/vnd.apple.mpegurl")
+  public ResponseEntity<String> getVideoStreamPlaylist(
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
-    final String playlistFile = streamingService.readPlaylistFile(eventId, fileSrcId);
-    return playlistFile != null && !("".equals(playlistFile))
-        ? ResponseEntity.ok(playlistFile)
-        : ResponseEntity.notFound().build();
+    return streamingService.getVideoStreamPlaylist(eventId, fileSrcId)
+            .map(M3UPlaylist::getSimplePlaylist)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
   }
 
   @RequestMapping(
-      value = "/stream/{fileSrcId}/{segmentId}.ts",
+      value = "/stream/{fileSrcId}/playlist.pls",
+      method = RequestMethod.GET)
+  public ResponseEntity<String> getVideoStreamPlsPlaylist(
+      @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
+
+    return streamingService.getVideoStreamPlaylist(eventId, fileSrcId)
+            .map(M3UPlaylist::getPlsPlaylist)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+  }
+
+  @RequestMapping(
+      value = "/stream/{fileSrcId}/{partId}/playlist.m3u8",
+      method = RequestMethod.GET,
+      produces = "application/vnd.apple.mpegurl")
+  public ResponseEntity<String> getVideoPartPlaylist(
+      @PathVariable("eventId") String eventId,
+      @PathVariable("fileSrcId") String fileSrcId,
+      @PathVariable("partId") Long partId) {
+
+    final String playlistFile = streamingService.readPlaylistFile(eventId, fileSrcId, partId);
+    return playlistFile != null && !("".equals(playlistFile))
+            ? ResponseEntity.ok(playlistFile)
+            : ResponseEntity.notFound().build();
+  }
+
+  @RequestMapping(
+      value = "/stream/{fileSrcId}/{partId}/{segmentId}.ts",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<Resource> getSegmentFile(
       @PathVariable("eventId") String eventId,
       @PathVariable("fileSrcId") String fileSrcId,
+      @PathVariable("partId") Long partId,
       @PathVariable("segmentId") String segmentId) {
 
     final Resource videoSegmentResource =
-        streamingService.getVideoSegmentResource(eventId, fileSrcId, segmentId);
+        streamingService.getVideoSegmentResource(eventId, fileSrcId, partId, segmentId);
     return videoSegmentResource != null
         ? ResponseEntity.ok(videoSegmentResource)
         : ResponseEntity.notFound().build();

@@ -39,7 +39,8 @@ import self.me.matchday.util.Log;
 public class VideoResourcesConfig implements WebMvcConfigurer {
 
   private VideoResourceInterceptor videoResourceInterceptor;
-  private String videoStreamInterceptPattern;
+  private String videoStreamM3u8InterceptPattern;
+  private String videoStreamPlsInterceptPattern;
   private String fileStorageLocation;
 
   public VideoResourcesConfig(@Autowired final VideoResourceInterceptor videoResourceInterceptor) {
@@ -51,8 +52,12 @@ public class VideoResourcesConfig implements WebMvcConfigurer {
 
     Log.i(
         "VideoResourcesConfig",
-        "Adding Interceptor for path matching pattern:" + videoStreamInterceptPattern);
+        String.format(
+            "Adding Interceptors for paths matching patterns:\n%s\n%s",
+            videoStreamM3u8InterceptPattern, videoStreamPlsInterceptPattern));
 
-    registry.addInterceptor(videoResourceInterceptor).addPathPatterns(videoStreamInterceptPattern);
+    registry
+        .addInterceptor(videoResourceInterceptor)
+        .addPathPatterns(videoStreamM3u8InterceptPattern, videoStreamPlsInterceptPattern);
   }
 }

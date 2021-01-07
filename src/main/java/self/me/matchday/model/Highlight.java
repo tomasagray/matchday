@@ -48,9 +48,8 @@ public class Highlight extends Event implements Serializable {
   }
 
   // Overrides
-  @NotNull
   @Override
-  public String toString() {
+  public @NotNull String toString() {
     return getTitle()
         + " ("
         + getCompetition()

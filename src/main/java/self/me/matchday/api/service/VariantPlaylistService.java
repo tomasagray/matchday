@@ -21,15 +21,15 @@ package self.me.matchday.api.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.VariantM3U;
+import self.me.matchday.model.M3UPlaylist;
 import self.me.matchday.util.Log;
 
 import javax.transaction.Transactional;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -41,49 +41,67 @@ public class VariantPlaylistService {
   private final EventFileService eventFileService;
 
   @Autowired
-  public VariantPlaylistService(final EventService eventService,
-      final EventFileService eventFileService) {
+  public VariantPlaylistService(
+      final EventService eventService, final EventFileService eventFileService) {
 
     this.eventService = eventService;
     this.eventFileService = eventFileService;
   }
 
-  public Optional<VariantM3U> fetchVariantPlaylist(final String fileSrcId) {
+  /**
+   * Retrieve an HLS playlist for the given file source (variant). Refreshes EventFile data, if
+   * necessary.
+   *
+   * @param fileSrcId The ID of the file source from which to create the playlist
+   * @return An Optional containing the playlist, if it was successfully created
+   */
+  public Optional<M3UPlaylist> fetchVariantPlaylist(final String fileSrcId) {
 
-    Log.i(LOG_TAG, String
-        .format("Fetching Variant Playlist for Event file source: %s ", fileSrcId));
-
-    // Result container
-    Optional<VariantM3U> result = Optional.empty();
+    Log.i(
+        LOG_TAG, String.format("Fetching Variant Playlist for Event file source: %s ", fileSrcId));
 
     // Get Event
-    final Optional<EventFileSource> eventOptional = eventService.fetchEventFileSrc(fileSrcId);
-    if (eventOptional.isPresent()) {
-
-      final EventFileSource eventFileSource = eventOptional.get();
+    final Optional<EventFileSource> fileSourceOptional = eventService.fetchEventFileSrc(fileSrcId);
+    if (fileSourceOptional.isPresent()) {
+      final EventFileSource eventFileSource = fileSourceOptional.get();
       if (eventFileSource.getEventFiles().size() > 0) {
 
-        // Refresh data for EventFiles
-        eventFileService.refreshEventFileData(eventFileSource, true);
-        // Retrieve fresh EventFiles & sort
-        final List<EventFile> eventFiles = eventFileSource.getEventFiles();
-        Collections.sort(eventFiles);
-        // Create new Playlist & return
-        result = Optional.of(new VariantM3U(eventFiles));
+        final M3UPlaylist playlist = new M3UPlaylist();
+        // Refresh data for EventFiles & create playlist
+        final List<M3UPlaylist> _playlist = eventFileSource.getEventFiles().stream()
+                .map(
+                        eventFile -> {
+                          try {
+                            return eventFileService.refreshEventFile(eventFile, false);
+                          } catch (ExecutionException | InterruptedException e) {
+                            final String msg = "Error refreshing EventFile: " + eventFile;
+                            Log.i(LOG_TAG, msg, e);
+                            throw new RuntimeException(msg, e);
+                          }
+                        })
+                .map(
+                        eventFile ->
+                                playlist.addMediaSegment(
+                                        eventFile.getInternalUrl(), eventFile.getTitle().toString(), null))
+                .collect(Collectors.toList());
+        Log.i(LOG_TAG, "Created playlist: " + _playlist);
+
+        return Optional.of(playlist);
 
       } else {
-        Log.e(LOG_TAG,
-            String
-                .format(
-                    "Could not create variant playlist for EventFileSource: %s; no EventFiles!",
-                    eventFileSource));
+        Log.e(
+            LOG_TAG,
+            String.format(
+                "Could not create variant playlist for EventFileSource: %s; no EventFiles!",
+                eventFileSource));
       }
     } else {
-      Log.e(LOG_TAG,
-          String.format("Could not create Variant Playlist; invalid EventFileSource ID: %s ",
-              fileSrcId));
+      Log.e(
+          LOG_TAG,
+          String.format(
+              "Could not create Variant Playlist; invalid EventFileSource ID: %s ", fileSrcId));
     }
     // Return optional
-    return result;
+    return Optional.empty();
   }
 }

@@ -19,11 +19,13 @@
 
 package self.me.matchday.api.service;
 
+import lombok.Builder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import self.me.matchday.model.EventFile;
-import self.me.matchday.model.EventFileSource;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.util.Log;
@@ -35,9 +37,10 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Transactional
@@ -46,7 +49,8 @@ public class EventFileService {
   private static final String LOG_TAG = "EventFileService";
   private static final int THREAD_POOL_SIZE = 12;
 
-  private final List<EventFileSource> lockedFileSources = new ArrayList<>();
+  // Already refreshing EventFiles
+  private final List<EventFile> lockedEventFiles = new ArrayList<>();
   // Services
   private final ExecutorService executorService;
   private final FileServerService fileServerService;
@@ -54,7 +58,9 @@ public class EventFileService {
 
   @Autowired
   public EventFileService(
-      final FileServerService fileServerService, final FFmpegPlugin ffmpegPlugin) {
+      final FileServerService fileServerService,
+      final FFmpegPlugin ffmpegPlugin,
+      final EventFileSelectorService eventFileSelectorService) {
 
     this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     this.fileServerService = fileServerService;
@@ -62,63 +68,48 @@ public class EventFileService {
   }
 
   /**
-   * Sends each EventFile from a File Source to its own thread to fetch missing or stale file data.
-   * Updates EventFiles in the local database.
+   * Add an EventFile refresh task to the job queue
    *
-   * @param eventFileSource The File Source to be refreshed.
-   * @return True if any EventFile data was modified, or false if not
+   * @param eventFile The EventFile to be refreshed
+   * @param fetchMetadata Whether or not to pre-fetch file metadata
+   * @return A Future representing the refreshed file
    */
-  public boolean refreshEventFileData(
-      @NotNull final EventFileSource eventFileSource, final boolean fetchMetadata) {
+  public EventFile refreshEventFile(
+      @NotNull final EventFile eventFile, final boolean fetchMetadata) throws ExecutionException, InterruptedException {
 
-    // Ensure each file source can only be updated once at a time
-    if (lockedFileSources.contains(eventFileSource)) {
-      Log.i(
-          LOG_TAG,
-          String.format(
-              "Refresh request denied for EventFileSource: %s; file source is locked (already being refreshed?)",
-              eventFileSource.getEventFileSrcId()));
-      return false;
+    if (!shouldRefreshData(eventFile)) {
+      Log.i(LOG_TAG, "EventFile is already fresh: " + eventFile);
+      return eventFile;
+    }
+    // Skip locked files & already fresh data
+    else if (lockedEventFiles.contains(eventFile)) {
+      final String message = String.format(
+              "Refresh request denied for EventFile: %s; file is locked (already being refreshed?)",
+              eventFile);
+      throw new HttpStatusCodeException(HttpStatus.TOO_MANY_REQUESTS, message) {
+        @Override
+        public @NotNull HttpStatus getStatusCode() {
+          return HttpStatus.TOO_MANY_REQUESTS;
+        }
+      };
     }
 
-    // Number of files actually updated by request
-    final AtomicInteger updatedFileCount = new AtomicInteger();
-    Log.i(LOG_TAG, "Refreshing remote data for file source: " + eventFileSource);
-    // Lock file source
-    lockedFileSources.add(eventFileSource);
+    // Lock EventFile
+    lockedEventFiles.add(eventFile);
+    // Send each link which needs to be updated to execute in its own thread
+    Log.i(LOG_TAG, "Refreshing remote data for EventFile: " + eventFile);
+    final EventFileRefreshTask refreshTask =
+        EventFileRefreshTask.builder()
+            .fileServerService(fileServerService)
+            .ffmpegPlugin(ffmpegPlugin)
+            .eventFile(eventFile)
+            .fetchMetadata(fetchMetadata)
+            .build();
 
-    try {
-      // Remote files container
-      final Set<Future<EventFile>> futureEventFiles = new LinkedHashSet<>();
-      // Send each link which needs to be updated to execute in its own thread
-      eventFileSource.getEventFiles().stream()
-          .filter(this::shouldRefreshData)
-          .forEach(
-              eventFile ->
-                  futureEventFiles.add(
-                      executorService.submit(
-                          new EventFileRefreshTask(
-                              fileServerService, ffmpegPlugin, eventFile, fetchMetadata))));
-
-      Log.i(LOG_TAG, String.format("Refreshing data for: %s EventFiles", futureEventFiles.size()));
-      // Retrieve results of remote fetch operation
-      futureEventFiles.forEach(
-          eventFileFuture -> {
-            try {
-              final EventFile eventFile = eventFileFuture.get();
-              updatedFileCount.incrementAndGet();
-              // Update managed version
-              mergeEventFile(eventFileSource, eventFile);
-            } catch (InterruptedException | ExecutionException e) {
-              Log.d(LOG_TAG, "Could not fetch remote file data for " + eventFileFuture, e);
-            }
-          });
-    } finally {
-      // Unlock file source
-      lockedFileSources.remove(eventFileSource);
-    }
-    // If any files were actually updated, return true
-    return updatedFileCount.get() > 0;
+    final EventFile refreshedEventFile = executorService.submit(refreshTask).get();
+    // Unlock file & return
+    lockedEventFiles.remove(eventFile);
+    return refreshedEventFile;
   }
 
   /**
@@ -140,33 +131,11 @@ public class EventFileService {
   }
 
   /**
-   * Update the managed EventFile with data retrieved from the remote task.
-   *
-   * @param eventFileSource The EvenFileSource with the managed version of the EventFile
-   * @param eventFile The updated (refreshed) EventFile data
-   */
-  private void mergeEventFile(
-      @NotNull EventFileSource eventFileSource, @NotNull EventFile eventFile) {
-
-    // Find the EventFile that needs updating
-    eventFileSource
-        .getEventFiles()
-        .forEach(
-            ef -> {
-              if (eventFile.equals(ef)) {
-                // Copy data
-                ef.setInternalUrl(eventFile.getInternalUrl());
-                ef.setMetadata(eventFile.getMetadata());
-                ef.setLastRefreshed(eventFile.getLastRefreshed());
-              }
-            });
-  }
-
-  /**
    * Updates the internal (download) URL of an EventFile, as well as the metadata, if it is null.
    * Saves updated EventFiles to database.
    */
-  private static class EventFileRefreshTask implements Callable<EventFile> {
+  @Builder
+  static class EventFileRefreshTask implements Callable<EventFile> {
 
     private final FileServerService fileServerService;
     private final FFmpegPlugin ffmpegPlugin;
@@ -244,4 +213,5 @@ public class EventFileService {
       }
     }
   }
+
 }

@@ -19,36 +19,31 @@
 
 package self.me.matchday.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import self.me.matchday.db.converter.PathConverter;
+import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import java.io.Serializable;
 import java.nio.file.Path;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class VideoStreamPlaylistLocator {
+public class SingleStreamLocator extends VideoStreamLocator {
 
-  @Data
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Embeddable
-  public static class VideoStreamPlaylistId implements Serializable {
-    private String eventId;
-    private String fileSrcId;
+  public SingleStreamLocator() {
+    this.playlistPath = null;
+    this.eventFile = null;
   }
 
-  @EmbeddedId
-  private VideoStreamPlaylistId playlistId;
-  @Convert(converter = PathConverter.class)
-  private Path playlistPath;
+  public SingleStreamLocator(@NotNull final Path playlistPath, @NotNull final EventFile eventFile) {
+    this.playlistPath = playlistPath;
+    this.eventFile = eventFile;
+  }
 
+  public String toString() {
+    return String.format(
+        "SingleStreamLocator([id]=%s, [eventFile]=%s, [playlistPath]=%s, [timestamp]=%s)",
+        this.streamLocatorId, this.eventFile, this.playlistPath, this.timestamp);
+  }
 }

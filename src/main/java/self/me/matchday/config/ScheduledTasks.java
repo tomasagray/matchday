@@ -19,11 +19,6 @@
 
 package self.me.matchday.config;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.time.Duration;
-import java.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -34,6 +29,12 @@ import self.me.matchday.api.service.PlaylistLocatorService;
 import self.me.matchday.api.service.VideoStreamingService;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.util.Log;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
  * Regularly run tasks. Configuration in external properties file.
@@ -71,6 +72,7 @@ public class ScheduledTasks {
     dataSourceService.refreshDataSources(snapshotRequest);
   }
 
+  // todo - update for VideoStreamPlaylist -> VideoStreamLocator structure
   @Scheduled(cron = "${scheduled-tasks.cron.prune-video-data}")
   public void pruneVideoData() {
 
@@ -96,9 +98,9 @@ public class ScheduledTasks {
                       expiredDays, playlistLocator));
 
               // This video data is expired; delete it
-              videoStreamingService.deleteVideoData(playlistLocator);
+//              videoStreamingService.deleteVideoData(playlistLocator);
               // Delete playlist locator
-              playlistLocatorService.deletePlaylistLocator(playlistLocator.getPlaylistId());
+              playlistLocatorService.deletePlaylistLocator(playlistLocator);
             }
           } catch (IOException e) {
             Log.e(LOG_TAG, "Error running scheduled delete of video data", e);

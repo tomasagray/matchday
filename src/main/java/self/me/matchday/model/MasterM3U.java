@@ -37,13 +37,13 @@ import static java.util.stream.Collectors.toList;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public final class MasterM3U extends M3UPlaylist {
+public final class MasterM3U extends M3U {
 
   private static final String LOG_TAG = "MasterM3U";
 
   private final List<VariantPlaylistEntry> variantPlaylistEntries = new ArrayList<>();
 
-  public void addVariant(@NotNull final Resolution resolution,
+  public MasterM3U addVariant(@NotNull final Resolution resolution,
                          final String languages, final long bitrate,
                          @NotNull final URI playlistLink) {
 
@@ -53,7 +53,10 @@ public final class MasterM3U extends M3UPlaylist {
     if (variantPlaylistEntries.size() == 0) {
       playlistEntry.setDefault(true);
     }
+    // Add to collection
     variantPlaylistEntries.add(playlistEntry);
+    // For fluency
+    return this;
   }
 
   /**
@@ -103,7 +106,7 @@ public final class MasterM3U extends M3UPlaylist {
   public static class VariantPlaylistEntry {
 
     private static final int BITRATE_INDEX = 0;
-    // M3UPlaylist extended tags
+    // M3U extended tags
     private static final String STREAM_INF = "#EXT-X-STREAM-INF:";
     private static final String BANDWIDTH_TAG = "BANDWIDTH=";
     private static final String VIDEO_TAG = "VIDEO=";

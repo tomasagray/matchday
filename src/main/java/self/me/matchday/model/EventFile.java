@@ -25,7 +25,10 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.FFmpegMetadataConverter;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -38,12 +41,12 @@ public class EventFile implements Comparable<EventFile> {
 
   private static double DEFAULT_DURATION = 3012.541956d;
 
-  //  @GeneratedValue
-  //  private Long eventFileId;
   // Fields
-  @Id private URL externalUrl;
+  @Id
+  private String eventFileId;
+  private URL externalUrl;
   private EventPartIdentifier title;
-  // refreshed data
+
   @Column(columnDefinition = "LONGTEXT")
   private URL internalUrl;
 
@@ -55,6 +58,7 @@ public class EventFile implements Comparable<EventFile> {
 
   public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
 
+    this.eventFileId = MD5String.fromData(externalUrl);
     this.title = title;
     this.externalUrl = externalUrl;
     this.internalUrl = null;
@@ -101,13 +105,13 @@ public class EventFile implements Comparable<EventFile> {
 
   /** Event part identifiers */
   public enum EventPartIdentifier {
-    DEFAULT("", "", -1),
-    PRE_MATCH("Pre-Match", "^[Pp][Rr][Ee][- ][Mm][Aa][Tt][Cc][Hh]$", 0),
-    FIRST_HALF("1st Half", "1 ?[Ss][Tt] [Hh][Aa][Ll][Ff]", 1),
-    SECOND_HALF("2nd Half", "2 ?[Nn][Dd] [Hh][Aa][Ll][Ff]", 2),
-    EXTRA_TIME("Extra-Time/Penalties", "^[Ee][Xx][Tt][Rr][Aa][- ][Tt][Ii][Mm][Ee]", 3),
-    TROPHY_CEREMONY("Trophy Ceremony", "^[Tt][Rr][Oo][Pp][Hh][Yy]", 4),
-    POST_MATCH("Post-Match", "^[Pp][Oo][Ss][Tt][- ][Mm][Aa][Tt][Cc][Hh]$", 5);
+    DEFAULT("", "", 0),
+    PRE_MATCH("Pre-Match", "^[Pp][Rr][Ee][- ][Mm][Aa][Tt][Cc][Hh]$", 1),
+    FIRST_HALF("1st Half", "1 ?[Ss][Tt] [Hh][Aa][Ll][Ff]", 2),
+    SECOND_HALF("2nd Half", "2 ?[Nn][Dd] [Hh][Aa][Ll][Ff]", 3),
+    EXTRA_TIME("Extra-Time/Penalties", "^[Ee][Xx][Tt][Rr][Aa][- ][Tt][Ii][Mm][Ee]", 4),
+    TROPHY_CEREMONY("Trophy Ceremony", "^[Tt][Rr][Oo][Pp][Hh][Yy]", 5),
+    POST_MATCH("Post-Match", "^[Pp][Oo][Ss][Tt][- ][Mm][Aa][Tt][Cc][Hh]$", 6);
 
     private final String name;
     private final Pattern pattern;
@@ -117,6 +121,10 @@ public class EventFile implements Comparable<EventFile> {
       this.name = name;
       this.pattern = Pattern.compile(pattern);
       this.order = order;
+    }
+
+    public int getOrder() {
+      return this.order;
     }
 
     @Override

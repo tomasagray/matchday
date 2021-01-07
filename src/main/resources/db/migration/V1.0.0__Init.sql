@@ -150,13 +150,13 @@ COLLATE = utf8mb4_0900_ai_ci;
 
 -- EventFile
 CREATE TABLE IF NOT EXISTS `matchday`.`event_file` (
-#   `event_file_id` BIGINT NOT NULL,
-  `external_url` VARCHAR(255) NOT NULL,
+  `event_file_id` VARCHAR(255) NOT NULL,
+  `external_url` TEXT NOT NULL,
   `internal_url` LONGTEXT NULL DEFAULT NULL,
   `last_refreshed` DATETIME(6) NULL DEFAULT NULL,
   `metadata` LONGTEXT NULL DEFAULT NULL,
   `title` INT NULL DEFAULT NULL,
-  PRIMARY KEY (`external_url`))
+  PRIMARY KEY (`event_file_id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
@@ -164,15 +164,15 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- EventFileSource EventFiles
 CREATE TABLE IF NOT EXISTS `matchday`.`event_file_source_event_files` (
   `event_file_source_event_file_src_id` VARCHAR(255) NOT NULL,
-  `event_files_external_url` VARCHAR(255) NOT NULL,
-  UNIQUE INDEX `UK_jxn8qvuddf4hm03b1u0dn2uob` (`event_files_external_url` ASC) VISIBLE,
+  `event_files_event_file_id` VARCHAR(255) NOT NULL,
+  UNIQUE INDEX `UK_jxn8qvuddf4hm03b1u0dn2uob` (`event_files_event_file_id` ASC) VISIBLE,
   INDEX `FKa8sd7dsyggnmcjo1p2q5svmsv` (`event_file_source_event_file_src_id` ASC) VISIBLE,
   CONSTRAINT `FKa8sd7dsyggnmcjo1p2q5svmsv`
     FOREIGN KEY (`event_file_source_event_file_src_id`)
     REFERENCES `matchday`.`event_file_source` (`event_file_src_id`),
   CONSTRAINT `FKsgkdutwpr1arwhe2pu2b184ya`
-    FOREIGN KEY (`event_files_external_url`)
-    REFERENCES `matchday`.`event_file` (`external_url`))
+    FOREIGN KEY (`event_files_event_file_id`)
+    REFERENCES `matchday`.`event_file` (`event_file_id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
@@ -255,11 +255,11 @@ DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
 -- VideoStreamLocator
-CREATE TABLE IF NOT EXISTS `matchday`.`video_stream_playlist_locator` (
-  `event_id` VARCHAR(255) NOT NULL,
-  `file_src_id` VARCHAR(255) NOT NULL,
-  `playlist_path` VARCHAR(255) NULL DEFAULT NULL,
-  PRIMARY KEY (`event_id`, `file_src_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb4
-COLLATE = utf8mb4_0900_ai_ci;
+# CREATE TABLE IF NOT EXISTS `matchday`.`video_stream_playlist_locator` (
+#   `event_id` VARCHAR(255) NOT NULL,
+#   `file_src_id` VARCHAR(255) NOT NULL,
+#   `playlist_path` VARCHAR(255) NULL DEFAULT NULL,
+#   PRIMARY KEY (`event_id`, `file_src_id`))
+# ENGINE = InnoDB
+# DEFAULT CHARACTER SET = utf8mb4
+# COLLATE = utf8mb4_0900_ai_ci;

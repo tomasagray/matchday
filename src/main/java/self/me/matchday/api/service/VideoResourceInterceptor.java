@@ -25,7 +25,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
-import self.me.matchday.model.VideoStreamPlaylistLocator;
+import self.me.matchday.model.M3UPlaylist;
+import self.me.matchday.model.VideoStreamLocator;
+import self.me.matchday.model.VideoStreamPlaylist;
 import self.me.matchday.util.FileCheckTask;
 import self.me.matchday.util.Log;
 
@@ -46,14 +48,11 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
   private Pattern urlPattern;
 
   private final VideoStreamingService videoStreamingService;
-  private final PlaylistLocatorService playlistLocatorService;
 
   public VideoResourceInterceptor(
-      @Autowired final VideoStreamingService videoStreamingService,
-      @Autowired final PlaylistLocatorService playlistLocatorService) {
+      @Autowired final VideoStreamingService videoStreamingService) {
 
     this.videoStreamingService = videoStreamingService;
-    this.playlistLocatorService = playlistLocatorService;
   }
 
   /**
@@ -76,6 +75,7 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
     final String servletPath = request.getServletPath();
     Log.i(LOG_TAG, LOG_TAG + " caught request at path: " + servletPath);
 
+    // todo: cleanup
     try {
       // Validate request path
       final Matcher pathMatcher = urlPattern.matcher(servletPath);
@@ -85,31 +85,34 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
         final String eventId = pathMatcher.group(1);
         final String fileSrcId = pathMatcher.group(2);
 
-        // Get playlist locator
-        final Optional<VideoStreamPlaylistLocator> locatorOptional =
-            playlistLocatorService.getPlaylistLocator(eventId, fileSrcId);
-        if (locatorOptional.isPresent()) {
-          // video has already begun streaming
+        // Is there already a stream playlist?
+        if (streamingHasBegun(eventId, fileSrcId)) {
           Log.i(
-              LOG_TAG,
-              String.format(
-                  "Found playlist locator: %s; video has begun streaming", locatorOptional.get()));
+                  LOG_TAG,
+                  String.format(
+                          "Video for Event: %s, File Source: %s has begun streaming", eventId, fileSrcId));
           return true;
         }
 
         // Stream video files to local disk
-        Log.i(LOG_TAG, String.format("Creating video stream for event: %s, file source: %s", eventId, fileSrcId));
-        final Optional<VideoStreamPlaylistLocator> playlistOptional =
+        Log.i(
+            LOG_TAG,
+            String.format(
+                "Creating video stream for event: %s, file source: %s", eventId, fileSrcId));
+        final Optional<VideoStreamPlaylist> playlistOptional =
             videoStreamingService.createVideoStream(eventId, fileSrcId);
 
         if (playlistOptional.isPresent()) {
-          VideoStreamPlaylistLocator playlistLocator = playlistOptional.get();
-          final Path playlistPath = playlistLocator.getPlaylistPath().toAbsolutePath();
+          final VideoStreamPlaylist videoStreamPlaylist = playlistOptional.get();
+          final VideoStreamLocator firstStreamLocator =
+              videoStreamPlaylist.getStreamLocators().get(0);
+          final Path playlistPath = firstStreamLocator.getPlaylistPath().toAbsolutePath();
           Log.i(LOG_TAG, "Created video stream at: " + playlistPath);
 
           // Ensure playlist creation has begun
           Log.i(LOG_TAG, "Waiting for stream head start...");
-          final FileCheckTask fileCheckTask = new FileCheckTask(playlistPath.toFile(), FILE_CHECK_DELAY);
+          final FileCheckTask fileCheckTask =
+              new FileCheckTask(playlistPath.toFile(), FILE_CHECK_DELAY);
           // Start checking
           fileCheckTask.start();
           // Wait until task finishes or times out
@@ -123,7 +126,7 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
           Log.d(
               LOG_TAG,
               String.format(
-                  "Could not create playlist for Event: %s, File Source: %s", eventId, fileSrcId));
+                  "Could not create stream for Event: %s, File Source: %s", eventId, fileSrcId));
         }
 
       } else {
@@ -139,5 +142,12 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
     }
     // Continue processing request
     return true;
+  }
+
+  private boolean streamingHasBegun(String eventId, String fileSrcId) {
+
+    final Optional<M3UPlaylist> playlistOptional =
+        videoStreamingService.getVideoStreamPlaylist(eventId, fileSrcId);
+    return playlistOptional.isPresent();
   }
 }
