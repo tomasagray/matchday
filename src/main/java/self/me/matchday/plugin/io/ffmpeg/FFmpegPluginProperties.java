@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -23,7 +23,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import self.me.matchday.plugin.PluginProperties;
-
 
 @Configuration
 @PropertySource("classpath:plugins/ffmpeg/ffmpeg.properties")

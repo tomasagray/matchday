@@ -51,7 +51,7 @@ public class FFmpegSingleStreamTask extends FFmpegStreamTask {
       URI uri) {
 
     this.command = command;
-    this.outputFile = outputFile;
+    this.outputPath = outputFile;
     this.dataDir = dataDir;
     this.loggingEnabled = loggingEnabled;
     this.transcodeArgs = transcodeArgs;
@@ -65,7 +65,7 @@ public class FFmpegSingleStreamTask extends FFmpegStreamTask {
     final String inputs = getInputString();
     final String arguments = Strings.join(transcodeArgs, ' ');
     return String.format(
-        "%s %s %s \"%s\"", this.getCommand(), inputs, arguments, this.getOutputFile());
+        "%s %s %s \"%s\"", this.getCommand(), inputs, arguments, this.getOutputPath());
   }
 
   /**

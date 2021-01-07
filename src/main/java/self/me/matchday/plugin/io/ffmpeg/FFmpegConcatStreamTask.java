@@ -32,9 +32,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Class which creates an FFMPEG concatenation task; concatenates multiple video files into one
- */
+/** Class which creates an FFMPEG concatenation task; concatenates multiple video files into one */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
@@ -47,14 +45,14 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
   @Builder
   public FFmpegConcatStreamTask(
       String command,
-      Path outputFile,
+      Path outputPath,
       Path dataDir,
       boolean loggingEnabled,
       List<String> transcodeArgs,
       List<URI> uris) {
 
     this.command = command;
-    this.outputFile = outputFile;
+    this.outputPath = outputPath;
     this.dataDir = dataDir;
     this.loggingEnabled = loggingEnabled;
     this.transcodeArgs = transcodeArgs;
@@ -68,7 +66,7 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
     final String inputs = getInputString();
     final String arguments = Strings.join(transcodeArgs, ' ');
     return String.format(
-        "%s %s %s \"%s\"", this.getCommand(), inputs, arguments, this.getOutputFile());
+        "%s %s %s \"%s\"", this.getCommand(), inputs, arguments, this.getOutputPath());
   }
 
   @Override

@@ -29,8 +29,9 @@ import self.me.matchday.util.Log;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -41,28 +42,29 @@ public class FFmpegPlugin implements Plugin {
   private final FFmpegPluginProperties pluginProperties;
   private final FFmpeg ffmpeg;
   private final FFprobe ffprobe;
-  private final Hashtable<Path, FFmpegStreamTask> streamingTasks = new Hashtable<>();
+  private final Map<Path, FFmpegStreamTask> streamingTasks = new LinkedHashMap<>();
 
   @Autowired
   public FFmpegPlugin(@NotNull final FFmpegPluginProperties pluginProperties) {
 
     this.pluginProperties = pluginProperties;
     // Create executable instances
-    ffmpeg = new FFmpeg(pluginProperties.getFFmpegLocation());
-    ffprobe = new FFprobe(pluginProperties.getFFprobeLocation());
+    this.ffmpeg = new FFmpeg(pluginProperties.getFFmpegLocation());
+    this.ffprobe = new FFprobe(pluginProperties.getFFprobeLocation());
   }
 
   /**
    * Create a concatenated HLS stream from a given collection of URIs
    *
    * @param uris URI pointers to video data
-   * @param storageLocation The output location for stream data
+   * @param playlistPath The output location for stream data
    * @return The path of the playlist file produced by FFMPEG
    */
-  public FFmpegStreamTask streamUris(@NotNull final List<URI> uris, @NotNull final Path storageLocation) {
+  public FFmpegStreamTask streamUris(
+      @NotNull final List<URI> uris, @NotNull final Path playlistPath) {
 
     // Get absolute path for task key
-    final Path absolutePath = storageLocation.toAbsolutePath();
+    final Path absolutePath = playlistPath.toAbsolutePath();
     // Check if a task is already working in path
     FFmpegStreamTask prevTask = isTaskAlreadyExecuting(absolutePath);
     if (prevTask != null) {
@@ -70,12 +72,9 @@ public class FFmpegPlugin implements Plugin {
     }
 
     // Create the streaming task
-    final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(uris, storageLocation);
+    final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(uris, playlistPath);
     // Add to collection
     streamingTasks.put(absolutePath, streamTask);
-    // Start streaming task
-    streamTask.start();
-
     // Return playlist file path
     return streamTask;
   }
@@ -84,13 +83,13 @@ public class FFmpegPlugin implements Plugin {
    * Create an HLS stream from a single URI
    *
    * @param uri The file resource pointer
-   * @param storageLocation The location on disk to store stream data
+   * @param playlistPath The location on disk to store stream data
    * @return The streaming task
    */
-  public FFmpegStreamTask streamUri(@NotNull final URI uri, @NotNull final Path storageLocation) {
+  public FFmpegStreamTask streamUri(@NotNull final URI uri, @NotNull final Path playlistPath) {
 
     // Get absolute path for task key
-    final Path absolutePath = storageLocation.toAbsolutePath();
+    final Path absolutePath = playlistPath.toAbsolutePath();
     // Check if a task is already working in path
     FFmpegStreamTask prevTask = isTaskAlreadyExecuting(absolutePath);
     if (prevTask != null) {
@@ -98,12 +97,10 @@ public class FFmpegPlugin implements Plugin {
     }
 
     // Create the streaming task
-    final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(uri, storageLocation);
+    final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(uri, playlistPath);
     // Add to collection
-    Log.i(LOG_TAG, "Adding streaming task to: " + absolutePath);
+    Log.i(LOG_TAG, "Created streaming task to: " + absolutePath);
     streamingTasks.put(absolutePath, streamTask);
-
-    // Return playlist file path
     return streamTask;
   }
 
@@ -114,16 +111,13 @@ public class FFmpegPlugin implements Plugin {
    * @return The task that is executing in the given directory, or null if none found
    */
   private @Nullable FFmpegStreamTask isTaskAlreadyExecuting(Path absolutePath) {
+
+    // Search currently executing tasks
     final FFmpegStreamTask prevTask = streamingTasks.get(absolutePath);
     if (prevTask != null) {
-      if (prevTask.isAlive()) {
-        // Task is already present and alive; abort
-        Log.i(LOG_TAG, String.format("Streaming task already begun for path: %s", absolutePath));
-        return prevTask;
-      } else {
-        // Previous task has finished; remove from list & continue
-        streamingTasks.remove(absolutePath);
-      }
+      // Task is already present and alive; return it
+      Log.i(LOG_TAG, String.format("Streaming task already begun for path: %s", absolutePath));
+      return prevTask;
     }
     return null;
   }
@@ -157,13 +151,11 @@ public class FFmpegPlugin implements Plugin {
       Log.i(LOG_TAG, "Killing streaming task to file: " + absolutePath);
       final boolean processKilled = streamingTask.kill();
       Log.i(
-          LOG_TAG, String.format("Streaming task to [%s] killed: %s", absolutePath, processKilled));
+          LOG_TAG, String.format("Streaming task to [%s] killed? %s", absolutePath, processKilled));
       if (processKilled) {
-        // remove from task list
         streamingTasks.remove(absolutePath);
       }
     }
-
     Log.i(LOG_TAG, "No task found for output file: " + absolutePath);
   }
 
@@ -184,7 +176,6 @@ public class FFmpegPlugin implements Plugin {
    * @throws IOException I/O problem
    */
   public FFmpegMetadata readFileMetadata(@NotNull final URI uri) throws IOException {
-
     return ffprobe.getFileMetadata(uri);
   }
 
