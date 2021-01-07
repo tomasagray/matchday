@@ -34,56 +34,53 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-/**
- * Test implementation of file server plugin
- */
+/** Test implementation of file server plugin */
 @Component
 public class TestFileServerPlugin implements FileServerPlugin {
 
-    private final UUID pluginId = UUID.randomUUID();
+  private final UUID pluginId = UUID.fromString("4636e383-2ddb-477e-85f2-36e6cd7a434b");
 
-    @Override
-    public @NotNull ClientResponse login(@NotNull FileServerUser user) {
+  @Override
+  public @NotNull ClientResponse login(@NotNull FileServerUser user) {
 
-        final Pattern userPattern = Pattern.compile("user-*");
-        final Pattern passwordPattern = Pattern.compile("password-*");
+    final Pattern userPattern = Pattern.compile("user-*");
+    final Pattern passwordPattern = Pattern.compile("password-*");
 
-        final String username = user.getUsername();
-        final String password = user.getPassword();
+    final String username = user.getUsername();
+    final String password = user.getPassword();
 
-        return (userPattern.matcher(username).find()
-                && passwordPattern.matcher(password).find())
-                ? ClientResponse.create(HttpStatus.OK).build()
-                : ClientResponse.create(HttpStatus.UNAUTHORIZED).build();
-    }
+    return (userPattern.matcher(username).find() && passwordPattern.matcher(password).find())
+        ? ClientResponse.create(HttpStatus.OK).build()
+        : ClientResponse.create(HttpStatus.UNAUTHORIZED).build();
+  }
 
-    @Override
-    public boolean acceptsUrl(@NotNull URL url) {
-        return CreateTestData.URL_PATTERN.matcher(url.toString()).find();
-    }
+  @Override
+  public boolean acceptsUrl(@NotNull URL url) {
+    return CreateTestData.URL_PATTERN.matcher(url.toString()).find();
+  }
 
-    @Override
-    public @NotNull Duration getRefreshRate() {
-        return Duration.ofDays(1_000);
-    }
+  @Override
+  public @NotNull Duration getRefreshRate() {
+    return Duration.ofDays(1_000);
+  }
 
-    @Override
-    public Optional<URL> getDownloadURL(@NotNull URL url, @NotNull Collection<HttpCookie> cookies) {
-        return Optional.of(url);
-    }
+  @Override
+  public Optional<URL> getDownloadURL(@NotNull URL url, @NotNull Collection<HttpCookie> cookies) {
+    return Optional.of(url);
+  }
 
-    @Override
-    public UUID getPluginId() {
-        return pluginId;
-    }
+  @Override
+  public UUID getPluginId() {
+    return pluginId;
+  }
 
-    @Override
-    public String getTitle() {
-        return "Test file server plugin";
-    }
+  @Override
+  public String getTitle() {
+    return "Test file server plugin";
+  }
 
-    @Override
-    public String getDescription() {
-        return "Test file server plugin";
-    }
+  @Override
+  public String getDescription() {
+    return "Test file server plugin";
+  }
 }

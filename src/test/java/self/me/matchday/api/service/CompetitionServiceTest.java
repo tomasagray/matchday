@@ -94,6 +94,5 @@ class CompetitionServiceTest {
             testCompetitionId, actualCompetition));
 
     assertThat(actualCompetition).isEqualTo(testCompetition);
-
   }
 }

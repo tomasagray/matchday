@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -39,56 +39,57 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestMethodOrder(OrderAnnotation.class)
 class FFprobeTest {
 
-    private static final String LOG_TAG = "FFprobeTest";
+  private static final String LOG_TAG = "FFprobeTest";
 
-    // Test constants
-    private static final String FFPROBE_PATH = "plugin.ffmpeg.ffprobe-location";
-    private static final String FFMPEG_PROPERTIES = "plugins\\ffmpeg\\ffmpeg.properties";
-    private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
+  // Test constants
+  private static final String FFPROBE_PATH = "plugin.ffmpeg.ffprobe-location";
+  private static final String FFMPEG_PROPERTIES = "plugins\\ffmpeg\\ffmpeg.properties";
+  private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
 
-    // Test resources
-    private static FFprobe ffProbe;
-    private static FFmpegMetadata expectedMetadata;
+  // Test resources
+  private static FFprobe ffProbe;
+  private static FFmpegMetadata expectedMetadata;
 
-    @BeforeAll
-    static void setUp() throws IOException {
+  @BeforeAll
+  static void setUp() throws IOException {
 
-        // Read plugin resources file
-        Map<String, String> resources = ResourceFileReader.readPropertiesResource(FFprobe.class, FFMPEG_PROPERTIES);
-        // Read test metadata & deserialize
-        List<String> sampleMetadata =
-                ResourceFileReader.readTextResource(FFprobeTest.class, SAMPLE_METADATA_JSON);
-        // Parse JSON to object
-        expectedMetadata = new Gson().fromJson(String.join(" ", sampleMetadata), FFmpegMetadata.class);
+    // Read plugin resources file
+    Map<String, String> resources =
+        ResourceFileReader.readPropertiesResource(FFprobe.class, FFMPEG_PROPERTIES);
+    // Read test metadata & deserialize
+    List<String> sampleMetadata =
+        ResourceFileReader.readTextResource(FFprobeTest.class, SAMPLE_METADATA_JSON);
+    // Parse JSON to object
+    expectedMetadata = new Gson().fromJson(String.join(" ", sampleMetadata), FFmpegMetadata.class);
 
-        // Create FFprobe instance
-        ffProbe = new FFprobe(resources.get(FFPROBE_PATH));
-    }
+    // Create FFprobe instance
+    ffProbe = new FFprobe(resources.get(FFPROBE_PATH));
+  }
 
-    @Test
-    @Order(1)
-    @DisplayName("Check creation of FFprobe instance")
-    void checkFFprobeCreation() {
+  @Test
+  @Order(1)
+  @DisplayName("Check creation of FFprobe instance")
+  void checkFFprobeCreation() {
 
-        Log.i(LOG_TAG, "Verifying FFprobe instance is NOT NULL...");
-        assertThat(ffProbe).isNotNull();
-    }
+    Log.i(LOG_TAG, "Verifying FFprobe instance is NOT NULL...");
+    assertThat(ffProbe).isNotNull();
+  }
 
-    @Test
-    @Order(2)
-    @DisplayName("Verify FFprobe can read remote file metadata")
-    void testGetFileMetadata() throws URISyntaxException, IOException {
+  @Test
+  @Order(2)
+  @DisplayName("Verify FFprobe can read remote file metadata")
+  void testGetFileMetadata() throws URISyntaxException, IOException {
 
-        // Initialize test URL; ensure same as test data
-        final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
-        assertThat(firstHalfUrl).isNotNull();
-        final String baseUrl = firstHalfUrl.toString().replaceAll("\\?[\\w]*=[\\w]*", "");
+    // Initialize test URL; ensure same as test data
+    final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
+    assertThat(firstHalfUrl).isNotNull();
+    final String baseUrl = firstHalfUrl.toString().replaceAll("\\?[\\w]*=[\\w]*", "");
 
-        Log.i(LOG_TAG, "Reading file data from: " + baseUrl);
-        FFmpegMetadata actualMetadata = ffProbe.getFileMetadata(new URI(baseUrl));
+    Log.i(LOG_TAG, "Reading file data from: " + baseUrl);
+    FFmpegMetadata actualMetadata = ffProbe.getFileMetadata(new URI(baseUrl));
 
-        Log.i(LOG_TAG, "Testing metadata for correctness...");
-        assertThat(actualMetadata).isNotNull();
-        assertThat(actualMetadata).isEqualTo(expectedMetadata);
-    }
+    Log.i(LOG_TAG, "Testing metadata for correctness...");
+    assertThat(actualMetadata).isNotNull();
+    assertThat(actualMetadata).isEqualTo(expectedMetadata);
+  }
 }

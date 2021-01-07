@@ -37,116 +37,106 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Validate Galataman pattern loading")
 class GManPatternsTest {
 
-    private static final String LOG_TAG = "GManPatternsTest";
-    
-    private static GManPatterns gManPatterns;
-    
-    @BeforeAll
-    static void setUp(@Autowired final GManPatterns _gManPatterns) {
-        // save autowired reference
-        gManPatterns = _gManPatterns;
-    }
+  private static final String LOG_TAG = "GManPatternsTest";
 
-    @Test
-    @DisplayName("Validate A/V delimiter is the correct character sequence")
-    void testAvDataDelimiter() {
+  private static GManPatterns gManPatterns;
 
-        final String actualAVDelimiter = gManPatterns.getAvDataDelimiter();
-        final String expectedAVDelimiter = "‖";
+  @BeforeAll
+  static void setUp(@Autowired final GManPatterns _gManPatterns) {
+    // save autowired reference
+    gManPatterns = _gManPatterns;
+  }
 
-        Log.i(LOG_TAG, "Testing A/V delimiter: " + actualAVDelimiter);
+  @Test
+  @DisplayName("Validate A/V delimiter is the correct character sequence")
+  void testAvDataDelimiter() {
 
-        assertThat(actualAVDelimiter)
-                .isNotNull()
-                .isNotEmpty();
-        assertThat(actualAVDelimiter).isEqualTo(expectedAVDelimiter);
-    }
+    final String actualAVDelimiter = gManPatterns.getAvDataDelimiter();
+    final String expectedAVDelimiter = "‖";
 
-    @Test
-    @DisplayName("Validate channel pattern correctly parses audio channels")
-    void testChannelMatcher() {
+    Log.i(LOG_TAG, "Testing A/V delimiter: " + actualAVDelimiter);
 
-        final String TEST_CHANNEL = "5.1 channels";
+    assertThat(actualAVDelimiter).isNotNull().isNotEmpty();
+    assertThat(actualAVDelimiter).isEqualTo(expectedAVDelimiter);
+  }
 
-        final String actualChannelPattern = gManPatterns.getChannel();
-        Log.i(LOG_TAG, "Testing channel pattern: " + actualChannelPattern);
+  @Test
+  @DisplayName("Validate channel pattern correctly parses audio channels")
+  void testChannelMatcher() {
 
-        assertThat(actualChannelPattern)
-                .isNotNull()
-                .isNotEmpty();
+    final String TEST_CHANNEL = "5.1 channels";
 
-        // test pattern
-        final Matcher surroundChannelMatcher = gManPatterns.getChannelMatcher(TEST_CHANNEL);
-        final boolean channelFound = surroundChannelMatcher.find();
-        assertThat(channelFound).isTrue();
-        assertThat(surroundChannelMatcher.group(1)).isEqualTo("5.1");
-    }
+    final String actualChannelPattern = gManPatterns.getChannel();
+    Log.i(LOG_TAG, "Testing channel pattern: " + actualChannelPattern);
 
-    @Test
-    @DisplayName("Validate bitrate pattern correctly parses video bitrate")
-    void testBitrateMatcher() {
+    assertThat(actualChannelPattern).isNotNull().isNotEmpty();
 
-        final String TEST_MBPS = "4 Mbps";
-        final String TEST_KBPS = "448 Kbps";
+    // test pattern
+    final Matcher surroundChannelMatcher = gManPatterns.getChannelMatcher(TEST_CHANNEL);
+    final boolean channelFound = surroundChannelMatcher.find();
+    assertThat(channelFound).isTrue();
+    assertThat(surroundChannelMatcher.group(1)).isEqualTo("5.1");
+  }
 
-        final String actualBitratePattern = gManPatterns.getBitrate();
-        Log.i(LOG_TAG, "Testing  bitrate pattern: " + actualBitratePattern);
+  @Test
+  @DisplayName("Validate bitrate pattern correctly parses video bitrate")
+  void testBitrateMatcher() {
 
-        assertThat(actualBitratePattern)
-                .isNotNull()
-                .isNotEmpty();
+    final String TEST_MBPS = "4 Mbps";
+    final String TEST_KBPS = "448 Kbps";
 
-        // test pattern
-        final boolean foundMbps = gManPatterns.getBitrateMatcher(TEST_MBPS).find();
-        final boolean foundKbps = gManPatterns.getBitrateMatcher(TEST_KBPS).find();
-        assertThat(foundMbps).isTrue();
-        assertThat(foundKbps).isTrue();
-    }
+    final String actualBitratePattern = gManPatterns.getBitrate();
+    Log.i(LOG_TAG, "Testing  bitrate pattern: " + actualBitratePattern);
 
-    @Test
-    @DisplayName("Validate video container pattern parses video container")
-    void testContainerMatcher() {
+    assertThat(actualBitratePattern).isNotNull().isNotEmpty();
 
-        final String TEST_CONTAINER = "H.264 mkv";
+    // test pattern
+    final boolean foundMbps = gManPatterns.getBitrateMatcher(TEST_MBPS).find();
+    final boolean foundKbps = gManPatterns.getBitrateMatcher(TEST_KBPS).find();
+    assertThat(foundMbps).isTrue();
+    assertThat(foundKbps).isTrue();
+  }
 
-        final String actualContainerPattern = gManPatterns.getContainer();
-        Log.i(LOG_TAG, "Testing container pattern: " + actualContainerPattern);
+  @Test
+  @DisplayName("Validate video container pattern parses video container")
+  void testContainerMatcher() {
 
-        assertThat(actualContainerPattern)
-                .isNotNull()
-                .isNotEmpty();
+    final String TEST_CONTAINER = "H.264 mkv";
 
-        // test pattern
-        final boolean foundContainer = gManPatterns.getContainerMatcher(TEST_CONTAINER).find();
-        assertThat(foundContainer).isTrue();
-    }
+    final String actualContainerPattern = gManPatterns.getContainer();
+    Log.i(LOG_TAG, "Testing container pattern: " + actualContainerPattern);
 
-    @Test
-    @DisplayName("Ensure video framerate pattern correctly parses framerate")
-    void testFramerateMatcher() {
+    assertThat(actualContainerPattern).isNotNull().isNotEmpty();
 
-        final String TEST_FPS = "25fps";
+    // test pattern
+    final boolean foundContainer = gManPatterns.getContainerMatcher(TEST_CONTAINER).find();
+    assertThat(foundContainer).isTrue();
+  }
 
-        final String actualFrameratePattern = gManPatterns.getFramerate();
-        Log.i(LOG_TAG, "Testing framerate pattern: " + actualFrameratePattern);
+  @Test
+  @DisplayName("Ensure video framerate pattern correctly parses framerate")
+  void testFramerateMatcher() {
 
-        assertThat(actualFrameratePattern)
-                .isNotNull()
-                .isNotEmpty();
+    final String TEST_FPS = "25fps";
 
-        // test pattern
-        final boolean foundFps = gManPatterns.getFramerateMatcher(TEST_FPS).find();
-        assertThat(foundFps).isTrue();
-    }
+    final String actualFrameratePattern = gManPatterns.getFramerate();
+    Log.i(LOG_TAG, "Testing framerate pattern: " + actualFrameratePattern);
 
-    @Test
-    @DisplayName("Validate bitrate conversion factor correctly converts bitrate units")
-    void testBitrateConversionFactor() {
+    assertThat(actualFrameratePattern).isNotNull().isNotEmpty();
 
-        final Long actualBitrateConversionFactor = gManPatterns.getBitrateConversionFactor();
-        final Long expectedBitrateConversionFactor = 1_000_000L;
+    // test pattern
+    final boolean foundFps = gManPatterns.getFramerateMatcher(TEST_FPS).find();
+    assertThat(foundFps).isTrue();
+  }
 
-        Log.i(LOG_TAG, "Testing bitrate conversion factor: " + actualBitrateConversionFactor);
-        assertThat(actualBitrateConversionFactor).isEqualTo(expectedBitrateConversionFactor);
-    }
+  @Test
+  @DisplayName("Validate bitrate conversion factor correctly converts bitrate units")
+  void testBitrateConversionFactor() {
+
+    final Long actualBitrateConversionFactor = gManPatterns.getBitrateConversionFactor();
+    final Long expectedBitrateConversionFactor = 1_000_000L;
+
+    Log.i(LOG_TAG, "Testing bitrate conversion factor: " + actualBitrateConversionFactor);
+    assertThat(actualBitrateConversionFactor).isEqualTo(expectedBitrateConversionFactor);
+  }
 }

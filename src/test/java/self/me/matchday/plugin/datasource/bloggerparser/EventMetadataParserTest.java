@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -41,8 +41,7 @@ class EventMetadataParserTest {
   @BeforeAll
   static void setUp() {
 
-    BloggerParserPatterns bloggerParserPatterns = new BloggerParserPatterns() {
-    };
+    BloggerParserPatterns bloggerParserPatterns = new BloggerParserPatterns() {};
     bloggerParserPatterns.competition = "^([\\w\\s])+ ";
     bloggerParserPatterns.fixture = "((Semi-)?Final)|((J|(Matchday ))\\d+)";
     bloggerParserPatterns.teams = "(?U)([\\w ?]+) vs.? ([\\w ?]+)";

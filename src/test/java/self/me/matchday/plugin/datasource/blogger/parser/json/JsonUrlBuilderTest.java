@@ -32,12 +32,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JsonUrlBuilderTest {
 
+  public static final String SEARCH_DATETIME = "2020-10-05T14:46:00";
   private static final String LOG_TAG = "JsonUrlBuilderTest";
-
   // Test constants
   private static final String SEARCH_TERM = "Barcelona";
   private static final String BASE_URL = "zkfullmatchvideos.blogspot.com";
-  public static final String SEARCH_DATETIME = "2020-10-05T14:46:00";
 
   @Test
   @DisplayName("Validate label search URL formatting")

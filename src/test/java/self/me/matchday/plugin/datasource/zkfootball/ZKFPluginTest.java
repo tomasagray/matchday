@@ -42,7 +42,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Validate ZKF plugin operation")
-// todo - blog is private?
 @Disabled
 class ZKFPluginTest {
 

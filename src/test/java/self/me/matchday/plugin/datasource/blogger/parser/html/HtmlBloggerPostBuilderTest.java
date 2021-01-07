@@ -25,9 +25,9 @@ import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import self.me.matchday.util.ResourceFileReader;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
 import self.me.matchday.util.Log;
+import self.me.matchday.util.ResourceFileReader;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

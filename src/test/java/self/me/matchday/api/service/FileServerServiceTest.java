@@ -57,8 +57,9 @@ class FileServerServiceTest {
   private static FileServerUser testFileServerUser;
 
   @BeforeAll
-  static void setUp(@Autowired final FileServerService fileServerService,
-                    @Autowired final TestFileServerPlugin testFileServerPlugin) {
+  static void setUp(
+      @Autowired final FileServerService fileServerService,
+      @Autowired final TestFileServerPlugin testFileServerPlugin) {
 
     FileServerServiceTest.fileServerService = fileServerService;
     FileServerServiceTest.testFileServerPlugin = testFileServerPlugin;
@@ -173,8 +174,7 @@ class FileServerServiceTest {
     final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
     assertThat(firstHalfUrl).isNotNull();
 
-    final Optional<URL> optionalURL =
-        fileServerService.getDownloadUrl(firstHalfUrl);
+    final Optional<URL> optionalURL = fileServerService.getDownloadUrl(firstHalfUrl);
     assertThat(optionalURL.isPresent()).isTrue();
 
     optionalURL.ifPresent(

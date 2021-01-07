@@ -57,9 +57,10 @@ class EventServiceTest {
   private static Team testTeam;
 
   @BeforeAll
-  static void setUp(@Autowired final EventService eventService,
-                    @Autowired final CompetitionService competitionService,
-                    @Autowired final TeamService teamService) {
+  static void setUp(
+      @Autowired final EventService eventService,
+      @Autowired final CompetitionService competitionService,
+      @Autowired final TeamService teamService) {
 
     EventServiceTest.eventService = eventService;
     EventServiceTest.competitionService = competitionService;
@@ -76,27 +77,32 @@ class EventServiceTest {
     testCompetition = testMatch.getCompetition();
     testTeam = testMatch.getHomeTeam();
 
-    final Optional<EventFileSource> fileSourceOptional = testMatch.getFileSources().stream().findFirst();
+    final Optional<EventFileSource> fileSourceOptional =
+        testMatch.getFileSources().stream().findFirst();
     assertThat(fileSourceOptional).isPresent();
     testFileSource = fileSourceOptional.get();
-
 
     Log.i(
         LOG_TAG,
         String.format(
             "Saved Event w/ID: %s, Competition ID: %s, Team ID: %s; EventFileSrcID: %s",
-            testMatch.getEventId(),
-                testCompetition,
-                testTeam,
-                testFileSource.getEventFileSrcId()));
+            testMatch.getEventId(), testCompetition, testTeam, testFileSource.getEventFileSrcId()));
   }
 
+  @AfterAll
+  static void tearDown() {
+
+    // delete test data
+    eventService.deleteEvent(testMatch);
+    competitionService.deleteCompetitionById(testCompetition.getCompetitionId());
+    teamService.deleteTeamById(testTeam.getTeamId());
+  }
 
   @Test
   @DisplayName("Ensure fetchAllEvents() returns all Events; at least @MIN_EVENT_COUNT")
   void fetchAllEvents() {
 
-    final int expectedEventCount = 1;   // minimum
+    final int expectedEventCount = 1; // minimum
     final Optional<List<Event>> eventsOptional = eventService.fetchAllEvents();
     assertThat(eventsOptional).isPresent();
 
@@ -133,7 +139,8 @@ class EventServiceTest {
     assertThat(eventOptional).isPresent();
     final Event event = eventOptional.get();
     // Get test file source
-    final Optional<EventFileSource> testFileSrcOptional = event.getFileSources().stream().findFirst();
+    final Optional<EventFileSource> testFileSrcOptional =
+        event.getFileSources().stream().findFirst();
     assertThat(testFileSrcOptional).isPresent();
     // Get file source ID
     final EventFileSource testFileSource = testFileSrcOptional.get();
@@ -141,13 +148,14 @@ class EventServiceTest {
     Log.i(LOG_TAG, "Test EventFileSource ID: " + testFileSourceId);
 
     final Optional<EventFileSource> fileSourceOptional =
-            eventService.fetchEventFileSrc(testFileSourceId);
+        eventService.fetchEventFileSrc(testFileSourceId);
     assertThat(fileSourceOptional).isPresent();
 
-    fileSourceOptional.ifPresent(eventFileSource -> {
-      Log.i(LOG_TAG, "Retrieved file source from database: " + eventFileSource);
-      assertThat(eventFileSource).isEqualTo(EventServiceTest.testFileSource);
-    });
+    fileSourceOptional.ifPresent(
+        eventFileSource -> {
+          Log.i(LOG_TAG, "Retrieved file source from database: " + eventFileSource);
+          assertThat(eventFileSource).isEqualTo(EventServiceTest.testFileSource);
+        });
   }
 
   @Test
@@ -188,7 +196,8 @@ class EventServiceTest {
   void saveAndDeleteEvent() {
 
     // Create test data
-    final Match saveEvent = new Match.MatchBuilder()
+    final Match saveEvent =
+        new Match.MatchBuilder()
             .setCompetition(testCompetition)
             .setHomeTeam(testTeam)
             .setAwayTeam(testTeam)
@@ -222,14 +231,5 @@ class EventServiceTest {
     final int postTestEventCount = postTestEvents.size();
 
     assertThat(postTestEventCount).isEqualTo(initialEventCount);
-  }
-
-  @AfterAll
-  static void tearDown() {
-
-    // delete test data
-    eventService.deleteEvent(testMatch);
-    competitionService.deleteCompetitionById(testCompetition.getCompetitionId());
-    teamService.deleteTeamById(testTeam.getTeamId());
   }
 }

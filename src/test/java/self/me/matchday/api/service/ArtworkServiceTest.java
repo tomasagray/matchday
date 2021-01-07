@@ -19,7 +19,10 @@
 
 package self.me.matchday.api.service;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,7 +41,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ArtworkServiceTest {
 
   private static final String LOG_TAG = "ArtworkServiceTest";
-
+  // Test constants
+  private static final int defaultTeamEmblemBytes = 15_182;
+  private static final int expectedCompetitionEmblemBytes = 13_989;
+  private static final int expectedFanartBytes = 866_211;
+  private static final int expectedLandscapeBytes = 189_337;
   // Test resources
   private static ArtworkService artworkService;
   private static TeamService teamService;
@@ -46,11 +53,6 @@ class ArtworkServiceTest {
   // Test data
   private static Team testTeam;
   private static Competition testCompetition;
-  // Test constants
-  private static final int defaultTeamEmblemBytes = 15_182;
-  private static final int expectedCompetitionEmblemBytes = 13_989;
-  private static final int expectedFanartBytes = 866_211;
-  private static final int expectedLandscapeBytes = 189_337;
 
   @BeforeAll
   static void setUp(
@@ -68,7 +70,6 @@ class ArtworkServiceTest {
     // Save to DB
     testTeam = teamService.saveTeam(team);
     testCompetition = competitionService.saveCompetition(competition);
-
   }
 
   @AfterAll
@@ -100,10 +101,11 @@ class ArtworkServiceTest {
     final Optional<byte[]> optionalBytes = artworkService.fetchTeamFanart(testTeam.getTeamId());
     assertThat(optionalBytes).isPresent();
 
-    optionalBytes.ifPresent(bytes -> {
-      Log.i(LOG_TAG, String.format("Read: %s bytes for default team fanart", bytes.length));
-      assertThat(bytes.length).isEqualTo(expectedFanartBytes);
-    });
+    optionalBytes.ifPresent(
+        bytes -> {
+          Log.i(LOG_TAG, String.format("Read: %s bytes for default team fanart", bytes.length));
+          assertThat(bytes.length).isEqualTo(expectedFanartBytes);
+        });
   }
 
   @Test
@@ -111,11 +113,14 @@ class ArtworkServiceTest {
   void fetchCompetitionEmblem() {
 
     final Optional<byte[]> optionalBytes =
-            artworkService.fetchCompetitionEmblem(testCompetition.getCompetitionId());
+        artworkService.fetchCompetitionEmblem(testCompetition.getCompetitionId());
     assertThat(optionalBytes).isPresent();
 
     final int actualCompetitionEmblemBytes = optionalBytes.get().length;
-    Log.i(LOG_TAG, String.format("Read: %s bytes for default competition emblem", actualCompetitionEmblemBytes));
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Read: %s bytes for default competition emblem", actualCompetitionEmblemBytes));
     assertThat(actualCompetitionEmblemBytes).isEqualTo(expectedCompetitionEmblemBytes);
   }
 
@@ -124,11 +129,13 @@ class ArtworkServiceTest {
   void fetchCompetitionFanart() {
 
     final Optional<byte[]> optionalBytes =
-            artworkService.fetchCompetitionFanart(testCompetition.getCompetitionId());
+        artworkService.fetchCompetitionFanart(testCompetition.getCompetitionId());
     assertThat(optionalBytes).isPresent();
 
     final byte[] actualFanartBytes = optionalBytes.get();
-    Log.i(LOG_TAG, String.format("Read: %s bytes for default competition fanart", actualFanartBytes.length));
+    Log.i(
+        LOG_TAG,
+        String.format("Read: %s bytes for default competition fanart", actualFanartBytes.length));
     assertThat(actualFanartBytes.length).isEqualTo(expectedFanartBytes);
   }
 
@@ -137,11 +144,14 @@ class ArtworkServiceTest {
   void fetchCompetitionMonochromeEmblem() {
 
     final Optional<byte[]> optionalBytes =
-            artworkService.fetchCompetitionMonochromeEmblem(testCompetition.getCompetitionId());
+        artworkService.fetchCompetitionMonochromeEmblem(testCompetition.getCompetitionId());
     assertThat(optionalBytes).isPresent();
 
     final int actualMonoEmblemBytes = optionalBytes.get().length;
-    Log.i(LOG_TAG, String.format("Read: %s bytes for default competition monochrome emblem", actualMonoEmblemBytes));
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Read: %s bytes for default competition monochrome emblem", actualMonoEmblemBytes));
     assertThat(actualMonoEmblemBytes).isEqualTo(expectedCompetitionEmblemBytes);
   }
 
@@ -150,11 +160,13 @@ class ArtworkServiceTest {
   void fetchCompetitionLandscape() {
 
     final Optional<byte[]> optionalBytes =
-            artworkService.fetchCompetitionLandscape(testCompetition.getCompetitionId());
+        artworkService.fetchCompetitionLandscape(testCompetition.getCompetitionId());
     assertThat(optionalBytes).isPresent();
 
     final int actualLandscapeBytes = optionalBytes.get().length;
-    Log.i(LOG_TAG, String.format("Read: %s bytes for landscape default artwork", actualLandscapeBytes));
+    Log.i(
+        LOG_TAG,
+        String.format("Read: %s bytes for landscape default artwork", actualLandscapeBytes));
     assertThat(actualLandscapeBytes).isEqualTo(expectedLandscapeBytes);
   }
 }

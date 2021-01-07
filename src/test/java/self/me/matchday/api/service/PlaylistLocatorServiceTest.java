@@ -24,10 +24,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.model.VideoStreamPlaylistLocator;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.CreateTestData;
+import self.me.matchday.db.EventFileSrcRepository;
+import self.me.matchday.model.EventFile;
+import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.VideoStreamLocator;
 import self.me.matchday.util.Log;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,60 +41,67 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for playlist locator service")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PlaylistLocatorServiceTest {
 
   private static final String LOG_TAG = "PlaylistLocatorServiceTest";
 
   private static PlaylistLocatorService playlistLocatorService;
-  private static VideoStreamPlaylistLocator testPlaylistLocator;
+  private static EventFileSrcRepository fileSrcRepository;
+  private static VideoStreamLocator testStreamLocator;
+  private static EventFileSource testEventFileSource;
+  private static EventFile testEventFile;
 
   @BeforeAll
-  static void setUp(@Autowired final PlaylistLocatorService playlistLocatorService) {
+  static void setUp(
+      @Autowired final PlaylistLocatorService playlistLocatorService,
+      @Autowired final EventFileSrcRepository fileSrcRepository) {
 
     PlaylistLocatorServiceTest.playlistLocatorService = playlistLocatorService;
+    PlaylistLocatorServiceTest.fileSrcRepository = fileSrcRepository;
+    // Get managed copy of test file source
+    final EventFileSource fileSource = CreateTestData.createTestEventFileSource();
+    PlaylistLocatorServiceTest.testEventFileSource = fileSrcRepository.save(fileSource);
+
+    PlaylistLocatorServiceTest.testEventFile =
+        PlaylistLocatorServiceTest.testEventFileSource.getEventFiles().get(0);
   }
 
   @AfterAll
-  static void tearDown() {
+  static void tearDownDependencies() {
+
+    // Cleanup test resources
+    fileSrcRepository.delete(testEventFileSource);
+  }
+
+  @AfterEach
+  void tearDown() {
 
     // Ensure test data is cleaned up
-    final VideoStreamPlaylistLocator.VideoStreamPlaylistId playlistLocatorId =
-        testPlaylistLocator.getPlaylistId();
-    if (playlistLocatorId != null) {
-      final Optional<VideoStreamPlaylistLocator> locatorOptional =
-          playlistLocatorService.getPlaylistLocator(
-              playlistLocatorId.getEventId(), playlistLocatorId.getFileSrcId());
-
-      // if test locator is still in DB...
-      locatorOptional.ifPresent(videoStreamPlaylistLocator -> {
-        Log.i(LOG_TAG, "Deleting test locator from DB...: " + playlistLocatorId);
-        playlistLocatorService.deletePlaylistLocator(playlistLocatorId);
-      });
+    if (testStreamLocator != null) {
+      Log.i(LOG_TAG, "Deleting test locator from DB...: " + testStreamLocator.getStreamLocatorId());
+      playlistLocatorService.deletePlaylistLocator(testStreamLocator);
     }
   }
 
   @Test
   @DisplayName("Test creation of new playlist locator")
-  @Order(1)
   void createNewPlaylistLocator() {
 
-    testPlaylistLocator =
-        playlistLocatorService.createNewPlaylistLocator(
-            "TEST_EVENT_ID", "TEST_FILE_SRC_ID", Path.of("."));
+    assertThat(testEventFile).isNotNull();
+    testStreamLocator =
+        playlistLocatorService.createNewPlaylistLocator(testEventFileSource, testEventFile);
 
-    Log.i(LOG_TAG, "Created playlist locator: " + testPlaylistLocator);
-    assertThat(testPlaylistLocator).isNotNull();
-    assertThat(testPlaylistLocator.getPlaylistId()).isNotNull();
+    Log.i(LOG_TAG, "Created playlist locator: " + testStreamLocator);
+    assertThat(testStreamLocator).isNotNull();
+    assertThat(testStreamLocator.getStreamLocatorId()).isNotNull();
   }
 
   @Test
   @DisplayName("Test retrieval of all playlist locators from database")
-  @Order(2)
   void getAllPlaylistLocators() {
 
     final int expectedPlaylistLocatorCount = 1;
-    final List<VideoStreamPlaylistLocator> playlistLocators =
+    final List<VideoStreamLocator> playlistLocators =
         playlistLocatorService.getAllPlaylistLocators();
     final int actualPlaylistLocatorCount = playlistLocators.size();
     Log.i(
@@ -101,29 +113,41 @@ class PlaylistLocatorServiceTest {
 
   @Test
   @DisplayName("Test retrieval of specific playlist locator from database")
-  @Order(3)
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   void getPlaylistLocator() {
 
-    final VideoStreamPlaylistLocator.VideoStreamPlaylistId playlistId =
-        testPlaylistLocator.getPlaylistId();
-    final Optional<VideoStreamPlaylistLocator> playlistLocatorOptional =
-        playlistLocatorService.getPlaylistLocator(
-            playlistId.getEventId(), playlistId.getFileSrcId());
+    // Create test resource
+    testStreamLocator =
+        playlistLocatorService.createNewPlaylistLocator(testEventFileSource, testEventFile);
+
+    final Long testStreamLocatorId = testStreamLocator.getStreamLocatorId();
+    final Optional<VideoStreamLocator> playlistLocatorOptional =
+        playlistLocatorService.getStreamLocator(testStreamLocatorId);
     assertThat(playlistLocatorOptional).isPresent();
 
-    final VideoStreamPlaylistLocator actualPlaylistLocator = playlistLocatorOptional.get();
+    final VideoStreamLocator actualPlaylistLocator = playlistLocatorOptional.get();
     Log.i(LOG_TAG, "Retrieved playlist locator: " + actualPlaylistLocator);
-    assertThat(actualPlaylistLocator).isEqualTo(testPlaylistLocator);
+
+    // Test playlist locator fields; timestamp will be different
+    // todo - should playlist timestamps be compared for equality?
+    assertThat(actualPlaylistLocator.getStreamLocatorId())
+        .isEqualTo(testStreamLocator.getStreamLocatorId());
+    assertThat(actualPlaylistLocator.getPlaylistPath())
+        .isEqualTo(testStreamLocator.getPlaylistPath());
+    assertThat(actualPlaylistLocator.getEventFile()).isEqualTo(testStreamLocator.getEventFile());
   }
 
   @Test
   @DisplayName("Test deletion of playlist locator")
-  @Order(4)
   void deletePlaylistLocator() {
+
+    // Create test resource
+    testStreamLocator =
+        playlistLocatorService.createNewPlaylistLocator(testEventFileSource, testEventFile);
 
     final int sizeBeforeDelete = playlistLocatorService.getAllPlaylistLocators().size();
     // Perform deletion
-    playlistLocatorService.deletePlaylistLocator(testPlaylistLocator.getPlaylistId());
+    playlistLocatorService.deletePlaylistLocator(testStreamLocator);
     final int sizeAfterDelete = playlistLocatorService.getAllPlaylistLocators().size();
     final int actualDifference = sizeBeforeDelete - sizeAfterDelete;
     final int expectedDifference = 1;

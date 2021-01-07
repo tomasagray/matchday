@@ -53,17 +53,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Disabled
 class NitroflarePluginTest {
 
-  private static final String LOG_TAG = "NitroflarePluginTest";
-
-  // Test constants
-  private static URL TEST_URL;
-  private static final Pattern DOWNLOAD_URL_PATTERN =
-      Pattern.compile(
-          "https://s\\d+\\.nitroflare\\.com/d/\\w+/20200908\\+denmark-england\\+0\\+eng\\+1080p\\.ts");
   public static final int REFRESH_HOURS = 24;
   public static final String USER_NAME = "blixblaxblox@protonmail.com";
   public static final String PASSWORD = "3wni(0wxF4qI4KQK";
-
+  private static final String LOG_TAG = "NitroflarePluginTest";
+  private static final Pattern DOWNLOAD_URL_PATTERN =
+      Pattern.compile(
+          "https://s\\d+\\.nitroflare\\.com/d/\\w+/20200908\\+denmark-england\\+0\\+eng\\+1080p\\.ts");
+  // Test constants
+  private static URL TEST_URL;
   // test resources
   private static NitroflarePlugin nitroflarePlugin;
   private static List<HttpCookie> testCookies;

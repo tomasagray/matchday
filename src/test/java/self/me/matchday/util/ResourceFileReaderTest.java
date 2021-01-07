@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -31,18 +31,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ResourceFileReaderTest {
 
-    private static final String LOG_TAG = "ResourceFileReaderTest";
-    private static final String PROPERTIES_FILE = "plugins\\disk-manager\\disk-manager.properties";
+  private static final String LOG_TAG = "ResourceFileReaderTest";
+  private static final String PROPERTIES_FILE = "plugins\\disk-manager\\disk-manager.properties";
 
-    @Test
-    @DisplayName("Ensure reads and splits resource file key/value pairs correctly")
-    void testReadPropertiesResourceFile() throws IOException {
+  @Test
+  @DisplayName("Ensure reads and splits resource file key/value pairs correctly")
+  void testReadPropertiesResourceFile() throws IOException {
 
-        Map<String, String> resourceFile =
-                ResourceFileReader.readPropertiesResource(DiskManager.class, PROPERTIES_FILE);
+    Map<String, String> resourceFile =
+        ResourceFileReader.readPropertiesResource(DiskManager.class, PROPERTIES_FILE);
 
-        // Perform tests
-        assertThat(resourceFile.size()).isGreaterThan(0);
+    // Perform tests
+    assertThat(resourceFile.size()).isGreaterThan(0);
 
     resourceFile.forEach(
         (key, value) -> {
@@ -50,34 +50,31 @@ class ResourceFileReaderTest {
           assertThat(key).isNotNull().isNotEmpty();
           // not comments
           if (!key.startsWith("#")) {
-              assertThat(value).isNotNull();
+            assertThat(value).isNotNull();
           }
         });
-    }
+  }
 
-    @Test
-    @DisplayName("Validate resource file to properties class mapping")
-    void testResourceToClassMapping() throws IOException {
+  @Test
+  @DisplayName("Validate resource file to properties class mapping")
+  void testResourceToClassMapping() throws IOException {
 
-        final GManPatterns gManPatterns =
-                ResourceFileReader
-                        .mapPropertiesToClass(GManPatterns.class,
-                                "plugins\\gman\\gman.patterns.properties",
-                                "gman.patterns");
+    final GManPatterns gManPatterns =
+        ResourceFileReader.mapPropertiesToClass(
+            GManPatterns.class, "plugins\\gman\\gman.patterns.properties", "gman.patterns");
 
-        assertThat(gManPatterns).isNotNull();
-        Log.i(LOG_TAG, "Testing GMan Patterns: " + gManPatterns);
+    assertThat(gManPatterns).isNotNull();
+    Log.i(LOG_TAG, "Testing GMan Patterns: " + gManPatterns);
 
-        assertThat(gManPatterns.getBitrate()).isNotNull();
-        assertThat(gManPatterns.getAvDataDelimiter()).isNotNull();
-        assertThat(gManPatterns.getBitrateConversionFactor()).isNotEqualTo(0);
-        assertThat(gManPatterns.getChannel()).isNotNull();
-        assertThat(gManPatterns.getContainer()).isNotNull();
-        assertThat(gManPatterns.getFramerate()).isNotNull();
-        assertThat(gManPatterns.getStartOfMetadata()).isNotNull();
-        assertThat(gManPatterns.getMetadataKvDelimiter()).isNotNull();
-        assertThat(gManPatterns.getMetadataDelimiter()).isNotNull();
-        assertThat(gManPatterns.getLanguageDelimiter()).isNotNull();
-
-    }
+    assertThat(gManPatterns.getBitrate()).isNotNull();
+    assertThat(gManPatterns.getAvDataDelimiter()).isNotNull();
+    assertThat(gManPatterns.getBitrateConversionFactor()).isNotEqualTo(0);
+    assertThat(gManPatterns.getChannel()).isNotNull();
+    assertThat(gManPatterns.getContainer()).isNotNull();
+    assertThat(gManPatterns.getFramerate()).isNotNull();
+    assertThat(gManPatterns.getStartOfMetadata()).isNotNull();
+    assertThat(gManPatterns.getMetadataKvDelimiter()).isNotNull();
+    assertThat(gManPatterns.getMetadataDelimiter()).isNotNull();
+    assertThat(gManPatterns.getLanguageDelimiter()).isNotNull();
+  }
 }

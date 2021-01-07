@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -86,7 +86,6 @@ class GManEventFileSourceParserTest {
     assertThat(actualFileSourceCount).isEqualTo(expectedFileSourceCount);
   }
 
-
   @Test
   @DisplayName("Validate parses correct # of file sources from sample data")
   void testEventFileSourceCount() {
@@ -107,7 +106,8 @@ class GManEventFileSourceParserTest {
     final String expectedChannel1 = "Sky Sports HD";
     final String expectedChannel2 = "TVE La 1 HD";
 
-    Log.i(LOG_TAG, String.format("Testing source channels: %s, %s", actualChannel1, actualChannel2));
+    Log.i(
+        LOG_TAG, String.format("Testing source channels: %s, %s", actualChannel1, actualChannel2));
     assertThat(actualChannel1).isEqualTo(expectedChannel1);
     assertThat(actualChannel2).isEqualTo(expectedChannel2);
   }
@@ -121,7 +121,9 @@ class GManEventFileSourceParserTest {
     final Resolution expectedResolution1 = Resolution.R_1080p;
     final Resolution expectedResolution2 = Resolution.R_1080i;
 
-    Log.i(LOG_TAG, String.format("Testing source resolutions: %s, %s", actualResolution1, actualResolution2));
+    Log.i(
+        LOG_TAG,
+        String.format("Testing source resolutions: %s, %s", actualResolution1, actualResolution2));
     assertThat(actualResolution1).isEqualTo(expectedResolution1);
     assertThat(actualResolution2).isEqualTo(expectedResolution2);
   }
@@ -135,7 +137,9 @@ class GManEventFileSourceParserTest {
     final String expectedLanguages1 = "English";
     final String expectedLanguages2 = "Spanish";
 
-    Log.i(LOG_TAG, String.format("Testing source languages: %s, %s", actualLanguages1, actualLanguages2));
+    Log.i(
+        LOG_TAG,
+        String.format("Testing source languages: %s, %s", actualLanguages1, actualLanguages2));
     assertThat(actualLanguages1).isEqualTo(expectedLanguages1);
     assertThat(actualLanguages2).isEqualTo(expectedLanguages2);
   }

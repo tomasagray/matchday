@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -55,47 +55,6 @@ class ZKFEventFileSourceParserTest {
   private static EventFileSource firstSource;
   private static EventFileSource secondSource;
 
-  // Mock class for testing purposes only!
-  @Data
-  private static class TestBloggerPost {
-
-    private String version;
-    private String encoding;
-    private TestBloggerEntry entry;
-    TestBloggerEntry getEntry() {
-      return entry;
-    }
-    @Data
-    static class TestBloggerEntryId {
-      private String t;
-
-      public void setT(String t) {
-        this.t = t;
-      }
-    }
-    @Data
-    static class TestBloggerEntryType {
-      private String type;
-      private String text;
-
-      String getText() {
-        return text;
-      }
-    }
-    @Data
-    static class TestBloggerEntry {
-      private TestBloggerEntryId id;
-      private LocalDateTime published;
-      private LocalDateTime updated;
-      private TestBloggerEntryType title;
-      private TestBloggerEntryType content;
-
-      TestBloggerEntryType getContent() {
-        return content;
-      }
-    }
-  }
-
   @BeforeAll
   static void setUp(@Autowired final ZKFEventFileSourceParser fileSourceParser) throws IOException {
 
@@ -140,7 +99,8 @@ class ZKFEventFileSourceParserTest {
     final String expectedChannel1 = "ORF Eins HD";
     final String expectedChannel2 = "ESPN";
 
-    Log.i(LOG_TAG, String.format("Testing source channels: %s, %s", actualChannel1, actualChannel2));
+    Log.i(
+        LOG_TAG, String.format("Testing source channels: %s, %s", actualChannel1, actualChannel2));
     assertThat(actualChannel1).isEqualTo(expectedChannel1);
     assertThat(actualChannel2).isEqualTo(expectedChannel2);
   }
@@ -153,7 +113,9 @@ class ZKFEventFileSourceParserTest {
     final Resolution actualResolution2 = secondSource.getResolution();
     final Resolution expectedResolution = Resolution.R_720p;
 
-    Log.i(LOG_TAG, String.format("Testing source resolutions: %s, %s", actualResolution1, actualResolution2));
+    Log.i(
+        LOG_TAG,
+        String.format("Testing source resolutions: %s, %s", actualResolution1, actualResolution2));
     assertThat(actualResolution1).isEqualTo(expectedResolution);
     assertThat(actualResolution2).isEqualTo(expectedResolution);
   }
@@ -167,7 +129,9 @@ class ZKFEventFileSourceParserTest {
     final String expectedLanguages1 = "German";
     final String expectedLanguages2 = "English";
 
-    Log.i(LOG_TAG, String.format("Testing source languages: %s, %s", actualLanguages1, actualLanguages2));
+    Log.i(
+        LOG_TAG,
+        String.format("Testing source languages: %s, %s", actualLanguages1, actualLanguages2));
     assertThat(actualLanguages1).isEqualTo(expectedLanguages1);
     assertThat(actualLanguages2).isEqualTo(expectedLanguages2);
   }
@@ -182,5 +146,50 @@ class ZKFEventFileSourceParserTest {
 
     assertThat(actualEventFiles1.size()).isEqualTo(expectedFileCount);
     assertThat(actualEventFiles2.size()).isEqualTo(expectedFileCount);
+  }
+
+  // Mock class for testing purposes only!
+  @Data
+  private static class TestBloggerPost {
+
+    private String version;
+    private String encoding;
+    private TestBloggerEntry entry;
+
+    TestBloggerEntry getEntry() {
+      return entry;
+    }
+
+    @Data
+    static class TestBloggerEntryId {
+      private String t;
+
+      public void setT(String t) {
+        this.t = t;
+      }
+    }
+
+    @Data
+    static class TestBloggerEntryType {
+      private String type;
+      private String text;
+
+      String getText() {
+        return text;
+      }
+    }
+
+    @Data
+    static class TestBloggerEntry {
+      private TestBloggerEntryId id;
+      private LocalDateTime published;
+      private LocalDateTime updated;
+      private TestBloggerEntryType title;
+      private TestBloggerEntryType content;
+
+      TestBloggerEntryType getContent() {
+        return content;
+      }
+    }
   }
 }

@@ -54,8 +54,7 @@ class NetscapeCookiesServiceTest {
     NetscapeCookiesServiceTest.cookiesService = cookiesService;
 
     // Read test resource from disk
-    final BufferedReader reader =
-        new BufferedReader(new FileReader(COOKIE_FILE));
+    final BufferedReader reader = new BufferedReader(new FileReader(COOKIE_FILE));
     cookieFile = reader.lines().collect(Collectors.joining("\n"));
 
     // Ensure file was read successfully
@@ -72,11 +71,12 @@ class NetscapeCookiesServiceTest {
     final List<HttpCookie> actualCookies = cookiesService.parseNetscapeCookies(cookieFile);
     assertThat(actualCookies.size()).isEqualTo(expectedCookieCount);
 
-    actualCookies.forEach(httpCookie -> {
-      Log.i(LOG_TAG, "Testing cookie:\n" + httpCookie + "\n");
-      assertThat(httpCookie).isNotNull();
-      assertThat(httpCookie.getName()).isNotNull().isNotEmpty();
-      assertThat(httpCookie.getValue()).isNotNull().isNotEmpty();
-    });
+    actualCookies.forEach(
+        httpCookie -> {
+          Log.i(LOG_TAG, "Testing cookie:\n" + httpCookie + "\n");
+          assertThat(httpCookie).isNotNull();
+          assertThat(httpCookie.getName()).isNotNull().isNotEmpty();
+          assertThat(httpCookie.getValue()).isNotNull().isNotEmpty();
+        });
   }
 }

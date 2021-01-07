@@ -78,7 +78,15 @@ class MatchServiceTest {
     MatchServiceTest.testMatch = (Match) testEventOptional.get();
     MatchServiceTest.testCompetition = testMatch.getCompetition();
     MatchServiceTest.testTeam = testMatch.getHomeTeam();
+  }
 
+  @AfterAll
+  static void tearDown() {
+
+    // delete test event
+    eventService.deleteEvent(testMatch);
+    competitionService.deleteCompetitionById(testCompetition.getCompetitionId());
+    teamService.deleteTeamById(testTeam.getTeamId());
   }
 
   @Test
@@ -112,14 +120,5 @@ class MatchServiceTest {
           assertThat(match.getHomeTeam()).isEqualTo(testTeam);
           assertThat(match.getCompetition()).isEqualTo(testCompetition);
         });
-  }
-
-  @AfterAll
-  static void tearDown() {
-
-    // delete test event
-    eventService.deleteEvent(testMatch);
-    competitionService.deleteCompetitionById(testCompetition.getCompetitionId());
-    teamService.deleteTeamById(testTeam.getTeamId());
   }
 }

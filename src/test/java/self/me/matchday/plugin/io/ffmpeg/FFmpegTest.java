@@ -24,8 +24,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import self.me.matchday.CreateTestData;
 import self.me.matchday.MatchdayApplication;
-import self.me.matchday.util.ResourceFileReader;
 import self.me.matchday.util.Log;
+import self.me.matchday.util.ResourceFileReader;
 
 import java.io.IOException;
 import java.net.URI;
@@ -66,8 +66,7 @@ class FFmpegTest {
     assertThat(firstHalfUrl).isNotNull();
     assertThat(secondHalfUrl).isNotNull();
 
-    final List<URI> urls =
-        List.of(firstHalfUrl.toURI(), secondHalfUrl.toURI());
+    final List<URI> urls = List.of(firstHalfUrl.toURI(), secondHalfUrl.toURI());
     storageLocation = resources.get("video-resources.file-storage-location") + "\\test_out";
 
     hlsStreamTask = ffmpeg.getHlsStreamTask(urls, Path.of(storageLocation));
@@ -103,9 +102,8 @@ class FFmpegTest {
   @DisplayName("Verify output path")
   void outputPath() {
 
-    String playlistPath = FFmpegTest.storageLocation + "\\playlist.m3u8";
-    final Path expectedOutputPath = Path.of(playlistPath);
-    final Path actualOutputPath = hlsStreamTask.getOutputFile();
+    final Path expectedOutputPath = Path.of(FFmpegTest.storageLocation);
+    final Path actualOutputPath = hlsStreamTask.getOutputPath();
 
     Log.i(LOG_TAG, "Testing output path: " + actualOutputPath);
     assertThat(actualOutputPath).isEqualByComparingTo(expectedOutputPath);

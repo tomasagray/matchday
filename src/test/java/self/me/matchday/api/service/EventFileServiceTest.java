@@ -35,7 +35,7 @@ import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.util.Log;
 
-import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,9 +55,9 @@ class EventFileServiceTest {
 
   @BeforeAll
   static void setUp(
-          @Autowired final EventFileService eventFileService,
-          @Autowired final FileServerService fileServerService,
-          @Autowired final TestFileServerPlugin testFileServerPlugin) {
+      @Autowired final EventFileService eventFileService,
+      @Autowired final FileServerService fileServerService,
+      @Autowired final TestFileServerPlugin testFileServerPlugin) {
 
     EventFileServiceTest.eventFileService = eventFileService;
     EventFileServiceTest.fileServerService = fileServerService;
@@ -72,37 +72,37 @@ class EventFileServiceTest {
     testEventFileSrc = CreateTestData.createTestEventFileSource();
   }
 
-
-  @Test
-  @DisplayName("Refresh data for a test EventFile")
-  void refreshEventFileData() {
-
-    // Refresh EventFile
-    eventFileService.refreshEventFileData(testEventFileSrc, true);
-
-    // Perform tests
-    final List<EventFile> eventFiles = testEventFileSrc.getEventFiles();
-    assertThat(eventFiles).isNotNull().isNotEmpty();
-
-    eventFiles.forEach(
-        eventFile -> {
-          Log.i(
-              LOG_TAG,
-              String.format(
-                  "Checking EventFile: %s, internal URL: %s",
-                  eventFile, eventFile.getInternalUrl()));
-
-          final FFmpegMetadata metadata = eventFile.getMetadata();
-          assertThat(eventFile.getInternalUrl()).isNotNull();
-          assertThat(metadata.getStreams().get(0).getDuration()).isGreaterThan(100);
-        });
-  }
-
   @AfterAll
   static void tearDown() {
 
     // Remove test user from repo
     Log.i(LOG_TAG, "Deleting test user: " + testFileServerUser);
     fileServerService.deleteUser(testFileServerUser.getUserId());
+  }
+
+  @Test
+  @DisplayName("Refresh data for a test EventFile")
+  void refreshEventFileData() throws ExecutionException, InterruptedException {
+
+    final int expectedStreamCount = 2;
+
+    // Get test EventFile
+    final EventFile testEventFile = testEventFileSrc.getEventFiles().get(0);
+    // Refresh EventFile
+    final EventFile testRefreshedEventFile = eventFileService.refreshEventFile(testEventFile, true);
+
+    // Perform tests
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Checking EventFile: %s, internal URL: %s",
+            testEventFile, testEventFile.getInternalUrl()));
+
+    final FFmpegMetadata metadata = testRefreshedEventFile.getMetadata();
+    // Test internal URL set
+    assertThat(testRefreshedEventFile.getInternalUrl()).isNotNull();
+    // Test metadata set
+    assertThat(metadata).isNotNull();
+    assertThat(metadata.getStreams().size()).isGreaterThanOrEqualTo(expectedStreamCount);
   }
 }

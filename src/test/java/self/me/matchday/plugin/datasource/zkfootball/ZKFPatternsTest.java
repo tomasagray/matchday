@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -26,7 +26,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.model.*;
+import self.me.matchday.model.FileSize;
+import self.me.matchday.model.Fixture;
+import self.me.matchday.model.Season;
+import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
 
 import java.time.LocalDate;
@@ -94,7 +97,8 @@ class ZKFPatternsTest {
     final Matcher dateMatcher = zkfPatterns.getDateMatcher(TEST_TITLE);
     assertThat(dateMatcher.find()).isTrue();
 
-    final LocalDate actualDate = LocalDate.parse(dateMatcher.group(1), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    final LocalDate actualDate =
+        LocalDate.parse(dateMatcher.group(1), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     final LocalDate expectedDate = LocalDate.of(2020, 10, 4);
     Log.i(LOG_TAG, "Testing event date: " + actualDate);
     assertThat(actualDate).isEqualTo(expectedDate);
@@ -112,7 +116,9 @@ class ZKFPatternsTest {
     final Team expectedHomeTeam = new Team("Barcelona");
     final Team expectedAwayTeam = new Team("Sevilla");
 
-    Log.i(LOG_TAG, String.format("Testing teams: home [%s], away [%s]", actualHomeTeam, actualAwayTeam));
+    Log.i(
+        LOG_TAG,
+        String.format("Testing teams: home [%s], away [%s]", actualHomeTeam, actualAwayTeam));
     assertThat(actualHomeTeam).isEqualTo(expectedHomeTeam);
     assertThat(actualAwayTeam).isEqualTo(expectedAwayTeam);
   }
@@ -134,8 +140,9 @@ class ZKFPatternsTest {
   @Test
   void isMetadata() {
 
-    final String TEST_STRING = "<b><b><span>channel:</span>&nbsp;ESPN</b><span><b><span>language:</span>&nbsp;<span><b>english</b></span></b></span><span><b><span>format:</span>&nbsp;720p 60FPS mkv</b></span><span><b><span>bitrate:</span>&nbsp;7 MB/sec</b></span><span><b><span>size:</span>&nbsp;6 GB</b></span></b>";
-//    Jsoup.parse(TEST_STRING);
+    final String TEST_STRING =
+        "<b><b><span>channel:</span>&nbsp;ESPN</b><span><b><span>language:</span>&nbsp;<span><b>english</b></span></b></span><span><b><span>format:</span>&nbsp;720p 60FPS mkv</b></span><span><b><span>bitrate:</span>&nbsp;7 MB/sec</b></span><span><b><span>size:</span>&nbsp;6 GB</b></span></b>";
+    //    Jsoup.parse(TEST_STRING);
     final boolean isMetadata = zkfPatterns.isMetadata(TEST_STRING);
 
     Log.i(LOG_TAG, "Testing String: " + TEST_STRING);

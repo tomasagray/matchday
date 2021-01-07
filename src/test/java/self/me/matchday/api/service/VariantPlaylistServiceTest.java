@@ -31,8 +31,8 @@ import self.me.matchday.CreateTestData;
 import self.me.matchday.TestFileServerPlugin;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.M3UPlaylist;
 import self.me.matchday.model.Match;
-import self.me.matchday.model.VariantM3U;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
@@ -58,12 +58,12 @@ class VariantPlaylistServiceTest {
 
   @BeforeAll
   static void setUp(
-          @Autowired final VariantPlaylistService playlistService,
-          @Autowired final EventService eventService,
-          @Autowired final FileServerService fileServerService,
-          @Autowired final CompetitionService competitionService,
-          @Autowired final TeamService teamService,
-          @Autowired final TestFileServerPlugin testFileServerPlugin) {
+      @Autowired final VariantPlaylistService playlistService,
+      @Autowired final EventService eventService,
+      @Autowired final FileServerService fileServerService,
+      @Autowired final CompetitionService competitionService,
+      @Autowired final TeamService teamService,
+      @Autowired final TestFileServerPlugin testFileServerPlugin) {
 
     VariantPlaylistServiceTest.playlistService = playlistService;
     VariantPlaylistServiceTest.eventService = eventService;
@@ -102,18 +102,19 @@ class VariantPlaylistServiceTest {
   void fetchVariantPlaylist() {
 
     // Get test file source
-    final Optional<EventFileSource> fileSourceOptional = testMatch.getFileSources().stream().findFirst();
+    final Optional<EventFileSource> fileSourceOptional =
+        testMatch.getFileSources().stream().findFirst();
     assertThat(fileSourceOptional).isPresent();
 
     final EventFileSource testFileSource = fileSourceOptional.get();
     assertThat(testFileSource).isNotNull();
 
     // Run test
-    final Optional<VariantM3U> playlistOptional =
+    final Optional<M3UPlaylist> playlistOptional =
         playlistService.fetchVariantPlaylist(testFileSource.getEventFileSrcId());
     assertThat(playlistOptional).isPresent();
 
-    final VariantM3U actualPlaylist = playlistOptional.get();
+    final M3UPlaylist actualPlaylist = playlistOptional.get();
     Log.i(LOG_TAG, "Created Variant M3U playlist:\n" + actualPlaylist);
     assertThat(actualPlaylist).isNotNull();
   }

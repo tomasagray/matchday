@@ -59,10 +59,18 @@ class HighlightServiceTest {
     HighlightServiceTest.competitionService = competitionService;
 
     // Create test data
-   HighlightServiceTest.testHighlight = CreateTestData.createHighlightShow();
+    HighlightServiceTest.testHighlight = CreateTestData.createHighlightShow();
 
     // Add test highlight show to DB
     HighlightServiceTest.eventService.saveEvent(testHighlight);
+  }
+
+  @AfterAll
+  static void tearDown() {
+
+    // delete test data from database
+    eventService.deleteEvent(testHighlight);
+    competitionService.deleteCompetitionById(testHighlight.getCompetition().getCompetitionId());
   }
 
   @Test
@@ -97,13 +105,5 @@ class HighlightServiceTest {
           assertThat(equals).isTrue();
           assertThat(highlight).isEqualTo(testHighlight);
         });
-  }
-
-  @AfterAll
-  static void tearDown() {
-
-    // delete test data from database
-    eventService.deleteEvent(testHighlight);
-    competitionService.deleteCompetitionById(testHighlight.getCompetition().getCompetitionId());
   }
 }

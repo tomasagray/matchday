@@ -53,10 +53,10 @@ class MasterPlaylistServiceTest {
 
   @BeforeAll
   static void setUp(
-          @Autowired final MasterPlaylistService playlistService,
-          @Autowired final EventService eventService,
-          @Autowired final CompetitionService competitionService,
-          @Autowired final TeamService teamService) {
+      @Autowired final MasterPlaylistService playlistService,
+      @Autowired final EventService eventService,
+      @Autowired final CompetitionService competitionService,
+      @Autowired final TeamService teamService) {
 
     MasterPlaylistServiceTest.playlistService = playlistService;
     MasterPlaylistServiceTest.eventService = eventService;
@@ -92,10 +92,11 @@ class MasterPlaylistServiceTest {
         playlistService.fetchMasterPlaylistForEvent(testMatch.getEventId());
     assertThat(playlistOptional).isPresent();
 
-    playlistOptional.ifPresent(masterM3U -> {
-      Log.i(LOG_TAG, "Generated master playlist: " + masterM3U);
-      assertThat(masterM3U).isNotNull();
-      assertThat(masterM3U.toString()).isNotEmpty();
-    });
+    playlistOptional.ifPresent(
+        masterM3U -> {
+          Log.i(LOG_TAG, "Generated master playlist: " + masterM3U);
+          assertThat(masterM3U).isNotNull();
+          assertThat(masterM3U.toString()).isNotEmpty();
+        });
   }
 }

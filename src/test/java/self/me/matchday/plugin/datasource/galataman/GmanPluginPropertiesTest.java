@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -55,10 +55,7 @@ class GmanPluginPropertiesTest {
 
     Log.i(LOG_TAG, "Testing base URL: " + actualBaseUrl);
 
-    assertThat(actualBaseUrl)
-            .isNotNull()
-            .isNotEmpty()
-            .isEqualTo(expectedBaseUrl);
+    assertThat(actualBaseUrl).isNotNull().isNotEmpty().isEqualTo(expectedBaseUrl);
   }
 
   @Test
@@ -79,9 +76,7 @@ class GmanPluginPropertiesTest {
     final String actualTitle = pluginProperties.getTitle();
     Log.i(LOG_TAG, "Testing plugin title: " + actualTitle);
 
-    assertThat(actualTitle)
-            .isNotNull()
-            .isNotEmpty();
+    assertThat(actualTitle).isNotNull().isNotEmpty();
   }
 
   @Test
@@ -91,8 +86,6 @@ class GmanPluginPropertiesTest {
     final String actualDescription = pluginProperties.getDescription();
     Log.i(LOG_TAG, "Testing plugin description: " + actualDescription);
 
-    assertThat(actualDescription)
-            .isNotNull()
-            .isNotEmpty();
+    assertThat(actualDescription).isNotNull().isNotEmpty();
   }
 }

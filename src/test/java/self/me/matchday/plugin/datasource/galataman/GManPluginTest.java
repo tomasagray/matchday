@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -32,7 +32,6 @@ import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -69,28 +68,21 @@ class GManPluginTest {
     Log.i(LOG_TAG, "Testing snapshot data...");
 
     AtomicInteger eventCounter = new AtomicInteger();
-    actualSnapshotData.forEach(event -> {
-      final String eventTitle = event.getTitle();
-      Log.i(LOG_TAG, "Validating Event title: " + eventTitle);
+    actualSnapshotData.forEach(
+        event -> {
+          final String eventTitle = event.getTitle();
+          Log.i(LOG_TAG, "Validating Event title: " + eventTitle);
 
-      // Validate each Event
-      assertThat(eventTitle)
-              .isNotNull()
-              .isNotEmpty();
+          // Validate each Event
+          assertThat(eventTitle).isNotNull().isNotEmpty();
 
-      assertThat(event.getCompetition()).isNotNull();
-      assertThat(event.getSeason()).isNotNull();
-      assertThat(event.getFixture()).isNotNull();
-      assertThat(event.getFileSources().size())
-              .isGreaterThanOrEqualTo(MIN_FILE_SOURCE_COUNT);
-      // validate date
-      assertThat(event.getDate().getDayOfMonth())
-              .isLessThanOrEqualTo(LocalDateTime.now().getDayOfMonth());
-      assertThat(event.getDate().getMonth())
-              .isEqualTo(LocalDateTime.now().getMonth());
+          assertThat(event.getCompetition()).isNotNull();
+          assertThat(event.getSeason()).isNotNull();
+          assertThat(event.getFixture()).isNotNull();
+          assertThat(event.getFileSources().size()).isGreaterThanOrEqualTo(MIN_FILE_SOURCE_COUNT);
 
-      eventCounter.getAndIncrement();
-    });
+          eventCounter.getAndIncrement();
+        });
 
     // Validate Event count
     final int actualEventCount = eventCounter.get();

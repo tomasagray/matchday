@@ -49,39 +49,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class DataSourceServiceTest {
 
   private static final String LOG_TAG = "DataSourceServiceTest";
-
-  private static class TestDataSourcePlugin implements DataSourcePlugin<Stream<Event>> {
-
-    private final UUID pluginId = UUID.randomUUID();
-    private final Event testMatch = CreateTestData.createTestMatch();
-    private final Stream<Event> testEvents = Stream.of(testMatch);
-
-    public Event getTestMatch() {
-      return this.testMatch;
-    }
-
-    @Override
-    public UUID getPluginId() {
-      return this.pluginId;
-    }
-
-    @Override
-    public String getTitle() {
-      return "Test data source plugin";
-    }
-
-    @Override
-    public String getDescription() {
-      return "A description";
-    }
-
-    @Override
-    public Snapshot<Stream<Event>> getSnapshot(@NotNull SnapshotRequest snapshotRequest) {
-
-      return new Snapshot<>(testEvents);
-    }
-  }
-
   private static DataSourceService dataSourceService;
   private static EventService eventService;
   private static DataSourcePlugin<Stream<Event>> testDataSourcePlugin;
@@ -233,5 +200,37 @@ class DataSourceServiceTest {
     Log.i(LOG_TAG, String.format("Found: %s enabled plugins", actualPluginCount));
 
     assertThat(actualPluginCount).isEqualTo(expectedPluginCount);
+  }
+
+  private static class TestDataSourcePlugin implements DataSourcePlugin<Stream<Event>> {
+
+    private final UUID pluginId = UUID.randomUUID();
+    private final Event testMatch = CreateTestData.createTestMatch();
+    private final Stream<Event> testEvents = Stream.of(testMatch);
+
+    public Event getTestMatch() {
+      return this.testMatch;
+    }
+
+    @Override
+    public UUID getPluginId() {
+      return this.pluginId;
+    }
+
+    @Override
+    public String getTitle() {
+      return "Test data source plugin";
+    }
+
+    @Override
+    public String getDescription() {
+      return "A description";
+    }
+
+    @Override
+    public Snapshot<Stream<Event>> getSnapshot(@NotNull SnapshotRequest snapshotRequest) {
+
+      return new Snapshot<>(testEvents);
+    }
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -35,43 +35,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("HtmlUrlBuilderTest - Test construction of Blogger HTML URLs")
 class HtmlUrlBuilderTest {
 
-    private static final String LOG_TAG = "HtmlUrlBuilderTest";
-    // Test constants
-    private static final String BASE_URL = "galatamanhdfb.blogspot.com";
+  private static final String LOG_TAG = "HtmlUrlBuilderTest";
+  // Test constants
+  private static final String BASE_URL = "galatamanhdfb.blogspot.com";
 
-    @Test
-    @DisplayName("Verify formats label search URL")
-    void testLabelSearchUrl() throws MalformedURLException {
+  @Test
+  @DisplayName("Verify formats label search URL")
+  void testLabelSearchUrl() throws MalformedURLException {
 
-        final String searchLabel = "Barcelona";
-        final String searchUrl = String.format("https://galatamanhdfb.blogspot.com/search/label/%s", searchLabel);
-        final URL actualUrl =
-                new HtmlUrlBuilder(BASE_URL)
-                        .labels(List.of(searchLabel))
-                        .buildUrl();
-        final URL expectedUrl = new URL(searchUrl);
+    final String searchLabel = "Barcelona";
+    final String searchUrl =
+        String.format("https://galatamanhdfb.blogspot.com/search/label/%s", searchLabel);
+    final URL actualUrl = new HtmlUrlBuilder(BASE_URL).labels(List.of(searchLabel)).buildUrl();
+    final URL expectedUrl = new URL(searchUrl);
 
-        Log.i(LOG_TAG, "Testing URL: " + actualUrl);
-        assertThat(actualUrl).isEqualTo(expectedUrl);
-    }
+    Log.i(LOG_TAG, "Testing URL: " + actualUrl);
+    assertThat(actualUrl).isEqualTo(expectedUrl);
+  }
 
-    @Test
-    @DisplayName("Verify formats date search URL")
-    void testEndDateSearch() throws MalformedURLException {
+  @Test
+  @DisplayName("Verify formats date search URL")
+  void testEndDateSearch() throws MalformedURLException {
 
-        final LocalDateTime testDateTime = LocalDateTime.of(2020, 10, 4, 12, 24);
+    final LocalDateTime testDateTime = LocalDateTime.of(2020, 10, 4, 12, 24);
 
-        final URL actualUrl =
-                new HtmlUrlBuilder(BASE_URL)
-                        .endDate(testDateTime)
-                        .buildUrl();
-        final URL expectedUrl =
-                new URL("https://galatamanhdfb.blogspot.com/search?updated-max=2020-10-04T12:24:00");
+    final URL actualUrl = new HtmlUrlBuilder(BASE_URL).endDate(testDateTime).buildUrl();
+    final URL expectedUrl =
+        new URL("https://galatamanhdfb.blogspot.com/search?updated-max=2020-10-04T12:24:00");
 
-        Log.i(LOG_TAG, "Testing URL: " + actualUrl);
-        System.out.println(URLDecoder.decode(expectedUrl.toString(), StandardCharsets.UTF_8));
-        assertThat(actualUrl).isEqualTo(expectedUrl);
-    }
+    Log.i(LOG_TAG, "Testing URL: " + actualUrl);
+    System.out.println(URLDecoder.decode(expectedUrl.toString(), StandardCharsets.UTF_8));
+    assertThat(actualUrl).isEqualTo(expectedUrl);
+  }
 
-    // TODO - Write tests for the other Blogger URL params
+  // TODO - Write tests for the other Blogger URL params
 }

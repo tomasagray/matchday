@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -45,77 +45,75 @@ import static org.assertj.core.api.Assertions.within;
 @DisplayName("Testing for Blogger plugin")
 class BloggerPluginTest {
 
-    private static final String LOG_TAG = "BloggerPluginTest";
+  private static final String LOG_TAG = "BloggerPluginTest";
 
-    private static BloggerPlugin bloggerPlugin;
+  private static BloggerPlugin bloggerPlugin;
 
-    @BeforeAll
-    static void setUp(@Autowired BloggerPlugin plugin) {
-        // Inject plugin
-        bloggerPlugin = plugin;
-    }
+  @BeforeAll
+  static void setUp(@Autowired BloggerPlugin plugin) {
+    // Inject plugin
+    bloggerPlugin = plugin;
+  }
 
-    @Test
-    @DisplayName("Validate plugin ID")
-    void testPluginId() {
+  @Test
+  @DisplayName("Validate plugin ID")
+  void testPluginId() {
 
-        final UUID actualPluginId = bloggerPlugin.getPluginId();
-        final UUID expectedPluginId = UUID.fromString("64d08bc8-bd9f-11ea-b3de-0242ac130004");
+    final UUID actualPluginId = bloggerPlugin.getPluginId();
+    final UUID expectedPluginId = UUID.fromString("64d08bc8-bd9f-11ea-b3de-0242ac130004");
 
-        Log.i(LOG_TAG, "Testing plugin ID: " + actualPluginId);
-        assertThat(actualPluginId).isEqualTo(expectedPluginId);
-    }
+    Log.i(LOG_TAG, "Testing plugin ID: " + actualPluginId);
+    assertThat(actualPluginId).isEqualTo(expectedPluginId);
+  }
 
-    @Test
-    @DisplayName("Validate plugin title")
-    void testTitle() {
+  @Test
+  @DisplayName("Validate plugin title")
+  void testTitle() {
 
-        final String actualTitle = bloggerPlugin.getTitle();
-        final String expectedTitle = "Blogger";
+    final String actualTitle = bloggerPlugin.getTitle();
+    final String expectedTitle = "Blogger";
 
-        Log.i(LOG_TAG, "Testing Blogger plugin title: " + actualTitle);
-        assertThat(actualTitle).isEqualTo(expectedTitle);
-    }
+    Log.i(LOG_TAG, "Testing Blogger plugin title: " + actualTitle);
+    assertThat(actualTitle).isEqualTo(expectedTitle);
+  }
 
-    @Test
-    @DisplayName("Validate plugin description")
-    void testDescription() {
+  @Test
+  @DisplayName("Validate plugin description")
+  void testDescription() {
 
-        final String actualDescription = bloggerPlugin.getDescription();
-        final String expectedDescription = "Reads a Blogger blog from either HTML or JSON sources, and makes it " +
-                "available to the containing application as a POJO. Implements the DataSourcePlugin<> interface.";
+    final String actualDescription = bloggerPlugin.getDescription();
+    final String expectedDescription =
+        "Reads a Blogger blog from either HTML or JSON sources, and makes it "
+            + "available to the containing application as a POJO. Implements the DataSourcePlugin<> interface.";
 
-        Log.i(LOG_TAG, "Testing Blogger plugin description:\n" + actualDescription);
-        assertThat(actualDescription).isEqualTo(expectedDescription);
-    }
+    Log.i(LOG_TAG, "Testing Blogger plugin description:\n" + actualDescription);
+    assertThat(actualDescription).isEqualTo(expectedDescription);
+  }
 
-    @Test
-    @DisplayName("Validate Snapshot request handling")
-    void testSnapshot() throws IOException {
+  @Test
+  @DisplayName("Validate Snapshot request handling")
+  void testSnapshot() throws IOException {
 
-        final int expectedPostCount = 4;
+    final int expectedPostCount = 4;
 
-        // Create SnapshotRequest
-        final SnapshotRequest snapshotRequest =
-                SnapshotRequest
-                        .builder()
-                        .labels(List.of("Barcelona"))
-                        .build();
-        // Setup BloggerParserFactory
-        bloggerPlugin.setBloggerBuilderFactory(new HtmlBuilderFactory());
-        // Set base URL
-        bloggerPlugin.setBaseUrl("galatamanhdfb.blogspot.com");
-        final Snapshot<Blogger> snapshot = bloggerPlugin.getSnapshot(snapshotRequest);
-        // Extract result
-        final Instant actualTimestamp = snapshot.getTimestamp();
-        final Instant expectedTimestamp = Instant.now();
-        final Blogger actualData = snapshot.getData();
-        final String expectedTitle = "GaLaTaMaN HD Football: Barcelona";
+    // Create SnapshotRequest
+    final SnapshotRequest snapshotRequest =
+        SnapshotRequest.builder().labels(List.of("Barcelona")).build();
+    // Setup BloggerParserFactory
+    bloggerPlugin.setBloggerBuilderFactory(new HtmlBuilderFactory());
+    // Set base URL
+    bloggerPlugin.setBaseUrl("galatamanhdfb.blogspot.com");
+    final Snapshot<Blogger> snapshot = bloggerPlugin.getSnapshot(snapshotRequest);
+    // Extract result
+    final Instant actualTimestamp = snapshot.getTimestamp();
+    final Instant expectedTimestamp = Instant.now();
+    final Blogger actualData = snapshot.getData();
+    final String expectedTitle = "GaLaTaMaN HD Football: Barcelona";
 
-        Log.i(LOG_TAG, "Testing snapshot: " + actualData);
-        Log.i(LOG_TAG, "Testing snapshot timestamp: " + actualTimestamp);
-        assertThat(actualTimestamp).isCloseTo(expectedTimestamp, within(5, ChronoUnit.SECONDS));
-        assertThat(actualData.getPostCount()).isGreaterThanOrEqualTo(expectedPostCount);
-        assertThat(actualData.getTitle()).isEqualTo(expectedTitle);
-    }
+    Log.i(LOG_TAG, "Testing snapshot: " + actualData);
+    Log.i(LOG_TAG, "Testing snapshot timestamp: " + actualTimestamp);
+    assertThat(actualTimestamp).isCloseTo(expectedTimestamp, within(5, ChronoUnit.SECONDS));
+    assertThat(actualData.getPostCount()).isGreaterThanOrEqualTo(expectedPostCount);
+    assertThat(actualData.getTitle()).isEqualTo(expectedTitle);
+  }
 }

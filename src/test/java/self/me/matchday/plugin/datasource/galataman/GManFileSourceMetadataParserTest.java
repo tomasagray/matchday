@@ -47,8 +47,7 @@ class GManFileSourceMetadataParserTest {
   private static EventFileSource testFileSource;
 
   @BeforeAll
-  static void setUp(@Autowired final GManPatterns patterns)
-      throws IOException {
+  static void setUp(@Autowired final GManPatterns patterns) throws IOException {
 
     // Read test data file
     final String postHtml =

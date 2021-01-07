@@ -35,10 +35,9 @@ class ICDPluginTest {
   // Test constants
   private static final String FILE_LINK =
       "https://www.inclouddrive.com/file/oRMf2UsQBoXpCK5Jd17S5Q/20201128-VAL-ATM-LL_2.ts";
-  private static URL fileUrl;
   private static final String URL_PATTERN =
       "https://d\\d+\\.inclouddrive.com/download.php\\?accesstoken=[\\w-]+";
-
+  private static URL fileUrl;
   // Test resources
   private static IcdPlugin icdPlugin;
   private static FileServerUser fileServerUser;
@@ -138,19 +137,4 @@ class ICDPluginTest {
           assertThat(matches).isTrue();
         });
   }
-
-
-  // todo - Saved for later use
-//  private static FileServerUser readUserDataFromDisk() throws IOException {
-//
-//    final String dataPath = "src/test/secure_resources/icd_test_login_data.csv";
-//
-//    // Read login data
-//    final String loginDataString = TextFileReader.readLocal(Path.of(dataPath));
-//    Log.i(LOG_TAG, String.format("Read login data from %s: %s", dataPath, loginDataString));
-//    // Split login data
-//    final String[] loginData = loginDataString.split(",");
-//    // Create fileserver user & return
-//    return new FileServerUser(loginData[0], loginData[1]);
-//  }
 }

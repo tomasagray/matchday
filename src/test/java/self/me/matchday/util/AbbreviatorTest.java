@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -27,29 +27,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Abbreviation strategy validation")
 class AbbreviatorTest {
 
-    private static final String LOG_TAG = "AbbreviatorTest";
+  private static final String LOG_TAG = "AbbreviatorTest";
 
-    private static final String TEST_STRING = "The quick brown fox jumped over the lazy dog.";
+  private static final String TEST_STRING = "The quick brown fox jumped over the lazy dog.";
 
-    @Test
-    @DisplayName("Test default abbreviation strategy")
-    void abbreviate() {
+  @Test
+  @DisplayName("Test default abbreviation strategy")
+  void abbreviate() {
 
-        final String actualAbbreviation = Abbreviator.abbreviate(TEST_STRING);
-        final String expectedAbbreviation = "THE";
+    final String actualAbbreviation = Abbreviator.abbreviate(TEST_STRING);
+    final String expectedAbbreviation = "THE";
 
-        Log.i(LOG_TAG, "Testing default abbreviation strategy for test String: " + TEST_STRING);
-        assertThat(actualAbbreviation).isEqualTo(expectedAbbreviation);
-    }
+    Log.i(LOG_TAG, "Testing default abbreviation strategy for test String: " + TEST_STRING);
+    assertThat(actualAbbreviation).isEqualTo(expectedAbbreviation);
+  }
 
-    @Test
-    @DisplayName("Test custom abbreviation length")
-    void testAbbreviate() {
+  @Test
+  @DisplayName("Test custom abbreviation length")
+  void testAbbreviate() {
 
-        final String actualAbbreviation = Abbreviator.abbreviate(TEST_STRING, 10);
-        final String expectedAbbreviation = "THEQUICKBR";
+    final String actualAbbreviation = Abbreviator.abbreviate(TEST_STRING, 10);
+    final String expectedAbbreviation = "THEQUICKBR";
 
-        Log.i(LOG_TAG, "Testing custom abbreviation of test String: " + TEST_STRING);
-        assertThat(actualAbbreviation).isEqualTo(expectedAbbreviation);
-    }
+    Log.i(LOG_TAG, "Testing custom abbreviation of test String: " + TEST_STRING);
+    assertThat(actualAbbreviation).isEqualTo(expectedAbbreviation);
+  }
 }

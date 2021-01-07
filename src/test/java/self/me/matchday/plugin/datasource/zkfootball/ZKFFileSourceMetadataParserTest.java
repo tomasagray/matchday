@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -50,8 +50,7 @@ class ZKFFileSourceMetadataParserTest {
   private static EventFileSource testFileSource;
 
   @BeforeAll
-  static void setUp(@Autowired final ZKFPatterns zkfPatterns)
-      throws IOException {
+  static void setUp(@Autowired final ZKFPatterns zkfPatterns) throws IOException {
 
     final String metadataHtml =
         Strings.join(
@@ -61,9 +60,9 @@ class ZKFFileSourceMetadataParserTest {
 
     // Parse test data
     final Document document = Jsoup.parse(metadataHtml);
-    final ZKFFileMetadata fileMetadata = new ZKFFileMetadata(document.getAllElements(), zkfPatterns);
+    final ZKFFileMetadata fileMetadata =
+        new ZKFFileMetadata(document.getAllElements(), zkfPatterns);
     testFileSource = EventFileSource.createEventFileSource(fileMetadata, MD5String.generate());
-
   }
 
   @Test

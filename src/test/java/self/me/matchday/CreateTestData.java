@@ -37,8 +37,10 @@ import static self.me.matchday.model.EventFileSource.Resolution.R_1080p;
 
 public class CreateTestData {
 
+  public static final Pattern URL_PATTERN =
+      Pattern.compile("http[s]?://192.168.0.101/matchday-testing/[\\w./-]*");
   private static final String LOG_TAG = "CreateTestData";
-
+  private static final Random numGen = new Random();
   public static URL GMAN_HTML;
   public static URL ZKF_JSON_URL;
   public static URL NITROFLARE_DL_URL;
@@ -54,10 +56,6 @@ public class CreateTestData {
       e.printStackTrace();
     }
   }
-
-  public static final Pattern URL_PATTERN =
-      Pattern.compile("http[s]?://192.168.0.101/matchday-testing/[\\w./-]*");
-  private static final Random numGen = new Random();
 
   // ================ EVENTS ======================
 
@@ -132,7 +130,7 @@ public class CreateTestData {
     URL preMatchUrl = getPreMatchUrl();
     URL firstHalfUrl = getFirstHalfUrl();
     URL secondHalfUrl = getSecondHalfUrl();
-    URL postMatchUrl = getPreMatchUrl();
+    URL postMatchUrl = getPostMatchUrl();
 
     assertThat(preMatchUrl).isNotNull();
     assertThat(firstHalfUrl).isNotNull();
@@ -166,7 +164,9 @@ public class CreateTestData {
 
     try {
       final String seed = "?rSeed=" + MD5String.generate();
-      return new URL("http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_1-1080.mkv" + seed);
+      return new URL(
+          "http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_1-1080.mkv"
+              + seed);
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
@@ -177,7 +177,22 @@ public class CreateTestData {
 
     try {
       final String seed = "?rSeed=" + MD5String.generate();
-      return new URL("http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_2-1080.mkv" + seed);
+      return new URL(
+          "http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_2-1080.mkv"
+              + seed);
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public static URL getPostMatchUrl() {
+
+    try {
+      final String seed = "?rSeed=" + MD5String.generate();
+      return new URL(
+          "http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_3-1080.mkv"
+              + seed);
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
