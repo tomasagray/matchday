@@ -37,6 +37,8 @@ import self.me.matchday.model.M3UPlaylist;
 import self.me.matchday.model.MasterM3U;
 import self.me.matchday.util.Log;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping(value = "/events/event/{eventId}/video")
 public class VideoStreamingController {
@@ -76,38 +78,37 @@ public class VideoStreamingController {
         .orElse(ResponseEntity.notFound().build());
   }
 
+  @RequestMapping(
+      value = "/playlist/master",
+      method = RequestMethod.GET,
+      produces = MEDIA_TYPE_MPEG_URL)
+  public ResponseEntity<String> getMasterPlaylist(@PathVariable final String eventId) {
 
-    @RequestMapping(
-        value = "/playlist/master",
-        method = RequestMethod.GET,
-        produces = MEDIA_TYPE_MPEG_URL)
-    public ResponseEntity<String> getMasterPlaylist(@PathVariable final String eventId) {
+    return masterPlaylistService
+        .fetchMasterPlaylistForEvent(eventId)
+        .map(MasterM3U::toString)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+  }
 
-      return masterPlaylistService
-          .fetchMasterPlaylistForEvent(eventId)
-          .map(MasterM3U::toString)
-          .map(ResponseEntity::ok)
-          .orElse(ResponseEntity.notFound().build());
-    }
+  @RequestMapping(
+      value = "/playlist/variant/{fileSrcId}",
+      method = RequestMethod.GET,
+      produces = MEDIA_TYPE_MPEG_URL)
+  public ResponseEntity<String> getVariantPlaylist(
+      @PathVariable final String eventId, @PathVariable final String fileSrcId) {
 
-    @RequestMapping(
-        value = "/playlist/variant/{fileSrcId}",
-        method = RequestMethod.GET,
-        produces = MEDIA_TYPE_MPEG_URL)
-    public ResponseEntity<String> getVariantPlaylist(
-        @PathVariable final String eventId, @PathVariable final String fileSrcId) {
+    Log.i(
+        "VideoStreamingController",
+        String.format(
+            "Getting variant playlist for Event: %s, File Source: %s", eventId, fileSrcId));
 
-      Log.i(
-          "VideoStreamingController",
-          String.format(
-              "Getting variant playlist for Event: %s, File Source: %s", eventId, fileSrcId));
-
-      return variantPlaylistService
-          .fetchVariantPlaylist(fileSrcId)
-          .map(M3UPlaylist::toString)
-          .map(ResponseEntity::ok)
-          .orElse(ResponseEntity.notFound().build());
-    }
+    return variantPlaylistService
+        .fetchVariantPlaylist(fileSrcId)
+        .map(M3UPlaylist::toString)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+  }
 
   @RequestMapping(
       value = "/stream/{fileSrcId}/playlist.m3u8",
@@ -116,22 +117,22 @@ public class VideoStreamingController {
   public ResponseEntity<String> getVideoStreamPlaylist(
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
-    return streamingService.getVideoStreamPlaylist(eventId, fileSrcId)
-            .map(M3UPlaylist::getSimplePlaylist)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    return streamingService
+        .getVideoStreamPlaylist(eventId, fileSrcId)
+        .map(M3UPlaylist::getSimplePlaylist)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
-  @RequestMapping(
-      value = "/stream/{fileSrcId}/playlist.pls",
-      method = RequestMethod.GET)
+  @RequestMapping(value = "/stream/{fileSrcId}/playlist.pls", method = RequestMethod.GET)
   public ResponseEntity<String> getVideoStreamPlsPlaylist(
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
-    return streamingService.getVideoStreamPlaylist(eventId, fileSrcId)
-            .map(M3UPlaylist::getPlsPlaylist)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    return streamingService
+        .getVideoStreamPlaylist(eventId, fileSrcId)
+        .map(M3UPlaylist::getPlsPlaylist)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
   @RequestMapping(
@@ -145,8 +146,8 @@ public class VideoStreamingController {
 
     final String playlistFile = streamingService.readPlaylistFile(eventId, fileSrcId, partId);
     return playlistFile != null && !("".equals(playlistFile))
-            ? ResponseEntity.ok(playlistFile)
-            : ResponseEntity.notFound().build();
+        ? ResponseEntity.ok(playlistFile)
+        : ResponseEntity.notFound().build();
   }
 
   @RequestMapping(
@@ -164,5 +165,33 @@ public class VideoStreamingController {
     return videoSegmentResource != null
         ? ResponseEntity.ok(videoSegmentResource)
         : ResponseEntity.notFound().build();
+  }
+
+  @RequestMapping(
+      value = "/stream/{fileSrcId}/delete-stream",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<String> deleteVideoData(
+      @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId)
+      throws IOException {
+
+    streamingService.deleteVideoData(fileSrcId);
+    final String message =
+        String.format("Deleted stream data for Event: %s, File Source: %s", eventId, fileSrcId);
+    return ResponseEntity.ok(message);
+  }
+
+  @RequestMapping(
+      value = "/stream/{fileSrcId}/kill-stream",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<String> killStreamTasks(
+      @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
+
+    final int killedTasks = streamingService.killAllStreamingTasks();
+    final String message = String.format("Killed %s streaming tasks", killedTasks);
+    return ResponseEntity.ok(message);
   }
 }
