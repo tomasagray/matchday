@@ -34,6 +34,7 @@ import self.me.matchday.util.Log;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,8 +50,7 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
 
   private final VideoStreamingService videoStreamingService;
 
-  public VideoResourceInterceptor(
-      @Autowired final VideoStreamingService videoStreamingService) {
+  public VideoResourceInterceptor(@Autowired final VideoStreamingService videoStreamingService) {
 
     this.videoStreamingService = videoStreamingService;
   }
@@ -70,78 +70,83 @@ public class VideoResourceInterceptor implements HandlerInterceptor {
   public boolean preHandle(
       @NotNull final HttpServletRequest request,
       @NotNull final HttpServletResponse response,
-      @NotNull final Object handler) {
+      @NotNull final Object handler)
+      throws Exception {
 
     final String servletPath = request.getServletPath();
     Log.i(LOG_TAG, LOG_TAG + " caught request at path: " + servletPath);
 
-    // todo: cleanup
-    try {
-      // Validate request path
-      final Matcher pathMatcher = urlPattern.matcher(servletPath);
-      if (pathMatcher.find()) {
+    // Validate request path
+    final Matcher pathMatcher = urlPattern.matcher(servletPath);
+    if (pathMatcher.find()) {
 
-        // Extract parameters from path
-        final String eventId = pathMatcher.group(1);
-        final String fileSrcId = pathMatcher.group(2);
+      // Extract parameters from path
+      final String eventId = pathMatcher.group(1);
+      final String fileSrcId = pathMatcher.group(2);
 
-        // Is there already a stream playlist?
-        if (streamingHasBegun(eventId, fileSrcId)) {
-          Log.i(
-                  LOG_TAG,
-                  String.format(
-                          "Video for Event: %s, File Source: %s has begun streaming", eventId, fileSrcId));
-          return true;
-        }
-
-        // Stream video files to local disk
+      // Is there already a stream playlist?
+      if (streamingHasBegun(eventId, fileSrcId)) {
         Log.i(
             LOG_TAG,
             String.format(
-                "Creating video stream for event: %s, file source: %s", eventId, fileSrcId));
-        final Optional<VideoStreamPlaylist> playlistOptional =
-            videoStreamingService.createVideoStream(eventId, fileSrcId);
+                "Video for Event: %s, File Source: %s has begun streaming", eventId, fileSrcId));
+        return true;
+      }
 
-        if (playlistOptional.isPresent()) {
-          final VideoStreamPlaylist videoStreamPlaylist = playlistOptional.get();
-          final VideoStreamLocator firstStreamLocator =
-              videoStreamPlaylist.getStreamLocators().get(0);
-          final Path playlistPath = firstStreamLocator.getPlaylistPath().toAbsolutePath();
-          Log.i(LOG_TAG, "Created video stream at: " + playlistPath);
+      // Stream video files to local disk
+      Log.i(
+          LOG_TAG,
+          String.format(
+              "Creating video stream for event: %s, file source: %s", eventId, fileSrcId));
+      final Optional<VideoStreamPlaylist> playlistOptional =
+          videoStreamingService.createVideoStream(eventId, fileSrcId);
+      if (playlistOptional.isPresent()) {
+        final VideoStreamPlaylist streamPlaylist = playlistOptional.get();
+        final Path playlistPath = getStreamingPath(streamPlaylist);
+        Log.i(LOG_TAG, "Created video stream at: " + playlistPath);
 
-          // Ensure playlist creation has begun
-          Log.i(LOG_TAG, "Waiting for stream head start...");
-          final FileCheckTask fileCheckTask =
-              new FileCheckTask(playlistPath.toFile(), FILE_CHECK_DELAY);
-          // Start checking
-          fileCheckTask.start();
-          // Wait until task finishes or times out
-          fileCheckTask.join();
-          final boolean fileFound = fileCheckTask.isFileFound();
-          Log.i(LOG_TAG, "Playlist file found? " + fileFound);
-          // If file not found, tell Spring to stop processing request
-          return fileFound;
-
-        } else {
-          Log.d(
-              LOG_TAG,
-              String.format(
-                  "Could not create stream for Event: %s, File Source: %s", eventId, fileSrcId));
-        }
+        // Wait until FFMPEG has started writing data to local disk
+        final boolean fileFound = waitForStreamToStart(playlistPath);
+        // Wait a little longer...
+        Thread.sleep(3 * 1_000); // todo - figure out a better way to handle delay
+        // If file not found, tell Spring to stop processing request
+        return fileFound;
 
       } else {
-        Log.e(LOG_TAG, "Could not extract necessary data from servlet path: " + servletPath);
-        return false;
+        final String message =
+            String.format(
+                "Could not create stream for Event: %s, File Source: %s", eventId, fileSrcId);
+        throw new RuntimeException(message);
       }
-    } catch (Throwable e) {
-      Log.e(
-          LOG_TAG,
-          String.format("Error streaming video files; request URI: %s", request.getRequestURI()),
-          e);
-      return false;
+    } else {
+      final String message = "Could not extract necessary data from servlet path: " + servletPath;
+      throw new IllegalArgumentException(message);
     }
-    // Continue processing request
-    return true;
+  }
+
+  private @NotNull Path getStreamingPath(@NotNull final VideoStreamPlaylist streamPlaylist) {
+
+    final VideoStreamLocator firstStreamLocator = streamPlaylist.getStreamLocators().get(0);
+    return firstStreamLocator.getPlaylistPath().toAbsolutePath();
+  }
+
+  private boolean waitForStreamToStart(Path playlistPath) throws InterruptedException {
+
+    // Ensure playlist creation has begun
+    Log.i(LOG_TAG, "Waiting for stream head start...");
+    final FileCheckTask fileCheckTask = new FileCheckTask(playlistPath.toFile(), FILE_CHECK_DELAY);
+    // Start checking
+    fileCheckTask.start();
+    // Wait until task finishes or times out
+    fileCheckTask.join();
+    final boolean fileFound = fileCheckTask.isFileFound();
+    final Duration executionTime = fileCheckTask.getExecutionTime();
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Playlist file found? %s, Time taken for stream to start: %s seconds",
+            fileFound, executionTime.getSeconds()));
+    return fileFound;
   }
 
   private boolean streamingHasBegun(String eventId, String fileSrcId) {

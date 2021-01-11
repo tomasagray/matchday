@@ -20,6 +20,7 @@
 package self.me.matchday.api.service;
 
 import lombok.Builder;
+import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @Transactional
@@ -74,8 +78,8 @@ public class EventFileService {
    * @param fetchMetadata Whether or not to pre-fetch file metadata
    * @return A Future representing the refreshed file
    */
-  public EventFile refreshEventFile(
-      @NotNull final EventFile eventFile, final boolean fetchMetadata) throws ExecutionException, InterruptedException {
+  public EventFile refreshEventFile(@NotNull final EventFile eventFile, final boolean fetchMetadata)
+      throws ExecutionException, InterruptedException {
 
     if (!shouldRefreshData(eventFile)) {
       Log.i(LOG_TAG, "EventFile is already fresh: " + eventFile);
@@ -83,7 +87,8 @@ public class EventFileService {
     }
     // Skip locked files & already fresh data
     else if (lockedEventFiles.contains(eventFile)) {
-      final String message = String.format(
+      final String message =
+          String.format(
               "Refresh request denied for EventFile: %s; file is locked (already being refreshed?)",
               eventFile);
       throw new HttpStatusCodeException(HttpStatus.TOO_MANY_REQUESTS, message) {
@@ -159,37 +164,28 @@ public class EventFileService {
      *
      * @return A fully-loaded EventFile
      */
+    @SneakyThrows
     @Override
     public EventFile call() {
 
       Log.i(LOG_TAG, "Refreshing data for EventFile: " + eventFile);
-      try {
-        // Fetch remote internal (download) URL
-        final Optional<URL> downloadUrl =
-            fileServerService.getDownloadUrl(eventFile.getExternalUrl());
-
-        if (downloadUrl.isPresent()) {
-          // Update remote (internal) URL
-          Log.i(
-              LOG_TAG,
-              String.format("Successfully updated remote URL for EventFile: %s", eventFile));
-          eventFile.setInternalUrl(downloadUrl.get());
-          // Update metadata
-          if (fetchMetadata) {
-            setEventFileMetadata();
-          }
-          // Update last refresh
-          eventFile.setLastRefreshed(Timestamp.from(Instant.now()));
-
-        } else {
-          throw new IOException(
-              String.format("Could not get remote URL for EventFile: %s", eventFile));
+      // Fetch remote internal (download) URL
+      final Optional<URL> downloadUrl =
+          fileServerService.getDownloadUrl(eventFile.getExternalUrl());
+      if (downloadUrl.isPresent()) {
+        // Update remote (internal) URL
+        Log.i(
+            LOG_TAG, String.format("Successfully updated remote URL for EventFile: %s", eventFile));
+        eventFile.setInternalUrl(downloadUrl.get());
+        // Update metadata
+        if (fetchMetadata) {
+          setEventFileMetadata();
         }
-      } catch (Exception e) {
-        Log.e(
-            LOG_TAG,
-            String.format("Could not refresh remote data for EventFile: %s", eventFile),
-            e);
+        // Update last refresh
+        eventFile.setLastRefreshed(Timestamp.from(Instant.now()));
+      } else {
+        throw new IOException(
+            String.format("Could not get remote URL for EventFile: %s", eventFile));
       }
       // Return updated EventFile
       return eventFile;
@@ -213,5 +209,4 @@ public class EventFileService {
       }
     }
   }
-
 }
