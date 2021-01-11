@@ -92,15 +92,15 @@ class VideoStreamingServiceTest {
   }
 
   @AfterAll
-  static void tearDown() {
+  static void tearDown() throws IOException {
 
     Log.i(LOG_TAG, "Deleting test data: " + testMatch);
     // delete test data
     eventService.deleteEvent(testMatch);
     competitionService.deleteCompetitionById(testMatch.getCompetition().getCompetitionId());
     teamService.deleteTeamById(testMatch.getHomeTeam().getTeamId());
-
     fileServerService.deleteUser(testFileServerUser.getUserId());
+    streamingService.deleteVideoData(testVideoStreamPlaylist);
   }
 
   @Test
@@ -179,7 +179,7 @@ class VideoStreamingServiceTest {
     Log.i(LOG_TAG, "Read playlist file:\n" + actualPlaylistFile);
 
     assertThat(actualPlaylistFile).isNotNull().isNotEmpty();
-    assertThat(actualPlaylistFile.length()).isGreaterThan(2_000);
+    assertThat(actualPlaylistFile.length()).isGreaterThan(500);
   }
 
   @Test
@@ -218,10 +218,11 @@ class VideoStreamingServiceTest {
 
     final List<VideoStreamLocator> streamLocators = testVideoStreamPlaylist.getStreamLocators();
 
+    final int waitSeconds = 10;
     // Ensure streaming is dead
     streamingService.killAllStreamingTasks();
     // Ensure tasks have time to die
-    Thread.sleep(5_000);
+    Thread.sleep(waitSeconds * 1_000);
     // Delete test data
     streamingService.deleteVideoData(testVideoStreamPlaylist);
 

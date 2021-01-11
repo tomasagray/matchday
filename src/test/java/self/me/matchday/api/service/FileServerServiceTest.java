@@ -220,7 +220,7 @@ class FileServerServiceTest {
         fileServerUsers -> {
           Log.i(LOG_TAG, "Fetched all users from plugin: " + fileServerUsers);
           assertThat(fileServerUsers.size()).isGreaterThanOrEqualTo(expectedUserCount);
-          assertThat(fileServerUsers.get(0)).isEqualTo(testFileServerUser);
+          assertThat(fileServerUsers).contains(testFileServerUser);
         });
   }
 

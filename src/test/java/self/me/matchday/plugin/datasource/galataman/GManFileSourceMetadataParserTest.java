@@ -53,7 +53,7 @@ class GManFileSourceMetadataParserTest {
     final String postHtml =
         Strings.join(
                 ResourceFileReader.readTextResource(
-                    GManEventFileSourceParserTest.class, "gman_source_metadata.html"))
+                    GManEventFileSourceParserTest.class, "gman_source_metadata2.html"))
             .with("\n");
 
     Log.i(LOG_TAG, "Read test data:\n" + postHtml);
@@ -68,7 +68,7 @@ class GManFileSourceMetadataParserTest {
   void testApproximateDurationParsing() {
 
     final String actualApproximateDuration = testFileSource.getApproximateDuration();
-    final String expectedApproximateDuration = "90min + Extras";
+    final String expectedApproximateDuration = "70min";
 
     Log.i(LOG_TAG, "Validating approximate video duration: " + actualApproximateDuration);
     assertThat(actualApproximateDuration).isEqualTo(expectedApproximateDuration);
@@ -79,7 +79,7 @@ class GManFileSourceMetadataParserTest {
   void testAudioChannelParsing() {
 
     final int actualAudioChannels = testFileSource.getAudioChannels();
-    final int expectedAudioChannels = 2;
+    final int expectedAudioChannels = 6;
 
     Log.i(LOG_TAG, "Testing audio channels: " + actualAudioChannels);
     assertThat(actualAudioChannels).isEqualTo(expectedAudioChannels);
@@ -90,7 +90,7 @@ class GManFileSourceMetadataParserTest {
   void testAudioCodecParsing() {
 
     final String actualCodec = testFileSource.getAudioCodec();
-    final String expectedCodec = "MP3";
+    final String expectedCodec = "AC3";
 
     Log.i(LOG_TAG, "Testing audio codec: " + actualCodec);
     assertThat(actualCodec).isEqualTo(expectedCodec);
@@ -101,7 +101,7 @@ class GManFileSourceMetadataParserTest {
   void testBitrate() {
 
     final Long actualBitrate = testFileSource.getBitrate();
-    final Long expectedBitrate = 4_000_000L;
+    final Long expectedBitrate = 8_000_000L;
 
     Log.i(LOG_TAG, "Testing bitrate: " + actualBitrate);
     assertThat(actualBitrate).isEqualTo(expectedBitrate);
@@ -112,7 +112,7 @@ class GManFileSourceMetadataParserTest {
   void testChannel() {
 
     final String actualChannel = testFileSource.getChannel();
-    final String expectedChannel = "Sky Sports HD";
+    final String expectedChannel = "BBC One HD";
 
     Log.i(LOG_TAG, "Testing channel: " + actualChannel);
     assertThat(actualChannel).isEqualTo(expectedChannel);
@@ -123,7 +123,7 @@ class GManFileSourceMetadataParserTest {
   void testFileSize() {
 
     final Long actualFileSize = testFileSource.getFileSize();
-    final Long expectedFileSize = 3_221_225_472L;
+    final Long expectedFileSize = 3758096384L;
 
     Log.i(LOG_TAG, "Testing approximate file size: " + actualFileSize);
     assertThat(actualFileSize).isEqualTo(expectedFileSize);
@@ -156,7 +156,7 @@ class GManFileSourceMetadataParserTest {
   void testMediaContainer() {
 
     final String actualMediaContainer = testFileSource.getMediaContainer();
-    final String expectedMediaContainer = "MKV";
+    final String expectedMediaContainer = "TS";
 
     Log.i(LOG_TAG, "Testing media container: " + actualMediaContainer);
     assertThat(actualMediaContainer).isEqualTo(expectedMediaContainer);
@@ -167,7 +167,7 @@ class GManFileSourceMetadataParserTest {
   void testVideoResolution() {
 
     final Resolution actualResolution = testFileSource.getResolution();
-    final Resolution expectedResolution = Resolution.R_720p;
+    final Resolution expectedResolution = Resolution.R_1080i;
 
     Log.i(LOG_TAG, "Testing video resolution: " + actualResolution);
     assertThat(actualResolution).isEqualTo(expectedResolution);

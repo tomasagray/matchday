@@ -129,7 +129,8 @@ class FFmpegPluginTest {
   void testConcatStreamUris() throws InterruptedException {
 
     final List<URI> testUris = getTestUris();
-    final FFmpegStreamTask streamTask = ffmpegPlugin.streamUris(testUris, storageLocation.toPath());
+    final FFmpegStreamTask streamTask =
+        ffmpegPlugin.streamUris(storageLocation.toPath(), testUris.toArray(new URI[0]));
     final Path streamingPath = streamTask.getOutputPath();
     // Start stream
     streamTask.start();
@@ -151,7 +152,7 @@ class FFmpegPluginTest {
   void testSingleHlsStream() throws InterruptedException {
 
     final FFmpegStreamTask streamTask =
-        ffmpegPlugin.streamUri(getTestUris().get(1), storageLocation.toPath());
+        ffmpegPlugin.streamUris(storageLocation.toPath(), getTestUris().get(1));
     final Path streamingPath = streamTask.getOutputPath();
     Log.i(LOG_TAG, "Starting test stream to: " + streamingPath.toAbsolutePath());
 
@@ -189,7 +190,7 @@ class FFmpegPluginTest {
 
     // Start a new task
     final FFmpegStreamTask streamingTask =
-        ffmpegPlugin.streamUris(getTestUris(), storageLocation.toPath());
+        ffmpegPlugin.streamUris(storageLocation.toPath(), getTestUris().toArray(new URI[0]));
     Log.i(LOG_TAG, "Created streaming task to: " + streamingTask.getOutputPath());
     streamingTask.start();
     // Wait...

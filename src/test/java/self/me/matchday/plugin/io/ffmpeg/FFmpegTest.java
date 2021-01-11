@@ -69,7 +69,7 @@ class FFmpegTest {
     final List<URI> urls = List.of(firstHalfUrl.toURI(), secondHalfUrl.toURI());
     storageLocation = resources.get("video-resources.file-storage-location") + "\\test_out";
 
-    hlsStreamTask = ffmpeg.getHlsStreamTask(urls, Path.of(storageLocation));
+    hlsStreamTask = ffmpeg.getHlsStreamTask(Path.of(storageLocation), urls.toArray(new URI[0]));
   }
 
   @Test
