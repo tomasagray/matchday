@@ -19,8 +19,8 @@
 
 package self.me.matchday.util;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -33,6 +33,8 @@ import java.util.TimerTask;
  * Checks whether a given file exists yet. Will timeout after a specified period, or 45 seconds by
  * default. Runs in its own thread.
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class FileCheckTask extends Thread {
 
   private static final String LOG_TAG = "FileCheckTask";
@@ -57,10 +59,11 @@ public class FileCheckTask extends Thread {
     }
   }
 
-  @Getter private final File file;
+  private final File file;
   private final long checkInterval;
   private final Duration timeout;
-  @Getter @Setter private boolean fileFound;
+  private Duration executionTime;
+  private boolean fileFound;
 
   public FileCheckTask(@NotNull final File file, final long checkInterval) {
     this(file, checkInterval, MAX_TIMEOUT);
@@ -89,6 +92,7 @@ public class FileCheckTask extends Thread {
     while (Duration.between(taskStarted, Instant.now()).compareTo(timeout) <= 0) {
       // Quit when the stream has begun
       if (fileFound) {
+        this.executionTime = Duration.between(taskStarted, Instant.now());
         return;
       }
     }

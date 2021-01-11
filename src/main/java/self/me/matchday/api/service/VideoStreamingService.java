@@ -135,14 +135,17 @@ public class VideoStreamingService {
       // Read playlist file; it is concurrently being written to,
       // so we read it reactively
       final StringBuilder sb = new StringBuilder();
-      Log.i(LOG_TAG, "Reading playlist from: " + streamLocator.getPlaylistPath());
+      final Path playlistPath = streamLocator.getPlaylistPath();
+      Log.i(LOG_TAG, "Reading playlist from: " + playlistPath);
       final Flux<String> flux =
           Flux.using(
-              () -> Files.lines(streamLocator.getPlaylistPath()),
+              () -> Files.lines(playlistPath),
               Flux::fromStream,
               BaseStream::close);
       flux.doOnNext(s -> sb.append(s).append("\n")).blockLast();
-      return sb.toString();
+      final String result = sb.toString();
+      Log.i(LOG_TAG, String.format("Read %s bytes from file: %s", result.getBytes().length, playlistPath));
+      return result;
 
     } else {
       Log.d(
@@ -223,11 +226,16 @@ public class VideoStreamingService {
   }
 
   /** Destroy all currently-running video streaming tasks */
-  public void killAllStreamingTasks() {
+  public int killAllStreamingTasks() {
 
+    // TODO - implement kill streams FOR GIVEN FILE SOURCE
+
+    final int streamingTaskCount = ffmpegPlugin.getStreamingTaskCount();
     Log.i(
-        LOG_TAG, String.format("Killing %s streaming tasks", ffmpegPlugin.getStreamingTaskCount()));
+        LOG_TAG, String.format("Killing %s streaming tasks", streamingTaskCount));
     ffmpegPlugin.interruptAllStreamTasks();
+    Log.i(LOG_TAG, "Task count after kill operation: " + ffmpegPlugin.getStreamingTaskCount());
+    return streamingTaskCount;
   }
 
   /**
@@ -239,16 +247,33 @@ public class VideoStreamingService {
   public void deleteVideoData(@NotNull final VideoStreamPlaylist streamPlaylist)
       throws IOException {
 
+    Path rootDirectory = null;
     // Delete data for each stream locator
     for (VideoStreamLocator streamLocator : streamPlaylist.getStreamLocators()) {
-
       final Path streamingPath = streamLocator.getPlaylistPath().getParent();
-      Log.i(LOG_TAG, "Deleting video data associated with playlist locator:\n" + streamLocator);
-      // Delete all contents of video data directory
-      Files.walkFileTree(streamingPath, new RecursiveDirectoryDeleter());
+      if (streamingPath.toFile().exists()) {
+        // Should be the same for each locator
+        rootDirectory = streamingPath.getParent();
+        Log.i(LOG_TAG, "Deleting video data associated with playlist locator:\n" + streamLocator);
+        // Delete all contents of video data directory
+        Files.walkFileTree(streamingPath, new RecursiveDirectoryDeleter());
+      }
+    }
+    // Delete data root
+    if (rootDirectory != null) {
+      Files.delete(rootDirectory);
     }
     // Delete data from DB
     playlistService.deleteVideoStreamPlaylist(streamPlaylist);
+  }
+
+  public void deleteVideoData(@NotNull final String fileSrcId) throws IOException {
+
+    final Optional<VideoStreamPlaylist> playlistOptional = playlistService.getVideoStreamPlaylist(fileSrcId);
+    if (playlistOptional.isPresent()) {
+      final VideoStreamPlaylist playlist = playlistOptional.get();
+      deleteVideoData(playlist);
+    }
   }
 
   private @NotNull M3UPlaylist getM3UPlaylistFromStreamPlaylist(
