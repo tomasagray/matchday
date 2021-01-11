@@ -20,7 +20,6 @@
 package self.me.matchday.plugin.io.ffmpeg;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import self.me.matchday.plugin.Plugin;
@@ -29,10 +28,7 @@ import self.me.matchday.util.Log;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class FFmpegPlugin implements Plugin {
@@ -54,25 +50,20 @@ public class FFmpegPlugin implements Plugin {
   }
 
   /**
-   * Create a concatenated HLS stream from a given collection of URIs
+   * Create an HLS stream from a given collection of URIs
    *
    * @param uris URI pointers to video data
    * @param playlistPath The output location for stream data
    * @return The path of the playlist file produced by FFMPEG
    */
   public FFmpegStreamTask streamUris(
-      @NotNull final List<URI> uris, @NotNull final Path playlistPath) {
+      @NotNull final Path playlistPath, @NotNull final URI... uris) {
 
     // Get absolute path for task key
     final Path absolutePath = playlistPath.toAbsolutePath();
-    // Check if a task is already working in path
-    FFmpegStreamTask prevTask = isTaskAlreadyExecuting(absolutePath);
-    if (prevTask != null) {
-      return prevTask;
-    }
-
+    checkTaskAlreadyExecuting(absolutePath);
     // Create the streaming task
-    final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(uris, playlistPath);
+    final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(playlistPath, uris);
     // Add to collection
     streamingTasks.put(absolutePath, streamTask);
     // Return playlist file path
@@ -80,46 +71,24 @@ public class FFmpegPlugin implements Plugin {
   }
 
   /**
-   * Create an HLS stream from a single URI
-   *
-   * @param uri The file resource pointer
-   * @param playlistPath The location on disk to store stream data
-   * @return The streaming task
-   */
-  public FFmpegStreamTask streamUri(@NotNull final URI uri, @NotNull final Path playlistPath) {
-
-    // Get absolute path for task key
-    final Path absolutePath = playlistPath.toAbsolutePath();
-    // Check if a task is already working in path
-    FFmpegStreamTask prevTask = isTaskAlreadyExecuting(absolutePath);
-    if (prevTask != null) {
-      return prevTask;
-    }
-
-    // Create the streaming task
-    final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(uri, playlistPath);
-    // Add to collection
-    Log.i(LOG_TAG, "Created streaming task to: " + absolutePath);
-    streamingTasks.put(absolutePath, streamTask);
-    return streamTask;
-  }
-
-  /**
    * Determines if there is a task streaming to the given directory
    *
    * @param absolutePath The path of the streaming task
-   * @return The task that is executing in the given directory, or null if none found
    */
-  private @Nullable FFmpegStreamTask isTaskAlreadyExecuting(Path absolutePath) {
+  private void checkTaskAlreadyExecuting(@NotNull final Path absolutePath) {
 
-    // Search currently executing tasks
-    final FFmpegStreamTask prevTask = streamingTasks.get(absolutePath);
+    // Check if a task is already working in path
+    FFmpegStreamTask prevTask = streamingTasks.get(absolutePath);
     if (prevTask != null) {
-      // Task is already present and alive; return it
-      Log.i(LOG_TAG, String.format("Streaming task already begun for path: %s", absolutePath));
-      return prevTask;
+      if (!prevTask.isAlive()) {
+        // Kill zombie task & proceed
+        prevTask.kill();
+        streamingTasks.remove(absolutePath);
+      } else {
+        throw new IllegalThreadStateException(
+                "FFmpeg has already started streaming to path: " + absolutePath);
+      }
     }
-    return null;
   }
 
   /** Cancels all streaming tasks running in the background */

@@ -136,7 +136,7 @@ class VideoStreamManager {
       // Get link to video data
       final URI videoDataLink = refreshedEventFile.getInternalUrl().toURI();
       // Start stream
-      final Thread streamTask = ffmpegPlugin.streamUri(videoDataLink, playlistPath);
+      final Thread streamTask = ffmpegPlugin.streamUris(playlistPath, videoDataLink);
       streamTask.start();
       // Wait for stream task to finish
       streamTask.join();

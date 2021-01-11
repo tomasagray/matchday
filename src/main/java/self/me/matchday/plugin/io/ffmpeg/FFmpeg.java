@@ -52,45 +52,36 @@ public class FFmpeg {
    * @param location The location on disk to store stream data
    * @return A thread task
    */
-  public FFmpegStreamTask getHlsStreamTask(@NotNull List<URI> uris, @NotNull final Path location) {
+  public FFmpegStreamTask getHlsStreamTask(@NotNull final Path location, @NotNull final URI... uris) {
 
     // Assemble arguments
+    final String command = Strings.join(baseArgs, ' ');
     final Path outputPath = location.toAbsolutePath();
+    final Path dataDir = outputPath.getParent();
     final List<String> transcodeArgs = getDefaultTranscodeArgs(location);
 
-    // Create FFMPEG CLI command & return
-    return FFmpegConcatStreamTask.builder()
-        .command(Strings.join(baseArgs, ' '))
-        .uris(uris)
-        .transcodeArgs(transcodeArgs)
-        .outputPath(outputPath)
-        .dataDir(outputPath.getParent())
-        .loggingEnabled(loggingEnabled)
-        .build();
-  }
-
-  /**
-   * Create a single FFMPEG stream task from the given URI to the given storage location
-   *
-   * @param uri The file resource pointer
-   * @param location The location on disk to store stream data
-   * @return The thread for this streaming job
-   */
-  public FFmpegStreamTask getHlsStreamTask(@NotNull final URI uri, @NotNull final Path location) {
-
-    // Setup output
-    final Path outputFile = location.toAbsolutePath();
-    final List<String> transcodeArgs = getDefaultTranscodeArgs(location);
-
-    // Create streaming task & return
-    return FFmpegSingleStreamTask.builder()
-        .command(Strings.join(baseArgs, ' '))
-        .uri(uri)
-        .transcodeArgs(transcodeArgs)
-        .outputFile(outputFile)
-        .dataDir(outputFile.getParent())
-        .loggingEnabled(loggingEnabled)
-        .build();
+    if (uris.length > 1) {
+      // Create FFMPEG CLI command & return
+      return FFmpegConcatStreamTask.builder()
+              .command(command)
+              .uris(List.of(uris))
+              .transcodeArgs(transcodeArgs)
+              .outputPath(outputPath)
+              .dataDir(dataDir)
+              .loggingEnabled(loggingEnabled)
+              .build();
+    } else {
+      URI uri = uris[0];
+      // Create streaming task & return
+      return FFmpegSingleStreamTask.builder()
+              .command(command)
+              .uri(uri)
+              .transcodeArgs(transcodeArgs)
+              .outputFile(outputPath)
+              .dataDir(dataDir)
+              .loggingEnabled(loggingEnabled)
+              .build();
+    }
   }
 
   private List<String> getDefaultTranscodeArgs(@NotNull final Path playlistPath) {
