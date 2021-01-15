@@ -25,20 +25,16 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.DataSourceService;
-import self.me.matchday.api.service.PlaylistLocatorService;
+import self.me.matchday.api.service.VideoStreamPlaylistService;
 import self.me.matchday.api.service.VideoStreamingService;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.time.Instant;
 
-/**
- * Regularly run tasks. Configuration in external properties file.
- */
+/** Regularly run tasks. Configuration in external properties file. */
 @Component
 @PropertySource("classpath:scheduled-tasks.properties")
 public class ScheduledTasks {
@@ -46,19 +42,20 @@ public class ScheduledTasks {
   private static final String LOG_TAG = "ScheduledTasks";
 
   private final DataSourceService dataSourceService;
-  private final PlaylistLocatorService playlistLocatorService;
+  private final VideoStreamPlaylistService streamPlaylistService;
   private final VideoStreamingService videoStreamingService;
 
   @Value("${scheduled-tasks.cron.video-data-expired-days}")
   private int videoDataExpiredDays;
 
   @Autowired
-  public ScheduledTasks(final DataSourceService dataSourceService,
-      final PlaylistLocatorService playlistLocatorService,
+  public ScheduledTasks(
+      final DataSourceService dataSourceService,
+      final VideoStreamPlaylistService streamPlaylistService,
       final VideoStreamingService videoStreamingService) {
 
     this.dataSourceService = dataSourceService;
-    this.playlistLocatorService = playlistLocatorService;
+    this.streamPlaylistService = streamPlaylistService;
     this.videoStreamingService = videoStreamingService;
   }
 
@@ -72,41 +69,37 @@ public class ScheduledTasks {
     dataSourceService.refreshDataSources(snapshotRequest);
   }
 
-  // todo - update for VideoStreamPlaylist -> VideoStreamLocator structure
   @Scheduled(cron = "${scheduled-tasks.cron.prune-video-data}")
   public void pruneVideoData() {
 
     Log.i(LOG_TAG, "Pruning video data more than 2 weeks old...");
 
     // Examine each playlist & related data
-    playlistLocatorService
-        .getAllPlaylistLocators()
-        .forEach(playlistLocator -> {
-          try {
+    streamPlaylistService
+        .getAllVideoStreamPlaylists()
+        .forEach(
+            videoStreamPlaylist -> {
+              try {
+                // Read creation date of playlist file
+                final Instant creationTime = videoStreamPlaylist.getTimestamp();
+                final Duration sinceCreation = Duration.between(creationTime, Instant.now());
+                final Duration expiredDays = Duration.ofDays(videoDataExpiredDays);
 
-            // Read creation date of playlist file
-            final BasicFileAttributes playlistFileAttributes =
-                Files.readAttributes(playlistLocator.getPlaylistPath(), BasicFileAttributes.class);
-            final Instant creationTime = playlistFileAttributes.creationTime().toInstant();
-
-            final Duration sinceCreation = Duration.between(creationTime, Instant.now());
-            final Duration expiredDays = Duration.ofDays(videoDataExpiredDays);
-
-            if (sinceCreation.compareTo(expiredDays) > 0) {
-              Log.i(LOG_TAG,
-                  String.format("Video data is more than %s old; deleting for %s",
-                      expiredDays, playlistLocator));
-
-              // This video data is expired; delete it
-//              videoStreamingService.deleteVideoData(playlistLocator);
-              // Delete playlist locator
-              playlistLocatorService.deletePlaylistLocator(playlistLocator);
-            }
-          } catch (IOException e) {
-            Log.e(LOG_TAG, "Error running scheduled delete of video data", e);
-            // Wrap exception
-            throw new RuntimeException(e);
-          }
-        });
+                // If the video stream is older than allowed
+                if (sinceCreation.compareTo(expiredDays) > 0) {
+                  Log.i(
+                      LOG_TAG,
+                      String.format(
+                          "Video data is more than %s old; deleting for %s",
+                          expiredDays, videoStreamPlaylist));
+                  // This video data is expired; delete it
+                  videoStreamingService.deleteVideoData(videoStreamPlaylist);
+                }
+              } catch (IOException e) {
+                Log.e(LOG_TAG, "Error running scheduled delete of video data", e);
+                // Wrap exception
+                throw new RuntimeException(e);
+              }
+            });
   }
 }

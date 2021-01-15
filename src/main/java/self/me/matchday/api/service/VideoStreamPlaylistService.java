@@ -54,6 +54,15 @@ public class VideoStreamPlaylistService {
   }
 
   /**
+   * Retrieve all video stream playlists.
+   *
+   * @return A List of all video stream playlists in the database
+   */
+  public List<VideoStreamPlaylist> getAllVideoStreamPlaylists() {
+    return playlistRepo.findAll();
+  }
+
+  /**
    * Create a playlist of video streams. Directories for video data will be automatically created.
    *
    * @param fileSource The EventFileSource from which the stream will be created
