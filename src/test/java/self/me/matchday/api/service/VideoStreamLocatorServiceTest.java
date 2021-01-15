@@ -41,11 +41,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for playlist locator service")
-class PlaylistLocatorServiceTest {
+class VideoStreamLocatorServiceTest {
 
   private static final String LOG_TAG = "PlaylistLocatorServiceTest";
 
-  private static PlaylistLocatorService playlistLocatorService;
+  private static VideoStreamLocatorService videoStreamLocatorService;
   private static EventFileSrcRepository fileSrcRepository;
   private static VideoStreamLocator testStreamLocator;
   private static EventFileSource testEventFileSource;
@@ -53,17 +53,17 @@ class PlaylistLocatorServiceTest {
 
   @BeforeAll
   static void setUp(
-      @Autowired final PlaylistLocatorService playlistLocatorService,
+      @Autowired final VideoStreamLocatorService videoStreamLocatorService,
       @Autowired final EventFileSrcRepository fileSrcRepository) {
 
-    PlaylistLocatorServiceTest.playlistLocatorService = playlistLocatorService;
-    PlaylistLocatorServiceTest.fileSrcRepository = fileSrcRepository;
+    VideoStreamLocatorServiceTest.videoStreamLocatorService = videoStreamLocatorService;
+    VideoStreamLocatorServiceTest.fileSrcRepository = fileSrcRepository;
     // Get managed copy of test file source
     final EventFileSource fileSource = CreateTestData.createTestEventFileSource();
-    PlaylistLocatorServiceTest.testEventFileSource = fileSrcRepository.save(fileSource);
+    VideoStreamLocatorServiceTest.testEventFileSource = fileSrcRepository.save(fileSource);
 
-    PlaylistLocatorServiceTest.testEventFile =
-        PlaylistLocatorServiceTest.testEventFileSource.getEventFiles().get(0);
+    VideoStreamLocatorServiceTest.testEventFile =
+        VideoStreamLocatorServiceTest.testEventFileSource.getEventFiles().get(0);
   }
 
   @AfterAll
@@ -79,7 +79,7 @@ class PlaylistLocatorServiceTest {
     // Ensure test data is cleaned up
     if (testStreamLocator != null) {
       Log.i(LOG_TAG, "Deleting test locator from DB...: " + testStreamLocator.getStreamLocatorId());
-      playlistLocatorService.deletePlaylistLocator(testStreamLocator);
+      videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
     }
   }
 
@@ -89,7 +89,7 @@ class PlaylistLocatorServiceTest {
 
     assertThat(testEventFile).isNotNull();
     testStreamLocator =
-        playlistLocatorService.createNewPlaylistLocator(testEventFileSource, testEventFile);
+        videoStreamLocatorService.createStreamLocator(testEventFileSource, testEventFile);
 
     Log.i(LOG_TAG, "Created playlist locator: " + testStreamLocator);
     assertThat(testStreamLocator).isNotNull();
@@ -102,7 +102,7 @@ class PlaylistLocatorServiceTest {
 
     final int expectedPlaylistLocatorCount = 1;
     final List<VideoStreamLocator> playlistLocators =
-        playlistLocatorService.getAllPlaylistLocators();
+        videoStreamLocatorService.getAllStreamLocators();
     final int actualPlaylistLocatorCount = playlistLocators.size();
     Log.i(
         LOG_TAG,
@@ -118,23 +118,18 @@ class PlaylistLocatorServiceTest {
 
     // Create test resource
     testStreamLocator =
-        playlistLocatorService.createNewPlaylistLocator(testEventFileSource, testEventFile);
+        videoStreamLocatorService.createStreamLocator(testEventFileSource, testEventFile);
 
     final Long testStreamLocatorId = testStreamLocator.getStreamLocatorId();
-    final Optional<VideoStreamLocator> playlistLocatorOptional =
-        playlistLocatorService.getStreamLocator(testStreamLocatorId);
-    assertThat(playlistLocatorOptional).isPresent();
+    final Optional<VideoStreamLocator> streamLocatorOptional =
+        videoStreamLocatorService.getStreamLocator(testStreamLocatorId);
+    assertThat(streamLocatorOptional).isPresent();
 
-    final VideoStreamLocator actualPlaylistLocator = playlistLocatorOptional.get();
-    Log.i(LOG_TAG, "Retrieved playlist locator: " + actualPlaylistLocator);
+    final VideoStreamLocator actualStreamLocator = streamLocatorOptional.get();
+    Log.i(LOG_TAG, "Retrieved playlist locator: " + actualStreamLocator);
 
     // Test playlist locator fields; timestamp will be different
-    // todo - should playlist timestamps be compared for equality?
-    assertThat(actualPlaylistLocator.getStreamLocatorId())
-        .isEqualTo(testStreamLocator.getStreamLocatorId());
-    assertThat(actualPlaylistLocator.getPlaylistPath())
-        .isEqualTo(testStreamLocator.getPlaylistPath());
-    assertThat(actualPlaylistLocator.getEventFile()).isEqualTo(testStreamLocator.getEventFile());
+    assertThat(actualStreamLocator).isEqualTo(testStreamLocator);
   }
 
   @Test
@@ -143,12 +138,12 @@ class PlaylistLocatorServiceTest {
 
     // Create test resource
     testStreamLocator =
-        playlistLocatorService.createNewPlaylistLocator(testEventFileSource, testEventFile);
+        videoStreamLocatorService.createStreamLocator(testEventFileSource, testEventFile);
 
-    final int sizeBeforeDelete = playlistLocatorService.getAllPlaylistLocators().size();
+    final int sizeBeforeDelete = videoStreamLocatorService.getAllStreamLocators().size();
     // Perform deletion
-    playlistLocatorService.deletePlaylistLocator(testStreamLocator);
-    final int sizeAfterDelete = playlistLocatorService.getAllPlaylistLocators().size();
+    videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
+    final int sizeAfterDelete = videoStreamLocatorService.getAllStreamLocators().size();
     final int actualDifference = sizeBeforeDelete - sizeAfterDelete;
     final int expectedDifference = 1;
     assertThat(actualDifference).isEqualTo(expectedDifference);

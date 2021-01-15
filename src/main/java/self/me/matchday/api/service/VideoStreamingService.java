@@ -54,7 +54,7 @@ public class VideoStreamingService {
   private final FFmpegPlugin ffmpegPlugin;
   private final EventService eventService;
   private final VideoStreamPlaylistService playlistService;
-  private final PlaylistLocatorService playlistLocatorService;
+  private final VideoStreamLocatorService videoStreamLocatorService;
 
   @Autowired
   public VideoStreamingService(
@@ -63,14 +63,14 @@ public class VideoStreamingService {
       final EventService eventService,
       final VideoStreamPlaylistService playlistService,
       final VideoStreamManager videoStreamManager,
-      final PlaylistLocatorService playlistLocatorService) {
+      final VideoStreamLocatorService videoStreamLocatorService) {
 
     this.diskManager = diskManager;
     this.ffmpegPlugin = ffmpegPlugin;
     this.eventService = eventService;
     this.playlistService = playlistService;
     this.videoStreamManager = videoStreamManager;
-    this.playlistLocatorService = playlistLocatorService;
+    this.videoStreamLocatorService = videoStreamLocatorService;
   }
 
   public Optional<Collection<EventFileSource>> fetchEventFileSources(
@@ -129,7 +129,7 @@ public class VideoStreamingService {
 
     // Get data to locate playlist file on disk
     final Optional<VideoStreamLocator> locatorOptional =
-        playlistLocatorService.getStreamLocator(partId);
+        videoStreamLocatorService.getStreamLocator(partId);
     if (locatorOptional.isPresent()) {
       final VideoStreamLocator streamLocator = locatorOptional.get();
       // Read playlist file; it is concurrently being written to,
@@ -186,7 +186,7 @@ public class VideoStreamingService {
             eventId, fileSrcId, partId, segmentId));
 
     final Optional<VideoStreamLocator> locatorOptional =
-        playlistLocatorService.getStreamLocator(partId);
+        videoStreamLocatorService.getStreamLocator(partId);
     if (locatorOptional.isPresent()) {
 
       // Get path to video data

@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class PlaylistLocatorService {
+public class VideoStreamLocatorService {
 
   private static final String PLAYLIST_NAME = "playlist.m3u8";
   private static final String LOG_TAG = "PlaylistLocatorService";
@@ -45,7 +45,7 @@ public class PlaylistLocatorService {
   private String fileStorageLocation;
 
   @Autowired
-  public PlaylistLocatorService(final VideoStreamLocatorRepo streamLocatorRepo) {
+  public VideoStreamLocatorService(final VideoStreamLocatorRepo streamLocatorRepo) {
 
     this.streamLocatorRepo = streamLocatorRepo;
   }
@@ -55,8 +55,7 @@ public class PlaylistLocatorService {
    *
    * @return A List of VideoStreamPlaylistLocators
    */
-  public List<VideoStreamLocator> getAllPlaylistLocators() {
-
+  public List<VideoStreamLocator> getAllStreamLocators() {
     return streamLocatorRepo.findAll();
   }
 
@@ -79,7 +78,7 @@ public class PlaylistLocatorService {
    * @return The newly created VideoStreamLocator
    */
   @Transactional
-  public VideoStreamLocator createNewPlaylistLocator(
+  public VideoStreamLocator createStreamLocator(
       @NotNull final EventFileSource fileSource, @NotNull final EventFile eventFile) {
 
     // Create playlist IDs
@@ -100,7 +99,7 @@ public class PlaylistLocatorService {
    *
    * @param streamLocator The playlist to be deleted
    */
-  public void deletePlaylistLocator(@NotNull final VideoStreamLocator streamLocator) {
+  public void deleteStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
     streamLocatorRepo.delete(streamLocator);
   }
 }

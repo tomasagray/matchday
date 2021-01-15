@@ -39,17 +39,17 @@ public class VideoStreamPlaylistService {
   private static final String LOG_TAG = "VideoStreamPlaylistService";
 
   private final VideoStreamPlaylistRepo playlistRepo;
-  private final PlaylistLocatorService playlistLocatorService;
+  private final VideoStreamLocatorService videoStreamLocatorService;
   private final EventFileSelectorService eventFileSelectorService;
 
   @Autowired
   public VideoStreamPlaylistService(
       final VideoStreamPlaylistRepo playlistRepo,
-      final PlaylistLocatorService playlistLocatorService,
+      final VideoStreamLocatorService videoStreamLocatorService,
       final EventFileSelectorService eventFileSelectorService) {
 
     this.playlistRepo = playlistRepo;
-    this.playlistLocatorService = playlistLocatorService;
+    this.videoStreamLocatorService = videoStreamLocatorService;
     this.eventFileSelectorService = eventFileSelectorService;
   }
 
@@ -80,7 +80,7 @@ public class VideoStreamPlaylistService {
         eventFile -> {
           // Create storage path for each task
           final VideoStreamLocator playlistLocator =
-              playlistLocatorService.createNewPlaylistLocator(fileSource, eventFile);
+              videoStreamLocatorService.createStreamLocator(fileSource, eventFile);
           // Add  playlist locator to VideoStreamPlaylist
           streamPlaylist.addStreamLocator(playlistLocator);
         });

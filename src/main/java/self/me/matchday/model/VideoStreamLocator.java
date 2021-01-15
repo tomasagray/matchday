@@ -20,6 +20,7 @@
 package self.me.matchday.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import self.me.matchday.db.converter.PathConverter;
 
 import javax.persistence.*;
@@ -39,6 +40,7 @@ public abstract class VideoStreamLocator {
   @ManyToOne(cascade = {CascadeType.MERGE})
   protected EventFile eventFile;
 
+  @EqualsAndHashCode.Exclude
   protected final Instant timestamp = Instant.now();
-  
+
 }
