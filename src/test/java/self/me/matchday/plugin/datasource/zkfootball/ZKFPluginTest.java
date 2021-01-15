@@ -20,7 +20,6 @@
 package self.me.matchday.plugin.datasource.zkfootball;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Validate ZKF plugin operation")
-@Disabled
 class ZKFPluginTest {
 
   private static final String LOG_TAG = "ZKFPluginTest";

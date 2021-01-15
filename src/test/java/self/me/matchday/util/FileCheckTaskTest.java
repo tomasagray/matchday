@@ -19,13 +19,18 @@
 
 package self.me.matchday.util;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -33,9 +38,15 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class FileCheckTaskTest {
 
   private static final String LOG_TAG = "FileCheckTaskTest";
+  public static final String TEST_IMG = "check-task-test.jpg";
+  public static final String TEST_URL = "https://wallpapercave.com/wp/wp4127639.jpg";
+  public static final int CHECK_INTERVAL_MS = 250;
+  public static final int MAX_DL_SECONDS = 5;
+  public static final int MIN_DL_MILLIS = 500;
 
   // Test resource
   private static Path playlistPath;
+  private static File testDownloadImg;
 
   @BeforeAll
   static void setup() {
@@ -47,12 +58,21 @@ class FileCheckTaskTest {
     playlistPath = new File(testPlaylistUrl.getFile()).toPath();
   }
 
+  @AfterAll
+  static void tearDown() throws IOException {
+
+    // Delete downloaded  resource
+    if (testDownloadImg != null && testDownloadImg.exists()) {
+      Files.delete(testDownloadImg.toPath());
+    }
+  }
+
   @Test
-  @DisplayName("Validate correctly finds specified file within time limit")
+  @DisplayName("Validate correctly finds already existing file within time limit")
   void testPlaylistCheck() throws InterruptedException {
 
     // Create check task
-    final FileCheckTask testTask = new FileCheckTask(playlistPath.toFile(), 250);
+    final FileCheckTask testTask = new FileCheckTask(playlistPath.toFile(), CHECK_INTERVAL_MS);
     // Run task
     testTask.start();
     // Wait until finished
@@ -60,7 +80,39 @@ class FileCheckTaskTest {
 
     // Test result
     final boolean testResult = testTask.isFileFound();
-    Log.i(LOG_TAG, "File was found? " + testResult);
+    final File testFile = testTask.getFile();
+    final Duration actualExecutionTime = testTask.getExecutionTime();
+    Log.i(LOG_TAG, String.format("File: %s was found? %s", testFile.getAbsolutePath(), testResult));
+    Log.i(LOG_TAG, "Execution time: " + actualExecutionTime);
     assertThat(testResult).isTrue();
+    assertThat(actualExecutionTime).isLessThanOrEqualTo(Duration.ofSeconds(3));
+  }
+
+  @Test
+  @DisplayName("Validate correctly determines time to download remote image resource")
+  void testRemoteFileTransfer() throws IOException, InterruptedException {
+
+    final URL testUrl = new URL(TEST_URL);
+    // Local storage location - parent of test resource
+    final Path storagePath = playlistPath.getParent();
+    testDownloadImg = storagePath.resolve(TEST_IMG).toFile();
+
+    // Start check task
+    final FileCheckTask fileCheckTask = new FileCheckTask(testDownloadImg, CHECK_INTERVAL_MS);
+    fileCheckTask.start();
+
+    // Begin remote resource download
+    try (final InputStream is = testUrl.openStream()) {
+      Files.copy(is, testDownloadImg.toPath());
+    }
+    // Finish check
+    fileCheckTask.join();
+
+    // Perform test
+    final Duration expectedMaxExecutionTime = Duration.ofSeconds(MAX_DL_SECONDS);
+    final Duration expectedMinExecutionTime = Duration.ofMillis(MIN_DL_MILLIS);
+    final Duration actualExecutionTime = fileCheckTask.getExecutionTime();
+    Log.i(LOG_TAG, "Download execution time: " + actualExecutionTime);
+    assertThat(actualExecutionTime).isLessThanOrEqualTo(expectedMaxExecutionTime).isGreaterThanOrEqualTo(expectedMinExecutionTime);
   }
 }
