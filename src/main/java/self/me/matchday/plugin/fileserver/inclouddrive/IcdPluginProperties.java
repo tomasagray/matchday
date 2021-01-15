@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -19,11 +19,7 @@
 
 package self.me.matchday.plugin.fileserver.inclouddrive;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -40,10 +36,12 @@ public class IcdPluginProperties extends PluginProperties {
   private String urlPattern;
   private String linkIdentifier;
   private String userDataIdentifier;
-  @Value("${plugin.icd.user-agent.mac}")    // mac & win versions in properties file
+
+  @Value("${plugin.icd.user-agent.mac}") // mac & win versions in properties file
   private String userAgent;
+
   private ICDUrl url;
-  private int defaultRefreshRate;
+  private int defaultRefreshHours;
 
   public String getBaseUrl() {
     return url.getBaseUrl();
@@ -70,13 +68,11 @@ public class IcdPluginProperties extends PluginProperties {
     private String app;
 
     String getBaseUrl() {
-      return
-          String.format(BASE_URL_PATTERN, protocol, subdomain, domain);
+      return String.format(BASE_URL_PATTERN, protocol, subdomain, domain);
     }
 
     String getLoginUri() {
-      return
-          String.format(LOGIN_URI_PATTERN, me, userAccess, app);
+      return String.format(LOGIN_URI_PATTERN, me, userAccess, app);
     }
   }
 }

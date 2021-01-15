@@ -79,7 +79,7 @@ public class IcdPlugin implements FileServerPlugin {
 
     // initialize fields
     acceptsUrlPattern = Pattern.compile(this.pluginProperties.getUrlPattern());
-    refreshRate = Duration.ofHours(this.pluginProperties.getDefaultRefreshRate());
+    refreshRate = Duration.ofHours(this.pluginProperties.getDefaultRefreshHours());
   }
 
   // === File server ===
