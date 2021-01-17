@@ -70,12 +70,21 @@ public class NetscapeCookiesService {
             .filter(substr -> !("".equals(substr)))
             .collect(Collectors.toList());
 
+    // Extract fields
+    final String name = fields.get(NAME_IDX);
+    // value may be empty
+    final String value = (fields.size() == 7) ? fields.get(VALUE_IDX) : "";
+    final String domain = fields.get(DOMAIN_IDX);
+    final String path = fields.get(PATH_IDX);
+    final boolean secure = toBoolean(fields.get(SECURE_IDX));
+    final long maxAge = Long.parseLong(fields.get(EXPIRATION_IDX));
+
     // map to cookie
-    return ResponseCookie.from(fields.get(NAME_IDX), fields.get(VALUE_IDX))
-        .domain(fields.get(DOMAIN_IDX))
-        .path(fields.get(PATH_IDX))
-        .secure(toBoolean(fields.get(SECURE_IDX)))
-        .maxAge(Long.parseLong(fields.get(EXPIRATION_IDX)))
+    return ResponseCookie.from(name, value)
+        .domain(domain)
+        .path(path)
+        .secure(secure)
+        .maxAge(maxAge)
         .build();
   }
 

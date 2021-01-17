@@ -87,6 +87,7 @@ public class IcdPlugin implements FileServerPlugin {
   @Override
   public @NotNull ClientResponse login(@NotNull FileServerUser user) {
 
+    // TODO - refactor this method!
     // Result container
     ClientResponse result;
 
