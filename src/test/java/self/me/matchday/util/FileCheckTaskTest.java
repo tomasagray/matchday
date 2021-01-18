@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -37,13 +37,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DisplayName("Testing for file-exists checker")
 class FileCheckTaskTest {
 
-  private static final String LOG_TAG = "FileCheckTaskTest";
   public static final String TEST_IMG = "check-task-test.jpg";
   public static final String TEST_URL = "https://wallpapercave.com/wp/wp4127639.jpg";
   public static final int CHECK_INTERVAL_MS = 250;
   public static final int MAX_DL_SECONDS = 5;
   public static final int MIN_DL_MILLIS = 500;
-
+  private static final String LOG_TAG = "FileCheckTaskTest";
   // Test resource
   private static Path playlistPath;
   private static File testDownloadImg;
@@ -113,6 +112,8 @@ class FileCheckTaskTest {
     final Duration expectedMinExecutionTime = Duration.ofMillis(MIN_DL_MILLIS);
     final Duration actualExecutionTime = fileCheckTask.getExecutionTime();
     Log.i(LOG_TAG, "Download execution time: " + actualExecutionTime);
-    assertThat(actualExecutionTime).isLessThanOrEqualTo(expectedMaxExecutionTime).isGreaterThanOrEqualTo(expectedMinExecutionTime);
+    assertThat(actualExecutionTime)
+        .isLessThanOrEqualTo(expectedMaxExecutionTime)
+        .isGreaterThanOrEqualTo(expectedMinExecutionTime);
   }
 }

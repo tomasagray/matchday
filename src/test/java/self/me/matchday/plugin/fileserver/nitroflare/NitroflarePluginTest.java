@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -39,9 +39,9 @@ import self.me.matchday.util.ResourceFileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,7 +64,7 @@ class NitroflarePluginTest {
   private static URL TEST_URL;
   // test resources
   private static NitroflarePlugin nitroflarePlugin;
-  private static List<HttpCookie> testCookies;
+  private static Set<HttpCookie> testCookies;
 
   @BeforeAll
   static void setup(
@@ -174,7 +174,7 @@ class NitroflarePluginTest {
         LOG_TAG,
         "Attempting to read Nitroflare download link from: " + CreateTestData.NITROFLARE_DL_URL);
     final Optional<URL> urlOptional =
-        nitroflarePlugin.getDownloadURL(CreateTestData.NITROFLARE_DL_URL, new ArrayList<>());
+        nitroflarePlugin.getDownloadURL(CreateTestData.NITROFLARE_DL_URL, new HashSet<>());
 
     assertThat(urlOptional).isPresent();
     final URL actualDownloadUrl = urlOptional.get();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -29,8 +29,8 @@ import self.me.matchday.plugin.fileserver.FileServerUser;
 
 import java.net.URL;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -65,7 +65,7 @@ public class TestFileServerPlugin implements FileServerPlugin {
   }
 
   @Override
-  public Optional<URL> getDownloadURL(@NotNull URL url, @NotNull Collection<HttpCookie> cookies) {
+  public Optional<URL> getDownloadURL(@NotNull URL url, @NotNull Set<HttpCookie> cookies) {
     return Optional.of(url);
   }
 

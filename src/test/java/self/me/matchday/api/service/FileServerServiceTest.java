@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -103,7 +103,7 @@ class FileServerServiceTest {
 
     final List<FileServerPlugin> fileServerPlugins = fileServerService.getFileServerPlugins();
 
-    final int expectedPluginCount = 3;
+    final int expectedPluginCount = 4;
     final int actualPluginCount = fileServerPlugins.size();
 
     assertThat(actualPluginCount).isEqualTo(expectedPluginCount);

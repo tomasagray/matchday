@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -32,7 +32,7 @@ import self.me.matchday.util.Log;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,7 +68,7 @@ class NetscapeCookiesServiceTest {
 
     final int expectedCookieCount = 9;
 
-    final List<HttpCookie> actualCookies = cookiesService.parseNetscapeCookies(cookieFile);
+    final Set<HttpCookie> actualCookies = cookiesService.parseNetscapeCookies(cookieFile);
     assertThat(actualCookies.size()).isEqualTo(expectedCookieCount);
 
     actualCookies.forEach(

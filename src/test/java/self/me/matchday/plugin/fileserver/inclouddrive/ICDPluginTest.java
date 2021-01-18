@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2021.
+ *
+ * This file is part of Matchday.
+ *
+ * Matchday is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Matchday is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package self.me.matchday.plugin.fileserver.inclouddrive;
 
 import org.junit.jupiter.api.*;
@@ -18,6 +37,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -109,10 +129,10 @@ class ICDPluginTest {
     Log.i(LOG_TAG, String.format("Getting download link for: %s", FILE_LINK));
 
     // Get user cookies to perform server interaction
-    final List<HttpCookie> cookies =
+    final Set<HttpCookie> cookies =
         fileServerUser.getCookies().stream()
             .map(SecureCookie::toSpringCookie)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     // Ensure cookies mapped successfully
     assertThat(cookies).isNotNull().isNotEmpty();
 
