@@ -39,8 +39,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -120,7 +120,7 @@ public class NitroflarePlugin implements FileServerPlugin {
   }
 
   @Override
-  public Optional<URL> getDownloadURL(@NotNull URL url, @NotNull Collection<HttpCookie> cookies)
+  public Optional<URL> getDownloadURL(@NotNull URL url, @NotNull Set<HttpCookie> cookies)
       throws IOException {
 
     // Download link page

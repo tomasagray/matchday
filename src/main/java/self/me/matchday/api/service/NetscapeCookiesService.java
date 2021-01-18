@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,13 +46,13 @@ public class NetscapeCookiesService {
    * @param cookieText The text of cookies.txt
    * @return A List<> of Sprint cookies
    */
-  public List<HttpCookie> parseNetscapeCookies(@NotNull final String cookieText) {
+  public Set<HttpCookie> parseNetscapeCookies(@NotNull final String cookieText) {
 
     // Split on newline, remove blanks, & map to cookies
     return Arrays.stream(cookieText.split("\n"))
         .filter(this::isCookie)
         .map(this::parseCookie)
-        .collect(Collectors.toList());
+        .collect(Collectors.toSet());
   }
 
   /**

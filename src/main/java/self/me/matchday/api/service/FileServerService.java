@@ -436,11 +436,11 @@ public class FileServerService {
 
       if (downloadUser != null) {
         // Decrypt user cookies
-        final List<HttpCookie> httpCookies =
+        final Set<HttpCookie> httpCookies =
             downloadUser.getCookies().stream()
                 .map(secureDataService::decryptData)
                 .map(SecureCookie::toSpringCookie)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         // Use the FS plugin to get the internal (download) URL
         return pluginForUrl.getDownloadURL(externalUrl, httpCookies);
       } else {

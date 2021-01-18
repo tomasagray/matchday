@@ -45,10 +45,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -171,7 +168,7 @@ public class IcdPlugin implements FileServerPlugin {
 
   @Override
   public Optional<URL> getDownloadURL(
-      @NotNull URL url, @NotNull final Collection<HttpCookie> cookies) throws IOException {
+      @NotNull URL url, @NotNull final Set<HttpCookie> cookies) throws IOException {
 
     // Create connection to ICD server
     final HttpURLConnection connection = createHttpConnection(url, cookies);

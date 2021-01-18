@@ -19,15 +19,16 @@
 
 package self.me.matchday.plugin.fileserver;
 
-import java.io.IOException;
-import java.net.URL;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpCookie;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.plugin.Plugin;
+
+import java.io.IOException;
+import java.net.URL;
+import java.time.Duration;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Represents a file server management service. Can log-in/logout and translate download requests.
@@ -64,6 +65,6 @@ public interface FileServerPlugin extends Plugin {
    * @return The internal URL needed to access this file resource from the outside world.
    */
   Optional<URL> getDownloadURL(@NotNull final URL url,
-      @NotNull final Collection<HttpCookie> cookies) throws IOException;
+      @NotNull final Set<HttpCookie> cookies) throws IOException;
 
 }
