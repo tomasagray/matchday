@@ -62,7 +62,7 @@ class FileFoxPluginTest {
 
     FileFoxPluginTest.plugin = plugin;
     FileFoxPluginTest.testDownloadLink =
-        new URL("https://filefox.cc/tsvf64y2vk7q/20210115-POR-BEN-PL_1.ts");
+        new URL("https://filefox.cc/k5impa7zfhdc/20210210-EVE-TOT-FAC_1-1080.mkv");
     FileFoxPluginTest.directDownloadLinkPattern =
         Pattern.compile("^https://s\\d{2}.filefox.cc/\\w*/[\\w.-]*");
 
