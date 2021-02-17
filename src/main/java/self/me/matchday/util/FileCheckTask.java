@@ -75,6 +75,7 @@ public class FileCheckTask extends Thread {
     this.file = file;
     this.checkInterval = checkInterval;
     this.timeout = timeout;
+    this.executionTime = timeout; // default to max
   }
 
   @Override
