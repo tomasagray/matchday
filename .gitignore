@@ -1,6 +1,6 @@
 # ========================= SENSITIVE DATA =========================
 /secure_data
-**/test/secure_resources/
+**/secure_resources/
 # ========================= END SENSITIVE DATA =========================
 
 # Created by .ignore support plugin (hsz.mobi)

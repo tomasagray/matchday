@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NetscapeCookiesServiceTest {
 
   private static final String LOG_TAG = "NetscapeCookiesServiceTest";
-  private static final String COOKIE_FILE = "src/test/secure_resources/cookies-nitroflare.txt";
+  private static final String COOKIE_FILE = "src/test/secure_resources/nitroflare.cookies";
 
   private static NetscapeCookiesService cookiesService;
   private static String cookieFile;
