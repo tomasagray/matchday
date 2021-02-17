@@ -19,25 +19,29 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.model.SecureCookie;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -46,31 +50,49 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for FileFox fileserver manager")
-@Disabled
 class FileFoxPluginTest {
 
   private static final String LOG_TAG = "FileFoxPluginTest";
 
+  private static final String LOGIN_DATA = "src/test/secure_resources/filefox_login.csv";
+
   private static FileFoxPlugin plugin;
+  private static FileServerService fileServerService;
   private static URL testDownloadLink;
-  private static FileServerUser testFileServerUser;
   private static Pattern directDownloadLinkPattern;
 
   @BeforeAll
   static void setUp(@Autowired FileFoxPlugin plugin, @Autowired FileServerService fileServerService)
-      throws MalformedURLException {
+      throws IOException {
 
     FileFoxPluginTest.plugin = plugin;
+    FileFoxPluginTest.fileServerService = fileServerService;
+
     FileFoxPluginTest.testDownloadLink =
         new URL("https://filefox.cc/k5impa7zfhdc/20210210-EVE-TOT-FAC_1-1080.mkv");
     FileFoxPluginTest.directDownloadLinkPattern =
         Pattern.compile("^https://s\\d{2}.filefox.cc/\\w*/[\\w.-]*");
+  }
 
-    // Get test user
+  private static FileServerUser getLoggedInUser() {
+
     final Optional<List<FileServerUser>> usersOptional =
         fileServerService.getAllServerUsers(plugin.getPluginId());
     assertThat(usersOptional).isPresent();
-    FileFoxPluginTest.testFileServerUser = usersOptional.get().get(0);
+    return usersOptional.get().get(0);
+  }
+
+  private static FileServerUser createTestUser() throws IOException {
+
+    final BufferedReader reader = new BufferedReader(new FileReader(LOGIN_DATA));
+    final String loginData = reader.lines().collect(Collectors.joining(" "));
+    Log.i(LOG_TAG, "Read login data: " + loginData);
+    final List<String> strings =
+        Arrays.stream(loginData.split("\""))
+            .filter(s -> !s.equals(",") && !"".equals(s))
+            .collect(Collectors.toList());
+    assertThat(strings.size()).isEqualTo(2);
+    return new FileServerUser(strings.get(0), strings.get(1));
   }
 
   @Test
@@ -128,12 +150,33 @@ class FileFoxPluginTest {
   }
 
   @Test
-  @Disabled
-  void login() {}
+  @DisplayName("Test login capability")
+  void login() throws IOException {
+
+    // Read test data
+    final FileServerUser fileServerUser = createTestUser();
+    // Perform login
+    Log.i(LOG_TAG, "Attempting login to FileFox file server with user: " + fileServerUser);
+    final ClientResponse response = plugin.login(fileServerUser);
+
+    // Check response
+    final String responseText = response.bodyToMono(String.class).block();
+    final MultiValueMap<String, ResponseCookie> cookies = response.cookies();
+    final HttpStatus statusCode = response.statusCode();
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Got response: %s\nbody:\n%s\nwith cookies:\n%s", statusCode, responseText, cookies));
+
+    final boolean loginSuccessful = statusCode.is2xxSuccessful();
+    assertThat(loginSuccessful).isTrue();
+  }
 
   @Test
   @DisplayName("Ensure plugin can extract direct download link")
   void getDownloadURL() throws IOException {
+
+    final FileServerUser testFileServerUser = getLoggedInUser();
 
     final Set<HttpCookie> cookies =
         testFileServerUser.getCookies().stream()

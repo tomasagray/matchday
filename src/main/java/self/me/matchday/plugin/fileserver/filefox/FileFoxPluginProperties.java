@@ -26,6 +26,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import self.me.matchday.plugin.PluginProperties;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.regex.Pattern;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Configuration
@@ -33,9 +37,39 @@ import self.me.matchday.plugin.PluginProperties;
 @ConfigurationProperties(prefix = "plugin.filefox")
 public class FileFoxPluginProperties extends PluginProperties {
 
+  private String baseUrl;
+  private String loginUrl;
   private String userAgent;
   private String linkUrlPattern;
   private String directDownloadUrlPattern;
   private String downloadLimitPattern;
   private int refreshHours;
+
+  public URL getBaseUrl() {
+    try {
+      return new URL(baseUrl);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("Could not parse FileFox base URL: " + baseUrl, e);
+    }
+  }
+
+  public URL getLoginUrl() {
+    try {
+      return new URL(loginUrl);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("Could not parse FileFox login URL: " + loginUrl, e);
+    }
+  }
+
+  public Pattern getLinkUrlPattern() {
+    return Pattern.compile(linkUrlPattern);
+  }
+
+  public Pattern getDirectDownloadUrlPattern() {
+    return Pattern.compile(directDownloadUrlPattern);
+  }
+
+  public Pattern getDownloadLimitPattern() {
+    return Pattern.compile(downloadLimitPattern);
+  }
 }

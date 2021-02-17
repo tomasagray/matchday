@@ -98,13 +98,12 @@ class FileFoxPluginPropertiesTest {
   void getLinkUrlPattern() throws MalformedURLException {
 
     final URL testUrl = new URL("https://filefox.cc/79muv293uj1r/20210121-EIB-ATM-LL_1.ts");
-    final String actualLinkUrlPattern = pluginProperties.getLinkUrlPattern();
+    final Pattern actualLinkUrlPattern = pluginProperties.getLinkUrlPattern();
 
     Log.i(
         LOG_TAG,
         String.format("Using URL matcher: %s for test URL:\n%s", actualLinkUrlPattern, testUrl));
-    final Pattern urlPattern = Pattern.compile(actualLinkUrlPattern);
-    final Matcher matcher = urlPattern.matcher(testUrl.toString());
+    final Matcher matcher = actualLinkUrlPattern.matcher(testUrl.toString());
     assertThat(matcher.find()).isTrue();
   }
 
@@ -115,13 +114,12 @@ class FileFoxPluginPropertiesTest {
     final URL testUrl =
         new URL(
             "https://s02.filefox.cc/wojxtujqwup7elabbssq26q4xhnjwzzgnrxcnsikekhsnu2h6db7ggkemibmq5l2px3e5rca/20210121-EIB-ATM-LL_1.ts");
-    final String actualUrlPattern = pluginProperties.getDirectDownloadUrlPattern();
+    final Pattern actualUrlPattern = pluginProperties.getDirectDownloadUrlPattern();
 
     Log.i(
         LOG_TAG,
         String.format("Using URL pattern matcher: %s for URL:\n%s", actualUrlPattern, testUrl));
-    final Pattern urlPattern = Pattern.compile(actualUrlPattern);
-    final Matcher matcher = urlPattern.matcher(testUrl.toString());
+    final Matcher matcher = actualUrlPattern.matcher(testUrl.toString());
     assertThat(matcher.find()).isTrue();
   }
 
