@@ -180,6 +180,8 @@ public class FileServerService {
         final FileServerPlugin serverPlugin = pluginOptional.get();
         Log.i(LOG_TAG, "Found plugin with ID: " + pluginId);
 
+        // todo - change to login object, so plugins can't modify user data
+        // todo - refactor this method; too long
         final ClientResponse loginResponse = serverPlugin.login(user);
         // If login successful
         if (loginResponse.statusCode().is2xxSuccessful()) {
@@ -190,7 +192,6 @@ public class FileServerService {
                   .flatMap(Collection::stream)
                   .map(SecureCookie::fromSpringCookie)
                   .collect(Collectors.toList());
-
           // Login user to server
           user.setLoggedIntoServer(serverPlugin.getPluginId().toString(), cookies);
           // Save user to repo

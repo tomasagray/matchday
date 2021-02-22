@@ -31,13 +31,19 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.util.Log;
 
 import java.io.*;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
+import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
@@ -61,13 +67,9 @@ public class ConnectionManager {
     try {
       // Map data
       final URL url = uri.toURL();
-      final URLConnection connection = setupUrlConnection(url, cookies);
-      final String data = readHttpData(connection);
+      final HttpURLConnection connection = setupUrlConnection(url, cookies);
+      return readHttpData(connection);
 
-      return ClientResponse.create(HttpStatus.OK)
-          .cookies(responseCookies -> updateCookies(connection, responseCookies))
-          .body(data)
-          .build();
     } catch (IOException e) {
       return ClientResponse.create(HttpStatus.BAD_REQUEST).body(e.getMessage()).build();
     }
@@ -83,9 +85,7 @@ public class ConnectionManager {
       final URL url = uri.toURL();
       final String query = getQueryString(queryParams);
       final HttpURLConnection connection = setupUrlConnection(url, cookies);
-      final String response = readPostResponse(connection, query);
-
-      return ClientResponse.create(HttpStatus.OK).body(response).build();
+      return performPost(connection, query);
 
     } catch (IOException e) {
       return ClientResponse.create(HttpStatus.BAD_REQUEST).body(e.getMessage()).build();
@@ -102,13 +102,44 @@ public class ConnectionManager {
     return connection;
   }
 
-  private String readHttpData(@NotNull final URLConnection connection) throws IOException {
+  private ClientResponse readHttpData(@NotNull final HttpURLConnection connection)
+      throws IOException {
 
-    // Read page with cookies
-    try (final InputStreamReader isr = new InputStreamReader(connection.getInputStream());
+    // Read page with headers
+    try (final InputStreamReader isr = new InputStreamReader(getInputStream(connection));
         final BufferedReader reader = new BufferedReader(isr)) {
-      return reader.lines().collect(Collectors.joining("\n"));
+
+      final HttpStatus status = HttpStatus.valueOf(connection.getResponseCode());
+      // Get headers, removing null entries
+      final Map<String, List<String>> headers =
+          connection.getHeaderFields().entrySet().stream()
+              .filter(entry -> entry.getKey() != null)
+              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+      final String body = reader.lines().collect(Collectors.joining("\n"));
+      return ClientResponse.create(status)
+          .headers(responseHeaders -> responseHeaders.putAll(headers))
+          .body(body)
+          .build();
     }
+  }
+
+  private ClientResponse performPost(
+      @NotNull HttpURLConnection connection, @NotNull String query) throws IOException {
+
+    configurePostConnection(connection);
+    final byte[] queryBytes = query.getBytes(StandardCharsets.UTF_8);
+    connection.setRequestProperty("Content-Length", Integer.toString(query.length()));
+
+    // POST request for download link
+    final OutputStream os = connection.getOutputStream();
+    os.write(queryBytes);
+    os.flush();
+
+    // Read complete response
+    final ClientResponse response = readHttpData(connection);
+    // Close stream
+    os.close();
+    return response;
   }
 
   @NotNull
@@ -126,73 +157,24 @@ public class ConnectionManager {
         .collect(Collectors.joining("&"));
   }
 
-  private void updateCookies(
-      @NotNull final URLConnection connection,
-      @NotNull final MultiValueMap<String, ResponseCookie> responseCookies) {
+  private InputStream getInputStream(@NotNull final HttpURLConnection connection)
+          throws IOException {
 
-    connection.getHeaderFields().get("Set-Cookie").stream()
-        .map(this::responseCookieFromString)
-        .filter(Objects::nonNull)
-        .forEach(cookie -> responseCookies.add(cookie.getName(), cookie));
-  }
-
-  private ResponseCookie responseCookieFromString(@NotNull final String str) {
-
-    try {
-
-      final List<List<String>> cookieFields =
-          Arrays.stream(str.split("; "))
-              .map(field -> Arrays.asList(field.split("=")))
-              .collect(Collectors.toList());
-      // Pop name & value
-      final String name = cookieFields.get(0).get(0);
-      final String value = cookieFields.get(0).get(1);
-      cookieFields.remove(0);
-      final Map<String, String> cookieMap =
-          cookieFields.stream()
-              .collect(Collectors.toMap(this::getCookieName, this::getCookieValue));
-
-      final String domain = cookieMap.get("domain");
-      final String path = cookieMap.get("path");
-      final Date date = dateFormat.parse(cookieMap.get("expires"));
-      final Duration maxAge = Duration.between(Instant.now(), date.toInstant());
-      final boolean httpOnly = cookieMap.get("HttpOnly") != null;
-      final boolean secure = cookieMap.get("Secure") != null;
-      final String sameSite = cookieMap.get("SameSite");
-
-      return ResponseCookie.from(name, value)
-          .domain(domain)
-          .path(path)
-          .maxAge(maxAge)
-          .httpOnly(httpOnly)
-          .secure(secure)
-          .sameSite(sameSite)
-          .build();
-    } catch (ParseException e) {
-      Log.e("FFConnectionManager", "Could not parse response cookie", e);
-      return null;
+    InputStream is;
+    // Check for error response
+    if (connection.getResponseCode() >= 400) {
+      is = connection.getErrorStream();
+    } else {
+      is = connection.getInputStream();
     }
-  }
-
-  private String readPostResponse(@NotNull HttpURLConnection connection, @NotNull String query)
-      throws IOException {
-
-    configurePostConnection(connection);
-    final byte[] queryBytes = query.getBytes(StandardCharsets.UTF_8);
-    connection.setRequestProperty("Content-Length", Integer.toString(query.length()));
-
-    // POST request for download link
-    final OutputStream os = connection.getOutputStream();
-    os.write(queryBytes);
-    os.flush();
-
-    // Read complete response
-    final InputStream inputStream = getResponseInputStream(connection);
-    final String response = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-    // Close streams
-    inputStream.close();
-    os.close();
-    return response;
+    // Handle content encoding
+    final String encoding = connection.getHeaderField("content-encoding");
+    if ("br".equalsIgnoreCase(encoding)) {
+      is = new BrotliInputStream(is);
+    } else if ("gzip".equalsIgnoreCase(encoding)) {
+      is = new GZIPInputStream(is);
+    }
+    return is;
   }
 
   private void configurePostConnection(@NotNull final HttpURLConnection connection)
@@ -217,24 +199,42 @@ public class ConnectionManager {
     connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
   }
 
-  private InputStream getResponseInputStream(@NotNull final HttpURLConnection connection)
-      throws IOException {
+  private ResponseCookie responseCookieFromString(@NotNull final String str) {
 
-    InputStream is;
-    // Check for error response
-    if (connection.getResponseCode() >= 400) {
-      is = connection.getErrorStream();
-    } else {
-      is = connection.getInputStream();
+    try {
+
+      final List<List<String>> cookieFields =
+              Arrays.stream(str.split("; "))
+                      .map(field -> Arrays.asList(field.split("=")))
+                      .collect(Collectors.toList());
+      // Pop name & value
+      final String name = cookieFields.get(0).get(0);
+      final String value = cookieFields.get(0).get(1);
+      cookieFields.remove(0);
+      final Map<String, String> cookieMap =
+              cookieFields.stream()
+                      .collect(Collectors.toMap(this::getCookieName, this::getCookieValue));
+
+      final String domain = cookieMap.get("domain");
+      final String path = cookieMap.get("path");
+      final Date date = dateFormat.parse(cookieMap.get("expires"));
+      final Duration maxAge = Duration.between(Instant.now(), date.toInstant());
+      final boolean httpOnly = cookieMap.get("HttpOnly") != null;
+      final boolean secure = cookieMap.get("Secure") != null;
+      final String sameSite = cookieMap.get("SameSite");
+
+      return ResponseCookie.from(name, value)
+              .domain(domain)
+              .path(path)
+              .maxAge(maxAge)
+              .httpOnly(httpOnly)
+              .secure(secure)
+              .sameSite(sameSite)
+              .build();
+    } catch (ParseException e) {
+      Log.e("FFConnectionManager", "Could not parse response cookie", e);
+      return null;
     }
-    // Handle content encoding
-    final String encoding = connection.getHeaderField("content-encoding");
-    if ("br".equalsIgnoreCase(encoding)) {
-      is = new BrotliInputStream(is);
-    } else if ("gzip".equalsIgnoreCase(encoding)) {
-      is = new GZIPInputStream(is);
-    }
-    return is;
   }
 
   private String getCookieName(@NotNull final List<String> strs) {

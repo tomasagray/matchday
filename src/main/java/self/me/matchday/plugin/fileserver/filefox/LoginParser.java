@@ -28,15 +28,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.model.SecureCookie;
 import self.me.matchday.plugin.fileserver.FileServerUser;
+import self.me.matchday.util.Log;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Data
 @Component
@@ -68,17 +68,14 @@ public class LoginParser {
     if (statusCode.is2xxSuccessful() || statusCode.is3xxRedirection()) {
       // Extract cookies
       final MultiValueMap<String, ResponseCookie> loginCookies = loginResponse.cookies();
-      final HashSet<SecureCookie> cookies = new HashSet<>();
-      // Map to SecureCookie
-      loginCookies.forEach(
-          (name, cookieJar) -> {
-            final Set<SecureCookie> collect =
-                cookieJar.stream().map(SecureCookie::fromSpringCookie).collect(Collectors.toSet());
-            cookies.addAll(collect);
-          });
+      final String body = loginResponse.bodyToMono(String.class).block();
+      Log.i("LoginParser", "Got response:\n" + body);
       // Correct status code
-      loginResponse = ClientResponse.from(loginResponse).statusCode(HttpStatus.OK).build();
-      user.setCookies(cookies);
+      loginResponse =
+          ClientResponse.from(loginResponse)
+              .statusCode(HttpStatus.OK)
+              .cookies(cookieJar -> cookieJar.addAll(loginCookies))
+              .build();
     }
     return loginResponse;
   }

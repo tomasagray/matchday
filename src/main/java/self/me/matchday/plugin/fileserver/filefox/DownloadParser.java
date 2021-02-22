@@ -89,13 +89,15 @@ public class DownloadParser {
 
   private void validateDownloadPage(@Nullable final String html) {
 
-    // todo - extract to plugin properties
+    // todo - extract Strings to plugin properties
     final String linkButtonText = "Get Download Link";
     if (html == null) {
       throw new RuntimeException("Download page data was null!");
     }
-
     final Document downloadPage = Jsoup.parse(html);
+    if (downloadPage.select("ul.navbar-nav").text().contains("Login")) {
+      throw new RuntimeException("User is not logged in");
+    }
     if (downloadPage.text().contains("This file can be downloaded by Premium Members only")) {
       throw new RuntimeException("User account is not premium");
     }
