@@ -20,26 +20,23 @@
 package self.me.matchday.plugin.fileserver.filefox;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.FormElement;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 @Component
 public class DownloadParser {
@@ -48,34 +45,30 @@ public class DownloadParser {
 
   private final FileFoxPluginProperties pluginProperties;
   private final ConnectionManager connectionManager;
+  private final PageEvaluator pageEvaluator;
 
   public DownloadParser(
       @Autowired FileFoxPluginProperties pluginProperties,
-      @Autowired ConnectionManager connectionManager) {
+      @Autowired ConnectionManager connectionManager,
+      @Autowired PageEvaluator pageEvaluator) {
 
     this.pluginProperties = pluginProperties;
     this.connectionManager = connectionManager;
+    this.pageEvaluator = pageEvaluator;
   }
 
   public Optional<URL> parseDownloadRequest(
-      @NotNull final URI uri, @NotNull MultiValueMap<String, String> cookieJar)
-      throws URISyntaxException {
+      @NotNull final URI uri, @NotNull MultiValueMap<String, String> cookieJar) {
 
     // Read remote page
     final ClientResponse downloadLandingResponse = connectionManager.get(uri, cookieJar);
-    // Extract cookies
-    downloadLandingResponse
-        .cookies()
-        .forEach(
-            (name, cookieSet) ->
-                cookieJar.put(
-                    name,
-                    cookieSet.stream().map(ResponseCookie::getValue).collect(Collectors.toList())));
     final String downloadLandingHtml = downloadLandingResponse.bodyToMono(String.class).block();
-    validateDownloadPage(downloadLandingHtml);
+    final PageType pageType = pageEvaluator.getPageType(downloadLandingHtml);
+    if (pageType != PageType.PremiumDownloadLanding) {
+      throw new RuntimeException("Response from FileFox was not a Premium download page");
+    }
 
     // Get hidden input fields
-    assert downloadLandingHtml != null;
     final Map<String, String> queryParams = getHiddenQueryParams(downloadLandingHtml);
     final String hiddenFormUri = getHiddenFormUri(downloadLandingHtml);
     final URI formUri = uri.resolve(hiddenFormUri);
@@ -83,35 +76,10 @@ public class DownloadParser {
     // Fetch direct download page & parse
     final String directDownloadHtml =
         connectionManager.post(formUri, cookieJar, queryParams).bodyToMono(String.class).block();
-    assert directDownloadHtml != null;
     return parseDirectDownloadPage(directDownloadHtml);
   }
 
-  private void validateDownloadPage(@Nullable final String html) {
-
-    // todo - extract Strings to plugin properties
-    final String linkButtonText = "Get Download Link";
-    if (html == null) {
-      throw new RuntimeException("Download page data was null!");
-    }
-    final Document downloadPage = Jsoup.parse(html);
-    if (downloadPage.select("ul.navbar-nav").text().contains("Login")) {
-      throw new RuntimeException("User is not logged in");
-    }
-    if (downloadPage.text().contains("This file can be downloaded by Premium Members only")) {
-      throw new RuntimeException("User account is not premium");
-    }
-
-    final Elements buttons = downloadPage.select("button.btn-default");
-    // Find the "get download link" button
-    buttons.stream()
-        .filter(button -> button.text().equalsIgnoreCase(linkButtonText))
-        .findAny()
-        .orElseThrow(
-            () -> new RuntimeException("HTML is not a valid download page (not logged in?)"));
-  }
-
-  private Map<String, String> getHiddenQueryParams(@NotNull final String html) {
+  private Map<String, String> getHiddenQueryParams(final String html) {
 
     // Parse download page for hidden form
     final Document downloadPage = Jsoup.parse(html);
@@ -128,7 +96,7 @@ public class DownloadParser {
     return hiddenValues;
   }
 
-  private String getHiddenFormUri(@NotNull final String pageHtml) {
+  private String getHiddenFormUri(final String pageHtml) {
 
     final String errorMessage = "Could not parse direct download location";
     // Get form URL
@@ -142,7 +110,7 @@ public class DownloadParser {
     throw new IllegalArgumentException(errorMessage);
   }
 
-  private Optional<URL> parseDirectDownloadPage(@NotNull final String directDownloadHtml) {
+  private Optional<URL> parseDirectDownloadPage(final String directDownloadHtml) {
 
     // Parse download link from response
     final Document document = Jsoup.parse(directDownloadHtml);
@@ -171,7 +139,7 @@ public class DownloadParser {
   }
 
   private boolean isDirectDownloadLink(@NotNull final Element link) {
-    return link.hasAttr(HREF)
-        && pluginProperties.getDirectDownloadUrlPattern().matcher(link.attr(HREF)).find();
+    final Pattern urlPattern = pluginProperties.getDirectDownloadUrlPattern();
+    return link.hasAttr(HREF) && urlPattern.matcher(link.attr(HREF)).find();
   }
 }

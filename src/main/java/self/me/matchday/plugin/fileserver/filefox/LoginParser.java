@@ -23,13 +23,11 @@ import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.plugin.fileserver.FileServerUser;
-import self.me.matchday.util.Log;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,39 +41,43 @@ import java.util.Map;
 public class LoginParser {
 
   private final ConnectionManager connectionManager;
+  private final PageEvaluator pageEvaluator;
   private final FileFoxPluginProperties pluginProperties;
   private final URI loginUri;
 
   public LoginParser(
       @Autowired ConnectionManager connectionManager,
+      @Autowired PageEvaluator pageEvaluator,
       @Autowired FileFoxPluginProperties pluginProperties)
       throws URISyntaxException {
 
     this.connectionManager = connectionManager;
+    this.pageEvaluator = pageEvaluator;
     this.pluginProperties = pluginProperties;
     this.loginUri = pluginProperties.getLoginUrl().toURI();
   }
 
   public ClientResponse performLogin(@NotNull final FileServerUser user) {
 
-    // Perform login
     final Map<String, String> loginData = getLoginData(user);
-    final LinkedMultiValueMap<String, String> emptyCookies = new LinkedMultiValueMap<>();
+    final MultiValueMap<String, String> emptyCookies = new LinkedMultiValueMap<>();
     ClientResponse loginResponse = connectionManager.post(loginUri, emptyCookies, loginData);
+    return evaluateLoginResponse(loginResponse);
+  }
+
+  private ClientResponse evaluateLoginResponse(@NotNull final ClientResponse loginResponse) {
 
     final HttpStatus statusCode = loginResponse.statusCode();
+    final String body = loginResponse.bodyToMono(String.class).block();
+    final PageType pageType = pageEvaluator.getPageType(body);
+
+    if (pageType == PageType.Login) {
+      return ClientResponse.from(loginResponse).statusCode(HttpStatus.UNAUTHORIZED).build();
+    }
     // todo - follow redirect? do we need more cookies?
-    if (statusCode.is2xxSuccessful() || statusCode.is3xxRedirection()) {
-      // Extract cookies
-      final MultiValueMap<String, ResponseCookie> loginCookies = loginResponse.cookies();
-      final String body = loginResponse.bodyToMono(String.class).block();
-      Log.i("LoginParser", "Got response:\n" + body);
+    if (statusCode.is3xxRedirection()) {
       // Correct status code
-      loginResponse =
-          ClientResponse.from(loginResponse)
-              .statusCode(HttpStatus.OK)
-              .cookies(cookieJar -> cookieJar.addAll(loginCookies))
-              .build();
+      return ClientResponse.from(loginResponse).statusCode(HttpStatus.OK).build();
     }
     return loginResponse;
   }
