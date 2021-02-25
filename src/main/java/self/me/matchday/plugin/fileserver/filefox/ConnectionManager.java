@@ -95,9 +95,11 @@ public class ConnectionManager {
   private HttpURLConnection setupUrlConnection(
       @NotNull URL url, @NotNull MultiValueMap<String, String> cookies) throws IOException {
 
-    final String cookiesHeader = getCookiesHeader(cookies);
     final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-    connection.setRequestProperty("Cookie", cookiesHeader);
+    final String cookiesHeader = getCookiesHeader(cookies);
+    if (!"".equals(cookiesHeader)) {
+      connection.setRequestProperty("Cookie", cookiesHeader);
+    }
     connection.setRequestProperty(USER_AGENT, pluginProperties.getUserAgent());
     return connection;
   }

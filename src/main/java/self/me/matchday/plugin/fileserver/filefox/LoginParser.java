@@ -69,9 +69,9 @@ public class LoginParser {
 
     final HttpStatus statusCode = loginResponse.statusCode();
     final String body = loginResponse.bodyToMono(String.class).block();
-    final PageType pageType = pageEvaluator.getPageType(body);
+    final FileFoxPage page = pageEvaluator.getFileFoxPage(body);
 
-    if (pageType == PageType.Login) {
+    if (!(page instanceof FileFoxPage.Profile)) {
       return ClientResponse.from(loginResponse).statusCode(HttpStatus.UNAUTHORIZED).build();
     }
     // todo - follow redirect? do we need more cookies?
