@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
-import self.me.matchday.TestFileServerPlugin;
+import self.me.matchday.UnitTestFileServerPlugin;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.M3UPlaylist;
@@ -63,7 +63,7 @@ class VariantPlaylistServiceTest {
       @Autowired final FileServerService fileServerService,
       @Autowired final CompetitionService competitionService,
       @Autowired final TeamService teamService,
-      @Autowired final TestFileServerPlugin testFileServerPlugin) {
+      @Autowired final UnitTestFileServerPlugin testFileServerPlugin) {
 
     VariantPlaylistServiceTest.playlistService = playlistService;
     VariantPlaylistServiceTest.eventService = eventService;

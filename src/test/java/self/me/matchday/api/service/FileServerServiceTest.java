@@ -31,7 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.CreateTestData;
-import self.me.matchday.TestFileServerPlugin;
+import self.me.matchday.UnitTestFileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
@@ -53,13 +53,13 @@ class FileServerServiceTest {
   private static final String LOG_TAG = "FileServerServiceTest";
 
   private static FileServerService fileServerService;
-  private static TestFileServerPlugin testFileServerPlugin;
+  private static FileServerPlugin testFileServerPlugin;
   private static FileServerUser testFileServerUser;
 
   @BeforeAll
   static void setUp(
       @Autowired final FileServerService fileServerService,
-      @Autowired final TestFileServerPlugin testFileServerPlugin) {
+      @Autowired final UnitTestFileServerPlugin testFileServerPlugin) {
 
     FileServerServiceTest.fileServerService = fileServerService;
     FileServerServiceTest.testFileServerPlugin = testFileServerPlugin;

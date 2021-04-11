@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
-import self.me.matchday.TestFileServerPlugin;
+import self.me.matchday.UnitTestFileServerPlugin;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.plugin.fileserver.FileServerUser;
@@ -57,7 +57,7 @@ class EventFileServiceTest {
   static void setUp(
       @Autowired final EventFileService eventFileService,
       @Autowired final FileServerService fileServerService,
-      @Autowired final TestFileServerPlugin testFileServerPlugin) {
+      @Autowired final UnitTestFileServerPlugin testFileServerPlugin) {
 
     EventFileServiceTest.eventFileService = eventFileService;
     EventFileServiceTest.fileServerService = fileServerService;
