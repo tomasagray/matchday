@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
-import self.me.matchday.TestFileServerPlugin;
+import self.me.matchday.UnitTestFileServerPlugin;
 import self.me.matchday.model.*;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
@@ -67,7 +67,7 @@ class VideoStreamingServiceTest {
       @Autowired final CompetitionService competitionService,
       @Autowired final TeamService teamService,
       @Autowired final FileServerService fileServerService,
-      @Autowired final TestFileServerPlugin testFileServerPlugin) {
+      @Autowired final UnitTestFileServerPlugin testFileServerPlugin) {
 
     VideoStreamingServiceTest.streamingService = streamingService;
     VideoStreamingServiceTest.eventService = eventService;
