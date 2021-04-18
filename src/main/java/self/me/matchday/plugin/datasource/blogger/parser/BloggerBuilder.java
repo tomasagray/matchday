@@ -19,7 +19,6 @@
 
 package self.me.matchday.plugin.datasource.blogger.parser;
 
-import java.io.IOException;
 import self.me.matchday.plugin.datasource.blogger.Blogger;
 
 public interface BloggerBuilder {
@@ -29,6 +28,6 @@ public interface BloggerBuilder {
    *
    * @return An initialized Blogger instance
    */
-  Blogger getBlogger() throws IOException;
+  Blogger getBlogger();
 
 }

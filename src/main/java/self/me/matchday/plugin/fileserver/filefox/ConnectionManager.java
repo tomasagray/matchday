@@ -23,12 +23,10 @@ import org.brotli.dec.BrotliInputStream;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.util.Log;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -36,12 +34,6 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,8 +43,6 @@ import java.util.zip.GZIPInputStream;
 public class ConnectionManager {
 
   private static final String USER_AGENT = "User-Agent";
-  private static final SimpleDateFormat dateFormat =
-      new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss zzz");
 
   private final FileFoxPluginProperties pluginProperties;
 
@@ -201,55 +191,4 @@ public class ConnectionManager {
     connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
   }
 
-  private ResponseCookie responseCookieFromString(@NotNull final String str) {
-
-    try {
-
-      final List<List<String>> cookieFields =
-              Arrays.stream(str.split("; "))
-                      .map(field -> Arrays.asList(field.split("=")))
-                      .collect(Collectors.toList());
-      // Pop name & value
-      final String name = cookieFields.get(0).get(0);
-      final String value = cookieFields.get(0).get(1);
-      cookieFields.remove(0);
-      final Map<String, String> cookieMap =
-              cookieFields.stream()
-                      .collect(Collectors.toMap(this::getCookieName, this::getCookieValue));
-
-      final String domain = cookieMap.get("domain");
-      final String path = cookieMap.get("path");
-      final Date date = dateFormat.parse(cookieMap.get("expires"));
-      final Duration maxAge = Duration.between(Instant.now(), date.toInstant());
-      final boolean httpOnly = cookieMap.get("HttpOnly") != null;
-      final boolean secure = cookieMap.get("Secure") != null;
-      final String sameSite = cookieMap.get("SameSite");
-
-      return ResponseCookie.from(name, value)
-              .domain(domain)
-              .path(path)
-              .maxAge(maxAge)
-              .httpOnly(httpOnly)
-              .secure(secure)
-              .sameSite(sameSite)
-              .build();
-    } catch (ParseException e) {
-      Log.e("FFConnectionManager", "Could not parse response cookie", e);
-      return null;
-    }
-  }
-
-  private String getCookieName(@NotNull final List<String> strs) {
-    if (strs.size() > 0) {
-      return strs.get(0);
-    }
-    return null;
-  }
-
-  private String getCookieValue(@NotNull final List<String> strs) {
-    if (strs.size() > 1) {
-      return strs.get(1);
-    }
-    return "true";
-  }
 }

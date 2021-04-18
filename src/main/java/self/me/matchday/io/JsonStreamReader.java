@@ -24,11 +24,9 @@
 package self.me.matchday.io;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Path;
 
 /**
@@ -39,27 +37,6 @@ import java.nio.file.Path;
 public class JsonStreamReader {
 
   private static final JsonParser parser = new JsonParser();
-
-  /**
-   * Read a remote JSON file from a URL via HTTP.
-   *
-   * @param url The URL of the JSON file/stream
-   * @return JsonObject A JsonObject (Gson) representing the stream.
-   * @throws IOException JSON cannot be read from the source.
-   * @throws JsonParseException The loaded text is not valid JSON.
-   * @throws JsonSyntaxException JSON is invalid.
-   */
-  public static JsonObject readRemote(URL url) throws IOException {
-    // Read the file
-    String json = TextFileReader.readRemote(url);
-    // Ensure data read
-    if ("".equals(json)) {
-      throw new IOException("No data read from URL: " + url);
-    }
-
-    // Parse & return
-    return parser.parse(json).getAsJsonObject();
-  }
 
   /**
    * Reads a JSON (.json) file from the local filesystem.

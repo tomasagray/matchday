@@ -23,12 +23,16 @@
  */
 package self.me.matchday.plugin.datasource.blogger;
 
-/**
- * Indicates the parser encountered an irrecoverable error when examining this Blogger plugin.
- */
+/** Indicates the parser encountered an irrecoverable error when examining this Blogger plugin. */
 public class InvalidBloggerFeedException extends RuntimeException {
 
-  public InvalidBloggerFeedException(String msg) {
+  private static final String DEFAULT_MSG = "Could not parse Blogger from data given";
+
+  public InvalidBloggerFeedException() {
+    super(DEFAULT_MSG);
+  }
+
+  public InvalidBloggerFeedException(final String msg) {
     super(msg);
   }
 

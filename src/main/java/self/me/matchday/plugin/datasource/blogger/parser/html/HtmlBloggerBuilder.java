@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -19,40 +19,36 @@
 
 package self.me.matchday.plugin.datasource.blogger.parser.html;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import self.me.matchday.io.TextFileReader;
 import self.me.matchday.plugin.datasource.blogger.Blogger;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
 import self.me.matchday.plugin.datasource.blogger.InvalidBloggerFeedException;
 import self.me.matchday.plugin.datasource.blogger.parser.BloggerBuilder;
 import self.me.matchday.util.URLQueryDecoder;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
 public class HtmlBloggerBuilder implements BloggerBuilder {
 
   // Dependencies
-  private final URL url;
+  private final String data;
   private final HtmlPostBuilderFactory postBuilderFactory;
 
   private Document html;
   private long postCount;
 
-  public HtmlBloggerBuilder(@NotNull final URL url,
-      @NotNull final HtmlPostBuilderFactory postBuilderFactory) {
-
-    this.url = url;
+  public HtmlBloggerBuilder(
+      @NotNull final String data, @NotNull final HtmlPostBuilderFactory postBuilderFactory) {
+    this.data = data;
     this.postBuilderFactory = postBuilderFactory;
-
   }
 
   private String parseBloggerId() {
@@ -95,11 +91,7 @@ public class HtmlBloggerBuilder implements BloggerBuilder {
       // Get the author <span> element
       final Element author = this.html.select("span[itemprop=author]").first();
       // Get the next <span> element which should contain the author data
-      final Element name =
-          author
-              .nextElementSiblings()
-              .select("span[itemprop=name]")
-              .first();
+      final Element name = author.nextElementSiblings().select("span[itemprop=name]").first();
       return name.text();
     } catch (NullPointerException e) {
       return "null";
@@ -115,35 +107,31 @@ public class HtmlBloggerBuilder implements BloggerBuilder {
   private Stream<BloggerPost> parseEntries() {
 
     // Result container
-    List<BloggerPost> entries  = new ArrayList<>();
+    List<BloggerPost> entries = new ArrayList<>();
     final Elements posts = this.html.select("div.date-posts > div.post-outer");
 
     if (posts.isEmpty()) {
-      throw new InvalidBloggerFeedException(
-          String.format("Feed  is empty from URL: %s", this.url));
+      throw new InvalidBloggerFeedException();
     }
 
-    posts.forEach(element -> {
-      // Create post parser
-      final HtmlBloggerPostBuilder htmlPostBuilder =
-          this.postBuilderFactory.createBuilder(element);
-      // Parse the post & add to list
-      entries.add(htmlPostBuilder.getBloggerPost());
-      postCount++;
-    });
+    posts.forEach(
+        element -> {
+          // Create post parser
+          final HtmlBloggerPostBuilder htmlPostBuilder =
+              this.postBuilderFactory.createBuilder(element);
+          // Parse the post & add to list
+          entries.add(htmlPostBuilder.getBloggerPost());
+          postCount++;
+        });
 
-    return
-        entries.stream();
+    return entries.stream();
   }
 
   @Override
-  public Blogger getBlogger() throws IOException {
+  public Blogger getBlogger() {
 
-    // Read HTML from URL
-    final String html = TextFileReader.readRemote(url);
     // DOM-ify HTML String
-    this.html = Jsoup.parse(html);
-
+    this.html = Jsoup.parse(data);
     // Get Blogger fields:
     String bloggerId = parseBloggerId();
     String title = parseTitle();
@@ -152,7 +140,6 @@ public class HtmlBloggerBuilder implements BloggerBuilder {
     String link = parseLink();
     Stream<BloggerPost> posts = parseEntries();
 
-    return
-        new Blogger(bloggerId, title, version, author, link, posts, postCount);
+    return new Blogger(bloggerId, title, version, author, link, posts, postCount);
   }
 }

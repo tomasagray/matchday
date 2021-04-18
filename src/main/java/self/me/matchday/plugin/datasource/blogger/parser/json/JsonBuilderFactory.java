@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -19,7 +19,6 @@
 
 package self.me.matchday.plugin.datasource.blogger.parser.json;
 
-import java.net.URL;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.plugin.datasource.blogger.parser.BloggerBuilder;
 import self.me.matchday.plugin.datasource.blogger.parser.BloggerBuilderFactory;
@@ -28,16 +27,12 @@ import self.me.matchday.plugin.datasource.blogger.parser.BloggerUrlBuilder;
 public class JsonBuilderFactory implements BloggerBuilderFactory {
 
   @Override
-  public BloggerBuilder getBloggerBuilder(@NotNull URL url) {
-
-    return
-        new JsonBloggerBuilder(url, new JsonPostBuilderFactory());
+  public BloggerBuilder getBloggerBuilder(@NotNull String blogData) {
+    return new JsonBloggerBuilder(blogData, new JsonPostBuilderFactory());
   }
 
   @Override
   public BloggerUrlBuilder getBloggerUrlBuilder(@NotNull final String baseUrl) {
-
-    return
-        new JsonUrlBuilder(baseUrl);
+    return new JsonUrlBuilder(baseUrl);
   }
 }

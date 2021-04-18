@@ -103,7 +103,7 @@ public class ResourceFileReader {
             if (!(line.equals(""))) {
                 // Split line
                 String[] split = line.split("=", 2);
-                if (split != null && split.length > 0) {
+                if (split.length > 0) {
                     final String key = split[0];
                     final String value = split.length == 2 ?
                             split[1].replace(" \\", "").trim() :

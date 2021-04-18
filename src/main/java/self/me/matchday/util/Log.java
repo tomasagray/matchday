@@ -83,7 +83,7 @@ public final class Log {
           .append(":\t")
           .append(logMsg);
       if (throwable != null) {
-        sb.append("\n\tException:\n-----------------\n\t").append(throwable.toString());
+        sb.append("\n\tException:\n-----------------\n\t").append(throwable);
       }
 
       // Build the string

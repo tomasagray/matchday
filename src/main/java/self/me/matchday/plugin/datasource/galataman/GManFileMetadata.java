@@ -130,7 +130,7 @@ class GManFileMetadata extends FileSourceMetadata {
                 break;
             default:
                 throw new IllegalArgumentException(
-                        "Invalid key/value in Galataman Event File Source metadata: " + kv.toString());
+                        "Invalid key/value in Galataman Event File Source metadata: " + kv);
         }
     }
 
