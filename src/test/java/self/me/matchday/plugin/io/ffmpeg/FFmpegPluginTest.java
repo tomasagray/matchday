@@ -248,7 +248,9 @@ class FFmpegPluginTest {
       // Wait for FFMPEG to do its thing...
       Thread.sleep(30_000L);
 
-      actualFileCount = streamingPath.getParent().toFile().list().length;
+      final String[] fileList = streamingPath.getParent().toFile().list();
+      assertThat(fileList).isNotNull();
+      actualFileCount = fileList.length;
       Log.i(LOG_TAG, String.format("Found %s files on current sleep cycle...", actualFileCount));
       if (actualFileCount >= MIN_EXPECTED_FILE_COUNT) {
         Log.i(LOG_TAG, "That's enough for testing...");

@@ -27,7 +27,6 @@ import self.me.matchday.plugin.datasource.blogger.Blogger;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
 import self.me.matchday.util.Log;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.stream.Stream;
@@ -41,11 +40,11 @@ class JsonBloggerBuilderTest {
   private static Blogger blogger;
 
   @BeforeAll
-  static void setUp() throws IOException {
+  static void setUp() {
 
     // Create parser
     JsonBloggerBuilder bloggerBuilder =
-        new JsonBloggerBuilder(CreateTestData.ZKF_JSON_URL, new JsonPostBuilderFactory());
+        new JsonBloggerBuilder(CreateTestData.ZKF_JSON, new JsonPostBuilderFactory());
     // Get Blogger from remote source
     blogger = bloggerBuilder.getBlogger();
   }
@@ -55,7 +54,7 @@ class JsonBloggerBuilderTest {
   void testBloggerId() {
 
     final String actualBlogId = blogger.getBlogId();
-    final String expectedBlogId = "3404769062477783101";
+    final String expectedBlogId = "3007373617851084235";
 
     Log.i(LOG_TAG, "Testing blog ID: " + actualBlogId);
     assertThat(actualBlogId).isEqualTo(expectedBlogId);
@@ -66,7 +65,7 @@ class JsonBloggerBuilderTest {
   void testTitle() {
 
     final String actualTitle = blogger.getTitle();
-    final String expectedTitle = "zkfootballmatches";
+    final String expectedTitle = "DOWNLOAD FULL MATCHES";
 
     Log.i(LOG_TAG, "Testing blog title: " + actualTitle);
     assertThat(actualTitle).isEqualTo(expectedTitle);
@@ -92,7 +91,7 @@ class JsonBloggerBuilderTest {
   void testAuthor() {
 
     final String actualAuthor = blogger.getAuthor();
-    final String expectedAuthor = "zkfootballmatches";
+    final String expectedAuthor = "FULL MATCHES DOWNLOAD";
 
     Log.i(LOG_TAG, "Testing Blogger author: " + actualAuthor);
     assertThat(actualAuthor).isEqualTo(expectedAuthor);

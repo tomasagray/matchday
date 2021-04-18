@@ -24,36 +24,42 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.*;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
+import self.me.matchday.util.ResourceFileReader;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
-import java.util.regex.Pattern;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static self.me.matchday.model.EventFileSource.Resolution.R_1080p;
 
 public class CreateTestData {
 
-  public static final Pattern URL_PATTERN =
-      Pattern.compile("http[s]?://192.168.0.101/matchday-testing/[\\w./-]*");
   private static final String LOG_TAG = "CreateTestData";
   private static final Random numGen = new Random();
-  public static URL GMAN_HTML;
-  public static URL ZKF_JSON_URL;
-  public static URL NITROFLARE_DL_URL;
+  public static final String GMAN_HTML;
+  public static final String ZKF_JSON;
+  public static final URL NITROFLARE_DL_URL;
 
   static {
     try {
-      GMAN_HTML = new URL("http://192.168.0.101/matchday-testing/gman.html");
-      ZKF_JSON_URL = new URL("http://192.168.0.101/matchday-testing/zkf.json");
-      NITROFLARE_DL_URL =
-          new URL("http://192.168.0.101/matchday-testing/nitroflare_sample_download_page.htm");
+      GMAN_HTML =
+          String.join(
+              " ",
+              ResourceFileReader.readTextResource(
+                  CreateTestData.class, "gman_sample_page_20210416.html"));
+      ZKF_JSON =
+          String.join(
+              "",
+              ResourceFileReader.readTextResource(
+                  CreateTestData.class, "zkf_sample_20210416.json"));
+      NITROFLARE_DL_URL = new URL("https://www.nitroflare.com/");
 
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -152,7 +158,7 @@ public class CreateTestData {
     try {
       final String seed = "?rSeed=" + MD5String.generate();
       return new URL(
-          "http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_0-1080.mkv"
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
               + seed);
     } catch (MalformedURLException e) {
       e.printStackTrace();
@@ -165,7 +171,7 @@ public class CreateTestData {
     try {
       final String seed = "?rSeed=" + MD5String.generate();
       return new URL(
-          "http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_1-1080.mkv"
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
               + seed);
     } catch (MalformedURLException e) {
       e.printStackTrace();
@@ -178,7 +184,7 @@ public class CreateTestData {
     try {
       final String seed = "?rSeed=" + MD5String.generate();
       return new URL(
-          "http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_2-1080.mkv"
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
               + seed);
     } catch (MalformedURLException e) {
       e.printStackTrace();
@@ -191,7 +197,7 @@ public class CreateTestData {
     try {
       final String seed = "?rSeed=" + MD5String.generate();
       return new URL(
-          "http://192.168.0.101/matchday-testing/video/tottenham-arsenal/20201206-TOT-ARS-EPL_3-1080.mkv"
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
               + seed);
     } catch (MalformedURLException e) {
       e.printStackTrace();

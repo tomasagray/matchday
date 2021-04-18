@@ -27,7 +27,6 @@ import self.me.matchday.plugin.datasource.blogger.Blogger;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
 import self.me.matchday.util.Log;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,13 +39,12 @@ class HtmlBloggerBuilderTest {
   private static Blogger blogger;
 
   @BeforeAll
-  static void setUp() throws IOException {
+  static void setUp() {
 
     // Parse blogger
     HtmlBloggerBuilder bloggerBuilder =
         new HtmlBloggerBuilder(CreateTestData.GMAN_HTML, new HtmlPostBuilderFactory());
     blogger = bloggerBuilder.getBlogger();
-
     Log.i(LOG_TAG, "Read Blogger from HTML:\n" + blogger);
   }
 

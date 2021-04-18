@@ -137,7 +137,7 @@ class NitroflarePluginTest {
   void acceptsUrl() throws IOException {
 
     // Create invalid URL
-    final URL invalidUrl = new URL("http://www.yahoo.com");
+    final URL invalidUrl = new URL("https://www.yahoo.com");
 
     Log.i(LOG_TAG, String.format("Testing URLs: valid (%s), invalid (%s)", TEST_URL, invalidUrl));
 

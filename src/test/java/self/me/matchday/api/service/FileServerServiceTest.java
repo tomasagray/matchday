@@ -106,7 +106,7 @@ class FileServerServiceTest {
     final int expectedPluginCount = 4;
     final int actualPluginCount = fileServerPlugins.size();
 
-    assertThat(actualPluginCount).isEqualTo(expectedPluginCount);
+    assertThat(actualPluginCount).isGreaterThanOrEqualTo(expectedPluginCount);
     assertThat(fileServerPlugins).contains(testFileServerPlugin);
   }
 

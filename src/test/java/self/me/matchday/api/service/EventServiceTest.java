@@ -165,12 +165,10 @@ class EventServiceTest {
     // Minimum expected events
     final int expectedEventCount = 1;
 
-    // Fetch Events for La Liga
     final Optional<List<Event>> optionalEvents =
         eventService.fetchEventsForCompetition(testCompetition.getCompetitionId());
 
     assertThat(optionalEvents).isPresent();
-
     optionalEvents.ifPresent(
         events -> assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount));
   }

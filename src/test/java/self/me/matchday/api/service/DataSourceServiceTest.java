@@ -185,7 +185,7 @@ class DataSourceServiceTest {
     final int actualPluginCount = dataSourcePlugins.size();
     Log.i(LOG_TAG, String.format("Found: %s plugins", actualPluginCount));
 
-    assertThat(actualPluginCount).isEqualTo(expectedPluginCount);
+    assertThat(actualPluginCount).isGreaterThanOrEqualTo(expectedPluginCount);
   }
 
   @Test
@@ -199,7 +199,7 @@ class DataSourceServiceTest {
     final int actualPluginCount = enabledPlugins.size();
     Log.i(LOG_TAG, String.format("Found: %s enabled plugins", actualPluginCount));
 
-    assertThat(actualPluginCount).isEqualTo(expectedPluginCount);
+    assertThat(actualPluginCount).isGreaterThanOrEqualTo(expectedPluginCount);
   }
 
   private static class TestDataSourcePlugin implements DataSourcePlugin<Stream<Event>> {

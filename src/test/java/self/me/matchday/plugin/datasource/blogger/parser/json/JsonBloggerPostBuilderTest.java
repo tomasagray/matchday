@@ -220,7 +220,7 @@ class JsonBloggerPostBuilderTest {
 
     final String actualLink = bloggerPost.getLink();
     final String expectedLink =
-        "http://zkfullmatchvideos.blogspot.com/2020/10/international-friendly-austria-vs.html";
+            "https://zkfullmatchvideos.blogspot.com/2020/10/international-friendly-austria-vs.html";
 
     Log.i(LOG_TAG, "Testing post link: " + actualLink);
     // URL-ify - first stage of validation
