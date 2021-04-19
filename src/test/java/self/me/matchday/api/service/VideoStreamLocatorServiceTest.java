@@ -71,6 +71,7 @@ class VideoStreamLocatorServiceTest {
 
     // Cleanup test resources
     fileSrcRepository.delete(testEventFileSource);
+    videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
   }
 
   @AfterEach
@@ -101,6 +102,9 @@ class VideoStreamLocatorServiceTest {
   void getAllPlaylistLocators() {
 
     final int expectedPlaylistLocatorCount = 1;
+    Log.i(LOG_TAG, "Adding test stream locator to database...");
+    testStreamLocator = videoStreamLocatorService.createStreamLocator(testEventFileSource, testEventFile);
+
     final List<VideoStreamLocator> playlistLocators =
         videoStreamLocatorService.getAllStreamLocators();
     final int actualPlaylistLocatorCount = playlistLocators.size();
@@ -109,6 +113,8 @@ class VideoStreamLocatorServiceTest {
         String.format("Fetched %s playlist locators from database", actualPlaylistLocatorCount));
 
     assertThat(actualPlaylistLocatorCount).isGreaterThanOrEqualTo(expectedPlaylistLocatorCount);
+    // Remove test resource
+    videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
   }
 
   @Test
