@@ -49,46 +49,47 @@ public class FFmpeg {
    * Create a concatenated FFMPEG stream of the given URIs at the given storage location
    *
    * @param uris A List of file resource pointers
-   * @param location The location on disk to store stream data
+   * @param playlistPath The location on disk to store stream data
    * @return A thread task
    */
-  public FFmpegStreamTask getHlsStreamTask(@NotNull final Path location, @NotNull final URI... uris) {
+  public FFmpegStreamTask getHlsStreamTask(
+      @NotNull final Path playlistPath, @NotNull final URI... uris) {
 
     // Assemble arguments
     final String command = Strings.join(baseArgs, ' ');
-    final Path outputPath = location.toAbsolutePath();
-    final Path dataDir = outputPath.getParent();
-    final List<String> transcodeArgs = getDefaultTranscodeArgs(location);
+    final Path playlistAbsolutePath = playlistPath.toAbsolutePath();
+    final Path dataDir = playlistAbsolutePath.getParent();
+    final List<String> transcodeArgs = getDefaultTranscodeArgs(dataDir);
 
     if (uris.length > 1) {
       // Create FFMPEG CLI command & return
       return FFmpegConcatStreamTask.builder()
-              .command(command)
-              .uris(List.of(uris))
-              .transcodeArgs(transcodeArgs)
-              .outputPath(outputPath)
-              .dataDir(dataDir)
-              .loggingEnabled(loggingEnabled)
-              .build();
+          .command(command)
+          .uris(List.of(uris))
+          .transcodeArgs(transcodeArgs)
+          .playlistPath(playlistAbsolutePath)
+          .dataDir(dataDir)
+          .loggingEnabled(loggingEnabled)
+          .build();
     } else {
       URI uri = uris[0];
       // Create streaming task & return
       return FFmpegSingleStreamTask.builder()
-              .command(command)
-              .uri(uri)
-              .transcodeArgs(transcodeArgs)
-              .outputFile(outputPath)
-              .dataDir(dataDir)
-              .loggingEnabled(loggingEnabled)
-              .build();
+          .command(command)
+          .uri(uri)
+          .transcodeArgs(transcodeArgs)
+          .playlistPath(playlistAbsolutePath)
+          .dataDir(dataDir)
+          .loggingEnabled(loggingEnabled)
+          .build();
     }
   }
 
-  private List<String> getDefaultTranscodeArgs(@NotNull final Path playlistPath) {
+  private List<String> getDefaultTranscodeArgs(@NotNull final Path storageLocation) {
 
     final List<String> transcodeArgs = new ArrayList<>();
-    final Path storageLocation = playlistPath.getParent().toAbsolutePath();
-    final Path segmentPattern = storageLocation.resolve(SEGMENT_PATTERN);
+    final Path absoluteStorageLocation = storageLocation.toAbsolutePath();
+    final Path segmentPattern = absoluteStorageLocation.resolve(SEGMENT_PATTERN);
     // Add arguments
     transcodeArgs.add("-vcodec copy");
     transcodeArgs.add("-acodec copy");
@@ -99,7 +100,6 @@ public class FFmpeg {
     // Add segment output pattern
     final String segments = String.format("\"%s\"", segmentPattern);
     transcodeArgs.add(segments);
-
     return transcodeArgs;
   }
 }

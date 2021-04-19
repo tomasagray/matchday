@@ -47,7 +47,7 @@ public final class FFmpegConcatProtocolStreamTask extends FFmpegStreamTask {
       List<URI> uris) {
 
     this.command = command;
-    this.outputPath = outputPath;
+    this.playlistPath = outputPath;
     this.dataDir = dataDir;
     this.loggingEnabled = loggingEnabled;
     this.transcodeArgs = transcodeArgs;
@@ -61,7 +61,7 @@ public final class FFmpegConcatProtocolStreamTask extends FFmpegStreamTask {
     final String inputs = getInputString();
     final String arguments = Strings.join(transcodeArgs, ' ');
     return String.format(
-        "%s %s %s \"%s\"", this.getCommand(), inputs, arguments, this.getOutputPath());
+        "%s %s %s \"%s\"", this.getCommand(), inputs, arguments, this.getPlaylistPath());
   }
 
   @Override

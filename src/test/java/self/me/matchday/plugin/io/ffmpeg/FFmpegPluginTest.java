@@ -61,6 +61,7 @@ class FFmpegPluginTest {
   private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
   // Test resources
   private static File storageLocation;
+  private static Path testPlaylist;
   private static FFmpegPlugin ffmpegPlugin;
   private static FFmpegMetadata expectedMetadata;
   private static List<URL> testUrls;
@@ -74,6 +75,7 @@ class FFmpegPluginTest {
     try {
       // Get video storage location
       storageLocation = new File(STORAGE_LOCATION);
+      testPlaylist = storageLocation.toPath().resolve("playlist.m3u8");
       Log.i(LOG_TAG, "Got storage path: " + storageLocation.getAbsolutePath());
 
       // Create directory if not exists
@@ -130,8 +132,8 @@ class FFmpegPluginTest {
 
     final List<URI> testUris = getTestUris();
     final FFmpegStreamTask streamTask =
-        ffmpegPlugin.streamUris(storageLocation.toPath(), testUris.toArray(new URI[0]));
-    final Path streamingPath = streamTask.getOutputPath();
+        ffmpegPlugin.streamUris(testPlaylist, testUris.toArray(new URI[0]));
+    final Path streamingPath = streamTask.getPlaylistPath();
     // Start stream
     streamTask.start();
     Log.i(
@@ -152,8 +154,8 @@ class FFmpegPluginTest {
   void testSingleHlsStream() throws InterruptedException {
 
     final FFmpegStreamTask streamTask =
-        ffmpegPlugin.streamUris(storageLocation.toPath(), getTestUris().get(1));
-    final Path streamingPath = streamTask.getOutputPath();
+        ffmpegPlugin.streamUris(testPlaylist, getTestUris().get(1));
+    final Path streamingPath = streamTask.getPlaylistPath();
     Log.i(LOG_TAG, "Starting test stream to: " + streamingPath.toAbsolutePath());
 
     // Start stream
@@ -190,8 +192,8 @@ class FFmpegPluginTest {
 
     // Start a new task
     final FFmpegStreamTask streamingTask =
-        ffmpegPlugin.streamUris(storageLocation.toPath(), getTestUris().toArray(new URI[0]));
-    Log.i(LOG_TAG, "Created streaming task to: " + streamingTask.getOutputPath());
+        ffmpegPlugin.streamUris(testPlaylist, getTestUris().toArray(new URI[0]));
+    Log.i(LOG_TAG, "Created streaming task to: " + streamingTask.getPlaylistPath());
     streamingTask.start();
     // Wait...
     Thread.sleep(5_000L);
@@ -199,7 +201,10 @@ class FFmpegPluginTest {
     assertThat(ffmpegPlugin.getStreamingTaskCount()).isGreaterThan(0);
 
     Log.i(LOG_TAG, "Interrupting streaming task...");
-    ffmpegPlugin.interruptStreamingTask(storageLocation.toPath());
+    ffmpegPlugin.interruptStreamingTask(streamingTask.getPlaylistPath());
+
+    // Allow time to die...
+    Thread.sleep(10 * 1_000L);
     assertThat(ffmpegPlugin.getStreamingTaskCount()).isEqualTo(0);
   }
 

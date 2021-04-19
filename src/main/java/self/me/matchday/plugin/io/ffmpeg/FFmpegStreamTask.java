@@ -42,7 +42,7 @@ public abstract class FFmpegStreamTask extends Thread {
 
   protected String command;
   protected List<String> transcodeArgs;
-  protected Path outputPath;
+  protected Path playlistPath;
   protected Path dataDir;
   protected boolean loggingEnabled;
   protected Process process;

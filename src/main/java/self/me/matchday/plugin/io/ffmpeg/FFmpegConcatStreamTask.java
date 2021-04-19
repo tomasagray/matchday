@@ -45,14 +45,14 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
   @Builder
   public FFmpegConcatStreamTask(
       String command,
-      Path outputPath,
+      Path playlistPath,
       Path dataDir,
       boolean loggingEnabled,
       List<String> transcodeArgs,
       List<URI> uris) {
 
     this.command = command;
-    this.outputPath = outputPath;
+    this.playlistPath = playlistPath;
     this.dataDir = dataDir;
     this.loggingEnabled = loggingEnabled;
     this.transcodeArgs = transcodeArgs;
@@ -66,7 +66,7 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
     final String inputs = getInputString();
     final String arguments = Strings.join(transcodeArgs, ' ');
     return String.format(
-        "%s %s %s \"%s\"", this.getCommand(), inputs, arguments, this.getOutputPath());
+        "%s %s %s \"%s\"", this.getCommand(), inputs, arguments, this.getPlaylistPath());
   }
 
   @Override

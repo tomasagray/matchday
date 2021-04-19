@@ -103,7 +103,7 @@ class FFmpegTest {
   void outputPath() {
 
     final Path expectedOutputPath = Path.of(FFmpegTest.storageLocation);
-    final Path actualOutputPath = hlsStreamTask.getOutputPath();
+    final Path actualOutputPath = hlsStreamTask.getPlaylistPath();
 
     Log.i(LOG_TAG, "Testing output path: " + actualOutputPath);
     assertThat(actualOutputPath).isEqualByComparingTo(expectedOutputPath);

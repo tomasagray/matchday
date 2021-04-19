@@ -124,6 +124,7 @@ public class FFmpegPlugin implements Plugin {
       if (processKilled) {
         streamingTasks.remove(absolutePath);
       }
+      return;
     }
     Log.i(LOG_TAG, "No task found for output file: " + absolutePath);
   }
