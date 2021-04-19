@@ -20,6 +20,7 @@
 package self.me.matchday.plugin.fileserver.filefox;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +51,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for FileFox fileserver manager")
+@Disabled
 class FileFoxPluginTest {
 
   private static final String LOG_TAG = "FileFoxPluginTest";
