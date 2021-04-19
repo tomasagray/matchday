@@ -76,7 +76,7 @@ class JsonBloggerBuilderTest {
   void testLink() throws MalformedURLException {
 
     final String actualLink = blogger.getLink();
-    final String expectedLink = "https://zkfootballmatch.blogspot.com/";
+    final String expectedLink = "https://fb11710500.blogspot.com/";
 
     Log.i(LOG_TAG, "Testing Blogger link: " + actualLink);
     // Validate URL
