@@ -27,6 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.CreateTestData;
+import self.me.matchday.api.service.video.VideoStreamLocatorService;
 import self.me.matchday.db.EventFileSrcRepository;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;

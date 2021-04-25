@@ -28,7 +28,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import self.me.matchday.api.service.VideoResourceInterceptor;
+import self.me.matchday.api.service.video.VideoResourceInterceptor;
 import self.me.matchday.util.Log;
 
 @Configuration

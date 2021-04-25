@@ -25,8 +25,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.DataSourceService;
-import self.me.matchday.api.service.VideoStreamPlaylistService;
-import self.me.matchday.api.service.VideoStreamingService;
+import self.me.matchday.api.service.video.VideoStreamPlaylistService;
+import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.util.Log;
 

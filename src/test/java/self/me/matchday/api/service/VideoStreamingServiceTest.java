@@ -27,6 +27,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
 import self.me.matchday.UnitTestFileServerPlugin;
+import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.*;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;

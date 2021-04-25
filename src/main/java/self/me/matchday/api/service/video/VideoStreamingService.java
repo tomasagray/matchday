@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.api.service;
+package self.me.matchday.api.service.video;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import self.me.matchday.api.controller.VideoStreamingController;
+import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.*;
 import self.me.matchday.plugin.io.diskmanager.DiskManager;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;

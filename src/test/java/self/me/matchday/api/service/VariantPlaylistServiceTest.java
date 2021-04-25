@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
 import self.me.matchday.UnitTestFileServerPlugin;
+import self.me.matchday.api.service.video.VariantPlaylistService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.M3UPlaylist;

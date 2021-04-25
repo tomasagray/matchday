@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
+import self.me.matchday.api.service.video.MasterPlaylistService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.MasterM3U;
 import self.me.matchday.model.Match;

@@ -17,20 +17,24 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.api.service;
+package self.me.matchday.api.service.video;
 
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.stereotype.Service;
+import self.me.matchday.api.service.EventFileService;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.VideoStreamLocator;
+import self.me.matchday.model.VideoStreamPlaylist;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.util.Log;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -39,9 +43,15 @@ class VideoStreamManager {
 
   private static final String LOG_TAG = "VideoStreamManager";
 
+  // Config
+  private static final int THREAD_COUNT = 4;
+
+  // Dependencies
   private final EventFileService eventFileService;
   private final FFmpegPlugin ffmpegPlugin;
-  private final ExecutorService executorService = Executors.newFixedThreadPool(4);
+  private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT);
+
+  private final Set<VideoStreamJob> streamJobs = new HashSet<>();
 
   @Autowired
   public VideoStreamManager(
@@ -49,6 +59,13 @@ class VideoStreamManager {
 
     this.eventFileService = eventFileService;
     this.ffmpegPlugin = ffmpegPlugin;
+  }
+
+  public void submitStreamingJob(@NotNull final VideoStreamPlaylist playlist) {
+
+    // Create stream job if not already exists
+
+    // Add to set of jobs
   }
 
   void startVideoStreamTask(@NotNull final VideoStreamLocator streamLocator) {
