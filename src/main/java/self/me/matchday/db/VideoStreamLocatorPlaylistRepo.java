@@ -23,13 +23,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.VideoStreamPlaylist;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
 import java.util.List;
 
 @Repository
-public interface VideoStreamPlaylistRepo extends JpaRepository<VideoStreamPlaylist, Long> {
+public interface VideoStreamLocatorPlaylistRepo
+    extends JpaRepository<VideoStreamLocatorPlaylist, Long> {
 
-  @Query("SELECT vspl FROM VideoStreamPlaylist vspl WHERE vspl.fileSource.eventFileSrcId = :fileSrcId ORDER BY vspl.timestamp")
-  List<VideoStreamPlaylist> fetchPlaylistsForFileSrc(@Param("fileSrcId") final String fileSrcId);
+  @Query(
+      "SELECT vspl FROM VideoStreamLocatorPlaylist vspl WHERE vspl.fileSource.eventFileSrcId = :fileSrcId ORDER BY vspl.timestamp")
+  List<VideoStreamLocatorPlaylist> fetchPlaylistsForFileSrc(
+      @Param("fileSrcId") final String fileSrcId);
 }

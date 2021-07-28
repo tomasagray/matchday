@@ -20,8 +20,18 @@
 package self.me.matchday.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.VideoStreamLocator;
+import self.me.matchday.model.EventFile;
+import self.me.matchday.model.video.VideoStreamLocator;
+
+import java.util.List;
 
 @Repository
-public interface VideoStreamLocatorRepo extends JpaRepository<VideoStreamLocator, Long> {}
+public interface VideoStreamLocatorRepo extends JpaRepository<VideoStreamLocator, Long> {
+
+  @Query(
+      "SELECT vsl FROM VideoStreamLocator vsl WHERE vsl.eventFile = :eventFile ORDER BY vsl.timestamp")
+  List<VideoStreamLocator> getStreamLocatorsFor(@Param("eventFile") EventFile eventFile);
+}

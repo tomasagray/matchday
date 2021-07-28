@@ -22,14 +22,15 @@ package self.me.matchday.api.service.video;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.service.EventFileSelectorService;
-import self.me.matchday.db.VideoStreamPlaylistRepo;
+import self.me.matchday.db.VideoStreamLocatorPlaylistRepo;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.VideoStreamLocator;
-import self.me.matchday.model.VideoStreamPlaylist;
+import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.util.Log;
 
 import java.nio.file.Path;
@@ -37,20 +38,21 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class VideoStreamPlaylistService {
+@PropertySource("classpath:video.properties")
+public class VideoStreamLocatorPlaylistService {
 
   private static final String LOG_TAG = "VideoStreamPlaylistService";
 
-  private final VideoStreamPlaylistRepo playlistRepo;
+  private final VideoStreamLocatorPlaylistRepo playlistRepo;
   private final VideoStreamLocatorService videoStreamLocatorService;
   private final EventFileSelectorService eventFileSelectorService;
-  // Configuration
+
   @Value("${video-resources.file-storage-location}")
   private Path fileStorageLocation;
 
   @Autowired
-  public VideoStreamPlaylistService(
-      final VideoStreamPlaylistRepo playlistRepo,
+  public VideoStreamLocatorPlaylistService(
+      final VideoStreamLocatorPlaylistRepo playlistRepo,
       final VideoStreamLocatorService videoStreamLocatorService,
       final EventFileSelectorService eventFileSelectorService) {
 
@@ -64,7 +66,7 @@ public class VideoStreamPlaylistService {
    *
    * @return A List of all video stream playlists in the database
    */
-  public List<VideoStreamPlaylist> getAllVideoStreamPlaylists() {
+  public List<VideoStreamLocatorPlaylist> getAllVideoStreamPlaylists() {
     return playlistRepo.findAll();
   }
 
@@ -75,7 +77,8 @@ public class VideoStreamPlaylistService {
    * @return The playlist of video streams
    */
   @Transactional
-  public VideoStreamPlaylist createVideoStreamPlaylist(@NotNull final EventFileSource fileSource) {
+  public VideoStreamLocatorPlaylist createVideoStreamPlaylist(
+      @NotNull final EventFileSource fileSource) {
 
     // Get list of "best" EventFiles for each event part
     final List<EventFile> playlistFiles = eventFileSelectorService.getPlaylistFiles(fileSource);
@@ -105,9 +108,11 @@ public class VideoStreamPlaylistService {
    * @param fileSrcId The ID of the EventFileSource this playlist was created from
    * @return An Optional containing the most recent playlist
    */
-  public Optional<VideoStreamPlaylist> getVideoStreamPlaylist(@NotNull final String fileSrcId) {
+  public Optional<VideoStreamLocatorPlaylist> getVideoStreamPlaylistFor(
+      @NotNull final String fileSrcId) {
 
-    final List<VideoStreamPlaylist> playlists = playlistRepo.fetchPlaylistsForFileSrc(fileSrcId);
+    final List<VideoStreamLocatorPlaylist> playlists =
+        playlistRepo.fetchPlaylistsForFileSrc(fileSrcId);
     if (playlists != null && playlists.size() > 0) {
       // Return most recent playlist
       return Optional.of(playlists.get(0));

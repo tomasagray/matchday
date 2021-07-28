@@ -51,10 +51,10 @@ public class VideoStreamingService {
 
   private static final String LOG_TAG = "VideoStreamingService";
 
-  private final VideoStreamManager videoStreamManager;
   private final FFmpegPlugin ffmpegPlugin;
   private final EventService eventService;
-  private final VideoStreamPlaylistService playlistService;
+  private final VideoStreamManager videoStreamManager;
+  private final VideoStreamLocatorPlaylistService playlistService;
   private final VideoStreamLocatorService videoStreamLocatorService;
 
   @Autowired

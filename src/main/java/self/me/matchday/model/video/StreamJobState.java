@@ -17,11 +17,27 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db;
+package self.me.matchday.model.video;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import self.me.matchday.model.VideoStreamJob;
+import lombok.Data;
 
-@Repository
-public interface VideoStreamJobRepository extends JpaRepository<VideoStreamJob, Long> {}
+import javax.persistence.*;
+
+@Data
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class StreamJobState {
+
+  @Id @GeneratedValue private Long id;
+  private JobStatus status = JobStatus.CREATED;
+  private Double completionRatio = 0.0;
+
+  public enum JobStatus {
+    CREATED,
+    STARTED,
+    ERROR,
+    BUFFERING,
+    STREAMING,
+    COMPLETED,
+  }
+}

@@ -25,7 +25,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.DataSourceService;
-import self.me.matchday.api.service.video.VideoStreamPlaylistService;
+import self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.util.Log;
@@ -42,7 +42,7 @@ public class ScheduledTasks {
   private static final String LOG_TAG = "ScheduledTasks";
 
   private final DataSourceService dataSourceService;
-  private final VideoStreamPlaylistService streamPlaylistService;
+  private final VideoStreamLocatorPlaylistService streamPlaylistService;
   private final VideoStreamingService videoStreamingService;
 
   @Value("${scheduled-tasks.cron.video-data-expired-days}")
@@ -51,7 +51,7 @@ public class ScheduledTasks {
   @Autowired
   public ScheduledTasks(
       final DataSourceService dataSourceService,
-      final VideoStreamPlaylistService streamPlaylistService,
+      final VideoStreamLocatorPlaylistService streamPlaylistService,
       final VideoStreamingService videoStreamingService) {
 
     this.dataSourceService = dataSourceService;

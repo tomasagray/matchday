@@ -94,7 +94,7 @@ public class HtmlBloggerBuilder implements BloggerBuilder {
       final Element name = author.nextElementSiblings().select("span[itemprop=name]").first();
       return name.text();
     } catch (NullPointerException e) {
-      return "null";
+      return null;
     }
   }
 
