@@ -57,8 +57,7 @@ class FFmpegTest {
 
     // Read configuration resources
     final Map<String, String> resources =
-        ResourceFileReader.readPropertiesResource(
-            MatchdayApplication.class, "video-resources.properties");
+        ResourceFileReader.readPropertiesResource(MatchdayApplication.class, "video.properties");
 
     // Create URLs
     final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
@@ -67,8 +66,7 @@ class FFmpegTest {
     assertThat(secondHalfUrl).isNotNull();
 
     final List<URI> urls = List.of(firstHalfUrl.toURI(), secondHalfUrl.toURI());
-    storageLocation = resources.get("video-resources.file-storage-location") + "\\test_out";
-
+    storageLocation = resources.get("video-resources.file-storage-location");
     hlsStreamTask = ffmpeg.getHlsStreamTask(Path.of(storageLocation), urls.toArray(new URI[0]));
   }
 

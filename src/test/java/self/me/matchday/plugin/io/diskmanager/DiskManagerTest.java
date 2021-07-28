@@ -19,6 +19,7 @@
 
 package self.me.matchday.plugin.io.diskmanager;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +31,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.model.FileSize;
 import self.me.matchday.util.Log;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,6 +51,7 @@ class DiskManagerTest {
   // Test criteria
   private static final Long SPACE_ENOUGH_FOR = FileSize.ofGigabytes(1);
   private static final Long TOO_MUCH_SPACE = FileSize.ofGigabytes(Long.MAX_VALUE);
+  public static final int TEST_DATA_LINES = 10_000;
 
   private static DiskManager diskManager;
 
@@ -90,22 +97,50 @@ class DiskManagerTest {
 
   @Test
   @DisplayName("Test used space computation")
-  void getUsedSpace() {
+  void getUsedSpace() throws IOException {
 
-    long usedSpace = 0;
+    File testData = null;
     try {
-      usedSpace = diskManager.getUsedSpace();
+      testData = createDiskSpaceTestData();
+      long actualUsedSpace;
+      final long expectedMinUsedSpace = testData.length();
+      actualUsedSpace = diskManager.getUsedSpace();
       Log.i(
           LOG_TAG,
           String.format(
-              "Found %s bytes used in:\n\t%s\\", usedSpace, diskManager.getStorageLocation()));
+              "Found %s bytes used in:\n\t%s\\",
+              actualUsedSpace, diskManager.getStorageLocation()));
 
-    } catch (IOException e) {
-      Log.e(LOG_TAG, "Error testing used disk space computation: " + e.getMessage());
+      // tests
+      assertThat(actualUsedSpace).isGreaterThanOrEqualTo(expectedMinUsedSpace);
+      assertThat(actualUsedSpace).isLessThan(Long.MAX_VALUE);
+
+    } finally {
+      if (testData != null) {
+        final boolean deleted = testData.delete();
+        Log.i(LOG_TAG, "Test successfully deleted test data? " + deleted);
+        assertThat(deleted).isTrue();
+      }
     }
+  }
 
-    // tests
-    assertThat(usedSpace).isGreaterThan(0);
-    assertThat(usedSpace).isLessThan(Long.MAX_VALUE);
+  @NotNull
+  private File createDiskSpaceTestData() throws IOException {
+
+    final File testDataFile =
+        new File(
+            Paths.get(diskManager.getStorageLocation().toAbsolutePath().toString(), "TEST_FILE.txt")
+                .toFile()
+                .getAbsolutePath());
+    final boolean fileCreated = testDataFile.createNewFile();
+    Log.i(LOG_TAG, String.format("Created file %s? %s", testDataFile, fileCreated));
+
+    final String data = "All work and no play makes Jack a dull boy.\n".repeat(TEST_DATA_LINES);
+    final OutputStreamWriter writer =
+        new OutputStreamWriter(new FileOutputStream(testDataFile), StandardCharsets.UTF_8);
+    writer.write(data);
+    writer.close();
+
+    return testDataFile;
   }
 }

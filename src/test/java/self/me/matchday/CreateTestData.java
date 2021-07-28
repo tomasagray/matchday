@@ -19,7 +19,6 @@
 
 package self.me.matchday;
 
-import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.*;
 import self.me.matchday.plugin.fileserver.FileServerUser;
@@ -130,7 +129,6 @@ public class CreateTestData {
     return fileSource;
   }
 
-  @SneakyThrows
   public static @NotNull List<EventFile> createTestEventFiles() {
 
     URL preMatchUrl = getPreMatchUrl();
@@ -204,6 +202,8 @@ public class CreateTestData {
     }
     return null;
   }
+
+  // ====================== Video Streaming ==========================
 
   // ====================== FILE SERVER ==============================
 

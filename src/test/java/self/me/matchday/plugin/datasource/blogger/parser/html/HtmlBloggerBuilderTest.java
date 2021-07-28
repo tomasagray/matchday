@@ -53,10 +53,8 @@ class HtmlBloggerBuilderTest {
   void testAuthor() {
 
     final String actualAuthor = blogger.getAuthor();
-    final String expectedAuthor = "null";
-
     Log.i(LOG_TAG, "Testing Blogger author: " + actualAuthor);
-    assertThat(actualAuthor).isEqualTo(expectedAuthor);
+    assertThat(actualAuthor).isNull();
   }
 
   @Test
