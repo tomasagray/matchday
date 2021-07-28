@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,30 +17,28 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model;
+package self.me.matchday.model.video;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import self.me.matchday.db.converter.PathConverter;
+import org.jetbrains.annotations.NotNull;
+import self.me.matchday.model.EventFile;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
 import java.nio.file.Path;
-import java.time.Instant;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class VideoStreamLocator {
+public class SingleStreamLocator extends VideoStreamLocator {
 
-  @Id @GeneratedValue protected Long streamLocatorId;
+  public SingleStreamLocator() {
+    this.playlistPath = null;
+    this.eventFile = null;
+  }
 
-  @Convert(converter = PathConverter.class)
-  protected Path playlistPath;
-
-  @ManyToOne(cascade = {CascadeType.MERGE})
-  protected EventFile eventFile;
-
-  @EqualsAndHashCode.Exclude
-  protected final Instant timestamp = Instant.now();
-
+  public SingleStreamLocator(@NotNull final Path playlistPath, @NotNull final EventFile eventFile) {
+    this.playlistPath = playlistPath;
+    this.eventFile = eventFile;
+  }
 }

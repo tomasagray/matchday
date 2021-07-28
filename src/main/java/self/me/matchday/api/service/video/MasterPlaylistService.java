@@ -27,7 +27,7 @@ import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.MasterM3U;
+import self.me.matchday.model.video.MasterM3U;
 import self.me.matchday.util.Log;
 
 import java.util.Collection;
@@ -96,8 +96,7 @@ public class MasterPlaylistService {
                 linkTo(
                         methodOn(VideoStreamingController.class)
                             .getVariantPlaylist(
-                                event.getEventId(),
-                                eventFileSource.getEventFileSrcId()))
+                                event.getEventId(), eventFileSource.getEventFileSrcId()))
                     .withSelfRel();
             // Add variant to master playlist
             masterPlaylist.addVariant(

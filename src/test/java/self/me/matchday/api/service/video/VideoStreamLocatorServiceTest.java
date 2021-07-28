@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.api.service;
+package self.me.matchday.api.service.video;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,13 +27,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.CreateTestData;
-import self.me.matchday.api.service.video.VideoStreamLocatorService;
 import self.me.matchday.db.EventFileSrcRepository;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.util.Log;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,6 +52,9 @@ class VideoStreamLocatorServiceTest {
   private static EventFileSource testEventFileSource;
   private static EventFile testEventFile;
 
+  private static final Path storageLocation = Path.of("C:\\Users\\Public\\Matchday\\videos\\_test");
+  private static Path testStorage;
+
   @BeforeAll
   static void setUp(
       @Autowired final VideoStreamLocatorService videoStreamLocatorService,
@@ -61,10 +64,13 @@ class VideoStreamLocatorServiceTest {
     VideoStreamLocatorServiceTest.fileSrcRepository = fileSrcRepository;
     // Get managed copy of test file source
     final EventFileSource fileSource = CreateTestData.createTestEventFileSource();
-    VideoStreamLocatorServiceTest.testEventFileSource = fileSrcRepository.save(fileSource);
+    VideoStreamLocatorServiceTest.testEventFileSource = fileSrcRepository.saveAndFlush(fileSource);
 
     VideoStreamLocatorServiceTest.testEventFile =
         VideoStreamLocatorServiceTest.testEventFileSource.getEventFiles().get(0);
+
+    VideoStreamLocatorServiceTest.testStorage =
+        storageLocation.resolve(testEventFileSource.getEventFileSrcId());
   }
 
   @AfterAll
@@ -90,8 +96,7 @@ class VideoStreamLocatorServiceTest {
   void createNewPlaylistLocator() {
 
     assertThat(testEventFile).isNotNull();
-    testStreamLocator =
-        videoStreamLocatorService.createStreamLocator(testEventFileSource, testEventFile);
+    testStreamLocator = videoStreamLocatorService.createStreamLocator(testStorage, testEventFile);
 
     Log.i(LOG_TAG, "Created playlist locator: " + testStreamLocator);
     assertThat(testStreamLocator).isNotNull();
@@ -104,7 +109,7 @@ class VideoStreamLocatorServiceTest {
 
     final int expectedPlaylistLocatorCount = 1;
     Log.i(LOG_TAG, "Adding test stream locator to database...");
-    testStreamLocator = videoStreamLocatorService.createStreamLocator(testEventFileSource, testEventFile);
+    testStreamLocator = videoStreamLocatorService.createStreamLocator(testStorage, testEventFile);
 
     final List<VideoStreamLocator> playlistLocators =
         videoStreamLocatorService.getAllStreamLocators();
@@ -124,8 +129,7 @@ class VideoStreamLocatorServiceTest {
   void getPlaylistLocator() {
 
     // Create test resource
-    testStreamLocator =
-        videoStreamLocatorService.createStreamLocator(testEventFileSource, testEventFile);
+    testStreamLocator = videoStreamLocatorService.createStreamLocator(testStorage, testEventFile);
 
     final Long testStreamLocatorId = testStreamLocator.getStreamLocatorId();
     final Optional<VideoStreamLocator> streamLocatorOptional =
@@ -144,8 +148,7 @@ class VideoStreamLocatorServiceTest {
   void deletePlaylistLocator() {
 
     // Create test resource
-    testStreamLocator =
-        videoStreamLocatorService.createStreamLocator(testEventFileSource, testEventFile);
+    testStreamLocator = videoStreamLocatorService.createStreamLocator(testStorage, testEventFile);
 
     final int sizeBeforeDelete = videoStreamLocatorService.getAllStreamLocators().size();
     // Perform deletion

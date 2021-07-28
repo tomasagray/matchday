@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model;
+package self.me.matchday.model.video;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -43,9 +43,11 @@ public final class MasterM3U extends M3U {
 
   private final List<VariantPlaylistEntry> variantPlaylistEntries = new ArrayList<>();
 
-  public MasterM3U addVariant(@NotNull final Resolution resolution,
-                         final String languages, final long bitrate,
-                         @NotNull final URI playlistLink) {
+  public MasterM3U addVariant(
+      @NotNull final Resolution resolution,
+      final String languages,
+      final long bitrate,
+      @NotNull final URI playlistLink) {
 
     // Create variant
     final VariantPlaylistEntry playlistEntry =
@@ -74,8 +76,7 @@ public final class MasterM3U extends M3U {
 
     // Group file sources by video resolution & sort within resolution
     final TreeMap<Resolution, List<VariantPlaylistEntry>> variantPlaylistEntries =
-        getVariantPlaylistEntries()
-            .stream()
+        getVariantPlaylistEntries().stream()
             .collect(groupingBy(VariantPlaylistEntry::getResolution, TreeMap::new, toList()));
 
     // Add each variant to output String
@@ -111,7 +112,7 @@ public final class MasterM3U extends M3U {
     private static final String BANDWIDTH_TAG = "BANDWIDTH=";
     private static final String VIDEO_TAG = "VIDEO=";
     private static final String RESOLUTION_TAG = "RESOLUTION=";
-    private static final String MEDIA_LINK = "#EXT-X-MEDIA:";  // for linking multiple versions
+    private static final String MEDIA_LINK = "#EXT-X-MEDIA:"; // for linking multiple versions
     private static final String MEDIA_TYPE = "TYPE=VIDEO";
     private static final String GROUP_ID_TAG = "GROUP-ID=";
     private static final String NAME_TAG = "NAME=";
@@ -124,9 +125,11 @@ public final class MasterM3U extends M3U {
     private long bitrate;
     private boolean isDefault;
 
-    VariantPlaylistEntry(@NotNull final Resolution resolution,
-                         final String languages, final long bitrate,
-                         @NotNull final URI playlistLink) {
+    VariantPlaylistEntry(
+        @NotNull final Resolution resolution,
+        final String languages,
+        final long bitrate,
+        @NotNull final URI playlistLink) {
 
       this.resolution = resolution;
       this.languages = languages;
@@ -147,7 +150,9 @@ public final class MasterM3U extends M3U {
           + "\""
           + String.join("/", getLanguages())
           + "\","
-          + "DEFAULT=" + (isDefault ? "YES" : "NO") + ","
+          + "DEFAULT="
+          + (isDefault ? "YES" : "NO")
+          + ","
           + URI_TAG
           + "\""
           + getPlaylistLink()
@@ -161,7 +166,9 @@ public final class MasterM3U extends M3U {
           + getBitrate()
           + ","
           + RESOLUTION_TAG
-          + getResolution().getWidth() + "x" + getResolution().getHeight()
+          + getResolution().getWidth()
+          + "x"
+          + getResolution().getHeight()
           + ","
           + VIDEO_TAG
           + "\""

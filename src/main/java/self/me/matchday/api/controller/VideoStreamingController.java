@@ -22,6 +22,7 @@ package self.me.matchday.api.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,11 +34,12 @@ import self.me.matchday.api.resource.VideoResource.VideoResourceAssembler;
 import self.me.matchday.api.service.video.MasterPlaylistService;
 import self.me.matchday.api.service.video.VariantPlaylistService;
 import self.me.matchday.api.service.video.VideoStreamingService;
-import self.me.matchday.model.M3UPlaylist;
-import self.me.matchday.model.MasterM3U;
+import self.me.matchday.model.video.M3UPlaylist;
+import self.me.matchday.model.video.MasterM3U;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/events/event/{eventId}/video")
@@ -117,8 +119,15 @@ public class VideoStreamingController {
   public ResponseEntity<String> getVideoStreamPlaylist(
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
-    return streamingService
-        .getVideoStreamPlaylist(eventId, fileSrcId)
+    final Optional<M3UPlaylist> playlistOptional =
+        streamingService.getVideoStreamPlaylist(eventId, fileSrcId);
+    if (playlistOptional == null) {
+      return ResponseEntity.notFound().build();
+    } else if (playlistOptional.isEmpty()) {
+      // wait signal
+      return ResponseEntity.status(HttpStatus.ACCEPTED).body("Resource is processing");
+    }
+    return playlistOptional
         .map(M3UPlaylist::getSimplePlaylist)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
@@ -144,10 +153,9 @@ public class VideoStreamingController {
       @PathVariable("fileSrcId") String fileSrcId,
       @PathVariable("partId") Long partId) {
 
-    final String playlistFile = streamingService.readPlaylistFile(eventId, fileSrcId, partId);
-    return playlistFile != null && !("".equals(playlistFile))
-        ? ResponseEntity.ok(playlistFile)
-        : ResponseEntity.notFound().build();
+    final Optional<String> playlistFile =
+        streamingService.readPlaylistFile(eventId, fileSrcId, partId);
+    return ResponseEntity.of(playlistFile);
   }
 
   @RequestMapping(
@@ -191,7 +199,10 @@ public class VideoStreamingController {
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
     final int killedTasks = streamingService.killAllStreamingTasks();
-    final String message = String.format("Killed %s streaming tasks", killedTasks);
+    final String message =
+        String.format(
+            "Killed %s streaming tasks for Event: %s, file source: %s",
+            killedTasks, eventId, fileSrcId);
     return ResponseEntity.ok(message);
   }
 }

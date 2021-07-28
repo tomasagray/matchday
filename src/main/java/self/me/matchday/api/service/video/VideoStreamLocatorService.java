@@ -21,13 +21,17 @@ package self.me.matchday.api.service.video;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.VideoStreamLocatorRepo;
-import self.me.matchday.model.*;
+import self.me.matchday.model.EventFile;
+import self.me.matchday.model.video.SingleStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.util.Log;
+import self.me.matchday.util.RecursiveDirectoryDeleter;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -35,18 +39,13 @@ import java.util.Optional;
 @Service
 public class VideoStreamLocatorService {
 
-  private static final String PLAYLIST_NAME = "playlist.m3u8";
+  private static final String PLAYLIST_NAME = "playlist.m3u8"; // todo - move to config
   private static final String LOG_TAG = "PlaylistLocatorService";
 
-  // Repositories
   private final VideoStreamLocatorRepo streamLocatorRepo;
-  // Configuration
-  @Value("${video-resources.file-storage-location}")
-  private String fileStorageLocation;
 
   @Autowired
   public VideoStreamLocatorService(final VideoStreamLocatorRepo streamLocatorRepo) {
-
     this.streamLocatorRepo = streamLocatorRepo;
   }
 
@@ -66,32 +65,50 @@ public class VideoStreamLocatorService {
    * @return An Optional of the playlist locator
    */
   public Optional<VideoStreamLocator> getStreamLocator(final Long streamLocatorId) {
-
     return streamLocatorRepo.findById(streamLocatorId);
+  }
+
+  /**
+   * Find the latest video stream locator for a given video file
+   *
+   * @param eventFile The video file representation
+   * @return The most recent stream locator for this video file, or Optional.empty();
+   */
+  public Optional<VideoStreamLocator> getStreamLocatorFor(@NotNull final EventFile eventFile) {
+
+    final List<VideoStreamLocator> streamLocators =
+        streamLocatorRepo.getStreamLocatorsFor(eventFile);
+    if (streamLocators.isEmpty()) {
+      return Optional.empty();
+    }
+    // return first (latest) locator
+    return Optional.of(streamLocators.get(0));
   }
 
   /**
    * Creates a new VideoStreamLocator and saves it to database.
    *
-   * @param fileSource The EventFileSource this video stream comes from
+   * @param storageLocation The Path of the data directory
    * @param eventFile Video data for the stream
    * @return The newly created VideoStreamLocator
    */
   @Transactional
   public VideoStreamLocator createStreamLocator(
-      @NotNull final EventFileSource fileSource, @NotNull final EventFile eventFile) {
-
-    // Create playlist IDs
-    final String fileSrcId = fileSource.getEventFileSrcId();
-    final String eventFileId = MD5String.fromData(eventFile.getExternalUrl());
+      @NotNull final Path storageLocation, @NotNull final EventFile eventFile) {
 
     // Create streaming storage path
-    final Path playlistPath = Path.of(fileStorageLocation, fileSrcId, eventFileId, PLAYLIST_NAME);
+    final Path playlistPath =
+        storageLocation.resolve(eventFile.getEventFileId()).resolve(PLAYLIST_NAME);
     // Create playlist locator
-    final VideoStreamLocator playlistLocator = new SingleStreamLocator(playlistPath, eventFile);
+    final VideoStreamLocator streamLocator = new SingleStreamLocator(playlistPath, eventFile);
     // Save locator to database & return
-    Log.i(LOG_TAG, "Saving playlist locator: " + streamLocatorRepo.saveAndFlush(playlistLocator));
-    return playlistLocator;
+    Log.i(LOG_TAG, "Saving stream locator: " + streamLocatorRepo.saveAndFlush(streamLocator));
+    return streamLocator;
+  }
+
+  @Transactional
+  public void saveStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
+    streamLocatorRepo.saveAndFlush(streamLocator);
   }
 
   /**
@@ -99,7 +116,24 @@ public class VideoStreamLocatorService {
    *
    * @param streamLocator The playlist to be deleted
    */
+  @Transactional
   public void deleteStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
     streamLocatorRepo.delete(streamLocator);
+  }
+
+  @Transactional
+  public void deleteStreamLocatorWithData(@NotNull final VideoStreamLocator streamLocator)
+      throws IOException {
+
+    final Path playlistPath = streamLocator.getPlaylistPath();
+    if (!playlistPath.toFile().isFile()) {
+      throw new IllegalArgumentException("VideoStreamLocator does not refer to a file");
+    }
+
+    final Path streamDataDir = playlistPath.getParent();
+    Files.walkFileTree(streamDataDir, new RecursiveDirectoryDeleter());
+    Log.i(
+        LOG_TAG,
+        "Successfully deleted local data associated with Video Stream Locator: " + streamLocator);
   }
 }

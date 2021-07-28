@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 import self.me.matchday.api.service.EventFileService;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.M3UPlaylist;
+import self.me.matchday.model.video.M3UPlaylist;
 import self.me.matchday.util.Log;
 
 import javax.transaction.Transactional;
@@ -70,21 +70,22 @@ public class VariantPlaylistService {
 
         final M3UPlaylist playlist = new M3UPlaylist();
         // Refresh data for EventFiles & create playlist
-        final List<M3UPlaylist> _playlist = eventFileSource.getEventFiles().stream()
+        final List<M3UPlaylist> _playlist =
+            eventFileSource.getEventFiles().stream()
                 .map(
-                        eventFile -> {
-                          try {
-                            return eventFileService.refreshEventFile(eventFile, false);
-                          } catch (ExecutionException | InterruptedException e) {
-                            final String msg = "Error refreshing EventFile: " + eventFile;
-                            Log.i(LOG_TAG, msg, e);
-                            throw new RuntimeException(msg, e);
-                          }
-                        })
+                    eventFile -> {
+                      try {
+                        return eventFileService.refreshEventFile(eventFile, false);
+                      } catch (ExecutionException | InterruptedException e) {
+                        final String msg = "Error refreshing EventFile: " + eventFile;
+                        Log.i(LOG_TAG, msg, e);
+                        throw new RuntimeException(msg, e);
+                      }
+                    })
                 .map(
-                        eventFile ->
-                                playlist.addMediaSegment(
-                                        eventFile.getInternalUrl(), eventFile.getTitle().toString(), null))
+                    eventFile ->
+                        playlist.addMediaSegment(
+                            eventFile.getInternalUrl(), eventFile.getTitle().toString(), null))
                 .collect(Collectors.toList());
         Log.i(LOG_TAG, "Created playlist: " + _playlist);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model;
+package self.me.matchday.model.video;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -118,10 +118,11 @@ public class M3UPlaylist extends M3U {
   public String getSimplePlaylist() {
 
     return getMediaSegments().stream()
-        .map(
-            mediaSegment ->
-                String.format("# %s\n%s", mediaSegment.getTitle(), mediaSegment.getUrl()))
-        .collect(Collectors.joining("\n")) + "\n";
+            .map(
+                mediaSegment ->
+                    String.format("# %s\n%s", mediaSegment.getTitle(), mediaSegment.getUrl()))
+            .collect(Collectors.joining("\n"))
+        + "\n";
   }
 
   // todo - make output separate from playlist structure
@@ -134,14 +135,13 @@ public class M3UPlaylist extends M3U {
       final MediaSegment mediaSegment = mediaSegments.get(i);
       final URL url = mediaSegment.getUrl();
       final String title = mediaSegment.getTitle();
-      final int fileNum = i + 1;    // PLS must start with File1...
+      final int fileNum = i + 1; // PLS must start with File1...
       sb.append("File").append(fileNum).append("=").append(url).append("\n");
       sb.append("Title").append(fileNum).append("=").append(title).append("\n");
     }
     sb.append("\n").append("NumberOfEntries=").append(segmentCount).append("\n");
     return sb.toString();
   }
-
 
   /**
    * Represents a single segment (record) in the playlist, which includes the URI of the media

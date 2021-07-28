@@ -21,6 +21,7 @@ package self.me.matchday.api.service.video;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.service.EventFileSelectorService;
@@ -31,6 +32,7 @@ import self.me.matchday.model.VideoStreamLocator;
 import self.me.matchday.model.VideoStreamPlaylist;
 import self.me.matchday.util.Log;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +44,9 @@ public class VideoStreamPlaylistService {
   private final VideoStreamPlaylistRepo playlistRepo;
   private final VideoStreamLocatorService videoStreamLocatorService;
   private final EventFileSelectorService eventFileSelectorService;
+  // Configuration
+  @Value("${video-resources.file-storage-location}")
+  private Path fileStorageLocation;
 
   @Autowired
   public VideoStreamPlaylistService(
@@ -74,14 +79,18 @@ public class VideoStreamPlaylistService {
 
     // Get list of "best" EventFiles for each event part
     final List<EventFile> playlistFiles = eventFileSelectorService.getPlaylistFiles(fileSource);
+    // Create storage path
+    final Path storageLocation = fileStorageLocation.resolve(fileSource.getEventFileSrcId());
     // Create stream playlist
-    final VideoStreamPlaylist streamPlaylist = new VideoStreamPlaylist(fileSource);
+    final VideoStreamLocatorPlaylist streamPlaylist =
+        new VideoStreamLocatorPlaylist(fileSource, storageLocation);
+
     // Create locator for each file stream
     playlistFiles.forEach(
         eventFile -> {
           // Create storage path for each task
           final VideoStreamLocator playlistLocator =
-              videoStreamLocatorService.createStreamLocator(fileSource, eventFile);
+              videoStreamLocatorService.createStreamLocator(storageLocation, eventFile);
           // Add  playlist locator to VideoStreamPlaylist
           streamPlaylist.addStreamLocator(playlistLocator);
         });
@@ -112,11 +121,7 @@ public class VideoStreamPlaylistService {
    *
    * @param streamPlaylist The playlist to be deleted
    */
-  public void deleteVideoStreamPlaylist(@NotNull final VideoStreamPlaylist streamPlaylist) {
-
-    // Nullify stream locator EventFiles so an FK constraint exception is not thrown;
-    // EventFiles are also referenced by EventFileSources
-    streamPlaylist.getStreamLocators().forEach(streamLocator -> streamLocator.setEventFile(null));
+  public void deleteVideoStreamPlaylist(@NotNull final VideoStreamLocatorPlaylist streamPlaylist) {
     playlistRepo.delete(streamPlaylist);
   }
 }

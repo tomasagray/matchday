@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,15 +17,12 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model;
+package self.me.matchday.model.video;
 
-/**
- * Represents an extended M3U playlist, UTF-8 encoded (.m3u8)
- */
+/** Represents an extended M3U playlist, UTF-8 encoded (.m3u8) */
 public abstract class M3U {
 
   // Standard tags
   protected static final String HEADER = "#EXTM3U";
   protected static final String INF = "#EXTINF:";
-
 }

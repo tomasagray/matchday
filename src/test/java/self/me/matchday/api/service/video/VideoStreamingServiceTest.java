@@ -17,8 +17,9 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.api.service;
+package self.me.matchday.api.service.video;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,17 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
 import self.me.matchday.UnitTestFileServerPlugin;
-import self.me.matchday.api.service.video.VideoStreamingService;
-import self.me.matchday.model.*;
+import self.me.matchday.api.service.CompetitionService;
+import self.me.matchday.api.service.EventService;
+import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.api.service.TeamService;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.EventFile;
+import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.Match;
+import self.me.matchday.model.video.M3UPlaylist;
+import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
@@ -38,6 +48,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,6 +62,8 @@ class VideoStreamingServiceTest {
 
   // Service dependencies
   private static VideoStreamingService streamingService;
+  private static final long waitSeconds = 60;
+  private static VideoStreamLocatorPlaylistService locatorPlaylistService;
   private static EventService eventService;
   private static CompetitionService competitionService;
   private static TeamService teamService;
@@ -58,12 +71,16 @@ class VideoStreamingServiceTest {
 
   // Test data
   private static Match testMatch;
-  private static VideoStreamPlaylist testVideoStreamPlaylist;
   private static FileServerUser testFileServerUser;
+  private static VideoStreamLocatorService streamLocatorService;
+  private static EventFile testEventFile;
+  private static EventFileSource testFileSource;
 
   @BeforeAll
   static void setUp(
       @Autowired final VideoStreamingService streamingService,
+      @Autowired final VideoStreamLocatorPlaylistService locatorPlaylistService,
+      @Autowired final VideoStreamLocatorService streamLocatorService,
       @Autowired final EventService eventService,
       @Autowired final CompetitionService competitionService,
       @Autowired final TeamService teamService,
@@ -71,6 +88,8 @@ class VideoStreamingServiceTest {
       @Autowired final UnitTestFileServerPlugin testFileServerPlugin) {
 
     VideoStreamingServiceTest.streamingService = streamingService;
+    VideoStreamingServiceTest.streamLocatorService = streamLocatorService;
+    VideoStreamingServiceTest.locatorPlaylistService = locatorPlaylistService;
     VideoStreamingServiceTest.eventService = eventService;
     VideoStreamingServiceTest.competitionService = competitionService;
     VideoStreamingServiceTest.teamService = teamService;
@@ -83,17 +102,17 @@ class VideoStreamingServiceTest {
 
     // Create test data
     final Match match = CreateTestData.createTestMatch();
-    // Save to DB
     eventService.saveEvent(match);
 
     // Get managed copy
     final Optional<Event> eventOptional = eventService.fetchById(match.getEventId());
     assertThat(eventOptional).isPresent();
     VideoStreamingServiceTest.testMatch = (Match) eventOptional.get();
+    VideoStreamingServiceTest.testFileSource = getTestFileSource();
   }
 
   @AfterAll
-  static void tearDown() throws IOException {
+  static void tearDown() {
 
     Log.i(LOG_TAG, "Deleting test data: " + testMatch);
     // delete test data
@@ -101,7 +120,6 @@ class VideoStreamingServiceTest {
     competitionService.deleteCompetitionById(testMatch.getCompetition().getCompetitionId());
     teamService.deleteTeamById(testMatch.getHomeTeam().getTeamId());
     fileServerService.deleteUser(testFileServerUser.getUserId());
-    streamingService.deleteVideoData(testVideoStreamPlaylist);
   }
 
   @Test
@@ -122,38 +140,54 @@ class VideoStreamingServiceTest {
     assertThat(actualFileSources).containsAll(expectedFileSources);
   }
 
+  @NotNull
+  private static EventFileSource getTestFileSource() {
+
+    AtomicReference<EventFileSource> atomicFileSource = new AtomicReference<>();
+    final Set<EventFileSource> fileSources = testMatch.getFileSources();
+    fileSources.stream().findFirst().ifPresent(atomicFileSource::set);
+    final EventFileSource testFileSource = atomicFileSource.get();
+
+    assertThat(testFileSource).isNotNull();
+    return testFileSource;
+  }
+
   @Test
   @Order(2)
-  @DisplayName("Validate creation of video stream resources")
-  void createVideoStream() throws InterruptedException, IOException {
+  @DisplayName("Test that a playlist is created & returned")
+  void getVideoStreamPlaylist() throws Exception {
 
-    final int expectedLocatorCount = 1;
+    // test constants
+    final long recheckDelay = 10_000L;
+    final int minPlaylistOutputLen = 10;
 
-    // Get test file source
-    final Optional<EventFileSource> fileSourceOptional =
-        testMatch.getFileSources().stream().findFirst();
-    assertThat(fileSourceOptional).isPresent();
-    final EventFileSource testFileSource = fileSourceOptional.get();
+    // test variables
+    final String testEventId = testMatch.getEventId();
+    final String testFileSrcId = testFileSource.getEventFileSrcId();
+    Log.i(LOG_TAG, "Testing with Match:\n" + testMatch);
     Log.i(
-        LOG_TAG, String.format("Using test event: %s\nFile source:%s", testMatch, testFileSource));
+        LOG_TAG,
+        String.format(
+            "Testing video stream creation with Event ID: %s, File Source ID: %s",
+            testEventId, testFileSrcId));
 
-    final Optional<VideoStreamPlaylist> playlistOptional =
-        streamingService.createVideoStream(
-            testMatch.getEventId(), testFileSource.getEventFileSrcId());
-    assertThat(playlistOptional).isPresent();
+    final Optional<M3UPlaylist> testVideoStreamPlaylist =
+        streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId);
+    assertThat(testVideoStreamPlaylist).isNotNull().isEmpty();
+    Log.i(LOG_TAG, "VideoStreamingService returned Optional.empty(), as expected...");
 
-    testVideoStreamPlaylist = playlistOptional.get();
-    Log.i(LOG_TAG, "Test created video streaming playlist: " + testVideoStreamPlaylist);
-    assertThat(testVideoStreamPlaylist.getId()).isNotNull();
-    assertThat(testVideoStreamPlaylist.getFileSource()).isNotNull();
-    assertThat(testVideoStreamPlaylist.getTimestamp()).isNotNull();
-    assertThat(testVideoStreamPlaylist.getStreamLocators().size())
-        .isGreaterThanOrEqualTo(expectedLocatorCount);
+    Log.i(LOG_TAG, String.format("Waiting %s milliseconds...", recheckDelay));
+    Thread.sleep(recheckDelay);
+    Log.i(LOG_TAG, "Done waiting, performing recheck...");
 
-    // Give FFMPEG a chance to create test data
-    final int waitSeconds = 35;
-    Log.i(LOG_TAG, String.format("Waiting for %s seconds...", waitSeconds));
-    Thread.sleep(waitSeconds * 1000);
+    final Optional<M3UPlaylist> afterDelayStreamPlaylist =
+        streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId);
+    assertThat(afterDelayStreamPlaylist).isNotNull().isPresent();
+
+    final M3UPlaylist testPlaylistOutput = afterDelayStreamPlaylist.get();
+    Log.i(LOG_TAG, "Test rendered M3U playlist:\n" + testPlaylistOutput);
+    assertThat(testPlaylistOutput).isNotNull().isNotEqualTo("");
+    assertThat(testPlaylistOutput.toString().length()).isGreaterThanOrEqualTo(minPlaylistOutputLen);
   }
 
   @Test
@@ -164,23 +198,31 @@ class VideoStreamingServiceTest {
     final Optional<EventFileSource> fileSourceOptional =
         testMatch.getFileSources().stream().findFirst();
     assertThat(fileSourceOptional).isPresent();
-
     final EventFileSource testFileSource = fileSourceOptional.get();
 
     // Get test stream locator
-    final VideoStreamLocator testStreamLocator = testVideoStreamPlaylist.getStreamLocators().get(0);
-    assertThat(testStreamLocator).isNotNull();
+    testEventFile = testFileSource.getEventFiles().get(0);
+    final Optional<VideoStreamLocator> locatorOptional =
+        VideoStreamingServiceTest.streamLocatorService.getStreamLocatorFor(testEventFile);
+    assertThat(locatorOptional).isNotNull().isPresent();
+    final VideoStreamLocator testStreamLocator = locatorOptional.get();
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Testing playlist file reading with File Source ID: %s, Stream Locator ID: %s",
+            testFileSource.getEventFileSrcId(), testStreamLocator.getStreamLocatorId()));
 
     // Read test playlist file
-    final String actualPlaylistFile =
+    final Optional<String> actualPlaylistFile =
         streamingService.readPlaylistFile(
             testMatch.getEventId(),
             testFileSource.getEventFileSrcId(),
             testStreamLocator.getStreamLocatorId());
     Log.i(LOG_TAG, "Read playlist file:\n" + actualPlaylistFile);
 
-    assertThat(actualPlaylistFile).isNotNull().isNotEmpty();
-    assertThat(actualPlaylistFile.length()).isGreaterThan(500);
+    assertThat(actualPlaylistFile).isNotNull().isNotEmpty().isPresent();
+    final String actualPlaylistData = actualPlaylistFile.get();
+    assertThat(actualPlaylistData.length()).isGreaterThan(500);
   }
 
   @Test
@@ -195,17 +237,26 @@ class VideoStreamingServiceTest {
         testMatch.getFileSources().stream().findFirst();
     assertThat(fileSourceOptional).isPresent();
     final EventFileSource testFileSource = fileSourceOptional.get();
-    // Get test stream locator
-    final VideoStreamLocator testStreamLocator = testVideoStreamPlaylist.getStreamLocators().get(0);
-    assertThat(testStreamLocator).isNotNull();
 
+    // Get test stream locator
+    final Optional<VideoStreamLocator> locatorOptional =
+        streamLocatorService.getStreamLocatorFor(testEventFile);
+    assertThat(locatorOptional).isPresent();
+    final VideoStreamLocator testStreamLocator = locatorOptional.get();
+    assertThat(testStreamLocator).isNotNull();
+    final Long testStreamLocatorId = testStreamLocator.getStreamLocatorId();
+    final String testEventFileSrcId = testFileSource.getEventFileSrcId();
+    final String testEventId = testMatch.getEventId();
+
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Testing video segment reading with Event ID: %s, File Source ID: %s, Stream Locator ID: %s",
+            testEventId, testEventFileSrcId, testStreamLocatorId));
     // Read video resource
     final Resource actualVideoResource =
         streamingService.getVideoSegmentResource(
-            testMatch.getEventId(),
-            testFileSource.getEventFileSrcId(),
-            testStreamLocator.getStreamLocatorId(),
-            "segment_00001");
+            testEventId, testEventFileSrcId, testStreamLocatorId, "segment_00001");
 
     Log.d(LOG_TAG, "Read video segment: " + actualVideoResource);
     assertThat(actualVideoResource).isNotNull();
@@ -217,15 +268,21 @@ class VideoStreamingServiceTest {
   @DisplayName("Validate ability to delete previously downloaded video data")
   void deleteVideoData() throws IOException, InterruptedException {
 
-    final List<VideoStreamLocator> streamLocators = testVideoStreamPlaylist.getStreamLocators();
+    final Optional<VideoStreamLocatorPlaylist> playlistOptional =
+        locatorPlaylistService.getVideoStreamPlaylistFor(testFileSource.getEventFileSrcId());
+    assertThat(playlistOptional).isPresent();
+    final VideoStreamLocatorPlaylist testVideoStreamLocatorPlaylist = playlistOptional.get();
+    final List<VideoStreamLocator> streamLocators =
+        testVideoStreamLocatorPlaylist.getStreamLocators();
 
-    final int waitSeconds = 10;
-    // Ensure streaming is dead
+    Log.i(
+        LOG_TAG,
+        String.format("Waiting %d seconds to ensure streaming processes are dead...", waitSeconds));
     streamingService.killAllStreamingTasks();
-    // Ensure tasks have time to die
     Thread.sleep(waitSeconds * 1_000);
-    // Delete test data
-    streamingService.deleteVideoData(testVideoStreamPlaylist);
+
+    Log.i(LOG_TAG, "Deleting video data...");
+    streamingService.deleteVideoData(testVideoStreamLocatorPlaylist);
 
     // Validate data has been removed
     streamLocators.forEach(
@@ -236,4 +293,8 @@ class VideoStreamingServiceTest {
           assertThat(exists).isFalse();
         });
   }
+
+  @Test
+  @Disabled
+  void killAllStreamingTasks() {}
 }

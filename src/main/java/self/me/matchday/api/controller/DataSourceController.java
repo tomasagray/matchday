@@ -135,7 +135,7 @@ public class DataSourceController {
     final boolean disabled = dataSourceService.disablePlugin(pluginId);
 
     if (disabled) {
-      status = HttpStatus.ACCEPTED;
+      status = HttpStatus.OK;
       message = String.format("Successfully disabled plugin with ID: %s", pluginId);
     } else {
       status = HttpStatus.BAD_REQUEST;

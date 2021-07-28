@@ -22,141 +22,120 @@ package self.me.matchday.api.service.video;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.service.EventFileService;
 import self.me.matchday.model.EventFile;
-import self.me.matchday.model.VideoStreamLocator;
-import self.me.matchday.model.VideoStreamPlaylist;
+import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.video.TaskListState;
+import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.util.Log;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.List;
+import java.util.Optional;
+
+import static self.me.matchday.model.video.StreamJobState.JobStatus;
 
 @Service
 class VideoStreamManager {
 
-  private static final String LOG_TAG = "VideoStreamManager";
-
-  // Config
-  private static final int THREAD_COUNT = 4;
-
-  // Dependencies
+  private final VideoStreamLocatorPlaylistService playlistService;
+  private final VideoStreamLocatorService locatorService;
   private final EventFileService eventFileService;
   private final FFmpegPlugin ffmpegPlugin;
-  private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT);
-
-  private final Set<VideoStreamJob> streamJobs = new HashSet<>();
 
   @Autowired
   public VideoStreamManager(
-      final EventFileService eventFileService, final FFmpegPlugin ffmpegPlugin) {
+      final VideoStreamLocatorPlaylistService playlistService,
+      final VideoStreamLocatorService locatorService,
+      final EventFileService eventFileService,
+      final FFmpegPlugin ffmpegPlugin) {
 
+    this.playlistService = playlistService;
+    this.locatorService = locatorService;
     this.eventFileService = eventFileService;
     this.ffmpegPlugin = ffmpegPlugin;
   }
 
-  public void submitStreamingJob(@NotNull final VideoStreamPlaylist playlist) {
-
-    // Create stream job if not already exists
-
-    // Add to set of jobs
+  public VideoStreamLocatorPlaylist createVideoStreamFrom(
+      @NotNull final EventFileSource fileSource) {
+    return playlistService.createVideoStreamPlaylist(fileSource);
   }
 
-  void startVideoStreamTask(@NotNull final VideoStreamLocator streamLocator) {
-
-    // Setup streaming job
-    final Path playlistPath = streamLocator.getPlaylistPath();
-    final EventFile eventFile = streamLocator.getEventFile();
-    // Create streaming task
-    final VideoStreamTask streamTask =
-        VideoStreamTask.builder()
-            .dependencies(eventFileService, ffmpegPlugin)
-            .eventFile(eventFile)
-            .storageLocation(playlistPath)
-            .build();
-    // Submit task to job processor
-    Log.i(LOG_TAG, "Starting stream task to: " + streamTask.getPlaylistPath());
-    executorService.execute(streamTask);
+  public Optional<VideoStreamLocatorPlaylist> getLocalStreamFor(@NotNull final String fileSrcId) {
+    return playlistService.getVideoStreamPlaylistFor(fileSrcId);
   }
 
-  @Configurable
-  static class VideoStreamTask extends Thread {
+  public void deleteLocalStream(@NotNull final VideoStreamLocatorPlaylist playlist)
+      throws IOException {
 
-    /** Builder class for the VideoStreamTask class */
-    static class VideoStreamTaskBuilder {
-
-      private EventFileService eventFileService;
-      private FFmpegPlugin ffmpegPlugin;
-      private EventFile eventFile;
-      private Path storageLocation;
-
-      VideoStreamTaskBuilder dependencies(
-          final EventFileService eventFileService, final FFmpegPlugin ffmpegPlugin) {
-        this.eventFileService = eventFileService;
-        this.ffmpegPlugin = ffmpegPlugin;
-        return this;
-      }
-
-      VideoStreamTaskBuilder eventFile(final EventFile eventFile) {
-        this.eventFile = eventFile;
-        return this;
-      }
-
-      VideoStreamTaskBuilder storageLocation(final Path storageLocation) {
-        this.storageLocation = storageLocation;
-        return this;
-      }
-
-      VideoStreamTask build() {
-        return new VideoStreamTask(eventFileService, ffmpegPlugin, eventFile, storageLocation);
-      }
+    Log.i("VideoStreamManager", "Deleting stream locator playlist: " + playlist.getId());
+    final List<VideoStreamLocator> streamLocators = playlist.getStreamLocators();
+    for (VideoStreamLocator streamLocator : streamLocators) {
+      locatorService.deleteStreamLocatorWithData(streamLocator);
     }
-
-    static VideoStreamTaskBuilder builder() {
-      return new VideoStreamTaskBuilder();
+    // delete stream root dir
+    final boolean storageDeleted = playlist.getStorageLocation().toFile().delete();
+    if (!storageDeleted) {
+      final String message =
+          "Could not delete storage directory for VideoStreamLocatorPlaylist: " + playlist.getId();
+      throw new IOException(message);
     }
+    playlistService.deleteVideoStreamPlaylist(playlist);
+  }
 
-    // Dependencies
-    private final EventFileService eventFileService;
-    private final FFmpegPlugin ffmpegPlugin;
-    // Data fields
-    private final EventFile eventFile;
-    private final Path playlistPath;
+  @Async
+  @SneakyThrows
+  public void beginStreaming(@NotNull final VideoStreamLocator streamLocator) {
 
-    private VideoStreamTask(
-        final EventFileService eventFileService,
-        final FFmpegPlugin ffmpegPlugin,
-        final EventFile eventFile,
-        final Path playlistPath) {
-      this.eventFileService = eventFileService;
-      this.ffmpegPlugin = ffmpegPlugin;
-      this.eventFile = eventFile;
-      this.playlistPath = playlistPath;
-    }
+    try {
+      updateLocatorTaskState(streamLocator, JobStatus.STARTED, 0.01);
+      final EventFile eventFile = streamLocator.getEventFile();
+      final Path playlistPath = streamLocator.getPlaylistPath();
 
-    public Path getPlaylistPath() {
-      return this.playlistPath;
-    }
-
-    @SneakyThrows
-    @Override
-    public void run() {
-
-      final EventFile refreshedEventFile =
-              eventFileService.refreshEventFile(this.eventFile, false);
-      // Get link to video data
+      updateLocatorTaskState(streamLocator, JobStatus.BUFFERING, 0.01);
+      final EventFile refreshedEventFile = eventFileService.refreshEventFile(eventFile, false);
       final URI videoDataLink = refreshedEventFile.getInternalUrl().toURI();
+      updateLocatorTaskState(streamLocator, JobStatus.BUFFERING, 0.1);
+
       // Start stream
       final Thread streamTask = ffmpegPlugin.streamUris(playlistPath, videoDataLink);
       streamTask.start();
+      updateLocatorTaskState(streamLocator, JobStatus.STREAMING, 0.1);
+
       // Wait for stream task to finish
       streamTask.join();
+      updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0);
+
+    } catch (Throwable e) {
+      updateLocatorTaskState(streamLocator, JobStatus.ERROR, -1.0);
+      throw e;
     }
+  }
+
+  public boolean isStreamReady(@NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
+
+    // update aggregate state
+    final TaskListState listState = locatorPlaylist.getState();
+    final JobStatus jobStatus = listState.getStatus();
+    return jobStatus == JobStatus.COMPLETED || jobStatus == JobStatus.STREAMING;
+
+    //    final VideoStreamLocatorPlaylist updatedPlaylist =
+    // playlistService.updateLocatorPlaylist(locatorPlaylist);
+    // todo - necessary? ^
+  }
+
+  private void updateLocatorTaskState(
+      @NotNull final VideoStreamLocator streamLocator,
+      @NotNull final JobStatus status,
+      final Double completionRatio) {
+
+    streamLocator.updateState(status, completionRatio);
+    locatorService.saveStreamLocator(streamLocator);
   }
 }

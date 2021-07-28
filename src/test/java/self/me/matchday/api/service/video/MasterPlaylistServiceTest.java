@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.api.service;
+package self.me.matchday.api.service.video;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,10 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.CreateTestData;
-import self.me.matchday.api.service.video.MasterPlaylistService;
+import self.me.matchday.api.service.CompetitionService;
+import self.me.matchday.api.service.EventService;
+import self.me.matchday.api.service.TeamService;
 import self.me.matchday.model.Event;
-import self.me.matchday.model.MasterM3U;
 import self.me.matchday.model.Match;
+import self.me.matchday.model.video.MasterM3U;
 import self.me.matchday.util.Log;
 
 import java.util.Optional;
