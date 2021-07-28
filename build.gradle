@@ -1,6 +1,6 @@
 plugins {
-	id 'org.springframework.boot' version '2.3.2.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'org.springframework.boot' version '2.5.2'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
 }
 
@@ -21,17 +21,19 @@ repositories {
 dependencies {
 
 	// Feed parsing
-	compile group: 'org.jsoup', name: 'jsoup', version: '1.12.1'
+	implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.1'
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
 	implementation group: 'org.brotli', name: 'dec', version: '0.1.2'
 
 	// Annotations
     implementation 'org.jetbrains:annotations:19.0.0'
+	implementation 'org.projectlombok:lombok:1.18.18'
 	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 
     // Lombok
-    compile group: 'org.jetbrains', name: 'annotations', version: '16.0.2'
+    implementation group: 'org.jetbrains', name: 'annotations', version: '16.0.2'
     implementation 'org.projectlombok:lombok'
+    testImplementation 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
 	// SpringBoot
@@ -47,7 +49,7 @@ dependencies {
 
 	// Development
 	implementation 'org.flywaydb:flyway-core'
-	runtimeOnly 'com.h2database:h2'
+	implementation 'com.h2database:h2'
 	// Remove to eliminate reflective access warning per: https://stackoverflow.com/a/61007739/4871490
 	runtimeOnly 'org.springframework.boot:spring-boot-devtools'
 
@@ -57,13 +59,13 @@ dependencies {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntime "org.junit.jupiter:junit-jupiter:$jupiter_version"
-	testCompile "org.junit.jupiter:junit-jupiter-params:$jupiter_version"
+	testImplementation "org.junit.jupiter:junit-jupiter:$jupiter_version"
+	testImplementation "org.junit.jupiter:junit-jupiter-params:$jupiter_version"
 }
 
 bootRun {
 	if (project.hasProperty('args')) {
-		args = project.args.split(',' as Closure)
+		args = project.args.split(',')
 	}
 }
 
