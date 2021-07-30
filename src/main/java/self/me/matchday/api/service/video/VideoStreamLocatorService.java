@@ -21,6 +21,7 @@ package self.me.matchday.api.service.video;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.VideoStreamLocatorRepo;
@@ -39,7 +40,9 @@ import java.util.Optional;
 @Service
 public class VideoStreamLocatorService {
 
-  private static final String PLAYLIST_NAME = "playlist.m3u8"; // todo - move to config
+  @Value("${video-resources.playlist-name}")
+  private String PLAYLIST_NAME;
+
   private static final String LOG_TAG = "PlaylistLocatorService";
 
   private final VideoStreamLocatorRepo streamLocatorRepo;

@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import self.me.matchday.api.service.EventFileService;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.video.TaskListState;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
@@ -89,7 +88,7 @@ class VideoStreamManager {
     playlistService.deleteVideoStreamPlaylist(playlist);
   }
 
-  @Async
+  @Async("VideoStreamExecutor")
   @SneakyThrows
   public void beginStreaming(@NotNull final VideoStreamLocator streamLocator) {
 
@@ -118,16 +117,15 @@ class VideoStreamManager {
     }
   }
 
+  /**
+   * Given a video stream playlist, determine if it is ready for a client to begin streaming
+   *
+   * @param locatorPlaylist The collection of streams for a particular Event
+   * @return true/false - clients can begin streaming
+   */
   public boolean isStreamReady(@NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
-
-    // update aggregate state
-    final TaskListState listState = locatorPlaylist.getState();
-    final JobStatus jobStatus = listState.getStatus();
+    final JobStatus jobStatus = locatorPlaylist.getState().getStatus();
     return jobStatus == JobStatus.COMPLETED || jobStatus == JobStatus.STREAMING;
-
-    //    final VideoStreamLocatorPlaylist updatedPlaylist =
-    // playlistService.updateLocatorPlaylist(locatorPlaylist);
-    // todo - necessary? ^
   }
 
   private void updateLocatorTaskState(

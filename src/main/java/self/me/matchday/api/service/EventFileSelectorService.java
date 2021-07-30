@@ -49,7 +49,7 @@ public class EventFileSelectorService {
         .getEventFiles()
         .forEach(eventFile -> eventParts.add(eventFile.getTitle(), eventFile));
 
-    // Get best version of each EventFile
+    // Get best version of each part
     return eventParts.values().stream()
         .map(this::getBestEventFile)
         .sorted()

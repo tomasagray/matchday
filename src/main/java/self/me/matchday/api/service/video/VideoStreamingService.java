@@ -20,6 +20,7 @@
 package self.me.matchday.api.service.video;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -228,7 +229,7 @@ public class VideoStreamingService {
    * @param streamLocator The locator pointing to the required playlist file
    * @return The playlist file as a String or empty
    */
-  private String readLocatorPlaylist(@NotNull final VideoStreamLocator streamLocator) {
+  private @Nullable String readLocatorPlaylist(@NotNull final VideoStreamLocator streamLocator) {
 
     final StringBuilder sb = new StringBuilder();
     final Path playlistPath = streamLocator.getPlaylistPath();
@@ -276,7 +277,7 @@ public class VideoStreamingService {
    * @param fileSrcId ID of the file source for this request
    * @return True if the event & associated file source were found, otherwise false
    */
-  private EventFileSource validateFileSourceRequest(
+  private @Nullable EventFileSource validateFileSourceRequest(
       @NotNull final String eventId, @NotNull final String fileSrcId) {
 
     // Get event from database
