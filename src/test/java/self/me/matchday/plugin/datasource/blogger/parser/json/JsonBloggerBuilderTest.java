@@ -22,7 +22,7 @@ package self.me.matchday.plugin.datasource.blogger.parser.json;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.plugin.datasource.blogger.Blogger;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
 import self.me.matchday.util.Log;
@@ -44,7 +44,7 @@ class JsonBloggerBuilderTest {
 
     // Create parser
     JsonBloggerBuilder bloggerBuilder =
-        new JsonBloggerBuilder(CreateTestData.ZKF_JSON, new JsonPostBuilderFactory());
+        new JsonBloggerBuilder(TestDataCreator.ZKF_JSON, new JsonPostBuilderFactory());
     // Get Blogger from remote source
     blogger = bloggerBuilder.getBlogger();
   }

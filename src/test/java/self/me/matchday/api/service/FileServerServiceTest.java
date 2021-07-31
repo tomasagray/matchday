@@ -30,7 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.UnitTestFileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
@@ -52,29 +52,28 @@ class FileServerServiceTest {
 
   private static final String LOG_TAG = "FileServerServiceTest";
 
+  private static TestDataCreator testDataCreator;
   private static FileServerService fileServerService;
   private static FileServerPlugin testFileServerPlugin;
   private static FileServerUser testFileServerUser;
 
   @BeforeAll
   static void setUp(
+      @Autowired @NotNull final TestDataCreator testDataCreator,
       @Autowired final FileServerService fileServerService,
       @Autowired final UnitTestFileServerPlugin testFileServerPlugin) {
 
+    FileServerServiceTest.testDataCreator = testDataCreator;
     FileServerServiceTest.fileServerService = fileServerService;
     FileServerServiceTest.testFileServerPlugin = testFileServerPlugin;
 
-    testFileServerUser = CreateTestData.createTestFileServerUser();
+    testFileServerUser = testDataCreator.createTestFileServerUser();
   }
 
   @AfterAll
   static void tearDown() {
-
     // delete test data
-    fileServerService.deleteUser(testFileServerUser.getUserId());
-    final Optional<FileServerUser> userOptional =
-        fileServerService.getUserById(testFileServerUser.getUserId());
-    assertThat(userOptional).isNotPresent();
+    testDataCreator.deleteFileServerUser(testFileServerUser);
   }
 
   // === Management ===
@@ -171,7 +170,7 @@ class FileServerServiceTest {
     // Ensure user is logged in
     fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
 
-    final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
+    final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
     assertThat(firstHalfUrl).isNotNull();
 
     final Optional<URL> optionalURL = fileServerService.getDownloadUrl(firstHalfUrl);
@@ -188,7 +187,7 @@ class FileServerServiceTest {
   @DisplayName("Validate plugin refresh rate retrieval in plugin service")
   void getFileServerRefreshRate() {
 
-    final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
+    final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
     assertThat(firstHalfUrl).isNotNull();
 
     final Duration actualServerRefreshRate =
@@ -241,6 +240,7 @@ class FileServerServiceTest {
 
   @NotNull
   private FileServerUser getFreshManagedUser() {
+
     final Optional<FileServerUser> afterLogoutOptional =
         fileServerService.getUserById(testFileServerUser.getUserId());
     assertThat(afterLogoutOptional).isPresent();

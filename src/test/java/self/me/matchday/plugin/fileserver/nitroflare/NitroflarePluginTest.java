@@ -30,7 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpCookie;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.NetscapeCookiesService;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
@@ -172,9 +172,9 @@ class NitroflarePluginTest {
 
     Log.i(
         LOG_TAG,
-        "Attempting to read Nitroflare download link from: " + CreateTestData.NITROFLARE_DL_URL);
+        "Attempting to read Nitroflare download link from: " + TestDataCreator.NITROFLARE_DL_URL);
     final Optional<URL> urlOptional =
-        nitroflarePlugin.getDownloadURL(CreateTestData.NITROFLARE_DL_URL, new HashSet<>());
+        nitroflarePlugin.getDownloadURL(TestDataCreator.NITROFLARE_DL_URL, new HashSet<>());
 
     assertThat(urlOptional).isPresent();
     final URL actualDownloadUrl = urlOptional.get();

@@ -22,6 +22,7 @@ package self.me.matchday.plugin.datasource.zkfootball;
 import com.google.gson.Gson;
 import lombok.Data;
 import org.assertj.core.util.Strings;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
@@ -56,7 +57,10 @@ class ZKFEventFileSourceParserTest {
   private static EventFileSource secondSource;
 
   @BeforeAll
-  static void setUp(@Autowired final ZKFEventFileSourceParser fileSourceParser) throws IOException {
+  static void setUp(
+      @Autowired @NotNull final TestDataCreator testDataCreator,
+      @Autowired @NotNull final ZKFEventFileSourceParser fileSourceParser)
+      throws IOException {
 
     final String zkfPostData =
         Strings.join(
@@ -70,7 +74,7 @@ class ZKFEventFileSourceParserTest {
     final String text = zkfPost.getEntry().getContent().getText();
 
     // Create test event
-    final Match testMatch = CreateTestData.createTestMatch();
+    final Match testMatch = testDataCreator.createTestMatch();
     testFileSources = fileSourceParser.getEventFileSources(testMatch, text);
 
     assertThat(testFileSources).isNotNull();

@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service.video;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.CreateTestData;
-import self.me.matchday.db.EventFileSrcRepository;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
@@ -46,8 +46,10 @@ class VideoStreamLocatorServiceTest {
 
   private static final String LOG_TAG = "PlaylistLocatorServiceTest";
 
+  private static TestDataCreator testDataCreator;
   private static VideoStreamLocatorService videoStreamLocatorService;
-  private static EventFileSrcRepository fileSrcRepository;
+
+  // test resources
   private static VideoStreamLocator testStreamLocator;
   private static EventFileSource testEventFileSource;
   private static EventFile testEventFile;
@@ -57,27 +59,24 @@ class VideoStreamLocatorServiceTest {
 
   @BeforeAll
   static void setUp(
-      @Autowired final VideoStreamLocatorService videoStreamLocatorService,
-      @Autowired final EventFileSrcRepository fileSrcRepository) {
+      @Autowired @NotNull final TestDataCreator testDataCreator,
+      @Autowired @NotNull final VideoStreamLocatorService videoStreamLocatorService) {
 
+    VideoStreamLocatorServiceTest.testDataCreator = testDataCreator;
     VideoStreamLocatorServiceTest.videoStreamLocatorService = videoStreamLocatorService;
-    VideoStreamLocatorServiceTest.fileSrcRepository = fileSrcRepository;
     // Get managed copy of test file source
-    final EventFileSource fileSource = CreateTestData.createTestEventFileSource();
-    VideoStreamLocatorServiceTest.testEventFileSource = fileSrcRepository.saveAndFlush(fileSource);
-
+    VideoStreamLocatorServiceTest.testEventFileSource = testDataCreator.createTestEventFileSource();
     VideoStreamLocatorServiceTest.testEventFile =
         VideoStreamLocatorServiceTest.testEventFileSource.getEventFiles().get(0);
-
+    // resolve test data storage path
     VideoStreamLocatorServiceTest.testStorage =
         storageLocation.resolve(testEventFileSource.getEventFileSrcId());
   }
 
   @AfterAll
   static void tearDownDependencies() {
-
     // Cleanup test resources
-    fileSrcRepository.delete(testEventFileSource);
+    testDataCreator.deleteEventFileSource(testEventFileSource);
     videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
   }
 

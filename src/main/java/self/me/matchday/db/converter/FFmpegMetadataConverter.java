@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -20,14 +20,15 @@
 package self.me.matchday.db.converter;
 
 import com.google.gson.Gson;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
+
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 
 @Converter
 public class FFmpegMetadataConverter implements AttributeConverter<FFmpegMetadata, String> {
 
-  // Single Gson instance for all conversions
+  // Use a single Gson instance for all conversions
   private final Gson gson = new Gson();
 
   @Override

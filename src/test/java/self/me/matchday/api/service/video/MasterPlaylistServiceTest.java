@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service.video;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -27,11 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
-import self.me.matchday.api.service.CompetitionService;
-import self.me.matchday.api.service.EventService;
-import self.me.matchday.api.service.TeamService;
-import self.me.matchday.model.Event;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.video.MasterM3U;
 import self.me.matchday.util.Log;
@@ -47,44 +44,27 @@ class MasterPlaylistServiceTest {
 
   private static final String LOG_TAG = "MasterPlaylistServiceTest";
 
+  private static TestDataCreator testDataCreator;
   private static MasterPlaylistService playlistService;
-  private static EventService eventService;
-  private static CompetitionService competitionService;
-  private static TeamService teamService;
 
   private static Match testMatch;
 
   @BeforeAll
   static void setUp(
-      @Autowired final MasterPlaylistService playlistService,
-      @Autowired final EventService eventService,
-      @Autowired final CompetitionService competitionService,
-      @Autowired final TeamService teamService) {
+      @Autowired @NotNull final TestDataCreator testDataCreator,
+      @Autowired final MasterPlaylistService playlistService) {
 
+    MasterPlaylistServiceTest.testDataCreator = testDataCreator;
     MasterPlaylistServiceTest.playlistService = playlistService;
-    MasterPlaylistServiceTest.eventService = eventService;
-    MasterPlaylistServiceTest.competitionService = competitionService;
-    MasterPlaylistServiceTest.teamService = teamService;
 
     // Create test data
-    Match match = CreateTestData.createTestMatch();
-    // Save test data to DB
-    eventService.saveEvent(match);
-
-    // Get managed copy for testing
-    final Optional<Event> testEventOptional = eventService.fetchById(match.getEventId());
-    assertThat(testEventOptional).isPresent();
-
-    testMatch = (Match) testEventOptional.get();
+    MasterPlaylistServiceTest.testMatch = testDataCreator.createTestMatch();
   }
 
   @AfterAll
   static void tearDown() {
-
     // delete test data
-    eventService.deleteEvent(testMatch);
-    competitionService.deleteCompetitionById(testMatch.getCompetition().getCompetitionId());
-    teamService.deleteTeamById(testMatch.getHomeTeam().getTeamId());
+    testDataCreator.deleteTestEvent(testMatch);
   }
 
   @Test

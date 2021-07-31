@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -55,7 +55,7 @@ public class JsonBloggerBuilder implements BloggerBuilder {
 
   /**
    * Get the "feed" portion of the JSON object. Also sets version field, as this is the only data
-   * outside of the "plugin" structure.
+   * outside the "plugin" structure.
    *
    * @param feed A JsonObject of the entire JSON plugin
    */

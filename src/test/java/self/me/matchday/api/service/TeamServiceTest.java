@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -27,9 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
-import self.me.matchday.model.Event;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
@@ -46,46 +46,29 @@ class TeamServiceTest {
 
   private static final String LOG_TAG = "TeamServiceTest";
 
+  private static TestDataCreator testDataCreator;
   private static TeamService teamService;
   private static Competition testCompetition;
   private static Team testTeam;
   private static Match testMatch;
-  private static EventService eventService;
-  private static CompetitionService competitionService;
 
   @BeforeAll
   static void setUp(
-      @Autowired final TeamService teamService,
-      @Autowired final EventService eventService,
-      @Autowired final CompetitionService competitionService) {
+      @Autowired @NotNull final TestDataCreator testDataCreator,
+      @Autowired @NotNull final TeamService teamService) {
 
+    TeamServiceTest.testDataCreator = testDataCreator;
     TeamServiceTest.teamService = teamService;
-    TeamServiceTest.eventService = eventService;
-    TeamServiceTest.competitionService = competitionService;
 
-    // Create test data
-    final Match match = CreateTestData.createTestMatch();
-    TeamServiceTest.eventService.saveEvent(match);
-
-    // get Spring managed copy
-    final Optional<Event> testEventOptional = eventService.fetchById(match.getEventId());
-    assertThat(testEventOptional).isPresent();
-
-    TeamServiceTest.testMatch = (Match) testEventOptional.get();
-    testCompetition = testMatch.getCompetition();
-    testTeam = testMatch.getHomeTeam();
-
-    // Save test data
-    TeamServiceTest.teamService.saveTeam(testTeam);
+    TeamServiceTest.testMatch = testDataCreator.createTestMatch();
+    TeamServiceTest.testCompetition = testMatch.getCompetition();
+    TeamServiceTest.testTeam = testMatch.getHomeTeam();
   }
 
   @AfterAll
   static void tearDown() {
-
     // delete test data
-    eventService.deleteEvent(testMatch);
-    teamService.deleteTeamById(testTeam.getTeamId());
-    competitionService.deleteCompetitionById(testCompetition.getCompetitionId());
+    testDataCreator.deleteTestEvent(testMatch);
   }
 
   @Test

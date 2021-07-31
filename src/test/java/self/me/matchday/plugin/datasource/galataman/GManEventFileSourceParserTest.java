@@ -20,6 +20,7 @@
 package self.me.matchday.plugin.datasource.galataman;
 
 import org.assertj.core.util.Strings;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.EventFileSource.Resolution;
@@ -46,12 +47,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GManEventFileSourceParserTest {
 
   private static final String LOG_TAG = "GManEventFileSourceParserTest";
+
   private static List<EventFileSource> testFileSources;
   private static EventFileSource secondSource;
   private static EventFileSource firstSource;
 
   @BeforeAll
-  static void setUp(@Autowired final GManEventFileSourceParser fileSourceParser)
+  static void setUp(
+      @Autowired @NotNull final TestDataCreator testDataCreator,
+      @Autowired @NotNull final GManEventFileSourceParser fileSourceParser)
       throws IOException {
 
     // Read test data
@@ -63,7 +67,7 @@ class GManEventFileSourceParserTest {
     Log.i(LOG_TAG, "Read file source test data:\n" + postHtml);
 
     // Create test event
-    final Match testMatch = CreateTestData.createTestMatch();
+    final Match testMatch = testDataCreator.createTestMatch();
 
     // Parse test data
     testFileSources = fileSourceParser.getEventFileSources(testMatch, postHtml);

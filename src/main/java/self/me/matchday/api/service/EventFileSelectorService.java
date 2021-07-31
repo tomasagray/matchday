@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class EventFileSelectorService {
 
   /**
-   * Get the best version of each EventFile for this EventFileSource, and return in the correct
+   * Get the best version of each EventFile for this EventFileSource, and return them in the correct
    * order.
    *
    * @param fileSource The source of video data for this Event

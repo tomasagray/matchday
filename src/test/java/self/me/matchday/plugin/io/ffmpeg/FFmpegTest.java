@@ -19,11 +19,16 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import self.me.matchday.CreateTestData;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.MatchdayApplication;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -37,6 +42,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
 @DisplayName("FFmpegTest - Test the creation of FFmpegSingleStreamTask HLS streaming task")
 class FFmpegTest {
 
@@ -51,8 +58,10 @@ class FFmpegTest {
   private static String storageLocation;
 
   @BeforeAll
-  static void setUp() throws URISyntaxException, IOException {
+  static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator)
+      throws URISyntaxException, IOException {
 
+    Log.i(LOG_TAG, "Instantiating FFmpeg Plugin with executable: " + FFMPEG_EXE);
     FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);
 
     // Read configuration resources
@@ -60,8 +69,8 @@ class FFmpegTest {
         ResourceFileReader.readPropertiesResource(MatchdayApplication.class, "video.properties");
 
     // Create URLs
-    final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
-    final URL secondHalfUrl = CreateTestData.getSecondHalfUrl();
+    final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
+    final URL secondHalfUrl = testDataCreator.getSecondHalfUrl();
     assertThat(firstHalfUrl).isNotNull();
     assertThat(secondHalfUrl).isNotNull();
 

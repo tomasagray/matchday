@@ -20,9 +20,14 @@
 package self.me.matchday.plugin.io.ffmpeg;
 
 import com.google.gson.Gson;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import self.me.matchday.CreateTestData;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -35,6 +40,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
 @DisplayName("FFprobeTest - Test the functionality of the FFprobe plugin")
 @TestMethodOrder(OrderAnnotation.class)
 class FFprobeTest {
@@ -48,10 +55,11 @@ class FFprobeTest {
 
   // Test resources
   private static FFprobe ffProbe;
+  private static URL testUrl;
   private static FFmpegMetadata expectedMetadata;
 
   @BeforeAll
-  static void setUp() throws IOException {
+  static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator) throws IOException {
 
     // Read plugin resources file
     Map<String, String> resources =
@@ -63,7 +71,9 @@ class FFprobeTest {
     expectedMetadata = new Gson().fromJson(String.join(" ", sampleMetadata), FFmpegMetadata.class);
 
     // Create FFprobe instance
+    Log.i(LOG_TAG, "Instantiating FFprobe with executable: " + FFPROBE_PATH);
     ffProbe = new FFprobe(resources.get(FFPROBE_PATH));
+    FFprobeTest.testUrl = testDataCreator.getFirstHalfUrl();
   }
 
   @Test
@@ -80,10 +90,7 @@ class FFprobeTest {
   @DisplayName("Verify FFprobe can read remote file metadata")
   void testGetFileMetadata() throws URISyntaxException, IOException {
 
-    // Initialize test URL; ensure same as test data
-    final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
-    assertThat(firstHalfUrl).isNotNull();
-    final String baseUrl = firstHalfUrl.toString().replaceAll("\\?[\\w]*=[\\w]*", "");
+    final String baseUrl = testUrl.toString().replaceAll("\\?[\\w]*=[\\w]*", "");
 
     Log.i(LOG_TAG, "Reading file data from: " + baseUrl);
     FFmpegMetadata actualMetadata = ffProbe.getFileMetadata(new URI(baseUrl));

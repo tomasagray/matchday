@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.UnitTestFileServerPlugin;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
@@ -47,37 +48,37 @@ class EventFileServiceTest {
   private static final String LOG_TAG = "EventFileServiceTest";
 
   // Test resources
+  private static TestDataCreator testDataCreator;
   private static EventFileService eventFileService;
-  private static FileServerService fileServerService;
 
   private static EventFileSource testEventFileSrc;
   private static FileServerUser testFileServerUser;
 
   @BeforeAll
   static void setUp(
-      @Autowired final EventFileService eventFileService,
-      @Autowired final FileServerService fileServerService,
-      @Autowired final UnitTestFileServerPlugin testFileServerPlugin) {
+      @Autowired @NotNull final TestDataCreator testDataCreator,
+      @Autowired @NotNull final EventFileService eventFileService,
+      @Autowired @NotNull final FileServerService fileServerService,
+      @Autowired @NotNull final UnitTestFileServerPlugin testFileServerPlugin) {
 
+    EventFileServiceTest.testDataCreator = testDataCreator;
     EventFileServiceTest.eventFileService = eventFileService;
-    EventFileServiceTest.fileServerService = fileServerService;
 
-    // Create & register test file server plugin
     // Create test user & login
-    EventFileServiceTest.testFileServerUser = CreateTestData.createTestFileServerUser();
+    EventFileServiceTest.testFileServerUser = testDataCreator.createTestFileServerUser();
     fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Create test EventFileSource
-    testEventFileSrc = CreateTestData.createTestEventFileSource();
+    testEventFileSrc = testDataCreator.createTestEventFileSource();
   }
 
   @AfterAll
   static void tearDown() {
-
     // Remove test user from repo
     Log.i(LOG_TAG, "Deleting test user: " + testFileServerUser);
-    fileServerService.deleteUser(testFileServerUser.getUserId());
+    testDataCreator.deleteFileServerUser(testFileServerUser);
+    testDataCreator.deleteEventFileSource(testEventFileSrc);
   }
 
   @Test

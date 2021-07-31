@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -75,7 +75,7 @@ public class EventFileService {
    * Add an EventFile refresh task to the job queue
    *
    * @param eventFile The EventFile to be refreshed
-   * @param fetchMetadata Whether or not to pre-fetch file metadata
+   * @param fetchMetadata Whether to pre-fetch file metadata
    * @return A Future representing the refreshed file
    */
   public EventFile refreshEventFile(@NotNull final EventFile eventFile, final boolean fetchMetadata)

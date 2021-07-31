@@ -27,13 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.UnitTestFileServerPlugin;
-import self.me.matchday.api.service.CompetitionService;
-import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.FileServerService;
-import self.me.matchday.api.service.TeamService;
-import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.video.M3UPlaylist;
@@ -51,54 +47,37 @@ class VariantPlaylistServiceTest {
 
   private static final String LOG_TAG = "VariantPlaylistServiceTest";
 
+  private static TestDataCreator testDataCreator;
   private static VariantPlaylistService playlistService;
-  private static EventService eventService;
-  private static FileServerService fileServerService;
-  private static CompetitionService competitionService;
-  private static TeamService teamService;
 
   private static Match testMatch;
   private static FileServerUser testFileServerUser;
 
   @BeforeAll
   static void setUp(
+      @Autowired final TestDataCreator testDataCreator,
       @Autowired final VariantPlaylistService playlistService,
-      @Autowired final EventService eventService,
       @Autowired final FileServerService fileServerService,
-      @Autowired final CompetitionService competitionService,
-      @Autowired final TeamService teamService,
       @Autowired final UnitTestFileServerPlugin testFileServerPlugin) {
 
+    VariantPlaylistServiceTest.testDataCreator = testDataCreator;
     VariantPlaylistServiceTest.playlistService = playlistService;
-    VariantPlaylistServiceTest.eventService = eventService;
-    VariantPlaylistServiceTest.fileServerService = fileServerService;
-    VariantPlaylistServiceTest.competitionService = competitionService;
-    VariantPlaylistServiceTest.teamService = teamService;
 
     // Register test file server plugin
     // Create test user & login
-    testFileServerUser = CreateTestData.createTestFileServerUser();
+    testFileServerUser = testDataCreator.createTestFileServerUser();
     fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
 
     // Create & save test data
-    Match match = CreateTestData.createTestMatch();
-    eventService.saveEvent(match);
-
-    // Retrieve managed copy
-    final Optional<Event> eventOptional = eventService.fetchById(match.getEventId());
-    assertThat(eventOptional).isPresent();
-    testMatch = (Match) eventOptional.get();
+    VariantPlaylistServiceTest.testMatch = testDataCreator.createTestMatch();
   }
 
   @AfterAll
   static void tearDown() {
-
     Log.i(LOG_TAG, "Deleting test data...");
     // delete test data
-    eventService.deleteEvent(testMatch);
-    competitionService.deleteCompetitionById(testMatch.getCompetition().getCompetitionId());
-    teamService.deleteTeamById(testMatch.getHomeTeam().getTeamId());
-    fileServerService.deleteUser(testFileServerUser.getUserId());
+    testDataCreator.deleteTestEvent(testMatch);
+    testDataCreator.deleteFileServerUser(testFileServerUser);
   }
 
   @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -69,7 +69,7 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
   /**
    * Parse out all EventFileSources from this post
    *
-   * @return A List<> of EventFileSources (may be empty)
+   * @return A List<> of EventFileSources (can be empty)
    */
   private @NotNull List<EventFileSource> parseEventFileSources(
       @NotNull final String html, @NotNull final String eventId) {
@@ -101,7 +101,7 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
                   // Attempt to parse
                   try {
                     final URL url = new URL(href);
-                    // Ensure link is one the server can parse
+                    // Ensure link is one that the server can parse
                     if (fileServerService.isVideoLink(url)) {
                       // Create EventFile & add to collection
                       final EventFile eventFile = new EventFile(partIdentifier, url);
@@ -121,7 +121,8 @@ public class ZKFEventFileSourceParser implements EventFileSourceParser {
             // Parse metadata
             final ZKFFileMetadata metadata = new ZKFFileMetadata(data, zkfPatterns);
             // Create a file source from data
-            final EventFileSource fileSource = EventFileSource.createEventFileSource(metadata, eventId);
+            final EventFileSource fileSource =
+                EventFileSource.createEventFileSource(metadata, eventId);
             // Add EventFiles to the current EventFileSource
             fileSource.getEventFiles().addAll(eventFiles);
             // Add to collection

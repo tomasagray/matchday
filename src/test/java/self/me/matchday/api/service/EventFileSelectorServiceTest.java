@@ -27,7 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
@@ -49,16 +49,16 @@ class EventFileSelectorServiceTest {
   private static EventFileSelectorService fileSelectorService;
 
   @BeforeAll
-  static void setUp(@Autowired final EventFileSelectorService fileSelectorService) {
+  static void setUp(
+      @Autowired @NotNull final TestDataCreator testDataCreator,
+      @Autowired @NotNull final EventFileSelectorService fileSelectorService) {
 
     EventFileSelectorServiceTest.fileSelectorService = fileSelectorService;
 
     // Create test data
-    testEventFileSource = CreateTestData.createTestEventFileSource();
+    testEventFileSource = testDataCreator.createTestEventFileSource();
     // Set internal urls for testing
     setInternalUrls(testEventFileSource.getEventFiles());
-    // Add unrefreshed EventFiles
-    testEventFileSource.getEventFiles().addAll(CreateTestData.createTestEventFiles());
   }
 
   private static void setInternalUrls(@NotNull final List<EventFile> eventFiles) {

@@ -20,13 +20,14 @@
 package self.me.matchday.plugin.io.ffmpeg;
 
 import com.google.gson.Gson;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.RecursiveDirectoryDeleter;
 import self.me.matchday.util.ResourceFileReader;
@@ -67,10 +68,13 @@ class FFmpegPluginTest {
   private static List<URL> testUrls;
 
   @BeforeAll
-  static void setUp(@Autowired FFmpegPlugin plugin) throws IOException {
+  static void setUp(
+      @Autowired @NotNull final TestDataCreator testDataCreator,
+      @Autowired @NotNull final FFmpegPlugin plugin)
+      throws IOException {
 
     // Get FFMPEG instance
-    ffmpegPlugin = plugin;
+    FFmpegPluginTest.ffmpegPlugin = plugin;
 
     try {
       // Get video storage location
@@ -85,10 +89,10 @@ class FFmpegPluginTest {
       }
 
       // initialize test URI
-      final URL preMatchUrl = CreateTestData.getPreMatchUrl();
-      final URL firstHalfUrl = CreateTestData.getFirstHalfUrl();
-      final URL secondHalfUrl = CreateTestData.getSecondHalfUrl();
-      final URL postMatchUrl = CreateTestData.getPostMatchUrl();
+      final URL preMatchUrl = testDataCreator.getPreMatchUrl();
+      final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
+      final URL secondHalfUrl = testDataCreator.getSecondHalfUrl();
+      final URL postMatchUrl = testDataCreator.getPostMatchUrl();
 
       assertThat(preMatchUrl).isNotNull();
       assertThat(firstHalfUrl).isNotNull();
@@ -127,7 +131,7 @@ class FFmpegPluginTest {
 
   @Test
   @Order(1)
-  @DisplayName("Test concat protocol stream remote data to correct path in required time")
+  @DisplayName("Test concat protocol streams remote data to the correct path within required time")
   void testConcatStreamUris() throws InterruptedException {
 
     final List<URI> testUris = getTestUris();
@@ -153,8 +157,7 @@ class FFmpegPluginTest {
   @DisplayName("Test single HLS stream generation")
   void testSingleHlsStream() throws InterruptedException {
 
-    final FFmpegStreamTask streamTask =
-        ffmpegPlugin.streamUris(testPlaylist, getTestUris().get(1));
+    final FFmpegStreamTask streamTask = ffmpegPlugin.streamUris(testPlaylist, getTestUris().get(1));
     final Path streamingPath = streamTask.getPlaylistPath();
     Log.i(LOG_TAG, "Starting test stream to: " + streamingPath.toAbsolutePath());
 
@@ -239,6 +242,9 @@ class FFmpegPluginTest {
   }
 
   private int getActualFileCount(Path streamingPath) throws InterruptedException {
+
+    final long waitSeconds = 30;
+
     // Test data
     int actualFileCount = 0;
 
@@ -251,7 +257,8 @@ class FFmpegPluginTest {
     while (!filesFound && elapsed.compareTo(timeout) < 0) {
 
       // Wait for FFMPEG to do its thing...
-      Thread.sleep(30_000L);
+      Log.i(LOG_TAG, String.format("Waiting %d seconds before retry...", waitSeconds));
+      Thread.sleep(waitSeconds * 1_000L);
 
       final String[] fileList = streamingPath.getParent().toFile().list();
       assertThat(fileList).isNotNull();

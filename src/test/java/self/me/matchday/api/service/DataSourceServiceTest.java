@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
@@ -49,15 +49,18 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class DataSourceServiceTest {
 
   private static final String LOG_TAG = "DataSourceServiceTest";
+  private static TestDataCreator testDataCreator;
   private static DataSourceService dataSourceService;
   private static EventService eventService;
   private static DataSourcePlugin<Stream<Event>> testDataSourcePlugin;
 
   @BeforeAll
   static void setUp(
-      @Autowired final DataSourceService dataSourceService,
+      @Autowired final TestDataCreator testDataCreator,
+      @Autowired @NotNull final DataSourceService dataSourceService,
       @Autowired final EventService eventService) {
 
+    DataSourceServiceTest.testDataCreator = testDataCreator;
     DataSourceServiceTest.dataSourceService = dataSourceService;
     DataSourceServiceTest.eventService = eventService;
 
@@ -205,7 +208,7 @@ class DataSourceServiceTest {
   private static class TestDataSourcePlugin implements DataSourcePlugin<Stream<Event>> {
 
     private final UUID pluginId = UUID.randomUUID();
-    private final Event testMatch = CreateTestData.createTestMatch();
+    private final Event testMatch = testDataCreator.createTestMatch();
     private final Stream<Event> testEvents = Stream.of(testMatch);
 
     public Event getTestMatch() {

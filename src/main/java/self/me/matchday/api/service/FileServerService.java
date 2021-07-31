@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -501,7 +501,7 @@ public class FileServerService {
       // Return the download user
       return users.get(0);
     }
-    // No logged in users for this plugin
+    // No logged-in users for this plugin
     return null;
   }
 }

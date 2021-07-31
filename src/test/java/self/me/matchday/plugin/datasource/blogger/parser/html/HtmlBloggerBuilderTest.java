@@ -22,7 +22,7 @@ package self.me.matchday.plugin.datasource.blogger.parser.html;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.plugin.datasource.blogger.Blogger;
 import self.me.matchday.plugin.datasource.blogger.BloggerPost;
 import self.me.matchday.util.Log;
@@ -43,7 +43,7 @@ class HtmlBloggerBuilderTest {
 
     // Parse blogger
     HtmlBloggerBuilder bloggerBuilder =
-        new HtmlBloggerBuilder(CreateTestData.GMAN_HTML, new HtmlPostBuilderFactory());
+        new HtmlBloggerBuilder(TestDataCreator.GMAN_HTML, new HtmlPostBuilderFactory());
     blogger = bloggerBuilder.getBlogger();
     Log.i(LOG_TAG, "Read Blogger from HTML:\n" + blogger);
   }

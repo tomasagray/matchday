@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Highlight;
 import self.me.matchday.util.Log;
 
@@ -43,34 +44,26 @@ class HighlightServiceTest {
 
   private static final String LOG_TAG = "HighlightServiceTest";
 
+  private static TestDataCreator testDataCreator;
   private static HighlightService highlightService;
   private static Highlight testHighlight;
-  private static EventService eventService;
-  private static CompetitionService competitionService;
 
   @BeforeAll
   static void setUp(
-      @Autowired final HighlightService highlightService,
-      @Autowired final EventService eventService,
-      @Autowired final CompetitionService competitionService) {
+      @Autowired @NotNull final TestDataCreator testDataCreator,
+      @Autowired @NotNull final HighlightService highlightService) {
 
+    HighlightServiceTest.testDataCreator = testDataCreator;
     HighlightServiceTest.highlightService = highlightService;
-    HighlightServiceTest.eventService = eventService;
-    HighlightServiceTest.competitionService = competitionService;
 
     // Create test data
-    HighlightServiceTest.testHighlight = CreateTestData.createHighlightShow();
-
-    // Add test highlight show to DB
-    HighlightServiceTest.eventService.saveEvent(testHighlight);
+    HighlightServiceTest.testHighlight = testDataCreator.createHighlightShow();
   }
 
   @AfterAll
   static void tearDown() {
-
     // delete test data from database
-    eventService.deleteEvent(testHighlight);
-    competitionService.deleteCompetitionById(testHighlight.getCompetition().getCompetitionId());
+    testDataCreator.deleteTestEvent(testHighlight);
   }
 
   @Test

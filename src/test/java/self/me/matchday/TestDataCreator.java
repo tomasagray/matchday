@@ -20,6 +20,10 @@
 package self.me.matchday;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import self.me.matchday.db.*;
 import self.me.matchday.model.*;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
@@ -35,7 +39,8 @@ import java.util.Random;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static self.me.matchday.model.EventFileSource.Resolution.R_1080p;
 
-public class CreateTestData {
+@Component
+public class TestDataCreator {
 
   private static final String LOG_TAG = "CreateTestData";
   private static final Random numGen = new Random();
@@ -49,12 +54,12 @@ public class CreateTestData {
           String.join(
               " ",
               ResourceFileReader.readTextResource(
-                  CreateTestData.class, "gman_sample_page_20210416.html"));
+                  TestDataCreator.class, "gman_sample_page_20210416.html"));
       ZKF_JSON =
           String.join(
               "",
               ResourceFileReader.readTextResource(
-                  CreateTestData.class, "zkf_sample_20210416.json"));
+                  TestDataCreator.class, "zkf_sample_20210416.json"));
       NITROFLARE_DL_URL = new URL("https://www.nitroflare.com/");
 
     } catch (IOException e) {
@@ -62,9 +67,35 @@ public class CreateTestData {
     }
   }
 
-  // ================ EVENTS ======================
+  private final EventRepository eventRepository;
+  private final MatchRepository matchRepository;
+  private final HighlightRepository highlightRepository;
+  private final CompetitionRepository competitionRepository;
+  private final TeamRepository teamRepository;
+  private final EventFileSrcRepository fileSrcRepository;
+  private final FileServerUserRepo userRepo;
 
-  public static Match createTestMatch() {
+  @Autowired
+  public TestDataCreator(
+      @NotNull final EventRepository eventRepository,
+      @NotNull final MatchRepository matchRepository,
+      @NotNull final HighlightRepository highlightRepository,
+      @NotNull final CompetitionRepository competitionRepository,
+      @NotNull final TeamRepository teamRepository,
+      @NotNull final EventFileSrcRepository fileSrcRepository,
+      @NotNull final FileServerUserRepo userRepo) {
+
+    this.eventRepository = eventRepository;
+    this.matchRepository = matchRepository;
+    this.highlightRepository = highlightRepository;
+    this.competitionRepository = competitionRepository;
+    this.teamRepository = teamRepository;
+    this.fileSrcRepository = fileSrcRepository;
+    this.userRepo = userRepo;
+  }
+
+  // ================ EVENTS ======================
+  public @NotNull Match createTestMatch() {
     // Create & save test match & EventFileSource
     final Competition testCompetition = createTestCompetition();
     final Team testTeam = createTestTeam();
@@ -80,14 +111,13 @@ public class CreateTestData {
 
     // Create file source & event files
     final EventFileSource testFileSource = createTestEventFileSource();
-    testFileSource.getEventFiles().addAll(createTestEventFiles());
     testMatch.getFileSources().add(testFileSource);
 
     Log.i(LOG_TAG, "Created test Event: " + testMatch);
-    return testMatch;
+    return matchRepository.saveAndFlush(testMatch);
   }
 
-  public static Highlight createHighlightShow() {
+  public Highlight createHighlightShow() {
 
     // Create test highlight show
     final String title = "Test Highlight Show " + numGen.nextInt();
@@ -95,26 +125,35 @@ public class CreateTestData {
     final Fixture testFixture = new Fixture(numGen.nextInt(34));
     final Season testSeason = new Season();
 
-    return new Highlight.HighlightBuilder()
-        .setTitle(title)
-        .setCompetition(testCompetition)
-        .setFixture(testFixture)
-        .setSeason(testSeason)
-        .setDate(LocalDateTime.now())
-        .build();
+    final Highlight highlight =
+        new Highlight.HighlightBuilder()
+            .setTitle(title)
+            .setCompetition(testCompetition)
+            .setFixture(testFixture)
+            .setSeason(testSeason)
+            .setDate(LocalDateTime.now())
+            .build();
+    return highlightRepository.saveAndFlush(highlight);
+  }
+
+  public void deleteTestEvent(@NotNull final Event event) {
+    Log.i(LOG_TAG, "Deleting Event: " + event);
+    eventRepository.delete(event);
   }
 
   @NotNull
-  public static Competition createTestCompetition() {
-    return new Competition("TEST COMPETITION " + numGen.nextInt());
+  public Competition createTestCompetition() {
+    final Competition competition = new Competition("TEST COMPETITION " + numGen.nextInt());
+    return competitionRepository.saveAndFlush(competition);
   }
 
   @NotNull
-  public static Team createTestTeam() {
-    return new Team("TEST TEAM " + numGen.nextInt());
+  public Team createTestTeam() {
+    final Team team = new Team("TEST TEAM " + numGen.nextInt());
+    return teamRepository.saveAndFlush(team);
   }
 
-  public static EventFileSource createTestEventFileSource() {
+  public @NotNull EventFileSource createTestEventFileSource() {
 
     final EventFileSource fileSource =
         EventFileSource.builder()
@@ -126,10 +165,15 @@ public class CreateTestData {
             .fileSize(FileSize.ofGigabytes(8))
             .build();
     fileSource.getEventFiles().addAll(createTestEventFiles());
-    return fileSource;
+    return fileSrcRepository.saveAndFlush(fileSource);
   }
 
-  public static @NotNull List<EventFile> createTestEventFiles() {
+  public void deleteEventFileSource(@NotNull final EventFileSource fileSource) {
+    Log.i(LOG_TAG, "Deleting EventFileSource: " + fileSource);
+    fileSrcRepository.delete(fileSource);
+  }
+
+  public @NotNull List<EventFile> createTestEventFiles() {
 
     URL preMatchUrl = getPreMatchUrl();
     URL firstHalfUrl = getFirstHalfUrl();
@@ -152,7 +196,7 @@ public class CreateTestData {
     return List.of(preMatch, firstHalf, secondHalf, postMatch);
   }
 
-  public static URL getPreMatchUrl() {
+  public @Nullable URL getPreMatchUrl() {
     try {
       final String seed = "?rSeed=" + MD5String.generate();
       return new URL(
@@ -164,7 +208,7 @@ public class CreateTestData {
     return null;
   }
 
-  public static URL getFirstHalfUrl() {
+  public @Nullable URL getFirstHalfUrl() {
 
     try {
       final String seed = "?rSeed=" + MD5String.generate();
@@ -177,7 +221,7 @@ public class CreateTestData {
     return null;
   }
 
-  public static URL getSecondHalfUrl() {
+  public @Nullable URL getSecondHalfUrl() {
 
     try {
       final String seed = "?rSeed=" + MD5String.generate();
@@ -190,7 +234,7 @@ public class CreateTestData {
     return null;
   }
 
-  public static URL getPostMatchUrl() {
+  public @Nullable URL getPostMatchUrl() {
 
     try {
       final String seed = "?rSeed=" + MD5String.generate();
@@ -203,15 +247,19 @@ public class CreateTestData {
     return null;
   }
 
-  // ====================== Video Streaming ==========================
-
   // ====================== FILE SERVER ==============================
 
-  public static FileServerUser createTestFileServerUser() {
+  public @NotNull FileServerUser createTestFileServerUser() {
 
     // ensure different userdata each time
     final String username = String.format("user-%s@server.com", numGen.nextInt(Integer.MAX_VALUE));
     final String password = String.format("password-%s", numGen.nextInt(Integer.MAX_VALUE));
-    return new FileServerUser(username, password);
+    final FileServerUser user = new FileServerUser(username, password);
+    return userRepo.saveAndFlush(user);
+  }
+
+  public void deleteFileServerUser(@NotNull final FileServerUser user) {
+    Log.i(LOG_TAG, "Deleting FileServerUser: " + user);
+    userRepo.delete(user);
   }
 }

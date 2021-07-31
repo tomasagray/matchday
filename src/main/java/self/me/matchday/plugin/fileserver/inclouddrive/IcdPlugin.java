@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -167,8 +167,8 @@ public class IcdPlugin implements FileServerPlugin {
   }
 
   @Override
-  public Optional<URL> getDownloadURL(
-      @NotNull URL url, @NotNull final Set<HttpCookie> cookies) throws IOException {
+  public Optional<URL> getDownloadURL(@NotNull URL url, @NotNull final Set<HttpCookie> cookies)
+      throws IOException {
 
     // Create connection to ICD server
     final HttpURLConnection connection = createHttpConnection(url, cookies);
@@ -205,7 +205,7 @@ public class IcdPlugin implements FileServerPlugin {
    * @throws IOException If connecting goes awry
    */
   private @NotNull HttpURLConnection createHttpConnection(
-      @NotNull URL url, Collection<HttpCookie> cookies) throws IOException {
+      @NotNull URL url, @NotNull Collection<HttpCookie> cookies) throws IOException {
 
     // Create HttpConnection
     final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -230,7 +230,8 @@ public class IcdPlugin implements FileServerPlugin {
    * @return A String containing data read from above connection
    * @throws IOException If there are problems reading data
    */
-  private String readDownloadPage(@NotNull final HttpURLConnection connection) throws IOException {
+  private @NotNull String readDownloadPage(@NotNull final HttpURLConnection connection)
+      throws IOException {
 
     // Result container
     final StringBuilder result = new StringBuilder();
@@ -278,7 +279,7 @@ public class IcdPlugin implements FileServerPlugin {
    * @param user The user that will be logged into the file server
    * @return An array of bytes of the URL encoded String
    */
-  private byte[] getLoginDataByteArray(@NotNull FileServerUser user) {
+  private byte @NotNull [] getLoginDataByteArray(@NotNull FileServerUser user) {
 
     // Container for data
     StringJoiner sj = new StringJoiner("&");

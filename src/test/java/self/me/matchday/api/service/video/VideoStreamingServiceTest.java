@@ -26,13 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.CreateTestData;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.UnitTestFileServerPlugin;
-import self.me.matchday.api.service.CompetitionService;
-import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.FileServerService;
-import self.me.matchday.api.service.TeamService;
-import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.Match;
@@ -43,6 +39,7 @@ import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -60,14 +57,11 @@ class VideoStreamingServiceTest {
 
   private static final String LOG_TAG = "VideoStreamingServiceTest";
 
-  // Service dependencies
-  private static VideoStreamingService streamingService;
   private static final long waitSeconds = 60;
+  // Service dependencies
+  private static TestDataCreator testDataCreator;
+  private static VideoStreamingService streamingService;
   private static VideoStreamLocatorPlaylistService locatorPlaylistService;
-  private static EventService eventService;
-  private static CompetitionService competitionService;
-  private static TeamService teamService;
-  private static FileServerService fileServerService;
 
   // Test data
   private static Match testMatch;
@@ -78,48 +72,34 @@ class VideoStreamingServiceTest {
 
   @BeforeAll
   static void setUp(
-      @Autowired final VideoStreamingService streamingService,
-      @Autowired final VideoStreamLocatorPlaylistService locatorPlaylistService,
-      @Autowired final VideoStreamLocatorService streamLocatorService,
-      @Autowired final EventService eventService,
-      @Autowired final CompetitionService competitionService,
-      @Autowired final TeamService teamService,
-      @Autowired final FileServerService fileServerService,
-      @Autowired final UnitTestFileServerPlugin testFileServerPlugin) {
+      @Autowired @NotNull final TestDataCreator testDataCreator,
+      @Autowired @NotNull final VideoStreamingService streamingService,
+      @Autowired @NotNull final VideoStreamLocatorPlaylistService locatorPlaylistService,
+      @Autowired @NotNull final VideoStreamLocatorService streamLocatorService,
+      @Autowired @NotNull final FileServerService fileServerService,
+      @Autowired @NotNull final UnitTestFileServerPlugin testFileServerPlugin) {
 
+    VideoStreamingServiceTest.testDataCreator = testDataCreator;
     VideoStreamingServiceTest.streamingService = streamingService;
     VideoStreamingServiceTest.streamLocatorService = streamLocatorService;
     VideoStreamingServiceTest.locatorPlaylistService = locatorPlaylistService;
-    VideoStreamingServiceTest.eventService = eventService;
-    VideoStreamingServiceTest.competitionService = competitionService;
-    VideoStreamingServiceTest.teamService = teamService;
-    VideoStreamingServiceTest.fileServerService = fileServerService;
 
     // Create test user & login
-    testFileServerUser = CreateTestData.createTestFileServerUser();
+    testFileServerUser = testDataCreator.createTestFileServerUser();
     fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Create test data
-    final Match match = CreateTestData.createTestMatch();
-    eventService.saveEvent(match);
-
-    // Get managed copy
-    final Optional<Event> eventOptional = eventService.fetchById(match.getEventId());
-    assertThat(eventOptional).isPresent();
-    VideoStreamingServiceTest.testMatch = (Match) eventOptional.get();
+    VideoStreamingServiceTest.testMatch = testDataCreator.createTestMatch();
     VideoStreamingServiceTest.testFileSource = getTestFileSource();
   }
 
   @AfterAll
   static void tearDown() {
-
     Log.i(LOG_TAG, "Deleting test data: " + testMatch);
     // delete test data
-    eventService.deleteEvent(testMatch);
-    competitionService.deleteCompetitionById(testMatch.getCompetition().getCompetitionId());
-    teamService.deleteTeamById(testMatch.getHomeTeam().getTeamId());
-    fileServerService.deleteUser(testFileServerUser.getUserId());
+    testDataCreator.deleteFileServerUser(testFileServerUser);
+    testDataCreator.deleteTestEvent(testMatch);
   }
 
   @Test
@@ -195,6 +175,8 @@ class VideoStreamingServiceTest {
   @DisplayName("Validate reading playlist file from disk")
   void readPlaylistFile() {
 
+    final int MIN_PLAYLIST_LEN = 200;
+
     final Optional<EventFileSource> fileSourceOptional =
         testMatch.getFileSources().stream().findFirst();
     assertThat(fileSourceOptional).isPresent();
@@ -220,9 +202,14 @@ class VideoStreamingServiceTest {
             testStreamLocator.getStreamLocatorId());
     Log.i(LOG_TAG, "Read playlist file:\n" + actualPlaylistFile);
 
+    // Perform tests
     assertThat(actualPlaylistFile).isNotNull().isNotEmpty().isPresent();
     final String actualPlaylistData = actualPlaylistFile.get();
-    assertThat(actualPlaylistData.length()).isGreaterThan(500);
+    final int actualPlaylistSize = actualPlaylistData.getBytes(StandardCharsets.UTF_8).length;
+
+    Log.i(
+        LOG_TAG, String.format("Ensuring read playlist is longer than %d bytes", MIN_PLAYLIST_LEN));
+    assertThat(actualPlaylistSize).isGreaterThan(MIN_PLAYLIST_LEN);
   }
 
   @Test
