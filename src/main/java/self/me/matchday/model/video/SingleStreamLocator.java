@@ -41,4 +41,9 @@ public class SingleStreamLocator extends VideoStreamLocator {
     this.playlistPath = playlistPath;
     this.eventFile = eventFile;
   }
+
+  @Override
+  public String toString() {
+    return super.toString();
+  }
 }

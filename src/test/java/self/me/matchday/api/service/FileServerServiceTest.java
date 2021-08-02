@@ -238,12 +238,25 @@ class FileServerServiceTest {
         });
   }
 
+  @Test
+  @DisplayName("Ensure file server user can be deleted from database")
+  void deleteUser() {
+
+    final String testUserId = testFileServerUser.getUserId();
+    Log.i(LOG_TAG, "Deleting user: " + testUserId);
+    fileServerService.deleteUser(testUserId);
+
+    final Optional<FileServerUser> userOptional = fileServerService.getUserById(testUserId);
+    Log.i(LOG_TAG, "User deleted; user is now: " + userOptional);
+    assertThat(userOptional).isEmpty();
+  }
+
   @NotNull
   private FileServerUser getFreshManagedUser() {
 
-    final Optional<FileServerUser> afterLogoutOptional =
+    final Optional<FileServerUser> userOptional =
         fileServerService.getUserById(testFileServerUser.getUserId());
-    assertThat(afterLogoutOptional).isPresent();
-    return afterLogoutOptional.get();
+    assertThat(userOptional).isPresent();
+    return userOptional.get();
   }
 }

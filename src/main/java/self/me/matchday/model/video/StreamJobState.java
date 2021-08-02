@@ -35,9 +35,10 @@ public abstract class StreamJobState {
   public enum JobStatus {
     CREATED,
     STARTED,
-    ERROR,
     BUFFERING,
     STREAMING,
     COMPLETED,
+    STOPPED,
+    ERROR,
   }
 }

@@ -31,6 +31,7 @@ import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.RecursiveDirectoryDeleter;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -129,10 +130,19 @@ public class VideoStreamLocatorService {
       throws IOException {
 
     final Path playlistPath = streamLocator.getPlaylistPath();
-    if (!playlistPath.toFile().isFile()) {
-      throw new IllegalArgumentException("VideoStreamLocator does not refer to a file");
+    final File playlistFile = playlistPath.toFile();
+    // if the file doesn't exist, just return
+    if (!playlistFile.exists()) {
+      return;
+    }
+    if (!playlistFile.isFile()) {
+      final String msg =
+          String.format(
+              "VideoStreamLocator: %s does not refer to a file! Will not delete", streamLocator);
+      throw new IllegalArgumentException(msg);
     }
 
+    // delete the data
     final Path streamDataDir = playlistPath.getParent();
     Files.walkFileTree(streamDataDir, new RecursiveDirectoryDeleter());
     Log.i(

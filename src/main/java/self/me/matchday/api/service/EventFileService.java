@@ -141,7 +141,7 @@ public class EventFileService {
    */
   @Builder
   static class EventFileRefreshTask implements Callable<EventFile> {
-
+    // todo - refactor as @Async method
     private final FileServerService fileServerService;
     private final FFmpegPlugin ffmpegPlugin;
     private final EventFile eventFile;

@@ -52,4 +52,11 @@ public abstract class VideoStreamLocator {
     this.state.setStatus(status);
     this.state.setCompletionRatio(completionRatio);
   }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "<<VideoStreamLocator>>(streamLocatorId=[%s], playlistPath=[%s], timestamp=[%s], VideoFile=[%s], state=[%s])",
+        streamLocatorId, playlistPath, timestamp, eventFile, state);
+  }
 }

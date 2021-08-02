@@ -117,6 +117,22 @@ class VideoStreamManager {
     }
   }
 
+  public int killAllStreams() {
+    final int taskCount = ffmpegPlugin.getStreamingTaskCount();
+    ffmpegPlugin.interruptAllStreamTasks();
+    return taskCount;
+  }
+
+  public void killAllStreamsFor(@NotNull final VideoStreamLocatorPlaylist playlist) {
+    playlist.getStreamLocators().forEach(this::killStreamingTask);
+  }
+
+  public void killStreamingTask(@NotNull final VideoStreamLocator streamLocator) {
+    final Double completionRatio = streamLocator.getState().getCompletionRatio();
+    updateLocatorTaskState(streamLocator, JobStatus.STOPPED, completionRatio);
+    ffmpegPlugin.interruptStreamingTask(streamLocator.getPlaylistPath());
+  }
+
   /**
    * Given a video stream playlist, determine if it is ready for a client to begin streaming
    *
@@ -132,7 +148,6 @@ class VideoStreamManager {
       @NotNull final VideoStreamLocator streamLocator,
       @NotNull final JobStatus status,
       final Double completionRatio) {
-
     streamLocator.updateState(status, completionRatio);
     locatorService.saveStreamLocator(streamLocator);
   }

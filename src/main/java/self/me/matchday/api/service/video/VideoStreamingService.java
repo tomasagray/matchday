@@ -35,7 +35,6 @@ import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.video.M3UPlaylist;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
@@ -52,7 +51,6 @@ public class VideoStreamingService {
 
   private static final String LOG_TAG = "VideoStreamingService";
 
-  private final FFmpegPlugin ffmpegPlugin;
   private final EventService eventService;
   private final VideoStreamManager videoStreamManager;
   private final VideoStreamLocatorPlaylistService playlistService;
@@ -60,18 +58,14 @@ public class VideoStreamingService {
 
   @Autowired
   public VideoStreamingService(
-      final FFmpegPlugin ffmpegPlugin,
       final EventService eventService,
       final VideoStreamManager videoStreamManager,
       final VideoStreamLocatorPlaylistService playlistService,
       final VideoStreamLocatorService videoStreamLocatorService) {
 
-    // Spring dependencies
-    // todo - remove unnecessary dependencies & methods
-    this.ffmpegPlugin = ffmpegPlugin;
     this.eventService = eventService;
-    this.playlistService = playlistService;
     this.videoStreamManager = videoStreamManager;
+    this.playlistService = playlistService;
     this.videoStreamLocatorService = videoStreamLocatorService;
   }
 
@@ -193,13 +187,17 @@ public class VideoStreamingService {
 
   /** Destroy all currently-running video streaming tasks */
   public int killAllStreamingTasks() {
+    return videoStreamManager.killAllStreams();
+  }
 
-    // TODO - implement kill streams FOR GIVEN FILE SOURCE
+  public void killStreamingFor(@NotNull final String fileSrcId) {
 
-    final int streamingTaskCount = ffmpegPlugin.getStreamingTaskCount();
-    Log.i(LOG_TAG, String.format("Killing %s streaming tasks", streamingTaskCount));
-    ffmpegPlugin.interruptAllStreamTasks();
-    return streamingTaskCount;
+    final Optional<VideoStreamLocatorPlaylist> playlistOptional =
+        videoStreamManager.getLocalStreamFor(fileSrcId);
+    if (playlistOptional.isPresent()) {
+      final VideoStreamLocatorPlaylist playlist = playlistOptional.get();
+      videoStreamManager.killAllStreamsFor(playlist);
+    }
   }
 
   /**

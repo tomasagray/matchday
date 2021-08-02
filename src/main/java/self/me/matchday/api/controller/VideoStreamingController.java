@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -46,6 +46,7 @@ import java.util.Optional;
 public class VideoStreamingController {
 
   public static final String MEDIA_TYPE_MPEG_URL = "application/x-mpeg-url";
+  public static final String MEDIA_TYPE_APPLE_MPEGURL = "application/vnd.apple.mpegurl";
 
   private final VideoStreamingService streamingService;
   private final VideoResourceAssembler resourceAssembler;
@@ -115,7 +116,7 @@ public class VideoStreamingController {
   @RequestMapping(
       value = "/stream/{fileSrcId}/playlist.m3u8",
       method = RequestMethod.GET,
-      produces = "application/vnd.apple.mpegurl")
+      produces = {MEDIA_TYPE_APPLE_MPEGURL, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> getVideoStreamPlaylist(
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
@@ -147,7 +148,7 @@ public class VideoStreamingController {
   @RequestMapping(
       value = "/stream/{fileSrcId}/{partId}/playlist.m3u8",
       method = RequestMethod.GET,
-      produces = "application/vnd.apple.mpegurl")
+      produces = MEDIA_TYPE_APPLE_MPEGURL)
   public ResponseEntity<String> getVideoPartPlaylist(
       @PathVariable("eventId") String eventId,
       @PathVariable("fileSrcId") String fileSrcId,

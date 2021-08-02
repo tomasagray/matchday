@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -28,7 +28,9 @@ import self.me.matchday.util.Log;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class FFmpegPlugin implements Plugin {
@@ -56,8 +58,7 @@ public class FFmpegPlugin implements Plugin {
    * @param playlistPath The output location for stream data
    * @return The path of the playlist file produced by FFMPEG
    */
-  public FFmpegStreamTask streamUris(
-      @NotNull final Path playlistPath, @NotNull final URI... uris) {
+  public FFmpegStreamTask streamUris(@NotNull final Path playlistPath, @NotNull final URI... uris) {
 
     // Get absolute path for task key
     final Path absolutePath = playlistPath.toAbsolutePath();
@@ -70,27 +71,6 @@ public class FFmpegPlugin implements Plugin {
     return streamTask;
   }
 
-  /**
-   * Determines if there is a task streaming to the given directory
-   *
-   * @param absolutePath The path of the streaming task
-   */
-  private void checkTaskAlreadyExecuting(@NotNull final Path absolutePath) {
-
-    // Check if a task is already working in path
-    FFmpegStreamTask prevTask = streamingTasks.get(absolutePath);
-    if (prevTask != null) {
-      if (!prevTask.isAlive()) {
-        // Kill zombie task & proceed
-        prevTask.kill();
-        streamingTasks.remove(absolutePath);
-      } else {
-        throw new IllegalThreadStateException(
-                "FFmpeg has already started streaming to path: " + absolutePath);
-      }
-    }
-  }
-
   /** Cancels all streaming tasks running in the background */
   public void interruptAllStreamTasks() {
 
@@ -98,7 +78,10 @@ public class FFmpegPlugin implements Plugin {
     streamingTasks.forEach(
         (pid, ffmpegTask) -> {
           Log.i(LOG_TAG, "Killing streaming task with thread ID: " + pid);
-          ffmpegTask.kill();
+          final boolean killed = ffmpegTask.kill();
+          if (!killed) {
+            throw new RuntimeException("Could not kill task with PID: " + pid);
+          }
         });
     // clear task list
     streamingTasks.clear();
@@ -162,5 +145,26 @@ public class FFmpegPlugin implements Plugin {
   @Override
   public String getDescription() {
     return pluginProperties.getDescription();
+  }
+
+  /**
+   * Determines if there is a task streaming to the given directory
+   *
+   * @param absolutePath The path of the streaming task
+   */
+  private void checkTaskAlreadyExecuting(@NotNull final Path absolutePath) {
+
+    // Check if a task is already working in path
+    FFmpegStreamTask prevTask = streamingTasks.get(absolutePath);
+    if (prevTask != null) {
+      if (!prevTask.isAlive()) {
+        // Kill zombie task & proceed
+        prevTask.kill();
+        streamingTasks.remove(absolutePath);
+      } else {
+        throw new IllegalThreadStateException(
+            "FFmpeg has already started streaming to path: " + absolutePath);
+      }
+    }
   }
 }

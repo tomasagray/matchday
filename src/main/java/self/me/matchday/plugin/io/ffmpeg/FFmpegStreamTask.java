@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -101,7 +101,7 @@ public abstract class FFmpegStreamTask extends Thread {
       // Ensure process is dead
       return !(process.destroyForcibly().isAlive());
     }
-    return true;
+    return false;
   }
 
   /**
@@ -132,7 +132,7 @@ public abstract class FFmpegStreamTask extends Thread {
    * @param dataDir Path to streaming directory
    * @return The log file location
    */
-  private File getLogFile(@NotNull final Path dataDir) {
+  private @NotNull File getLogFile(@NotNull final Path dataDir) {
 
     // Create log file name from timestamp
     final String timestamp = LocalDateTime.now().format(LOGFILE_TIMESTAMP_FORMATTER);

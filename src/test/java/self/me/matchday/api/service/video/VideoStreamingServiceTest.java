@@ -45,6 +45,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -252,6 +253,23 @@ class VideoStreamingServiceTest {
 
   @Test
   @Order(5)
+  @DisplayName("Ensure streaming service can kill all current streaming tasks")
+  void killAllStreamingTasks() throws InterruptedException {
+
+    final int waitSeconds = 3;
+    final int expectedTasksKilled = 1;
+
+    Log.i(LOG_TAG, "Attempting to kill all tasks...");
+    final int actualTasksKilled = streamingService.killAllStreamingTasks();
+    Log.i(LOG_TAG, String.format("Waiting %d seconds for streams to die...", waitSeconds));
+    TimeUnit.SECONDS.sleep(waitSeconds);
+
+    Log.i(LOG_TAG, String.format("Service killed: %d tasks", actualTasksKilled));
+    assertThat(actualTasksKilled).isGreaterThanOrEqualTo(expectedTasksKilled);
+  }
+
+  @Test
+  @Order(6)
   @DisplayName("Validate ability to delete previously downloaded video data")
   void deleteVideoData() throws IOException, InterruptedException {
 
@@ -279,11 +297,5 @@ class VideoStreamingServiceTest {
           Log.i(LOG_TAG, String.format("Path: %s exists? %s", playlistPath, exists));
           assertThat(exists).isFalse();
         });
-  }
-
-  @Test
-  @Disabled
-  void killAllStreamingTasks() {
-    // TODO - write this test
   }
 }

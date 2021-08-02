@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestMethodOrder(OrderAnnotation.class)
 class FFmpegPluginTest {
 
-  public static final int MIN_EXPECTED_FILE_COUNT = 100;
+  public static final int MIN_EXPECTED_FILE_COUNT = 25;
   private static final String LOG_TAG = "FFmpegPluginTest";
   // Test constants
   private static final String STORAGE_LOCATION = "src/test/data/video_test";
