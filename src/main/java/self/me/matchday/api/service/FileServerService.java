@@ -49,7 +49,8 @@ public class FileServerService {
   private static final Duration DEFAULT_REFRESH_RATE = Duration.ofHours(4);
 
   private final List<FileServerPlugin> fileServerPlugins;
-  private final List<FileServerPlugin> enabledPlugins = new ArrayList<>();
+  private final List<FileServerPlugin> enabledPlugins =
+      Collections.synchronizedList(new ArrayList<>());
   private final FileServerUserRepo userRepo;
   private final SecureDataService secureDataService;
   private final UserValidationService userValidationService;
@@ -362,8 +363,7 @@ public class FileServerService {
    * @param pluginId ID of the fileserver plugin
    * @return A List of FSUsers
    */
-  public Optional<List<FileServerUser>> getAllServerUsers(@NotNull final UUID pluginId) {
-
+  public List<FileServerUser> getAllServerUsers(@NotNull final UUID pluginId) {
     return userRepo.fetchAllUsersForServer(pluginId.toString());
   }
 
@@ -494,10 +494,8 @@ public class FileServerService {
   private @Nullable FileServerUser getDownloadUser(@NotNull final UUID pluginId) {
 
     // Get logged-in users for this repo
-    final Optional<List<FileServerUser>> userOptional =
-        userRepo.fetchLoggedInUsersForServer(pluginId.toString());
-    if (userOptional.isPresent()) {
-      final List<FileServerUser> users = userOptional.get();
+    final List<FileServerUser> users = userRepo.fetchLoggedInUsersForServer(pluginId.toString());
+    if (users.size() > 0) {
       // Return the download user
       return users.get(0);
     }

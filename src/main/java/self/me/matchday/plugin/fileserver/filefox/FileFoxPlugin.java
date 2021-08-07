@@ -72,14 +72,19 @@ public class FileFoxPlugin implements FileServerPlugin {
   }
 
   @Override
-  public boolean acceptsUrl(@NotNull URL url) {
-    final Matcher urlMatcher = pluginProperties.getLinkUrlPattern().matcher(url.toString());
-    return urlMatcher.find();
+  public @NotNull URL getHostname() {
+    return pluginProperties.getBaseUrl();
   }
 
   @Override
   public @NotNull Duration getRefreshRate() {
     return Duration.ofHours(pluginProperties.getRefreshHours());
+  }
+
+  @Override
+  public boolean acceptsUrl(@NotNull URL url) {
+    final Matcher urlMatcher = pluginProperties.getLinkUrlPattern().matcher(url.toString());
+    return urlMatcher.find();
   }
 
   @Override

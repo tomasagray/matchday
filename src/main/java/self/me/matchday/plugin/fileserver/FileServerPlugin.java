@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -36,11 +36,29 @@ import java.util.Set;
 public interface FileServerPlugin extends Plugin {
 
   /**
+   * Get the hostname of the fileserver as a URL
+   *
+   * @return Hostname of fileserver
+   */
+  @NotNull
+  URL getHostname();
+
+  /**
+   * Get the maximum age before data retrieved by this fileserver manager should be considered
+   * stale.
+   *
+   * @return The maximum age before data should be refreshed.
+   */
+  @NotNull
+  Duration getRefreshRate();
+
+  /**
    * Login to the file server
    *
    * @return The response from the remote file server
    */
-  @NotNull ClientResponse login(@NotNull final FileServerUser user);
+  @NotNull
+  ClientResponse login(@NotNull final FileServerUser user);
 
   /**
    * Determine whether this file server can translate the given URL into a download URL.
@@ -51,20 +69,11 @@ public interface FileServerPlugin extends Plugin {
   boolean acceptsUrl(@NotNull final URL url);
 
   /**
-   * Get the maximum age before data retrieved by this fileserver manager should be considered
-   * stale.
-   *
-   * @return The maximum age before data should be refreshed.
-   */
-  @NotNull Duration getRefreshRate();
-
-  /**
    * Extract download URL data from a given URL
    *
    * @param url The external access URL for the file server.
    * @return The internal URL needed to access this file resource from the outside world.
    */
-  Optional<URL> getDownloadURL(@NotNull final URL url,
-      @NotNull final Set<HttpCookie> cookies) throws IOException;
-
+  Optional<URL> getDownloadURL(@NotNull final URL url, @NotNull final Set<HttpCookie> cookies)
+      throws IOException;
 }

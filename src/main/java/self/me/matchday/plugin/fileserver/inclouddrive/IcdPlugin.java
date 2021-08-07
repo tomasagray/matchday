@@ -24,6 +24,7 @@ import com.google.gson.JsonSyntaxException;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpCookie;
@@ -71,7 +72,7 @@ public class IcdPlugin implements FileServerPlugin {
 
     // initialize dependencies
     this.pluginProperties = pluginProperties;
-    this.webClient = WebClient.create(pluginProperties.getBaseUrl());
+    this.webClient = WebClient.create(pluginProperties.getBaseUrl().toString());
     gson = new Gson();
 
     // initialize fields
@@ -80,6 +81,15 @@ public class IcdPlugin implements FileServerPlugin {
   }
 
   // === File server ===
+  @Override
+  public @NotNull URL getHostname() {
+    return pluginProperties.getBaseUrl();
+  }
+
+  @Override
+  public @NotNull Duration getRefreshRate() {
+    return this.refreshRate;
+  }
 
   @Override
   public @NotNull ClientResponse login(@NotNull FileServerUser user) {
@@ -159,11 +169,6 @@ public class IcdPlugin implements FileServerPlugin {
   @Override
   public boolean acceptsUrl(@NotNull URL url) {
     return acceptsUrlPattern.matcher(url.toString()).find();
-  }
-
-  @Override
-  public @NotNull Duration getRefreshRate() {
-    return this.refreshRate;
   }
 
   @Override
@@ -266,7 +271,9 @@ public class IcdPlugin implements FileServerPlugin {
     // If we got a hit
     if (!elements.isEmpty()) {
       // Extract href from <a>
-      String theLink = elements.first().attr("href");
+      final Element first = elements.first();
+      assert first != null;
+      String theLink = first.attr("href");
       return Optional.of(new URL(theLink));
     } else {
       return Optional.empty();

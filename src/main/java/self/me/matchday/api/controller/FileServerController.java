@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -94,11 +95,12 @@ public class FileServerController {
   public ResponseEntity<CollectionModel<FileServerUserResource>> getFileServerUsers(
       @PathVariable("id") final UUID pluginId) {
 
-    return fileServerService
-        .getAllServerUsers(pluginId)
-        .map(userResourceAssembler::toCollectionModel)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+    final List<FileServerUser> users = fileServerService.getAllServerUsers(pluginId);
+    if (users.size() > 0) {
+      return ResponseEntity.ok().body(userResourceAssembler.toCollectionModel(users));
+    } else {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @RequestMapping(value = "/users/{userId}", method = RequestMethod.GET)
@@ -212,12 +214,16 @@ public class FileServerController {
       response =
           ResponseEntity.status(HttpStatus.OK)
               .contentType(MediaType.APPLICATION_JSON)
-              .body(messageResourceAssembler.toModel("Successfully disabled plugin with ID: " + pluginId));
+              .body(
+                  messageResourceAssembler.toModel(
+                      "Successfully disabled plugin with ID: " + pluginId));
     } else {
       response =
           ResponseEntity.status(HttpStatus.BAD_REQUEST)
               .contentType(MediaType.APPLICATION_JSON)
-              .body(messageResourceAssembler.toModel("Could not disable plugin with ID: " + pluginId));
+              .body(
+                  messageResourceAssembler.toModel(
+                      "Could not disable plugin with ID: " + pluginId));
     }
     return response;
   }
@@ -235,16 +241,20 @@ public class FileServerController {
     Log.i(LOG_TAG, "Attempting to enable file server plugin with ID: " + pluginId);
     if (fileServerService.enablePlugin(pluginId)) {
       response =
-              ResponseEntity.status(HttpStatus.OK)
+          ResponseEntity.status(HttpStatus.OK)
               .contentType(MediaType.APPLICATION_JSON)
-              .body(messageResourceAssembler.toModel("Enabled file server plugin with ID: " + pluginId));
+              .body(
+                  messageResourceAssembler.toModel(
+                      "Enabled file server plugin with ID: " + pluginId));
     } else {
       response =
-              ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          ResponseEntity.status(HttpStatus.BAD_REQUEST)
               .contentType(MediaType.APPLICATION_JSON)
-              .body(messageResourceAssembler.toModel("Could not enable file server plugin with ID: " + pluginId));
+              .body(
+                  messageResourceAssembler.toModel(
+                      "Could not enable file server plugin with ID: " + pluginId));
     }
-    return  response;
+    return response;
   }
 
   // === Helpers ===

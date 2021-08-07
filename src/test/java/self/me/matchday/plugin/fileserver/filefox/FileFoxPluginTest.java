@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -77,14 +79,13 @@ class FileFoxPluginTest {
   }
 
   private static FileServerUser getLoggedInUser() {
-
-    final Optional<List<FileServerUser>> usersOptional =
-        fileServerService.getAllServerUsers(plugin.getPluginId());
-    assertThat(usersOptional).isPresent();
-    return usersOptional.get().get(0);
+    final List<FileServerUser> users = fileServerService.getAllServerUsers(plugin.getPluginId());
+    assertThat(users.size()).isGreaterThan(0);
+    return users.get(0);
   }
 
-  private static FileServerUser createTestUser() throws IOException {
+  @Contract(" -> new")
+  private static @NotNull FileServerUser createTestUser() throws IOException {
 
     final BufferedReader reader = new BufferedReader(new FileReader(LOGIN_DATA));
     final String loginData = reader.lines().collect(Collectors.joining(" "));

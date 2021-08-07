@@ -31,7 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.UnitTestFileServerPlugin;
+import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
@@ -61,7 +61,7 @@ class FileServerServiceTest {
   static void setUp(
       @Autowired @NotNull final TestDataCreator testDataCreator,
       @Autowired final FileServerService fileServerService,
-      @Autowired final UnitTestFileServerPlugin testFileServerPlugin) {
+      @Autowired final TestFileServerPlugin testFileServerPlugin) {
 
     FileServerServiceTest.testDataCreator = testDataCreator;
     FileServerServiceTest.fileServerService = fileServerService;
@@ -211,22 +211,20 @@ class FileServerServiceTest {
             testFileServerUser, testFileServerPlugin.getPluginId()));
     fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
 
-    final Optional<List<FileServerUser>> usersOptional =
+    final List<FileServerUser> fileServerUsers =
         fileServerService.getAllServerUsers(testFileServerPlugin.getPluginId());
-    assertThat(usersOptional.isPresent()).isTrue();
 
-    usersOptional.ifPresent(
-        fileServerUsers -> {
-          Log.i(LOG_TAG, "Fetched all users from plugin: " + fileServerUsers);
-          assertThat(fileServerUsers.size()).isGreaterThanOrEqualTo(expectedUserCount);
-          assertThat(fileServerUsers).contains(testFileServerUser);
-        });
+    Log.i(LOG_TAG, "Fetched all users from plugin: " + fileServerUsers);
+    assertThat(fileServerUsers.size()).isGreaterThanOrEqualTo(expectedUserCount);
+    assertThat(fileServerUsers).contains(testFileServerUser);
   }
 
   @Test
   @DisplayName("Validate retrieval of specific user by ID")
   void getUserById() {
 
+    final UUID testPluginId = testFileServerPlugin.getPluginId();
+    fileServerService.login(testFileServerUser, testPluginId);
     final Optional<FileServerUser> userOptional =
         fileServerService.getUserById(testFileServerUser.getUserId());
     assertThat(userOptional.isPresent()).isTrue();
@@ -236,6 +234,8 @@ class FileServerServiceTest {
           Log.i(LOG_TAG, "Retrieved user from plugin: " + fileServerUser);
           assertThat(fileServerUser).isEqualTo(testFileServerUser);
         });
+
+    fileServerService.logout(testFileServerUser, testPluginId);
   }
 
   @Test

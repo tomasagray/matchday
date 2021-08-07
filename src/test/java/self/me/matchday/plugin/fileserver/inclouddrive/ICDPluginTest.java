@@ -72,13 +72,10 @@ class ICDPluginTest {
     // Parse URL
     fileUrl = new URL(FILE_LINK);
 
-    final Optional<List<FileServerUser>> usersOptional =
-        fileServerService.getAllServerUsers(icdPlugin.getPluginId());
-    assertThat(usersOptional).isPresent();
-
-    final List<FileServerUser> users = usersOptional.get();
+    final List<FileServerUser> users = fileServerService.getAllServerUsers(icdPlugin.getPluginId());
+    assertThat(users.size()).isGreaterThan(0);
     fileServerUser = users.get(0);
-
+    assertThat(fileServerUser).isNotNull();
     Log.i(LOG_TAG, "Testing with user:\n" + fileServerUser);
   }
 

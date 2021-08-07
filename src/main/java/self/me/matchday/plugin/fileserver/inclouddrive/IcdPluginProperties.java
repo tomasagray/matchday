@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -26,6 +26,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import self.me.matchday.plugin.PluginProperties;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Configuration
@@ -43,8 +46,13 @@ public class IcdPluginProperties extends PluginProperties {
   private ICDUrl url;
   private int defaultRefreshHours;
 
-  public String getBaseUrl() {
-    return url.getBaseUrl();
+  public URL getBaseUrl() {
+    final String baseUrl = url.getBaseUrl();
+    try {
+      return new URL(baseUrl);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("Could not parse InCloudDrive base URL: " + baseUrl);
+    }
   }
 
   public String getLoginUri() {

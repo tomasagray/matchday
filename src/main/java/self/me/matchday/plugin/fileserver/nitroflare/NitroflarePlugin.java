@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -57,7 +57,7 @@ public class NitroflarePlugin implements FileServerPlugin {
   public NitroflarePlugin(final NitroflarePluginProperties pluginProperties) {
 
     this.pluginProperties = pluginProperties;
-    this.webClient = WebClient.create(pluginProperties.getBaseUrl());
+    this.webClient = WebClient.create(pluginProperties.getBaseUrl().toString());
     this.urlPattern = Pattern.compile(pluginProperties.getUrlPattern());
   }
 
@@ -79,6 +79,16 @@ public class NitroflarePlugin implements FileServerPlugin {
 
   // === File Server Plugin ===
   @Override
+  public @NotNull URL getHostname() {
+    return pluginProperties.getBaseUrl();
+  }
+
+  @Override
+  public @NotNull Duration getRefreshRate() {
+    return Duration.ofHours(pluginProperties.getRefreshRateHours());
+  }
+
+  @Override
   public @NotNull ClientResponse login(@NotNull FileServerUser user) {
 
     final String loginUrl = pluginProperties.getLoginUrl();
@@ -96,27 +106,16 @@ public class NitroflarePlugin implements FileServerPlugin {
             .block();
     // Ensure some kind of response is returned
     if (clientResponse == null) {
-      return
-          ClientResponse
-              .create(HttpStatus.BAD_REQUEST)
-              .body("Response from Nitroflare server was null")
-              .build();
+      return ClientResponse.create(HttpStatus.BAD_REQUEST)
+          .body("Response from Nitroflare server was null")
+          .build();
     }
     return clientResponse;
   }
 
   @Override
   public boolean acceptsUrl(@NotNull URL url) {
-    return
-        urlPattern
-            .matcher(url.toString())
-            .find();
-  }
-
-  @Override
-  public @NotNull Duration getRefreshRate() {
-    return
-        Duration.ofHours(pluginProperties.getRefreshRateHours());
+    return urlPattern.matcher(url.toString()).find();
   }
 
   @Override
@@ -129,8 +128,9 @@ public class NitroflarePlugin implements FileServerPlugin {
             .get()
             .uri(url.toString())
             .cookies(
-                requestCookies -> cookies
-                    .forEach(cookie -> requestCookies.add(cookie.getName(), cookie.getValue())))
+                requestCookies ->
+                    cookies.forEach(
+                        cookie -> requestCookies.add(cookie.getName(), cookie.getValue())))
             .exchange()
             .block();
 
@@ -155,8 +155,7 @@ public class NitroflarePlugin implements FileServerPlugin {
     final Element link = document.getElementById(pluginProperties.getDownloadLinkId());
     if (link != null) {
       final String downloadUrl = link.attr("href");
-      return
-          Optional.of(new URL(downloadUrl));
+      return Optional.of(new URL(downloadUrl));
     }
     // Link not found
     return Optional.empty();
@@ -169,7 +168,6 @@ public class NitroflarePlugin implements FileServerPlugin {
     // Generate random token
     final String token = MD5String.generate();
     // Return formatted request String
-    return
-        String.format(LOGIN_REQUEST_FORMAT, username, fileServerUser.getPassword(), token);
+    return String.format(LOGIN_REQUEST_FORMAT, username, fileServerUser.getPassword(), token);
   }
 }

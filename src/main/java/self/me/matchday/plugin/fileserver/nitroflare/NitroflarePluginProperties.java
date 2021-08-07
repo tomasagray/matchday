@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -27,19 +27,31 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import self.me.matchday.plugin.PluginProperties;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Configuration
 @PropertySource("classpath:plugins/nitroflare/nitroflare.properties")
 @ConfigurationProperties(prefix = "plugin.nitroflare")
-public class NitroflarePluginProperties extends PluginProperties{
+public class NitroflarePluginProperties extends PluginProperties {
 
   private String baseUrl;
   private String loginUrl;
   private String downloadLinkId;
   private int refreshRateHours;
+
   @Value("${plugin.nitroflare.url-pattern.regexp}")
   private String urlPattern;
+
   private String userAgent;
 
+  public URL getBaseUrl() {
+    try {
+      return new URL(baseUrl);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("Could not parse NitroFlare plugin URL: " + baseUrl);
+    }
+  }
 }
