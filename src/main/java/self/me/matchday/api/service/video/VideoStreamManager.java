@@ -32,6 +32,7 @@ import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.util.Log;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
@@ -79,17 +80,21 @@ class VideoStreamManager {
       locatorService.deleteStreamLocatorWithData(streamLocator);
     }
     // delete stream root dir
-    final boolean storageDeleted = playlist.getStorageLocation().toFile().delete();
-    if (!storageDeleted) {
-      final String message =
-          "Could not delete storage directory for VideoStreamLocatorPlaylist: " + playlist.getId();
-      throw new IOException(message);
+    final File storageLocation = playlist.getStorageLocation().toFile();
+    if (storageLocation.exists()) {
+      final boolean storageDeleted = storageLocation.delete();
+      if (!storageDeleted) {
+        final String message =
+            "Could not delete storage directory for VideoStreamLocatorPlaylist: "
+                + playlist.getId();
+        throw new IOException(message);
+      }
     }
     playlistService.deleteVideoStreamPlaylist(playlist);
   }
 
-  @Async("VideoStreamExecutor")
   @SneakyThrows
+  @Async("VideoStreamExecutor")
   public void beginStreaming(@NotNull final VideoStreamLocator streamLocator) {
 
     try {

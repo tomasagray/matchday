@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.UnitTestFileServerPlugin;
+import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.plugin.fileserver.FileServerUser;
@@ -59,7 +59,7 @@ class EventFileServiceTest {
       @Autowired @NotNull final TestDataCreator testDataCreator,
       @Autowired @NotNull final EventFileService eventFileService,
       @Autowired @NotNull final FileServerService fileServerService,
-      @Autowired @NotNull final UnitTestFileServerPlugin testFileServerPlugin) {
+      @Autowired @NotNull final TestFileServerPlugin testFileServerPlugin) {
 
     EventFileServiceTest.testDataCreator = testDataCreator;
     EventFileServiceTest.eventFileService = eventFileService;

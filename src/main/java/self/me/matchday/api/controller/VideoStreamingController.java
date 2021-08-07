@@ -22,13 +22,14 @@ package self.me.matchday.api.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import self.me.matchday.api.resource.VideoPlaylistResource;
+import self.me.matchday.api.resource.VideoPlaylistResource.VideoPlaylistResourceAssembler;
 import self.me.matchday.api.resource.VideoResource;
 import self.me.matchday.api.resource.VideoResource.VideoResourceAssembler;
 import self.me.matchday.api.service.video.MasterPlaylistService;
@@ -50,6 +51,7 @@ public class VideoStreamingController {
 
   private final VideoStreamingService streamingService;
   private final VideoResourceAssembler resourceAssembler;
+  private final VideoPlaylistResourceAssembler playlistResourceAssembler;
   private final MasterPlaylistService masterPlaylistService;
   private final VariantPlaylistService variantPlaylistService;
 
@@ -57,11 +59,13 @@ public class VideoStreamingController {
   public VideoStreamingController(
       final VideoStreamingService streamingService,
       final VideoResourceAssembler resourceAssembler,
+      final VideoPlaylistResourceAssembler playlistResourceAssembler,
       final MasterPlaylistService masterPlaylistService,
       final VariantPlaylistService variantPlaylistService) {
 
     this.streamingService = streamingService;
     this.resourceAssembler = resourceAssembler;
+    this.playlistResourceAssembler = playlistResourceAssembler;
     this.masterPlaylistService = masterPlaylistService;
     this.variantPlaylistService = variantPlaylistService;
   }
@@ -116,25 +120,19 @@ public class VideoStreamingController {
   @RequestMapping(
       value = "/stream/{fileSrcId}/playlist.m3u8",
       method = RequestMethod.GET,
-      produces = {MEDIA_TYPE_APPLE_MPEGURL, MediaType.APPLICATION_JSON_VALUE})
-  public ResponseEntity<String> getVideoStreamPlaylist(
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<VideoPlaylistResource> getVideoStreamPlaylist(
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
-    final Optional<M3UPlaylist> playlistOptional =
-        streamingService.getVideoStreamPlaylist(eventId, fileSrcId);
-    if (playlistOptional == null) {
-      return ResponseEntity.notFound().build();
-    } else if (playlistOptional.isEmpty()) {
-      // wait signal
-      return ResponseEntity.status(HttpStatus.ACCEPTED).body("Resource is processing");
-    }
-    return playlistOptional
-        .map(M3UPlaylist::getSimplePlaylist)
-        .map(ResponseEntity::ok)
+    return streamingService
+        .getVideoStreamPlaylist(eventId, fileSrcId)
+        .map(playlistResourceAssembler::toModel)
+        .map(resource -> ResponseEntity.accepted().body(resource))
         .orElse(ResponseEntity.notFound().build());
   }
 
-  @RequestMapping(value = "/stream/{fileSrcId}/playlist.pls", method = RequestMethod.GET)
+  // todo - re-enable when playlist output refactored
+  /*  @RequestMapping(value = "/stream/{fileSrcId}/playlist.pls", method = RequestMethod.GET)
   public ResponseEntity<String> getVideoStreamPlsPlaylist(
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
@@ -143,7 +141,7 @@ public class VideoStreamingController {
         .map(M3UPlaylist::getPlsPlaylist)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
-  }
+  }*/
 
   @RequestMapping(
       value = "/stream/{fileSrcId}/{partId}/playlist.m3u8",

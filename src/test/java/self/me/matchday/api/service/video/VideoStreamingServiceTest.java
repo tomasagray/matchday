@@ -27,12 +27,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.UnitTestFileServerPlugin;
+import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
 import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.Match;
-import self.me.matchday.model.video.M3UPlaylist;
+import self.me.matchday.model.video.VideoPlaylist;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.fileserver.FileServerUser;
@@ -58,7 +58,7 @@ class VideoStreamingServiceTest {
 
   private static final String LOG_TAG = "VideoStreamingServiceTest";
 
-  private static final long waitSeconds = 60;
+  private static final long waitSeconds = 10;
   // Service dependencies
   private static TestDataCreator testDataCreator;
   private static VideoStreamingService streamingService;
@@ -78,7 +78,7 @@ class VideoStreamingServiceTest {
       @Autowired @NotNull final VideoStreamLocatorPlaylistService locatorPlaylistService,
       @Autowired @NotNull final VideoStreamLocatorService streamLocatorService,
       @Autowired @NotNull final FileServerService fileServerService,
-      @Autowired @NotNull final UnitTestFileServerPlugin testFileServerPlugin) {
+      @Autowired @NotNull final TestFileServerPlugin testFileServerPlugin) {
 
     VideoStreamingServiceTest.testDataCreator = testDataCreator;
     VideoStreamingServiceTest.streamingService = streamingService;
@@ -138,10 +138,6 @@ class VideoStreamingServiceTest {
   @DisplayName("Test that a playlist is created & returned")
   void getVideoStreamPlaylist() throws Exception {
 
-    // test constants
-    final long recheckDelay = 10_000L;
-    final int minPlaylistOutputLen = 10;
-
     // test variables
     final String testEventId = testMatch.getEventId();
     final String testFileSrcId = testFileSource.getEventFileSrcId();
@@ -152,23 +148,33 @@ class VideoStreamingServiceTest {
             "Testing video stream creation with Event ID: %s, File Source ID: %s",
             testEventId, testFileSrcId));
 
-    final Optional<M3UPlaylist> testVideoStreamPlaylist =
+    final Optional<VideoPlaylist> playlistOptional =
         streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId);
-    assertThat(testVideoStreamPlaylist).isNotNull().isEmpty();
-    Log.i(LOG_TAG, "VideoStreamingService returned Optional.empty(), as expected...");
+    assertThat(playlistOptional).isPresent();
+    final VideoPlaylist videoPlaylist = playlistOptional.get();
+    Log.i(LOG_TAG, "Retrieved VideoPlaylist: " + videoPlaylist);
+    assertThat(videoPlaylist).isNotNull();
+    assertThat(videoPlaylist.getPlaylist()).isNull();
 
-    Log.i(LOG_TAG, String.format("Waiting %s milliseconds...", recheckDelay));
+    Log.i(LOG_TAG, "VideoStreamingService returned a \"wait\" playlist, as expected...");
+    final long recheckDelay = videoPlaylist.getWaitMillis();
+    assertThat(recheckDelay).isGreaterThan(0);
+    Log.i(
+        LOG_TAG,
+        String.format("Waiting %s milliseconds from playlist recommendation...", recheckDelay));
     Thread.sleep(recheckDelay);
     Log.i(LOG_TAG, "Done waiting, performing recheck...");
 
-    final Optional<M3UPlaylist> afterDelayStreamPlaylist =
+    final Optional<VideoPlaylist> afterDelayStreamPlaylist =
         streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId);
     assertThat(afterDelayStreamPlaylist).isNotNull().isPresent();
 
-    final M3UPlaylist testPlaylistOutput = afterDelayStreamPlaylist.get();
-    Log.i(LOG_TAG, "Test rendered M3U playlist:\n" + testPlaylistOutput);
-    assertThat(testPlaylistOutput).isNotNull().isNotEqualTo("");
-    assertThat(testPlaylistOutput.toString().length()).isGreaterThanOrEqualTo(minPlaylistOutputLen);
+    final VideoPlaylist testPlaylistOutput = afterDelayStreamPlaylist.get();
+    assertThat(testPlaylistOutput).isNotNull();
+    final String renderedPlaylist = testPlaylistOutput.getPlaylist();
+    Log.i(LOG_TAG, "Test rendered M3U playlist:\n" + renderedPlaylist);
+    assertThat(renderedPlaylist).isNotNull().isNotEmpty().isNotBlank();
+    assertThat(testPlaylistOutput.getWaitMillis()).isEqualTo(0);
   }
 
   @Test
@@ -176,7 +182,7 @@ class VideoStreamingServiceTest {
   @DisplayName("Validate reading playlist file from disk")
   void readPlaylistFile() {
 
-    final int MIN_PLAYLIST_LEN = 200;
+    final int MIN_PLAYLIST_LEN = 100;
 
     final Optional<EventFileSource> fileSourceOptional =
         testMatch.getFileSources().stream().findFirst();
@@ -235,37 +241,21 @@ class VideoStreamingServiceTest {
     final Long testStreamLocatorId = testStreamLocator.getStreamLocatorId();
     final String testEventFileSrcId = testFileSource.getEventFileSrcId();
     final String testEventId = testMatch.getEventId();
+    final String segmentId = "segment_00001";
 
     Log.i(
         LOG_TAG,
         String.format(
-            "Testing video segment reading with Event ID: %s, File Source ID: %s, Stream Locator ID: %s",
-            testEventId, testEventFileSrcId, testStreamLocatorId));
+            "Testing video segment reading with Event ID: %s, File Source ID: %s, Stream Locator ID: %s, Segment ID: %s",
+            testEventId, testEventFileSrcId, testStreamLocatorId, segmentId));
     // Read video resource
     final Resource actualVideoResource =
         streamingService.getVideoSegmentResource(
-            testEventId, testEventFileSrcId, testStreamLocatorId, "segment_00001");
+            testEventId, testEventFileSrcId, testStreamLocatorId, segmentId);
 
     Log.d(LOG_TAG, "Read video segment: " + actualVideoResource);
     assertThat(actualVideoResource).isNotNull();
     assertThat(actualVideoResource.contentLength()).isGreaterThan(minContentLength);
-  }
-
-  @Test
-  @Order(5)
-  @DisplayName("Ensure streaming service can kill all current streaming tasks")
-  void killAllStreamingTasks() throws InterruptedException {
-
-    final int waitSeconds = 3;
-    final int expectedTasksKilled = 1;
-
-    Log.i(LOG_TAG, "Attempting to kill all tasks...");
-    final int actualTasksKilled = streamingService.killAllStreamingTasks();
-    Log.i(LOG_TAG, String.format("Waiting %d seconds for streams to die...", waitSeconds));
-    TimeUnit.SECONDS.sleep(waitSeconds);
-
-    Log.i(LOG_TAG, String.format("Service killed: %d tasks", actualTasksKilled));
-    assertThat(actualTasksKilled).isGreaterThanOrEqualTo(expectedTasksKilled);
   }
 
   @Test
@@ -297,5 +287,46 @@ class VideoStreamingServiceTest {
           Log.i(LOG_TAG, String.format("Path: %s exists? %s", playlistPath, exists));
           assertThat(exists).isFalse();
         });
+  }
+
+  @Test
+  @Order(5)
+  @DisplayName("Ensure streaming service can kill all current streaming tasks")
+  void killAllStreamingTasks() throws InterruptedException {
+
+    final int waitSeconds = 10;
+    final int expectedTasksKilled = 4;
+
+    Log.i(LOG_TAG, "Attempting to kill all tasks...");
+    final int actualTasksKilled = streamingService.killAllStreamingTasks();
+    Log.i(LOG_TAG, String.format("Waiting %d seconds for streams to die...", waitSeconds));
+    TimeUnit.SECONDS.sleep(waitSeconds);
+
+    Log.i(LOG_TAG, String.format("Service killed: %d tasks", actualTasksKilled));
+    assertThat(actualTasksKilled).isGreaterThanOrEqualTo(expectedTasksKilled);
+  }
+
+  @Test
+  @Disabled
+  public void killStreamingFor() throws InterruptedException {
+
+    final int waitSeconds = 10;
+
+    final EventFileSource testFileSource = getTestFileSource();
+    final String fileSrcId = testFileSource.getEventFileSrcId();
+    Log.i(
+        LOG_TAG,
+        "Beginning test stream for file source stream killing with file source ID: " + fileSrcId);
+
+    final Optional<VideoPlaylist> playlistOptional =
+        streamingService.getVideoStreamPlaylist(testMatch.getEventId(), fileSrcId);
+    assertThat(playlistOptional).isPresent();
+
+    Log.i(LOG_TAG, String.format("Waiting %d seconds for streams to get started...", waitSeconds));
+    TimeUnit.SECONDS.sleep(waitSeconds);
+
+    Log.i(LOG_TAG, "Done waiting. Attempting to kill streams for file source: " + fileSrcId);
+    final VideoPlaylist videoPlaylist = playlistOptional.get();
+    streamingService.killStreamingFor(fileSrcId);
   }
 }

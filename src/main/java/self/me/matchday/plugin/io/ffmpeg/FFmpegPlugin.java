@@ -28,9 +28,8 @@ import self.me.matchday.util.Log;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 @Component
 public class FFmpegPlugin implements Plugin {

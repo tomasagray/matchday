@@ -33,6 +33,7 @@ import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.video.M3UPlaylist;
+import self.me.matchday.model.video.VideoPlaylist;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.util.Log;
@@ -88,40 +89,27 @@ public class VideoStreamingService {
    * @return An Optional containing the playlist, if one was found; empty indicates one is being
    *     created
    */
-  public Optional<M3UPlaylist> getVideoStreamPlaylist(
+  public Optional<VideoPlaylist> getVideoStreamPlaylist(
       @NotNull final String eventId, @NotNull final String fileSrcId) {
 
     // todo - ensure validation happens
 
     final EventFileSource eventFileSource = validateFileSourceRequest(eventId, fileSrcId);
     if (eventFileSource != null) {
-      final Optional<VideoStreamLocatorPlaylist> playlistOptional =
-          videoStreamManager.getLocalStreamFor(fileSrcId);
-
-      // if there is a playlist, inspect its state
-      if (playlistOptional.isPresent()) {
-        final VideoStreamLocatorPlaylist locatorPlaylist = playlistOptional.get();
-        // determine if stream is ready
-        if (videoStreamManager.isStreamReady(locatorPlaylist)) {
-          // format as M3U playlist & return
-          final M3UPlaylist playlist =
-              getM3UPlaylistFromStreamPlaylist(eventId, fileSrcId, locatorPlaylist);
-          return Optional.of(playlist);
-        } else {
-          // the playlist is being created, wait...
-          return Optional.empty();
-        }
-      } else {
-        // create playlist & asynchronously begin playlist stream
-        final VideoStreamLocatorPlaylist locatorPlaylist =
-            videoStreamManager.createVideoStreamFrom(eventFileSource);
-        locatorPlaylist.getStreamLocators().forEach(videoStreamManager::beginStreaming);
-        // return wait...
-        return Optional.empty();
-      }
+      return videoStreamManager
+          .getLocalStreamFor(fileSrcId)
+          .map(playlist -> getPlaylistFromLocators(eventId, fileSrcId, playlist))
+          .orElseGet(
+              () -> {
+                // create playlist & asynchronously begin playlist stream
+                final VideoStreamLocatorPlaylist playlist =
+                    videoStreamManager.createVideoStreamFrom(eventFileSource);
+                playlist.getStreamLocators().forEach(videoStreamManager::beginStreaming);
+                return getPlaylistFromLocators(eventId, fileSrcId, playlist);
+              });
     }
     // return "not found"
-    return null;
+    return Optional.empty();
   }
 
   /**

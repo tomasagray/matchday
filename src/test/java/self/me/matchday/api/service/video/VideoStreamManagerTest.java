@@ -28,7 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.UnitTestFileServerPlugin;
+import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
 import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.video.StreamJobState.JobStatus;
@@ -63,7 +63,7 @@ class VideoStreamManagerTest {
   public static void setup(
       @Autowired @NotNull final TestDataCreator testDataCreator,
       @Autowired @NotNull final FileServerService fileServerService,
-      @Autowired @NotNull final UnitTestFileServerPlugin testFileServerPlugin,
+      @Autowired @NotNull final TestFileServerPlugin testFileServerPlugin,
       @Autowired final VideoStreamManager streamManager) {
 
     VideoStreamManagerTest.streamManager = streamManager;

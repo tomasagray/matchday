@@ -23,8 +23,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.*;
 import self.me.matchday.model.*;
+import self.me.matchday.model.video.SingleStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
@@ -32,6 +36,7 @@ import self.me.matchday.util.ResourceFileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -74,6 +79,8 @@ public class TestDataCreator {
   private final TeamRepository teamRepository;
   private final EventFileSrcRepository fileSrcRepository;
   private final FileServerUserRepo userRepo;
+  private final VideoStreamLocatorPlaylistRepo locatorPlaylistRepo;
+  private final VideoStreamLocatorRepo streamLocatorRepo;
 
   @Autowired
   public TestDataCreator(
@@ -83,7 +90,9 @@ public class TestDataCreator {
       @NotNull final CompetitionRepository competitionRepository,
       @NotNull final TeamRepository teamRepository,
       @NotNull final EventFileSrcRepository fileSrcRepository,
-      @NotNull final FileServerUserRepo userRepo) {
+      @NotNull final FileServerUserRepo userRepo,
+      @NotNull final VideoStreamLocatorPlaylistRepo locatorPlaylistRepo,
+      @NotNull final VideoStreamLocatorRepo locatorRepo) {
 
     this.eventRepository = eventRepository;
     this.matchRepository = matchRepository;
@@ -92,6 +101,8 @@ public class TestDataCreator {
     this.teamRepository = teamRepository;
     this.fileSrcRepository = fileSrcRepository;
     this.userRepo = userRepo;
+    this.locatorPlaylistRepo = locatorPlaylistRepo;
+    this.streamLocatorRepo = locatorRepo;
   }
 
   // ================ EVENTS ======================
@@ -196,51 +207,56 @@ public class TestDataCreator {
     return List.of(preMatch, firstHalf, secondHalf, postMatch);
   }
 
-  public @Nullable URL getPreMatchUrl() {
-    try {
-      final String seed = "?rSeed=" + MD5String.generate();
-      return new URL(
-          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-              + seed);
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
+  @Transactional
+  public @NotNull VideoStreamLocatorPlaylist createStreamLocatorPlaylist() {
+
+    final EventFileSource fileSource = createTestEventFileSource();
+    final Path locatorPath = Path.of("C:\\Users\\Public\\Matchday\\testing");
+    final VideoStreamLocatorPlaylist playlist =
+        new VideoStreamLocatorPlaylist(fileSource, locatorPath);
+    final List<EventFile> eventFiles = fileSource.getEventFiles();
+    for (final EventFile eventFile : eventFiles) {
+      final VideoStreamLocator streamLocator = createStreamLocator(eventFile);
+      playlist.addStreamLocator(streamLocator);
     }
-    return null;
+    final VideoStreamLocatorPlaylist locatorPlaylist = locatorPlaylistRepo.saveAndFlush(playlist);
+    Log.i(LOG_TAG, "Created VideoStreamLocatorPlaylist:\n" + locatorPlaylist);
+    return locatorPlaylist;
+  }
+
+  @Transactional
+  public @NotNull VideoStreamLocator createStreamLocator(final EventFile eventFile) {
+    final VideoStreamLocator locator = new SingleStreamLocator();
+    locator.setEventFile(eventFile);
+    final VideoStreamLocator streamLocator = streamLocatorRepo.saveAndFlush(locator);
+    Log.i(LOG_TAG, "Created VideoStreamLocator: " + streamLocator);
+    return streamLocator;
+  }
+
+  public @Nullable URL getPreMatchUrl() {
+    return getTestUrl(
+        "http://192.168.0.107:7000/matches/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_ETPEN.ts");
   }
 
   public @Nullable URL getFirstHalfUrl() {
-
-    try {
-      final String seed = "?rSeed=" + MD5String.generate();
-      return new URL(
-          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
-              + seed);
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-    }
-    return null;
+    return getTestUrl(
+        "http://192.168.0.107:7000/matches/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_1EN.ts");
   }
 
   public @Nullable URL getSecondHalfUrl() {
-
-    try {
-      final String seed = "?rSeed=" + MD5String.generate();
-      return new URL(
-          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
-              + seed);
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-    }
-    return null;
+    return getTestUrl(
+        "http://192.168.0.107:7000/matches/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_2EN.ts");
   }
 
   public @Nullable URL getPostMatchUrl() {
+    return getTestUrl(
+        "http://192.168.0.107:7000/matches/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_ETPEN.ts");
+  }
 
+  private @Nullable URL getTestUrl(@NotNull final String url) {
     try {
       final String seed = "?rSeed=" + MD5String.generate();
-      return new URL(
-          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
-              + seed);
+      return new URL(url + seed);
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
