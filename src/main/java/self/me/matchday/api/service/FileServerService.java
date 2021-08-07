@@ -84,6 +84,10 @@ public class FileServerService {
     return this.fileServerPlugins;
   }
 
+  public List<FileServerPlugin> getEnabledPlugins() {
+    return this.enabledPlugins;
+  }
+
   /**
    * Determine if a given plugin is currently active
    *

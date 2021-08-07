@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -104,11 +104,12 @@ public class VideoResource extends RepresentationModel<VideoResource> {
               .withRel(TRANSCODE_STREAM));
 
       // locally transcoded stream (.pls format)
-      videoResource.add(
-          linkTo(
-                  methodOn(VideoStreamingController.class)
-                      .getVideoStreamPlsPlaylist(eventId, fileSrcId))
-              .withRel(TRANSCODE_PLS_STREAM));
+      // todo - fix this
+      /*      videoResource.add(
+      linkTo(
+              methodOn(VideoStreamingController.class)
+                  .getVideoStreamPlsPlaylist(eventId, fileSrcId))
+          .withRel(TRANSCODE_PLS_STREAM));*/
       return videoResource;
     }
 

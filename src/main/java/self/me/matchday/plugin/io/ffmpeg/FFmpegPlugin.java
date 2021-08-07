@@ -39,7 +39,8 @@ public class FFmpegPlugin implements Plugin {
   private final FFmpegPluginProperties pluginProperties;
   private final FFmpeg ffmpeg;
   private final FFprobe ffprobe;
-  private final Map<Path, FFmpegStreamTask> streamingTasks = new LinkedHashMap<>();
+  private final ConcurrentSkipListMap<Path, FFmpegStreamTask> streamingTasks =
+      new ConcurrentSkipListMap<>();
 
   @Autowired
   public FFmpegPlugin(@NotNull final FFmpegPluginProperties pluginProperties) {

@@ -54,6 +54,7 @@ public class VideoStreamingService {
 
   private final EventService eventService;
   private final VideoStreamManager videoStreamManager;
+  private final StreamDelayAdviceService delayAdviceService;
   private final VideoStreamLocatorPlaylistService playlistService;
   private final VideoStreamLocatorService videoStreamLocatorService;
 
@@ -61,11 +62,13 @@ public class VideoStreamingService {
   public VideoStreamingService(
       final EventService eventService,
       final VideoStreamManager videoStreamManager,
+      final StreamDelayAdviceService delayAdviceService,
       final VideoStreamLocatorPlaylistService playlistService,
       final VideoStreamLocatorService videoStreamLocatorService) {
 
     this.eventService = eventService;
     this.videoStreamManager = videoStreamManager;
+    this.delayAdviceService = delayAdviceService;
     this.playlistService = playlistService;
     this.videoStreamLocatorService = videoStreamLocatorService;
   }
@@ -228,7 +231,33 @@ public class VideoStreamingService {
     return result.isEmpty() ? null : result;
   }
 
-  private @NotNull M3UPlaylist getM3UPlaylistFromStreamPlaylist(
+  private @NotNull Optional<VideoPlaylist> getPlaylistFromLocators(
+      @NotNull final String eventId,
+      @NotNull final String fileSrcId,
+      @NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
+
+    String playlist = null;
+    long waitMillis = 0;
+
+    if (videoStreamManager.isStreamReady(locatorPlaylist)) {
+      final M3UPlaylist m3uPlaylist =
+          getM3UPlaylistFromPlaylist(eventId, fileSrcId, locatorPlaylist);
+      playlist = m3uPlaylist.getSimplePlaylist();
+    } else {
+      waitMillis = delayAdviceService.getDelayAdvice(locatorPlaylist);
+    }
+
+    final VideoPlaylist videoPlaylist =
+        VideoPlaylist.builder()
+            .playlist(playlist)
+            .waitMillis(waitMillis)
+            .eventId(eventId)
+            .fileSrcId(fileSrcId)
+            .build();
+    return Optional.of(videoPlaylist);
+  }
+
+  private @NotNull M3UPlaylist getM3UPlaylistFromPlaylist(
       @NotNull final String eventId,
       @NotNull final String fileSrcId,
       @NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
