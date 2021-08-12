@@ -27,25 +27,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.core.publisher.Flux;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.RecursiveDirectoryDeleter;
 import self.me.matchday.util.ResourceFileReader;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,8 +56,9 @@ class FFmpegPluginTest {
   public static final int MIN_EXPECTED_FILE_COUNT = 25;
   private static final String LOG_TAG = "FFmpegPluginTest";
   // Test constants
-  private static final String STORAGE_LOCATION = "src/test/data/video_test";
+  private static final String STORAGE_LOCATION = "C:\\Users\\Public\\Matchday\\testing";
   private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
+
   // Test resources
   private static File storageLocation;
   private static Path testPlaylist;
@@ -132,19 +131,22 @@ class FFmpegPluginTest {
   @Test
   @Order(1)
   @DisplayName("Test concat protocol streams remote data to the correct path within required time")
-  void testConcatStreamUris() throws InterruptedException {
+  void testConcatStreamUris() throws IOException {
 
     final List<URI> testUris = getTestUris();
+
     final FFmpegStreamTask streamTask =
         ffmpegPlugin.streamUris(testPlaylist, testUris.toArray(new URI[0]));
     final Path streamingPath = streamTask.getPlaylistPath();
     // Start stream
-    streamTask.start();
+    final Process process = streamTask.execute();
     Log.i(
         LOG_TAG,
         String.format(
             "Began streaming to path: [%s] at time: %s",
             streamingPath.toAbsolutePath(), Instant.now()));
+    // attach for log output
+    logOutput(process.getErrorStream());
 
     // Wait for stream, then get file count
     int actualFileCount = getActualFileCount(streamingPath);
@@ -155,20 +157,32 @@ class FFmpegPluginTest {
   @Test
   @Order(2)
   @DisplayName("Test single HLS stream generation")
-  void testSingleHlsStream() throws InterruptedException {
+  void testSingleHlsStream() throws IOException {
 
     final FFmpegStreamTask streamTask = ffmpegPlugin.streamUris(testPlaylist, getTestUris().get(1));
     final Path streamingPath = streamTask.getPlaylistPath();
     Log.i(LOG_TAG, "Starting test stream to: " + streamingPath.toAbsolutePath());
 
     // Start stream
-    final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    executorService.submit(streamTask);
-
+    final Process process = streamTask.execute();
+    logOutput(process.getErrorStream());
     // Run test
     final int actualFileCount = getActualFileCount(streamingPath);
+
     Log.i(LOG_TAG, "Actual file count: " + actualFileCount);
     assertThat(actualFileCount).isGreaterThanOrEqualTo(MIN_EXPECTED_FILE_COUNT);
+  }
+
+  private void logOutput(@NotNull final InputStream is) {
+    final Flux<String> emitter =
+        Flux.using(
+            () -> new BufferedReader(new InputStreamReader(is)).lines(),
+            Flux::fromStream,
+            Stream::close);
+    emitter
+        .takeUntil(s -> s.matches("[\\w\\s-./=]*time=00:01:[\\d.]+[\\w\\s-./=]*"))
+        .doOnComplete(() -> Log.i(LOG_TAG, "Test streaming complete."))
+        .subscribe(line -> Log.i(LOG_TAG, "[ffmpeg]: " + line));
   }
 
   @Test
@@ -191,13 +205,14 @@ class FFmpegPluginTest {
   @Test
   @Order(4)
   @DisplayName("Validate that a particular streaming task can be interrupted")
-  void killStreamingTask() throws InterruptedException {
+  void killStreamingTask() throws InterruptedException, IOException {
 
     // Start a new task
     final FFmpegStreamTask streamingTask =
         ffmpegPlugin.streamUris(testPlaylist, getTestUris().toArray(new URI[0]));
     Log.i(LOG_TAG, "Created streaming task to: " + streamingTask.getPlaylistPath());
-    streamingTask.start();
+    final Process process = streamingTask.execute();
+    logOutput(process.getErrorStream());
     // Wait...
     Thread.sleep(5_000L);
     Log.i(LOG_TAG, "Ensuring task has been started...");
@@ -241,35 +256,19 @@ class FFmpegPluginTest {
         .collect(Collectors.toList());
   }
 
-  private int getActualFileCount(Path streamingPath) throws InterruptedException {
+  private int getActualFileCount(@NotNull Path streamingPath) {
 
     final long waitSeconds = 30;
 
     // Test data
-    int actualFileCount = 0;
+    int actualFileCount;
 
-    final Duration timeout = Duration.ofSeconds(30);
-    boolean filesFound = false;
-    Duration elapsed = Duration.ZERO;
-    Instant start = Instant.now();
-
-    // Check file count
-    while (!filesFound && elapsed.compareTo(timeout) < 0) {
-
-      // Wait for FFMPEG to do its thing...
-      Log.i(LOG_TAG, String.format("Waiting %d seconds before retry...", waitSeconds));
-      Thread.sleep(waitSeconds * 1_000L);
-
-      final String[] fileList = streamingPath.getParent().toFile().list();
-      assertThat(fileList).isNotNull();
-      actualFileCount = fileList.length;
-      Log.i(LOG_TAG, String.format("Found %s files on current sleep cycle...", actualFileCount));
-      if (actualFileCount >= MIN_EXPECTED_FILE_COUNT) {
-        Log.i(LOG_TAG, "That's enough for testing...");
-        filesFound = true;
-      }
-      elapsed = Duration.between(start, Instant.now());
-    }
+    // Wait for FFMPEG to do its thing...
+    Log.i(LOG_TAG, String.format("Waiting %d seconds before retry...", waitSeconds));
+    final String[] fileList = streamingPath.getParent().toFile().list();
+    assertThat(fileList).isNotNull();
+    actualFileCount = fileList.length;
+    Log.i(LOG_TAG, String.format("Found %s files on current sleep cycle...", actualFileCount));
     return actualFileCount;
   }
 }

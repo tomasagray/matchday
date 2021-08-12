@@ -128,7 +128,7 @@ class VideoStreamManagerTest {
   @DisplayName("Validate asynchronous video streaming")
   void beginStreaming() throws InterruptedException {
 
-    final int streamHeadStartSeconds = 3;
+    final int streamHeadStartSeconds = 10;
 
     final VideoStreamLocatorPlaylist testPlaylist = getStreamLocatorPlaylist();
     VideoStreamManagerTest.testStreamLocator = testPlaylist.getStreamLocators().get(0);
@@ -149,7 +149,7 @@ class VideoStreamManagerTest {
   @DisplayName("Validate that streaming has registered in the database")
   void isStreamReady() throws InterruptedException {
 
-    final long waitSeconds = 10;
+    final long waitSeconds = 30;
 
     Log.i(
         LOG_TAG,
@@ -169,7 +169,7 @@ class VideoStreamManagerTest {
   @DisplayName("Validate VideoStreamManager can interrupt streaming tasks")
   void killAllStreamsFor() throws InterruptedException {
 
-    final int waitToDie = 10;
+    final int waitToDie = 30;
 
     final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
     Log.i(LOG_TAG, "Attempting to kill all streams for VideoStreamLocatorPlaylist: " + playlist);
@@ -180,8 +180,9 @@ class VideoStreamManagerTest {
 
     Log.i(LOG_TAG, "Ensuring all tasks are dead");
     final VideoStreamLocatorPlaylist deadPlaylist = getStreamLocatorPlaylist();
-    final boolean streamReady = streamManager.isStreamReady(deadPlaylist);
     final JobStatus killedStatus = deadPlaylist.getState().getStatus();
+    final boolean streamReady =
+        killedStatus == JobStatus.COMPLETED || killedStatus == JobStatus.STREAMING;
     Log.i(LOG_TAG, "JobStatus: " + killedStatus);
     deadPlaylist
         .getStreamLocators()

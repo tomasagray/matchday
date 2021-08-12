@@ -58,7 +58,8 @@ class VideoStreamingServiceTest {
 
   private static final String LOG_TAG = "VideoStreamingServiceTest";
 
-  private static final long waitSeconds = 10;
+  private static final long waitSeconds = 30;
+
   // Service dependencies
   private static TestDataCreator testDataCreator;
   private static VideoStreamingService streamingService;
@@ -153,23 +154,28 @@ class VideoStreamingServiceTest {
     assertThat(playlistOptional).isPresent();
     final VideoPlaylist videoPlaylist = playlistOptional.get();
     Log.i(LOG_TAG, "Retrieved VideoPlaylist: " + videoPlaylist);
+
     assertThat(videoPlaylist).isNotNull();
     assertThat(videoPlaylist.getPlaylist()).isNull();
-
-    Log.i(LOG_TAG, "VideoStreamingService returned a \"wait\" playlist, as expected...");
-    final long recheckDelay = videoPlaylist.getWaitMillis();
+    long recheckDelay = videoPlaylist.getWaitMillis();
     assertThat(recheckDelay).isGreaterThan(0);
-    Log.i(
-        LOG_TAG,
-        String.format("Waiting %s milliseconds from playlist recommendation...", recheckDelay));
-    Thread.sleep(recheckDelay);
+    Log.i(LOG_TAG, "VideoStreamingService returned a \"wait\" playlist, as expected...");
+
+    VideoPlaylist testPlaylistOutput = null;
+    while (recheckDelay > 0) {
+      Log.i(
+          LOG_TAG,
+          String.format("Waiting %s milliseconds from playlist recommendation...", recheckDelay));
+      Thread.sleep(recheckDelay);
+
+      final Optional<VideoPlaylist> afterDelayStreamPlaylist =
+          streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId);
+      assertThat(afterDelayStreamPlaylist).isNotNull().isPresent();
+      testPlaylistOutput = afterDelayStreamPlaylist.get();
+      assertThat(testPlaylistOutput).isNotNull();
+      recheckDelay = testPlaylistOutput.getWaitMillis();
+    }
     Log.i(LOG_TAG, "Done waiting, performing recheck...");
-
-    final Optional<VideoPlaylist> afterDelayStreamPlaylist =
-        streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId);
-    assertThat(afterDelayStreamPlaylist).isNotNull().isPresent();
-
-    final VideoPlaylist testPlaylistOutput = afterDelayStreamPlaylist.get();
     assertThat(testPlaylistOutput).isNotNull();
     final String renderedPlaylist = testPlaylistOutput.getPlaylist();
     Log.i(LOG_TAG, "Test rendered M3U playlist:\n" + renderedPlaylist);
@@ -180,10 +186,16 @@ class VideoStreamingServiceTest {
   @Test
   @Order(3)
   @DisplayName("Validate reading playlist file from disk")
-  void readPlaylistFile() {
+  void readPlaylistFile() throws InterruptedException {
 
     final int MIN_PLAYLIST_LEN = 100;
 
+    Log.i(
+        LOG_TAG, String.format("Waiting %d seconds to ensure stream has started...", waitSeconds));
+    TimeUnit.SECONDS.sleep(waitSeconds);
+    Log.i(LOG_TAG, "Done waiting. Proceeding with test...");
+
+    // get test file source
     final Optional<EventFileSource> fileSourceOptional =
         testMatch.getFileSources().stream().findFirst();
     assertThat(fileSourceOptional).isPresent();
