@@ -22,13 +22,11 @@ package self.me.matchday.plugin.io.ffmpeg;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
-import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Flux;
 import self.me.matchday.util.Log;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -46,43 +44,22 @@ public abstract class FFmpegStreamTask extends Thread {
   protected Path dataDir;
   protected boolean loggingEnabled;
   protected Process process;
-  protected FFmpegLogAdapter logAdapter;
+  protected Flux<String> logAdapter;
+
+  public Process execute() throws IOException {
+    prepareStream();
+    final String command = getExecCommand();
+    Log.i(LOG_TAG, "Executing command:\n" + command);
+    this.process = Runtime.getRuntime().exec(command);
+    return this.process;
+  }
 
   @SneakyThrows
   @Override
   public void run() {
-
-    try {
-      // Perform necessary prerequisite steps
-      prepareStream();
-
-      // Get formatted exec command
-      String execCommand = getExecCommand();
-      Log.i(LOG_TAG, "Executing shell command:\n" + execCommand);
-
-      // Execute FFmpeg task
-      process = Runtime.getRuntime().exec(execCommand);
-
-      // Begin logging, if enabled
-      if (loggingEnabled) {
-        logAdapter = new FFmpegLogAdapter(process.getErrorStream(), getLogFile(dataDir));
-        logAdapter.start();
-      }
-
-      // Allow the process to finish executing
-      process.waitFor();
-      process.destroy();
-
-    } catch (InterruptedException e) {
-      if (process != null) {
-        Log.i(LOG_TAG, String.format("Streaming task with PID: %s interrupted", process.pid()));
-      }
-    } finally {
-      // If logging active, finish it
-      if (logAdapter != null) {
-        logAdapter.join();
-      }
-    }
+    final Process process = this.execute();
+    process.waitFor();
+    process.destroy();
   }
 
   /**
@@ -91,11 +68,6 @@ public abstract class FFmpegStreamTask extends Thread {
    * @return True/false if the task was successfully killed
    */
   public final boolean kill() {
-
-    // Stop logging
-    if (logAdapter != null) {
-      logAdapter.interrupt();
-    }
     // Ensure process exists
     if (process != null) {
       // Ensure process is dead
@@ -124,21 +96,4 @@ public abstract class FFmpegStreamTask extends Thread {
    * @return The input portion of the FFMPEG command
    */
   abstract String getInputString();
-
-  /**
-   * Create a reference to the log file location; inside streaming directory, with the format:
-   * ffmpeg-yyyy-MM-dd_hh-mm-ss.log
-   *
-   * @param dataDir Path to streaming directory
-   * @return The log file location
-   */
-  private @NotNull File getLogFile(@NotNull final Path dataDir) {
-
-    // Create log file name from timestamp
-    final String timestamp = LocalDateTime.now().format(LOGFILE_TIMESTAMP_FORMATTER);
-    final String logFilename = String.format("ffmpeg-%s.log", timestamp);
-
-    // Create file reference in working directory
-    return new File(dataDir.toFile(), logFilename);
-  }
 }

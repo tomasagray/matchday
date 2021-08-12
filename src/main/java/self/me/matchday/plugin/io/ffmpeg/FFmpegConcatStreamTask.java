@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -71,10 +71,8 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
 
   @Override
   protected void prepareStream() throws IOException {
-
     // Create output directory
     Files.createDirectories(this.getDataDir());
-
     // Create URI list text file
     this.concatFile = createConcatFile();
     Log.i(LOG_TAG, "Created concat text file: " + concatFile);
@@ -96,7 +94,6 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
     // Map each URI to en entry in the concat file
     final String concatFileText =
         uris.stream().map(url -> String.format("file '%s'\n", url)).collect(Collectors.joining());
-
     // Write data to file
     final Path concatFilePath = Path.of(getDataDir().toAbsolutePath().toString(), CONCAT_FILENAME);
     return Files.writeString(concatFilePath, concatFileText);

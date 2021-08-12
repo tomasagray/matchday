@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -42,8 +42,7 @@ public class EventFile implements Comparable<EventFile> {
   private static double DEFAULT_DURATION = 3012.541956d;
 
   // Fields
-  @Id
-  private String eventFileId;
+  @Id private String eventFileId;
   private URL externalUrl;
   private EventPartIdentifier title;
 
@@ -54,7 +53,7 @@ public class EventFile implements Comparable<EventFile> {
   @Column(columnDefinition = "LONGTEXT")
   private FFmpegMetadata metadata;
 
-  private Timestamp lastRefreshed = new Timestamp(0L);
+  private Timestamp lastRefreshed = new Timestamp(0L); // todo - write converter
 
   public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
 

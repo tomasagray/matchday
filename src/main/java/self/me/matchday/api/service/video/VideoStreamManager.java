@@ -24,18 +24,23 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import self.me.matchday.api.service.EventFileService;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegLogger;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask;
 import self.me.matchday.util.Log;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
 
@@ -96,30 +101,57 @@ class VideoStreamManager {
   @SneakyThrows
   @Async("VideoStreamExecutor")
   public void beginStreaming(@NotNull final VideoStreamLocator streamLocator) {
-
     try {
-      updateLocatorTaskState(streamLocator, JobStatus.STARTED, 0.01);
       final EventFile eventFile = streamLocator.getEventFile();
       final Path playlistPath = streamLocator.getPlaylistPath();
 
-      updateLocatorTaskState(streamLocator, JobStatus.BUFFERING, 0.01);
+      updateLocatorTaskState(streamLocator, JobStatus.STARTED, 0.0);
       final EventFile refreshedEventFile = eventFileService.refreshEventFile(eventFile, false);
       final URI videoDataLink = refreshedEventFile.getInternalUrl().toURI();
-      updateLocatorTaskState(streamLocator, JobStatus.BUFFERING, 0.1);
+      updateLocatorTaskState(streamLocator, JobStatus.BUFFERING, 0.0);
 
       // Start stream
-      final Thread streamTask = ffmpegPlugin.streamUris(playlistPath, videoDataLink);
-      streamTask.start();
-      updateLocatorTaskState(streamLocator, JobStatus.STREAMING, 0.1);
-
-      // Wait for stream task to finish
-      streamTask.join();
-      updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0);
-
+      final FFmpegStreamTask streamTask = ffmpegPlugin.streamUris(playlistPath, videoDataLink);
+      updateLocatorTaskState(streamLocator, JobStatus.STREAMING, 0.0);
+      if (streamTask.isLoggingEnabled()) {
+        streamWithLogging(streamLocator, streamTask);
+      } else {
+        streamWithoutLog(streamTask);
+        updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0);
+      }
     } catch (Throwable e) {
       updateLocatorTaskState(streamLocator, JobStatus.ERROR, -1.0);
       throw e;
     }
+  }
+
+  private void streamWithLogging(
+      @NotNull final VideoStreamLocator streamLocator, @NotNull final FFmpegStreamTask streamTask)
+      throws IOException {
+
+    final Process streamProcess = streamTask.execute();
+    final FFmpegLogger logger = new FFmpegLogger(streamProcess, streamTask.getDataDir());
+    final FFmpegLogAdapter logReader = new FFmpegLogAdapter(locatorService, streamLocator);
+    final OpenOption[] options = {StandardOpenOption.CREATE, StandardOpenOption.WRITE};
+    AsynchronousFileChannel fw = AsynchronousFileChannel.open(logger.getLogFile(), options);
+    final Flux<String> logEmitter = logger.beginLogging(fw);
+    logEmitter
+        .doOnNext(logReader)
+        .doOnComplete(() -> updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0))
+        .subscribe();
+  }
+
+  private void streamWithoutLog(@NotNull final FFmpegStreamTask streamTask)
+      throws IOException, InterruptedException {
+
+    final Process process = streamTask.execute();
+    // absorb process output
+    final InputStream errorStream = process.getErrorStream();
+    final BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream));
+    reader.lines().forEach(line -> {});
+    // wait for process to finish
+    process.waitFor();
+    process.destroy();
   }
 
   public int killAllStreams() {
@@ -136,17 +168,6 @@ class VideoStreamManager {
     final Double completionRatio = streamLocator.getState().getCompletionRatio();
     updateLocatorTaskState(streamLocator, JobStatus.STOPPED, completionRatio);
     ffmpegPlugin.interruptStreamingTask(streamLocator.getPlaylistPath());
-  }
-
-  /**
-   * Given a video stream playlist, determine if it is ready for a client to begin streaming
-   *
-   * @param locatorPlaylist The collection of streams for a particular Event
-   * @return true/false - clients can begin streaming
-   */
-  public boolean isStreamReady(@NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
-    final JobStatus jobStatus = locatorPlaylist.getState().getStatus();
-    return jobStatus == JobStatus.COMPLETED || jobStatus == JobStatus.STREAMING;
   }
 
   private void updateLocatorTaskState(

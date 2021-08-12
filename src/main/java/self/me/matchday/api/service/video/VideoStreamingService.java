@@ -239,9 +239,8 @@ public class VideoStreamingService {
     String playlist = null;
     long waitMillis = 0;
 
-    if (videoStreamManager.isStreamReady(locatorPlaylist)) {
-      final M3UPlaylist m3uPlaylist =
-          getM3UPlaylistFromPlaylist(eventId, fileSrcId, locatorPlaylist);
+    if (delayAdviceService.isStreamReady(locatorPlaylist)) {
+      final M3UPlaylist m3uPlaylist = getM3UFromPlaylist(eventId, fileSrcId, locatorPlaylist);
       playlist = m3uPlaylist.getSimplePlaylist();
     } else {
       waitMillis = delayAdviceService.getDelayAdvice(locatorPlaylist);
@@ -257,7 +256,7 @@ public class VideoStreamingService {
     return Optional.of(videoPlaylist);
   }
 
-  private @NotNull M3UPlaylist getM3UPlaylistFromPlaylist(
+  private @NotNull M3UPlaylist getM3UFromPlaylist(
       @NotNull final String eventId,
       @NotNull final String fileSrcId,
       @NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {

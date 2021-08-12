@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.model.video.TaskListState;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
@@ -56,11 +57,31 @@ public class StreamDelayAdviceService {
 
   public long getDelayAdvice(@NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
 
-    final JobStatus status = locatorPlaylist.getState().getStatus();
-    final int stepsToComplete = Math.abs(status.compareTo(JobStatus.COMPLETED));
-    final int locatorCount = locatorPlaylist.getStreamLocators().size();
-    final long pingTime = getPingTime(locatorPlaylist);
-    return computeWaitMillis(locatorCount, stepsToComplete, pingTime, ffmpegStartUpTime);
+    if (!isStreamReady(locatorPlaylist)) {
+      final JobStatus status = locatorPlaylist.getState().getStatus();
+      final int stepsToComplete = JobStatus.COMPLETED.compareTo(status);
+      final int locatorCount = locatorPlaylist.getStreamLocators().size();
+      final long pingTime = getPingTime(locatorPlaylist);
+      return computeWaitMillis(locatorCount, stepsToComplete, pingTime, ffmpegStartUpTime);
+    }
+    return 0;
+  }
+
+  /**
+   * Given a video stream playlist, determine if it is ready for a client to begin streaming
+   *
+   * @param locatorPlaylist The collection of streams for a particular Event
+   * @return true/false - clients can begin streaming
+   */
+  public boolean isStreamReady(@NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
+
+    final TaskListState state = locatorPlaylist.getState();
+    final JobStatus jobStatus = state.getStatus();
+    final Double completionRatio = state.getCompletionRatio();
+
+    final boolean status = jobStatus == JobStatus.COMPLETED || jobStatus == JobStatus.STREAMING;
+    final boolean completion = completionRatio > .01;
+    return status && completion;
   }
 
   public void pingActiveFileServers() {
@@ -68,6 +89,11 @@ public class StreamDelayAdviceService {
     fileServerService.getEnabledPlugins().forEach(this::pingFileServer);
   }
 
+  /**
+   * Ping the specified fileserver and record the result
+   *
+   * @param fileServerPlugin A fileserver
+   */
   public void pingFileServer(@NotNull final FileServerPlugin fileServerPlugin) {
 
     long timeout = 3_000; // default

@@ -19,8 +19,10 @@
 
 package self.me.matchday.model.video;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.jetbrains.annotations.NotNull;
@@ -32,8 +34,10 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 @Entity
 public class VideoStreamLocatorPlaylist {
 
@@ -93,7 +97,41 @@ public class VideoStreamLocatorPlaylist {
     }
     // compute aggregate completion total
     final double playlistCompletionRatio = aggregateCompletionTotal / streamLocators.size();
-    listState.setCompletionRatio(
-        playlistCompletionRatio); // todo make sure this updates database when entity saved
+    listState.setCompletionRatio(playlistCompletionRatio);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    VideoStreamLocatorPlaylist that = (VideoStreamLocatorPlaylist) o;
+
+    return Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return 1304080917;
+  }
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName()
+        + "("
+        + "id = "
+        + id
+        + ", "
+        + "fileSource = "
+        + fileSource
+        + ", "
+        + "storageLocation = "
+        + storageLocation
+        + ", "
+        + "timestamp = "
+        + timestamp
+        + ", "
+        + "state = "
+        + state
+        + ")";
   }
 }
