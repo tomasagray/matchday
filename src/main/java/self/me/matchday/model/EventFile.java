@@ -19,10 +19,13 @@
 
 package self.me.matchday.model;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.FFmpegMetadataConverter;
+import self.me.matchday.db.converter.TimestampConverter;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 
 import javax.persistence.Column;
@@ -35,7 +38,9 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Entity
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @NoArgsConstructor
 public class EventFile implements Comparable<EventFile> {
 
@@ -53,7 +58,8 @@ public class EventFile implements Comparable<EventFile> {
   @Column(columnDefinition = "LONGTEXT")
   private FFmpegMetadata metadata;
 
-  private Timestamp lastRefreshed = new Timestamp(0L); // todo - write converter
+  @Convert(converter = TimestampConverter.class)
+  private Timestamp lastRefreshed = new Timestamp(0L);
 
   public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
 
