@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "video-resources.file-storage-location",
+      "type": "java.lang.String",
+      "description": "Default file storage location for video files."
+    }
+  ]
+}
