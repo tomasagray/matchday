@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -20,6 +20,7 @@
 package self.me.matchday.api.service;
 
 import org.springframework.stereotype.Service;
+import self.me.matchday.model.FileServerUser;
 import self.me.matchday.util.Log;
 
 import java.util.regex.Pattern;

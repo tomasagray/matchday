@@ -27,9 +27,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.db.FileServerUserRepo;
+import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
-import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
@@ -177,20 +177,15 @@ public class FileServerService {
     HttpStatus status = HttpStatus.BAD_REQUEST;
     String message;
 
-    if (userValidationService.isValidUserData(user.getUsername(), user.getPassword())) {
+    if (userValidationService.isValidUserData(user)) {
       // Validate login data
       final Optional<FileServerPlugin> pluginOptional = getPluginById(pluginId);
       if (pluginOptional.isPresent()) {
-
         final FileServerPlugin serverPlugin = pluginOptional.get();
         Log.i(LOG_TAG, "Found plugin with ID: " + pluginId);
-
-        // todo - change to login object, so plugins can't modify user data
-        // todo - refactor this method; too long
         final ClientResponse loginResponse = serverPlugin.login(user);
         // If login successful
         if (loginResponse.statusCode().is2xxSuccessful()) {
-
           // Extract cookies
           final List<SecureCookie> cookies =
               loginResponse.cookies().values().stream()
@@ -202,7 +197,6 @@ public class FileServerService {
           // Save user to repo
           userRepo.save(user);
           Log.i(LOG_TAG, "Login SUCCESSFUL with user: " + user);
-
           // Return successful response
           status = HttpStatus.OK;
           message =
@@ -224,7 +218,6 @@ public class FileServerService {
     } else {
       message = "Invalid user data passed: " + user;
     }
-
     // Return login response
     return ClientResponse.create(status).body(message).build();
   }
@@ -233,20 +226,19 @@ public class FileServerService {
    * Login a user to a file server using previously gathered cookies
    *
    * @param pluginId The ID of the file server
-   * @param username The user to be logged in
-   * @param password The user's password
+   * @param user The user to login
    * @param cookieData A collection of cookies necessary to access secure parts of the server
    * @return The response
    */
   public ClientResponse loginWithCookies(
       @NotNull final UUID pluginId,
-      final String username,
-      final String password,
-      final String cookieData) {
+      @NotNull final FileServerUser user,
+      @NotNull final String cookieData) {
 
     // Result containers
     HttpStatus status = HttpStatus.BAD_REQUEST;
     String message;
+    Log.i(LOG_TAG, String.format("Attempting login with user: %s, plugin: %s", user, pluginId));
 
     // Parse cookies
     final List<SecureCookie> cookies =
@@ -255,29 +247,23 @@ public class FileServerService {
             .collect(Collectors.toList());
 
     // Validate user data
-    if (userValidationService.isValidUserData(username, password)) {
+    if (userValidationService.isValidUserData(user)) {
       // Validate cookies
       if (!cookies.isEmpty()) {
         // Validate plugin ID
         final Optional<FileServerPlugin> pluginOptional = getPluginById(pluginId);
         if (pluginOptional.isPresent()) {
           final FileServerPlugin serverPlugin = pluginOptional.get();
-
-          // Prepare user
-          final FileServerUser user = new FileServerUser(username, password);
-
           // Login user to appropriate server
           user.setLoggedIntoServer(serverPlugin.getPluginId().toString(), cookies);
           // Save to repo
           userRepo.save(user);
-
           // Return successful response
           status = HttpStatus.OK;
           message =
               String.format(
                   "User: %s successfully logged into file server: %s",
                   user.getUsername(), serverPlugin.getTitle());
-
         } else {
           message = String.format("File server ID: %s NOT FOUND", pluginId);
         }
@@ -285,8 +271,9 @@ public class FileServerService {
         message = "Not cookies supplied with login request";
       }
     } else {
-      message = "Invalid user data for user: " + username;
+      message = "Invalid user data for user: " + user.getUsername();
     }
+    Log.i(LOG_TAG, message);
     return ClientResponse.create(status).body(message).build();
   }
 
@@ -438,7 +425,6 @@ public class FileServerService {
     if (pluginForUrl != null) {
       // Get a logged in user
       final FileServerUser downloadUser = getDownloadUser(pluginForUrl.getPluginId());
-
       if (downloadUser != null) {
         // Decrypt user cookies
         final Set<HttpCookie> httpCookies =
@@ -478,7 +464,6 @@ public class FileServerService {
    * @return The first registered fileserver manager which can handle the URL.
    */
   public @Nullable FileServerPlugin getEnabledPluginForUrl(@NotNull final URL url) {
-
     // search only ENABLED plugins
     for (final FileServerPlugin plugin : this.enabledPlugins) {
       if (plugin.acceptsUrl(url)) {
@@ -496,7 +481,6 @@ public class FileServerService {
    * @return A logged-in fileserver user, or null if none found
    */
   private @Nullable FileServerUser getDownloadUser(@NotNull final UUID pluginId) {
-
     // Get logged-in users for this repo
     final List<FileServerUser> users = userRepo.fetchLoggedInUsersForServer(pluginId.toString());
     if (users.size() > 0) {

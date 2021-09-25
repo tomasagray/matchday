@@ -22,6 +22,7 @@ package self.me.matchday.plugin.fileserver;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpCookie;
 import org.springframework.web.reactive.function.client.ClientResponse;
+import self.me.matchday.model.FileServerUser;
 import self.me.matchday.plugin.Plugin;
 
 import java.io.IOException;

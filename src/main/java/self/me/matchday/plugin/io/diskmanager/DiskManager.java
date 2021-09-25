@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -36,12 +36,9 @@ public class DiskManager {
   private static final Long MAX_DISK_CONSUMPTION = FileSize.ofGigabytes(300);
 
   @Getter private final Path storageLocation;
-  private final Path fileSystemRoot;
+  @Getter private final Path fileSystemRoot;
 
   public DiskManager(@NotNull final DiskManagerProperties properties) {
-
-    // Read storage location from plugin properties
-    // todo - change this, make storage path injectable
     this.storageLocation = Path.of(properties.getStorageLocation());
     this.fileSystemRoot = determineFileSystemRoot();
   }

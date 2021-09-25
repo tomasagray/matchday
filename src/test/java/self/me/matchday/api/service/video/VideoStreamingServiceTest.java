@@ -31,11 +31,12 @@ import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
 import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.Match;
+import self.me.matchday.model.video.M3uRenderer;
 import self.me.matchday.model.video.VideoPlaylist;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
@@ -139,6 +140,7 @@ class VideoStreamingServiceTest {
   @DisplayName("Test that a playlist is created & returned")
   void getVideoStreamPlaylist() throws Exception {
 
+    final M3uRenderer renderer = new M3uRenderer();
     // test variables
     final String testEventId = testMatch.getEventId();
     final String testFileSrcId = testFileSource.getEventFileSrcId();
@@ -331,7 +333,8 @@ class VideoStreamingServiceTest {
         "Beginning test stream for file source stream killing with file source ID: " + fileSrcId);
 
     final Optional<VideoPlaylist> playlistOptional =
-        streamingService.getVideoStreamPlaylist(testMatch.getEventId(), fileSrcId);
+        streamingService.getVideoStreamPlaylist(
+            testMatch.getEventId(), fileSrcId, new M3uRenderer());
     assertThat(playlistOptional).isPresent();
 
     Log.i(LOG_TAG, String.format("Waiting %d seconds for streams to get started...", waitSeconds));

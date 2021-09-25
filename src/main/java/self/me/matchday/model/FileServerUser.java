@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,13 +17,12 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.fileserver;
+package self.me.matchday.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.MD5String;
-import self.me.matchday.model.SecureCookie;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -31,9 +30,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /** Represents a file server user */
-@Data
+@Getter
+@RequiredArgsConstructor
 @Entity
-public class FileServerUser implements Serializable {
+public final class FileServerUser implements Serializable {
 
   @Id private String userId;
   private final String username;
@@ -47,16 +47,14 @@ public class FileServerUser implements Serializable {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.EAGER)
-  private Collection<SecureCookie> cookies = new ArrayList<>();
+  private final Collection<SecureCookie> cookies = new ArrayList<>();
 
-  // default constructor
   public FileServerUser() {
     this.username = this.email = null;
     this.password = null;
   }
 
   public FileServerUser(@NotNull final String username, @NotNull final String password) {
-
     this.userId = MD5String.fromData(username);
     this.username = this.email = username;
     this.password = password;
@@ -70,17 +68,14 @@ public class FileServerUser implements Serializable {
    */
   public void setLoggedIntoServer(
       @NotNull final String serverId, @NotNull final Collection<SecureCookie> cookies) {
-
-    setUserId(MD5String.fromData(this.username, serverId));
-    setServerId(serverId);
+    this.serverId = serverId;
+    this.loggedIn = true;
     setCookies(cookies);
-    setLoggedIn(true);
   }
 
   public void setLoggedOut() {
-    // Clear login data
+    this.loggedIn = false;
     clearCookies();
-    setLoggedIn(false);
   }
 
   public void setCookies(@NotNull final Collection<SecureCookie> cookies) {

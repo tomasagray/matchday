@@ -30,9 +30,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.MD5String;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
-import self.me.matchday.plugin.fileserver.FileServerUser;
 
 import java.io.IOException;
 import java.net.URL;

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.plugin.fileserver.FileServerUser;
+import self.me.matchday.model.FileServerUser;
 
 import java.net.URI;
 import java.net.URISyntaxException;

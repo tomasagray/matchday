@@ -35,8 +35,8 @@ import self.me.matchday.api.resource.FileServerUserResource.UserResourceAssemble
 import self.me.matchday.api.resource.MessageResource;
 import self.me.matchday.api.resource.MessageResource.MessageResourceAssembler;
 import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.model.FileServerUser;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
-import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 import java.io.BufferedReader;
@@ -144,12 +144,12 @@ public class FileServerController {
       @RequestParam("password") final String password,
       @RequestParam("cookie-file") final MultipartFile cookies) {
 
-    // Read POST data
     final String cookieData = readPostTextData(cookies);
+    final FileServerUser user = new FileServerUser(username, password);
 
     // Login via file server service
     final ClientResponse response =
-        fileServerService.loginWithCookies(fileServerId, username, password, cookieData);
+        fileServerService.loginWithCookies(fileServerId, user, cookieData);
     final String messageText = getResponseMessage(response);
     final MessageResource message = messageResourceAssembler.toModel(messageText);
 
