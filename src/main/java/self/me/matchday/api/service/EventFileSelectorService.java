@@ -22,16 +22,38 @@ package self.me.matchday.api.service;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFile.EventPartIdentifier;
 import self.me.matchday.model.EventFileSource;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class EventFileSelectorService {
+
+  /**
+   * Get the "best" file source, sorted by: language -> bitrate -> resolution
+   *
+   * @param event The event containing the file sources
+   * @return The "best" file source
+   */
+  public EventFileSource getBestFileSource(@NotNull final Event event) {
+
+    // sort file sources
+    final ArrayList<EventFileSource> fileSources = new ArrayList<>(event.getFileSources());
+    fileSources.sort(
+        Comparator.comparing(EventFileSource::getResolution)
+            .thenComparing(EventFileSource::getBitrate)
+            .thenComparing(EventFileSource::getLanguages));
+    // todo - get "preferred" language instead of alphabetical sort ^
+    // get top result
+    return fileSources.get(0);
+  }
 
   /**
    * Get the best version of each EventFile for this EventFileSource, and return them in the correct

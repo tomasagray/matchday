@@ -98,6 +98,7 @@ class VideoStreamManager {
     playlistService.deleteVideoStreamPlaylist(playlist);
   }
 
+  // todo - extract to strategy pattern
   @SneakyThrows
   @Async("VideoStreamExecutor")
   public void beginStreaming(@NotNull final VideoStreamLocator streamLocator) {

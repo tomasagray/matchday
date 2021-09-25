@@ -93,7 +93,9 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 
       // remote stream (no transcoding)
       videoResource.add(
-          linkTo(methodOn(VideoStreamingController.class).getVariantPlaylist(eventId, fileSrcId))
+          linkTo(
+                  methodOn(VideoStreamingController.class)
+                      .getVideoStreamPlaylist(eventId, fileSrcId))
               .withRel(VARIANT_PLAYLIST));
 
       // local stream (transcoded to local disk)
@@ -104,12 +106,11 @@ public class VideoResource extends RepresentationModel<VideoResource> {
               .withRel(TRANSCODE_STREAM));
 
       // locally transcoded stream (.pls format)
-      // todo - fix this
-      /*      videoResource.add(
-      linkTo(
-              methodOn(VideoStreamingController.class)
-                  .getVideoStreamPlsPlaylist(eventId, fileSrcId))
-          .withRel(TRANSCODE_PLS_STREAM));*/
+      videoResource.add(
+          linkTo(
+                  methodOn(VideoStreamingController.class)
+                      .getVideoStreamPlsPlaylist(eventId, fileSrcId))
+              .withRel(TRANSCODE_PLS_STREAM));
       return videoResource;
     }
 

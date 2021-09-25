@@ -28,6 +28,4 @@ public class VideoPlaylist {
 
   private final String playlist;
   private final long waitMillis;
-  private String eventId;
-  private String fileSrcId;
 }

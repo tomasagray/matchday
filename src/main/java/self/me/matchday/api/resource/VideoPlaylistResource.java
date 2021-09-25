@@ -30,9 +30,6 @@ import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.model.video.VideoPlaylist;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 @JsonRootName("video-playlist")
@@ -55,11 +52,6 @@ public class VideoPlaylistResource extends RepresentationModel<VideoPlaylistReso
       final VideoPlaylistResource playlistResource = instantiateModel(entity);
       playlistResource.setPlaylist(entity.getPlaylist());
       playlistResource.setWaitMillis(entity.getWaitMillis());
-      playlistResource.add(
-          linkTo(
-                  methodOn(VideoStreamingController.class)
-                      .getVideoStreamPlaylist(entity.getEventId(), entity.getFileSrcId()))
-              .withSelfRel());
       return playlistResource;
     }
   }

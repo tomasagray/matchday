@@ -24,22 +24,21 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import self.me.matchday.api.controller.VideoStreamingController;
+import self.me.matchday.api.service.EventFileSelectorService;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.EventFile;
 import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.video.M3UPlaylist;
 import self.me.matchday.model.video.VideoPlaylist;
+import self.me.matchday.model.video.VideoPlaylistRenderer;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,12 +46,16 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.BaseStream;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @Service
 public class VideoStreamingService {
 
   private static final String LOG_TAG = "VideoStreamingService";
 
   private final EventService eventService;
+  private final EventFileSelectorService selectorService;
   private final VideoStreamManager videoStreamManager;
   private final StreamDelayAdviceService delayAdviceService;
   private final VideoStreamLocatorPlaylistService playlistService;
@@ -61,12 +64,14 @@ public class VideoStreamingService {
   @Autowired
   public VideoStreamingService(
       final EventService eventService,
+      final EventFileSelectorService selectorService,
       final VideoStreamManager videoStreamManager,
       final StreamDelayAdviceService delayAdviceService,
       final VideoStreamLocatorPlaylistService playlistService,
       final VideoStreamLocatorService videoStreamLocatorService) {
 
     this.eventService = eventService;
+    this.selectorService = selectorService;
     this.videoStreamManager = videoStreamManager;
     this.delayAdviceService = delayAdviceService;
     this.playlistService = playlistService;
@@ -85,6 +90,20 @@ public class VideoStreamingService {
     return Optional.empty();
   }
 
+  public Optional<VideoPlaylist> getBestVideoStreamPlaylist(
+      @NotNull final String eventId, @NotNull final VideoPlaylistRenderer renderer) {
+
+    final Optional<Event> eventOptional = eventService.fetchById(eventId);
+    return eventOptional
+        .map(
+            event -> {
+              final EventFileSource fileSource = selectorService.getBestFileSource(event);
+              final String fileSrcId = fileSource.getEventFileSrcId();
+              return this.getVideoStreamPlaylist(eventId, fileSrcId, renderer);
+            })
+        .orElse(Optional.empty());
+  }
+
   /**
    * Get the most recent video stream playlist for the given file source
    *
@@ -93,26 +112,87 @@ public class VideoStreamingService {
    *     created
    */
   public Optional<VideoPlaylist> getVideoStreamPlaylist(
-      @NotNull final String eventId, @NotNull final String fileSrcId) {
+      @NotNull final String eventId,
+      @NotNull final String fileSrcId,
+      @NotNull final VideoPlaylistRenderer renderer) {
 
-    // todo - ensure validation happens
-
-    final EventFileSource eventFileSource = validateFileSourceRequest(eventId, fileSrcId);
+    final EventFileSource eventFileSource = getRequestedFileSource(eventId, fileSrcId);
     if (eventFileSource != null) {
       return videoStreamManager
           .getLocalStreamFor(fileSrcId)
-          .map(playlist -> getPlaylistFromLocators(eventId, fileSrcId, playlist))
-          .orElseGet(
-              () -> {
-                // create playlist & asynchronously begin playlist stream
-                final VideoStreamLocatorPlaylist playlist =
-                    videoStreamManager.createVideoStreamFrom(eventFileSource);
-                playlist.getStreamLocators().forEach(videoStreamManager::beginStreaming);
-                return getPlaylistFromLocators(eventId, fileSrcId, playlist);
-              });
+          .map(playlist -> renderPlaylist(eventId, fileSrcId, renderer, playlist))
+          .or(() -> Optional.of(createPlaylist(eventFileSource)));
     }
-    // return "not found"
+    // "not found"
     return Optional.empty();
+  }
+
+  /**
+   * Retrieve the specified file source for the DB, via the Event
+   *
+   * @param eventId ID of the Event for this request
+   * @param fileSrcId ID of the file source for this request
+   * @return True if the event & associated file source were found, otherwise false
+   */
+  private @Nullable EventFileSource getRequestedFileSource(
+      @NotNull final String eventId, @NotNull final String fileSrcId) {
+
+    // Get event from database
+    final Optional<Event> eventOptional = eventService.fetchById(eventId);
+    if (eventOptional.isPresent()) {
+      final Event event = eventOptional.get();
+      return event.getFileSource(fileSrcId);
+    }
+    // not found
+    return null;
+  }
+
+  private @NotNull VideoPlaylist renderPlaylist(
+      @NotNull String eventId,
+      @NotNull String fileSrcId,
+      @NotNull VideoPlaylistRenderer renderer,
+      @NotNull VideoStreamLocatorPlaylist playlist) {
+
+    long waitMillis = 0;
+    String renderedPlaylist = null;
+
+    if (delayAdviceService.isStreamReady(playlist)) {
+      // Create a segment for each playlist entry
+      playlist
+          .getStreamLocators()
+          .forEach(
+              locator -> {
+                final EventFile videoFile = locator.getEventFile();
+                final Long streamLocatorId = locator.getStreamLocatorId();
+                final URI playlistUri =
+                    linkTo(
+                            methodOn(VideoStreamingController.class)
+                                .getVideoPartPlaylist(eventId, fileSrcId, streamLocatorId))
+                        .toUri();
+                final String title = videoFile.getTitle().toString();
+                final double duration = videoFile.getDuration();
+                renderer.addMediaSegment(playlistUri, title, duration);
+              });
+      renderedPlaylist = renderer.renderPlaylist();
+    } else {
+      waitMillis = delayAdviceService.getDelayAdvice(playlist);
+    }
+    return VideoPlaylist.builder().waitMillis(waitMillis).playlist(renderedPlaylist).build();
+  }
+
+  /**
+   * Create playlist & asynchronously begin playlist stream
+   *
+   * @param eventFileSource Video source from which to create playlist
+   * @return The video playlist
+   */
+  private @NotNull VideoPlaylist createPlaylist(@NotNull final EventFileSource eventFileSource) {
+
+    final VideoStreamLocatorPlaylist playlist =
+        videoStreamManager.createVideoStreamFrom(eventFileSource);
+    playlist.getStreamLocators().forEach(videoStreamManager::beginStreaming);
+    final long delayAdvice = delayAdviceService.getDelayAdvice(playlist);
+    return VideoPlaylist.builder().waitMillis(delayAdvice).build();
   }
 
   /**
@@ -126,7 +206,6 @@ public class VideoStreamingService {
   public Optional<String> readPlaylistFile(
       @NotNull final String eventId, @NotNull final String fileSrcId, @NotNull final Long partId) {
 
-    // todo - ensure validation happens at some point!
     Log.i(
         LOG_TAG,
         String.format(
@@ -137,6 +216,25 @@ public class VideoStreamingService {
     final Optional<VideoStreamLocator> locatorOptional =
         videoStreamLocatorService.getStreamLocator(partId);
     return locatorOptional.map(this::readLocatorPlaylist);
+  }
+
+  /**
+   * Read playlist file; it may be concurrently being written to, so we read it reactively
+   *
+   * @param streamLocator The locator pointing to the required playlist file
+   * @return The playlist file as a String or empty
+   */
+  private @Nullable String readLocatorPlaylist(@NotNull final VideoStreamLocator streamLocator) {
+
+    final StringBuilder sb = new StringBuilder();
+    final Path playlistPath = streamLocator.getPlaylistPath();
+    Log.i(LOG_TAG, "Reading playlist from: " + playlistPath);
+
+    final Flux<String> flux =
+        Flux.using(() -> Files.lines(playlistPath), Flux::fromStream, BaseStream::close);
+    flux.doOnNext(s -> sb.append(s).append("\n")).blockLast();
+    final String result = sb.toString();
+    return result.isEmpty() ? null : result;
   }
 
   /**
@@ -154,7 +252,6 @@ public class VideoStreamingService {
       @NotNull final Long partId,
       @NotNull final String segmentId) {
 
-    // todo - ensure validation happens!
     Log.i(
         LOG_TAG,
         String.format(
@@ -210,97 +307,5 @@ public class VideoStreamingService {
       final VideoStreamLocatorPlaylist playlist = playlistOptional.get();
       deleteVideoData(playlist);
     }
-  }
-
-  /**
-   * Read playlist file; it may be concurrently being written to, so we read it reactively
-   *
-   * @param streamLocator The locator pointing to the required playlist file
-   * @return The playlist file as a String or empty
-   */
-  private @Nullable String readLocatorPlaylist(@NotNull final VideoStreamLocator streamLocator) {
-
-    final StringBuilder sb = new StringBuilder();
-    final Path playlistPath = streamLocator.getPlaylistPath();
-    Log.i(LOG_TAG, "Reading playlist from: " + playlistPath);
-
-    final Flux<String> flux =
-        Flux.using(() -> Files.lines(playlistPath), Flux::fromStream, BaseStream::close);
-    flux.doOnNext(s -> sb.append(s).append("\n")).blockLast();
-    final String result = sb.toString();
-    return result.isEmpty() ? null : result;
-  }
-
-  private @NotNull Optional<VideoPlaylist> getPlaylistFromLocators(
-      @NotNull final String eventId,
-      @NotNull final String fileSrcId,
-      @NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
-
-    String playlist = null;
-    long waitMillis = 0;
-
-    if (delayAdviceService.isStreamReady(locatorPlaylist)) {
-      final M3UPlaylist m3uPlaylist = getM3UFromPlaylist(eventId, fileSrcId, locatorPlaylist);
-      playlist = m3uPlaylist.getSimplePlaylist();
-    } else {
-      waitMillis = delayAdviceService.getDelayAdvice(locatorPlaylist);
-    }
-
-    final VideoPlaylist videoPlaylist =
-        VideoPlaylist.builder()
-            .playlist(playlist)
-            .waitMillis(waitMillis)
-            .eventId(eventId)
-            .fileSrcId(fileSrcId)
-            .build();
-    return Optional.of(videoPlaylist);
-  }
-
-  private @NotNull M3UPlaylist getM3UFromPlaylist(
-      @NotNull final String eventId,
-      @NotNull final String fileSrcId,
-      @NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
-
-    // Map to M3U playlist
-    final M3UPlaylist playlist = new M3UPlaylist();
-    locatorPlaylist
-        .getStreamLocators()
-        .forEach(
-            streamLocator -> {
-              try {
-                // Create a segment for each playlist entry
-                final EventFile eventFile = streamLocator.getEventFile();
-                final String title = eventFile.getTitle().toString();
-                final URI playlistUri =
-                    WebMvcLinkBuilder.linkTo(
-                            WebMvcLinkBuilder.methodOn(VideoStreamingController.class)
-                                .getVideoPartPlaylist(
-                                    eventId, fileSrcId, streamLocator.getStreamLocatorId()))
-                        .toUri();
-                playlist.addMediaSegment(playlistUri.toURL(), title, null);
-              } catch (MalformedURLException ignore) {
-              }
-            });
-    return playlist;
-  }
-
-  /**
-   * Ensure valid data has been submitted with request
-   *
-   * @param eventId ID of the Event for this request
-   * @param fileSrcId ID of the file source for this request
-   * @return True if the event & associated file source were found, otherwise false
-   */
-  private @Nullable EventFileSource validateFileSourceRequest(
-      @NotNull final String eventId, @NotNull final String fileSrcId) {
-
-    // Get event from database
-    final Optional<Event> eventOptional = eventService.fetchById(eventId);
-    if (eventOptional.isPresent()) {
-      final Event event = eventOptional.get();
-      return event.getFileSource(fileSrcId);
-    }
-    // Request invalid
-    return null;
   }
 }

@@ -82,6 +82,14 @@ public class VideoStreamLocatorPlaylistService {
 
     // Get list of "best" EventFiles for each event part
     final List<EventFile> playlistFiles = eventFileSelectorService.getPlaylistFiles(fileSource);
+    if (playlistFiles == null || playlistFiles.size() == 0) {
+      final String msg =
+          String.format(
+              "Could not create VideoStreamLocatorPlaylist from file source: %s; has no video files!",
+              fileSource);
+      throw new IllegalArgumentException(msg);
+    }
+
     // Create storage path
     final Path storageLocation = fileStorageLocation.resolve(fileSource.getEventFileSrcId());
     // Create stream playlist

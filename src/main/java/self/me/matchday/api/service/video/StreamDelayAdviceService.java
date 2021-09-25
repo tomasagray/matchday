@@ -109,7 +109,7 @@ public class StreamDelayAdviceService {
       final long pingTime = Duration.between(pingStart, pingEnd).toMillis();
       delayIndex.put(fileServerPlugin, pingTime);
     } catch (IOException e) {
-      // something went wrong; use max as default
+      // something went wrong; use default
       delayIndex.put(fileServerPlugin, timeout);
     }
   }

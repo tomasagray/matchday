@@ -32,12 +32,9 @@ import self.me.matchday.api.resource.VideoPlaylistResource;
 import self.me.matchday.api.resource.VideoPlaylistResource.VideoPlaylistResourceAssembler;
 import self.me.matchday.api.resource.VideoResource;
 import self.me.matchday.api.resource.VideoResource.VideoResourceAssembler;
-import self.me.matchday.api.service.video.MasterPlaylistService;
-import self.me.matchday.api.service.video.VariantPlaylistService;
 import self.me.matchday.api.service.video.VideoStreamingService;
-import self.me.matchday.model.video.M3UPlaylist;
-import self.me.matchday.model.video.MasterM3U;
-import self.me.matchday.util.Log;
+import self.me.matchday.model.video.M3uRenderer;
+import self.me.matchday.model.video.PlsRenderer;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -46,28 +43,21 @@ import java.util.Optional;
 @RequestMapping(value = "/events/event/{eventId}/video")
 public class VideoStreamingController {
 
-  public static final String MEDIA_TYPE_MPEG_URL = "application/x-mpeg-url";
   public static final String MEDIA_TYPE_APPLE_MPEGURL = "application/vnd.apple.mpegurl";
 
   private final VideoStreamingService streamingService;
   private final VideoResourceAssembler resourceAssembler;
   private final VideoPlaylistResourceAssembler playlistResourceAssembler;
-  private final MasterPlaylistService masterPlaylistService;
-  private final VariantPlaylistService variantPlaylistService;
 
   @Autowired
   public VideoStreamingController(
       final VideoStreamingService streamingService,
       final VideoResourceAssembler resourceAssembler,
-      final VideoPlaylistResourceAssembler playlistResourceAssembler,
-      final MasterPlaylistService masterPlaylistService,
-      final VariantPlaylistService variantPlaylistService) {
+      final VideoPlaylistResourceAssembler playlistResourceAssembler) {
 
     this.streamingService = streamingService;
     this.resourceAssembler = resourceAssembler;
     this.playlistResourceAssembler = playlistResourceAssembler;
-    this.masterPlaylistService = masterPlaylistService;
-    this.variantPlaylistService = variantPlaylistService;
   }
 
   @RequestMapping(
@@ -76,7 +66,6 @@ public class VideoStreamingController {
   public ResponseEntity<CollectionModel<VideoResource>> getVideoResources(
       @PathVariable final String eventId) {
 
-    // Set EventID for resource assembler
     resourceAssembler.setEventId(eventId);
     return streamingService
         .fetchEventFileSources(eventId)
@@ -85,35 +74,18 @@ public class VideoStreamingController {
         .orElse(ResponseEntity.notFound().build());
   }
 
+  // todo - update API, make more sense
   @RequestMapping(
       value = "/playlist/master",
       method = RequestMethod.GET,
-      produces = MEDIA_TYPE_MPEG_URL)
-  public ResponseEntity<String> getMasterPlaylist(@PathVariable final String eventId) {
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<VideoPlaylistResource> getMasterPlaylist(
+      @PathVariable final String eventId) {
 
-    return masterPlaylistService
-        .fetchMasterPlaylistForEvent(eventId)
-        .map(MasterM3U::toString)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-  }
-
-  @RequestMapping(
-      value = "/playlist/variant/{fileSrcId}",
-      method = RequestMethod.GET,
-      produces = MEDIA_TYPE_MPEG_URL)
-  public ResponseEntity<String> getVariantPlaylist(
-      @PathVariable final String eventId, @PathVariable final String fileSrcId) {
-
-    Log.i(
-        "VideoStreamingController",
-        String.format(
-            "Getting variant playlist for Event: %s, File Source: %s", eventId, fileSrcId));
-
-    return variantPlaylistService
-        .fetchVariantPlaylist(fileSrcId)
-        .map(M3UPlaylist::toString)
-        .map(ResponseEntity::ok)
+    return streamingService
+        .getBestVideoStreamPlaylist(eventId, new M3uRenderer())
+        .map(playlistResourceAssembler::toModel)
+        .map(resource -> ResponseEntity.accepted().body(resource))
         .orElse(ResponseEntity.notFound().build());
   }
 
@@ -125,23 +97,22 @@ public class VideoStreamingController {
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
     return streamingService
-        .getVideoStreamPlaylist(eventId, fileSrcId)
+        .getVideoStreamPlaylist(eventId, fileSrcId, new M3uRenderer())
         .map(playlistResourceAssembler::toModel)
         .map(resource -> ResponseEntity.accepted().body(resource))
         .orElse(ResponseEntity.notFound().build());
   }
 
-  // todo - re-enable when playlist output refactored
-  /*  @RequestMapping(value = "/stream/{fileSrcId}/playlist.pls", method = RequestMethod.GET)
-  public ResponseEntity<String> getVideoStreamPlsPlaylist(
+  @RequestMapping(value = "/stream/{fileSrcId}/playlist.pls", method = RequestMethod.GET)
+  public ResponseEntity<VideoPlaylistResource> getVideoStreamPlsPlaylist(
       @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
 
     return streamingService
-        .getVideoStreamPlaylist(eventId, fileSrcId)
-        .map(M3UPlaylist::getPlsPlaylist)
-        .map(ResponseEntity::ok)
+        .getVideoStreamPlaylist(eventId, fileSrcId, new PlsRenderer())
+        .map(playlistResourceAssembler::toModel)
+        .map(resource -> ResponseEntity.accepted().body(resource))
         .orElse(ResponseEntity.notFound().build());
-  }*/
+  }
 
   @RequestMapping(
       value = "/stream/{fileSrcId}/{partId}/playlist.m3u8",
