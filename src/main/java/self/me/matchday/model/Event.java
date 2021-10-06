@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -21,11 +21,15 @@ package self.me.matchday.model;
 
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.model.video.VideoFileSource;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A sporting Event; could be a Match (game), highlight show, trophy celebration, group selection,
@@ -36,25 +40,29 @@ import java.util.*;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Event {
 
-  @Id
-  protected String eventId;
+  @Id protected String eventId;
+
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Competition competition;
+
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Season season;
+
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Fixture fixture;
+
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  protected final Set<EventFileSource> fileSources = new HashSet<>();
+  protected final Set<VideoFileSource> fileSources = new HashSet<>();
+
   protected String title;
   protected LocalDateTime date;
 
   /**
    * Encapsulates the file source TreeSet<> logic.
    *
-   * @param fileSources A Collection<> of EventFileSources
+   * @param fileSources A Collection<> of VideoFileSources
    */
-  public void addFileSources(@NotNull final Collection<EventFileSource> fileSources) {
+  public void addFileSources(@NotNull final Collection<VideoFileSource> fileSources) {
     // Add all collection elements to set
     this.fileSources.addAll(fileSources);
   }
@@ -65,11 +73,11 @@ public abstract class Event {
    * @param fileSrcId The ID of the file source
    * @return the requested file source, or null if not found
    */
-  public EventFileSource getFileSource(final @NotNull String fileSrcId) {
+  public VideoFileSource getFileSource(final @NotNull String fileSrcId) {
 
     // Search the collection of file sources for the ID
-    for (EventFileSource fileSrc : fileSources) {
-      if (fileSrc.getEventFileSrcId().equals(fileSrcId)) {
+    for (VideoFileSource fileSrc : fileSources) {
+      if (fileSrc.getFileSrcId().equals(fileSrcId)) {
         return fileSrc;
       }
     }
@@ -85,8 +93,7 @@ public abstract class Event {
 
     // Cast for comparison
     final Event event = (Event) o;
-    return this.getEventId().equals(event.getEventId())
-            && this.getTitle().equals(event.getTitle());
+    return this.getEventId().equals(event.getEventId()) && this.getTitle().equals(event.getTitle());
   }
 
   @Override
@@ -101,18 +108,12 @@ public abstract class Event {
   protected static final DateTimeFormatter EVENT_ID_DATE_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-W");
 
-  /**
-   * Defines default Event sorting order - reverse chronological.
-   */
+  /** Defines default Event sorting order - reverse chronological. */
   public static class EventSorter implements Comparator<Event> {
 
     @Override
     public int compare(@NotNull Event o1, @NotNull Event o2) {
-      return
-          o1
-              .getDate()
-              .compareTo(o2.getDate())
-              * -1;
+      return o1.getDate().compareTo(o2.getDate()) * -1;
     }
   }
 }

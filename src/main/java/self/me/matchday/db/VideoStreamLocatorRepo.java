@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -23,7 +23,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.EventFile;
+import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoStreamLocator;
 
 import java.util.List;
@@ -32,6 +32,6 @@ import java.util.List;
 public interface VideoStreamLocatorRepo extends JpaRepository<VideoStreamLocator, Long> {
 
   @Query(
-      "SELECT vsl FROM VideoStreamLocator vsl WHERE vsl.eventFile = :eventFile ORDER BY vsl.timestamp")
-  List<VideoStreamLocator> getStreamLocatorsFor(@Param("eventFile") EventFile eventFile);
+      "SELECT vsl FROM VideoStreamLocator vsl WHERE vsl.videoFile = :videoFile ORDER BY vsl.timestamp")
+  List<VideoStreamLocator> getStreamLocatorsFor(@Param("videoFile") VideoFile videoFile);
 }

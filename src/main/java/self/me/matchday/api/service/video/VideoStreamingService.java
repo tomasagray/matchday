@@ -27,15 +27,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import self.me.matchday.api.controller.VideoStreamingController;
-import self.me.matchday.api.service.EventFileSelectorService;
 import self.me.matchday.api.service.EventService;
+import self.me.matchday.api.service.VideoFileSelectorService;
 import self.me.matchday.model.Event;
-import self.me.matchday.model.EventFile;
-import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.video.VideoPlaylist;
-import self.me.matchday.model.video.VideoPlaylistRenderer;
-import self.me.matchday.model.video.VideoStreamLocator;
-import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
+import self.me.matchday.model.video.*;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
@@ -55,7 +50,7 @@ public class VideoStreamingService {
   private static final String LOG_TAG = "VideoStreamingService";
 
   private final EventService eventService;
-  private final EventFileSelectorService selectorService;
+  private final VideoFileSelectorService selectorService;
   private final VideoStreamManager videoStreamManager;
   private final StreamDelayAdviceService delayAdviceService;
   private final VideoStreamLocatorPlaylistService playlistService;
@@ -64,7 +59,7 @@ public class VideoStreamingService {
   @Autowired
   public VideoStreamingService(
       final EventService eventService,
-      final EventFileSelectorService selectorService,
+      final VideoFileSelectorService selectorService,
       final VideoStreamManager videoStreamManager,
       final StreamDelayAdviceService delayAdviceService,
       final VideoStreamLocatorPlaylistService playlistService,
@@ -78,7 +73,7 @@ public class VideoStreamingService {
     this.videoStreamLocatorService = videoStreamLocatorService;
   }
 
-  public Optional<Collection<EventFileSource>> fetchEventFileSources(
+  public Optional<Collection<VideoFileSource>> fetchVideoFileSources(
       @NotNull final String eventId) {
 
     final Optional<Event> eventOptional = eventService.fetchById(eventId);
@@ -97,8 +92,8 @@ public class VideoStreamingService {
     return eventOptional
         .map(
             event -> {
-              final EventFileSource fileSource = selectorService.getBestFileSource(event);
-              final String fileSrcId = fileSource.getEventFileSrcId();
+              final VideoFileSource fileSource = selectorService.getBestFileSource(event);
+              final String fileSrcId = fileSource.getFileSrcId();
               return this.getVideoStreamPlaylist(eventId, fileSrcId, renderer);
             })
         .orElse(Optional.empty());
@@ -107,7 +102,7 @@ public class VideoStreamingService {
   /**
    * Get the most recent video stream playlist for the given file source
    *
-   * @param fileSrcId The ID of the EventFileSource
+   * @param fileSrcId The ID of the VideoFileSource
    * @return An Optional containing the playlist, if one was found; empty indicates one is being
    *     created
    */
@@ -116,12 +111,12 @@ public class VideoStreamingService {
       @NotNull final String fileSrcId,
       @NotNull final VideoPlaylistRenderer renderer) {
 
-    final EventFileSource eventFileSource = getRequestedFileSource(eventId, fileSrcId);
-    if (eventFileSource != null) {
+    final VideoFileSource videoFileSource = getRequestedFileSource(eventId, fileSrcId);
+    if (videoFileSource != null) {
       return videoStreamManager
           .getLocalStreamFor(fileSrcId)
           .map(playlist -> renderPlaylist(eventId, fileSrcId, renderer, playlist))
-          .or(() -> Optional.of(createPlaylist(eventFileSource)));
+          .or(() -> Optional.of(createPlaylist(videoFileSource)));
     }
     // "not found"
     return Optional.empty();
@@ -134,7 +129,7 @@ public class VideoStreamingService {
    * @param fileSrcId ID of the file source for this request
    * @return True if the event & associated file source were found, otherwise false
    */
-  private @Nullable EventFileSource getRequestedFileSource(
+  private @Nullable VideoFileSource getRequestedFileSource(
       @NotNull final String eventId, @NotNull final String fileSrcId) {
 
     // Get event from database
@@ -162,7 +157,7 @@ public class VideoStreamingService {
           .getStreamLocators()
           .forEach(
               locator -> {
-                final EventFile videoFile = locator.getEventFile();
+                final VideoFile videoFile = locator.getVideoFile();
                 final Long streamLocatorId = locator.getStreamLocatorId();
                 final URI playlistUri =
                     linkTo(
@@ -183,13 +178,13 @@ public class VideoStreamingService {
   /**
    * Create playlist & asynchronously begin playlist stream
    *
-   * @param eventFileSource Video source from which to create playlist
+   * @param videoFileSource Video source from which to create playlist
    * @return The video playlist
    */
-  private @NotNull VideoPlaylist createPlaylist(@NotNull final EventFileSource eventFileSource) {
+  private @NotNull VideoPlaylist createPlaylist(@NotNull final VideoFileSource videoFileSource) {
 
     final VideoStreamLocatorPlaylist playlist =
-        videoStreamManager.createVideoStreamFrom(eventFileSource);
+        videoStreamManager.createVideoStreamFrom(videoFileSource);
     playlist.getStreamLocators().forEach(videoStreamManager::beginStreaming);
     final long delayAdvice = delayAdviceService.getDelayAdvice(playlist);
     return VideoPlaylist.builder().waitMillis(delayAdvice).build();
@@ -199,7 +194,7 @@ public class VideoStreamingService {
    * Read playlist file from disk and return as a String
    *
    * @param eventId The ID of the Event of this video data
-   * @param fileSrcId The ID of the video data variant (EventFileSource)
+   * @param fileSrcId The ID of the video data variant (VideoFileSource)
    * @param partId Playlist locator ID
    * @return The playlist as a String
    */
@@ -241,7 +236,7 @@ public class VideoStreamingService {
    * Read video segment (.ts) data from disk
    *
    * @param eventId The ID of the Event for this video data
-   * @param fileSrcId The ID of the video variant (EventFileSource)
+   * @param fileSrcId The ID of the video variant (VideoFileSource)
    * @param partId Playlist locator ID
    * @param segmentId The filename of the requested segment (.ts extension assumed)
    * @return The video data as a Resource

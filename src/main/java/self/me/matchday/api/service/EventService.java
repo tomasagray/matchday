@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -22,12 +22,12 @@ package self.me.matchday.api.service;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import self.me.matchday.db.EventFileSrcRepository;
 import self.me.matchday.db.EventRepository;
+import self.me.matchday.db.VideoFileSrcRepository;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
-import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.util.Log;
 
 import java.time.LocalDate;
@@ -43,7 +43,7 @@ public class EventService {
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
   private final EventRepository eventRepository;
-  private final EventFileSrcRepository fileSrcRepository;
+  private final VideoFileSrcRepository fileSrcRepository;
 
   @Autowired
   EventService(final EventRepository eventRepository,
@@ -125,7 +125,7 @@ public class EventService {
     if (isValidEvent(event)) {
       // See if Event already exists in DB
       final Optional<Event> eventOptional = fetchById(event.getEventId());
-      // Merge EventFileSources
+      // Merge VideoFileSources
       eventOptional.ifPresent(value -> event.getFileSources().addAll(value.getFileSources()));
       // Save to DB
       Log.i(LOG_TAG, "Saving event: " + eventRepository.saveAndFlush(event));
@@ -153,33 +153,59 @@ public class EventService {
    */
   private boolean isValidEvent(final Event event) {
 
-    // Criteria
-    boolean titleValid = false,
-        competitionValid = false,
-        dateValid = false;
-    // Minimum date
-    final LocalDateTime MIN_DATE =
-        LocalDateTime.of(LocalDate.ofYearDay(1970, 1), LocalTime.MIN);
+    if (event == null) {
+      reject("Event is null");
+    }
+    // Validate title
+    final String title = event.getTitle();
+    if (!isTitleValid(title)) {
+      reject("title invalid: " + title);
+    }
+    // Validate Competition
+    final Competition competition = event.getCompetition();
+    if (!isValidCompetition(competition)) {
+      reject("invalid competition: " + competition);
+    }
+    // Validate date
+    final LocalDateTime date = event.getDate();
+    if (!isValidDate(date)) {
+      reject("invalid date: " + date);
+    }
+    // Validate video file references
+    final Set<VideoFileSource> fileSources = event.getFileSources();
+    if (!isValidVideoFiles(fileSources)) {
+      reject("no video files!");
+    }
+  }
 
-    if (event != null) {
-      // Validate title
-      final String title = event.getTitle();
-      if (title != null && !("".equals(title))) {
-        titleValid = true;
-      }
-      // Validate Competition
-      final Competition competition = event.getCompetition();
-      if (competition != null) {
-        final String name = competition.getName();
-        if (name != null && !("".equals(name))) {
-          competitionValid = true;
-        }
-      }
-      // Validate date
-      final LocalDateTime date = event.getDate();
-      if (date != null && date.isAfter(MIN_DATE)) {
-        dateValid = true;
-      }
+  private void reject(@NotNull final String message) {
+    throw new IllegalArgumentException("Event rejected; " + message);
+  }
+
+  private boolean isTitleValid(final String title) {
+    return title != null && !("".equals(title));
+  }
+
+  private boolean isValidCompetition(final Competition competition) {
+    if (competition != null) {
+      final String name = competition.getName();
+      return name != null && !("".equals(name));
+    }
+    return false;
+  }
+
+  private boolean isValidDate(final LocalDateTime date) {
+    final LocalDateTime MIN_DATE = LocalDateTime.of(LocalDate.ofYearDay(1970, 1), LocalTime.MIN);
+    return date != null && date.isAfter(MIN_DATE);
+  }
+
+  private boolean isValidVideoFiles(final Collection<VideoFileSource> fileSources) {
+    if (fileSources == null) {
+      return false;
+    }
+    int totalVideoFiles = 0;
+    for (final VideoFileSource fileSource : fileSources) {
+      totalVideoFiles += fileSource.getVideoFiles().size();
     }
 
     // Perform test

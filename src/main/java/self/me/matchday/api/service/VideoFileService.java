@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
-import self.me.matchday.model.EventFile;
+import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.util.Log;
@@ -48,23 +48,23 @@ import java.util.concurrent.Executors;
 
 @Service
 @Transactional
-public class EventFileService {
+public class VideoFileService {
 
-  private static final String LOG_TAG = "EventFileService";
+  private static final String LOG_TAG = "VideoFileService";
   private static final int THREAD_POOL_SIZE = 12;
 
-  // Already refreshing EventFiles
-  private final List<EventFile> lockedEventFiles = new ArrayList<>();
+  // Already refreshing VideoFiles
+  private final List<VideoFile> lockedVideoFiles = new ArrayList<>();
   // Services
   private final ExecutorService executorService;
   private final FileServerService fileServerService;
   private final FFmpegPlugin ffmpegPlugin;
 
   @Autowired
-  public EventFileService(
+  public VideoFileService(
       final FileServerService fileServerService,
       final FFmpegPlugin ffmpegPlugin,
-      final EventFileSelectorService eventFileSelectorService) {
+      final VideoFileSelectorService videoFileSelectorService) {
 
     this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     this.fileServerService = fileServerService;
@@ -72,25 +72,25 @@ public class EventFileService {
   }
 
   /**
-   * Add an EventFile refresh task to the job queue
+   * Add an VideoFile refresh task to the job queue
    *
-   * @param eventFile The EventFile to be refreshed
+   * @param videoFile The VideoFile to be refreshed
    * @param fetchMetadata Whether to pre-fetch file metadata
    * @return A Future representing the refreshed file
    */
-  public EventFile refreshEventFile(@NotNull final EventFile eventFile, final boolean fetchMetadata)
+  public VideoFile refreshVideoFile(@NotNull final VideoFile videoFile, final boolean fetchMetadata)
       throws ExecutionException, InterruptedException {
 
-    if (!shouldRefreshData(eventFile)) {
-      Log.i(LOG_TAG, "EventFile is already fresh: " + eventFile);
-      return eventFile;
+    if (!shouldRefreshData(videoFile)) {
+      Log.i(LOG_TAG, "VideoFile is already fresh: " + videoFile);
+      return videoFile;
     }
     // Skip locked files & already fresh data
-    else if (lockedEventFiles.contains(eventFile)) {
+    else if (lockedVideoFiles.contains(videoFile)) {
       final String message =
           String.format(
-              "Refresh request denied for EventFile: %s; file is locked (already being refreshed?)",
-              eventFile);
+              "Refresh request denied for VideoFile: %s; file is locked (already being refreshed?)",
+              videoFile);
       throw new HttpStatusCodeException(HttpStatus.TOO_MANY_REQUESTS, message) {
         @Override
         public @NotNull HttpStatus getStatusCode() {
@@ -99,112 +99,112 @@ public class EventFileService {
       };
     }
 
-    // Lock EventFile
-    lockedEventFiles.add(eventFile);
+    // Lock VideoFile
+    lockedVideoFiles.add(videoFile);
     // Send each link which needs to be updated to execute in its own thread
-    Log.i(LOG_TAG, "Refreshing remote data for EventFile: " + eventFile);
-    final EventFileRefreshTask refreshTask =
-        EventFileRefreshTask.builder()
+    Log.i(LOG_TAG, "Refreshing remote data for VideoFile: " + videoFile);
+    final VideoFileRefreshTask refreshTask =
+        VideoFileRefreshTask.builder()
             .fileServerService(fileServerService)
             .ffmpegPlugin(ffmpegPlugin)
-            .eventFile(eventFile)
+            .videoFile(videoFile)
             .fetchMetadata(fetchMetadata)
             .build();
 
-    final EventFile refreshedEventFile = executorService.submit(refreshTask).get();
+    final VideoFile refreshedVideoFile = executorService.submit(refreshTask).get();
     // Unlock file & return
-    lockedEventFiles.remove(eventFile);
-    return refreshedEventFile;
+    lockedVideoFiles.remove(videoFile);
+    return refreshedVideoFile;
   }
 
   /**
    * Determine whether the data for the file should be refreshed.
    *
-   * @param eventFile The EventFile with possibly stale data.
+   * @param videoFile The VideoFile with possibly stale data.
    * @return True/false
    */
-  private boolean shouldRefreshData(@NotNull EventFile eventFile) {
+  private boolean shouldRefreshData(@NotNull VideoFile videoFile) {
 
     // Last time this file's data refreshed
-    final Instant lastRefresh = eventFile.getLastRefreshed().toInstant();
+    final Instant lastRefresh = videoFile.getLastRefreshed().toInstant();
     // Time since refresh
     final Duration sinceRefresh = Duration.between(lastRefresh, Instant.now());
     // Get recommended refresh rate
     final Duration refreshRate =
-        fileServerService.getFileServerRefreshRate(eventFile.getExternalUrl());
+        fileServerService.getFileServerRefreshRate(videoFile.getExternalUrl());
     return sinceRefresh.toMillis() > refreshRate.toMillis();
   }
 
   /**
-   * Updates the internal (download) URL of an EventFile, as well as the metadata, if it is null.
-   * Saves updated EventFiles to database.
+   * Updates the internal (download) URL of an VideoFile, as well as the metadata, if it is null.
+   * Saves updated VideoFiles to database.
    */
   @Builder
-  static class EventFileRefreshTask implements Callable<EventFile> {
+  static class VideoFileRefreshTask implements Callable<VideoFile> {
     // todo - refactor as @Async method
     private final FileServerService fileServerService;
     private final FFmpegPlugin ffmpegPlugin;
-    private final EventFile eventFile;
+    private final VideoFile videoFile;
     private final boolean fetchMetadata;
 
-    public EventFileRefreshTask(
+    public VideoFileRefreshTask(
         @NotNull final FileServerService fileServerService,
         @NotNull final FFmpegPlugin ffmpegPlugin,
-        @NotNull final EventFile eventFile,
+        @NotNull final VideoFile videoFile,
         final boolean fetchMetadata) {
 
       this.fileServerService = fileServerService;
       this.ffmpegPlugin = ffmpegPlugin;
-      this.eventFile = eventFile;
+      this.videoFile = videoFile;
       this.fetchMetadata = fetchMetadata;
     }
 
     /**
-     * Gets missing or expired EventFile data and returns a new, complete EventFile
+     * Gets missing or expired VideoFile data and returns a new, complete VideoFile
      *
-     * @return A fully-loaded EventFile
+     * @return A fully-loaded VideoFile
      */
     @SneakyThrows
     @Override
-    public EventFile call() {
+    public VideoFile call() {
 
-      Log.i(LOG_TAG, "Refreshing data for EventFile: " + eventFile);
+      Log.i(LOG_TAG, "Refreshing data for VideoFile: " + videoFile);
       // Fetch remote internal (download) URL
       final Optional<URL> downloadUrl =
-          fileServerService.getDownloadUrl(eventFile.getExternalUrl());
+          fileServerService.getDownloadUrl(videoFile.getExternalUrl());
       if (downloadUrl.isPresent()) {
         // Update remote (internal) URL
         Log.i(
-            LOG_TAG, String.format("Successfully updated remote URL for EventFile: %s", eventFile));
-        eventFile.setInternalUrl(downloadUrl.get());
+            LOG_TAG, String.format("Successfully updated remote URL for VideoFile: %s", videoFile));
+        videoFile.setInternalUrl(downloadUrl.get());
         // Update metadata
         if (fetchMetadata) {
-          setEventFileMetadata();
+          setVideoFileMetadata();
         }
         // Update last refresh
-        eventFile.setLastRefreshed(Timestamp.from(Instant.now()));
+        videoFile.setLastRefreshed(Timestamp.from(Instant.now()));
       } else {
         throw new IOException(
-            String.format("Could not get remote URL for EventFile: %s", eventFile));
+            String.format("Could not get remote URL for VideoFile: %s", videoFile));
       }
-      // Return updated EventFile
-      return eventFile;
+      // Return updated VideoFile
+      return videoFile;
     }
 
     /**
-     * Retrieves video metadata for the EventFile associated with this task.
+     * Retrieves video metadata for the VideoFile associated with this task.
      *
      * @throws IOException If there is an error reading data
      */
-    private void setEventFileMetadata() throws Exception {
+    private void setVideoFileMetadata() throws Exception {
 
       // Update ONLY if metadata is null
-      if (eventFile.getMetadata() == null) {
-        final URI eventFileUri = eventFile.getInternalUrl().toURI();
-        final FFmpegMetadata ffmpegMetadata = ffmpegPlugin.readFileMetadata(eventFileUri);
+      if (videoFile.getMetadata() == null) {
+        final URI videoFileUri = videoFile.getInternalUrl().toURI();
+        final FFmpegMetadata ffmpegMetadata = ffmpegPlugin.readFileMetadata(videoFileUri);
         // Ensure metadata successfully updated
         if (ffmpegMetadata != null) {
-          eventFile.setMetadata(ffmpegMetadata);
+          videoFile.setMetadata(ffmpegMetadata);
         }
       }
     }

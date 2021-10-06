@@ -25,8 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.VideoStreamLocatorRepo;
-import self.me.matchday.model.EventFile;
 import self.me.matchday.model.video.SingleStreamLocator;
+import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.RecursiveDirectoryDeleter;
@@ -75,13 +75,13 @@ public class VideoStreamLocatorService {
   /**
    * Find the latest video stream locator for a given video file
    *
-   * @param eventFile The video file representation
+   * @param videoFile The video file representation
    * @return The most recent stream locator for this video file, or Optional.empty();
    */
-  public Optional<VideoStreamLocator> getStreamLocatorFor(@NotNull final EventFile eventFile) {
+  public Optional<VideoStreamLocator> getStreamLocatorFor(@NotNull final VideoFile videoFile) {
 
     final List<VideoStreamLocator> streamLocators =
-        streamLocatorRepo.getStreamLocatorsFor(eventFile);
+        streamLocatorRepo.getStreamLocatorsFor(videoFile);
     if (streamLocators.isEmpty()) {
       return Optional.empty();
     }
@@ -93,18 +93,17 @@ public class VideoStreamLocatorService {
    * Creates a new VideoStreamLocator and saves it to database.
    *
    * @param storageLocation The Path of the data directory
-   * @param eventFile Video data for the stream
+   * @param videoFile Video data for the stream
    * @return The newly created VideoStreamLocator
    */
   @Transactional
   public VideoStreamLocator createStreamLocator(
-      @NotNull final Path storageLocation, @NotNull final EventFile eventFile) {
+      @NotNull final Path storageLocation, @NotNull final VideoFile videoFile) {
 
     // Create streaming storage path
-    final Path playlistPath =
-        storageLocation.resolve(eventFile.getEventFileId()).resolve(PLAYLIST_NAME);
+    final Path playlistPath = storageLocation.resolve(videoFile.getFileId()).resolve(PLAYLIST_NAME);
     // Create playlist locator
-    final VideoStreamLocator streamLocator = new SingleStreamLocator(playlistPath, eventFile);
+    final VideoStreamLocator streamLocator = new SingleStreamLocator(playlistPath, videoFile);
     // Save locator to database & return
     Log.i(LOG_TAG, "Saving stream locator: " + streamLocatorRepo.saveAndFlush(streamLocator));
     return streamLocator;

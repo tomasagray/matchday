@@ -17,15 +17,15 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model;
+package self.me.matchday.model.video;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.FFmpegMetadataConverter;
 import self.me.matchday.db.converter.TimestampConverter;
+import self.me.matchday.model.MD5String;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 
 import javax.persistence.Column;
@@ -41,13 +41,12 @@ import java.util.regex.Pattern;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@NoArgsConstructor
-public class EventFile implements Comparable<EventFile> {
+public class VideoFile implements Comparable<VideoFile> {
 
   private static double DEFAULT_DURATION = 3012.541956d;
 
   // Fields
-  @Id private String eventFileId;
+  @Id private String fileId;
   private URL externalUrl;
   private EventPartIdentifier title;
 
@@ -61,9 +60,9 @@ public class EventFile implements Comparable<EventFile> {
   @Convert(converter = TimestampConverter.class)
   private Timestamp lastRefreshed = new Timestamp(0L);
 
-  public EventFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
+  public VideoFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
 
-    this.eventFileId = MD5String.fromData(externalUrl);
+    this.fileId = MD5String.fromData(externalUrl);
     this.title = title;
     this.externalUrl = externalUrl;
     this.internalUrl = null;
@@ -71,9 +70,9 @@ public class EventFile implements Comparable<EventFile> {
   }
 
   /**
-   * Returns the duration of this EventFile, in milliseconds.
+   * Returns the duration of this VideoFile, in milliseconds.
    *
-   * @return The duration of this EventFile (millis).
+   * @return The duration of this VideoFile (millis).
    */
   public double getDuration() {
     if (getMetadata() != null && getMetadata().getFormat() != null) {
@@ -89,12 +88,12 @@ public class EventFile implements Comparable<EventFile> {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof EventFile)) {
+    if (!(obj instanceof VideoFile)) {
       return false;
     }
     // Cast
-    final EventFile eventFile = (EventFile) obj;
-    return this.getExternalUrl().equals(eventFile.getExternalUrl());
+    final VideoFile videoFile = (VideoFile) obj;
+    return this.getExternalUrl().equals(videoFile.getExternalUrl());
   }
 
   @Override
@@ -104,7 +103,7 @@ public class EventFile implements Comparable<EventFile> {
   }
 
   @Override
-  public int compareTo(@NotNull EventFile test) {
+  public int compareTo(@NotNull VideoFile test) {
     return this.getTitle().order - test.getTitle().order;
   }
 

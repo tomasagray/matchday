@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -21,7 +21,7 @@ package self.me.matchday.model;
 
 import lombok.Data;
 
-import static self.me.matchday.model.EventFileSource.*;
+import static self.me.matchday.model.video.VideoFileSource.Resolution;
 
 @Data
 public abstract class FileSourceMetadata {

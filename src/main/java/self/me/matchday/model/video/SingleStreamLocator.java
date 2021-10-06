@@ -22,7 +22,6 @@ package self.me.matchday.model.video;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.EventFile;
 
 import javax.persistence.Entity;
 import java.nio.file.Path;
@@ -34,12 +33,12 @@ public class SingleStreamLocator extends VideoStreamLocator {
 
   public SingleStreamLocator() {
     this.playlistPath = null;
-    this.eventFile = null;
+    this.videoFile = null;
   }
 
-  public SingleStreamLocator(@NotNull final Path playlistPath, @NotNull final EventFile eventFile) {
+  public SingleStreamLocator(@NotNull final Path playlistPath, @NotNull final VideoFile videoFile) {
     this.playlistPath = playlistPath;
-    this.eventFile = eventFile;
+    this.videoFile = videoFile;
   }
 
   @Override

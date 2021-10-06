@@ -68,7 +68,7 @@ public class VideoStreamingController {
 
     resourceAssembler.setEventId(eventId);
     return streamingService
-        .fetchEventFileSources(eventId)
+        .fetchVideoFileSources(eventId)
         .map(resourceAssembler::toCollectionModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());

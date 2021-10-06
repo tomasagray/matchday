@@ -23,7 +23,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.PathConverter;
-import self.me.matchday.model.EventFile;
 
 import javax.persistence.*;
 import java.nio.file.Path;
@@ -42,7 +41,7 @@ public abstract class VideoStreamLocator {
   @EqualsAndHashCode.Exclude protected final Instant timestamp = Instant.now();
 
   @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
-  protected EventFile eventFile;
+  protected VideoFile videoFile;
 
   @OneToOne(cascade = CascadeType.ALL)
   protected TaskState state = TaskState.builder().build();
@@ -57,6 +56,6 @@ public abstract class VideoStreamLocator {
   public String toString() {
     return String.format(
         "<<VideoStreamLocator>>(streamLocatorId=[%s], playlistPath=[%s], timestamp=[%s], VideoFile=[%s], state=[%s])",
-        streamLocatorId, playlistPath, timestamp, eventFile, state);
+        streamLocatorId, playlistPath, timestamp, videoFile, state);
   }
 }

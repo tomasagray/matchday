@@ -27,7 +27,6 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.PathConverter;
-import self.me.matchday.model.EventFileSource;
 
 import javax.persistence.*;
 import java.nio.file.Path;
@@ -42,7 +41,7 @@ import java.util.Objects;
 public class VideoStreamLocatorPlaylist {
 
   @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
-  private final EventFileSource fileSource;
+  private final VideoFileSource fileSource;
 
   @OneToMany(cascade = CascadeType.ALL)
   @LazyCollection(LazyCollectionOption.FALSE)
@@ -63,7 +62,7 @@ public class VideoStreamLocatorPlaylist {
   }
 
   public VideoStreamLocatorPlaylist(
-      @NotNull final EventFileSource fileSource, @NotNull final Path storageLocation) {
+      @NotNull final VideoFileSource fileSource, @NotNull final Path storageLocation) {
     this.fileSource = fileSource;
     this.storageLocation = storageLocation;
   }

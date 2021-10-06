@@ -25,10 +25,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.api.service.EventFileSelectorService;
+import self.me.matchday.api.service.VideoFileSelectorService;
 import self.me.matchday.db.VideoStreamLocatorPlaylistRepo;
-import self.me.matchday.model.EventFile;
-import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.util.Log;
@@ -45,7 +45,7 @@ public class VideoStreamLocatorPlaylistService {
 
   private final VideoStreamLocatorPlaylistRepo playlistRepo;
   private final VideoStreamLocatorService videoStreamLocatorService;
-  private final EventFileSelectorService eventFileSelectorService;
+  private final VideoFileSelectorService videoFileSelectorService;
 
   @Value("${video-resources.file-storage-location}")
   private Path fileStorageLocation;
@@ -54,11 +54,11 @@ public class VideoStreamLocatorPlaylistService {
   public VideoStreamLocatorPlaylistService(
       final VideoStreamLocatorPlaylistRepo playlistRepo,
       final VideoStreamLocatorService videoStreamLocatorService,
-      final EventFileSelectorService eventFileSelectorService) {
+      final VideoFileSelectorService videoFileSelectorService) {
 
     this.playlistRepo = playlistRepo;
     this.videoStreamLocatorService = videoStreamLocatorService;
-    this.eventFileSelectorService = eventFileSelectorService;
+    this.videoFileSelectorService = videoFileSelectorService;
   }
 
   /**
@@ -73,15 +73,15 @@ public class VideoStreamLocatorPlaylistService {
   /**
    * Create a playlist of video streams. Directories for video data will be automatically created.
    *
-   * @param fileSource The EventFileSource from which the stream will be created
+   * @param fileSource The VideoFileSource from which the stream will be created
    * @return The playlist of video streams
    */
   @Transactional
   public VideoStreamLocatorPlaylist createVideoStreamPlaylist(
-      @NotNull final EventFileSource fileSource) {
+      @NotNull final VideoFileSource fileSource) {
 
-    // Get list of "best" EventFiles for each event part
-    final List<EventFile> playlistFiles = eventFileSelectorService.getPlaylistFiles(fileSource);
+    // Get list of "best" VideoFiles for each event part
+    final List<VideoFile> playlistFiles = videoFileSelectorService.getPlaylistFiles(fileSource);
     if (playlistFiles == null || playlistFiles.size() == 0) {
       final String msg =
           String.format(
@@ -91,17 +91,17 @@ public class VideoStreamLocatorPlaylistService {
     }
 
     // Create storage path
-    final Path storageLocation = fileStorageLocation.resolve(fileSource.getEventFileSrcId());
+    final Path storageLocation = fileStorageLocation.resolve(fileSource.getFileSrcId());
     // Create stream playlist
     final VideoStreamLocatorPlaylist streamPlaylist =
         new VideoStreamLocatorPlaylist(fileSource, storageLocation);
 
     // Create locator for each file stream
     playlistFiles.forEach(
-        eventFile -> {
+        videoFile -> {
           // Create storage path for each task
           final VideoStreamLocator playlistLocator =
-              videoStreamLocatorService.createStreamLocator(storageLocation, eventFile);
+              videoStreamLocatorService.createStreamLocator(storageLocation, videoFile);
           // Add  playlist locator to VideoStreamPlaylist
           streamPlaylist.addStreamLocator(playlistLocator);
         });
@@ -113,7 +113,7 @@ public class VideoStreamLocatorPlaylistService {
   /**
    * Retrieve the most recently created playlist from the database
    *
-   * @param fileSrcId The ID of the EventFileSource this playlist was created from
+   * @param fileSrcId The ID of the VideoFileSource this playlist was created from
    * @return An Optional containing the most recent playlist
    */
   public Optional<VideoStreamLocatorPlaylist> getVideoStreamPlaylistFor(

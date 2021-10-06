@@ -25,9 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import self.me.matchday.api.service.EventFileService;
-import self.me.matchday.model.EventFile;
-import self.me.matchday.model.EventFileSource;
+import self.me.matchday.api.service.VideoFileService;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegLogger;
@@ -51,24 +51,24 @@ class VideoStreamManager {
 
   private final VideoStreamLocatorPlaylistService playlistService;
   private final VideoStreamLocatorService locatorService;
-  private final EventFileService eventFileService;
+  private final VideoFileService videoFileService;
   private final FFmpegPlugin ffmpegPlugin;
 
   @Autowired
   public VideoStreamManager(
       final VideoStreamLocatorPlaylistService playlistService,
       final VideoStreamLocatorService locatorService,
-      final EventFileService eventFileService,
+      final VideoFileService videoFileService,
       final FFmpegPlugin ffmpegPlugin) {
 
     this.playlistService = playlistService;
     this.locatorService = locatorService;
-    this.eventFileService = eventFileService;
+    this.videoFileService = videoFileService;
     this.ffmpegPlugin = ffmpegPlugin;
   }
 
   public VideoStreamLocatorPlaylist createVideoStreamFrom(
-      @NotNull final EventFileSource fileSource) {
+      @NotNull final VideoFileSource fileSource) {
     return playlistService.createVideoStreamPlaylist(fileSource);
   }
 
@@ -103,12 +103,12 @@ class VideoStreamManager {
   @Async("VideoStreamExecutor")
   public void beginStreaming(@NotNull final VideoStreamLocator streamLocator) {
     try {
-      final EventFile eventFile = streamLocator.getEventFile();
+      final VideoFile videoFile = streamLocator.getVideoFile();
       final Path playlistPath = streamLocator.getPlaylistPath();
 
       updateLocatorTaskState(streamLocator, JobStatus.STARTED, 0.0);
-      final EventFile refreshedEventFile = eventFileService.refreshEventFile(eventFile, false);
-      final URI videoDataLink = refreshedEventFile.getInternalUrl().toURI();
+      final VideoFile refreshedVideoFile = videoFileService.refreshVideoFile(videoFile, false);
+      final URI videoDataLink = refreshedVideoFile.getInternalUrl().toURI();
       updateLocatorTaskState(streamLocator, JobStatus.BUFFERING, 0.0);
 
       // Start stream

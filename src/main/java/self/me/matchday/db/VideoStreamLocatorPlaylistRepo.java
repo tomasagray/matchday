@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -32,7 +32,9 @@ public interface VideoStreamLocatorPlaylistRepo
     extends JpaRepository<VideoStreamLocatorPlaylist, Long> {
 
   @Query(
-      "SELECT vspl FROM VideoStreamLocatorPlaylist vspl WHERE vspl.fileSource.eventFileSrcId = :fileSrcId ORDER BY vspl.timestamp")
+      "SELECT vslp FROM VideoStreamLocatorPlaylist vslp "
+          + "WHERE vslp.fileSource.fileSrcId = :fileSrcId "
+          + "ORDER BY vslp.timestamp")
   List<VideoStreamLocatorPlaylist> fetchPlaylistsForFileSrc(
       @Param("fileSrcId") final String fileSrcId);
 }

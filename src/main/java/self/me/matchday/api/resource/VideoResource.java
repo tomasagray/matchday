@@ -31,8 +31,8 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
-import self.me.matchday.model.EventFileSource;
-import self.me.matchday.model.EventFileSource.Resolution;
+import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.video.VideoFileSource.Resolution;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -64,7 +64,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 
   @Component
   public static class VideoResourceAssembler
-      extends RepresentationModelAssemblerSupport<EventFileSource, VideoResource> {
+      extends RepresentationModelAssemblerSupport<VideoFileSource, VideoResource> {
 
     @Getter @Setter private String eventId;
 
@@ -73,11 +73,11 @@ public class VideoResource extends RepresentationModel<VideoResource> {
     }
 
     @Override
-    public @NotNull VideoResource toModel(@NotNull EventFileSource entity) {
+    public @NotNull VideoResource toModel(@NotNull VideoFileSource entity) {
 
       final VideoResource videoResource = instantiateModel(entity);
 
-      final String fileSrcId = entity.getEventFileSrcId();
+      final String fileSrcId = entity.getFileSrcId();
       final Resolution resolution = entity.getResolution();
 
       // Add metadata
@@ -116,7 +116,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 
     @Override
     public @NotNull CollectionModel<VideoResource> toCollectionModel(
-        @NotNull Iterable<? extends EventFileSource> entities) {
+        @NotNull Iterable<? extends VideoFileSource> entities) {
 
       final CollectionModel<VideoResource> videoResources = super.toCollectionModel(entities);
 

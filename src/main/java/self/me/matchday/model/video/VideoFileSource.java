@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,14 +17,14 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model;
+package self.me.matchday.model.video;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import self.me.matchday.model.FileSourceMetadata;
+import self.me.matchday.model.MD5String;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -38,10 +38,12 @@ import java.util.regex.Pattern;
  * stream and its origin.
  */
 @Entity
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Builder
 @AllArgsConstructor
-public class EventFileSource implements Comparable<EventFileSource> {
+public class VideoFileSource implements Comparable<VideoFileSource> {
 
   /** Video resolution classes */
   public enum Resolution {
@@ -108,14 +110,14 @@ public class EventFileSource implements Comparable<EventFileSource> {
     }
   }
 
-  @Id private final String eventFileSrcId;
+  @Id private final String fileSrcId;
   private String channel;
   private String source;
   private String approximateDuration;
   private String languages;
 
-  @OneToMany(targetEntity = EventFile.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private final List<EventFile> eventFiles = new ArrayList<>();
+  @OneToMany(targetEntity = VideoFile.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private final List<VideoFile> videoFiles = new ArrayList<>();
   // Media metadata
   private Resolution resolution;
   private String mediaContainer;
@@ -126,7 +128,11 @@ public class EventFileSource implements Comparable<EventFileSource> {
   private int frameRate;
   private int audioChannels;
 
-  public static EventFileSource createEventFileSource(
+  public VideoFileSource() {
+    this.fileSrcId = null;
+  }
+
+  public static VideoFileSource createVideoFileSource(
       @NotNull final FileSourceMetadata metadata, @NotNull final String eventId) {
 
     // Extract metadata
@@ -161,8 +167,8 @@ public class EventFileSource implements Comparable<EventFileSource> {
             audioChannels);
 
     // Create file source & return
-    return EventFileSource.builder()
-        .eventFileSrcId(id)
+    return VideoFileSource.builder()
+        .fileSrcId(id)
         .channel(channel)
         .languages(languages)
         .resolution(resolution)
@@ -178,34 +184,30 @@ public class EventFileSource implements Comparable<EventFileSource> {
         .build();
   }
 
-  public EventFileSource() {
-    this.eventFileSrcId = null;
-  }
-
   public String toString() {
 
     return String.format(
         "%s (%s) - %s, %s files",
-        getChannel(), getResolution(), getLanguages(), getEventFiles().size());
+        getChannel(), getResolution(), getLanguages(), getVideoFiles().size());
   }
 
   @Override
   public boolean equals(final Object o) {
-    if (!(o instanceof EventFileSource)) {
+    if (!(o instanceof VideoFileSource)) {
       return false;
     }
     // Cast for comparison
-    final EventFileSource eventFileSource = (EventFileSource) o;
+    final VideoFileSource videoFileSource = (VideoFileSource) o;
     return this.getChannel() != null
-        && this.getChannel().equals(eventFileSource.getChannel())
+        && this.getChannel().equals(videoFileSource.getChannel())
         && this.getLanguages() != null
-        && this.getLanguages().equals(eventFileSource.getLanguages())
+        && this.getLanguages().equals(videoFileSource.getLanguages())
         && this.getResolution() != null
-        && this.getResolution().equals(eventFileSource.getResolution());
+        && this.getResolution().equals(videoFileSource.getResolution());
   }
 
   @Override
-  public int compareTo(@NotNull EventFileSource entity) {
+  public int compareTo(@NotNull VideoFileSource entity) {
 
     // Null resolutions are less-than by definition
     if (getResolution() == null || entity.getResolution() == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -20,8 +20,6 @@
 package self.me.matchday.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.video.VideoFileSource;
 
-public interface EventFileSrcRepository extends JpaRepository<EventFileSource, String> {
-
-}
+public interface VideoFileSrcRepository extends JpaRepository<VideoFileSource, String> {}

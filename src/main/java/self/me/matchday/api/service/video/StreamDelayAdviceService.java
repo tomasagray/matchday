@@ -123,7 +123,7 @@ public class StreamDelayAdviceService {
   private long getPingTime(@NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
 
     return locatorPlaylist.getStreamLocators().stream()
-        .map(locator -> locator.getEventFile().getExternalUrl())
+        .map(locator -> locator.getVideoFile().getExternalUrl())
         .findFirst()
         .map(fileServerService::getEnabledPluginForUrl)
         .map(delayIndex::get)

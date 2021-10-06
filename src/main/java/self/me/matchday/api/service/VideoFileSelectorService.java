@@ -23,9 +23,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import self.me.matchday.model.Event;
-import self.me.matchday.model.EventFile;
-import self.me.matchday.model.EventFile.EventPartIdentifier;
-import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFile.EventPartIdentifier;
+import self.me.matchday.model.video.VideoFileSource;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,7 +34,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class EventFileSelectorService {
+public class VideoFileSelectorService {
 
   /**
    * Get the "best" file source, sorted by: language -> bitrate -> resolution
@@ -42,54 +42,54 @@ public class EventFileSelectorService {
    * @param event The event containing the file sources
    * @return The "best" file source
    */
-  public EventFileSource getBestFileSource(@NotNull final Event event) {
+  public VideoFileSource getBestFileSource(@NotNull final Event event) {
 
     // sort file sources
-    final ArrayList<EventFileSource> fileSources = new ArrayList<>(event.getFileSources());
+    final ArrayList<VideoFileSource> fileSources = new ArrayList<>(event.getFileSources());
     fileSources.sort(
-        Comparator.comparing(EventFileSource::getResolution)
-            .thenComparing(EventFileSource::getBitrate)
-            .thenComparing(EventFileSource::getLanguages));
+        Comparator.comparing(VideoFileSource::getResolution)
+            .thenComparing(VideoFileSource::getBitrate)
+            .thenComparing(VideoFileSource::getLanguages));
     // todo - get "preferred" language instead of alphabetical sort ^
     // get top result
     return fileSources.get(0);
   }
 
   /**
-   * Get the best version of each EventFile for this EventFileSource, and return them in the correct
+   * Get the best version of each VideoFile for this VideoFileSource, and return them in the correct
    * order.
    *
    * @param fileSource The source of video data for this Event
-   * @return The "best" versions of each EventFile
+   * @return The "best" versions of each VideoFile
    */
-  public List<EventFile> getPlaylistFiles(@NotNull final EventFileSource fileSource) {
+  public List<VideoFile> getPlaylistFiles(@NotNull final VideoFileSource fileSource) {
 
-    // Sort EventFiles by part
-    final LinkedMultiValueMap<EventPartIdentifier, EventFile> eventParts =
+    // Sort VideoFiles by part
+    final LinkedMultiValueMap<EventPartIdentifier, VideoFile> eventParts =
         new LinkedMultiValueMap<>();
     fileSource
-        .getEventFiles()
-        .forEach(eventFile -> eventParts.add(eventFile.getTitle(), eventFile));
+        .getVideoFiles()
+        .forEach(videoFile -> eventParts.add(videoFile.getTitle(), videoFile));
 
     // Get best version of each part
     return eventParts.values().stream()
-        .map(this::getBestEventFile)
+        .map(this::getBestVideoFile)
         .sorted()
         .collect(Collectors.toList());
   }
 
   /**
-   * Given a List of EventFiles which all represent the same portion of the same event, get the
-   * "best" version. Best is determined by: Does the EventFile have an internal URL? ... more to
+   * Given a List of VideoFiles which all represent the same portion of the same event, get the
+   * "best" version. Best is determined by: Does the VideoFile have an internal URL? ... more to
    * come
    *
-   * @param eventFiles A List of EventFile versions
+   * @param videoFiles A List of VideoFile versions
    * @return The "best" version
    */
-  private @NotNull EventFile getBestEventFile(@NotNull final List<EventFile> eventFiles) {
+  private @NotNull VideoFile getBestVideoFile(@NotNull final List<VideoFile> videoFiles) {
 
-    final Optional<EventFile> eventFileOptional =
-        eventFiles.stream()
+    final Optional<VideoFile> videoFileOptional =
+        videoFiles.stream()
             .min(
                 (ev1, ev2) -> {
                   // todo - include file server differentiation
@@ -104,8 +104,8 @@ public class EventFileSelectorService {
                   }
                 });
     // Validation should have occurred upstream
-    assert eventFileOptional.isPresent();
+    assert videoFileOptional.isPresent();
     // Return "best" event file option
-    return eventFileOptional.get();
+    return videoFileOptional.get();
   }
 }
