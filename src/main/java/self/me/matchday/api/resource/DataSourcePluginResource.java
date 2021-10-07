@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -35,7 +35,6 @@ import self.me.matchday.model.Event;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -58,7 +57,7 @@ public class DataSourcePluginResource extends RepresentationModel<DataSourcePlug
   @Component
   public static class DataSourcePluginResourceAssembler
       extends RepresentationModelAssemblerSupport<
-          DataSourcePlugin<Stream<Event>>, DataSourcePluginResource> {
+          DataSourcePlugin<Event>, DataSourcePluginResource> {
 
     private final DataSourceService dataSourceService;
 
@@ -69,7 +68,7 @@ public class DataSourcePluginResource extends RepresentationModel<DataSourcePlug
 
     @Override
     public @NotNull DataSourcePluginResource toModel(
-        @NotNull final DataSourcePlugin<Stream<Event>> plugin) {
+        @NotNull final DataSourcePlugin<Event> plugin) {
 
       // Determine if enabled
       final boolean pluginEnabled = dataSourceService.isPluginEnabled(plugin.getPluginId());
@@ -89,7 +88,7 @@ public class DataSourcePluginResource extends RepresentationModel<DataSourcePlug
 
     @Override
     public @NotNull CollectionModel<DataSourcePluginResource> toCollectionModel(
-        @NotNull Iterable<? extends DataSourcePlugin<Stream<Event>>> plugins) {
+        @NotNull Iterable<? extends DataSourcePlugin<Event>> plugins) {
 
       final CollectionModel<DataSourcePluginResource> pluginResources =
           super.toCollectionModel(plugins);

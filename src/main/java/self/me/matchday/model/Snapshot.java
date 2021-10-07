@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -19,28 +19,23 @@
 
 package self.me.matchday.model;
 
-import java.time.Instant;
-import java.util.function.Function;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
+
+import java.time.Instant;
+import java.util.stream.Stream;
 
 @Getter
 public class Snapshot<T> {
 
   private final Instant timestamp;
-  private final T data;
+  private final Stream<T> data;
 
-  public Snapshot(T data) {
-    this.data = data;
-    this.timestamp = Instant.now();
+  public Snapshot(Stream<T> data) {
+    this(data, Instant.now());
   }
-  // Copy constructor
-  public Snapshot(T data, Instant timestamp) {
+
+  public Snapshot(Stream<T> data, Instant timestamp) {
     this.data = data;
     this.timestamp = timestamp;
-  }
-
-  public <U> Snapshot<U> map(@NotNull final Function<T, U> mapper) {
-    return new Snapshot<>(mapper.apply(data));
   }
 }

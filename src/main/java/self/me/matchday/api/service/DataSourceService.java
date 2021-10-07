@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -34,20 +34,19 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Service
 public class DataSourceService {
 
   private static final String LOG_TAG = "DataSourceService";
 
-  @Getter private final Set<DataSourcePlugin<Stream<Event>>> dataSourcePlugins;
-  @Getter private final Set<DataSourcePlugin<Stream<Event>>> enabledPlugins = new HashSet<>();
+  @Getter private final Set<DataSourcePlugin<Event>> dataSourcePlugins;
+  @Getter private final Set<DataSourcePlugin<Event>> enabledPlugins = new HashSet<>();
   private final EventService eventService;
 
   @Autowired
   DataSourceService(
-      @NotNull final Set<DataSourcePlugin<Stream<Event>>> dataSourcePlugins,
+      @NotNull final Set<DataSourcePlugin<Event>> dataSourcePlugins,
       @NotNull final EventService eventService) {
 
     this.dataSourcePlugins = dataSourcePlugins;
@@ -68,7 +67,7 @@ public class DataSourceService {
     enabledPlugins.forEach(
         plugin -> {
           try {
-            final Snapshot<Stream<Event>> snapshot = plugin.getSnapshot(snapshotRequest);
+            final Snapshot<Event> snapshot = plugin.getSnapshot(snapshotRequest);
             // Save Snapshot data to database
             snapshot.getData().forEach(eventService::saveEvent);
 
@@ -91,8 +90,7 @@ public class DataSourceService {
    * @param pluginId The ID of the requested plugin
    * @return An Optional which may contain the requested plugin
    */
-  public Optional<DataSourcePlugin<Stream<Event>>> getDataSourcePlugin(
-      @NotNull final UUID pluginId) {
+  public Optional<DataSourcePlugin<Event>> getDataSourcePlugin(@NotNull final UUID pluginId) {
 
     return dataSourcePlugins.stream()
         .filter(plugin -> pluginId.equals(plugin.getPluginId()))
@@ -110,14 +108,16 @@ public class DataSourceService {
     Log.i(LOG_TAG, "Attempting to enable plugin: " + pluginId);
 
     // Find requested plugin
-    final Optional<DataSourcePlugin<Stream<Event>>> pluginOptional =
+    final Optional<DataSourcePlugin<Event>> pluginOptional =
         dataSourcePlugins.stream()
             .filter(plugin -> pluginId.equals(plugin.getPluginId()))
             .findFirst();
     if (pluginOptional.isPresent()) {
       // Plugin found; enable
-      final boolean added = enabledPlugins.add(pluginOptional.get());
-      Log.i(LOG_TAG, String.format("Successfully enabled plugin: %s? %s", pluginId, added));
+      final DataSourcePlugin<Event> plugin = pluginOptional.get();
+      final boolean added = enabledPlugins.add(plugin);
+      Log.i(
+          LOG_TAG, String.format("Successfully enabled plugin: %s? %s", plugin.getTitle(), added));
       return added;
     } else {
       Log.i(LOG_TAG, "Could not find plugin with ID: " + pluginId);
@@ -136,12 +136,13 @@ public class DataSourceService {
     Log.i(LOG_TAG, "Attempting to disable plugin: " + pluginId);
 
     // Find the requested plugin
-    final Optional<DataSourcePlugin<Stream<Event>>> pluginOptional =
+    final Optional<DataSourcePlugin<Event>> pluginOptional =
         enabledPlugins.stream().filter(plugin -> pluginId.equals(plugin.getPluginId())).findFirst();
     if (pluginOptional.isPresent()) {
       // Remove from enabled plugins
-      final boolean removed = enabledPlugins.remove(pluginOptional.get());
-      Log.i(LOG_TAG, String.format("Disabled plugin: %s? %s", pluginId, removed));
+      final DataSourcePlugin<Event> plugin = pluginOptional.get();
+      final boolean removed = enabledPlugins.remove(plugin);
+      Log.i(LOG_TAG, String.format("Disabled plugin: %s? %s", plugin.getTitle(), removed));
       return removed;
     } else {
       Log.i(LOG_TAG, "Could not find plugin with ID: " + pluginId);

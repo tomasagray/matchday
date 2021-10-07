@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -36,7 +36,6 @@ import self.me.matchday.util.Log;
 
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping(value = "/data-sources")
@@ -81,8 +80,7 @@ public class DataSourceController {
   public CollectionModel<DataSourcePluginResource> getAllPlugins() {
 
     // Retrieve all plugins from service
-    final Set<DataSourcePlugin<Stream<Event>>> dataSourcePlugins =
-        dataSourceService.getDataSourcePlugins();
+    final Set<DataSourcePlugin<Event>> dataSourcePlugins = dataSourceService.getDataSourcePlugins();
     return pluginResourceAssembler.toCollectionModel(dataSourcePlugins);
   }
 
