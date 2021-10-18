@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -27,9 +27,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-/**
- * Class to handle logging functionality.
- */
+/** Class to handle logging functionality. */
 public final class Log {
 
   private enum Level {
@@ -61,17 +59,19 @@ public final class Log {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
       // indent newlines
-      String logMsg = msg.replaceAll("\\n", "\n\t");
+      String logMsg = null;
+      if (msg != null) {
+        logMsg = msg.replaceAll("\\n", "\n\t");
+      }
       // Prepare timestamp
       LocalDateTime dateTime = LocalDateTime.ofInstant(timestamp, ZoneId.systemDefault());
       final String date = dateTime.format(DateTimeFormatter.ISO_DATE);
       final String time = dateTime.format(DateTimeFormatter.ofPattern("hh:mm:ss.SSS"));
       // Holder for text output
       StringBuilder sb = new StringBuilder();
-      sb
-          .append(date)
+      sb.append(date)
           .append(" ")
           .append(time)
           .append("  <")
@@ -215,7 +215,8 @@ public final class Log {
     System.out.println(logEntry);
   }
 
-  private static void print_error(@NotNull final LogEntry logEntry, @NotNull final Throwable throwable) {
+  private static void print_error(
+      @NotNull final LogEntry logEntry, @NotNull final Throwable throwable) {
     System.out.println(logEntry);
     throwable.printStackTrace();
   }

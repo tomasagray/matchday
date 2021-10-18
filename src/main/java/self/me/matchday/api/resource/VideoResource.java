@@ -86,7 +86,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
       videoResource.languages = entity.getLanguages();
       videoResource.resolution = (resolution != null) ? resolution.toString() : null;
       videoResource.mediaContainer = entity.getMediaContainer();
-      videoResource.bitrate = entity.getBitrate();
+      videoResource.bitrate = entity.getVideoBitrate();
       videoResource.frameRate = entity.getFrameRate();
       videoResource.videoCodec = entity.getVideoCodec();
       videoResource.audioCodec = entity.getAudioCodec();

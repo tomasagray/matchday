@@ -21,17 +21,14 @@ package self.me.matchday.api.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.video.VideoFile;
-import self.me.matchday.model.video.VideoFile.EventPartIdentifier;
 import self.me.matchday.model.video.VideoFileSource;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class VideoFileSelectorService {
@@ -48,7 +45,7 @@ public class VideoFileSelectorService {
     final ArrayList<VideoFileSource> fileSources = new ArrayList<>(event.getFileSources());
     fileSources.sort(
         Comparator.comparing(VideoFileSource::getResolution)
-            .thenComparing(VideoFileSource::getBitrate)
+            .thenComparing(VideoFileSource::getVideoBitrate)
             .thenComparing(VideoFileSource::getLanguages));
     // todo - get "preferred" language instead of alphabetical sort ^
     // get top result
@@ -64,6 +61,9 @@ public class VideoFileSelectorService {
    */
   public List<VideoFile> getPlaylistFiles(@NotNull final VideoFileSource fileSource) {
 
+    // todo - reimplement this
+    return new ArrayList<>(fileSource.getVideoFiles().get(0).values());
+    /*
     // Sort VideoFiles by part
     final LinkedMultiValueMap<EventPartIdentifier, VideoFile> eventParts =
         new LinkedMultiValueMap<>();
@@ -75,7 +75,7 @@ public class VideoFileSelectorService {
     return eventParts.values().stream()
         .map(this::getBestVideoFile)
         .sorted()
-        .collect(Collectors.toList());
+        .collect(Collectors.toList());*/
   }
 
   /**
