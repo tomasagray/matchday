@@ -19,7 +19,7 @@
 
 package self.me.matchday.model;
 
-import lombok.Data;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.video.VideoFileSource;
 
@@ -35,15 +35,27 @@ import java.util.Set;
  * A sporting Event; could be a Match (game), highlight show, trophy celebration, group selection,
  * or ... ?
  */
-@Data
+@Getter
+@Setter
+@ToString
+// @RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Event {
+public class Event {
 
   @Id protected String eventId;
 
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Competition competition;
+
+  @ManyToOne(cascade = CascadeType.MERGE)
+  protected Team homeTeam;
+
+  @ManyToOne(cascade = CascadeType.MERGE)
+  protected Team awayTeam;
 
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Season season;

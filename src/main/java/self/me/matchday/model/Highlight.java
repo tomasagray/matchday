@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 public class Highlight extends Event implements Serializable {
 
   public Highlight() {
+    super();
     this.eventId = MD5String.generate();
   }
 

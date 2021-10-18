@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,15 +17,15 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.bloggerparser;
+package self.me.matchday.db;
 
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.EventFileSource;
+import org.springframework.data.jpa.repository.JpaRepository;
+import self.me.matchday.model.DataSource;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface EventFileSourceParser {
+public interface DataSourceRepository extends JpaRepository<DataSource, Long> {
 
-  List<EventFileSource> getEventFileSources(@NotNull final Event event, @NotNull final String html);
+  List<DataSource> findDataSourcesByPluginId(UUID pluginId);
 }

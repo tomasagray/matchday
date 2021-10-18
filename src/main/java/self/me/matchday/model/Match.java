@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -58,6 +58,7 @@ public class Match extends Event implements Serializable {
 
   // Default constructor
   public Match() {
+    super();
     this.eventId = MD5String.generate();
   }
 
@@ -75,31 +76,39 @@ public class Match extends Event implements Serializable {
     this.date = date;
     this.season = season;
     this.fixture = fixture;
-    this.eventId =
-        MD5String.fromData(homeTeam, awayTeam, competition, date, season, fixture);
+    this.eventId = MD5String.fromData(homeTeam, awayTeam, competition, date, season, fixture);
   }
 
   @NotNull
   @Override
   public String getTitle() {
 
-    return
-        competition
-          + ": "
-          + homeTeam
-          + " vs. "
-          + awayTeam
-          + ((fixture != null) ? ", " + fixture : "");
+    return competition
+        + ": "
+        + homeTeam
+        + " vs. "
+        + awayTeam
+        + ((fixture != null) ? ", " + fixture : "");
   }
 
   @NotNull
   @Override
   public String toString() {
     String str =
-        "Competition: " + getCompetition() +
-            ", " + "Season: " + getSeason() + ", " + "Teams: " + getHomeTeam() +
-            " vs. " + getAwayTeam() +
-            ", " + "Fixture: " + getFixture() + ", ";
+        "Competition: "
+            + getCompetition()
+            + ", "
+            + "Season: "
+            + getSeason()
+            + ", "
+            + "Teams: "
+            + getHomeTeam()
+            + " vs. "
+            + getAwayTeam()
+            + ", "
+            + "Fixture: "
+            + getFixture()
+            + ", ";
     if (date != null) {
       str += "Date: " + DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).format(getDate());
     } else {
@@ -108,9 +117,7 @@ public class Match extends Event implements Serializable {
     return str;
   }
 
-  /**
-   * Builder class for Matches
-   */
+  /** Builder class for Matches */
   public static class MatchBuilder {
 
     // Match components

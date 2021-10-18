@@ -17,27 +17,39 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource;
+package self.me.matchday.model;
 
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Snapshot;
-import self.me.matchday.model.SnapshotRequest;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import self.me.matchday.db.converter.UriConverter;
 import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
-import self.me.matchday.plugin.Plugin;
 
-import java.io.IOException;
+import javax.persistence.*;
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
-public interface DataSourcePlugin<T> extends Plugin {
+@Getter
+@Setter
+@ToString
+@Entity
+@RequiredArgsConstructor
+public abstract class DataSource {
 
-  Snapshot<T> getAllSnapshots(@NotNull final SnapshotRequest request) throws IOException;
+  @Convert(converter = UriConverter.class)
+  protected final URI uri;
 
-  Snapshot<T> getSnapshot(
-      @NotNull final SnapshotRequest request, @NotNull final DataSource dataSource)
-      throws IOException;
+  @ManyToMany(targetEntity = VideoSourceMetadataPatternKit.class, fetch = FetchType.EAGER)
+  protected final List<VideoSourceMetadataPatternKit> metadataPatterns;
 
-  DataSource addDataSource(
-      @NotNull final URI uri, @NotNull final List<VideoSourceMetadataPatternKit> metadataPatterns);
+  protected final UUID pluginId;
+  @Id @GeneratedValue private Long id;
+
+  public DataSource() {
+    this.uri = null;
+    this.metadataPatterns = null;
+    this.pluginId = null;
+  }
 }

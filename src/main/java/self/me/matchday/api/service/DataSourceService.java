@@ -67,7 +67,7 @@ public class DataSourceService {
     enabledPlugins.forEach(
         plugin -> {
           try {
-            final Snapshot<Event> snapshot = plugin.getSnapshot(snapshotRequest);
+            final Snapshot<Event> snapshot = plugin.getAllSnapshots(snapshotRequest);
             // Save Snapshot data to database
             snapshot.getData().forEach(eventService::saveEvent);
 

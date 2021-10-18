@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,17 +17,22 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.blogger;
+package self.me.matchday.db.converter;
 
-/**
- * Indicates this particular Blogger post could not be understood by the Post parser.
- */
-public class InvalidBloggerPostException extends RuntimeException {
-  public InvalidBloggerPostException(String msg, RuntimeException e) {
-    super(msg, e);
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
+import java.util.regex.Pattern;
+
+@Converter
+public class PatternConverter implements AttributeConverter<Pattern, String> {
+
+  @Override
+  public String convertToDatabaseColumn(Pattern attribute) {
+    return attribute != null ? attribute.toString() : null;
   }
 
-  public InvalidBloggerPostException(String msg) {
-    super(msg);
+  @Override
+  public Pattern convertToEntityAttribute(String dbData) {
+    return dbData != null ? Pattern.compile(dbData) : null;
   }
 }

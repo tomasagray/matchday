@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,22 +17,22 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.blogger.parser;
+package self.me.matchday.db.converter;
 
-import self.me.matchday.plugin.datasource.blogger.BloggerPost;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
+import java.net.URI;
 
-import java.util.regex.Pattern;
+@Converter
+public class UriConverter implements AttributeConverter<URI, String> {
 
-public interface BloggerPostBuilder {
+  @Override
+  public String convertToDatabaseColumn(URI attribute) {
+    return (attribute == null) ? null : attribute.toString();
+  }
 
-    Pattern bloggerIdPattern = Pattern.compile("^tag:blogger.com,1999:blog-(\\d+)$");
-    Pattern postIdPattern = Pattern.compile("^tag:blogger.com,1999:blog-(\\d+).post-(\\d+)$");
-
-    /**
-     * Create a <b>BloggerPost</b>
-     *
-     * @return A fully parsed BloggerPost object.
-     */
-    BloggerPost getBloggerPost();
-
+  @Override
+  public URI convertToEntityAttribute(String dbData) {
+    return (dbData == null) ? null : URI.create(dbData);
+  }
 }

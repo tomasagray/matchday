@@ -20,6 +20,8 @@
 package self.me.matchday.model;
 
 import lombok.Getter;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.stream.Stream;
@@ -29,6 +31,11 @@ public class Snapshot<T> {
 
   private final Instant timestamp;
   private final Stream<T> data;
+
+  @Contract("_ -> new")
+  public static <T> @NotNull Snapshot<T> of(@NotNull Stream<T> data) {
+    return new Snapshot<>(data);
+  }
 
   public Snapshot(Stream<T> data) {
     this(data, Instant.now());

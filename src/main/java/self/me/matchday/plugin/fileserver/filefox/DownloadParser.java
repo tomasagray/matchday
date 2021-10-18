@@ -68,6 +68,7 @@ public class DownloadParser {
       final FileFoxPage.DirectDownload directDownload = (FileFoxPage.DirectDownload) ddlPage;
       return Optional.of(directDownload.getDdlUrl());
     }
+    // todo - don't use optional, throw exceptions
     return Optional.empty();
   }
 }
