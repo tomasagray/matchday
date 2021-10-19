@@ -32,8 +32,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
+import self.me.matchday.model.FileServerUser;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
-import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;

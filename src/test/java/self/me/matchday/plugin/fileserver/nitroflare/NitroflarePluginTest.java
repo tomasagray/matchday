@@ -19,7 +19,6 @@
 
 package self.me.matchday.plugin.fileserver.nitroflare;
 
-import org.apache.logging.log4j.util.Strings;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +31,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.NetscapeCookiesService;
-import self.me.matchday.plugin.fileserver.FileServerUser;
+import self.me.matchday.model.FileServerUser;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -81,10 +80,8 @@ class NitroflarePluginTest {
 
     // Read test cookie data
     final String cookieData =
-        Strings.join(
-            ResourceFileReader.readTextResource(
-                NitroflarePluginTest.class, "nitroflare-cookies.txt"),
-            '\n');
+        ResourceFileReader.readTextResource(NitroflarePluginTest.class, "nitroflare-cookies.txt");
+    assertThat(cookieData).isNotNull();
     // Parse cookie data
     NitroflarePluginTest.testCookies = netscapeCookiesService.parseNetscapeCookies(cookieData);
   }

@@ -35,8 +35,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
-import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 import java.io.BufferedReader;
