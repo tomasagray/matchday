@@ -107,6 +107,18 @@ class VideoStreamingServiceTest {
     testDataCreator.deleteTestEvent(testMatch);
   }
 
+  @NotNull
+  private static VideoFileSource getTestFileSource() {
+
+    AtomicReference<VideoFileSource> atomicFileSource = new AtomicReference<>();
+    final Set<VideoFileSource> fileSources = testMatch.getFileSources();
+    fileSources.stream().findFirst().ifPresent(atomicFileSource::set);
+    final VideoFileSource testFileSource = atomicFileSource.get();
+
+    assertThat(testFileSource).isNotNull();
+    return testFileSource;
+  }
+
   @Test
   @Order(1)
   @DisplayName("Validate retrieval of file sources for a given Event")

@@ -30,12 +30,12 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
 import self.me.matchday.api.service.FileServerService;
-import self.me.matchday.model.EventFileSource;
+import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.video.StreamJobState.JobStatus;
 import self.me.matchday.model.video.TaskListState;
+import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-import self.me.matchday.plugin.fileserver.FileServerUser;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
