@@ -26,10 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.*;
 import self.me.matchday.model.*;
-import self.me.matchday.model.video.SingleStreamLocator;
-import self.me.matchday.model.video.VideoStreamLocator;
-import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-import self.me.matchday.plugin.fileserver.FileServerUser;
+import self.me.matchday.model.video.*;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -38,11 +35,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static self.me.matchday.model.EventFileSource.Resolution.R_1080p;
+import static self.me.matchday.model.video.VideoFile.EventPartIdentifier.*;
+import static self.me.matchday.model.video.VideoFileSource.Resolution.R_1080p;
 
 @Component
 public class TestDataCreator {
@@ -56,15 +55,10 @@ public class TestDataCreator {
   static {
     try {
       GMAN_HTML =
-          String.join(
-              " ",
-              ResourceFileReader.readTextResource(
-                  TestDataCreator.class, "gman_sample_page_20210416.html"));
+          ResourceFileReader.readTextResource(
+              TestDataCreator.class, "gman_sample_page_20210416.html");
       ZKF_JSON =
-          String.join(
-              "",
-              ResourceFileReader.readTextResource(
-                  TestDataCreator.class, "zkf_sample_20210416.json"));
+          ResourceFileReader.readTextResource(TestDataCreator.class, "zkf_sample_20210416.json");
       NITROFLARE_DL_URL = new URL("https://www.nitroflare.com/");
 
     } catch (IOException e) {
@@ -77,7 +71,7 @@ public class TestDataCreator {
   private final HighlightRepository highlightRepository;
   private final CompetitionRepository competitionRepository;
   private final TeamRepository teamRepository;
-  private final EventFileSrcRepository fileSrcRepository;
+  private final VideoFileSrcRepository fileSrcRepository;
   private final FileServerUserRepo userRepo;
   private final VideoStreamLocatorPlaylistRepo locatorPlaylistRepo;
   private final VideoStreamLocatorRepo streamLocatorRepo;
@@ -89,7 +83,7 @@ public class TestDataCreator {
       @NotNull final HighlightRepository highlightRepository,
       @NotNull final CompetitionRepository competitionRepository,
       @NotNull final TeamRepository teamRepository,
-      @NotNull final EventFileSrcRepository fileSrcRepository,
+      @NotNull final VideoFileSrcRepository fileSrcRepository,
       @NotNull final FileServerUserRepo userRepo,
       @NotNull final VideoStreamLocatorPlaylistRepo locatorPlaylistRepo,
       @NotNull final VideoStreamLocatorRepo locatorRepo) {
@@ -107,7 +101,7 @@ public class TestDataCreator {
 
   // ================ EVENTS ======================
   public @NotNull Match createTestMatch() {
-    // Create & save test match & EventFileSource
+    // Create & save test match & VideoFileSource
     final Competition testCompetition = createTestCompetition();
     final Team testTeam = createTestTeam();
     final Match testMatch =
@@ -121,7 +115,7 @@ public class TestDataCreator {
             .build();
 
     // Create file source & event files
-    final EventFileSource testFileSource = createTestEventFileSource();
+    final VideoFileSource testFileSource = createTestVideoFileSource();
     testMatch.getFileSources().add(testFileSource);
 
     Log.i(LOG_TAG, "Created test Event: " + testMatch);
@@ -164,70 +158,81 @@ public class TestDataCreator {
     return teamRepository.saveAndFlush(team);
   }
 
-  public @NotNull EventFileSource createTestEventFileSource() {
+  public @NotNull VideoFileSource createTestVideoFileSource() {
 
-    final EventFileSource fileSource =
-        EventFileSource.builder()
-            .eventFileSrcId(MD5String.generate())
+    final int fileSetCount = 1;
+
+    final List<VideoFilePack> videoFilePacks = createTestVideoFiles(fileSetCount);
+    final VideoFileSource fileSource =
+        VideoFileSource.builder()
+            .fileSrcId(MD5String.generate())
             .channel("Event Service Test Channel")
             .resolution(R_1080p)
             .languages("English")
-            .bitrate(8_000L)
+            .videoBitrate(8_000L)
+            .videoFilePacks(videoFilePacks)
             .fileSize(FileSize.ofGigabytes(8))
             .build();
-    fileSource.getEventFiles().addAll(createTestEventFiles());
     return fileSrcRepository.saveAndFlush(fileSource);
   }
 
-  public void deleteEventFileSource(@NotNull final EventFileSource fileSource) {
-    Log.i(LOG_TAG, "Deleting EventFileSource: " + fileSource);
+  public void deleteVideoFileSource(@NotNull final VideoFileSource fileSource) {
+    Log.i(LOG_TAG, "Deleting VideoFileSource: " + fileSource);
     fileSrcRepository.delete(fileSource);
   }
 
-  public @NotNull List<EventFile> createTestEventFiles() {
+  public @NotNull List<VideoFilePack> createTestVideoFiles(final int count) {
 
-    URL preMatchUrl = getPreMatchUrl();
-    URL firstHalfUrl = getFirstHalfUrl();
-    URL secondHalfUrl = getSecondHalfUrl();
-    URL postMatchUrl = getPostMatchUrl();
+    List<VideoFilePack> videoFiles = new ArrayList<>();
 
-    assertThat(preMatchUrl).isNotNull();
-    assertThat(firstHalfUrl).isNotNull();
-    assertThat(secondHalfUrl).isNotNull();
-    assertThat(postMatchUrl).isNotNull();
+    for (int i = 0; i < count; ++i) {
+      URL preMatchUrl = getPreMatchUrl();
+      URL firstHalfUrl = getFirstHalfUrl();
+      URL secondHalfUrl = getSecondHalfUrl();
+      URL postMatchUrl = getPostMatchUrl();
 
-    final EventFile preMatch = new EventFile(EventFile.EventPartIdentifier.PRE_MATCH, preMatchUrl);
-    final EventFile firstHalf =
-        new EventFile(EventFile.EventPartIdentifier.FIRST_HALF, firstHalfUrl);
-    final EventFile secondHalf =
-        new EventFile(EventFile.EventPartIdentifier.SECOND_HALF, secondHalfUrl);
-    final EventFile postMatch =
-        new EventFile(EventFile.EventPartIdentifier.POST_MATCH, postMatchUrl);
+      assertThat(preMatchUrl).isNotNull();
+      assertThat(firstHalfUrl).isNotNull();
+      assertThat(secondHalfUrl).isNotNull();
+      assertThat(postMatchUrl).isNotNull();
 
-    return List.of(preMatch, firstHalf, secondHalf, postMatch);
+      final VideoFile preMatch = new VideoFile(PRE_MATCH, preMatchUrl);
+      final VideoFile firstHalf = new VideoFile(FIRST_HALF, firstHalfUrl);
+      final VideoFile secondHalf = new VideoFile(SECOND_HALF, secondHalfUrl);
+      final VideoFile postMatch = new VideoFile(POST_MATCH, postMatchUrl);
+      final VideoFilePack pack = new VideoFilePack();
+      pack.put(preMatch);
+      pack.put(firstHalf);
+      pack.put(secondHalf);
+      pack.put(postMatch);
+      videoFiles.add(pack);
+    }
+    return videoFiles;
   }
 
   @Transactional
   public @NotNull VideoStreamLocatorPlaylist createStreamLocatorPlaylist() {
 
-    final EventFileSource fileSource = createTestEventFileSource();
+    final VideoFileSource fileSource = createTestVideoFileSource();
     final Path locatorPath = Path.of("C:\\Users\\Public\\Matchday\\testing");
     final VideoStreamLocatorPlaylist playlist =
         new VideoStreamLocatorPlaylist(fileSource, locatorPath);
-    final List<EventFile> eventFiles = fileSource.getEventFiles();
-    for (final EventFile eventFile : eventFiles) {
-      final VideoStreamLocator streamLocator = createStreamLocator(eventFile);
-      playlist.addStreamLocator(streamLocator);
-    }
+    final VideoFilePack videoFiles = fileSource.getVideoFilePacks().get(0);
+    videoFiles.forEach(
+        (title, file) -> {
+          final VideoStreamLocator streamLocator = createStreamLocator(file);
+          playlist.addStreamLocator(streamLocator);
+        });
+
     final VideoStreamLocatorPlaylist locatorPlaylist = locatorPlaylistRepo.saveAndFlush(playlist);
     Log.i(LOG_TAG, "Created VideoStreamLocatorPlaylist:\n" + locatorPlaylist);
     return locatorPlaylist;
   }
 
   @Transactional
-  public @NotNull VideoStreamLocator createStreamLocator(final EventFile eventFile) {
+  public @NotNull VideoStreamLocator createStreamLocator(final VideoFile videoFile) {
     final VideoStreamLocator locator = new SingleStreamLocator();
-    locator.setEventFile(eventFile);
+    locator.setVideoFile(videoFile);
     final VideoStreamLocator streamLocator = streamLocatorRepo.saveAndFlush(locator);
     Log.i(LOG_TAG, "Created VideoStreamLocator: " + streamLocator);
     return streamLocator;
