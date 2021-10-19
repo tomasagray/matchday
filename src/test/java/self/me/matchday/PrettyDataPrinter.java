@@ -76,10 +76,10 @@ public class PrettyDataPrinter {
     return String.format("File Source:%n--------%n%s%n%s", fileSrc, videoFiles);
   }
 
-  public static String getPrintableVideos(@NotNull VideoFilePack fileMap) {
+  public static String getPrintableVideos(@NotNull VideoFilePack filePack) {
 
     final StringBuilder sb = new StringBuilder();
-    fileMap.forEach((title, videoFile) -> sb.append(videoFile).append("\n"));
+    filePack.stream().sorted().forEach((videoFile) -> sb.append(videoFile).append("\n"));
     return String.format("Video File Collection:%n%s%n", sb);
   }
 }

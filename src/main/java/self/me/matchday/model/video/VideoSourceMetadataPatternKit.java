@@ -23,6 +23,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.db.converter.CaseInsensitivePatternConverter;
 import self.me.matchday.db.converter.PatternConverter;
 
 import javax.persistence.*;
@@ -105,6 +106,9 @@ public class VideoSourceMetadataPatternKit {
 
     @Convert(converter = PatternConverter.class)
     private Pattern videoFileUrlRegex;
+
+    @Convert(converter = CaseInsensitivePatternConverter.class)
+    private Pattern eventPartIdentifierRegex;
 
     private int channel;
     private int resolution;

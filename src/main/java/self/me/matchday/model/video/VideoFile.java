@@ -35,7 +35,6 @@ import javax.persistence.Id;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 @Entity
 @Getter
@@ -104,74 +103,30 @@ public class VideoFile implements Comparable<VideoFile> {
 
   @Override
   public int compareTo(@NotNull VideoFile test) {
-    return this.getTitle().order - test.getTitle().order;
+    return this.getTitle().compareTo(test.getTitle());
   }
 
   /** Event part identifiers */
   public enum EventPartIdentifier {
     // todo - remove patterns, order
 
-    DEFAULT("", "", 0),
-    PRE_MATCH("Pre-Match", "^[Pp][Rr][Ee][- ][Mm][Aa][Tt][Cc][Hh]$", 1),
-    FIRST_HALF("1st Half", "1 ?[Ss][Tt] [Hh][Aa][Ll][Ff]", 2),
-    SECOND_HALF("2nd Half", "2 ?[Nn][Dd] [Hh][Aa][Ll][Ff]", 3),
-    EXTRA_TIME("Extra-Time/Penalties", "^[Ee][Xx][Tt][Rr][Aa][- ][Tt][Ii][Mm][Ee]", 4),
-    TROPHY_CEREMONY("Trophy Ceremony", "^[Tt][Rr][Oo][Pp][Hh][Yy]", 5),
-    POST_MATCH("Post-Match", "^[Pp][Oo][Ss][Tt][- ][Mm][Aa][Tt][Cc][Hh]$", 6);
+    DEFAULT(""),
+    PRE_MATCH("Pre-Match"),
+    FIRST_HALF("1st Half"),
+    SECOND_HALF("2nd Half"),
+    EXTRA_TIME("Extra-Time/Penalties"),
+    TROPHY_CEREMONY("Trophy Ceremony"),
+    POST_MATCH("Post-Match");
 
     private final String name;
-    private final Pattern pattern;
-    private final int order;
 
-    EventPartIdentifier(@NotNull String name, @NotNull String pattern, int order) {
+    EventPartIdentifier(@NotNull String name) {
       this.name = name;
-      this.pattern = Pattern.compile(pattern);
-      this.order = order;
-    }
-
-    public int getOrder() {
-      return this.order;
     }
 
     @Override
     public String toString() {
       return this.name;
-    }
-
-    /**
-     * Determines if the given String corresponds to an enumerated Event part identifier.
-     *
-     * @param str The test String
-     * @return True / false.
-     */
-    public static boolean isPartIdentifier(@NotNull String str) {
-      return PRE_MATCH.pattern.matcher(str).find()
-          || FIRST_HALF.pattern.matcher(str).find()
-          || SECOND_HALF.pattern.matcher(str).find()
-          || EXTRA_TIME.pattern.matcher(str).find()
-          || TROPHY_CEREMONY.pattern.matcher(str).find()
-          || POST_MATCH.pattern.matcher(str).find();
-    }
-
-    /**
-     * Factory method to convert a String to an enumerated Event part identifier.
-     *
-     * @param str The String to be converted.
-     * @return The enumerated value, or <b>DEFAULT</b> if the given String does not match any
-     *     values.
-     */
-    public static EventPartIdentifier fromString(@NotNull String str) {
-      // If the given String doesn't match
-      EventPartIdentifier result = DEFAULT;
-
-      for (EventPartIdentifier partIdentifier : EventPartIdentifier.values()) {
-        if (partIdentifier.pattern.matcher(str).matches()) {
-          result = partIdentifier;
-          break;
-        }
-      }
-
-      return result;
     }
   }
 }

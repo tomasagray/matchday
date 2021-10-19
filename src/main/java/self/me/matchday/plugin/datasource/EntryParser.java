@@ -40,10 +40,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -203,7 +200,8 @@ public class EntryParser {
         .forEach(
             link -> {
               try {
-                final EventPartIdentifier title = findPartTitle(link);
+                final EventPartIdentifier title =
+                    findPartTitle(link, patternKit.getEventPartIdentifierRegex());
                 final String href = link.attr("href");
                 final URL url = new URL(href);
                 final VideoFile videoFile = new VideoFile(title, url);
@@ -286,13 +284,37 @@ public class EntryParser {
     return Arrays.stream(data.split("\\.")).mapToInt(Integer::parseInt).sum();
   }
 
-  private EventPartIdentifier findPartTitle(@NotNull Element link) {
+  private EventPartIdentifier findPartTitle(@NotNull Element link, @NotNull Pattern partIdRegex) {
 
     return link.previousElementSiblings().stream()
-        .filter(sibling -> EventPartIdentifier.isPartIdentifier(sibling.text()))
-        .map(sibling -> EventPartIdentifier.fromString(sibling.text()))
+        .map(Element::text)
+        .map(text -> getPartIdentifier(text, partIdRegex))
+        .filter(Objects::nonNull)
         .findFirst()
         .orElse(EventPartIdentifier.DEFAULT);
+  }
+
+  private EventPartIdentifier getPartIdentifier(
+      @NotNull final String text, @NotNull Pattern partRegex) {
+
+    final Matcher matcher = partRegex.matcher(text);
+    EventPartIdentifier result = null;
+
+    if (matcher.find()) {
+      final String partIdData = matcher.group(1).toLowerCase(Locale.ROOT);
+      if (partIdData.contains("pre")) {
+        result = EventPartIdentifier.PRE_MATCH;
+      } else if (partIdData.contains("1st") || partIdData.contains("first")) {
+        result = EventPartIdentifier.FIRST_HALF;
+      } else if (partIdData.contains("2nd") || partIdData.contains("second")) {
+        result = EventPartIdentifier.SECOND_HALF;
+      } else if (partIdData.contains("post")) {
+        result = EventPartIdentifier.POST_MATCH;
+      } else if (partIdData.contains("trophy")) {
+        result = EventPartIdentifier.TROPHY_CEREMONY;
+      }
+    }
+    return result;
   }
 
   public static class PatternKitAdapter {

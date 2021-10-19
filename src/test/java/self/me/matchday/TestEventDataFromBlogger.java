@@ -56,8 +56,8 @@ public class TestEventDataFromBlogger {
 
   static {
     try {
-      html = getFreshHtml();
-      //      html = getStaleHtml();
+      //      html = getFreshHtml();
+      html = getStaleHtml();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -65,7 +65,7 @@ public class TestEventDataFromBlogger {
 
   public static @NotNull String getStaleHtml() throws IOException {
 
-    final String dataLocation = "gman_liverpool.html";
+    final String dataLocation = "blogger_html_sample2.html";
     Log.i(LOG_TAG, "Reading test HTML data from: " + dataLocation);
     final String data =
         ResourceFileReader.readTextResource(TestEventDataFromBlogger.class, dataLocation);
@@ -122,6 +122,7 @@ public class TestEventDataFromBlogger {
     return Map.of("WithFixture", patternKit1, "NoFixture", patternKit2);
   }
 
+  // TODO: extract patterns
   public static FileSourceMetadataPatternKit createFileSourcePatternKit() {
 
     final Pattern fileSourcePattern =
@@ -134,10 +135,13 @@ public class TestEventDataFromBlogger {
                 + "Release[\\w\\s]*:? [HhDd]* (\\d+[pi])");
     final Pattern videoFileUrlRegex =
         Pattern.compile("^http[s]?://[\\w.]*filefox.cc/[\\w]+/[\\w-_]*.(mkv|ts)");
+    final Pattern eventPartIdentifierRegex =
+        Pattern.compile("(Pre-|Post-|1st|First|2nd|Second|Trophy)", Pattern.CASE_INSENSITIVE);
 
     return FileSourceMetadataPatternKit.builder()
         .fileSourceMetadataRegex(fileSourcePattern)
         .videoFileUrlRegex(videoFileUrlRegex)
+        .eventPartIdentifierRegex(eventPartIdentifierRegex)
         .channel(1)
         .source(2)
         .languages(3)
