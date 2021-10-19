@@ -205,7 +205,7 @@ public class EventService {
     }
     int totalVideoFiles = 0;
     for (final VideoFileSource fileSource : fileSources) {
-      totalVideoFiles += fileSource.getVideoFiles().size();
+      totalVideoFiles += fileSource.getVideoFilePacks().size();
     }
 
     // Perform test

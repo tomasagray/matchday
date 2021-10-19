@@ -23,13 +23,10 @@ import lombok.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import self.me.matchday.model.video.VideoFile.EventPartIdentifier;
 
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -82,18 +79,6 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
     }
 
     /**
-     * Determines if the supplied String corresponds to an enumerated video resolution.
-     *
-     * @param str The test String
-     * @return True / false.
-     */
-    public static boolean isResolution(@NotNull String str) {
-      return Arrays.stream(Resolution.values())
-          .map(resolution -> resolution.pattern.matcher(str))
-          .anyMatch(Matcher::matches);
-    }
-
-    /**
      * Factory method to return an enumerated video resolution from a given String.
      *
      * @param str The String to be converted.
@@ -116,8 +101,8 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   private String approximateDuration;
   private String languages;
 
-  @OneToMany(targetEntity = VideoFile.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private List<Map<EventPartIdentifier, VideoFile>> videoFiles;
+  @OneToMany(targetEntity = VideoFilePack.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private List<VideoFilePack> videoFilePacks;
 
   // Media metadata
   private Resolution resolution;

@@ -144,6 +144,6 @@ public class StreamDelayAdviceService {
       final int stepToComplete,
       final long pingTime,
       final long ffmpegOverhead) {
-    return numStreams * stepToComplete * pingTime + ffmpegOverhead;
+    return stepToComplete * pingTime + ffmpegOverhead;
   }
 }

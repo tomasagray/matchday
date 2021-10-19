@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 
 import java.util.ArrayList;
@@ -59,10 +60,10 @@ public class VideoFileSelectorService {
    * @param fileSource The source of video data for this Event
    * @return The "best" versions of each VideoFile
    */
-  public List<VideoFile> getPlaylistFiles(@NotNull final VideoFileSource fileSource) {
+  public VideoFilePack getPlaylistFiles(@NotNull final VideoFileSource fileSource) {
 
     // todo - reimplement this
-    return new ArrayList<>(fileSource.getVideoFiles().get(0).values());
+    return fileSource.getVideoFilePacks().get(0);
     /*
     // Sort VideoFiles by part
     final LinkedMultiValueMap<EventPartIdentifier, VideoFile> eventParts =

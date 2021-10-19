@@ -28,7 +28,8 @@ import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -47,14 +48,6 @@ import java.time.format.FormatStyle;
 public class Match extends Event implements Serializable {
 
   private static final long serialVersionUID = 123456L; // for cross-platform serialization
-
-  @ManyToOne(targetEntity = Team.class, cascade = CascadeType.MERGE)
-  @JoinColumn(name = "home_team_id")
-  private Team homeTeam;
-
-  @ManyToOne(targetEntity = Team.class, cascade = CascadeType.MERGE)
-  @JoinColumn(name = "away_team_id")
-  private Team awayTeam;
 
   // Default constructor
   public Match() {

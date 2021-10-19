@@ -392,26 +392,6 @@ public class FileServerService {
   // === Downloads ===
 
   /**
-   * Determines if any registered plugin (active or not) can accept the given URL
-   *
-   * @param url The URL under question
-   * @return True/false
-   */
-  public boolean isVideoLink(@NotNull final URL url) {
-
-    // Use each plugin to examine URL
-    final List<FileServerPlugin> fileServerPlugins = getFileServerPlugins();
-    for (FileServerPlugin plugin : fileServerPlugins) {
-      if (plugin.acceptsUrl(url)) {
-        // A plugin matches this URL; it's an acceptable file link
-        return true;
-      }
-    }
-    // No plugin will accept URL
-    return false;
-  }
-
-  /**
    * Wraps the getDownloadUrl() method of each File Server, and routes the request to the
    * appropriate one.
    *

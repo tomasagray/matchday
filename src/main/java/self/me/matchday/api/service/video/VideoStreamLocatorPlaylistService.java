@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.service.VideoFileSelectorService;
 import self.me.matchday.db.VideoStreamLocatorPlaylistRepo;
-import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
@@ -81,7 +81,7 @@ public class VideoStreamLocatorPlaylistService {
       @NotNull final VideoFileSource fileSource) {
 
     // Get list of "best" VideoFiles for each event part
-    final List<VideoFile> playlistFiles = videoFileSelectorService.getPlaylistFiles(fileSource);
+    final VideoFilePack playlistFiles = videoFileSelectorService.getPlaylistFiles(fileSource);
     if (playlistFiles == null || playlistFiles.size() == 0) {
       final String msg =
           String.format(
@@ -98,7 +98,7 @@ public class VideoStreamLocatorPlaylistService {
 
     // Create locator for each file stream
     playlistFiles.forEach(
-        videoFile -> {
+        (title, videoFile) -> {
           // Create storage path for each task
           final VideoStreamLocator playlistLocator =
               videoStreamLocatorService.createStreamLocator(storageLocation, videoFile);

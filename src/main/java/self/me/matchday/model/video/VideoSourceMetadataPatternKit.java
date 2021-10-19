@@ -19,102 +19,105 @@
 
 package self.me.matchday.model.video;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.Hibernate;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import self.me.matchday.db.converter.PatternConverter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 @Getter
 @Setter
-@ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Entity
 public class VideoSourceMetadataPatternKit {
 
-  @Id @GeneratedValue private Long id;
+  @Id @GeneratedValue Long id;
+  @OneToOne private EventMetadataPatternKit eventMetadataPatternKit;
+  @OneToMany private List<FileSourceMetadataPatternKit> fileSourceMetadataPatternKits;
 
-  // event metadata
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern competition;
+  private VideoSourceMetadataPatternKit(
+      @NotNull EventMetadataPatternKit eventKit,
+      @NotNull List<FileSourceMetadataPatternKit> fileSourceKits) {
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern fixture;
+    this.eventMetadataPatternKit = eventKit;
+    this.fileSourceMetadataPatternKits = fileSourceKits;
+  }
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern homeTeam;
+  @Contract("_, _ -> new")
+  public static @NotNull VideoSourceMetadataPatternKit from(
+      @NotNull EventMetadataPatternKit eventKit,
+      @NotNull List<FileSourceMetadataPatternKit> fileSourceKits) {
+    return new VideoSourceMetadataPatternKit(eventKit, fileSourceKits);
+  }
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern awayTeam;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    VideoSourceMetadataPatternKit that = (VideoSourceMetadataPatternKit) o;
+    return id != null && Objects.equals(id, that.id);
+  }
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern season;
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(this);
+  }
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern date;
+  @Getter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Entity
+  public static class EventMetadataPatternKit {
 
-  // video metadata
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern startOfMetadata;
+    @Id @GeneratedValue private Long id;
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern metadataDelimiter;
+    @Convert(converter = PatternConverter.class)
+    private Pattern eventMetadataRegex;
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern kvDelimiter;
+    private int competitionName;
+    private int homeTeamName;
+    private int awayTeamName;
+    private int season;
+    private int fixture;
+    private int date;
+  }
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern allMetadata;
+  @Getter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Entity
+  public static class FileSourceMetadataPatternKit {
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern channel;
+    @Id @GeneratedValue private Long id;
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern source;
+    @Convert(converter = PatternConverter.class)
+    private Pattern fileSourceMetadataRegex;
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern approximateDuration;
+    @Convert(converter = PatternConverter.class)
+    private Pattern eventPartRegex;
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern language;
+    @Convert(converter = PatternConverter.class)
+    private Pattern videoFileUrlRegex;
 
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern filesize;
-
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern videoBitrate;
-
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern resolution;
-
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern framerate;
-
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern container;
-
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern videoCodec;
-
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern audioBitrate;
-
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern audioCodec;
-
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern audioChannels;
-
-  // video file identification
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern videoFileUrl;
-
-  @OneToOne(targetEntity = VideoSourceMetadataPattern.class)
-  private VideoSourceMetadataPattern eventPartIdentifier;
-
-  private long bitrateConversionFactor;
+    private int channel;
+    private int resolution;
+    private int source;
+    private int duration;
+    private int languages;
+    private int container;
+    private int videoCodec;
+    private int videoBitrate;
+    private int audioCodec;
+    private int audioBitrate;
+    private int filesize;
+    private int framerate;
+    private int audioChannels;
+  }
 }

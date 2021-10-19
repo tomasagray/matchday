@@ -19,16 +19,20 @@
 
 package self.me.matchday.model.video;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Entity;
 import java.nio.file.Path;
+import java.util.Objects;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 public class SingleStreamLocator extends VideoStreamLocator {
 
   public SingleStreamLocator() {
@@ -42,7 +46,15 @@ public class SingleStreamLocator extends VideoStreamLocator {
   }
 
   @Override
-  public String toString() {
-    return super.toString();
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    SingleStreamLocator that = (SingleStreamLocator) o;
+    return streamLocatorId != null && Objects.equals(streamLocatorId, that.streamLocatorId);
+  }
+
+  @Override
+  public int hashCode() {
+    return 0;
   }
 }

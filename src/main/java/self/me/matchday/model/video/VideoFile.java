@@ -69,6 +69,10 @@ public class VideoFile implements Comparable<VideoFile> {
     this.metadata = null;
   }
 
+  public void setFileId(String id) {
+    this.fileId = id;
+  }
+
   /**
    * Returns the duration of this VideoFile, in milliseconds.
    *
