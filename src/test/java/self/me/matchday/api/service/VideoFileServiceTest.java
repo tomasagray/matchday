@@ -30,9 +30,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
-import self.me.matchday.model.EventFile;
-import self.me.matchday.model.EventFileSource;
-import self.me.matchday.plugin.fileserver.FileServerUser;
+import self.me.matchday.model.FileServerUser;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.util.Log;
 
@@ -42,35 +42,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@DisplayName("Testing for EventFile refresh service")
-class EventFileServiceTest {
+@DisplayName("Testing for VideoFile refresh service")
+class VideoFileServiceTest {
 
-  private static final String LOG_TAG = "EventFileServiceTest";
+  private static final String LOG_TAG = "VideoFileServiceTest";
 
   // Test resources
   private static TestDataCreator testDataCreator;
-  private static EventFileService eventFileService;
+  private static VideoFileService videoFileService;
 
-  private static EventFileSource testEventFileSrc;
+  private static VideoFileSource testVideoFileSrc;
   private static FileServerUser testFileServerUser;
 
   @BeforeAll
   static void setUp(
       @Autowired @NotNull final TestDataCreator testDataCreator,
-      @Autowired @NotNull final EventFileService eventFileService,
+      @Autowired @NotNull final VideoFileService videoFileService,
       @Autowired @NotNull final FileServerService fileServerService,
       @Autowired @NotNull final TestFileServerPlugin testFileServerPlugin) {
 
-    EventFileServiceTest.testDataCreator = testDataCreator;
-    EventFileServiceTest.eventFileService = eventFileService;
+    VideoFileServiceTest.testDataCreator = testDataCreator;
+    VideoFileServiceTest.videoFileService = videoFileService;
 
     // Create test user & login
-    EventFileServiceTest.testFileServerUser = testDataCreator.createTestFileServerUser();
+    VideoFileServiceTest.testFileServerUser = testDataCreator.createTestFileServerUser();
     fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
-    // Create test EventFileSource
-    testEventFileSrc = testDataCreator.createTestEventFileSource();
+    // Create test VideoFileSource
+    testVideoFileSrc = testDataCreator.createTestVideoFileSource();
   }
 
   @AfterAll
@@ -78,30 +78,31 @@ class EventFileServiceTest {
     // Remove test user from repo
     Log.i(LOG_TAG, "Deleting test user: " + testFileServerUser);
     testDataCreator.deleteFileServerUser(testFileServerUser);
-    testDataCreator.deleteEventFileSource(testEventFileSrc);
+    testDataCreator.deleteVideoFileSource(testVideoFileSrc);
   }
 
   @Test
-  @DisplayName("Refresh data for a test EventFile")
-  void refreshEventFileData() throws ExecutionException, InterruptedException {
+  @DisplayName("Refresh data for a test VideoFile")
+  void refreshVideoFileData() throws ExecutionException, InterruptedException {
 
     final int expectedStreamCount = 2;
 
-    // Get test EventFile
-    final EventFile testEventFile = testEventFileSrc.getEventFiles().get(0);
-    // Refresh EventFile
-    final EventFile testRefreshedEventFile = eventFileService.refreshEventFile(testEventFile, true);
+    // Get test VideoFile
+    final VideoFile testVideoFile =
+        testVideoFileSrc.getVideoFilePacks().get(0).get(VideoFile.EventPartIdentifier.FIRST_HALF);
+    // Refresh VideoFile
+    final VideoFile testRefreshedVideoFile = videoFileService.refreshVideoFile(testVideoFile, true);
 
     // Perform tests
     Log.i(
         LOG_TAG,
         String.format(
-            "Checking EventFile: %s, internal URL: %s",
-            testEventFile, testEventFile.getInternalUrl()));
+            "Checking VideoFile: %s, internal URL: %s",
+            testVideoFile, testVideoFile.getInternalUrl()));
 
-    final FFmpegMetadata metadata = testRefreshedEventFile.getMetadata();
+    final FFmpegMetadata metadata = testRefreshedVideoFile.getMetadata();
     // Test internal URL set
-    assertThat(testRefreshedEventFile.getInternalUrl()).isNotNull();
+    assertThat(testRefreshedVideoFile.getInternalUrl()).isNotNull();
     // Test metadata set
     assertThat(metadata).isNotNull();
     assertThat(metadata.getStreams().size()).isGreaterThanOrEqualTo(expectedStreamCount);

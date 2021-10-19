@@ -56,7 +56,7 @@ class VideoStreamManagerTest {
   private static VideoStreamManager streamManager;
 
   // test resources
-  private static EventFileSource testFileSource;
+  private static VideoFileSource testFileSource;
   private static VideoStreamLocator testStreamLocator;
 
   @BeforeAll
@@ -67,7 +67,7 @@ class VideoStreamManagerTest {
       @Autowired final VideoStreamManager streamManager) {
 
     VideoStreamManagerTest.streamManager = streamManager;
-    VideoStreamManagerTest.testFileSource = testDataCreator.createTestEventFileSource();
+    VideoStreamManagerTest.testFileSource = testDataCreator.createTestVideoFileSource();
 
     final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
     final ClientResponse loginResponse =
@@ -112,7 +112,7 @@ class VideoStreamManagerTest {
   @DisplayName("Validate retrieval of previously created playlist")
   void getLocalStreamFor() {
 
-    final String testFileSrcId = VideoStreamManagerTest.testFileSource.getEventFileSrcId();
+    final String testFileSrcId = VideoStreamManagerTest.testFileSource.getFileSrcId();
     Log.i(
         LOG_TAG,
         "Attempting VideoStreamLocatorPlaylist lookup for file source ID: " + testFileSrcId);
@@ -161,7 +161,7 @@ class VideoStreamManagerTest {
 
     final JobStatus actualStreamStatus = testStreamLocator.getState().getStatus();
     Log.i(LOG_TAG, "Stream status was: " + actualStreamStatus);
-    assertThat(actualStreamStatus).isEqualTo(JobStatus.STREAMING);
+    assertThat(actualStreamStatus).isGreaterThanOrEqualTo(JobStatus.STREAMING);
   }
 
   @Test
@@ -202,7 +202,7 @@ class VideoStreamManagerTest {
   @DisplayName("Ensure VideoStreamManager can delete local data")
   void deleteLocalStream() throws IOException {
 
-    final String fileSrcId = testFileSource.getEventFileSrcId();
+    final String fileSrcId = testFileSource.getFileSrcId();
     final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
     final Path storageLocation = playlist.getStorageLocation();
     Log.i(LOG_TAG, "Deleting local data associated with VideoStreamLocatorPlaylist: " + playlist);
@@ -222,7 +222,7 @@ class VideoStreamManagerTest {
    * @return a VideoStreamLocatorPlaylist
    */
   private @NotNull VideoStreamLocatorPlaylist getStreamLocatorPlaylist() {
-    final String fileSrcId = testFileSource.getEventFileSrcId();
+    final String fileSrcId = testFileSource.getFileSrcId();
     final Optional<VideoStreamLocatorPlaylist> playlistOptional =
         streamManager.getLocalStreamFor(fileSrcId);
     assertThat(playlistOptional).isPresent();
