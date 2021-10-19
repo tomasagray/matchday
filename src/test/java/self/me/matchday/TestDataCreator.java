@@ -56,9 +56,9 @@ public class TestDataCreator {
     try {
       GMAN_HTML =
           ResourceFileReader.readTextResource(
-              TestDataCreator.class, "gman_sample_page_20210416.html");
+              TestDataCreator.class, "gman_sam^ple_page_20210416.html");
       ZKF_JSON =
-          ResourceFileReader.readTextResource(TestDataCreator.class, "zkf_sample_20210416.json");
+          ResourceFileReader.readTextResource(TestDataCreator.class, "blogger_json_sample.json");
       NITROFLARE_DL_URL = new URL("https://www.nitroflare.com/");
 
     } catch (IOException e) {
