@@ -23,8 +23,9 @@
  */
 package self.me.matchday.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.Hibernate;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +35,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Objects;
 
 /**
  * Class representing a match (game) between two teams (home & away) in a given Competition on a
@@ -41,11 +43,13 @@ import java.time.format.FormatStyle;
  *
  * @author tomas
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @Entity
 @Table(name = "Matches")
 public class Match extends Event implements Serializable {
+
+  // todo - delete this class, related
 
   private static final long serialVersionUID = 123456L; // for cross-platform serialization
 
@@ -154,5 +158,18 @@ public class Match extends Event implements Serializable {
     public Match build() {
       return new Match(homeTeam, awayTeam, competition, season, fixture, date);
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    Match match = (Match) o;
+    return eventId != null && Objects.equals(eventId, match.eventId);
+  }
+
+  @Override
+  public int hashCode() {
+    return 0;
   }
 }

@@ -62,9 +62,7 @@ public class VideoFileService {
 
   @Autowired
   public VideoFileService(
-      final FileServerService fileServerService,
-      final FFmpegPlugin ffmpegPlugin,
-      final VideoFileSelectorService videoFileSelectorService) {
+      final FileServerService fileServerService, final FFmpegPlugin ffmpegPlugin) {
 
     this.executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     this.fileServerService = fileServerService;
@@ -146,18 +144,6 @@ public class VideoFileService {
     private final FFmpegPlugin ffmpegPlugin;
     private final VideoFile videoFile;
     private final boolean fetchMetadata;
-
-    public VideoFileRefreshTask(
-        @NotNull final FileServerService fileServerService,
-        @NotNull final FFmpegPlugin ffmpegPlugin,
-        @NotNull final VideoFile videoFile,
-        final boolean fetchMetadata) {
-
-      this.fileServerService = fileServerService;
-      this.ffmpegPlugin = ffmpegPlugin;
-      this.videoFile = videoFile;
-      this.fetchMetadata = fetchMetadata;
-    }
 
     /**
      * Gets missing or expired VideoFile data and returns a new, complete VideoFile

@@ -19,17 +19,23 @@
 
 package self.me.matchday.model.video;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.PathConverter;
 
 import javax.persistence.*;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class VideoStreamLocator {
 
@@ -57,5 +63,18 @@ public abstract class VideoStreamLocator {
     return String.format(
         "<<VideoStreamLocator>>(streamLocatorId=[%s], playlistPath=[%s], timestamp=[%s], VideoFile=[%s], state=[%s])",
         streamLocatorId, playlistPath, timestamp, videoFile, state);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    VideoStreamLocator that = (VideoStreamLocator) o;
+    return streamLocatorId != null && Objects.equals(streamLocatorId, that.streamLocatorId);
+  }
+
+  @Override
+  public int hashCode() {
+    return 0;
   }
 }

@@ -72,12 +72,12 @@ public class LoginParser {
     final FileFoxPage page = pageEvaluator.getFileFoxPage(body);
 
     if (!(page instanceof FileFoxPage.Profile)) {
-      return ClientResponse.from(loginResponse).statusCode(HttpStatus.UNAUTHORIZED).build();
+      return loginResponse.mutate().statusCode(HttpStatus.UNAUTHORIZED).build();
     }
     // todo - follow redirect? do we need more cookies?
     if (statusCode.is3xxRedirection()) {
       // Correct status code
-      return ClientResponse.from(loginResponse).statusCode(HttpStatus.OK).build();
+      return loginResponse.mutate().statusCode(HttpStatus.OK).build();
     }
     return loginResponse;
   }

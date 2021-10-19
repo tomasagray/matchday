@@ -69,10 +69,6 @@ public class VideoFile implements Comparable<VideoFile> {
     this.metadata = null;
   }
 
-  public void setFileId(String id) {
-    this.fileId = id;
-  }
-
   /**
    * Returns the duration of this VideoFile, in milliseconds.
    *
@@ -113,6 +109,8 @@ public class VideoFile implements Comparable<VideoFile> {
 
   /** Event part identifiers */
   public enum EventPartIdentifier {
+    // todo - remove patterns, order
+
     DEFAULT("", "", 0),
     PRE_MATCH("Pre-Match", "^[Pp][Rr][Ee][- ][Mm][Aa][Tt][Cc][Hh]$", 1),
     FIRST_HALF("1st Half", "1 ?[Ss][Tt] [Hh][Aa][Ll][Ff]", 2),

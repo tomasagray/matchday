@@ -29,7 +29,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpCookie;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.NetscapeCookiesService;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.util.Log;
@@ -52,9 +51,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Disabled
 class NitroflarePluginTest {
 
-  public static final int REFRESH_HOURS = 24;
-  public static final String USER_NAME = "blixblaxblox@protonmail.com";
-  public static final String PASSWORD = "3wni(0wxF4qI4KQK";
+  private static final int REFRESH_HOURS = 24;
+  private static final String USER_NAME = "blixblaxblox@protonmail.com";
+  private static final String PASSWORD = "3wni(0wxF4qI4KQK";
+  private static URL NITROFLARE_DL_URL;
   private static final String LOG_TAG = "NitroflarePluginTest";
   private static final Pattern DOWNLOAD_URL_PATTERN =
       Pattern.compile(
@@ -73,7 +73,8 @@ class NitroflarePluginTest {
 
     NitroflarePluginTest.nitroflarePlugin = nitroflarePlugin;
 
-    // init test URL
+    // init test URLs
+    NITROFLARE_DL_URL = new URL("https://www.nitroflare.com/");
     TEST_URL =
         new URL(
             "https://nitroflare.com/view/C41524E28CC3151/20200908_denmark-england_0_eng_1080p.ts");
@@ -168,11 +169,9 @@ class NitroflarePluginTest {
         new URL(
             "https://s99.nitroflare.com/d/66fa7c9bd6bca032b0183d3d319ae045/20201117-ESP-GER-UNL_1-1080.mkv");
 
-    Log.i(
-        LOG_TAG,
-        "Attempting to read Nitroflare download link from: " + TestDataCreator.NITROFLARE_DL_URL);
+    Log.i(LOG_TAG, "Attempting to read Nitroflare download link from: " + NITROFLARE_DL_URL);
     final Optional<URL> urlOptional =
-        nitroflarePlugin.getDownloadURL(TestDataCreator.NITROFLARE_DL_URL, new HashSet<>());
+        nitroflarePlugin.getDownloadURL(NITROFLARE_DL_URL, new HashSet<>());
 
     assertThat(urlOptional).isPresent();
     final URL actualDownloadUrl = urlOptional.get();

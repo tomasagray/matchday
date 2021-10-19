@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -23,15 +23,14 @@
  */
 package self.me.matchday.io;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import org.jetbrains.annotations.NotNull;
 
 /** A simple class for reading text files into a String. */
 public class TextFileReader {
@@ -51,25 +50,6 @@ public class TextFileReader {
       // Container for text data
       StringBuilder sb = new StringBuilder();
       // Add string data to container
-      reader.lines().forEach(sb::append);
-      return sb.toString();
-    }
-  }
-
-  /**
-   * Reads a text file from the local file-system.
-   *
-   * @param uri a representing the Path to the file
-   * @return the text data in the file
-   * @throws IOException if the file cannot be read.
-   */
-  @NotNull
-  public static String readLocal(@NotNull final Path uri) throws IOException {
-
-    try (BufferedReader reader = Files.newBufferedReader(uri)) {
-      // Container for the String data
-      StringBuilder sb = new StringBuilder();
-      // Add the data to the container
       reader.lines().forEach(sb::append);
       return sb.toString();
     }

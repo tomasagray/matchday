@@ -19,47 +19,30 @@
 
 package self.me.matchday.model.video;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.Entity;
+import java.util.Objects;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
+@Builder
 @Entity
 public class TaskListState extends StreamJobState {
 
-  public static TaskListStateBuilder builder() {
-    return new TaskListStateBuilder();
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    TaskListState that = (TaskListState) o;
+    return getId() != null && Objects.equals(getId(), that.getId());
   }
 
-  public static class TaskListStateBuilder {
-
-    private Long id;
-    private JobStatus status = StreamJobState.JobStatus.CREATED;
-    private Double completionRatio = 0.0;
-
-    public TaskListStateBuilder id(Long id) {
-      this.id = id;
-      return this;
-    }
-
-    public TaskListStateBuilder status(JobStatus status) {
-      this.status = status;
-      return this;
-    }
-
-    public TaskListStateBuilder completionRatio(Double completionRatio) {
-      this.completionRatio = completionRatio;
-      return this;
-    }
-
-    public TaskListState build() {
-      final TaskListState taskListState = new TaskListState();
-      taskListState.setId(this.id);
-      taskListState.setStatus(this.status);
-      taskListState.setCompletionRatio(this.completionRatio);
-      return taskListState;
-    }
+  @Override
+  public int hashCode() {
+    return 0;
   }
 }

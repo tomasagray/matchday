@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -23,7 +23,8 @@
  */
 package self.me.matchday.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Abbreviator;
 
@@ -39,23 +40,19 @@ import java.util.Locale;
  *
  * @author tomas
  */
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "Teams")
 public class Team implements Serializable {
 
-  private static final long serialVersionUID = 123456L; // for serialization across platforms
-
   // Fields
-  @Id
-  private final String teamId;
+  @Id private final String teamId;
   private String name;
   private String abbreviation;
   private Locale locale;
-  @OneToOne
-  private Artwork emblem;
-  @OneToOne
-  private Artwork fanart;
+  @OneToOne private Artwork emblem;
+  @OneToOne private Artwork fanart;
 
   // Default constructor
   public Team() {
@@ -97,7 +94,6 @@ public class Team implements Serializable {
 
     // Cast for comparison
     final Team team = (Team) obj;
-    return
-            team.getName().equals(this.getName());
+    return team.getName().equals(this.getName());
   }
 }

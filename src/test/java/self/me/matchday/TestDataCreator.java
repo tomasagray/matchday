@@ -28,9 +28,7 @@ import self.me.matchday.db.*;
 import self.me.matchday.model.*;
 import self.me.matchday.model.video.*;
 import self.me.matchday.util.Log;
-import self.me.matchday.util.ResourceFileReader;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -48,23 +46,6 @@ public class TestDataCreator {
 
   private static final String LOG_TAG = "CreateTestData";
   private static final Random numGen = new Random();
-  public static final String GMAN_HTML;
-  public static final String ZKF_JSON;
-  public static final URL NITROFLARE_DL_URL;
-
-  static {
-    try {
-      GMAN_HTML =
-          ResourceFileReader.readTextResource(
-              TestDataCreator.class, "gman_sam^ple_page_20210416.html");
-      ZKF_JSON =
-          ResourceFileReader.readTextResource(TestDataCreator.class, "blogger_json_sample.json");
-      NITROFLARE_DL_URL = new URL("https://www.nitroflare.com/");
-
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
 
   private final EventRepository eventRepository;
   private final MatchRepository matchRepository;

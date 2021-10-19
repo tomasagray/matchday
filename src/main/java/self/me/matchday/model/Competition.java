@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -23,16 +23,18 @@
  */
 package self.me.matchday.model;
 
-import java.io.Serializable;
-import java.util.Locale;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
+import self.me.matchday.util.Abbreviator;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.util.Abbreviator;
+import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * Represents a competition, e.g., a domestic league (EPL) or cup (FA Cup), a tournament (UCL, World
@@ -40,27 +42,21 @@ import self.me.matchday.util.Abbreviator;
  *
  * @author tomas
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "Competitions")
 public class Competition implements Serializable {
 
-  private static final long serialVersionUID = 123456L;   // for cross-platform serialization
-
-  @Id
-  private String competitionId;
+  @Id private String competitionId;
   private String name;
   private String abbreviation;
   private Locale locale;
-  @OneToOne
-  private Artwork emblem;
-  @OneToOne
-  private Artwork fanart;
-  @OneToOne
-  private Artwork monochromeEmblem;
-  @OneToOne
-  private Artwork landscape;
+  @OneToOne private Artwork emblem;
+  @OneToOne private Artwork fanart;
+  @OneToOne private Artwork monochromeEmblem;
+  @OneToOne private Artwork landscape;
 
   public Competition(@NotNull final String name) {
     // Automatically create an abbreviation
@@ -82,14 +78,14 @@ public class Competition implements Serializable {
 
   @Override
   public boolean equals(Object obj) {
-    if(obj == this) {
+    if (obj == this) {
       return true;
     }
-    if( !(obj instanceof Competition) ) {
+    if (!(obj instanceof Competition)) {
       return false;
     }
     // Cast for comparison
-    Competition competition = (Competition)obj;
+    Competition competition = (Competition) obj;
     return competition.getName().equals(this.getName());
   }
 

@@ -19,7 +19,8 @@
 
 package self.me.matchday.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Entity;
@@ -28,10 +29,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /** A highlight show, week in review or other non-Match televised Event. */
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "Highlights")
 public class Highlight extends Event implements Serializable {
+
+  // todo - delete this class, related
 
   public Highlight() {
     super();

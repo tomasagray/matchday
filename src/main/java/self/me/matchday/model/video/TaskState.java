@@ -19,47 +19,14 @@
 
 package self.me.matchday.model.video;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import javax.persistence.Entity;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
+@Builder
 @Entity
-public class TaskState extends StreamJobState {
-
-  public static TaskStateBuilder builder() {
-    return new TaskStateBuilder();
-  }
-
-  public static class TaskStateBuilder {
-
-    private Long id;
-    private JobStatus status = StreamJobState.JobStatus.CREATED;
-    private Double completionRatio = 0.0;
-
-    public TaskStateBuilder id(Long id) {
-      this.id = id;
-      return this;
-    }
-
-    public TaskStateBuilder status(JobStatus status) {
-      this.status = status;
-      return this;
-    }
-
-    public TaskStateBuilder completionRatio(Double completionRatio) {
-      this.completionRatio = completionRatio;
-      return this;
-    }
-
-    public TaskState build() {
-      final TaskState taskState = new TaskState();
-      taskState.setId(this.id);
-      taskState.setStatus(this.status);
-      taskState.setCompletionRatio(this.completionRatio);
-      return taskState;
-    }
-  }
-}
+public class TaskState extends StreamJobState {}

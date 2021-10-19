@@ -132,7 +132,8 @@ public class IcdPlugin implements FileServerPlugin {
         // Check for hidden error
         if ("error".equals(icdMessage.getResult())) {
           // It's actually an error, correct response & return
-          return ClientResponse.from(response)
+          return response
+              .mutate()
               .statusCode(HttpStatus.BAD_REQUEST)
               .body(icdMessage.getMessage())
               .build();
@@ -149,7 +150,8 @@ public class IcdPlugin implements FileServerPlugin {
                 .build();
         // Add user data cookie to response
         result =
-            ClientResponse.from(response)
+            response
+                .mutate()
                 .cookies(cookies -> cookies.add(USERDATA_COOKIE_NAME, userDataCookie))
                 .build();
       } else {
