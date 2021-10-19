@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,16 +58,16 @@ class FFprobeTest {
   private static FFmpegMetadata expectedMetadata;
 
   @BeforeAll
-  static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator) throws IOException {
+  static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator) {
 
     // Read plugin resources file
     Map<String, String> resources =
         ResourceFileReader.readPropertiesResource(FFprobe.class, FFMPEG_PROPERTIES);
     // Read test metadata & deserialize
-    List<String> sampleMetadata =
+    String sampleMetadata =
         ResourceFileReader.readTextResource(FFprobeTest.class, SAMPLE_METADATA_JSON);
     // Parse JSON to object
-    expectedMetadata = new Gson().fromJson(String.join(" ", sampleMetadata), FFmpegMetadata.class);
+    expectedMetadata = new Gson().fromJson(sampleMetadata, FFmpegMetadata.class);
 
     // Create FFprobe instance
     Log.i(LOG_TAG, "Instantiating FFprobe with executable: " + FFPROBE_PATH);

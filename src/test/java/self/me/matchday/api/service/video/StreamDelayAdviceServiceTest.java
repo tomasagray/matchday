@@ -57,10 +57,11 @@ class StreamDelayAdviceServiceTest {
   @DisplayName("Validate sane advice is given")
   void getDelayAdvice() {
 
+    final int expectedDelayAdvice = 16_750;
     Log.i(LOG_TAG, "Attempting to get delay advice for locator playlist:\n" + testLocatorPlaylist);
     final long delayAdvice = delayAdviceService.getDelayAdvice(testLocatorPlaylist);
     Log.i(LOG_TAG, "Got stream wait advice: " + delayAdvice);
-    assertThat(delayAdvice).isNotZero().isEqualTo(13_750);
+    assertThat(delayAdvice).isNotZero().isEqualTo(expectedDelayAdvice);
   }
 
   @Test

@@ -32,7 +32,6 @@ import self.me.matchday.TestDataCreator;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -59,7 +58,7 @@ class FFmpegTest {
 
   @BeforeAll
   static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator)
-      throws URISyntaxException, IOException {
+      throws URISyntaxException {
 
     Log.i(LOG_TAG, "Instantiating FFmpeg Plugin with executable: " + FFMPEG_EXE);
     FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);

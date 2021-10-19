@@ -21,10 +21,8 @@ package self.me.matchday.util;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import self.me.matchday.plugin.datasource.galataman.GManPatterns;
 import self.me.matchday.plugin.io.diskmanager.DiskManager;
 
-import java.io.IOException;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +34,7 @@ class ResourceFileReaderTest {
 
   @Test
   @DisplayName("Ensure reads and splits resource file key/value pairs correctly")
-  void testReadPropertiesResourceFile() throws IOException {
+  void testReadPropertiesResourceFile() {
 
     Map<String, String> resourceFile =
         ResourceFileReader.readPropertiesResource(DiskManager.class, PROPERTIES_FILE);
@@ -53,28 +51,5 @@ class ResourceFileReaderTest {
             assertThat(value).isNotNull();
           }
         });
-  }
-
-  @Test
-  @DisplayName("Validate resource file to properties class mapping")
-  void testResourceToClassMapping() throws IOException {
-
-    final GManPatterns gManPatterns =
-        ResourceFileReader.mapPropertiesToClass(
-            GManPatterns.class, "plugins\\gman\\gman.patterns.properties", "gman.patterns");
-
-    assertThat(gManPatterns).isNotNull();
-    Log.i(LOG_TAG, "Testing GMan Patterns: " + gManPatterns);
-
-    assertThat(gManPatterns.getBitrate()).isNotNull();
-    assertThat(gManPatterns.getAvDataDelimiter()).isNotNull();
-    assertThat(gManPatterns.getBitrateConversionFactor()).isNotEqualTo(0);
-    assertThat(gManPatterns.getChannel()).isNotNull();
-    assertThat(gManPatterns.getContainer()).isNotNull();
-    assertThat(gManPatterns.getFramerate()).isNotNull();
-    assertThat(gManPatterns.getStartOfMetadata()).isNotNull();
-    assertThat(gManPatterns.getMetadataKvDelimiter()).isNotNull();
-    assertThat(gManPatterns.getMetadataDelimiter()).isNotNull();
-    assertThat(gManPatterns.getLanguageDelimiter()).isNotNull();
   }
 }

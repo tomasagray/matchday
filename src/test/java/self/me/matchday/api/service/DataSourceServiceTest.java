@@ -19,7 +19,9 @@
 
 package self.me.matchday.api.service;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -29,12 +31,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
+import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
+import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 import self.me.matchday.util.Log;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -52,7 +57,7 @@ class DataSourceServiceTest {
   private static TestDataCreator testDataCreator;
   private static DataSourceService dataSourceService;
   private static EventService eventService;
-  private static DataSourcePlugin<Stream<Event>> testDataSourcePlugin;
+  private static DataSourcePlugin<Event> testDataSourcePlugin;
 
   @BeforeAll
   static void setUp(
@@ -106,7 +111,7 @@ class DataSourceServiceTest {
 
     Log.i(LOG_TAG, "Attempting to retrieve test plugin: " + testDataSourcePlugin.getPluginId());
     // Retrieve test plugin
-    final Optional<DataSourcePlugin<Stream<Event>>> pluginOptional =
+    final Optional<DataSourcePlugin<Event>> pluginOptional =
         dataSourceService.getDataSourcePlugin(
             DataSourceServiceTest.testDataSourcePlugin.getPluginId());
 
@@ -126,9 +131,8 @@ class DataSourceServiceTest {
     final boolean enabled = dataSourceService.enablePlugin(testPluginId);
     assertThat(enabled).isTrue();
     // Ensure plugin has been added to enabled plugins
-    final Set<DataSourcePlugin<Stream<Event>>> enabledPlugins =
-        dataSourceService.getEnabledPlugins();
-    final Optional<DataSourcePlugin<Stream<Event>>> pluginOptional =
+    final Set<DataSourcePlugin<Event>> enabledPlugins = dataSourceService.getEnabledPlugins();
+    final Optional<DataSourcePlugin<Event>> pluginOptional =
         enabledPlugins.stream()
             .filter(plugin -> testPluginId.equals(plugin.getPluginId()))
             .findFirst();
@@ -151,9 +155,8 @@ class DataSourceServiceTest {
     assertThat(disabled).isTrue();
 
     // Ensure plugin is NOT enabled
-    final Set<DataSourcePlugin<Stream<Event>>> enabledPlugins =
-        dataSourceService.getEnabledPlugins();
-    final Optional<DataSourcePlugin<Stream<Event>>> pluginOptional =
+    final Set<DataSourcePlugin<Event>> enabledPlugins = dataSourceService.getEnabledPlugins();
+    final Optional<DataSourcePlugin<Event>> pluginOptional =
         enabledPlugins.stream()
             .filter(plugin -> testPluginId.equals(plugin.getPluginId()))
             .findAny();
@@ -183,8 +186,7 @@ class DataSourceServiceTest {
     final int expectedPluginCount = 3;
 
     // Retrieve all data source plugins
-    final Set<DataSourcePlugin<Stream<Event>>> dataSourcePlugins =
-        dataSourceService.getDataSourcePlugins();
+    final Set<DataSourcePlugin<Event>> dataSourcePlugins = dataSourceService.getDataSourcePlugins();
     final int actualPluginCount = dataSourcePlugins.size();
     Log.i(LOG_TAG, String.format("Found: %s plugins", actualPluginCount));
 
@@ -195,17 +197,16 @@ class DataSourceServiceTest {
   @DisplayName("Validate correct # of ENABLED plugins is returned by service")
   void getEnabledPlugins() {
 
-    final int expectedPluginCount = 3;
+    final int expectedPluginCount = 2;
 
-    final Set<DataSourcePlugin<Stream<Event>>> enabledPlugins =
-        dataSourceService.getEnabledPlugins();
+    final Set<DataSourcePlugin<Event>> enabledPlugins = dataSourceService.getEnabledPlugins();
     final int actualPluginCount = enabledPlugins.size();
     Log.i(LOG_TAG, String.format("Found: %s enabled plugins", actualPluginCount));
 
     assertThat(actualPluginCount).isGreaterThanOrEqualTo(expectedPluginCount);
   }
 
-  private static class TestDataSourcePlugin implements DataSourcePlugin<Stream<Event>> {
+  private static class TestDataSourcePlugin implements DataSourcePlugin<Event> {
 
     private final UUID pluginId = UUID.randomUUID();
     private final Event testMatch = testDataCreator.createTestMatch();
@@ -220,20 +221,36 @@ class DataSourceServiceTest {
       return this.pluginId;
     }
 
+    @Contract(pure = true)
     @Override
-    public String getTitle() {
+    public @NotNull String getTitle() {
       return "Test data source plugin";
     }
 
+    @Contract(pure = true)
     @Override
-    public String getDescription() {
+    public @NotNull String getDescription() {
       return "A description";
     }
 
+    @Contract("_ -> new")
     @Override
-    public Snapshot<Stream<Event>> getSnapshot(@NotNull SnapshotRequest snapshotRequest) {
-
+    public @NotNull Snapshot<Event> getAllSnapshots(@NotNull SnapshotRequest request) {
       return new Snapshot<>(testEvents);
+    }
+
+    @Contract(pure = true)
+    @Override
+    public @Nullable Snapshot<Event> getSnapshot(
+        @NotNull SnapshotRequest request, @NotNull DataSource dataSource) {
+      return null;
+    }
+
+    @Contract(pure = true)
+    @Override
+    public @Nullable DataSource addDataSource(
+        @NotNull URI uri, @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns) {
+      return null;
     }
   }
 }

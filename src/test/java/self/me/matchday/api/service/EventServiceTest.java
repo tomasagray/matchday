@@ -29,7 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.model.*;
+import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
+import self.me.matchday.model.Team;
+import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.util.Log;
 
 import java.time.LocalDateTime;
@@ -51,7 +55,7 @@ class EventServiceTest {
 
   // Test data
   private static Match testMatch;
-  private static EventFileSource testFileSource;
+  private static VideoFileSource testFileSource;
   private static Competition testCompetition;
   private static Team testTeam;
 
@@ -67,7 +71,7 @@ class EventServiceTest {
     testCompetition = testMatch.getCompetition();
     testTeam = testMatch.getHomeTeam();
 
-    final Optional<EventFileSource> fileSourceOptional =
+    final Optional<VideoFileSource> fileSourceOptional =
         testMatch.getFileSources().stream().findFirst();
     assertThat(fileSourceOptional).isPresent();
     testFileSource = fileSourceOptional.get();
@@ -75,8 +79,8 @@ class EventServiceTest {
     Log.i(
         LOG_TAG,
         String.format(
-            "Saved Event w/ID: %s, Competition ID: %s, Team ID: %s; EventFileSrcID: %s",
-            testMatch.getEventId(), testCompetition, testTeam, testFileSource.getEventFileSrcId()));
+            "Saved Event w/ID: %s, Competition ID: %s, Team ID: %s; FileSrcID: %s",
+            testMatch.getEventId(), testCompetition, testTeam, testFileSource.getFileSrcId()));
   }
 
   @AfterAll
@@ -118,30 +122,30 @@ class EventServiceTest {
   }
 
   @Test
-  @DisplayName("Ensure a specific Event file source can be recalled from database")
-  void fetchEventFileSrc() {
+  @DisplayName("Ensure a specific video file source can be recalled from database")
+  void fetchVideoFileSrc() {
 
     // Get test event from DB
     final Optional<Event> eventOptional = eventService.fetchById(testMatch.getEventId());
     assertThat(eventOptional).isPresent();
     final Event event = eventOptional.get();
     // Get test file source
-    final Optional<EventFileSource> testFileSrcOptional =
+    final Optional<VideoFileSource> testFileSrcOptional =
         event.getFileSources().stream().findFirst();
     assertThat(testFileSrcOptional).isPresent();
     // Get file source ID
-    final EventFileSource testFileSource = testFileSrcOptional.get();
-    final String testFileSourceId = testFileSource.getEventFileSrcId();
-    Log.i(LOG_TAG, "Test EventFileSource ID: " + testFileSourceId);
+    final VideoFileSource testFileSource = testFileSrcOptional.get();
+    final String testFileSourceId = testFileSource.getFileSrcId();
+    Log.i(LOG_TAG, "Test VideoFileSource ID: " + testFileSourceId);
 
-    final Optional<EventFileSource> fileSourceOptional =
-        eventService.fetchEventFileSrc(testFileSourceId);
+    final Optional<VideoFileSource> fileSourceOptional =
+        eventService.fetchVideoFileSrc(testFileSourceId);
     assertThat(fileSourceOptional).isPresent();
 
     fileSourceOptional.ifPresent(
-        eventFileSource -> {
-          Log.i(LOG_TAG, "Retrieved file source from database: " + eventFileSource);
-          assertThat(eventFileSource).isEqualTo(EventServiceTest.testFileSource);
+        videoFileSource -> {
+          Log.i(LOG_TAG, "Retrieved file source from database: " + videoFileSource);
+          assertThat(videoFileSource).isEqualTo(EventServiceTest.testFileSource);
         });
   }
 
@@ -188,6 +192,8 @@ class EventServiceTest {
             .setAwayTeam(testTeam)
             .setDate(LocalDateTime.now())
             .build();
+    saveEvent.addFileSources(List.of(testDataCreator.createTestVideoFileSource()));
+
     final Optional<List<Event>> optionalEvents = eventService.fetchAllEvents();
     assertThat(optionalEvents).isPresent();
     final List<Event> events = optionalEvents.get();

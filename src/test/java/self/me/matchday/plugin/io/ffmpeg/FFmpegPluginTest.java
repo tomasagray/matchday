@@ -105,10 +105,10 @@ class FFmpegPluginTest {
     }
 
     // Read test metadata & deserialize
-    List<String> sampleMetadata =
+    String sampleMetadata =
         ResourceFileReader.readTextResource(FFprobeTest.class, SAMPLE_METADATA_JSON);
     // Parse JSON to object
-    expectedMetadata = new Gson().fromJson(String.join(" ", sampleMetadata), FFmpegMetadata.class);
+    expectedMetadata = new Gson().fromJson(sampleMetadata, FFmpegMetadata.class);
   }
 
   @AfterEach
