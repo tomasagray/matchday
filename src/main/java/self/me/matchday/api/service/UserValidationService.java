@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.util.Log;
@@ -38,8 +39,8 @@ public class UserValidationService {
   private static final String PASSWORD_REGEX =
       "^[a-zA-Z0-9,_\\-()!@#$%^&*=+{\\[}\\];:'\"<>/?~`]{8,}$";
 
-  public boolean isValidUserData(final String username, final String password) {
-    return isValidEmailAddress(username) && isValidPassword(password);
+  public boolean isValidUserData(@NotNull final FileServerUser user) {
+    return isValidEmailAddress(user.getUsername()) && isValidPassword(user.getPassword());
   }
 
   public boolean isValidEmailAddress(final String email) {

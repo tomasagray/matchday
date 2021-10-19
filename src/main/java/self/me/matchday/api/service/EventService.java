@@ -33,8 +33,10 @@ import self.me.matchday.util.Log;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class EventService {
@@ -46,9 +48,8 @@ public class EventService {
   private final VideoFileSrcRepository fileSrcRepository;
 
   @Autowired
-  EventService(final EventRepository eventRepository,
-      final EventFileSrcRepository fileSrcRepository) {
-
+  EventService(
+      final EventRepository eventRepository, final VideoFileSrcRepository fileSrcRepository) {
     this.eventRepository = eventRepository;
     this.fileSrcRepository = fileSrcRepository;
   }
@@ -73,15 +74,11 @@ public class EventService {
   }
 
   public Optional<Event> fetchById(@NotNull final String eventId) {
-
-    return
-        eventRepository.findById(eventId);
+    return eventRepository.findById(eventId);
   }
 
-  public Optional<EventFileSource> fetchEventFileSrc(final String fileSrcId) {
-
-    return
-        fileSrcRepository.findById(fileSrcId);
+  public Optional<VideoFileSource> fetchVideoFileSrc(final String fileSrcId) {
+    return fileSrcRepository.findById(fileSrcId);
   }
 
   /**
@@ -90,12 +87,8 @@ public class EventService {
    * @param competitionId The ID of the Competition.
    * @return A CollectionModel containing all Events for the specified Competition.
    */
-  public Optional<List<Event>> fetchEventsForCompetition(
-      @NotNull final String competitionId) {
-
-    return
-        eventRepository
-            .fetchEventsByCompetition(competitionId);
+  public Optional<List<Event>> fetchEventsForCompetition(@NotNull final String competitionId) {
+    return eventRepository.fetchEventsByCompetition(competitionId);
   }
 
   /**
@@ -105,10 +98,7 @@ public class EventService {
    * @return A CollectionModel containing the Events.
    */
   public Optional<List<Event>> fetchEventsForTeam(@NotNull final String teamId) {
-
-    return
-        eventRepository
-            .fetchEventsByTeam(teamId);
+    return eventRepository.fetchEventsByTeam(teamId);
   }
 
   // ==============
@@ -121,16 +111,16 @@ public class EventService {
    * @param event The Event to be saved
    */
   public void saveEvent(@NotNull final Event event) {
-
-    if (isValidEvent(event)) {
+    try {
+      validateEvent(event);
       // See if Event already exists in DB
       final Optional<Event> eventOptional = fetchById(event.getEventId());
       // Merge VideoFileSources
       eventOptional.ifPresent(value -> event.getFileSources().addAll(value.getFileSources()));
       // Save to DB
-      Log.i(LOG_TAG, "Saving event: " + eventRepository.saveAndFlush(event));
-    } else {
-      Log.d(LOG_TAG, String.format("Event: %s was not saved to DB; invalid", event));
+      Log.i(LOG_TAG, "Saved event: " + eventRepository.saveAndFlush(event));
+    } catch (Exception e) {
+      Log.e(LOG_TAG, String.format("Event: %s was not saved to DB; %s", event, e.getMessage()), e);
     }
   }
 
@@ -140,7 +130,6 @@ public class EventService {
    * @param event The Event to delete
    */
   public void deleteEvent(@NotNull final Event event) {
-
     Log.i(LOG_TAG, "Deleting Event with ID: " + event.getEventId());
     eventRepository.delete(event);
   }
@@ -149,9 +138,8 @@ public class EventService {
    * Ensure Event meets certain criteria.
    *
    * @param event The Event to be validated
-   * @return True/false - Is a valid Event
    */
-  private boolean isValidEvent(final Event event) {
+  private void validateEvent(final Event event) {
 
     if (event == null) {
       reject("Event is null");
@@ -207,9 +195,6 @@ public class EventService {
     for (final VideoFileSource fileSource : fileSources) {
       totalVideoFiles += fileSource.getVideoFilePacks().size();
     }
-
-    // Perform test
-    return
-        titleValid && competitionValid && dateValid;
+    return totalVideoFiles > 0;
   }
 }

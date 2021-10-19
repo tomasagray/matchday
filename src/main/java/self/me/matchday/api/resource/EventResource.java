@@ -124,17 +124,14 @@ public class EventResource extends RepresentationModel<EventResource> {
         if (awayTeam != null) {
           eventResource.setAwayTeam(teamResourceAssembler.toModel(awayTeam));
         }
-        // add self link
         eventResource.add(
             linkTo(methodOn(MatchController.class).fetchMatchById(match.getEventId()))
                 .withSelfRel());
       } else {
-        // it's a Highlight; add self link
         eventResource.add(
             linkTo(methodOn(HighlightController.class).fetchHighlightById(entity.getEventId()))
                 .withSelfRel());
       }
-      // Return the finished product
       return eventResource;
     }
 
