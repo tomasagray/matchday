@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -19,121 +19,135 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
-import lombok.Data;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import self.me.matchday.io.TextFileReader;
+import self.me.matchday.db.DataSourceRepository;
+import self.me.matchday.model.DataSource;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
+import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
-import self.me.matchday.plugin.datasource.blogger.parser.BloggerBuilder;
-import self.me.matchday.plugin.datasource.blogger.parser.BloggerBuilderFactory;
-import self.me.matchday.plugin.datasource.blogger.parser.html.HtmlBuilderFactory;
-import self.me.matchday.plugin.datasource.blogger.parser.json.JsonBuilderFactory;
-import self.me.matchday.util.Log;
+import self.me.matchday.plugin.datasource.EntryParser;
+import self.me.matchday.plugin.datasource.blogger.model.Blogger;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.stream.Stream;
 
-@Data
 @Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class BloggerPlugin implements DataSourcePlugin<Blogger> {
+public class BloggerPlugin implements DataSourcePlugin<Event> {
 
-  private static final String LOG_TAG = "BloggerPlugin";
+  private final DataSourceRepository dataSourceRepo;
+  private final BloggerPluginProperties pluginProperties;
+  private final BloggerQueryBuilder queryBuilder;
 
-  public enum FetchMode {
-    JSON,
-    HTML,
-  }
+  BloggerPlugin(
+      @NotNull DataSourceRepository dataSourceRepo,
+      @NotNull BloggerPluginProperties pluginProperties,
+      @NotNull BloggerQueryBuilder queryBuilder) {
 
-  private final BloggerPluginProperties properties;
-  private String baseUrl;
-  private FetchMode fetchMode;
-  private BloggerBuilderFactory bloggerBuilderFactory;
-
-  public BloggerPlugin(@Autowired BloggerPluginProperties pluginProperties) {
-    this.properties = pluginProperties;
-  }
-
-  /**
-   * Supply the correct abstract factory implementation depending on the plugin setting.
-   *
-   * @param fetchMode What type of data is the plugin going to attempt to fetch?
-   */
-  public void setFetchMode(@NotNull final FetchMode fetchMode) {
-
-    if (fetchMode == FetchMode.JSON) {
-      bloggerBuilderFactory = new JsonBuilderFactory();
-    } else if (fetchMode == FetchMode.HTML) {
-      bloggerBuilderFactory = new HtmlBuilderFactory();
-    }
+    this.dataSourceRepo = dataSourceRepo;
+    this.pluginProperties = pluginProperties;
+    this.queryBuilder = queryBuilder;
   }
 
   @Override
   public UUID getPluginId() {
-    return UUID.fromString(properties.getId());
+    return UUID.fromString(pluginProperties.getId());
   }
 
   @Override
   public String getTitle() {
-    return properties.getTitle();
+    return pluginProperties.getTitle();
   }
 
   @Override
   public String getDescription() {
-    return properties.getDescription();
+    return pluginProperties.getDescription();
   }
 
-  /**
-   * Get an instantaneous view (a Snapshot) of a Blogger blog.
-   *
-   * @param snapshotRequest The request data
-   * @return A Snapshot of the Blogger
-   * @throws IOException If the data cannot be read or parsed
-   */
   @Override
-  @Contract("_ -> new")
-  public @NotNull Snapshot<Blogger> getSnapshot(@NotNull final SnapshotRequest snapshotRequest)
-      throws IOException {
+  public DataSource addDataSource(
+      @NotNull URI uri, @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns) {
 
-    // Get the required URL from the request data
-    final URL url = getUrlFromRequest(snapshotRequest);
-    Log.i(LOG_TAG, String.format("Getting Blogger snapshot from URL: %s", url));
-    final String blogData = TextFileReader.readRemote(url);
-    final BloggerBuilder bloggerBuilder = bloggerBuilderFactory.getBloggerBuilder(blogData);
-    // Create a Blogger Snapshot & return
-    return new Snapshot<>(bloggerBuilder.getBlogger());
+    final BloggerDataSource dataSource =
+        new BloggerDataSource(uri, metadataPatterns, this.getPluginId());
+    // determine parser type
+    final Matcher jsonUrlMatcher = pluginProperties.getJsonUrlPattern().matcher(uri.toString());
+    final BloggerDataSource.SourceType type =
+        jsonUrlMatcher.find()
+            ? BloggerDataSource.SourceType.JSON
+            : BloggerDataSource.SourceType.HTML;
+    dataSource.setSourceType(type);
+    return dataSourceRepo.save(dataSource);
   }
 
-  /**
-   * Use the BloggerUrlBuilder implementation to parse a Snapshot request into the appropriate URL
-   * type.
-   *
-   * @param snapshotRequest The request data
-   * @return A formatted Blogger URL
-   * @throws MalformedURLException If the URL is invalid
-   */
-  private @NotNull URL getUrlFromRequest(@NotNull SnapshotRequest snapshotRequest)
-      throws MalformedURLException {
+  @Override
+  public Snapshot<Event> getAllSnapshots(@NotNull SnapshotRequest request) {
 
-    return bloggerBuilderFactory
-        .getBloggerUrlBuilder(baseUrl)
-        .labels(snapshotRequest.getLabels())
-        .endDate(snapshotRequest.getEndDate())
-        .startDate(snapshotRequest.getStartDate())
-        .maxResults(snapshotRequest.getMaxResults())
-        .pageToken(snapshotRequest.getPageToken())
-        .fetchImages(snapshotRequest.isFetchImages())
-        .fetchBodies(snapshotRequest.isFetchBodies())
-        .orderBy(snapshotRequest.getOrderBy())
-        .status(snapshotRequest.getStatus())
-        .buildUrl();
+    // get all DataSources for this plugin
+    final List<DataSource> dataSources =
+        dataSourceRepo.findDataSourcesByPluginId(this.getPluginId());
+    // snapshot all DataSources & collate
+    final Stream<Event> events =
+        dataSources.stream()
+            .flatMap(
+                source -> {
+                  try {
+                    return getEventStream(request, source);
+                  } catch (IOException wrapped) {
+                    throw new RuntimeException(wrapped);
+                  }
+                });
+    return Snapshot.of(events);
+  }
+
+  @Override
+  public Snapshot<Event> getSnapshot(
+      @NotNull SnapshotRequest request, @NotNull DataSource dataSource) throws IOException {
+
+    final Stream<Event> events = getEventStream(request, dataSource);
+    return Snapshot.of(events);
+  }
+
+  @NotNull
+  private Stream<Event> getEventStream(
+      @NotNull SnapshotRequest request, @NotNull DataSource dataSource) throws IOException {
+
+    // ensure dataSource is a BloggerDataSource, cast
+    if (!(dataSource instanceof BloggerDataSource)) {
+      throw new IllegalArgumentException("Not a Blogger data source: " + dataSource);
+    }
+    final BloggerDataSource bloggerDataSource = (BloggerDataSource) dataSource;
+
+    // determine whether HTML or JSON parser is called for
+    final BloggerParser parser =
+        bloggerDataSource.getSourceType() == BloggerDataSource.SourceType.JSON
+            ? new JsonBloggerParser()
+            : new HtmlBloggerParser();
+    // parse request into blogger query
+    final String query = queryBuilder.buildQueryFrom(request);
+    final URL bloggerUrl = dataSource.getUri().resolve(query).toURL();
+    // use appropriate BloggerParser to get snapshot
+    final Blogger blogger = parser.getBlogger(bloggerUrl);
+
+    // parse events from Blogger instance
+    return parseEvents(blogger, dataSource.getMetadataPatterns());
+  }
+
+  private @NotNull Stream<Event> parseEvents(
+      @NotNull Blogger blogger, @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns) {
+
+    return blogger.getFeed().getEntry().stream()
+        .flatMap(
+            entry -> {
+              final String content = entry.getContent().getData();
+              return EntryParser.parse(content).with(metadataPatterns);
+            });
   }
 }

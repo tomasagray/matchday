@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,14 +17,25 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.blogger.parser;
+package self.me.matchday.plugin.datasource.blogger.model;
 
-import org.jetbrains.annotations.NotNull;
+import lombok.Builder;
+import lombok.Data;
 
-public interface BloggerBuilderFactory {
+import java.time.LocalDateTime;
+import java.util.List;
 
-  BloggerBuilder getBloggerBuilder(@NotNull final String data);
+@Data
+@Builder
+public class BloggerEntry {
 
-  BloggerUrlBuilder getBloggerUrlBuilder(@NotNull final String baseUrl);
-
+  private BloggerFeed.Generic<String> id;
+  private BloggerFeed.Generic<LocalDateTime> published;
+  private BloggerFeed.Generic<LocalDateTime> updated;
+  private List<BloggerFeed.Term> category;
+  private BloggerFeed.Str title;
+  private BloggerFeed.Str content;
+  private List<BloggerFeed.Link> link;
+  private List<BloggerFeed.Author> author;
+  private BloggerFeed.Generic<Integer> thr$total;
 }

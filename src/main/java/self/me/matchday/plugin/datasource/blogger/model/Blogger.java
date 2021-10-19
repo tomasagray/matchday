@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -17,25 +17,25 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.galataman;
+package self.me.matchday.plugin.datasource.blogger.model;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import self.me.matchday.plugin.PluginProperties;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-@Configuration
-@PropertySource("classpath:plugins/gman/gman.properties")
-@ConfigurationProperties(prefix = "plugin.gman")
-public class GmanPluginProperties extends PluginProperties {
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
-  private String baseUrl;
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
+public class Blogger {
 
-  public String getBaseUrl() {
-    return baseUrl;
-  }
+  @Id @GeneratedValue private Long id;
 
-  public void setBaseUrl(final String baseUrl) {
-    this.baseUrl = baseUrl;
-  }
+  private String version;
+  private String encoding;
+  private BloggerFeed feed;
 }
