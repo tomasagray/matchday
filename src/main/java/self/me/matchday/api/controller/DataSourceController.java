@@ -19,7 +19,6 @@
 
 package self.me.matchday.api.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +28,7 @@ import self.me.matchday.api.resource.DataSourcePluginResource;
 import self.me.matchday.api.resource.DataSourcePluginResource.DataSourcePluginResourceAssembler;
 import self.me.matchday.api.resource.MessageResource;
 import self.me.matchday.api.service.DataSourceService;
+import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
@@ -48,9 +48,9 @@ public class DataSourceController {
   private final DataSourcePluginResourceAssembler pluginResourceAssembler;
 
   DataSourceController(
-      @Autowired final DataSourceService dataSourceService,
-      @Autowired final DataSourcePluginResourceAssembler pluginResourceAssembler,
-      @Autowired final MessageResource.MessageResourceAssembler messageResourceAssembler) {
+      DataSourceService dataSourceService,
+      DataSourcePluginResourceAssembler pluginResourceAssembler,
+      MessageResource.MessageResourceAssembler messageResourceAssembler) {
 
     this.dataSourceService = dataSourceService;
     this.pluginResourceAssembler = pluginResourceAssembler;
@@ -140,5 +140,19 @@ public class DataSourceController {
       message = String.format("Could not disable plugin with ID: %s", pluginId);
     }
     return ResponseEntity.status(status).body(messageResourceAssembler.toModel(message));
+  }
+
+  @RequestMapping(
+      value = "/data-source/{pluginId}/add",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<MessageResource> addDataSource(
+      @PathVariable("pluginId") final UUID pluginId, @RequestBody DataSource dataSource) {
+
+    final DataSource source = dataSourceService.addDataSource(pluginId, dataSource);
+    final MessageResource messageResource =
+        messageResourceAssembler.toModel("Successfully added new DataSource: " + source.getId());
+    return ResponseEntity.ok(messageResource);
   }
 }

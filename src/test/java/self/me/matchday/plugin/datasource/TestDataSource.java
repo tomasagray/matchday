@@ -17,44 +17,22 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model;
+package self.me.matchday.plugin.datasource;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import self.me.matchday.db.converter.UriConverter;
+import self.me.matchday.model.DataSource;
 import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
 @Getter
-@Setter
-@ToString
 @Entity
-@RequiredArgsConstructor
-public abstract class DataSource {
+public class TestDataSource extends DataSource {
 
-  @Convert(converter = UriConverter.class)
-  protected final URI baseUri;
-
-  @ManyToMany(
-      targetEntity = VideoSourceMetadataPatternKit.class,
-      fetch = FetchType.EAGER,
-      cascade = CascadeType.ALL)
-  protected final List<VideoSourceMetadataPatternKit> metadataPatterns;
-
-  protected boolean enabled = true;
-
-  protected final UUID pluginId;
-  @Id @GeneratedValue private Long id;
-
-  public DataSource() {
-    this.baseUri = null;
-    this.metadataPatterns = null;
-    this.pluginId = null;
+  TestDataSource(URI uri, List<VideoSourceMetadataPatternKit> metadataPatterns, UUID pluginId) {
+    super(uri, metadataPatterns, pluginId);
   }
 }

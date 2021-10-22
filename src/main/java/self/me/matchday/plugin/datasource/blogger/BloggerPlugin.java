@@ -20,6 +20,7 @@
 package self.me.matchday.plugin.datasource.blogger;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import self.me.matchday.db.DataSourceRepository;
 import self.me.matchday.model.DataSource;
@@ -37,6 +38,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 @Component
@@ -45,6 +47,9 @@ public class BloggerPlugin implements DataSourcePlugin<Event> {
   private final DataSourceRepository dataSourceRepo;
   private final BloggerPluginProperties pluginProperties;
   private final BloggerQueryBuilder queryBuilder;
+
+  @Value("${plugin.blogger.blogger-url-pattern}")
+  private String bloggerUrlPattern;
 
   BloggerPlugin(
       @NotNull DataSourceRepository dataSourceRepo,
@@ -73,18 +78,29 @@ public class BloggerPlugin implements DataSourcePlugin<Event> {
 
   @Override
   public DataSource addDataSource(
-      @NotNull URI uri, @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns) {
+      @NotNull URI baseUri, @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns) {
+
+    validateDataSourceUri(baseUri);
 
     final BloggerDataSource dataSource =
-        new BloggerDataSource(uri, metadataPatterns, this.getPluginId());
+        new BloggerDataSource(baseUri, metadataPatterns, this.getPluginId());
     // determine parser type
-    final Matcher jsonUrlMatcher = pluginProperties.getJsonUrlPattern().matcher(uri.toString());
+    final Matcher jsonUrlMatcher = pluginProperties.getJsonUrlPattern().matcher(baseUri.toString());
     final BloggerDataSource.SourceType type =
         jsonUrlMatcher.find()
             ? BloggerDataSource.SourceType.JSON
             : BloggerDataSource.SourceType.HTML;
     dataSource.setSourceType(type);
-    return dataSourceRepo.save(dataSource);
+    return dataSourceRepo.saveAndFlush(dataSource);
+  }
+
+  private void validateDataSourceUri(@NotNull URI uri) {
+
+    final Pattern urlPattern = Pattern.compile(bloggerUrlPattern);
+    final Matcher matcher = urlPattern.matcher(uri.toString());
+    if (!matcher.find()) {
+      throw new IllegalArgumentException("Given URL is not a Blogger URL: " + uri);
+    }
   }
 
   @Override
@@ -132,7 +148,7 @@ public class BloggerPlugin implements DataSourcePlugin<Event> {
             : new HtmlBloggerParser();
     // parse request into blogger query
     final String query = queryBuilder.buildQueryFrom(request);
-    final URL bloggerUrl = dataSource.getUri().resolve(query).toURL();
+    final URL bloggerUrl = dataSource.getBaseUri().resolve(query).toURL();
     // use appropriate BloggerParser to get snapshot
     final Blogger blogger = parser.getBlogger(bloggerUrl);
 

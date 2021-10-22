@@ -23,6 +23,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
@@ -112,17 +113,9 @@ public class DataSourceService {
         dataSourcePlugins.stream()
             .filter(plugin -> pluginId.equals(plugin.getPluginId()))
             .findFirst();
-    if (pluginOptional.isPresent()) {
-      // Plugin found; enable
-      final DataSourcePlugin<Event> plugin = pluginOptional.get();
-      final boolean added = enabledPlugins.add(plugin);
-      Log.i(
-          LOG_TAG, String.format("Successfully enabled plugin: %s? %s", plugin.getTitle(), added));
-      return added;
-    } else {
-      Log.i(LOG_TAG, "Could not find plugin with ID: " + pluginId);
-    }
-    return false;
+    return pluginOptional
+        .map(plugin -> enabledPlugins.contains(plugin) || enabledPlugins.add(plugin))
+        .orElse(false);
   }
 
   /**
@@ -158,5 +151,15 @@ public class DataSourceService {
    */
   public boolean isPluginEnabled(@NotNull final UUID pluginId) {
     return enabledPlugins.stream().anyMatch(plugin -> pluginId.equals(plugin.getPluginId()));
+  }
+
+  public DataSource addDataSource(
+      @NotNull final UUID pluginId, @NotNull final DataSource dataSource) {
+    return this.getDataSourcePlugin(pluginId)
+        .map(
+            plugin ->
+                plugin.addDataSource(dataSource.getBaseUri(), dataSource.getMetadataPatterns()))
+        .orElseThrow(
+            () -> new IllegalArgumentException("No DataSourcePlugin with ID: " + pluginId));
   }
 }

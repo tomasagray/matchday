@@ -35,7 +35,8 @@ import java.util.Set;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DisplayName(
-    "Test that the EntryParser API can successfully parse Events & related from HTML given a PatternKit")
+    "Test that the EntryParser API can successfully parse "
+        + "Events & related from HTML, given a PatternKit")
 class EntryParserTest {
 
   private static final String LOG_TAG = "EntryParserTest";

@@ -1,0 +1,91 @@
+{
+  "baseUri": "https://galatamanhdfb.blogspot.com",
+  "metadataPatterns": [
+    {
+      "eventPatternKit": {
+        "eventMetadataRegex": {
+          "pattern": "([\\p{L}\\s]+) (\\d{2,4}/\\d{2,4})[-Matchdy\\s]*(\\d+)[\\s-]*(\\d{2}/\\d{2}/\\d{2,4}) ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) _+",
+          "flags": 64
+        },
+        "competitionName": 1,
+        "homeTeamName": 5,
+        "awayTeamName": 6,
+        "season": 2,
+        "fixture": 3,
+        "date": 4
+      },
+      "fileSourcePatternKits": [
+        {
+          "fileSourceMetadataRegex": {
+            "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+ \\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ (\\p{L}+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
+            "flags": 64
+          },
+          "videoFileUrlRegex": {
+            "pattern": "^http[s]?://[\\p{L}.]*filefox.cc/[\\p{L}]+/[\\p{L}-_]*.(mkv|ts)",
+            "flags": 64
+          },
+          "eventPartIdentifierRegex": {
+            "pattern": "(Pre-|Post-|1st|First|2nd|Second|Trophy)",
+            "flags": 2
+          },
+          "channel": 1,
+          "resolution": 12,
+          "source": 2,
+          "duration": 10,
+          "languages": 3,
+          "container": 5,
+          "videoCodec": 0,
+          "videoBitrate": 4,
+          "audioCodec": 8,
+          "audioBitrate": 7,
+          "filesize": 11,
+          "framerate": 6,
+          "audioChannels": 9
+        }
+      ]
+    },
+    {
+      "eventPatternKit": {
+        "eventMetadataRegex": {
+          "pattern": "(?:FÚTBOL:\\s)*([\\p{L}\\s]*)[\\s-]*(\\d{2}/\\d{2}/\\d{2,4}) ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) _+",
+          "flags": 64
+        },
+        "competitionName": 1,
+        "date": 2,
+        "homeTeamName": 3,
+        "awayTeamName": 4
+      },
+      "fileSourcePatternKits": [
+        {
+          "fileSourceMetadataRegex": {
+            "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+ \\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ (\\p{L}+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
+            "flags": 64
+          },
+          "videoFileUrlRegex": {
+            "pattern": "^http[s]?://[\\p{L}.]*filefox.cc/[\\p{L}]+/[\\p{L}-_]*.(mkv|ts)",
+            "flags": 64
+          },
+          "eventPartIdentifierRegex": {
+            "pattern": "(Pre-|Post-|1st|First|2nd|Second|Trophy)",
+            "flags": 2
+          },
+          "channel": 1,
+          "resolution": 12,
+          "source": 2,
+          "duration": 10,
+          "languages": 3,
+          "container": 5,
+          "videoCodec": 0,
+          "videoBitrate": 4,
+          "audioCodec": 8,
+          "audioBitrate": 7,
+          "filesize": 11,
+          "framerate": 6,
+          "audioChannels": 9
+        }
+      ]
+    }
+  ],
+  "pluginId": "64d08bc8-bd9f-11ea-b3de-0242ac130004",
+  "enabled": true
+}

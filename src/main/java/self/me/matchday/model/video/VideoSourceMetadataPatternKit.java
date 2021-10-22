@@ -34,19 +34,25 @@ import java.util.regex.Pattern;
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 @Entity
+@Table(name = "video_data_patterns")
 public class VideoSourceMetadataPatternKit {
 
   @Id @GeneratedValue Long id;
-  @OneToOne private EventMetadataPatternKit eventMetadataPatternKit;
-  @OneToMany private List<FileSourceMetadataPatternKit> fileSourceMetadataPatternKits;
+
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private EventMetadataPatternKit eventPatternKit;
+
+  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private List<FileSourceMetadataPatternKit> fileSourcePatternKits;
 
   private VideoSourceMetadataPatternKit(
       @NotNull EventMetadataPatternKit eventKit,
       @NotNull List<FileSourceMetadataPatternKit> fileSourceKits) {
 
-    this.eventMetadataPatternKit = eventKit;
-    this.fileSourceMetadataPatternKits = fileSourceKits;
+    this.eventPatternKit = eventKit;
+    this.fileSourcePatternKits = fileSourceKits;
   }
 
   @Contract("_, _ -> new")
@@ -66,19 +72,22 @@ public class VideoSourceMetadataPatternKit {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(this);
+    return Objects.hash(id, eventPatternKit, fileSourcePatternKits);
   }
 
   @Getter
   @NoArgsConstructor
   @AllArgsConstructor
+  @ToString
   @Builder
   @Entity
+  @Table(name = "event_data_patterns")
   public static class EventMetadataPatternKit {
 
     @Id @GeneratedValue private Long id;
 
     @Convert(converter = PatternConverter.class)
+    @Column(columnDefinition = "LONGTEXT")
     private Pattern eventMetadataRegex;
 
     private int competitionName;
@@ -92,13 +101,16 @@ public class VideoSourceMetadataPatternKit {
   @Getter
   @NoArgsConstructor
   @AllArgsConstructor
+  @ToString
   @Builder
   @Entity
+  @Table(name = "filesource_data_patterns")
   public static class FileSourceMetadataPatternKit {
 
     @Id @GeneratedValue private Long id;
 
     @Convert(converter = PatternConverter.class)
+    @Column(name = "filesource_regex", columnDefinition = "LONGTEXT")
     private Pattern fileSourceMetadataRegex;
 
     @Convert(converter = PatternConverter.class)
@@ -108,6 +120,7 @@ public class VideoSourceMetadataPatternKit {
     private Pattern videoFileUrlRegex;
 
     @Convert(converter = CaseInsensitivePatternConverter.class)
+    @Column(name = "part_id_regex")
     private Pattern eventPartIdentifierRegex;
 
     private int channel;

@@ -21,7 +21,10 @@ package self.me.matchday;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.io.TextFileReader;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.video.VideoFile;
@@ -47,10 +50,13 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static self.me.matchday.model.video.VideoSourceMetadataPatternKit.*;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
 public class TestEventDataFromBlogger {
 
-  public static final Map<String, VideoSourceMetadataPatternKit> gmanPatternKits =
+  public static final Map<String, VideoSourceMetadataPatternKit> patternKits =
       createEventPatternKits();
+
   private static final String LOG_TAG = "TestEventDataFromBlogger";
   private static String html;
 
@@ -107,7 +113,8 @@ public class TestEventDataFromBlogger {
 
     final Pattern eventPattern2 =
         Pattern.compile(
-            "[FÚTBOL:\\s]*([\\w\\s]*)[\\s-]*(\\d{2}/\\d{2}/\\d{2,4}) ([\\w\\s-]+) vs.? ([\\w\\s-]+) _+");
+            "[FÚTBOL:]*([\\p{L}]+) (\\d{2,4}/\\d{2,4})[-Matchdy\\s]*(\\d)+[\\s-]*(\\d{2}/\\d{2}/\\d{2,4}) "
+                + "([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) _+");
     final EventMetadataPatternKit eventKit2 =
         EventMetadataPatternKit.builder()
             .eventMetadataRegex(eventPattern2)
@@ -181,7 +188,7 @@ public class TestEventDataFromBlogger {
   public static @NotNull List<Event> parseBloggerEntry(@NotNull BloggerEntry entry) {
 
     final List<Event> events = new ArrayList<>();
-    gmanPatternKits.forEach(
+    patternKits.forEach(
         (name, kit) -> {
           try {
             final String content = entry.getContent().getData();

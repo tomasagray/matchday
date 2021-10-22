@@ -22,9 +22,11 @@ package self.me.matchday.plugin.datasource.blogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
+import org.yaml.snakeyaml.util.UriEncoder;
 import self.me.matchday.model.SnapshotRequest;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,10 +47,15 @@ public class BloggerQueryBuilder {
     final String updatedMin = getUpdatedMin(request);
     final String updatedMax = getUpdatedMax(request);
 
-    return labelsQuery
-        + Stream.of(maxResults, updatedMax, updatedMin)
-            .filter(s -> s != null && !s.equals(""))
-            .collect(Collectors.joining("&"));
+    String query =
+        labelsQuery
+            + Stream.of(maxResults, updatedMax, updatedMin)
+                .filter(s -> s != null && !s.equals(""))
+                .collect(Collectors.joining("&"));
+    if (!"".equals(query)) {
+      query = pluginProperties.getQueryUrlPrefix() + query;
+    }
+    return query;
   }
 
   @Nullable
@@ -92,10 +99,14 @@ public class BloggerQueryBuilder {
 
   private String getLabelsQuery(@NotNull SnapshotRequest request) {
 
-    final String labels = String.join("/", request.getLabels());
     String labelsQuery = "";
-    if (!labels.equals("")) {
-      labelsQuery = String.format("/-/%s", labels);
+    final List<String> labels = request.getLabels();
+    if (labels != null) {
+      final String allLabels =
+          labels.stream().map(UriEncoder::encode).collect(Collectors.joining("/"));
+      if (!allLabels.equals("")) {
+        labelsQuery = String.format("/label/%s", allLabels);
+      }
     }
     return labelsQuery;
   }

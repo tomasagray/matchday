@@ -34,6 +34,7 @@ import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoFileSource.Resolution;
 import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
 import self.me.matchday.model.video.VideoSourceMetadataPatternKit.EventMetadataPatternKit;
+import self.me.matchday.util.Log;
 
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
@@ -79,15 +80,16 @@ public class EntryParser {
 
   private @NotNull Event parseEventData(@NotNull final String text) {
 
-    final EventMetadataPatternKit eventKit = patternKit.getEventMetadataPatternKit();
+    final EventMetadataPatternKit eventKit = patternKit.getEventPatternKit();
     final Pattern metadataRegex = eventKit.getEventMetadataRegex();
     final Matcher metadata = metadataRegex.matcher(text);
 
     if (metadata.find()) {
-      final Team homeTeam = getNew(Team.class, metadata, eventKit.getHomeTeamName());
-      final Team awayTeam = getNew(Team.class, metadata, eventKit.getAwayTeamName());
+
       final Competition competition =
           getNew(Competition.class, metadata, eventKit.getCompetitionName());
+      final Team homeTeam = getNew(Team.class, metadata, eventKit.getHomeTeamName());
+      final Team awayTeam = getNew(Team.class, metadata, eventKit.getAwayTeamName());
       final LocalDate date = parseDate(eventKit, metadata);
       Fixture fixture = parseFixture(eventKit, metadata);
       Season season = parseSeason(eventKit, metadata);
@@ -100,11 +102,19 @@ public class EntryParser {
           .date(date.atStartOfDay())
           .build();
     }
-    final String msg =
-        String.format(
-            "Could not parse Event metadata with pattern:%n%s%n from supplied text:%n%s",
-            metadataRegex, text.replace("_", "").substring(0, 128));
-    throw new IllegalArgumentException(msg);
+    throw new IllegalArgumentException(getFailMsg(text, metadataRegex));
+  }
+
+  private String getFailMsg(@NotNull String text, Pattern metadataRegex) {
+    final int maxTextLen = 128;
+    final String truncatedText =
+        (text.length() < maxTextLen)
+            ? text
+            : text.replace("_", "").substring(0, maxTextLen) + "...";
+
+    return String.format(
+        "Could not parse Event metadata with pattern:%n%s%n from supplied text:%n%s",
+        metadataRegex, truncatedText);
   }
 
   private <T> @Nullable T getNew(@NotNull Class<T> clazz, @NotNull Matcher matcher, int group) {
@@ -127,7 +137,7 @@ public class EntryParser {
 
   private List<VideoFileSource> parseVideoFileSources(@NotNull final String text) {
 
-    return patternKit.getFileSourceMetadataPatternKits().stream()
+    return patternKit.getFileSourcePatternKits().stream()
         .map(patternKit -> parseFileSourceFrom(text, patternKit))
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
@@ -330,7 +340,20 @@ public class EntryParser {
     }
 
     public Stream<Event> with(@NotNull Collection<VideoSourceMetadataPatternKit> patternKits) {
-      return patternKits.stream().map(this::with);
+      return patternKits.stream()
+          .map(
+              patternKit -> {
+                try {
+                  return this.with(patternKit);
+                } catch (Throwable e) {
+                  // todo - handle this better!
+                  Log.i(
+                      "EntryParser",
+                      "Could not parse data with given PatternKit; proceeding to next...",
+                      e);
+                  return null;
+                }
+              });
     }
   }
 }

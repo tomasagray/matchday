@@ -19,9 +19,7 @@
 
 package self.me.matchday.api.service;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -33,18 +31,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
-import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
+import self.me.matchday.plugin.datasource.TestDataSourcePlugin;
 import self.me.matchday.util.Log;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -62,7 +57,8 @@ class DataSourceServiceTest {
   @BeforeAll
   static void setUp(
       @Autowired final TestDataCreator testDataCreator,
-      @Autowired @NotNull final DataSourceService dataSourceService,
+      @Autowired final TestDataSourcePlugin testDataSourcePlugin,
+      @Autowired final @NotNull DataSourceService dataSourceService,
       @Autowired final EventService eventService) {
 
     DataSourceServiceTest.testDataCreator = testDataCreator;
@@ -70,7 +66,7 @@ class DataSourceServiceTest {
     DataSourceServiceTest.eventService = eventService;
 
     // Create test plugin & register
-    DataSourceServiceTest.testDataSourcePlugin = new TestDataSourcePlugin();
+    DataSourceServiceTest.testDataSourcePlugin = testDataSourcePlugin;
     dataSourceService.getDataSourcePlugins().add(testDataSourcePlugin);
   }
 
@@ -78,10 +74,6 @@ class DataSourceServiceTest {
   static void tearDown() {
 
     Log.i(LOG_TAG, "Deleting test data...");
-
-    // Delete test data
-    final Event testMatch = ((TestDataSourcePlugin) testDataSourcePlugin).getTestMatch();
-    eventService.deleteEvent(testMatch);
     final boolean removed = dataSourceService.getDataSourcePlugins().remove(testDataSourcePlugin);
     assertThat(removed).isTrue();
   }
@@ -124,8 +116,8 @@ class DataSourceServiceTest {
   @DisplayName("Ensure plugins can be enabled")
   void enablePlugin() {
 
+    dataSourceService.getDataSourcePlugins().add(testDataSourcePlugin);
     final UUID testPluginId = testDataSourcePlugin.getPluginId();
-    Log.i(LOG_TAG, "Attempting to enabled plugin: " + testPluginId);
 
     // Attempt to enable plugin
     final boolean enabled = dataSourceService.enablePlugin(testPluginId);
@@ -206,51 +198,20 @@ class DataSourceServiceTest {
     assertThat(actualPluginCount).isGreaterThanOrEqualTo(expectedPluginCount);
   }
 
-  private static class TestDataSourcePlugin implements DataSourcePlugin<Event> {
+  @Test
+  @DisplayName("Validate that a DataSource can be added to the database")
+  void addDataSource() {
 
-    private final UUID pluginId = UUID.randomUUID();
-    private final Event testMatch = testDataCreator.createTestMatch();
-    private final Stream<Event> testEvents = Stream.of(testMatch);
+    final DataSource testDataSource = TestDataCreator.readTestDataSource();
+    Log.i(LOG_TAG, "Read test DataSource:\n" + testDataSource);
+    final DataSource addedDataSource =
+        testDataSourcePlugin.addDataSource(
+            testDataSource.getBaseUri(), testDataSource.getMetadataPatterns());
+    Log.i(LOG_TAG, "Added DataSource to database:\n" + addedDataSource);
 
-    public Event getTestMatch() {
-      return this.testMatch;
-    }
-
-    @Override
-    public UUID getPluginId() {
-      return this.pluginId;
-    }
-
-    @Contract(pure = true)
-    @Override
-    public @NotNull String getTitle() {
-      return "Test data source plugin";
-    }
-
-    @Contract(pure = true)
-    @Override
-    public @NotNull String getDescription() {
-      return "A description";
-    }
-
-    @Contract("_ -> new")
-    @Override
-    public @NotNull Snapshot<Event> getAllSnapshots(@NotNull SnapshotRequest request) {
-      return new Snapshot<>(testEvents);
-    }
-
-    @Contract(pure = true)
-    @Override
-    public @Nullable Snapshot<Event> getSnapshot(
-        @NotNull SnapshotRequest request, @NotNull DataSource dataSource) {
-      return null;
-    }
-
-    @Contract(pure = true)
-    @Override
-    public @Nullable DataSource addDataSource(
-        @NotNull URI uri, @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns) {
-      return null;
-    }
+    assertThat(addedDataSource).isNotNull();
+    assertThat(addedDataSource.getBaseUri()).isEqualTo(testDataSource.getBaseUri());
+    assertThat(addedDataSource.getMetadataPatterns().size())
+        .isEqualTo(testDataSource.getMetadataPatterns().size());
   }
 }

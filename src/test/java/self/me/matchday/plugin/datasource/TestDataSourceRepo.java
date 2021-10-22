@@ -17,36 +17,11 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.blogger;
+package self.me.matchday.plugin.datasource;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import self.me.matchday.model.DataSource;
-import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
 
-import javax.persistence.Entity;
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-
-@Entity
-@NoArgsConstructor
-public class BloggerDataSource extends DataSource {
-
-  @Getter @Setter private SourceType sourceType;
-
-  public BloggerDataSource(
-      @NotNull URI baseUri,
-      @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns,
-      @NotNull UUID pluginId) {
-
-    super(baseUri, metadataPatterns, pluginId);
-  }
-
-  public enum SourceType {
-    HTML,
-    JSON,
-  }
-}
+@Repository
+public interface TestDataSourceRepo extends JpaRepository<DataSource, Long> {}

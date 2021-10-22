@@ -19,6 +19,9 @@
 
 package self.me.matchday;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.*;
 import self.me.matchday.model.*;
 import self.me.matchday.model.video.*;
+import self.me.matchday.plugin.datasource.blogger.BloggerDataSource;
 import self.me.matchday.util.Log;
+import self.me.matchday.util.ResourceFileReader;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static self.me.matchday.model.video.VideoFile.EventPartIdentifier.*;
@@ -57,6 +63,22 @@ public class TestDataCreator {
   private final VideoStreamLocatorPlaylistRepo locatorPlaylistRepo;
   private final VideoStreamLocatorRepo streamLocatorRepo;
 
+  private static final Gson gson;
+
+  static {
+    gson =
+        new GsonBuilder()
+            .registerTypeAdapter(
+                Pattern.class,
+                (JsonDeserializer<Pattern>)
+                    (json, typeOfT, context) -> {
+                      final String pattern = json.getAsJsonObject().get("pattern").getAsString();
+                      return Pattern.compile(pattern, Pattern.UNICODE_CASE);
+                    })
+            .create();
+  }
+
+  // todo - make test versions of all repos!
   @Autowired
   public TestDataCreator(
       @NotNull final EventRepository eventRepository,
@@ -78,6 +100,16 @@ public class TestDataCreator {
     this.userRepo = userRepo;
     this.locatorPlaylistRepo = locatorPlaylistRepo;
     this.streamLocatorRepo = locatorRepo;
+  }
+
+  // ======================== DATA SOURCE ========================
+  public static DataSource readTestDataSource() {
+
+    final String dataSourceJson =
+        ResourceFileReader.readTextResource(TestDataCreator.class, "test_blogger_datasource.json");
+    final BloggerDataSource testDataSource = gson.fromJson(dataSourceJson, BloggerDataSource.class);
+    Log.i(LOG_TAG, "Read test datasource:\n" + testDataSource);
+    return testDataSource;
   }
 
   // ================ EVENTS ======================

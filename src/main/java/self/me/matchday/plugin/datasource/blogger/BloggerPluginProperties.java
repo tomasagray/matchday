@@ -19,6 +19,7 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
+import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +38,7 @@ public class BloggerPluginProperties extends PluginProperties {
   private String bloggerUrlPattern;
   private String jsonUrlPattern;
   private String dateTimeFormatPattern;
+  @Getter private String queryUrlPrefix;
 
   public Pattern getBloggerUrlPattern() {
     return Pattern.compile(bloggerUrlPattern);

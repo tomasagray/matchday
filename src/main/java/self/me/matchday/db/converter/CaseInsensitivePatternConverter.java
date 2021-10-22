@@ -33,6 +33,8 @@ public class CaseInsensitivePatternConverter implements AttributeConverter<Patte
 
   @Override
   public Pattern convertToEntityAttribute(String dbData) {
-    return dbData == null ? null : Pattern.compile(dbData, Pattern.CASE_INSENSITIVE);
+    return dbData == null
+        ? null
+        : Pattern.compile(dbData, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
   }
 }

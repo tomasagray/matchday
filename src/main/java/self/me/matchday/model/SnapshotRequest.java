@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -20,14 +20,11 @@
 package self.me.matchday.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.springframework.format.annotation.DateTimeFormat;
 
 @ToString
 @Builder
@@ -41,9 +38,11 @@ public class SnapshotRequest {
   @JsonFormat(pattern = DATE_PATTERN)
   @DateTimeFormat(pattern = DATE_PATTERN)
   private LocalDateTime endDate;
+
   @JsonFormat(pattern = DATE_PATTERN)
   @DateTimeFormat(pattern = DATE_PATTERN)
   private LocalDateTime startDate;
+
   private boolean fetchBodies;
   private boolean fetchImages;
   private int maxResults;
@@ -51,5 +50,4 @@ public class SnapshotRequest {
   private String orderBy;
   private String pageToken;
   private String status;
-
 }

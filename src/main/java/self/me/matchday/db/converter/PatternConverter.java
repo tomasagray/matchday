@@ -33,6 +33,6 @@ public class PatternConverter implements AttributeConverter<Pattern, String> {
 
   @Override
   public Pattern convertToEntityAttribute(String dbData) {
-    return dbData != null ? Pattern.compile(dbData) : null;
+    return dbData != null ? Pattern.compile(dbData, Pattern.UNICODE_CASE) : null;
   }
 }

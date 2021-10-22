@@ -39,5 +39,6 @@ public interface DataSourcePlugin<T> extends Plugin {
       throws IOException;
 
   DataSource addDataSource(
-      @NotNull final URI uri, @NotNull final List<VideoSourceMetadataPatternKit> metadataPatterns);
+      @NotNull final URI baseUri,
+      @NotNull final List<VideoSourceMetadataPatternKit> metadataPatterns);
 }
