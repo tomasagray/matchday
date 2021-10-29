@@ -108,8 +108,6 @@ public class VideoFile implements Comparable<VideoFile> {
 
   /** Event part identifiers */
   public enum EventPartIdentifier {
-    // todo - remove patterns, order
-
     DEFAULT(""),
     PRE_MATCH("Pre-Match"),
     FIRST_HALF("1st Half"),

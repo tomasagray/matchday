@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -164,6 +165,7 @@ public class BloggerPlugin implements DataSourcePlugin<Event> {
             entry -> {
               final String content = entry.getContent().getData();
               return EntryParser.parse(content).with(metadataPatterns);
-            });
+            })
+        .filter(Objects::nonNull);
   }
 }
