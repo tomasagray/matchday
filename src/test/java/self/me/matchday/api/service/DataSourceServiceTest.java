@@ -49,19 +49,16 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class DataSourceServiceTest {
 
   private static final String LOG_TAG = "DataSourceServiceTest";
-  private static TestDataCreator testDataCreator;
   private static DataSourceService dataSourceService;
   private static EventService eventService;
   private static DataSourcePlugin<Event> testDataSourcePlugin;
 
   @BeforeAll
   static void setUp(
-      @Autowired final TestDataCreator testDataCreator,
       @Autowired final TestDataSourcePlugin testDataSourcePlugin,
       @Autowired final @NotNull DataSourceService dataSourceService,
       @Autowired final EventService eventService) {
 
-    DataSourceServiceTest.testDataCreator = testDataCreator;
     DataSourceServiceTest.dataSourceService = dataSourceService;
     DataSourceServiceTest.eventService = eventService;
 

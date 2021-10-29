@@ -73,7 +73,7 @@ public class TestDataSourcePlugin implements DataSourcePlugin<Event> {
   @Override
   public @Nullable Snapshot<Event> getSnapshot(
       @NotNull SnapshotRequest request, @NotNull DataSource dataSource) {
-    return null;
+    return Snapshot.of(Stream.of(testDataCreator.createTestMatch()));
   }
 
   @Contract(pure = true)

@@ -108,7 +108,9 @@ class BloggerPluginTest {
 
   @Test
   @Disabled
-  void getAllSnapshots() {}
+  void getAllSnapshots() {
+    // todo - getAllSnapshots test
+  }
 
   @Test
   @DisplayName("Get a Snapshot from the test DataSource")
