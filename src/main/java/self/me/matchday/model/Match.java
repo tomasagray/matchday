@@ -31,7 +31,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -47,11 +46,9 @@ import java.util.Objects;
 @Setter
 @Entity
 @Table(name = "Matches")
-public class Match extends Event implements Serializable {
+public class Match extends Event {
 
   // todo - delete this class, related
-
-  private static final long serialVersionUID = 123456L; // for cross-platform serialization
 
   // Default constructor
   public Match() {

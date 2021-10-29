@@ -21,6 +21,8 @@ package self.me.matchday.model;
 
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.Corrected;
+import self.me.matchday.CorrectedOrNull;
 import self.me.matchday.model.video.VideoFileSource;
 
 import javax.persistence.*;
@@ -48,12 +50,15 @@ public class Event {
 
   @Id protected String eventId;
 
+  @Corrected
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Competition competition;
 
+  @CorrectedOrNull
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Team homeTeam;
 
+  @CorrectedOrNull
   @ManyToOne(cascade = CascadeType.MERGE)
   protected Team awayTeam;
 
