@@ -19,8 +19,6 @@
 
 package self.me.matchday.plugin.fileserver.inclouddrive;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -36,6 +34,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
+import self.me.matchday.util.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,11 +58,8 @@ public class IcdPlugin implements FileServerPlugin {
   public static final int COOKIE_MAX_DAYS = 10;
   public static final String COOKIE_DOMAIN = ".inclouddrive.com";
 
-  // Dependencies
   private final IcdPluginProperties pluginProperties;
   private final WebClient webClient;
-  private final Gson gson;
-  // Fields
   private final Pattern acceptsUrlPattern;
   private final Duration refreshRate;
 
@@ -73,7 +69,6 @@ public class IcdPlugin implements FileServerPlugin {
     // initialize dependencies
     this.pluginProperties = pluginProperties;
     this.webClient = WebClient.create(pluginProperties.getBaseUrl().toString());
-    gson = new Gson();
 
     // initialize fields
     acceptsUrlPattern = Pattern.compile(this.pluginProperties.getUrlPattern());
@@ -127,7 +122,7 @@ public class IcdPlugin implements FileServerPlugin {
 
         // Parse response body
         final String responseBody = response.bodyToMono(String.class).block();
-        final IcdMessage icdMessage = gson.fromJson(responseBody, IcdMessage.class);
+        final IcdMessage icdMessage = JsonParser.fromJson(responseBody, IcdMessage.class);
 
         // Check for hidden error
         if ("error".equals(icdMessage.getResult())) {
@@ -157,7 +152,7 @@ public class IcdPlugin implements FileServerPlugin {
       } else {
         result = response;
       }
-    } catch (JsonSyntaxException | NullPointerException e) {
+    } catch (NullPointerException e) {
       // Return useful response to end user
       final String message =
           String.format("Could not parse response from InCloudDrive: %s", e.getMessage());

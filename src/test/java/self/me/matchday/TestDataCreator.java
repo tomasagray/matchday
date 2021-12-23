@@ -30,7 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.*;
 import self.me.matchday.model.*;
 import self.me.matchday.model.video.*;
-import self.me.matchday.plugin.datasource.blogger.BloggerDataSource;
+import self.me.matchday.plugin.datasource.parsing.PatternKit;
+import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -38,9 +39,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -106,10 +105,122 @@ public class TestDataCreator {
   public static DataSource readTestDataSource() {
 
     final String dataSourceJson =
-        ResourceFileReader.readTextResource(TestDataCreator.class, "test_blogger_datasource.json");
-    final BloggerDataSource testDataSource = gson.fromJson(dataSourceJson, BloggerDataSource.class);
+        ResourceFileReader.readTextResource(TestDataCreator.class, filename);
+    final DataSource testDataSource = JsonParser.fromJson(dataSourceJson, DataSource.class);
     Log.i(LOG_TAG, "Read test datasource:\n" + testDataSource);
     return testDataSource;
+  }
+
+  private static void writeTestPatternKit(@NotNull PatternKit<?> patternKit, String filename) {
+
+    final String dataDir =
+        "C:\\Users\\Tomas\\Projects\\Source\\IdeaProjects\\matchday\\src\\test\\resources\\";
+    try (final BufferedWriter writer = new BufferedWriter(new FileWriter(dataDir + filename))) {
+      final Type type = TypeToken.get(patternKit.getClass()).getType();
+      final String json = JsonParser.toJson(patternKit, type);
+      writer.write(json);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public PatternKit<Event> createEventPatternKit() {
+    return
+    //        createEventPatternKitManually();
+    createEventPatternKitFromFile();
+  }
+
+  private @NotNull PatternKit<Event> createEventPatternKitManually() {
+
+    final PatternKit<Event> patternKit = new PatternKit<>(Event.class);
+    patternKit.setPattern(
+        Pattern.compile(
+            "([\\p{L}\\d\\s]+) (\\d{2,4}/\\d{2,4})[-Matchdy\\s]*(\\d+)[\\s-]*([\\p{L}\\s-]+) "
+                + "vs.? ([\\p{L}\\s-]+) - (\\d{2}/\\d{2}/\\d{2,4})",
+            Pattern.UNICODE_CASE));
+
+    Map<Integer, Class<?>> indexes = new HashMap<>();
+    indexes.put(1, Competition.class);
+    indexes.put(2, Season.class);
+    indexes.put(3, Fixture.class);
+    indexes.put(4, Team.class);
+    indexes.put(5, Team.class);
+    indexes.put(6, LocalDateTime.class);
+    patternKit.setIndexes(indexes);
+    return patternKit;
+  }
+
+  private PatternKit<Event> createEventPatternKitFromFile() {
+
+    final String patternKitData =
+        ResourceFileReader.readTextResource(TestDataCreator.class, "test_event_pattern_kit.json");
+    final Type type = new TypeToken<PatternKit<Event>>() {}.getType();
+    return JsonParser.fromJson(patternKitData, type);
+  }
+
+  public PatternKit<VideoFileSource> createFileSourcePatternKit() {
+    return
+    //      createFileSourcePatternKitManually();
+    createFileSourcePatternFromFile();
+  }
+
+  @NotNull
+  public PatternKit<VideoFileSource> createFileSourcePatternKitManually() {
+
+    final Pattern pattern =
+        Pattern.compile(
+            "Channel[\\s\\p{L}]*:? ([\\p{L}\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\d-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+) (\\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
+            Pattern.UNICODE_CASE);
+    final Map<Integer, Class<?>> indexes =
+        new HashMap<>(
+            Map.of(
+                1,
+                String.class, // channel
+                /*"source":*/ 2,
+                String.class,
+                /*"languages":*/ 3,
+                String.class,
+                /*"videoBitrate":*/ 4,
+                Long.class,
+                /*"videoCodec":*/ 5,
+                String.class,
+                /*"container":*/ 6,
+                String.class,
+                /*"framerate":*/ 7,
+                Integer.class,
+                /*"audioBitrate":*/ 8,
+                Long.class,
+                /*"audioCodec":*/ 9,
+                String.class,
+                /*"audioChannels":*/ 10,
+                Integer.class));
+    indexes.putAll(
+        Map.of(
+            /*"duration":*/ 11,
+            String.class,
+            /*"filesize":*/ 12,
+            Long.class,
+            13,
+            Resolution.class));
+
+    return new PatternKit<>(null, indexes, pattern, VideoFileSource.class);
+  }
+
+  public PatternKit<VideoFileSource> createFileSourcePatternFromFile() {
+
+    final String patternKitData =
+        ResourceFileReader.readTextResource(
+            TestDataCreator.class, "test_filesource_pattern_kit.json");
+    final Type type = new TypeToken<PatternKit<VideoFileSource>>() {}.getType();
+    return JsonParser.fromJson(patternKitData, type);
+  }
+
+  public List<? extends Event> getExpectedTestEventData() {
+
+    final Type type = new TypeToken<List<? extends Event>>() {}.getType();
+    final String testDataJson =
+        ResourceFileReader.readTextResource(TestDataCreator.class, "test_entity_parser_data.json");
+    return JsonParser.fromJson(testDataJson, type);
   }
 
   // ================ EVENTS ======================
@@ -295,5 +406,23 @@ public class TestDataCreator {
   public void deleteFileServerUser(@NotNull final FileServerUser user) {
     Log.i(LOG_TAG, "Deleting FileServerUser: " + user);
     userRepo.delete(user);
+  }
+
+  public Highlight createHighlightShow() {
+
+    // Create test highlight show
+    //    final String title = "Test Highlight Show " + numGen.nextInt();
+    final Competition testCompetition = createTestCompetition();
+    final Fixture testFixture = new Fixture(numGen.nextInt(34));
+    final Season testSeason = new Season();
+
+    final Highlight highlight =
+        Highlight.highlightBuilder()
+            .competition(testCompetition)
+            .fixture(testFixture)
+            .season(testSeason)
+            .date(LocalDateTime.now())
+            .build();
+    return highlightRepository.saveAndFlush(highlight);
   }
 }

@@ -19,7 +19,6 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -28,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
+import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -67,7 +67,7 @@ class FFprobeTest {
     String sampleMetadata =
         ResourceFileReader.readTextResource(FFprobeTest.class, SAMPLE_METADATA_JSON);
     // Parse JSON to object
-    expectedMetadata = new Gson().fromJson(sampleMetadata, FFmpegMetadata.class);
+    expectedMetadata = JsonParser.fromJson(sampleMetadata, FFmpegMetadata.class);
 
     // Create FFprobe instance
     Log.i(LOG_TAG, "Instantiating FFprobe with executable: " + FFPROBE_PATH);

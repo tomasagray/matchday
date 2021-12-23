@@ -22,6 +22,7 @@ package self.me.matchday.api.service;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.EventRepository;
 import self.me.matchday.db.VideoFileSrcRepository;
 import self.me.matchday.model.Competition;
@@ -110,13 +111,17 @@ public class EventService {
    *
    * @param event The Event to be saved
    */
+  @Transactional
   public void saveEvent(@NotNull final Event event) {
     try {
       validateEvent(event);
       // See if Event already exists in DB
-      final Optional<Event> eventOptional = fetchById(event.getEventId());
-      // Merge VideoFileSources
-      eventOptional.ifPresent(value -> event.getFileSources().addAll(value.getFileSources()));
+      final String eventId = event.getEventId();
+      if (eventId != null) {
+        final Optional<Event> eventOptional = fetchById(eventId);
+        // Merge VideoFileSources
+        eventOptional.ifPresent(value -> event.getFileSources().addAll(value.getFileSources()));
+      }
       // Save to DB
       Log.i(LOG_TAG, "Saved event: " + eventRepository.saveAndFlush(event));
     } catch (Exception e) {
@@ -144,22 +149,15 @@ public class EventService {
     if (event == null) {
       reject("Event is null");
     }
-    // Validate title
-    final String title = event.getTitle();
-    if (!isTitleValid(title)) {
-      reject("title invalid: " + title);
-    }
-    // Validate Competition
+
     final Competition competition = event.getCompetition();
     if (!isValidCompetition(competition)) {
       reject("invalid competition: " + competition);
     }
-    // Validate date
     final LocalDateTime date = event.getDate();
     if (!isValidDate(date)) {
       reject("invalid date: " + date);
     }
-    // Validate video file references
     final Set<VideoFileSource> fileSources = event.getFileSources();
     if (!isValidVideoFiles(fileSources)) {
       reject("no video files!");
@@ -168,10 +166,6 @@ public class EventService {
 
   private void reject(@NotNull final String message) {
     throw new IllegalArgumentException("Event rejected; " + message);
-  }
-
-  private boolean isTitleValid(final String title) {
-    return title != null && !("".equals(title));
   }
 
   private boolean isValidCompetition(final Competition competition) {

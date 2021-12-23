@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2021.
  *
  * This file is part of Matchday.
  *
@@ -19,9 +19,8 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.util.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,14 +34,10 @@ import java.util.stream.Collectors;
 public class FFprobe {
 
   private final List<String> baseArgs;
-  private final Gson gson;
   private String result;
-  private int processResult;
 
   public FFprobe(@NotNull final String execPath) {
 
-    // Create JSON parser
-    this.gson = new Gson();
     // Setup global CLI arguments
     baseArgs =
         List.of(
@@ -63,16 +58,8 @@ public class FFprobe {
    */
   public FFmpegMetadata getFileMetadata(@NotNull final URI uri) throws IOException {
 
-    try {
-      // Read remote file metadata
-      readFileMetadata(uri);
-      // Parse data from JSON to metadata object
-      return gson.fromJson(result, FFmpegMetadata.class);
-
-    } catch (JsonSyntaxException e) {
-      throw new IOException(
-          String.format("Could not parse JSON from String, exit value: %s", processResult), e);
-    }
+    readFileMetadata(uri);
+    return JsonParser.fromJson(result, FFmpegMetadata.class);
   }
 
   /**
@@ -100,7 +87,7 @@ public class FFprobe {
 
     } finally {
       // Ensure process closed
-      processResult = process.exitValue();
+      int processResult = process.exitValue();
       process.destroy();
     }
   }

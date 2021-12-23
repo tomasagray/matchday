@@ -19,8 +19,8 @@
 
 package self.me.matchday.db.converter;
 
-import com.google.gson.Gson;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
+import self.me.matchday.util.JsonParser;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
@@ -28,16 +28,13 @@ import javax.persistence.Converter;
 @Converter
 public class FFmpegMetadataConverter implements AttributeConverter<FFmpegMetadata, String> {
 
-  // Use a single Gson instance for all conversions
-  private final Gson gson = new Gson();
-
   @Override
   public String convertToDatabaseColumn(FFmpegMetadata attribute) {
-    return gson.toJson(attribute);
+    return JsonParser.toJson(attribute);
   }
 
   @Override
   public FFmpegMetadata convertToEntityAttribute(String dbData) {
-    return gson.fromJson(dbData, FFmpegMetadata.class);
+    return JsonParser.fromJson(dbData, FFmpegMetadata.class);
   }
 }

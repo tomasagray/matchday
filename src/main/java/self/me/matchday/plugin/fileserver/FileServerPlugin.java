@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Represents a file server management service. Can log-in/logout and translate download requests.
+ * Represents a file server management service. Can log in/log out and translate download requests.
  */
 public interface FileServerPlugin extends Plugin {
 

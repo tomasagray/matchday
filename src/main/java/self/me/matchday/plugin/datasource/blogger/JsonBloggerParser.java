@@ -19,33 +19,14 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.plugin.datasource.blogger.model.Blogger;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import self.me.matchday.util.JsonParser;
 
 public class JsonBloggerParser implements BloggerParser {
 
-  private static final Gson gson;
-
-  static {
-    gson =
-        new GsonBuilder()
-            .registerTypeAdapter(
-                LocalDateTime.class,
-                (JsonDeserializer<LocalDateTime>)
-                    (json, type, jsonDeserializationContext) ->
-                        LocalDateTime.parse(
-                            json.getAsString(), DateTimeFormatter.ofPattern(DATETIME_PATTERN)))
-            .create();
-  }
-
   @Override
   public Blogger getBlogger(@NotNull final String data) {
-    return gson.fromJson(data, Blogger.class);
+    return JsonParser.fromJson(data, Blogger.class);
   }
 }
