@@ -1,18 +1,18 @@
 {
-  "baseUri": "https://galatamanhdfb.blogspot.com",
+  "baseUri": "https://fb11710500.blogspot.com/feeds/posts/default/",
   "metadataPatterns": [
     {
       "eventPatternKit": {
         "eventMetadataRegex": {
-          "pattern": "([\\p{L}\\s]+) (\\d{2,4}/\\d{2,4})[-Matchdy\\s]*(\\d+)[\\s-]*(\\d{2}/\\d{2}/\\d{2,4}) ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) _+",
+          "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4})[-Matchdy\\s]*(\\d+)[\\s-]*([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
           "flags": 64
         },
         "competitionName": 1,
-        "homeTeamName": 5,
-        "awayTeamName": 6,
+        "homeTeamName": 4,
+        "awayTeamName": 5,
         "season": 2,
         "fixture": 3,
-        "date": 4
+        "date": 6
       },
       "fileSourcePatternKits": [
         {
@@ -47,13 +47,14 @@
     {
       "eventPatternKit": {
         "eventMetadataRegex": {
-          "pattern": "(?:FÚTBOL:\\s)*([\\p{L}\\s]*)[\\s-]*(\\d{2}/\\d{2}/\\d{2,4}) ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) _+",
+          "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4}) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
           "flags": 64
         },
         "competitionName": 1,
-        "date": 2,
-        "homeTeamName": 3,
-        "awayTeamName": 4
+        "season": 2,
+        "date": 3,
+        "homeTeamName": 4,
+        "awayTeamName": 5
       },
       "fileSourcePatternKits": [
         {

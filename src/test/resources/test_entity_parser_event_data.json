@@ -1,0 +1,134 @@
+[
+  {
+    "competition": {
+      "competitionId": "d41d8cd98f00b204e9800998ecf8427e",
+      "name": "EPL",
+      "abbreviation": "EPL"
+    },
+    "homeTeam": {
+      "name": "Brentford",
+      "abbreviation": "BRE"
+    },
+    "awayTeam": {
+      "name": "Watford",
+      "abbreviation": "WAT"
+    },
+    "season": {
+      "startDate": {
+        "year": 2021,
+        "month": 8,
+        "day": 1
+      },
+      "endDate": {
+        "year": 2022,
+        "month": 5,
+        "day": 31
+      }
+    },
+    "fixture": {
+      "title": "Matchday",
+      "fixtureNumber": 16
+    },
+    "fileSources": [],
+    "date": "2021-12-10T00:00:00"
+  },
+  {
+    "competition": {
+      "competitionId": "d41d8cd98f00b204e9800998ecf8427e",
+      "name": "Watford Bundesliga",
+      "abbreviation": "WAT"
+    },
+    "homeTeam": {
+      "name": "FC Köln",
+      "abbreviation": "FCK"
+    },
+    "awayTeam": {
+      "name": "Augsburg",
+      "abbreviation": "AUG"
+    },
+    "season": {
+      "startDate": {
+        "year": 2021,
+        "month": 8,
+        "day": 1
+      },
+      "endDate": {
+        "year": 2022,
+        "month": 5,
+        "day": 31
+      }
+    },
+    "fixture": {
+      "title": "Matchday",
+      "fixtureNumber": 15
+    },
+    "fileSources": [],
+    "date": "2021-12-10T00:00:00"
+  },
+  {
+    "competition": {
+      "competitionId": "d41d8cd98f00b204e9800998ecf8427e",
+      "name": "UEFA Conference League UEL",
+      "abbreviation": "UEF"
+    },
+    "homeTeam": {
+      "name": "Lazio",
+      "abbreviation": "LAZ"
+    },
+    "awayTeam": {
+      "name": "Galatasaray",
+      "abbreviation": "GAL"
+    },
+    "season": {
+      "startDate": {
+        "year": 2021,
+        "month": 8,
+        "day": 1
+      },
+      "endDate": {
+        "year": 2022,
+        "month": 5,
+        "day": 31
+      }
+    },
+    "fixture": {
+      "title": "Matchday",
+      "fixtureNumber": 6
+    },
+    "fileSources": [],
+    "date": "2021-12-09T00:00:00"
+  },
+  {
+    "competition": {
+      "competitionId": "d41d8cd98f00b204e9800998ecf8427e",
+      "name": "Lazio UEL",
+      "abbreviation": "LAZ"
+    },
+    "homeTeam": {
+      "name": "West Ham United",
+      "abbreviation": "WES"
+    },
+    "awayTeam": {
+      "name": "Dinamo Zagreb",
+      "abbreviation": "DIN"
+    },
+    "season": {
+      "startDate": {
+        "year": 2021,
+        "month": 8,
+        "day": 1
+      },
+      "endDate": {
+        "year": 2022,
+        "month": 5,
+        "day": 31
+      }
+    },
+    "fixture": {
+      "title": "Matchday",
+      "fixtureNumber": 6
+    },
+    "fileSources": [],
+    "date": "2021-12-09T00:00:00"
+  }
+]

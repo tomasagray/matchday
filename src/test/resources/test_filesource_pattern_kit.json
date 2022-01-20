@@ -1,0 +1,22 @@
+{
+  "fields": {
+    "1": "channel",
+    "2": "source",
+    "3": "languages",
+    "4": "videoBitrate",
+    "5": "videoCodec",
+    "6": "mediaContainer",
+    "7": "framerate",
+    "8": "audioBitrate",
+    "9": "audioCodec",
+    "10": "audioChannels",
+    "11": "approximateDuration",
+    "12": "filesize",
+    "13": "resolution"
+  },
+  "pattern": {
+    "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\d-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+) (\\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
+    "flags": 64
+  },
+  "clazz": "self.me.matchday.model.video.VideoFileSource"
+}

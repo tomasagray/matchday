@@ -2,12 +2,12 @@
   "version": "1.0",
   "encoding": "UTF-8",
   "feed": {
-    "xmlns": "http://www.w3.org/2005/Atom",
-    "xmlns$openSearch": "http://a9.com/-/spec/opensearchrss/1.0/",
-    "xmlns$blogger": "http://schemas.google.com/blogger/2008",
-    "xmlns$georss": "http://www.georss.org/georss",
-    "xmlns$gd": "http://schemas.google.com/g/2005",
-    "xmlns$thr": "http://purl.org/syndication/thread/1.0",
+    "xmlns": "https://www.w3.org/2005/Atom",
+    "xmlns$openSearch": "https://a9.com/-/spec/opensearchrss/1.0/",
+    "xmlns$blogger": "https://schemas.google.com/blogger/2008",
+    "xmlns$georss": "https://www.georss.org/georss",
+    "xmlns$gd": "https://schemas.google.com/g/2005",
+    "xmlns$thr": "https://purl.org/syndication/thread/1.0",
     "id": {
       "$t": "tag:blogger.com,1999:blog-3007373617851084235"
     },
@@ -3443,7 +3443,7 @@
     },
     "link": [
       {
-        "rel": "http://schemas.google.com/g/2005#feed",
+        "rel": "https://schemas.google.com/g/2005#feed",
         "type": "application/atom+xml",
         "href": "https:\/\/fb11710500.blogspot.com\/feeds\/posts\/default"
       },
@@ -3459,7 +3459,7 @@
       },
       {
         "rel": "hub",
-        "href": "http://pubsubhubbub.appspot.com/"
+        "href": "https://pubsubhubbub.appspot.com/"
       },
       {
         "rel": "next",
@@ -3473,13 +3473,13 @@
           "$t": "FULL MATCHES DOWNLOAD"
         },
         "uri": {
-          "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+          "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
         },
         "email": {
           "$t": "noreply@blogger.com"
         },
         "gd$image": {
-          "rel": "http://schemas.google.com/g/2005#thumbnail",
+          "rel": "https://schemas.google.com/g/2005#thumbnail",
           "width": "16",
           "height": "16",
           "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -3488,7 +3488,7 @@
     ],
     "generator": {
       "version": "7.00",
-      "uri": "http://www.blogger.com",
+      "uri": "https://www.blogger.com",
       "$t": "Blogger"
     },
     "openSearch$totalResults": {
@@ -3513,15 +3513,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Eintracht Braunschweig"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "German Bundesliga 2"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Paderborn"
           }
         ],
@@ -3569,13 +3569,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -3598,15 +3598,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Darmstadt"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "German Bundesliga 2"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Greuther Fürth"
           }
         ],
@@ -3654,13 +3654,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -3683,7 +3683,7 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Moto GP"
           }
         ],
@@ -3731,13 +3731,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -3760,15 +3760,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Juárez (MEX)"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Mexico Liga MX"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Tigres UANL"
           }
         ],
@@ -3816,13 +3816,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -3845,7 +3845,7 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Formula 1 (F1)"
           }
         ],
@@ -3893,13 +3893,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -3922,15 +3922,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Club Bolivar"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Copa Libertadores"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Junior Barranquilla FC"
           }
         ],
@@ -3978,13 +3978,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4007,15 +4007,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Atlético Pantoja"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "CONCACAF Champions League"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Monterrey"
           }
         ],
@@ -4063,13 +4063,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4092,15 +4092,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Columbus Crew"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "CONCACAF Champions League"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Real Estelí"
           }
         ],
@@ -4148,13 +4148,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4177,7 +4177,7 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "UEFA Europa League (UEL)"
           }
         ],
@@ -4225,13 +4225,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4254,7 +4254,7 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "UEFA Europa League (UEL)"
           }
         ],
@@ -4302,13 +4302,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4331,15 +4331,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Coventry City"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "English League Championship"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Rotherham United"
           }
         ],
@@ -4387,13 +4387,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4416,15 +4416,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Arsenal FC"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Slavia Praha"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "UEFA Europa League (UEL)"
           }
         ],
@@ -4472,13 +4472,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4501,15 +4501,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Ajax Amsterdam"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "AS Roma"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "UEFA Europa League (UEL)"
           }
         ],
@@ -4557,13 +4557,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4586,15 +4586,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Dinamo Zagreb"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "UEFA Europa League (UEL)"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Villarreal"
           }
         ],
@@ -4642,13 +4642,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4671,15 +4671,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Granada"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Manchester United"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "UEFA Europa League (UEL)"
           }
         ],
@@ -4727,13 +4727,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4756,15 +4756,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "América RN"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Copa do Brasil"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Cruzeiro"
           }
         ],
@@ -4812,13 +4812,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4841,15 +4841,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "CONCACAF Champions League"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Deportivo Saprissa"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Philadelphia Union"
           }
         ],
@@ -4897,13 +4897,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -4926,15 +4926,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "CD Olimpia"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Club America"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "CONCACAF Champions League"
           }
         ],
@@ -4982,13 +4982,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -5011,15 +5011,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Atletico Nacional"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Club Libertad"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Copa Libertadores"
           }
         ],
@@ -5067,13 +5067,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -5096,15 +5096,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Defensa y Justicia"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Palmeiras"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Recopa Sudamericana"
           }
         ],
@@ -5152,13 +5152,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -5181,15 +5181,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Copa Sudamericana"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Fenix"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Torque"
           }
         ],
@@ -5237,13 +5237,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -5266,15 +5266,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Copa Libertadores"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Gremio"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Independiente del Valle"
           }
         ],
@@ -5322,13 +5322,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -5351,15 +5351,15 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Club León"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "CONCACAF Champions League"
           },
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "Toronto FC"
           }
         ],
@@ -5407,13 +5407,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -5436,7 +5436,7 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "UEFA Champions League"
           }
         ],
@@ -5484,13 +5484,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
@@ -5513,7 +5513,7 @@
         },
         "category": [
           {
-            "scheme": "http://www.blogger.com/atom/ns#",
+            "scheme": "https://www.blogger.com/atom/ns#",
             "term": "UEFA Champions League"
           }
         ],
@@ -5561,13 +5561,13 @@
               "$t": "FULL MATCHES DOWNLOAD"
             },
             "uri": {
-              "$t": "http:\/\/www.blogger.com\/profile\/05700646228779463727"
+              "$t": "https:\/\/www.blogger.com\/profile\/05700646228779463727"
             },
             "email": {
               "$t": "noreply@blogger.com"
             },
             "gd$image": {
-              "rel": "http://schemas.google.com/g/2005#thumbnail",
+              "rel": "https://schemas.google.com/g/2005#thumbnail",
               "width": "16",
               "height": "16",
               "src": "https:\/\/img1.blogblog.com\/img\/b16-rounded.gif"
