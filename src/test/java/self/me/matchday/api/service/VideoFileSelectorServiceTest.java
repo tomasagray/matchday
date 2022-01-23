@@ -99,14 +99,14 @@ class VideoFileSelectorServiceTest {
     final VideoFilePack testFileList = fileSelectorService.getPlaylistFiles(testVideoFileSource);
     Log.i(LOG_TAG, "Testing event file order for: " + testFileList);
 
-    final VideoFile preMatch = testFileList.get(EventPartIdentifier.PRE_MATCH);
-    final VideoFile firstHalf = testFileList.get(EventPartIdentifier.FIRST_HALF);
-    final VideoFile secondHalf = testFileList.get(EventPartIdentifier.SECOND_HALF);
-    final VideoFile postMatch = testFileList.get(EventPartIdentifier.POST_MATCH);
+    final VideoFile preMatch = testFileList.get(PartIdentifier.PRE_MATCH);
+    final VideoFile firstHalf = testFileList.get(PartIdentifier.FIRST_HALF);
+    final VideoFile secondHalf = testFileList.get(PartIdentifier.SECOND_HALF);
+    final VideoFile postMatch = testFileList.get(PartIdentifier.POST_MATCH);
 
-    assertThat(preMatch.getTitle()).isEqualTo(EventPartIdentifier.PRE_MATCH);
-    assertThat(firstHalf.getTitle()).isEqualTo(EventPartIdentifier.FIRST_HALF);
-    assertThat(secondHalf.getTitle()).isEqualTo(EventPartIdentifier.SECOND_HALF);
-    assertThat(postMatch.getTitle()).isEqualTo(EventPartIdentifier.POST_MATCH);
+    assertThat(preMatch.getTitle()).isEqualTo(PartIdentifier.PRE_MATCH);
+    assertThat(firstHalf.getTitle()).isEqualTo(PartIdentifier.FIRST_HALF);
+    assertThat(secondHalf.getTitle()).isEqualTo(PartIdentifier.SECOND_HALF);
+    assertThat(postMatch.getTitle()).isEqualTo(PartIdentifier.POST_MATCH);
   }
 }

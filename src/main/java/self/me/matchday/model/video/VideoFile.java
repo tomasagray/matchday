@@ -20,7 +20,7 @@
 package self.me.matchday.model.video;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.FFmpegMetadataConverter;
@@ -39,15 +39,15 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class VideoFile implements Comparable<VideoFile> {
 
-  private static double DEFAULT_DURATION = 3012.541956d;
+  private static double DEFAULT_DURATION = -1.0;
 
   // Fields
   @Id private String fileId;
   private URL externalUrl;
-  private EventPartIdentifier title;
+  private PartIdentifier title;
 
   @Column(columnDefinition = "LONGTEXT")
   private URL internalUrl;
@@ -59,7 +59,7 @@ public class VideoFile implements Comparable<VideoFile> {
   @Convert(converter = TimestampConverter.class)
   private Timestamp lastRefreshed = new Timestamp(0L);
 
-  public VideoFile(@NotNull final EventPartIdentifier title, @NotNull final URL externalUrl) {
+  public VideoFile(@NotNull final PartIdentifier title, @NotNull final URL externalUrl) {
 
     this.fileId = MD5String.fromData(externalUrl);
     this.title = title;
@@ -104,27 +104,5 @@ public class VideoFile implements Comparable<VideoFile> {
   @Override
   public int compareTo(@NotNull VideoFile test) {
     return this.getTitle().compareTo(test.getTitle());
-  }
-
-  /** Event part identifiers */
-  public enum EventPartIdentifier {
-    DEFAULT(""),
-    PRE_MATCH("Pre-Match"),
-    FIRST_HALF("1st Half"),
-    SECOND_HALF("2nd Half"),
-    EXTRA_TIME("Extra-Time/Penalties"),
-    TROPHY_CEREMONY("Trophy Ceremony"),
-    POST_MATCH("Post-Match");
-
-    private final String name;
-
-    EventPartIdentifier(@NotNull String name) {
-      this.name = name;
-    }
-
-    @Override
-    public String toString() {
-      return this.name;
-    }
   }
 }

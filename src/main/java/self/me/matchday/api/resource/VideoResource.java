@@ -31,8 +31,8 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
+import self.me.matchday.model.video.Resolution;
 import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.model.video.VideoFileSource.Resolution;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;

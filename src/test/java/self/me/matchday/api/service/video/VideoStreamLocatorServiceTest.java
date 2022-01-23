@@ -28,6 +28,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
+import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
@@ -70,7 +71,7 @@ class VideoStreamLocatorServiceTest {
         VideoStreamLocatorServiceTest.testVideoFileSource
             .getVideoFilePacks()
             .get(0)
-            .get(VideoFile.EventPartIdentifier.FIRST_HALF);
+            .get(PartIdentifier.FIRST_HALF);
     // resolve test data storage path
     VideoStreamLocatorServiceTest.testStorage =
         storageLocation.resolve(testVideoFileSource.getFileSrcId());
