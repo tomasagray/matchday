@@ -85,7 +85,7 @@ public class DataSourceController {
   }
 
   @RequestMapping(
-      value = "/data-source/{pluginId}",
+      value = "/plugin/{pluginId}",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<DataSourcePluginResource> getDataSourcePlugin(
@@ -99,7 +99,7 @@ public class DataSourceController {
   }
 
   @RequestMapping(
-      value = "/data-source/{pluginId}/enable",
+      value = "/plugin/{pluginId}/enable",
       method = {RequestMethod.POST, RequestMethod.GET},
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -121,7 +121,7 @@ public class DataSourceController {
   }
 
   @RequestMapping(
-      value = "/data-source/{pluginId}/disable",
+      value = "/plugin/{pluginId}/disable",
       method = {RequestMethod.POST, RequestMethod.GET},
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -143,16 +143,27 @@ public class DataSourceController {
   }
 
   @RequestMapping(
-      value = "/data-source/{pluginId}/add",
+      value = "/add-data-source",
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MessageResource> addDataSource(
-      @PathVariable("pluginId") final UUID pluginId, @RequestBody DataSource dataSource) {
+  public ResponseEntity<MessageResource> addDataSource(@RequestBody DataSource dataSource) {
 
-    final DataSource source = dataSourceService.addDataSource(pluginId, dataSource);
+    final DataSource source = dataSourceService.addDataSource(dataSource);
     final MessageResource messageResource =
         messageResourceAssembler.toModel("Successfully added new DataSource: " + source.getId());
     return ResponseEntity.ok(messageResource);
+  }
+
+  @RequestMapping(
+      value = "/get-data-source/{dataSourceId}",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<DataSource> getDataSource(@PathVariable("dataSourceId") Long dataSourceId) {
+
+    return dataSourceService
+        .getDataSourceById(dataSourceId)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 }

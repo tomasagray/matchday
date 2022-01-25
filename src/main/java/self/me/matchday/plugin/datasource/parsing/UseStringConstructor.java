@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -17,23 +17,22 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource;
+package self.me.matchday.plugin.datasource.parsing;
 
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Snapshot;
-import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.plugin.Plugin;
 
-import java.io.IOException;
+import java.lang.reflect.Constructor;
 
-public interface DataSourcePlugin<T> extends Plugin {
+public class UseStringConstructor implements CreationStrategy {
 
-  Snapshot<? extends T> getAllSnapshots(@NotNull final SnapshotRequest request) throws IOException;
+  @Override
+  public Object apply(String data, @NotNull Class<?> clazz) {
 
-  Snapshot<? extends T> getSnapshot(
-      @NotNull final SnapshotRequest request, @NotNull final DataSource dataSource)
-      throws IOException;
-
-  void validateDataSource(@NotNull DataSource dataSource);
+    try {
+      final Constructor<?> constructor = clazz.getConstructor(String.class);
+      return constructor.newInstance(data);
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

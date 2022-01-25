@@ -23,6 +23,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import self.me.matchday.db.DataSourceRepository;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Snapshot;
@@ -41,19 +42,22 @@ public class DataSourceService {
 
   private static final String LOG_TAG = "DataSourceService";
 
+  private final DataSourceRepository dataSourceRepository;
   @Getter private final Set<DataSourcePlugin<Event>> dataSourcePlugins;
   @Getter private final Set<DataSourcePlugin<Event>> enabledPlugins = new HashSet<>();
   private final EventService eventService;
 
   @Autowired
   DataSourceService(
-      @NotNull final Set<DataSourcePlugin<Event>> dataSourcePlugins,
-      @NotNull final EventService eventService) {
+      DataSourceRepository dataSourceRepository,
+      Set<DataSourcePlugin<Event>> dataSourcePlugins,
+      EventService eventService) {
 
+    this.dataSourceRepository = dataSourceRepository;
     this.dataSourcePlugins = dataSourcePlugins;
+    this.eventService = eventService;
     // all enabled by default
     this.enabledPlugins.addAll(dataSourcePlugins);
-    this.eventService = eventService;
   }
 
   /**
@@ -68,7 +72,7 @@ public class DataSourceService {
     enabledPlugins.forEach(
         plugin -> {
           try {
-            final Snapshot<Event> snapshot = plugin.getAllSnapshots(snapshotRequest);
+            final Snapshot<? extends Event> snapshot = plugin.getAllSnapshots(snapshotRequest);
             // Save Snapshot data to database
             snapshot.getData().forEach(eventService::saveEvent);
 
@@ -81,7 +85,6 @@ public class DataSourceService {
                 e);
           }
         });
-
     return snapshotRequest;
   }
 
@@ -153,13 +156,19 @@ public class DataSourceService {
     return enabledPlugins.stream().anyMatch(plugin -> pluginId.equals(plugin.getPluginId()));
   }
 
-  public DataSource addDataSource(
-      @NotNull final UUID pluginId, @NotNull final DataSource dataSource) {
-    return this.getDataSourcePlugin(pluginId)
+  public DataSource addDataSource(@NotNull final DataSource dataSource) {
+
+    return this.getDataSourcePlugin(dataSource.getPluginId())
         .map(
-            plugin ->
-                plugin.addDataSource(dataSource.getBaseUri(), dataSource.getMetadataPatterns()))
+            plugin -> {
+              plugin.validateDataSource(dataSource);
+              return dataSourceRepository.saveAndFlush(dataSource);
+            })
         .orElseThrow(
-            () -> new IllegalArgumentException("No DataSourcePlugin with ID: " + pluginId));
+            () -> new IllegalArgumentException("Could not save DataSource:\n" + dataSource));
+  }
+
+  public Optional<DataSource> getDataSourceById(@NotNull Long id) {
+    return dataSourceRepository.findById(id);
   }
 }

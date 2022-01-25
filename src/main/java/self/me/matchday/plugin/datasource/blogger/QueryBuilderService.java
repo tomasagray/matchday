@@ -17,22 +17,23 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource;
+package self.me.matchday.plugin.datasource.blogger;
 
-import lombok.Getter;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+import self.me.matchday.model.SnapshotRequest;
+import self.me.matchday.plugin.datasource.blogger.BloggerPlugin.SourceType;
 
-import javax.persistence.Entity;
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
+@Service
+public class QueryBuilderService {
 
-@Getter
-@Entity
-public class TestDataSource extends DataSource {
+  public @NotNull String buildQueryFrom(
+      @NotNull final SnapshotRequest request, @NotNull SourceType type) {
 
-  TestDataSource(URI uri, List<VideoSourceMetadataPatternKit> metadataPatterns, UUID pluginId) {
-    super(uri, metadataPatterns, pluginId);
+    final BloggerQueryBuilder queryBuilder =
+        type == SourceType.JSON
+            ? new BloggerQueryBuilder.JsonQueryBuilder(request)
+            : new BloggerQueryBuilder.HtmlQueryBuilder(request);
+    return queryBuilder.build();
   }
 }

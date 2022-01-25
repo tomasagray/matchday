@@ -21,73 +21,84 @@ package self.me.matchday.plugin.datasource.blogger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.util.UriEncoder;
 import self.me.matchday.model.SnapshotRequest;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Component
-public class BloggerQueryBuilder {
+public abstract class BloggerQueryBuilder {
 
-  private final BloggerPluginProperties pluginProperties;
+  private final SnapshotRequest request;
 
-  BloggerQueryBuilder(BloggerPluginProperties pluginProperties) {
-    this.pluginProperties = pluginProperties;
+  BloggerQueryBuilder(@NotNull final SnapshotRequest request) {
+    this.request = request;
   }
 
   public @NotNull String buildQueryFrom(@NotNull final SnapshotRequest request) {
 
-    // todo - other query params?
-    final String labelsQuery = getLabelsQuery(request);
-    final String maxResults = getMaxResults(request);
-    final String updatedMin = getUpdatedMin(request);
-    final String updatedMax = getUpdatedMax(request);
-
-    String query =
-        labelsQuery
-            + Stream.of(maxResults, updatedMax, updatedMin)
-                .filter(s -> s != null && !s.equals(""))
-                .collect(Collectors.joining("&"));
+    final String queryPrefix = getQueryUrlPrefix();
+    final String labelsQuery = getLabelsQuery();
+    final String params = getParams();
+    String query = labelsQuery + (!params.equals("") ? "?" + params : "");
     if (!"".equals(query)) {
-      query = pluginProperties.getQueryUrlPrefix() + query;
+      query = queryPrefix + query;
     }
     return query;
   }
 
+  abstract String getQueryUrlPrefix();
+
+  abstract String getLabelPrefix();
+
+  abstract String getParams();
+
+  protected String getLabelsQuery() {
+
+    String labelsQuery = "";
+    final List<String> labels = request.getLabels();
+    if (labels != null) {
+      final String allLabels =
+          labels.stream().map(UriEncoder::encode).collect(Collectors.joining("/"));
+      if (!allLabels.equals("")) {
+        final String labelPrefix = getLabelPrefix();
+        labelsQuery = labelPrefix + allLabels;
+      }
+    }
+    return labelsQuery;
+  }
+
   @Nullable
-  private String getUpdatedMax(@NotNull SnapshotRequest request) {
+  protected String getUpdatedMax() {
 
     final LocalDateTime endDate = request.getEndDate();
     String updatedMax = null;
     if (endDate != null) {
       updatedMax =
           String.format(
-              "updated-max=%s&orderBy=updated",
-              endDate.format(pluginProperties.getDateTimeFormatter()));
+              "updated-max=%s&orderBy=updated", endDate.format(DateTimeFormatter.ISO_DATE_TIME));
     }
     return updatedMax;
   }
 
   @Nullable
-  private String getUpdatedMin(@NotNull SnapshotRequest request) {
+  protected String getUpdatedMin() {
 
     final LocalDateTime startDate = request.getStartDate();
     String updatedMin = null;
     if (startDate != null) {
       updatedMin =
           String.format(
-              "updated-min=%s&orderBy=updated",
-              startDate.format(pluginProperties.getDateTimeFormatter()));
+              "updated-min=%s&orderBy=updated", startDate.format(DateTimeFormatter.ISO_DATE_TIME));
     }
     return updatedMin;
   }
 
   @Nullable
-  private String getMaxResults(@NotNull SnapshotRequest request) {
+  protected String getMaxResults() {
 
     final int maxResults = request.getMaxResults();
     String maxResultQuery = null;
@@ -97,17 +108,61 @@ public class BloggerQueryBuilder {
     return maxResultQuery;
   }
 
-  private String getLabelsQuery(@NotNull SnapshotRequest request) {
+  public static class HtmlQueryBuilder extends BloggerQueryBuilder {
 
-    String labelsQuery = "";
-    final List<String> labels = request.getLabels();
-    if (labels != null) {
-      final String allLabels =
-          labels.stream().map(UriEncoder::encode).collect(Collectors.joining("/"));
-      if (!allLabels.equals("")) {
-        labelsQuery = String.format("/label/%s", allLabels);
-      }
+    HtmlQueryBuilder(@NotNull SnapshotRequest request) {
+      super(request);
     }
-    return labelsQuery;
+
+    @Override
+    String getQueryUrlPrefix() {
+      return "/search";
+    }
+
+    @Override
+    String getLabelPrefix() {
+      return "/label/";
+    }
+
+    @NotNull
+    protected String getParams() {
+
+      // todo - other query params?
+      final String maxResults = getMaxResults();
+      final String updatedMin = getUpdatedMin();
+      final String updatedMax = getUpdatedMax();
+      return Stream.of(maxResults, updatedMax, updatedMin)
+          .filter(s -> s != null && !s.equals(""))
+          .collect(Collectors.joining("&"));
+    }
+  }
+
+  public static class JsonQueryBuilder extends BloggerQueryBuilder {
+
+    JsonQueryBuilder(@NotNull SnapshotRequest request) {
+      super(request);
+    }
+
+    @Override
+    String getQueryUrlPrefix() {
+      return "";
+    }
+
+    @Override
+    String getLabelPrefix() {
+      return "/-/";
+    }
+
+    @Override
+    String getParams() {
+
+      final String json = "alt=json";
+      final String maxResults = getMaxResults();
+      final String updatedMin = getUpdatedMin();
+      final String updatedMax = getUpdatedMax();
+      return Stream.of(json, maxResults, updatedMax, updatedMin)
+          .filter(s -> s != null && !s.equals(""))
+          .collect(Collectors.joining("&"));
+    }
   }
 }

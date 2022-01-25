@@ -20,17 +20,19 @@
 package self.me.matchday.plugin.datasource.blogger;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 import self.me.matchday.db.DataSourceRepository;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
-import self.me.matchday.plugin.datasource.EntryParser;
 import self.me.matchday.plugin.datasource.blogger.model.Blogger;
+import self.me.matchday.plugin.datasource.blogger.model.BloggerEntry;
+import self.me.matchday.plugin.datasource.parsing.EntityParser;
+import self.me.matchday.plugin.datasource.parsing.PatternKit;
 
 import java.io.IOException;
 import java.net.URI;
@@ -53,13 +55,17 @@ public class BloggerPlugin implements DataSourcePlugin<Event> {
   private String bloggerUrlPattern;
 
   BloggerPlugin(
+      @NotNull EntityParser entityParser,
       @NotNull DataSourceRepository dataSourceRepo,
       @NotNull BloggerPluginProperties pluginProperties,
-      @NotNull BloggerQueryBuilder queryBuilder) {
+      @NotNull QueryBuilderService queryBuilder,
+      @NotNull DataSourceValidator dataSourceValidator) {
 
+    this.entityParser = entityParser;
     this.dataSourceRepo = dataSourceRepo;
     this.pluginProperties = pluginProperties;
     this.queryBuilder = queryBuilder;
+    this.dataSourceValidator = dataSourceValidator;
   }
 
   @Override
@@ -78,34 +84,13 @@ public class BloggerPlugin implements DataSourcePlugin<Event> {
   }
 
   @Override
-  public DataSource addDataSource(
-      @NotNull URI baseUri, @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns) {
-
-    validateDataSourceUri(baseUri);
-
-    final BloggerDataSource dataSource =
-        new BloggerDataSource(baseUri, metadataPatterns, this.getPluginId());
-    // determine parser type
-    final Matcher jsonUrlMatcher = pluginProperties.getJsonUrlPattern().matcher(baseUri.toString());
-    final BloggerDataSource.SourceType type =
-        jsonUrlMatcher.find()
-            ? BloggerDataSource.SourceType.JSON
-            : BloggerDataSource.SourceType.HTML;
-    dataSource.setSourceType(type);
-    return dataSourceRepo.saveAndFlush(dataSource);
-  }
-
-  private void validateDataSourceUri(@NotNull URI uri) {
-
-    final Pattern urlPattern = Pattern.compile(bloggerUrlPattern);
-    final Matcher matcher = urlPattern.matcher(uri.toString());
-    if (!matcher.find()) {
-      throw new IllegalArgumentException("Given URL is not a Blogger URL: " + uri);
-    }
+  public void validateDataSource(@NotNull DataSource dataSource) {
+    dataSourceValidator.validateDataSourcePluginId(this.getPluginId(), dataSource.getPluginId());
+    dataSourceValidator.validateDataSourceUri(dataSource.getBaseUri());
   }
 
   @Override
-  public Snapshot<Event> getAllSnapshots(@NotNull SnapshotRequest request) {
+  public Snapshot<? extends Event> getAllSnapshots(@NotNull SnapshotRequest request) {
 
     // get all DataSources for this plugin
     final List<DataSource> dataSources =
@@ -125,47 +110,57 @@ public class BloggerPlugin implements DataSourcePlugin<Event> {
   }
 
   @Override
-  public Snapshot<Event> getSnapshot(
+  public Snapshot<? extends Event> getSnapshot(
       @NotNull SnapshotRequest request, @NotNull DataSource dataSource) throws IOException {
 
-    final Stream<Event> events = getEventStream(request, dataSource);
+    final Stream<? extends Event> events = getEventStream(request, dataSource);
     return Snapshot.of(events);
   }
 
   @NotNull
-  private Stream<Event> getEventStream(
+  private Stream<? extends Event> getEventStream(
       @NotNull SnapshotRequest request, @NotNull DataSource dataSource) throws IOException {
 
-    // ensure dataSource is a BloggerDataSource, cast
-    if (!(dataSource instanceof BloggerDataSource)) {
-      throw new IllegalArgumentException("Not a Blogger data source: " + dataSource);
-    }
-    final BloggerDataSource bloggerDataSource = (BloggerDataSource) dataSource;
+    validateDataSource(dataSource);
 
     // determine whether HTML or JSON parser is called for
+    final SourceType type = getSourceType(dataSource.getBaseUri());
     final BloggerParser parser =
-        bloggerDataSource.getSourceType() == BloggerDataSource.SourceType.JSON
-            ? new JsonBloggerParser()
-            : new HtmlBloggerParser();
+        type == SourceType.JSON ? new JsonBloggerParser() : new HtmlBloggerParser();
     // parse request into blogger query
-    final String query = queryBuilder.buildQueryFrom(request);
+    final String query = queryBuilder.buildQueryFrom(request, type);
     final URL bloggerUrl = dataSource.getBaseUri().resolve(query).toURL();
     // use appropriate BloggerParser to get snapshot
     final Blogger blogger = parser.getBlogger(bloggerUrl);
 
     // parse events from Blogger instance
-    return parseEvents(blogger, dataSource.getMetadataPatterns());
+    final List<PatternKit<? extends Event>> patternKits = List.of(new PatternKit<>(Event.class));
+    // todo -                   get real pattern kits from repo/service ^
+    return parseEvents(blogger, patternKits);
   }
 
-  private @NotNull Stream<Event> parseEvents(
-      @NotNull Blogger blogger, @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns) {
+  private @NotNull Stream<? extends Event> parseEvents(
+      @NotNull Blogger blogger, @NotNull List<PatternKit<? extends Event>> patternKits) {
 
     return blogger.getFeed().getEntry().stream()
-        .flatMap(
-            entry -> {
-              final String content = entry.getContent().getData();
-              return EntryParser.parse(content).with(metadataPatterns);
-            })
+        .flatMap(entry -> parseEntry(patternKits, entry))
         .filter(Objects::nonNull);
+  }
+
+  private Stream<? extends Event> parseEntry(
+      @NotNull List<PatternKit<? extends Event>> patternKits, @NotNull BloggerEntry entry) {
+
+    final String content = entry.getContent().getData();
+
+    // parse content - text, links, etc.
+    final Document document = Jsoup.parse(content);
+    final String text = document.text();
+    // get event data - plain text - event pattern kit
+    // get file source data - plain text - file source pattern kit
+    // get links - HTML - video file pattern kit
+    //    document.select()
+    // zip streams together
+
+    return null; // entityParser.createEntityStream(patternKits, content);
   }
 }

@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import self.me.matchday.db.converter.UriConverter;
-import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
+import self.me.matchday.plugin.datasource.parsing.PatternKit;
 
 import javax.persistence.*;
 import java.net.URI;
@@ -54,7 +54,7 @@ public abstract class DataSource {
 
   public DataSource() {
     this.baseUri = null;
-    this.metadataPatterns = null;
+    this.patternKits = null;
     this.pluginId = null;
   }
 }

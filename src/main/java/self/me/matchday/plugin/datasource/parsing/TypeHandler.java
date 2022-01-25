@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -17,23 +17,16 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource;
+package self.me.matchday.plugin.datasource.parsing;
 
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Snapshot;
-import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.plugin.Plugin;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-import java.io.IOException;
+import java.util.function.Function;
 
-public interface DataSourcePlugin<T> extends Plugin {
-
-  Snapshot<? extends T> getAllSnapshots(@NotNull final SnapshotRequest request) throws IOException;
-
-  Snapshot<? extends T> getSnapshot(
-      @NotNull final SnapshotRequest request, @NotNull final DataSource dataSource)
-      throws IOException;
-
-  void validateDataSource(@NotNull DataSource dataSource);
+@Data
+@AllArgsConstructor
+public abstract class TypeHandler<T> {
+  private Class<T> clazz;
+  private Function<String, ? extends T> handler;
 }

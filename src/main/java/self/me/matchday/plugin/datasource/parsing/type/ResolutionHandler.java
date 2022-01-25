@@ -17,23 +17,16 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource;
+package self.me.matchday.plugin.datasource.parsing.type;
 
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Snapshot;
-import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.plugin.Plugin;
+import org.springframework.stereotype.Component;
+import self.me.matchday.model.video.Resolution;
+import self.me.matchday.plugin.datasource.parsing.TypeHandler;
 
-import java.io.IOException;
+@Component
+public class ResolutionHandler extends TypeHandler<Resolution> {
 
-public interface DataSourcePlugin<T> extends Plugin {
-
-  Snapshot<? extends T> getAllSnapshots(@NotNull final SnapshotRequest request) throws IOException;
-
-  Snapshot<? extends T> getSnapshot(
-      @NotNull final SnapshotRequest request, @NotNull final DataSource dataSource)
-      throws IOException;
-
-  void validateDataSource(@NotNull DataSource dataSource);
+  public ResolutionHandler() {
+    super(Resolution.class, Resolution::fromString);
+  }
 }

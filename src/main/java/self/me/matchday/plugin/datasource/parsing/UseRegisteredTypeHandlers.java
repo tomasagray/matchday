@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -17,36 +17,26 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.blogger;
+package self.me.matchday.plugin.datasource.parsing;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
 
-import javax.persistence.Entity;
-import java.net.URI;
 import java.util.List;
-import java.util.UUID;
 
-@Entity
-@NoArgsConstructor
-public class BloggerDataSource extends DataSource {
+public class UseRegisteredTypeHandlers implements CreationStrategy {
 
-  @Getter @Setter private SourceType sourceType;
+  private final List<TypeHandler<?>> typeHandlers;
 
-  public BloggerDataSource(
-      @NotNull URI baseUri,
-      @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns,
-      @NotNull UUID pluginId) {
-
-    super(baseUri, metadataPatterns, pluginId);
+  public UseRegisteredTypeHandlers(@NotNull final List<TypeHandler<?>> typeHandlers) {
+    this.typeHandlers = typeHandlers;
   }
 
-  public enum SourceType {
-    HTML,
-    JSON,
+  @Override
+  public Object apply(String data, Class<?> clazz) {
+    return typeHandlers.stream()
+        .filter(typeHandler -> typeHandler.getClazz().equals(clazz))
+        .findFirst()
+        .map(typeHandler -> typeHandler.getHandler().apply(data))
+        .orElseThrow();
   }
 }
