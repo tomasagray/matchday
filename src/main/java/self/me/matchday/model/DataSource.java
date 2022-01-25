@@ -38,18 +38,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public abstract class DataSource {
 
+  private final UUID pluginId;
+
   @Convert(converter = UriConverter.class)
-  protected final URI baseUri;
+  private final URI baseUri;
 
-  @ManyToMany(
-      targetEntity = VideoSourceMetadataPatternKit.class,
-      fetch = FetchType.EAGER,
-      cascade = CascadeType.ALL)
-  protected final List<VideoSourceMetadataPatternKit> metadataPatterns;
+  @ManyToMany(targetEntity = PatternKit.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private final List<PatternKit<?>> patternKits;
 
-  protected boolean enabled = true;
-
-  protected final UUID pluginId;
   @Id @GeneratedValue private Long id;
 
   public DataSource() {

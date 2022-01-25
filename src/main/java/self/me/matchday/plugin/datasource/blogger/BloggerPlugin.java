@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -47,12 +47,11 @@ import java.util.stream.Stream;
 @Component
 public class BloggerPlugin implements DataSourcePlugin<Event> {
 
+  private final EntityParser entityParser;
+  private final QueryBuilderService queryBuilder;
   private final DataSourceRepository dataSourceRepo;
   private final BloggerPluginProperties pluginProperties;
-  private final BloggerQueryBuilder queryBuilder;
-
-  @Value("${plugin.blogger.blogger-url-pattern}")
-  private String bloggerUrlPattern;
+  private final DataSourceValidator dataSourceValidator;
 
   BloggerPlugin(
       @NotNull EntityParser entityParser,
@@ -66,6 +65,14 @@ public class BloggerPlugin implements DataSourcePlugin<Event> {
     this.pluginProperties = pluginProperties;
     this.queryBuilder = queryBuilder;
     this.dataSourceValidator = dataSourceValidator;
+  }
+
+  @NotNull
+  private SourceType getSourceType(@NotNull URI baseUri) {
+
+    final Pattern jsonUrlPattern = pluginProperties.getJsonUrlPattern();
+    final Matcher jsonUrlMatcher = jsonUrlPattern.matcher(baseUri.toString());
+    return jsonUrlMatcher.find() ? SourceType.JSON : SourceType.HTML;
   }
 
   @Override
@@ -155,6 +162,8 @@ public class BloggerPlugin implements DataSourcePlugin<Event> {
     // parse content - text, links, etc.
     final Document document = Jsoup.parse(content);
     final String text = document.text();
+    // TODO - implement this
+
     // get event data - plain text - event pattern kit
     // get file source data - plain text - file source pattern kit
     // get links - HTML - video file pattern kit
@@ -162,5 +171,10 @@ public class BloggerPlugin implements DataSourcePlugin<Event> {
     // zip streams together
 
     return null; // entityParser.createEntityStream(patternKits, content);
+  }
+
+  enum SourceType {
+    HTML,
+    JSON,
   }
 }

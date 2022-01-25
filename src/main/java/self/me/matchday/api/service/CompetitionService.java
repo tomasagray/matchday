@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -76,7 +76,6 @@ public class CompetitionService {
         competitionRepository
             .findById(competitionId);
   }
-
 
   /**
    * Saves the given Competition to the database, if it is valid

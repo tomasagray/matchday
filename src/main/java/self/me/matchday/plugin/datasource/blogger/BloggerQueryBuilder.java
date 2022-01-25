@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -38,7 +38,8 @@ public abstract class BloggerQueryBuilder {
     this.request = request;
   }
 
-  public @NotNull String buildQueryFrom(@NotNull final SnapshotRequest request) {
+  @NotNull
+  String build() {
 
     final String queryPrefix = getQueryUrlPrefix();
     final String labelsQuery = getLabelsQuery();
