@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -36,7 +36,6 @@ import self.me.matchday.model.Team;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.util.Log;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -182,35 +181,15 @@ class EventServiceTest {
 
   @Test
   @DisplayName("Ensure an Event can be saved to the database & then deleted")
-  void saveAndDeleteEvent() {
+  void deleteEvent() {
 
     // Create test data
-    final Match saveEvent =
-        new Match.MatchBuilder()
-            .setCompetition(testCompetition)
-            .setHomeTeam(testTeam)
-            .setAwayTeam(testTeam)
-            .setDate(LocalDateTime.now())
-            .build();
-    saveEvent.addFileSources(List.of(testDataCreator.createTestVideoFileSource()));
+    final Match saveEvent = testDataCreator.createTestMatch();
 
-    final Optional<List<Event>> optionalEvents = eventService.fetchAllEvents();
-    assertThat(optionalEvents).isPresent();
-    final List<Event> events = optionalEvents.get();
-    final int initialEventCount = events.size();
-
-    // Save test Event to DB
-    eventService.saveEvent(saveEvent);
-    // Retrieve saved Event from DB
-    final Optional<Event> optionalEvent = eventService.fetchById(saveEvent.getEventId());
-
-    // Test retrieved Event
-    assertThat(optionalEvent).isPresent();
-    optionalEvent.ifPresent(
-        event -> {
-          Log.i(LOG_TAG, "Retrieved test Event: " + event);
-          assertThat(event).isEqualTo(saveEvent);
-        });
+    final Optional<List<Event>> initialEvents = eventService.fetchAllEvents();
+    assertThat(initialEvents).isPresent();
+    final int initialEventCount = initialEvents.get().size();
+    assertThat(initialEventCount).isNotZero();
 
     // Delete test data
     eventService.deleteEvent(saveEvent);
@@ -221,6 +200,6 @@ class EventServiceTest {
     final List<Event> postTestEvents = optionalEventsPostTest.get();
     final int postTestEventCount = postTestEvents.size();
 
-    assertThat(postTestEventCount).isEqualTo(initialEventCount);
+    assertThat(postTestEventCount).isEqualTo(initialEventCount - 1);
   }
 }

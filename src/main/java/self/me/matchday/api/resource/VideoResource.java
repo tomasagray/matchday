@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -87,7 +87,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
       videoResource.resolution = (resolution != null) ? resolution.toString() : null;
       videoResource.mediaContainer = entity.getMediaContainer();
       videoResource.bitrate = entity.getVideoBitrate();
-      videoResource.frameRate = entity.getFrameRate();
+      videoResource.frameRate = entity.getFramerate();
       videoResource.videoCodec = entity.getVideoCodec();
       videoResource.audioCodec = entity.getAudioCodec();
 

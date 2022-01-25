@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -49,16 +49,20 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class DataSourceServiceTest {
 
   private static final String LOG_TAG = "DataSourceServiceTest";
+
+  private static TestDataCreator testDataCreator;
   private static DataSourceService dataSourceService;
   private static EventService eventService;
   private static DataSourcePlugin<Event> testDataSourcePlugin;
 
   @BeforeAll
   static void setUp(
+      @Autowired TestDataCreator testDataCreator,
       @Autowired final TestDataSourcePlugin testDataSourcePlugin,
       @Autowired final @NotNull DataSourceService dataSourceService,
       @Autowired final EventService eventService) {
 
+    DataSourceServiceTest.testDataCreator = testDataCreator;
     DataSourceServiceTest.dataSourceService = dataSourceService;
     DataSourceServiceTest.eventService = eventService;
 
@@ -199,16 +203,14 @@ class DataSourceServiceTest {
   @DisplayName("Validate that a DataSource can be added to the database")
   void addDataSource() {
 
-    final DataSource testDataSource = TestDataCreator.readTestDataSource();
+    final DataSource testDataSource = testDataCreator.readTestHtmlDataSource();
     Log.i(LOG_TAG, "Read test DataSource:\n" + testDataSource);
-    final DataSource addedDataSource =
-        testDataSourcePlugin.addDataSource(
-            testDataSource.getBaseUri(), testDataSource.getMetadataPatterns());
+    final DataSource addedDataSource = dataSourceService.addDataSource(testDataSource);
     Log.i(LOG_TAG, "Added DataSource to database:\n" + addedDataSource);
 
     assertThat(addedDataSource).isNotNull();
     assertThat(addedDataSource.getBaseUri()).isEqualTo(testDataSource.getBaseUri());
-    assertThat(addedDataSource.getMetadataPatterns().size())
-        .isEqualTo(testDataSource.getMetadataPatterns().size());
+    assertThat(addedDataSource.getPatternKits().size())
+        .isEqualTo(testDataSource.getPatternKits().size());
   }
 }

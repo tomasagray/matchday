@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -27,11 +28,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
 import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,21 +47,25 @@ class CompetitionServiceTest {
 
   // Test resources
   private static CompetitionService competitionService;
+  private static TestDataCreator testDataCreator;
   private static Competition testCompetition;
 
   @BeforeAll
-  static void setUp(@Autowired final CompetitionService service) {
-    competitionService = service;
+  static void setUp(
+      @Autowired @NotNull CompetitionService service,
+      @Autowired @NotNull TestDataCreator testDataCreator) {
 
-    // Add test data to DB
-    testCompetition = new Competition("Competition Service Test Competition");
-    competitionService.saveCompetition(testCompetition);
+    final Random random = new Random();
+    CompetitionServiceTest.competitionService = service;
+    CompetitionServiceTest.testDataCreator = testDataCreator;
+    CompetitionServiceTest.testCompetition =
+        testDataCreator.createTestCompetition("CST_Competition_" + random.nextInt());
   }
 
   @AfterAll
   static void tearDown() {
     // delete test data from DB
-    competitionService.deleteCompetitionById(testCompetition.getCompetitionId());
+    testDataCreator.deleteTestCompetition(testCompetition);
   }
 
   @Test

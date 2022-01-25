@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -27,11 +28,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
 
 import java.util.Optional;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,42 +44,37 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ArtworkServiceTest {
 
   private static final String LOG_TAG = "ArtworkServiceTest";
+
   // Test constants
   private static final int defaultTeamEmblemBytes = 15_182;
   private static final int expectedCompetitionEmblemBytes = 13_989;
   private static final int expectedFanartBytes = 866_211;
   private static final int expectedLandscapeBytes = 189_337;
+
   // Test resources
   private static ArtworkService artworkService;
-  private static TeamService teamService;
-  private static CompetitionService competitionService;
+  private static TestDataCreator testDataCreator;
+
   // Test data
-  private static Team testTeam;
   private static Competition testCompetition;
+  private static Team testTeam;
 
   @BeforeAll
   static void setUp(
-      @Autowired final ArtworkService service,
-      @Autowired final TeamService teamService,
-      @Autowired final CompetitionService competitionService) {
+      @Autowired @NotNull TestDataCreator testDataCreator,
+      @Autowired @NotNull ArtworkService service) {
 
     ArtworkServiceTest.artworkService = service;
-    ArtworkServiceTest.teamService = teamService;
-    ArtworkServiceTest.competitionService = competitionService;
-
-    // Create test resources
-    final Team team = new Team("Test Team");
-    final Competition competition = new Competition("Test Competition");
-    // Save to DB
-    testTeam = teamService.saveTeam(team);
-    testCompetition = competitionService.saveCompetition(competition);
+    ArtworkServiceTest.testDataCreator = testDataCreator;
+    ArtworkServiceTest.testCompetition =
+        testDataCreator.createTestCompetition("Artwork_Competition_" + new Random().nextInt());
+    ArtworkServiceTest.testTeam = testDataCreator.createTestTeam();
   }
 
   @AfterAll
   static void tearDown() {
-    // delete test resources
-    competitionService.deleteCompetitionById(testCompetition.getCompetitionId());
-    teamService.deleteTeamById(testTeam.getTeamId());
+    testDataCreator.deleteTestCompetition(testCompetition);
+    testDataCreator.deleteTestTeam(testTeam);
   }
 
   @Test

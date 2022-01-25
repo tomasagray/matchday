@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -22,14 +22,10 @@ package self.me.matchday.plugin.datasource;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.*;
-import self.me.matchday.model.video.VideoSourceMetadataPatternKit;
 
-import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -37,11 +33,9 @@ import java.util.stream.Stream;
 public class TestDataSourcePlugin implements DataSourcePlugin<Event> {
 
   private final UUID pluginId = UUID.randomUUID();
-  private final JpaRepository<DataSource, Long> dataSourceRepo;
   private final TestDataCreator testDataCreator;
 
-  public TestDataSourcePlugin(TestDataSourceRepo dataSourceRepo, TestDataCreator testDataCreator) {
-    this.dataSourceRepo = dataSourceRepo;
+  public TestDataSourcePlugin(TestDataCreator testDataCreator) {
     this.testDataCreator = testDataCreator;
   }
 
@@ -76,12 +70,10 @@ public class TestDataSourcePlugin implements DataSourcePlugin<Event> {
     return Snapshot.of(Stream.of(testDataCreator.createTestMatch()));
   }
 
-  @Contract(pure = true)
   @Override
-  public @Nullable DataSource addDataSource(
-      @NotNull URI baseUri, @NotNull List<VideoSourceMetadataPatternKit> metadataPatterns) {
-    final TestDataSource entity = new TestDataSource(baseUri, metadataPatterns, this.getPluginId());
-    System.out.println("Created test data source:\n" + entity);
-    return dataSourceRepo.saveAndFlush(entity);
+  public void validateDataSource(@NotNull DataSource dataSource) {
+    if (!dataSource.getPluginId().equals(getPluginId())) {
+      throw new IllegalArgumentException("Wrong pluginId for TestDataSourcePlugin");
+    }
   }
 }

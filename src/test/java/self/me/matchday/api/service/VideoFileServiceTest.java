@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -31,6 +31,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
 import self.me.matchday.model.FileServerUser;
+import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
@@ -89,7 +90,7 @@ class VideoFileServiceTest {
 
     // Get test VideoFile
     final VideoFile testVideoFile =
-        testVideoFileSrc.getVideoFilePacks().get(0).get(VideoFile.EventPartIdentifier.FIRST_HALF);
+        testVideoFileSrc.getVideoFilePacks().get(0).get(PartIdentifier.FIRST_HALF);
     // Refresh VideoFile
     final VideoFile testRefreshedVideoFile = videoFileService.refreshVideoFile(testVideoFile, true);
 
