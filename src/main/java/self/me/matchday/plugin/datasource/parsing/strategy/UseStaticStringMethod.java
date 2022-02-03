@@ -17,9 +17,10 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.parsing;
+package self.me.matchday.plugin.datasource.parsing.strategy;
 
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.plugin.datasource.parsing.CreationStrategy;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;

@@ -19,28 +19,47 @@
 
 package self.me.matchday.plugin.datasource.parsing.type;
 
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import self.me.matchday.plugin.datasource.parsing.TypeHandler;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 public class LocalDateTimeHandler extends TypeHandler<LocalDateTime> {
 
-  // todo - List of date time patterns?
+  private static final List<String> patterns = new ArrayList<>();
+
+  static {
+    patterns.add("dd/MM/yyyy");
+  }
 
   public LocalDateTimeHandler() {
-    super(
-        LocalDateTime.class,
-        s -> {
-          try {
-            return LocalDate.parse(s, DateTimeFormatter.ofPattern("dd/MM/yyyy")).atStartOfDay();
-          } catch (DateTimeParseException e) {
-            return null;
-          }
-        });
+    super(LocalDateTime.class, LocalDateTimeHandler::parseData);
+  }
+
+  private static LocalDateTime parseData(String data) {
+    return patterns.stream()
+        .map(pattern -> attemptParsing(data, pattern))
+        .filter(Objects::nonNull)
+        .findFirst()
+        .orElse(null);
+  }
+
+  @Nullable
+  private static LocalDateTime attemptParsing(String data, String pattern) {
+    try {
+      if (pattern.contains("T")) {
+        return LocalDateTime.parse(data, DateTimeFormatter.ofPattern(pattern));
+      }
+      return LocalDate.parse(data, DateTimeFormatter.ofPattern(pattern)).atStartOfDay();
+    } catch (Exception e) {
+      return null;
+    }
   }
 }

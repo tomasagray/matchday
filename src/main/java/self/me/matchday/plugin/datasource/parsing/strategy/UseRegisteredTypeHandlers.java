@@ -17,22 +17,28 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.parsing;
+package self.me.matchday.plugin.datasource.parsing.strategy;
 
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.plugin.datasource.parsing.CreationStrategy;
+import self.me.matchday.plugin.datasource.parsing.TypeHandler;
 
-import java.lang.reflect.Constructor;
+import java.util.List;
 
-public class UseStringConstructor implements CreationStrategy {
+public class UseRegisteredTypeHandlers implements CreationStrategy {
+
+  private final List<TypeHandler<?>> typeHandlers;
+
+  public UseRegisteredTypeHandlers(@NotNull final List<TypeHandler<?>> typeHandlers) {
+    this.typeHandlers = typeHandlers;
+  }
 
   @Override
-  public Object apply(String data, @NotNull Class<?> clazz) {
-
-    try {
-      final Constructor<?> constructor = clazz.getConstructor(String.class);
-      return constructor.newInstance(data);
-    } catch (ReflectiveOperationException e) {
-      throw new RuntimeException(e);
-    }
+  public Object apply(String data, Class<?> clazz) {
+    return typeHandlers.stream()
+        .filter(typeHandler -> typeHandler.getClazz().equals(clazz))
+        .findFirst()
+        .map(typeHandler -> typeHandler.getHandler().apply(data))
+        .orElseThrow();
   }
 }
