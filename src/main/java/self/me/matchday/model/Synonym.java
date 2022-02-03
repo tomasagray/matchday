@@ -38,10 +38,11 @@ import java.util.Objects;
 @Entity
 public class Synonym {
 
+  @Id @GeneratedValue private Long id;
+
   @ElementCollection(fetch = FetchType.EAGER)
   private final List<String> synonyms;
 
-  @Id @GeneratedValue private Long id;
   private int primaryIndex = 0;
 
   public Synonym() {
@@ -71,6 +72,6 @@ public class Synonym {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this);
+    return Objects.hash(synonyms, id, primaryIndex);
   }
 }

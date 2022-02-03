@@ -34,10 +34,7 @@ import self.me.matchday.util.Log;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class EventService {
@@ -55,10 +52,8 @@ public class EventService {
     this.fileSrcRepository = fileSrcRepository;
   }
 
-  // ==============
-  // Getters
-  // ==============
-
+  // Getters   ==============================================================
+// todo - don't use optional
   public Optional<List<Event>> fetchAllEvents() {
 
     Log.i(LOG_TAG, "Fetching latest Events...");
@@ -74,11 +69,11 @@ public class EventService {
     return Optional.empty();
   }
 
-  public Optional<Event> fetchById(@NotNull final String eventId) {
+  public Optional<Event> fetchById(@NotNull final UUID eventId) {
     return eventRepository.findById(eventId);
   }
 
-  public Optional<VideoFileSource> fetchVideoFileSrc(final String fileSrcId) {
+  public Optional<VideoFileSource> fetchVideoFileSrc(final UUID fileSrcId) {
     return fileSrcRepository.findById(fileSrcId);
   }
 
@@ -88,23 +83,22 @@ public class EventService {
    * @param competitionId The ID of the Competition.
    * @return A CollectionModel containing all Events for the specified Competition.
    */
-  public Optional<List<Event>> fetchEventsForCompetition(@NotNull final String competitionId) {
+  public Optional<List<Event>> fetchEventsForCompetition(@NotNull final UUID competitionId) {
     return eventRepository.fetchEventsByCompetition(competitionId);
   }
 
   /**
    * Retrieve all Events associated with the specified Team.
    *
-   * @param teamId The ID of the Team.
+   * @param teamId The name of the Team.
    * @return A CollectionModel containing the Events.
    */
-  public Optional<List<Event>> fetchEventsForTeam(@NotNull final String teamId) {
+  public Optional<List<Event>> fetchEventsForTeam(@NotNull final UUID teamId) {
+    // todo - remove Optional
     return eventRepository.fetchEventsByTeam(teamId);
   }
 
-  // ==============
-  // Setters
-  // ==============
+  // Setters   ==============================================================
 
   /**
    * Persist an Event; must pass validation, or will skip and make a note in logs.
@@ -116,7 +110,7 @@ public class EventService {
     try {
       validateEvent(event);
       // See if Event already exists in DB
-      final String eventId = event.getEventId();
+      final UUID eventId = event.getEventId();
       if (eventId != null) {
         final Optional<Event> eventOptional = fetchById(eventId);
         // Merge VideoFileSources

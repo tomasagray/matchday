@@ -24,8 +24,12 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.VideoFileSelectorService;
@@ -34,12 +38,12 @@ import self.me.matchday.model.video.*;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.BaseStream;
+import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -73,8 +77,7 @@ public class VideoStreamingService {
     this.videoStreamLocatorService = videoStreamLocatorService;
   }
 
-  public Optional<Collection<VideoFileSource>> fetchVideoFileSources(
-      @NotNull final String eventId) {
+  public Optional<Collection<VideoFileSource>> fetchVideoFileSources(@NotNull final UUID eventId) {
 
     final Optional<Event> eventOptional = eventService.fetchById(eventId);
     if (eventOptional.isPresent()) {
@@ -86,14 +89,14 @@ public class VideoStreamingService {
   }
 
   public Optional<VideoPlaylist> getBestVideoStreamPlaylist(
-      @NotNull final String eventId, @NotNull final VideoPlaylistRenderer renderer) {
+      @NotNull final UUID eventId, @NotNull final VideoPlaylistRenderer renderer) {
 
     final Optional<Event> eventOptional = eventService.fetchById(eventId);
     return eventOptional
         .map(
             event -> {
               final VideoFileSource fileSource = selectorService.getBestFileSource(event);
-              final String fileSrcId = fileSource.getFileSrcId();
+              final UUID fileSrcId = fileSource.getFileSrcId();
               return this.getVideoStreamPlaylist(eventId, fileSrcId, renderer);
             })
         .orElse(Optional.empty());
@@ -107,8 +110,8 @@ public class VideoStreamingService {
    *     created
    */
   public Optional<VideoPlaylist> getVideoStreamPlaylist(
-      @NotNull final String eventId,
-      @NotNull final String fileSrcId,
+      @NotNull final UUID eventId,
+      @NotNull final UUID fileSrcId,
       @NotNull final VideoPlaylistRenderer renderer) {
 
     final VideoFileSource videoFileSource = getRequestedFileSource(eventId, fileSrcId);
@@ -130,7 +133,7 @@ public class VideoStreamingService {
    * @return True if the event & associated file source were found, otherwise false
    */
   private @Nullable VideoFileSource getRequestedFileSource(
-      @NotNull final String eventId, @NotNull final String fileSrcId) {
+      @NotNull final UUID eventId, @NotNull final UUID fileSrcId) {
 
     // Get event from database
     final Optional<Event> eventOptional = eventService.fetchById(eventId);
@@ -143,8 +146,8 @@ public class VideoStreamingService {
   }
 
   private @NotNull VideoPlaylist renderPlaylist(
-      @NotNull String eventId,
-      @NotNull String fileSrcId,
+      @NotNull UUID eventId,
+      @NotNull UUID fileSrcId,
       @NotNull VideoPlaylistRenderer renderer,
       @NotNull VideoStreamLocatorPlaylist playlist) {
 
@@ -199,7 +202,7 @@ public class VideoStreamingService {
    * @return The playlist as a String
    */
   public Optional<String> readPlaylistFile(
-      @NotNull final String eventId, @NotNull final String fileSrcId, @NotNull final Long partId) {
+      @NotNull final UUID eventId, @NotNull final UUID fileSrcId, @NotNull final Long partId) {
 
     Log.i(
         LOG_TAG,
@@ -224,12 +227,25 @@ public class VideoStreamingService {
     final StringBuilder sb = new StringBuilder();
     final Path playlistPath = streamLocator.getPlaylistPath();
     Log.i(LOG_TAG, "Reading playlist from: " + playlistPath);
-
-    final Flux<String> flux =
-        Flux.using(() -> Files.lines(playlistPath), Flux::fromStream, BaseStream::close);
-    flux.doOnNext(s -> sb.append(s).append("\n")).blockLast();
+    final Flux<DataBuffer> fluxBuffer =
+        DataBufferUtils.read(playlistPath, new DefaultDataBufferFactory(), 4096);
+    fluxBuffer
+        .publishOn(Schedulers.boundedElastic())
+        .doOnNext(buffer -> readBufferFromDisk(buffer, sb))
+        .blockLast();
     final String result = sb.toString();
     return result.isEmpty() ? null : result;
+  }
+
+  private void readBufferFromDisk(@NotNull DataBuffer buffer, @NotNull StringBuilder sb) {
+    try {
+      final InputStream inputStream = buffer.asInputStream();
+      final String data = new String(inputStream.readAllBytes());
+      sb.append(data);
+    } catch (IOException e) {
+      e.printStackTrace();    // todo - handle this better!
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -242,8 +258,8 @@ public class VideoStreamingService {
    * @return The video data as a Resource
    */
   public Resource getVideoSegmentResource(
-      @NotNull final String eventId,
-      @NotNull final String fileSrcId,
+      @NotNull final UUID eventId,
+      @NotNull final UUID fileSrcId,
       @NotNull final Long partId,
       @NotNull final String segmentId) {
 
@@ -273,7 +289,7 @@ public class VideoStreamingService {
     return videoStreamManager.killAllStreams();
   }
 
-  public void killStreamingFor(@NotNull final String fileSrcId) {
+  public void killStreamingFor(@NotNull final UUID fileSrcId) {
 
     final Optional<VideoStreamLocatorPlaylist> playlistOptional =
         videoStreamManager.getLocalStreamFor(fileSrcId);
@@ -294,7 +310,7 @@ public class VideoStreamingService {
     videoStreamManager.deleteLocalStream(streamPlaylist);
   }
 
-  public void deleteVideoData(@NotNull final String fileSrcId) throws IOException {
+  public void deleteVideoData(@NotNull final UUID fileSrcId) throws IOException {
 
     final Optional<VideoStreamLocatorPlaylist> playlistOptional =
         playlistService.getVideoStreamPlaylistFor(fileSrcId);

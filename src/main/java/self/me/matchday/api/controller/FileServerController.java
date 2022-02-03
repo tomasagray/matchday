@@ -105,7 +105,7 @@ public class FileServerController {
 
   @RequestMapping(value = "/users/{userId}", method = RequestMethod.GET)
   public ResponseEntity<FileServerUserResource> getUserData(
-      @PathVariable("userId") final String userId) {
+      @PathVariable("userId") final UUID userId) {
     return fileServerService
         .getUserById(userId)
         .map(userResourceAssembler::toModel)

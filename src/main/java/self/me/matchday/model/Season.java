@@ -19,27 +19,28 @@
 
 package self.me.matchday.model;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
+import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import lombok.Data;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import java.util.Objects;
 
-@Data
-@Entity
-@Table(name = "Seasons")
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Embeddable
 public final class Season implements Serializable {
 
   private static final String LOG_TAG = "SeasonClass";
-  private static final long serialVersionUID = 123456L;   // for cross-platform serialization
+  private static final long serialVersionUID = 123456L; // for cross-platform serialization
 
   // Default parameters
   private static final int MILLENNIUM = 2_000;
@@ -48,24 +49,19 @@ public final class Season implements Serializable {
   private static final int DEFAULT_YEAR = -1;
   private static final int DEFAULT_START_DAY = 1;
   private static final int DEFAULT_END_DAY = 31;
-  private static final LocalDate START_DATE = LocalDate
-      .of(DEFAULT_YEAR, Month.AUGUST, DEFAULT_START_DAY);
+  private static final LocalDate START_DATE =
+      LocalDate.of(DEFAULT_YEAR, Month.AUGUST, DEFAULT_START_DAY);
   private static final LocalDate END_DATE = LocalDate.of(DEFAULT_YEAR, Month.MAY, DEFAULT_END_DAY);
   private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
-  // Fields
-  @Id
-  private final String seasonId;
+  //  @Id @GeneratedValue private Long seasonId;
   private final LocalDate startDate;
   private final LocalDate endDate;
 
-  /**
-   * Default constructor; defaults to the current year, Aug 1 to May 31 of next year.
-   */
+  /** Default constructor; defaults to the current year, Aug 1 to May 31 of next year. */
   public Season() {
     this.startDate = LocalDate.from(START_DATE).withYear(LocalDate.now().getYear());
     this.endDate = this.startDate.plusYears(1);
-    this.seasonId = MD5String.fromData(this.startDate);
   }
 
   /**
@@ -74,23 +70,21 @@ public final class Season implements Serializable {
    * DateTimeFormatException.
    *
    * @param startYear The beginning year of the season (ex.: 2019)
-   * @param endYear   The end year of the season (ex: 2020)
+   * @param endYear The end year of the season (ex: 2020)
    */
   public Season(final int startYear, final int endYear) {
     // Check for illegal dates
-    if (startYear < MIN_YEAR || startYear > MAX_YEAR
-        || endYear < MIN_YEAR || endYear > MAX_YEAR) {
+    if (startYear < MIN_YEAR || startYear > MAX_YEAR || endYear < MIN_YEAR || endYear > MAX_YEAR) {
 
       String msg =
-          String.format("The years must be within the range: 2000 - 3000; given: %s, %s",
-              startYear, endYear);
+          String.format(
+              "The years must be within the range: 2000 - 3000; given: %s, %s", startYear, endYear);
       String data = String.format("%s/%s", startYear, endYear);
       throw new DateTimeParseException(msg, data, 0);
     }
 
     this.startDate = LocalDate.from(START_DATE).withYear(startYear);
     this.endDate = LocalDate.from(END_DATE).withYear(endYear);
-    this.seasonId = MD5String.fromData(this.startDate);
   }
 
   @NotNull
@@ -117,6 +111,6 @@ public final class Season implements Serializable {
 
   @Override
   public int hashCode() {
-    return seasonId.hashCode() * startDate.hashCode() * endDate.hashCode();
+    return Objects.hash(startDate, endDate);
   }
 }

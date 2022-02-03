@@ -38,6 +38,7 @@ import self.me.matchday.model.video.PlsRenderer;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/events/event/{eventId}/video")
@@ -64,7 +65,7 @@ public class VideoStreamingController {
       value = {"", "/"},
       method = RequestMethod.GET)
   public ResponseEntity<CollectionModel<VideoResource>> getVideoResources(
-      @PathVariable final String eventId) {
+      @PathVariable final UUID eventId) {
 
     resourceAssembler.setEventId(eventId);
     return streamingService
@@ -79,8 +80,7 @@ public class VideoStreamingController {
       value = "/playlist/master",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<VideoPlaylistResource> getMasterPlaylist(
-      @PathVariable final String eventId) {
+  public ResponseEntity<VideoPlaylistResource> getMasterPlaylist(@PathVariable final UUID eventId) {
 
     return streamingService
         .getBestVideoStreamPlaylist(eventId, new M3uRenderer())
@@ -94,7 +94,7 @@ public class VideoStreamingController {
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<VideoPlaylistResource> getVideoStreamPlaylist(
-      @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
+      @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId) {
 
     return streamingService
         .getVideoStreamPlaylist(eventId, fileSrcId, new M3uRenderer())
@@ -105,7 +105,7 @@ public class VideoStreamingController {
 
   @RequestMapping(value = "/stream/{fileSrcId}/playlist.pls", method = RequestMethod.GET)
   public ResponseEntity<VideoPlaylistResource> getVideoStreamPlsPlaylist(
-      @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
+      @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId) {
 
     return streamingService
         .getVideoStreamPlaylist(eventId, fileSrcId, new PlsRenderer())
@@ -119,8 +119,8 @@ public class VideoStreamingController {
       method = RequestMethod.GET,
       produces = MEDIA_TYPE_APPLE_MPEGURL)
   public ResponseEntity<String> getVideoPartPlaylist(
-      @PathVariable("eventId") String eventId,
-      @PathVariable("fileSrcId") String fileSrcId,
+      @PathVariable("eventId") UUID eventId,
+      @PathVariable("fileSrcId") UUID fileSrcId,
       @PathVariable("partId") Long partId) {
 
     final Optional<String> playlistFile =
@@ -133,8 +133,8 @@ public class VideoStreamingController {
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<Resource> getSegmentFile(
-      @PathVariable("eventId") String eventId,
-      @PathVariable("fileSrcId") String fileSrcId,
+      @PathVariable("eventId") UUID eventId,
+      @PathVariable("fileSrcId") UUID fileSrcId,
       @PathVariable("partId") Long partId,
       @PathVariable("segmentId") String segmentId) {
 
@@ -151,7 +151,7 @@ public class VideoStreamingController {
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> deleteVideoData(
-      @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId)
+      @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId)
       throws IOException {
 
     streamingService.deleteVideoData(fileSrcId);
@@ -166,7 +166,7 @@ public class VideoStreamingController {
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> killStreamTasks(
-      @PathVariable("eventId") String eventId, @PathVariable("fileSrcId") String fileSrcId) {
+      @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId) {
 
     final int killedTasks = streamingService.killAllStreamingTasks();
     final String message =

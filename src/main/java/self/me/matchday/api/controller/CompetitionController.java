@@ -36,6 +36,8 @@ import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.TeamService;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping(value = "/competitions")
 public class CompetitionController {
@@ -49,12 +51,12 @@ public class CompetitionController {
 
   @Autowired
   public CompetitionController(
-      final CompetitionService competitionService,
-      final CompetitionResourceAssembler competitionResourceAssembler,
-      final TeamService teamService,
-      final TeamResourceAssembler teamResourceAssembler,
-      final EventService eventService,
-      final EventResourceAssembler eventResourceAssembler) {
+      CompetitionService competitionService,
+      CompetitionResourceAssembler competitionResourceAssembler,
+      TeamService teamService,
+      TeamResourceAssembler teamResourceAssembler,
+      EventService eventService,
+      EventResourceAssembler eventResourceAssembler) {
 
     this.competitionService = competitionService;
     this.competitionResourceAssembler = competitionResourceAssembler;
@@ -82,12 +84,12 @@ public class CompetitionController {
   /**
    * Retrieve a single Competition from the local database.
    *
-   * @param competitionId MD5 String ID for the desired Competition.
+   * @param competitionId ID for the desired Competition.
    * @return A Competition Resource.
    */
   @RequestMapping(value = "/competition/{competitionId}", method = RequestMethod.GET)
   public ResponseEntity<CompetitionResource> fetchCompetitionById(
-      @PathVariable final String competitionId) {
+      @PathVariable final UUID competitionId) {
 
     return competitionService
         .fetchCompetitionById(competitionId)
@@ -99,12 +101,12 @@ public class CompetitionController {
   /**
    * Retrieve Teams for a given Competition from the database.
    *
-   * @param competitionId The ID of the competition
+   * @param competitionId The name of the competition
    * @return A CollectionModel containing the Teams.
    */
   @RequestMapping(value = "/competition/{competitionId}/teams", method = RequestMethod.GET)
   public CollectionModel<TeamResource> fetchCompetitionTeams(
-      @PathVariable final String competitionId) {
+      @PathVariable final UUID competitionId) {
 
     return teamService
         .fetchTeamsByCompetitionId(competitionId)
@@ -115,12 +117,12 @@ public class CompetitionController {
   /**
    * Gets all Events associated with the given Competition from the local database.
    *
-   * @param competitionId The ID of the Competition.
+   * @param competitionId The name of the Competition.
    * @return A ResponseEntity containing the CollectionModel of Events.
    */
   @RequestMapping(value = "/competition/{competitionId}/events", method = RequestMethod.GET)
   public CollectionModel<EventResource> fetchCompetitionEvents(
-      @PathVariable final String competitionId) {
+      @PathVariable final UUID competitionId) {
 
     return eventService
         .fetchEventsForCompetition(competitionId)

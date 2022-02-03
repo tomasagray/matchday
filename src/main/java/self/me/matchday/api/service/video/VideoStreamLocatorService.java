@@ -37,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class VideoStreamLocatorService {
@@ -101,7 +102,8 @@ public class VideoStreamLocatorService {
       @NotNull final Path storageLocation, @NotNull final VideoFile videoFile) {
 
     // Create streaming storage path
-    final Path playlistPath = storageLocation.resolve(videoFile.getFileId()).resolve(PLAYLIST_NAME);
+    final UUID fileId = videoFile.getFileId();
+    final Path playlistPath = storageLocation.resolve(fileId.toString()).resolve(PLAYLIST_NAME);
     // Create playlist locator
     final VideoStreamLocator streamLocator = new SingleStreamLocator(playlistPath, videoFile);
     // Save locator to database & return

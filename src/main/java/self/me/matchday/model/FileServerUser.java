@@ -22,12 +22,15 @@ package self.me.matchday.model;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
+import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.UUID;
 
 /** Represents a file server user */
 @Getter
@@ -35,12 +38,16 @@ import java.util.Collection;
 @Entity
 public final class FileServerUser implements Serializable {
 
-  @Id private String userId;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  private UUID userId;
+
   private final String username;
   private final String password;
   private final String email;
   private boolean loggedIn;
-  private String serverId;
+  private UUID serverId;
 
   @OneToMany(
       targetEntity = SecureCookie.class,
@@ -55,7 +62,6 @@ public final class FileServerUser implements Serializable {
   }
 
   public FileServerUser(@NotNull final String username, @NotNull final String password) {
-    this.userId = MD5String.fromData(username);
     this.username = this.email = username;
     this.password = password;
   }
@@ -67,7 +73,7 @@ public final class FileServerUser implements Serializable {
    * @param cookies Any cookies returned with login response
    */
   public void setLoggedIntoServer(
-      @NotNull final String serverId, @NotNull final Collection<SecureCookie> cookies) {
+      @NotNull final UUID serverId, @NotNull final Collection<SecureCookie> cookies) {
     this.serverId = serverId;
     this.loggedIn = true;
     setCookies(cookies);
@@ -91,8 +97,13 @@ public final class FileServerUser implements Serializable {
   @Override
   public String toString() {
     return String.format(
-        "Username: %s, Password: *****, Logged in: %s, Email: %s, Server ID: %s, Cookies: %s",
-        getUsername(), isLoggedIn(), getEmail(), getServerId(), Strings.join(cookies, ','));
+        "UserID: %s, Username: %s, Password: *****, Logged in: %s, Email: %s, Server ID: %s, Cookies: %s",
+        getUserId(),
+        getUsername(),
+        isLoggedIn(),
+        getEmail(),
+        getServerId(),
+        Strings.join(cookies, ','));
   }
 
   @Override
@@ -114,10 +125,6 @@ public final class FileServerUser implements Serializable {
 
   @Override
   public int hashCode() {
-    int hash = 7;
-    hash = 31 * hash + username.hashCode();
-    hash = 31 * hash + password.hashCode();
-    hash = 31 * hash + ((email != null) ? email.hashCode() : 0);
-    return hash;
+    return Objects.hash(userId, username, password, email, loggedIn, serverId, cookies);
   }
 }

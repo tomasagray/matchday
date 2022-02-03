@@ -24,16 +24,20 @@
 package self.me.matchday.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Abbreviator;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Represents a football team.
@@ -42,38 +46,29 @@ import java.util.Locale;
  */
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
-@Table(name = "Teams")
 public class Team implements Serializable {
 
-  // Fields
-  @Id private final String teamId;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  private UUID teamId;
+
   private String name;
   private String abbreviation;
   private Locale locale;
   @OneToOne private Artwork emblem;
   @OneToOne private Artwork fanart;
 
-  // Default constructor
-  public Team() {
-    this.teamId = MD5String.generate();
-  }
-
   public Team(@NotNull String name) {
     this.name = name;
-    // Defaults
     this.abbreviation = Abbreviator.abbreviate(this.name);
-    this.teamId = MD5String.fromData(name);
   }
 
   @Override
   public String toString() {
     return this.name;
-  }
-
-  @Override
-  public int hashCode() {
-    return name.hashCode() * teamId.hashCode();
   }
 
   /**
@@ -95,5 +90,10 @@ public class Team implements Serializable {
     // Cast for comparison
     final Team team = (Team) obj;
     return team.getName().equals(this.getName());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(teamId, name, abbreviation, locale, emblem, fanart);
   }
 }

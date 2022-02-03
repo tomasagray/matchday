@@ -19,8 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.util.List;
-import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +26,10 @@ import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Match;
 import self.me.matchday.util.Log;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class MatchService {
@@ -70,11 +72,9 @@ public class MatchService {
    * @param matchId The ID of the match we want.
    * @return An optional containing the match resource, if it was found.
    */
-  public Optional<Match> fetchMatch(@NotNull String matchId) {
+  public Optional<Match> fetchMatch(@NotNull UUID matchId) {
 
     Log.i(LOG_TAG, String.format("Fetching Match with ID: %s from the database.", matchId));
-    return
-        matchRepository
-            .findById(matchId);
+    return matchRepository.findById(matchId);
   }
 }

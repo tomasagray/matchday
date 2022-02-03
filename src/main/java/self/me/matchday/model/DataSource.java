@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -36,8 +36,9 @@ import java.util.UUID;
 @ToString
 @Entity
 @RequiredArgsConstructor
-public abstract class DataSource {
+public final class DataSource {
 
+  @Id @GeneratedValue private Long id;
   private final UUID pluginId;
 
   @Convert(converter = UriConverter.class)
@@ -46,7 +47,7 @@ public abstract class DataSource {
   @ManyToMany(targetEntity = PatternKit.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   private final List<PatternKit<?>> patternKits;
 
-  @Id @GeneratedValue private Long id;
+  private boolean enabled = true;
 
   public DataSource() {
     this.baseUri = null;

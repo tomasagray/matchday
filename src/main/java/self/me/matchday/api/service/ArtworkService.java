@@ -34,6 +34,7 @@ import self.me.matchday.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ArtworkService {
@@ -41,32 +42,35 @@ public class ArtworkService {
   private static final String LOG_TAG = "ArtworkService";
 
   // Default artwork paths
-  private final static String DEFAULT_FANART = "image/fanart/default_fanart.jpg";
-  private final static String DEFAULT_TEAM_EMBLEM = "image/emblem/default_team_emblem.png";
-  private final static String DEFAULT_COMPETITION_EMBLEM = "image/emblem/default_competition_emblem.png";
-  private final static String DEFAULT_COMPETITION_LANDSCAPE = "image/landscape/default_competition_landscape.jpg";
+  // todo - extract
+  private static final String DEFAULT_FANART = "image/fanart/default_fanart.jpg";
+  private static final String DEFAULT_TEAM_EMBLEM = "image/emblem/default_team_emblem.png";
+  private static final String DEFAULT_COMPETITION_EMBLEM =
+      "image/emblem/default_competition_emblem.png";
+  private static final String DEFAULT_COMPETITION_LANDSCAPE =
+      "image/landscape/default_competition_landscape.jpg";
 
   private final TeamRepository teamRepository;
   private final CompetitionRepository competitionRepository;
 
   @Autowired
-  public ArtworkService(TeamRepository teamRepository, CompetitionRepository competitionRepository) {
+  public ArtworkService(
+      TeamRepository teamRepository, CompetitionRepository competitionRepository) {
 
     this.teamRepository = teamRepository;
     this.competitionRepository = competitionRepository;
   }
 
-  // Team artwork
-  // ===============================================================================================
+  // Team artwork   ==============================================================
 
   /**
    * Retrieves the emblem image for the specified Team. If the emblem has not been set, returns the
    * default team emblem image.
    *
-   * @param teamId The ID of the Team.
+   * @param teamId The name of the Team.
    * @return An optional containing a byte array of the image data.
    */
-  public Optional<byte[]> fetchTeamEmblem(@NotNull final String teamId) {
+  public Optional<byte[]> fetchTeamEmblem(@NotNull final UUID teamId) {
 
     Log.i(LOG_TAG, String.format("Fetching emblem for Team: %s", teamId));
     // Get the Team
@@ -84,7 +88,7 @@ public class ArtworkService {
           return Optional.of(readDefaultArtworkFromDisk(DEFAULT_TEAM_EMBLEM));
         }
       } catch (IOException | NullPointerException e) {
-        Log.e(LOG_TAG, "Could not read emblem image file for Team with ID: " + teamId, e);
+        Log.e(LOG_TAG, "Could not read emblem image file for Team with name: " + teamId, e);
       }
     } else {
       Log.e(LOG_TAG, String.format("Team %s not found in database", teamId));
@@ -96,10 +100,10 @@ public class ArtworkService {
   /**
    * Retrieve the fanart image data for the specified Team.
    *
-   * @param teamId The ID of the Team.
+   * @param teamId The name of the Team.
    * @return A byte array of the image data, or empty() if none found.
    */
-  public Optional<byte[]> fetchTeamFanart(@NotNull final String teamId) {
+  public Optional<byte[]> fetchTeamFanart(@NotNull final UUID teamId) {
 
     // Get the Team
     final Optional<Team> teamOptional = teamRepository.findById(teamId);
@@ -115,27 +119,27 @@ public class ArtworkService {
           return Optional.of(readDefaultArtworkFromDisk(DEFAULT_FANART));
         }
       } catch (IOException e) {
-        Log.e(LOG_TAG, "Could not read fanart data for Team with ID: " + teamId, e);
+        Log.e(LOG_TAG, "Could not read fanart data for Team with name: " + teamId, e);
       }
     }
     // Artwork not found
     return Optional.empty();
   }
 
-  // Competition artwork
-  // ===============================================================================================
+  // Competition artwork   ==============================================================
 
   /**
    * Retrieves the emblem image for the specified Competition. If the emblem has not been set,
    * returns the default artwork.
    *
-   * @param competitionId The ID of the Competition.
+   * @param competitionName The URL-encoded competitionName of the Competition.
    * @return An Optional containing a byte array of the image data.
    */
-  public Optional<byte[]> fetchCompetitionEmblem(@NotNull final String competitionId) {
+  public Optional<byte[]> fetchCompetitionEmblem(@NotNull final UUID competitionName) {
 
     // Get competition from DB
-    final Optional<Competition> competitionOptional = competitionRepository.findById(competitionId);
+    final Optional<Competition> competitionOptional =
+        competitionRepository.findById(competitionName);
     if (competitionOptional.isPresent()) {
       try {
         final Artwork emblem = competitionOptional.get().getEmblem();
@@ -146,7 +150,8 @@ public class ArtworkService {
           return Optional.of(readDefaultArtworkFromDisk(DEFAULT_COMPETITION_EMBLEM));
         }
       } catch (IOException e) {
-        Log.e(LOG_TAG, "Could not read emblem image for Competition with ID: " + competitionId, e);
+        Log.e(
+            LOG_TAG, "Could not read emblem image for Competition with name: " + competitionName, e);
       }
     }
     // Artwork not found
@@ -157,13 +162,14 @@ public class ArtworkService {
    * Retrieves the fanart image for the specified Competition. If fanart has not been set, returns
    * the default competition fanart instead.
    *
-   * @param competitionId The ID of the Competition.
+   * @param competitionName The URL-encoded name of the Competition.
    * @return A byte array of the image data.
    */
-  public Optional<byte[]> fetchCompetitionFanart(@NotNull final String competitionId) {
+  public Optional<byte[]> fetchCompetitionFanart(@NotNull final UUID competitionName) {
 
     // Get competition
-    final Optional<Competition> competitionOptional = competitionRepository.findById(competitionId);
+    final Optional<Competition> competitionOptional =
+        competitionRepository.findById(competitionName);
     if (competitionOptional.isPresent()) {
       try {
         final Artwork fanart = competitionOptional.get().getFanart();
@@ -175,8 +181,10 @@ public class ArtworkService {
           return Optional.of(readDefaultArtworkFromDisk(DEFAULT_FANART));
         }
       } catch (IOException e) {
-        Log.e(LOG_TAG,
-            "Could not read fanart image data from disk for Competition with ID: " + competitionId,
+        Log.e(
+            LOG_TAG,
+            "Could not read fanart image data from disk for Competition with name: "
+                + competitionName,
             e);
       }
     }
@@ -188,13 +196,14 @@ public class ArtworkService {
    * Retrieves the monochrome emblem image data for the specified Competition. If the monochrome
    * emblem has not been set, returns the default instead.
    *
-   * @param competitionId The ID of the Competition.
+   * @param competitionName The URL-encoded name of the Competition.
    * @return A byte array of the image data.
    */
-  public Optional<byte[]> fetchCompetitionMonochromeEmblem(@NotNull final String competitionId) {
+  public Optional<byte[]> fetchCompetitionMonochromeEmblem(@NotNull final UUID competitionName) {
 
     // Get competition
-    final Optional<Competition> competitionOptional = competitionRepository.findById(competitionId);
+    final Optional<Competition> competitionOptional =
+        competitionRepository.findById(competitionName);
     if (competitionOptional.isPresent()) {
       try {
         final Artwork monochromeEmblem = competitionOptional.get().getMonochromeEmblem();
@@ -206,9 +215,11 @@ public class ArtworkService {
           return Optional.of(readDefaultArtworkFromDisk(DEFAULT_COMPETITION_EMBLEM));
         }
       } catch (IOException e) {
-        Log.e(LOG_TAG,
-            "Could not read monochrome emblem image data from disk for Competition with ID: "
-                + competitionId, e);
+        Log.e(
+            LOG_TAG,
+            "Could not read monochrome emblem image data from disk for Competition with name: "
+                + competitionName,
+            e);
       }
     }
     // Artwork not found
@@ -218,13 +229,14 @@ public class ArtworkService {
   /**
    * Retrieves the landscape artwork for the given Competition.
    *
-   * @param competitionId The ID of the Competition.
+   * @param competitionName The URL-encoded name of the Competition.
    * @return A byte array containing the image data.
    */
-  public Optional<byte[]> fetchCompetitionLandscape(@NotNull final String competitionId) {
+  public Optional<byte[]> fetchCompetitionLandscape(@NotNull final UUID competitionName) {
 
     // Get competition from DB
-    final Optional<Competition> competitionOptional = competitionRepository.findById(competitionId);
+    final Optional<Competition> competitionOptional =
+        competitionRepository.findById(competitionName);
     if (competitionOptional.isPresent()) {
       try {
         final Artwork landscape = competitionOptional.get().getLandscape();
@@ -236,15 +248,17 @@ public class ArtworkService {
           return Optional.of(readDefaultArtworkFromDisk(DEFAULT_COMPETITION_LANDSCAPE));
         }
       } catch (IOException e) {
-        Log.e(LOG_TAG,
-            "Could not read landscape image data for Competition with ID: " + competitionId, e);
+        Log.e(
+            LOG_TAG,
+            "Could not read landscape image data for Competition with name: " + competitionName,
+            e);
       }
     }
     // Artwork not found
     return Optional.empty();
   }
 
-  // Helper functions
+  // Helper functions   ==============================================================
 
   /**
    * Reads the given Artwork image file from local disk storage.

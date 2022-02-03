@@ -19,8 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.util.List;
-import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +26,10 @@ import self.me.matchday.db.HighlightRepository;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Highlight;
 import self.me.matchday.util.Log;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class HighlightService {
@@ -71,11 +73,9 @@ public class HighlightService {
    * @param highlightShowId ID of the Highlight Show.
    * @return The requested Highlight, or empty().
    */
-  public Optional<Highlight> fetchHighlight(@NotNull String highlightShowId) {
+  public Optional<Highlight> fetchHighlight(@NotNull UUID highlightShowId) {
 
     Log.i(LOG_TAG, "Fetching Highlight Show for ID: " + highlightShowId);
-    return
-        highlightRepository
-            .findById(highlightShowId);
+    return highlightRepository.findById(highlightShowId);
   }
 }

@@ -27,27 +27,28 @@ import self.me.matchday.model.Event;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface EventRepository extends JpaRepository<Event, String> {
+public interface EventRepository extends JpaRepository<Event, UUID> {
 
   /**
    * Retrieve all Events associated with the specified competition.
    *
-   * @param competitionId The ID of the Competition.
+   * @param competitionId The name of the Competition.
    * @return A List of Competitions.
    */
   @Query("SELECT ev FROM Event ev JOIN ev.competition cm WHERE cm.competitionId = :competitionId")
-  Optional<List<Event>> fetchEventsByCompetition(@Param("competitionId") String competitionId);
+  Optional<List<Event>> fetchEventsByCompetition(@Param("competitionId") UUID competitionId);
 
   /**
    * Retrieve all Events associated with the specified Team.
    *
-   * @param teamId The ID of the Team.
+   * @param teamId The name of the Team.
    * @return A List of Events which include this Team.
    */
   @Query(
       "SELECT mt FROM Match mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
           + "WHERE ht.teamId = :teamId OR at.teamId = :teamId")
-  Optional<List<Event>> fetchEventsByTeam(@Param("teamId") String teamId);
+  Optional<List<Event>> fetchEventsByTeam(@Param("teamId") UUID teamId);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -22,15 +22,13 @@ package self.me.matchday.api.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.EventResource;
 import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
 import self.me.matchday.api.service.HighlightService;
 import self.me.matchday.util.Log;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/highlights")
@@ -41,8 +39,8 @@ public class HighlightController {
   private final EventResourceAssembler resourceAssembler;
 
   @Autowired
-  public HighlightController(final HighlightService highlightService,
-      final EventResourceAssembler resourceAssembler) {
+  public HighlightController(
+      final HighlightService highlightService, final EventResourceAssembler resourceAssembler) {
 
     this.highlightService = highlightService;
     this.resourceAssembler = resourceAssembler;
@@ -57,11 +55,10 @@ public class HighlightController {
   @ResponseBody
   public CollectionModel<EventResource> fetchAllHighlights() {
 
-    return
-        highlightService
-            .fetchAllHighlights()
-            .map(resourceAssembler::toCollectionModel)
-            .orElse(null);
+    return highlightService
+        .fetchAllHighlights()
+        .map(resourceAssembler::toCollectionModel)
+        .orElse(null);
   }
 
   /**
@@ -72,15 +69,14 @@ public class HighlightController {
    */
   @RequestMapping(value = "/highlight-shows/highlight/{eventId}", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<EventResource> fetchHighlightById(@PathVariable String eventId) {
+  public ResponseEntity<EventResource> fetchHighlightById(@PathVariable UUID eventId) {
 
     Log.i(LOG_TAG, "Fetching Highlight Show with ID: " + eventId);
 
-    return
-        highlightService
-            .fetchHighlight(eventId)
-            .map(resourceAssembler::toModel)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+    return highlightService
+        .fetchHighlight(eventId)
+        .map(resourceAssembler::toModel)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 }

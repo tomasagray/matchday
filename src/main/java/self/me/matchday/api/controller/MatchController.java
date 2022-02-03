@@ -31,6 +31,8 @@ import self.me.matchday.api.resource.EventResource;
 import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
 import self.me.matchday.api.service.MatchService;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping(value = "/matches")
 public class MatchController {
@@ -68,7 +70,7 @@ public class MatchController {
    */
   @RequestMapping(value = "/match/{matchId}", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<EventResource> fetchMatchById(@PathVariable String matchId) {
+  public ResponseEntity<EventResource> fetchMatchById(@PathVariable UUID matchId) {
 
     return matchService
         .fetchMatch(matchId)

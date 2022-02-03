@@ -33,6 +33,8 @@ import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.TeamService;
 
+import java.util.UUID;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -72,13 +74,13 @@ public class TeamController {
   }
 
   /**
-   * Publish a single Team to the API, specified by the Team ID.
+   * Publish a single Team to the API, specified by the Team name.
    *
-   * @param teamId The Team ID (MD5 String)
+   * @param teamId The Team name (MD5 String)
    * @return The Team as an HttpEntity.
    */
   @RequestMapping(value = "/team/{teamId}", method = RequestMethod.GET)
-  public ResponseEntity<TeamResource> fetchTeamById(@PathVariable final String teamId) {
+  public ResponseEntity<TeamResource> fetchTeamByName(@PathVariable final UUID teamId) {
 
     return teamService
         .fetchTeamById(teamId)
@@ -90,12 +92,12 @@ public class TeamController {
   /**
    * Retrieves all Events associated with the specified Team, and publishes to the API.
    *
-   * @param teamId The ID of the Team.
+   * @param teamId The name of the Team.
    * @return A CollectionModel of Events.
    */
   @RequestMapping(value = "/team/{teamId}/events", method = RequestMethod.GET)
   public ResponseEntity<CollectionModel<EventResource>> fetchEventsForTeam(
-      @PathVariable final String teamId) {
+      @PathVariable final UUID teamId) {
 
     return eventService
         .fetchEventsForTeam(teamId)

@@ -30,6 +30,7 @@ import self.me.matchday.util.Log;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CompetitionService {
@@ -69,13 +70,12 @@ public class CompetitionService {
    * @param competitionId The ID of the desired Competition.
    * @return The Competition as a resource.
    */
-  public Optional<Competition> fetchCompetitionById(@NotNull String competitionId) {
+  public Optional<Competition> fetchCompetitionById(@NotNull UUID competitionId) {
 
-    Log.i(LOG_TAG,
+    Log.i(
+        LOG_TAG,
         String.format("Fetching competition with ID: %s from the database.", competitionId));
-    return
-        competitionRepository
-            .findById(competitionId);
+    return competitionRepository.findById(competitionId);
   }
 
   /**
@@ -101,9 +101,10 @@ public class CompetitionService {
    * @param competitionId The ID of the Competition to delete
    */
   @Transactional
-  public void deleteCompetitionById(@NotNull final String competitionId) {
+  public void deleteCompetitionById(@NotNull final UUID competitionId) {
 
-    Log.i(LOG_TAG, String.format("Deleting Competition with ID: [%s] from database", competitionId));
+    Log.i(
+        LOG_TAG, String.format("Deleting Competition with ID: [%s] from database", competitionId));
     competitionRepository.deleteById(competitionId);
   }
 

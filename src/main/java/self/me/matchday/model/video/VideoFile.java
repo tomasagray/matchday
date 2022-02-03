@@ -22,19 +22,17 @@ package self.me.matchday.model.video;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.FFmpegMetadataConverter;
 import self.me.matchday.db.converter.TimestampConverter;
-import self.me.matchday.model.MD5String;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -44,8 +42,10 @@ public class VideoFile implements Comparable<VideoFile> {
 
   private static double DEFAULT_DURATION = -1.0;
 
-  // Fields
-  @Id private String fileId;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  private UUID fileId;
   private URL externalUrl;
   private PartIdentifier title;
 
@@ -60,12 +60,8 @@ public class VideoFile implements Comparable<VideoFile> {
   private Timestamp lastRefreshed = new Timestamp(0L);
 
   public VideoFile(@NotNull final PartIdentifier title, @NotNull final URL externalUrl) {
-
-    this.fileId = MD5String.fromData(externalUrl);
     this.title = title;
     this.externalUrl = externalUrl;
-    this.internalUrl = null;
-    this.metadata = null;
   }
 
   /**
@@ -82,7 +78,7 @@ public class VideoFile implements Comparable<VideoFile> {
   }
 
   public String toString() {
-    return String.format("%s - %s", getTitle(), getExternalUrl().toString());
+    return String.format("%s - %s", getTitle(), getExternalUrl());
   }
 
   @Override
@@ -92,17 +88,20 @@ public class VideoFile implements Comparable<VideoFile> {
     }
     // Cast
     final VideoFile videoFile = (VideoFile) obj;
+    if (this.getExternalUrl() == null) {
+      return videoFile.getExternalUrl() == null;
+    }
     return this.getExternalUrl().equals(videoFile.getExternalUrl());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        getTitle(), getExternalUrl(), getInternalUrl(), getMetadata(), getLastRefreshed());
+    return Objects.hash(fileId, externalUrl, title, internalUrl, metadata, lastRefreshed);
   }
 
   @Override
   public int compareTo(@NotNull VideoFile test) {
-    return this.getTitle().compareTo(test.getTitle());
+    final PartIdentifier otherTitle = test.getTitle();
+    return this.getTitle().compareTo(otherTitle);
   }
 }

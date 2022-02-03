@@ -34,6 +34,8 @@ import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.model.video.Resolution;
 import self.me.matchday.model.video.VideoFileSource;
 
+import java.util.UUID;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -66,7 +68,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
   public static class VideoResourceAssembler
       extends RepresentationModelAssemblerSupport<VideoFileSource, VideoResource> {
 
-    @Getter @Setter private String eventId;
+    @Getter @Setter private UUID eventId;
 
     public VideoResourceAssembler() {
       super(VideoStreamingController.class, VideoResource.class);
@@ -77,7 +79,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 
       final VideoResource videoResource = instantiateModel(entity);
 
-      final String fileSrcId = entity.getFileSrcId();
+      final UUID fileSrcId = entity.getFileSrcId();
       final Resolution resolution = entity.getResolution();
 
       // Add metadata

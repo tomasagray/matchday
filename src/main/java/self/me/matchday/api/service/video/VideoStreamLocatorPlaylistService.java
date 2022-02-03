@@ -36,6 +36,7 @@ import self.me.matchday.util.Log;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @PropertySource("classpath:video.properties")
@@ -91,7 +92,8 @@ public class VideoStreamLocatorPlaylistService {
     }
 
     // Create storage path
-    final Path storageLocation = fileStorageLocation.resolve(fileSource.getFileSrcId());
+    final UUID fileSrcId = fileSource.getFileSrcId();
+    final Path storageLocation = fileStorageLocation.resolve(fileSrcId.toString());
     // Create stream playlist
     final VideoStreamLocatorPlaylist streamPlaylist =
         new VideoStreamLocatorPlaylist(fileSource, storageLocation);
@@ -117,7 +119,7 @@ public class VideoStreamLocatorPlaylistService {
    * @return An Optional containing the most recent playlist
    */
   public Optional<VideoStreamLocatorPlaylist> getVideoStreamPlaylistFor(
-      @NotNull final String fileSrcId) {
+      @NotNull final UUID fileSrcId) {
 
     final List<VideoStreamLocatorPlaylist> playlists =
         playlistRepo.fetchPlaylistsForFileSrc(fileSrcId);

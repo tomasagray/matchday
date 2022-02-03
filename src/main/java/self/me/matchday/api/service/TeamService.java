@@ -22,6 +22,7 @@ package self.me.matchday.api.service;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.TeamRepository;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
@@ -30,6 +31,8 @@ import java.util.*;
 
 @Service
 public class TeamService {
+
+  // todo - remove Optionals on Lists
 
   private static final String LOG_TAG = "TeamService";
 
@@ -66,12 +69,8 @@ public class TeamService {
    * @param teamId The Team ID.
    * @return The requested Team, wrapped in an Optional.
    */
-  public Optional<Team> fetchTeamById(@NotNull final String teamId) {
-
-    Log.i(LOG_TAG, String.format("Fetching Team with ID: %s from the local database.", teamId));
-    return
-        teamRepository
-            .findById(teamId);
+  public Optional<Team> fetchTeamById(@NotNull final UUID teamId) {
+    return teamRepository.findById(teamId);
   }
 
   /**
@@ -80,15 +79,9 @@ public class TeamService {
    * @param competitionId The ID of the Competition.
    * @return All Teams which have Events in the given Competition.
    */
-  public Optional<List<Team>> fetchTeamsByCompetitionId(
-      @NotNull final String competitionId) {
+  public Optional<List<Team>> fetchTeamsByCompetitionId(@NotNull final UUID competitionId) {
 
-    Log.i(LOG_TAG,
-        String.format("Fetching all Teams for Competition ID: %s from local database.", competitionId));
-
-    // Get home teams
     final List<Team> homeTeams = teamRepository.fetchHomeTeamsByCompetition(competitionId);
-    // Get away teams
     final List<Team> awayTeams = teamRepository.fetchAwayTeamsByCompetition(competitionId);
 
     // Combine results in a Set<> to ensure no duplicates
@@ -98,7 +91,6 @@ public class TeamService {
     List<Team> teamList = new ArrayList<>(teamSet);
     // Sort by Team name
     teamList.sort(Comparator.comparing(Team::getName));
-
     return Optional.of(teamList);
   }
 
@@ -108,8 +100,8 @@ public class TeamService {
    * @param team The Team to persist
    * @return The (now Spring-managed) Team, or null if invalid data was passed
    */
+  @Transactional
   public Team saveTeam(@NotNull final Team team) {
-
     if (isValidTeam(team)) {
       teamRepository.saveAndFlush(team);
       return team;
@@ -121,12 +113,13 @@ public class TeamService {
   /**
    * Delete a Team from the database with the specified ID
    *
-   * @param teamId The ID of the Team to delete
+   * @param teamName The name of the Team to delete
    */
-  public void deleteTeamById(@NotNull final String teamId) {
+  @Transactional
+  public void deleteTeamByName(@NotNull final String teamName) {
 
-    Log.i(LOG_TAG, String.format("Deleting Team with ID: %s from database", teamId));
-    teamRepository.deleteById(teamId);
+    Log.i(LOG_TAG, String.format("Deleting Team with ID: %s from database", teamName));
+    teamRepository.deleteByName(teamName);
   }
 
   /**
@@ -136,8 +129,6 @@ public class TeamService {
    * @return true/false
    */
   private boolean isValidTeam(@NotNull final Team team) {
-
     return team.getName() != null;
   }
 }
-

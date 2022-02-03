@@ -20,6 +20,7 @@
 package self.me.matchday.model;
 
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.Corrected;
 import self.me.matchday.CorrectedOrNull;
@@ -28,19 +29,12 @@ import self.me.matchday.model.video.VideoFileSource;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-/**
- * A sporting Event; could be a Match (game), highlight show, trophy celebration, group selection,
- * or ... ?
- */
+/** A sporting Event */
 @Getter
 @Setter
 @ToString
-// @RequiredArgsConstructor
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -48,31 +42,35 @@ import java.util.Set;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Event {
 
-  @Id protected String eventId;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  protected UUID eventId;
 
   @Corrected
-  @ManyToOne(cascade = CascadeType.MERGE)
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
   protected Competition competition;
 
   @CorrectedOrNull
-  @ManyToOne(cascade = CascadeType.MERGE)
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
   protected Team homeTeam;
 
   @CorrectedOrNull
-  @ManyToOne(cascade = CascadeType.MERGE)
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
   protected Team awayTeam;
 
-  @ManyToOne(cascade = CascadeType.MERGE)
-  protected Season season;
+  @Embedded protected Season season;
 
-  @ManyToOne(cascade = CascadeType.MERGE)
-  protected Fixture fixture;
+  @Embedded protected Fixture fixture;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   protected final Set<VideoFileSource> fileSources = new HashSet<>();
 
-  protected String title;
   protected LocalDateTime date;
+
+  public String getTitle() {
+    return String.format("%s - %s, %s", competition, homeTeam, awayTeam);
+  }
 
   /**
    * Encapsulates the file source TreeSet<> logic.
@@ -84,13 +82,17 @@ public class Event {
     this.fileSources.addAll(fileSources);
   }
 
+  public void addFileSource(@NotNull final VideoFileSource fileSource) {
+    this.fileSources.add(fileSource);
+  }
+
   /**
    * Retrieve a particular file source from this Event
    *
    * @param fileSrcId The ID of the file source
    * @return the requested file source, or null if not found
    */
-  public VideoFileSource getFileSource(final @NotNull String fileSrcId) {
+  public VideoFileSource getFileSource(final @NotNull UUID fileSrcId) {
 
     // Search the collection of file sources for the ID
     for (VideoFileSource fileSrc : fileSources) {
@@ -115,10 +117,8 @@ public class Event {
 
   @Override
   public int hashCode() {
-    int hash = 11;
-    hash = 31 * hash + eventId.hashCode();
-    hash = 31 * hash + ((title != null) ? title.hashCode() : 0);
-    return hash;
+    return Objects.hash(
+        eventId, competition, homeTeam, awayTeam, season, fixture, fileSources, date);
   }
 
   // Ensure consistent Event ID generation

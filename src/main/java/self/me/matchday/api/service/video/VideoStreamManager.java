@@ -43,6 +43,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static self.me.matchday.model.video.StreamJobState.JobStatus;
 
@@ -72,7 +73,7 @@ class VideoStreamManager {
     return playlistService.createVideoStreamPlaylist(fileSource);
   }
 
-  public Optional<VideoStreamLocatorPlaylist> getLocalStreamFor(@NotNull final String fileSrcId) {
+  public Optional<VideoStreamLocatorPlaylist> getLocalStreamFor(@NotNull final UUID fileSrcId) {
     return playlistService.getVideoStreamPlaylistFor(fileSrcId);
   }
 

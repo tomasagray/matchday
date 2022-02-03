@@ -33,6 +33,7 @@ import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -47,7 +48,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @JsonInclude(value = Include.NON_NULL)
 public class FileServerUserResource extends RepresentationModel<FileServerUserResource> {
 
-  private String id;
+  private UUID userId;
   private String username;
   private String email;
   private boolean loggedIn;
@@ -65,7 +66,7 @@ public class FileServerUserResource extends RepresentationModel<FileServerUserRe
     public @NotNull FileServerUserResource toModel(@NotNull final FileServerUser entity) {
 
       final FileServerUserResource resource = instantiateModel(entity);
-      resource.setId(entity.getUserId());
+      resource.setUserId(entity.getUserId());
       resource.setUsername(entity.getUsername());
       resource.setEmail(entity.getEmail());
       resource.setLoggedIn(entity.isLoggedIn());

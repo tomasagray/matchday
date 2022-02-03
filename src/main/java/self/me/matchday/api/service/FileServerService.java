@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.db.FileServerUserRepo;
 import self.me.matchday.model.FileServerUser;
@@ -171,11 +172,13 @@ public class FileServerService {
    * @param pluginId The pluginId of the fileserver plugin
    * @return Was login successful? (true/false)
    */
+  @Transactional
   public ClientResponse login(@NotNull final FileServerUser user, @NotNull final UUID pluginId) {
 
     // Result container
     HttpStatus status = HttpStatus.BAD_REQUEST;
     String message;
+    Log.i(LOG_TAG, "Attempting to login user: " + user);
 
     if (userValidationService.isValidUserData(user)) {
       // Validate login data
@@ -193,16 +196,16 @@ public class FileServerService {
                   .map(SecureCookie::fromSpringCookie)
                   .collect(Collectors.toList());
           // Login user to server
-          user.setLoggedIntoServer(serverPlugin.getPluginId().toString(), cookies);
+          user.setLoggedIntoServer(serverPlugin.getPluginId(), cookies);
           // Save user to repo
-          userRepo.save(user);
-          Log.i(LOG_TAG, "Login SUCCESSFUL with user: " + user);
+          final FileServerUser flushedUser = userRepo.saveAndFlush(user);
+          Log.i(LOG_TAG, "Login SUCCESSFUL with user: " + flushedUser);
           // Return successful response
           status = HttpStatus.OK;
           message =
               String.format(
                   "User: %s successfully logged into file server: %s",
-                  user.getUsername(), serverPlugin.getTitle());
+                  flushedUser.getUsername(), serverPlugin.getTitle());
         } else {
           Log.i(
               LOG_TAG,
@@ -230,6 +233,7 @@ public class FileServerService {
    * @param cookieData A collection of cookies necessary to access secure parts of the server
    * @return The response
    */
+  @Transactional
   public ClientResponse loginWithCookies(
       @NotNull final UUID pluginId,
       @NotNull final FileServerUser user,
@@ -255,7 +259,7 @@ public class FileServerService {
         if (pluginOptional.isPresent()) {
           final FileServerPlugin serverPlugin = pluginOptional.get();
           // Login user to appropriate server
-          user.setLoggedIntoServer(serverPlugin.getPluginId().toString(), cookies);
+          user.setLoggedIntoServer(serverPlugin.getPluginId(), cookies);
           // Save to repo
           userRepo.save(user);
           // Return successful response
@@ -284,6 +288,7 @@ public class FileServerService {
    * @param pluginId The ID of the plugin for the file server
    * @return The response from the file server upon logging out
    */
+  @Transactional
   public ClientResponse logout(@NotNull final FileServerUser user, @NotNull final UUID pluginId) {
 
     final StringJoiner failureMessage = new StringJoiner(" ");
@@ -294,7 +299,7 @@ public class FileServerService {
     if (userOptional.isPresent()) {
       final FileServerUser userData = userOptional.get();
       // Validate server ID
-      if (userData.getServerId().equals(pluginId.toString())) {
+      if (userData.getServerId().equals(pluginId)) {
         // Perform logout request
         userData.setLoggedOut();
         // Save data
@@ -323,6 +328,7 @@ public class FileServerService {
    * @param pluginId The ID of the file server plugin
    * @return The login response
    */
+  @Transactional
   public ClientResponse relogin(@NotNull final FileServerUser user, @NotNull final UUID pluginId) {
 
     String message;
@@ -355,7 +361,7 @@ public class FileServerService {
    * @return A List of FSUsers
    */
   public List<FileServerUser> getAllServerUsers(@NotNull final UUID pluginId) {
-    return userRepo.fetchAllUsersForServer(pluginId.toString());
+    return userRepo.fetchAllUsersForServer(pluginId);
   }
 
   /**
@@ -364,8 +370,7 @@ public class FileServerService {
    * @param userId The ID of the user
    * @return An Optional containing the user, if found
    */
-  public Optional<FileServerUser> getUserById(@NotNull final String userId) {
-
+  public Optional<FileServerUser> getUserById(@NotNull final UUID userId) {
     return userRepo.findById(userId);
   }
 
@@ -374,7 +379,8 @@ public class FileServerService {
    *
    * @param userId The ID of the user to delete
    */
-  public void deleteUser(@NotNull final String userId) {
+  @Transactional
+  public void deleteUser(@NotNull final UUID userId) {
 
     // Ensure user is in DB
     final Optional<FileServerUser> userOptional = userRepo.findById(userId);
@@ -462,7 +468,7 @@ public class FileServerService {
    */
   private @Nullable FileServerUser getDownloadUser(@NotNull final UUID pluginId) {
     // Get logged-in users for this repo
-    final List<FileServerUser> users = userRepo.fetchLoggedInUsersForServer(pluginId.toString());
+    final List<FileServerUser> users = userRepo.fetchLoggedInUsersForServer(pluginId);
     if (users.size() > 0) {
       // Return the download user
       return users.get(0);

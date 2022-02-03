@@ -19,34 +19,34 @@
 
 package self.me.matchday.model.video;
 
+import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.video.VideoFile.EventPartIdentifier;
 
 import javax.persistence.*;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+@ToString
 @Entity
 public class VideoFilePack {
 
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  private UUID id;
+
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  /*@CollectionTable(
-  name = "video_file_pack_mapping",
-  joinColumns = {@JoinColumn(name = "file_pack_id", referencedColumnName = "id")})*/
   @MapKeyEnumerated
   @MapKeyColumn(name = "pack_id")
-  private final Map<EventPartIdentifier, VideoFile> videoFiles;
-
-  @Id @GeneratedValue Long id;
+  private final Map<PartIdentifier, VideoFile> videoFiles;
 
   public VideoFilePack() {
-    this.videoFiles = new HashMap<>();
-  }
-
-  public VideoFilePack(@NotNull Map<EventPartIdentifier, VideoFile> videoFiles) {
-    this.videoFiles = videoFiles;
+    this.videoFiles = new ConcurrentSkipListMap<>();
   }
 
   public boolean put(@NotNull VideoFile videoFile) {
@@ -54,15 +54,27 @@ public class VideoFilePack {
     return added == null;
   }
 
-  public VideoFile get(@NotNull EventPartIdentifier title) {
+  public VideoFile get(@NotNull PartIdentifier title) {
     return videoFiles.get(title);
+  }
+
+  public VideoFile firstPart() {
+    final Map.Entry<PartIdentifier, VideoFile> firstEntry =
+        ((NavigableMap<PartIdentifier, VideoFile>) videoFiles).firstEntry();
+    return firstEntry != null ? firstEntry.getValue() : null;
+  }
+
+  public VideoFile lastPart() {
+    final Map.Entry<PartIdentifier, VideoFile> lastEntry =
+        ((NavigableMap<PartIdentifier, VideoFile>) videoFiles).lastEntry();
+    return lastEntry != null ? lastEntry.getValue() : null;
   }
 
   public int size() {
     return videoFiles.size();
   }
 
-  public void forEach(BiConsumer<EventPartIdentifier, VideoFile> fn) {
+  public void forEach(BiConsumer<PartIdentifier, VideoFile> fn) {
     videoFiles.forEach(fn);
   }
 

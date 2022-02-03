@@ -26,6 +26,7 @@ import org.springframework.stereotype.Repository;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface VideoStreamLocatorPlaylistRepo
@@ -36,5 +37,5 @@ public interface VideoStreamLocatorPlaylistRepo
           + "WHERE vslp.fileSource.fileSrcId = :fileSrcId "
           + "ORDER BY vslp.timestamp")
   List<VideoStreamLocatorPlaylist> fetchPlaylistsForFileSrc(
-      @Param("fileSrcId") final String fileSrcId);
+      @Param("fileSrcId") final UUID fileSrcId);
 }

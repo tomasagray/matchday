@@ -22,4 +22,6 @@ package self.me.matchday.db;
 import org.springframework.data.jpa.repository.JpaRepository;
 import self.me.matchday.model.video.VideoFileSource;
 
-public interface VideoFileSrcRepository extends JpaRepository<VideoFileSource, String> {}
+import java.util.UUID;
+
+public interface VideoFileSrcRepository extends JpaRepository<VideoFileSource, UUID> {}

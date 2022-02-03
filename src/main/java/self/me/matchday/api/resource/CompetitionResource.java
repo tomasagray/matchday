@@ -35,6 +35,7 @@ import self.me.matchday.api.controller.CompetitionController;
 import self.me.matchday.model.Competition;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -49,7 +50,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @JsonInclude(value = Include.NON_NULL)
 public class CompetitionResource extends RepresentationModel<CompetitionResource> {
 
-  private String id;
+  private UUID id;
   private String name;
   private String abbreviation;
   private Locale locale;
@@ -76,7 +77,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       final CompetitionResource competitionResource = instantiateModel(competition);
 
       // populate DTO
-      final String competitionId = competition.getCompetitionId();
+      final UUID competitionId = competition.getCompetitionId();
       competitionResource.setId(competitionId);
       competitionResource.setName(competition.getName());
       competitionResource.setAbbreviation(competition.getAbbreviation());

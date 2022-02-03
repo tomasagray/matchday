@@ -26,14 +26,15 @@ import org.springframework.stereotype.Repository;
 import self.me.matchday.model.FileServerUser;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface FileServerUserRepo extends JpaRepository<FileServerUser, String> {
+public interface FileServerUserRepo extends JpaRepository<FileServerUser, UUID> {
 
   @Query("SELECT user FROM FileServerUser user WHERE user.serverId = :serverId")
-  List<FileServerUser> fetchAllUsersForServer(@Param("serverId") String serverId);
+  List<FileServerUser> fetchAllUsersForServer(@Param("serverId") UUID serverId);
 
   @Query(
       "SELECT user FROM FileServerUser user WHERE user.serverId = :serverId AND user.loggedIn = true")
-  List<FileServerUser> fetchLoggedInUsersForServer(@Param("serverId") String serverId);
+  List<FileServerUser> fetchLoggedInUsersForServer(@Param("serverId") UUID serverId);
 }

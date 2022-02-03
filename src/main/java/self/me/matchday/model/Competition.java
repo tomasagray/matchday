@@ -26,15 +26,17 @@ package self.me.matchday.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Abbreviator;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * Represents a competition, e.g., a domestic league (EPL) or cup (FA Cup), a tournament (UCL, World
@@ -46,10 +48,13 @@ import java.util.Locale;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "Competitions")
 public class Competition implements Serializable {
 
-  @Id private String competitionId;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  private UUID competitionId;
+
   private String name;
   private String abbreviation;
   private Locale locale;
@@ -59,16 +64,12 @@ public class Competition implements Serializable {
   @OneToOne private Artwork landscape;
 
   public Competition(@NotNull final String name) {
-    // Automatically create an abbreviation
     this(name, Abbreviator.abbreviate(name));
   }
 
   public Competition(@NotNull final String name, @NotNull final String abbreviation) {
-
     this.name = name;
     this.abbreviation = abbreviation;
-    // Generate ID
-    this.competitionId = MD5String.fromData(this.name, this.abbreviation);
   }
 
   @Override
@@ -78,13 +79,10 @@ public class Competition implements Serializable {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == this) {
-      return true;
-    }
+
     if (!(obj instanceof Competition)) {
       return false;
     }
-    // Cast for comparison
     Competition competition = (Competition) obj;
     return competition.getName().equals(this.getName());
   }

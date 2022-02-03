@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -35,6 +35,7 @@ import self.me.matchday.api.controller.TeamController;
 import self.me.matchday.model.Team;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -49,14 +50,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @JsonInclude(value = Include.NON_NULL)
 public class TeamResource extends RepresentationModel<TeamResource> {
 
-  private String id;
+  private UUID id;
   private String name;
   private String abbreviation;
   private Locale locale;
 
   @Component
-  public static class TeamResourceAssembler extends
-      RepresentationModelAssemblerSupport<Team, TeamResource> {
+  public static class TeamResourceAssembler
+      extends RepresentationModelAssemblerSupport<Team, TeamResource> {
 
     private static final LinkRelation EVENTS = LinkRelation.of("events");
     private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
@@ -72,26 +73,22 @@ public class TeamResource extends RepresentationModel<TeamResource> {
 
       final TeamResource teamResource = instantiateModel(team);
       // initialize resource
-      final String teamId = team.getTeamId();
+      final UUID teamId = team.getTeamId();
       teamResource.setId(teamId);
       teamResource.setName(team.getName());
       teamResource.setAbbreviation(team.getAbbreviation());
       teamResource.setLocale(team.getLocale());
       // attach links
       teamResource.add(
-          linkTo(methodOn(TeamController.class).fetchTeamById(teamId)).withSelfRel());
+          linkTo(methodOn(TeamController.class).fetchTeamByName(teamId)).withSelfRel());
       // artwork
-      teamResource.add(linkTo(
-          methodOn(ArtworkController.class)
-              .fetchTeamEmblem(teamId))
-          .withRel(EMBLEM));
-      teamResource.add(linkTo(
-          methodOn(ArtworkController.class)
-              .fetchTeamFanart(teamId))
-          .withRel(FANART));
+      teamResource.add(
+          linkTo(methodOn(ArtworkController.class).fetchTeamEmblem(teamId)).withRel(EMBLEM));
+      teamResource.add(
+          linkTo(methodOn(ArtworkController.class).fetchTeamFanart(teamId)).withRel(FANART));
       // events
-      teamResource.add(linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId))
-          .withRel(EVENTS));
+      teamResource.add(
+          linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId)).withRel(EVENTS));
 
       return teamResource;
     }
@@ -103,10 +100,7 @@ public class TeamResource extends RepresentationModel<TeamResource> {
 
       final CollectionModel<TeamResource> teamResources = super.toCollectionModel(teams);
       // add a self link
-      teamResources
-          .add(linkTo(methodOn(TeamController.class)
-              .fetchAllTeams())
-              .withSelfRel());
+      teamResources.add(linkTo(methodOn(TeamController.class).fetchAllTeams()).withSelfRel());
       return teamResources;
     }
   }
