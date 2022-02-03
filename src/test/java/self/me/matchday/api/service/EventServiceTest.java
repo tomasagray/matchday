@@ -38,6 +38,7 @@ import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -134,7 +135,7 @@ class EventServiceTest {
     assertThat(testFileSrcOptional).isPresent();
     // Get file source ID
     final VideoFileSource testFileSource = testFileSrcOptional.get();
-    final String testFileSourceId = testFileSource.getFileSrcId();
+    final UUID testFileSourceId = testFileSource.getFileSrcId();
     Log.i(LOG_TAG, "Test VideoFileSource ID: " + testFileSourceId);
 
     final Optional<VideoFileSource> fileSourceOptional =

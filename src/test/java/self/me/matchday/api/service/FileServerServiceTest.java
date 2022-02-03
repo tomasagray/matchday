@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
@@ -48,6 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for remote file server management service")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class FileServerServiceTest {
 
   private static final String LOG_TAG = "FileServerServiceTest";
@@ -141,7 +143,7 @@ class FileServerServiceTest {
     Log.i(LOG_TAG, "Attempting login with user: " + testFileServerUser);
     final ClientResponse actualResponse = fileServerService.login(testFileServerUser, testPluginId);
 
-    Log.i(LOG_TAG, "Got response: " + actualResponse);
+    Log.i(LOG_TAG, "Got login response: " + actualResponse.statusCode());
     // Ensure successful login
     assertThat(actualResponse.statusCode()).isEqualTo(HttpStatus.OK);
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
@@ -149,6 +151,7 @@ class FileServerServiceTest {
     // Logout
     final ClientResponse logoutResponse =
         fileServerService.logout(testFileServerUser, testPluginId);
+    Log.i(LOG_TAG, "Got logout response: " + logoutResponse.statusCode());
     assertThat(logoutResponse.statusCode().is2xxSuccessful()).isTrue();
     // Get fresh managed copy
     final FileServerUser userAfterLogout = getFreshManagedUser();
@@ -224,25 +227,33 @@ class FileServerServiceTest {
   void getUserById() {
 
     final UUID testPluginId = testFileServerPlugin.getPluginId();
-    fileServerService.login(testFileServerUser, testPluginId);
-    final Optional<FileServerUser> userOptional =
-        fileServerService.getUserById(testFileServerUser.getUserId());
+    final FileServerUser testUser = testDataCreator.createTestFileServerUser();
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Logging in to File Server Plugin: %s%n with user: %s", testPluginId, testUser));
+    final ClientResponse loginResponse = fileServerService.login(testUser, testPluginId);
+    Log.i(LOG_TAG, "Got login response: " + loginResponse.statusCode());
+
+    final UUID testUserId = testUser.getUserId();
+    Log.i(LOG_TAG, "Attempting to retrieve user with ID: " + testUserId);
+    final Optional<FileServerUser> userOptional = fileServerService.getUserById(testUserId);
     assertThat(userOptional.isPresent()).isTrue();
 
     userOptional.ifPresent(
         fileServerUser -> {
           Log.i(LOG_TAG, "Retrieved user from plugin: " + fileServerUser);
-          assertThat(fileServerUser).isEqualTo(testFileServerUser);
+          assertThat(fileServerUser).isEqualTo(testUser);
         });
 
-    fileServerService.logout(testFileServerUser, testPluginId);
+    fileServerService.logout(testUser, testPluginId);
   }
 
   @Test
   @DisplayName("Ensure file server user can be deleted from database")
   void deleteUser() {
 
-    final String testUserId = testFileServerUser.getUserId();
+    final UUID testUserId = testFileServerUser.getUserId();
     Log.i(LOG_TAG, "Deleting user: " + testUserId);
     fileServerService.deleteUser(testUserId);
 

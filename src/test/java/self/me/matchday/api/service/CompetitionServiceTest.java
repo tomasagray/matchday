@@ -35,6 +35,7 @@ import self.me.matchday.util.Log;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -87,7 +88,7 @@ class CompetitionServiceTest {
   @DisplayName("Validate retrieval of a single competition from database")
   void fetchCompetitionById() {
 
-    final String testCompetitionId = testCompetition.getCompetitionId();
+    final UUID testCompetitionId = testCompetition.getCompetitionId();
 
     final Optional<Competition> competitionOptional =
         competitionService.fetchCompetitionById(testCompetitionId);

@@ -35,6 +35,7 @@ import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -93,7 +94,7 @@ class MatchServiceTest {
   @DisplayName("Test retrieval of a particular Match from database")
   void fetchMatch() {
 
-    final String testMatchId = testMatch.getEventId();
+    final UUID testMatchId = testMatch.getEventId();
     Log.i(LOG_TAG, "Attempting to retrieve Match from database; ID: " + testMatchId);
     final Optional<Match> optionalMatch = matchService.fetchMatch(testMatchId);
 

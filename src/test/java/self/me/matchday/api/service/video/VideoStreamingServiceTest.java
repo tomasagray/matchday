@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
@@ -37,10 +38,7 @@ import self.me.matchday.util.Log;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -49,12 +47,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for video streaming service")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class VideoStreamingServiceTest {
 
   private static final String LOG_TAG = "VideoStreamingServiceTest";
 
-  private static final long waitSeconds = 30;
+  private static final long waitSeconds = 10;
 
   // Service dependencies
   private static TestDataCreator testDataCreator;
@@ -92,10 +91,10 @@ class VideoStreamingServiceTest {
     VideoStreamingServiceTest.testFileSource = getTestFileSource();
     VideoStreamingServiceTest.testVideoFile =
         testFileSource.getVideoFilePacks().stream()
-            .findAny()
+            .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("No VideoFilePacks for test data"))
             .stream()
-            .findAny()
+            .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("No VideoFiles for test data"));
   }
 
@@ -144,8 +143,8 @@ class VideoStreamingServiceTest {
 
     final M3uRenderer renderer = new M3uRenderer();
     // test variables
-    final String testEventId = testMatch.getEventId();
-    final String testFileSrcId = testFileSource.getFileSrcId();
+    final UUID testEventId = testMatch.getEventId();
+    final UUID testFileSrcId = testFileSource.getFileSrcId();
     Log.i(LOG_TAG, "Testing with Match:\n" + testMatch);
     Log.i(
         LOG_TAG,
@@ -213,13 +212,13 @@ class VideoStreamingServiceTest {
             testMatch.getEventId(),
             VideoStreamingServiceTest.testFileSource.getFileSrcId(),
             testStreamLocator.getStreamLocatorId());
-    Log.i(LOG_TAG, "Read playlist file:\n" + actualPlaylistFile);
 
     // Perform tests
     assertThat(actualPlaylistFile).isNotNull().isNotEmpty().isPresent();
     final String actualPlaylistData = actualPlaylistFile.get();
     final int actualPlaylistSize = actualPlaylistData.getBytes(StandardCharsets.UTF_8).length;
-
+    Log.i(LOG_TAG, "Read playlist data:\n" + actualPlaylistData);
+    Log.i(LOG_TAG, "Data length: " + actualPlaylistSize);
     Log.i(
         LOG_TAG, String.format("Ensuring read playlist is longer than %d bytes", MIN_PLAYLIST_LEN));
     assertThat(actualPlaylistSize).isGreaterThan(MIN_PLAYLIST_LEN);
@@ -236,8 +235,8 @@ class VideoStreamingServiceTest {
 
     // Test params
     final Long testStreamLocatorId = testStreamLocator.getStreamLocatorId();
-    final String testVideoFileSrcId = VideoStreamingServiceTest.testFileSource.getFileSrcId();
-    final String testEventId = testMatch.getEventId();
+    final UUID testVideoFileSrcId = VideoStreamingServiceTest.testFileSource.getFileSrcId();
+    final UUID testEventId = testMatch.getEventId();
     final String segmentId = "segment_00001";
 
     Log.i(
@@ -320,7 +319,7 @@ class VideoStreamingServiceTest {
     final int waitSeconds = 10;
 
     final VideoFileSource testFileSource = getTestFileSource();
-    final String fileSrcId = testFileSource.getFileSrcId();
+    final UUID fileSrcId = testFileSource.getFileSrcId();
     Log.i(
         LOG_TAG,
         "Beginning test stream for file source stream killing with file source ID: " + fileSrcId);

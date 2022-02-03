@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 @Component
 public class TestDataSourcePlugin implements DataSourcePlugin<Event> {
 
-  private final UUID pluginId = UUID.randomUUID();
+  private final UUID pluginId = UUID.fromString("37149b7c-4dae-48c2-997a-a7427628b408");
   private final TestDataCreator testDataCreator;
 
   public TestDataSourcePlugin(TestDataCreator testDataCreator) {

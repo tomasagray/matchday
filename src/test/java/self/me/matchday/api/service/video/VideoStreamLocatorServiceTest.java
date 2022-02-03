@@ -24,6 +24,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @DisplayName("Testing for playlist locator service")
 class VideoStreamLocatorServiceTest {
 
@@ -74,7 +76,7 @@ class VideoStreamLocatorServiceTest {
             .get(PartIdentifier.FIRST_HALF);
     // resolve test data storage path
     VideoStreamLocatorServiceTest.testStorage =
-        storageLocation.resolve(testVideoFileSource.getFileSrcId());
+        storageLocation.resolve(testVideoFileSource.getFileSrcId().toString());
   }
 
   @AfterAll

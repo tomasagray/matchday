@@ -35,6 +35,7 @@ import self.me.matchday.util.Log;
 
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -81,9 +82,9 @@ class ArtworkServiceTest {
   @DisplayName("Validate default team emblem retrieval")
   void fetchDefaultTeamEmblem() {
 
-    Log.i(LOG_TAG, "Getting emblem artwork for team ID: " + testTeam.getTeamId());
-    final Optional<byte[]> teamEmblemOptional =
-        artworkService.fetchTeamEmblem(testTeam.getTeamId());
+    final UUID teamId = testTeam.getTeamId();
+    Log.i(LOG_TAG, "Getting emblem artwork for team ID: " + teamId);
+    final Optional<byte[]> teamEmblemOptional = artworkService.fetchTeamEmblem(teamId);
     assertThat(teamEmblemOptional.isPresent()).isTrue();
 
     final byte[] teamEmblem = teamEmblemOptional.get();

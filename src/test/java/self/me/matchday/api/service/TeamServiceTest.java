@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
@@ -41,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @DisplayName("Testing for Team service")
 class TeamServiceTest {
 
@@ -132,7 +134,9 @@ class TeamServiceTest {
     final int initialTeamCount = teams.size();
 
     // Save team to database
-    teamService.saveTeam(savingTestTeam);
+    final Team savedTeam = teamService.saveTeam(savingTestTeam);
+    Log.i(LOG_TAG, "Successfully saved Team: " + savedTeam);
+
     // Get new team list
     final Optional<List<Team>> optionalTeamsPostUpdate = teamService.fetchAllTeams();
     assertThat(optionalTeamsPostUpdate).isPresent();
@@ -143,7 +147,7 @@ class TeamServiceTest {
     assertThat(postUpdateTeamCount - initialTeamCount).isEqualTo(1);
 
     // Cleanup
-    teamService.deleteTeamById(savingTestTeam.getTeamId());
+    teamService.deleteTeamByName(savingTestTeam.getName());
   }
 
   @Test
@@ -161,7 +165,7 @@ class TeamServiceTest {
     final int updatedTeamCount = updatedTeams.size();
 
     // Delete test team
-    teamService.deleteTeamById(deleteTestTeam.getTeamId());
+    teamService.deleteTeamByName(deleteTestTeam.getName());
     // Get new team count
     final Optional<List<Team>> deletedTeamsListOptional = teamService.fetchAllTeams();
     assertThat(deletedTeamsListOptional).isPresent();

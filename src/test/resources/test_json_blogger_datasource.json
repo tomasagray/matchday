@@ -1,92 +1,67 @@
 {
-  "baseUri": "https://fb11710500.blogspot.com/feeds/posts/default/",
-  "metadataPatterns": [
+  "pluginId": "64d08bc8-bd9f-11ea-b3de-0242ac130004",
+  "baseUri": "http://192.168.0.107:7000/",
+  "patternKits": [
     {
-      "eventPatternKit": {
-        "eventMetadataRegex": {
-          "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4})[-Matchdy\\s]*(\\d+)[\\s-]*([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
-          "flags": 64
-        },
-        "competitionName": 1,
-        "homeTeamName": 4,
-        "awayTeamName": 5,
-        "season": 2,
-        "fixture": 3,
-        "date": 6
+      "clazz": "self.me.matchday.model.Event",
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "fixture",
+        "4": "homeTeam",
+        "5": "awayTeam",
+        "6": "date"
       },
-      "fileSourcePatternKits": [
-        {
-          "fileSourceMetadataRegex": {
-            "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+ \\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ (\\p{L}+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
-            "flags": 64
-          },
-          "videoFileUrlRegex": {
-            "pattern": "^http[s]?://[\\p{L}.]*filefox.cc/[\\p{L}]+/[\\p{L}-_]*.(mkv|ts)",
-            "flags": 64
-          },
-          "eventPartIdentifierRegex": {
-            "pattern": "(Pre-|Post-|1st|First|2nd|Second|Trophy)",
-            "flags": 2
-          },
-          "channel": 1,
-          "resolution": 12,
-          "source": 2,
-          "duration": 10,
-          "languages": 3,
-          "container": 5,
-          "videoCodec": 0,
-          "videoBitrate": 4,
-          "audioCodec": 8,
-          "audioBitrate": 7,
-          "filesize": 11,
-          "framerate": 6,
-          "audioChannels": 9
-        }
-      ]
+      "pattern": {
+        "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}/\\d{2,4})[-Matchdy\\s]*(\\d+)[\\s-]*([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) - (\\d{2}/\\d{2}/\\d{2,4})",
+        "flags": 64
+      }
     },
     {
-      "eventPatternKit": {
-        "eventMetadataRegex": {
-          "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4}) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
-          "flags": 64
-        },
-        "competitionName": 1,
-        "season": 2,
-        "date": 3,
-        "homeTeamName": 4,
-        "awayTeamName": 5
+      "clazz": "self.me.matchday.model.video.VideoFileSource",
+      "fields": {
+        "1": "channel",
+        "2": "source",
+        "3": "languages",
+        "4": "videoBitrate",
+        "5": "videoCodec",
+        "6": "mediaContainer",
+        "7": "framerate",
+        "8": "audioBitrate",
+        "9": "audioCodec",
+        "10": "audioChannels",
+        "11": "approximateDuration",
+        "12": "filesize",
+        "13": "resolution"
       },
-      "fileSourcePatternKits": [
-        {
-          "fileSourceMetadataRegex": {
-            "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+ \\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ (\\p{L}+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
-            "flags": 64
-          },
-          "videoFileUrlRegex": {
-            "pattern": "^http[s]?://[\\p{L}.]*filefox.cc/[\\p{L}]+/[\\p{L}-_]*.(mkv|ts)",
-            "flags": 64
-          },
-          "eventPartIdentifierRegex": {
-            "pattern": "(Pre-|Post-|1st|First|2nd|Second|Trophy)",
-            "flags": 2
-          },
-          "channel": 1,
-          "resolution": 12,
-          "source": 2,
-          "duration": 10,
-          "languages": 3,
-          "container": 5,
-          "videoCodec": 0,
-          "videoBitrate": 4,
-          "audioCodec": 8,
-          "audioBitrate": 7,
-          "filesize": 11,
-          "framerate": 6,
-          "audioChannels": 9
-        }
-      ]
+      "pattern": {
+        "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\d-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+) (\\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
+        "flags": 64
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.video.VideoFilePack"
+    },
+    {
+      "clazz": "self.me.matchday.model.video.VideoFile",
+      "fields": {
+        "0": "title"
+      },
+      "pattern": {
+        "pattern": "[1st2ndFirSeco-]+ Half|[Postre]+-Match",
+        "flags": 0
+      }
+    },
+    {
+      "clazz": "java.net.URL",
+      "fields": {
+        "0": "url"
+      },
+      "pattern": {
+        "pattern": "^http[s]?://[\\p{L}.]*filefox.cc/[\\w]+/[\\w-]*.(mkv|ts)",
+        "flags": 0
+      }
     }
   ],
-  "pluginId": "64d08bc8-bd9f-11ea-b3de-0242ac130004",
   "enabled": true
 }

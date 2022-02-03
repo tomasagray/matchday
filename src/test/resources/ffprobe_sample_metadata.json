@@ -141,7 +141,7 @@
   "chapters": [
   ],
   "format": {
-    "filename": "http://192.168.0.107:7000/matches/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_1EN.ts",
+    "filename": "http://192.168.0.107:7000/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_1EN.ts",
     "nb_streams": 3,
     "nb_programs": 1,
     "format_name": "mpegts",

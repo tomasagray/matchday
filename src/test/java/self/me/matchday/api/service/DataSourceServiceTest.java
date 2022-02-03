@@ -32,10 +32,20 @@ import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.SnapshotRequest;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFilePack;
+import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 import self.me.matchday.plugin.datasource.TestDataSourcePlugin;
+import self.me.matchday.plugin.datasource.parsing.PatternKit;
+import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.Log;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -203,7 +213,8 @@ class DataSourceServiceTest {
   @DisplayName("Validate that a DataSource can be added to the database")
   void addDataSource() {
 
-    final DataSource testDataSource = testDataCreator.readTestHtmlDataSource();
+//    createTestFile();
+    final DataSource testDataSource = testDataCreator.readTestJsonDataSource();
     Log.i(LOG_TAG, "Read test DataSource:\n" + testDataSource);
     final DataSource addedDataSource = dataSourceService.addDataSource(testDataSource);
     Log.i(LOG_TAG, "Added DataSource to database:\n" + addedDataSource);
@@ -212,5 +223,37 @@ class DataSourceServiceTest {
     assertThat(addedDataSource.getBaseUri()).isEqualTo(testDataSource.getBaseUri());
     assertThat(addedDataSource.getPatternKits().size())
         .isEqualTo(testDataSource.getPatternKits().size());
+  }
+
+  private static void createTestFile() {
+    final PatternKit<Event> eventPatternKit = testDataCreator.createEventPatternKit();
+    final PatternKit<VideoFileSource> fileSourcePatternKit =
+        testDataCreator.createFileSourcePatternKit();
+    final PatternKit<VideoFilePack> videoFilePackPatternKit =
+        testDataCreator.createVideoFilePackPatternKit();
+    final PatternKit<VideoFile> videoFilePatternKit = testDataCreator.createVideoFilePatternKit();
+    final PatternKit<URL> urlPatternKit = testDataCreator.createUrlPatternKit();
+    final List<PatternKit<?>> patternKits =
+        List.of(
+            eventPatternKit,
+            fileSourcePatternKit,
+            videoFilePackPatternKit,
+            videoFilePatternKit,
+            urlPatternKit);
+    final DataSource dataSource =
+        new DataSource(
+            UUID.fromString("37149b7c-4dae-48c2-997a-a7427628b408"),
+            URI.create("https://localhost:8081/"),
+            patternKits);
+    final String json = JsonParser.toJson(dataSource);
+
+    try (BufferedWriter writer =
+        new BufferedWriter(
+            new FileWriter(
+                "C:\\Users\\Tomas\\Projects\\Source\\IdeaProjects\\matchday\\src\\test\\resources\\test_json_blogger_datasource.json"))) {
+      writer.write(json);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }

@@ -27,6 +27,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -43,6 +46,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -150,11 +154,21 @@ class EntityCorrectionServiceTest {
     }
   }
 
-  @Test
-  @DisplayName("Validate that a word with no Synonyms is not modified")
-  void testNoSynonymNoModify() throws ReflectiveOperationException {
+  private static @NotNull Stream<Arguments> getWordsWithNoSynonyms() {
+    return Stream.of(
+            Arguments.of("I have no equal"),
+            Arguments.of("I have some equals"),
+            Arguments.of("I have a lot of equals"),
+            Arguments.of("Stop copying me!"),
+            Arguments.of("No!")
+    );
+  }
 
-    final String testString = "I have no equal.";
+  @ParameterizedTest
+  @MethodSource("getWordsWithNoSynonyms")
+  @DisplayName("Validate that a word with no Synonyms is not modified")
+  void testNoSynonymNoModify(String testString) throws ReflectiveOperationException {
+
     final TestCorrectionEntity testEntity = new TestCorrectionEntity(testString);
     correctionService.createSynonymsFrom(getTestSynonymList());
     Log.i(LOG_TAG, "Created test resource:  " + testEntity);

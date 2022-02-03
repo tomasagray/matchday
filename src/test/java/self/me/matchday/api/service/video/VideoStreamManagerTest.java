@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,7 +113,7 @@ class VideoStreamManagerTest {
   @DisplayName("Validate retrieval of previously created playlist")
   void getLocalStreamFor() {
 
-    final String testFileSrcId = VideoStreamManagerTest.testFileSource.getFileSrcId();
+    final UUID testFileSrcId = VideoStreamManagerTest.testFileSource.getFileSrcId();
     Log.i(
         LOG_TAG,
         "Attempting VideoStreamLocatorPlaylist lookup for file source ID: " + testFileSrcId);
@@ -202,7 +203,7 @@ class VideoStreamManagerTest {
   @DisplayName("Ensure VideoStreamManager can delete local data")
   void deleteLocalStream() throws IOException {
 
-    final String fileSrcId = testFileSource.getFileSrcId();
+    final UUID fileSrcId = testFileSource.getFileSrcId();
     final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
     final Path storageLocation = playlist.getStorageLocation();
     Log.i(LOG_TAG, "Deleting local data associated with VideoStreamLocatorPlaylist: " + playlist);
@@ -222,7 +223,7 @@ class VideoStreamManagerTest {
    * @return a VideoStreamLocatorPlaylist
    */
   private @NotNull VideoStreamLocatorPlaylist getStreamLocatorPlaylist() {
-    final String fileSrcId = testFileSource.getFileSrcId();
+    final UUID fileSrcId = testFileSource.getFileSrcId();
     final Optional<VideoStreamLocatorPlaylist> playlistOptional =
         streamManager.getLocalStreamFor(fileSrcId);
     assertThat(playlistOptional).isPresent();

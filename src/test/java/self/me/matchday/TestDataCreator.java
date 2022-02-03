@@ -23,6 +23,8 @@ import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.*;
@@ -49,9 +51,12 @@ import static self.me.matchday.model.video.PartIdentifier.*;
 import static self.me.matchday.model.video.Resolution.R_1080p;
 
 @Service
+@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class TestDataCreator {
 
   private static final String LOG_TAG = "CreateTestData";
+
+  private static final String BASE_URL = "http://192.168.0.107:7000";
   private static final Random numGen = new Random();
 
   private final EventRepository eventRepository;
@@ -64,7 +69,6 @@ public class TestDataCreator {
   private final VideoStreamLocatorPlaylistRepo locatorPlaylistRepo;
   private final VideoStreamLocatorRepo streamLocatorRepo;
 
-  // todo - make test versions of all repos!
   @Autowired
   public TestDataCreator(
       @NotNull final EventRepository eventRepository,
@@ -159,9 +163,9 @@ public class TestDataCreator {
     indexes.put(1, "competition");
     indexes.put(2, "season");
     indexes.put(3, "fixture");
-    indexes.put(4, "homeTeam");
-    indexes.put(5, "awayTeam");
-    indexes.put(6, "date");
+    indexes.put(4, "date");
+    indexes.put(5, "homeTeam");
+    indexes.put(6, "awayTeam");
     patternKit.setFields(indexes);
     return patternKit;
   }
@@ -301,12 +305,19 @@ public class TestDataCreator {
   }
 
   // ================ EVENTS ======================
+
   @Transactional
   @NotNull
   public Match createTestMatch() {
+    return this.createTestMatch("");
+  }
+
+  @Transactional
+  @NotNull
+  public Match createTestMatch(@NotNull String competitionName) {
     // Create & save test match & VideoFileSource
-    final Competition testCompetition = createTestCompetition();
-    final Team testTeam = createTestTeam();
+    final Competition testCompetition = createTestCompetition(competitionName);
+    final Team testTeam = createTestTeam(competitionName);
     final Match testMatch =
         Match.matchBuilder()
             .date(LocalDateTime.now())
@@ -355,9 +366,16 @@ public class TestDataCreator {
   @Transactional
   @NotNull
   public Team createTestTeam() {
-    final Team team = new Team("TEST TEAM " + numGen.nextInt());
+    return this.createTestTeam("TEST TEAM " + numGen.nextInt());
+  }
+
+  @Transactional
+  @NotNull
+  public Team createTestTeam(@NotNull String name) {
+    final Team team = new Team(name);
     return teamRepository.saveAndFlush(team);
   }
+
 
   @Transactional
   public void deleteTestTeam(@NotNull Team team) {
@@ -374,7 +392,7 @@ public class TestDataCreator {
     final List<VideoFilePack> videoFilePacks = createTestVideoFiles(fileSetCount);
     final VideoFileSource fileSource =
         VideoFileSource.builder()
-            .fileSrcId(MD5String.generate())
+            .fileSrcId(UUID.randomUUID())
             .channel("Event Service Test Channel")
             .resolution(R_1080p)
             .languages("English")
@@ -451,22 +469,22 @@ public class TestDataCreator {
 
   public @Nullable URL getPreMatchUrl() {
     return getTestUrl(
-        "http://192.168.0.107:7000/matches/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_ETPEN.ts");
+        BASE_URL + "/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_ETPEN.ts");
   }
 
   public @Nullable URL getFirstHalfUrl() {
     return getTestUrl(
-        "http://192.168.0.107:7000/matches/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_1EN.ts");
+        BASE_URL + "/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_1EN.ts");
   }
 
   public @Nullable URL getSecondHalfUrl() {
     return getTestUrl(
-        "http://192.168.0.107:7000/matches/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_2EN.ts");
+        BASE_URL + "/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_2EN.ts");
   }
 
   public @Nullable URL getPostMatchUrl() {
     return getTestUrl(
-        "http://192.168.0.107:7000/matches/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_ETPEN.ts");
+        BASE_URL + "/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_ETPEN.ts");
   }
 
   private @Nullable URL getTestUrl(@NotNull final String url) {

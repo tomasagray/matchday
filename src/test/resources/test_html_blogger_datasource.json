@@ -1,5 +1,5 @@
 {
-  "baseUri": "https://galatamanhdfb.blogspot.com",
+  "baseUri": "http://192.168.0.107:7000",
   "metadataPatterns": [
     {
       "eventPatternKit": {
