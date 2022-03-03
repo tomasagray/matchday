@@ -1,0 +1,96 @@
+{
+  "patternKitPack": {
+    "patternKits": {
+      "self.me.matchday.model.video.VideoFile": {
+        "clazz": "self.me.matchday.model.video.VideoFile",
+        "patternKits": [
+          {
+            "clazz": "self.me.matchday.model.video.VideoFile",
+            "fields": {
+              "0": "title"
+            },
+            "pattern": {
+              "pattern": "[1st2ndFirSeco-]+ Half|[Postre]+-Match",
+              "flags": 0
+            }
+          }
+        ]
+      },
+      "java.net.URL": {
+        "clazz": "java.net.URL",
+        "patternKits": [
+          {
+            "clazz": "java.net.URL",
+            "fields": {
+              "0": "url"
+            },
+            "pattern": {
+              "pattern": "^http[s]?://[\\p{L}.]*filefox.cc/[\\w]+/[\\w-]*.(mkv|ts)",
+              "flags": 0
+            }
+          }
+        ]
+      },
+      "self.me.matchday.model.video.VideoFilePack": {
+        "clazz": "self.me.matchday.model.video.VideoFilePack",
+        "patternKits": [
+          {
+            "clazz": "self.me.matchday.model.video.VideoFilePack"
+          }
+        ]
+      },
+      "self.me.matchday.model.video.VideoFileSource": {
+        "clazz": "self.me.matchday.model.video.VideoFileSource",
+        "patternKits": [
+          {
+            "clazz": "self.me.matchday.model.video.VideoFileSource",
+            "fields": {
+              "1": "channel",
+              "2": "source",
+              "3": "languages",
+              "4": "videoBitrate",
+              "5": "videoCodec",
+              "6": "mediaContainer",
+              "7": "framerate",
+              "8": "audioBitrate",
+              "9": "audioCodec",
+              "10": "audioChannels",
+              "11": "approximateDuration",
+              "12": "filesize",
+              "13": "resolution"
+            },
+            "pattern": {
+              "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\d\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\s\\d-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\d+\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+) (\\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
+              "flags": 64
+            }
+          }
+        ]
+      },
+      "self.me.matchday.model.Event": {
+        "clazz": "self.me.matchday.model.Event",
+        "patternKits": [
+          {
+            "clazz": "self.me.matchday.model.Event",
+            "fields": {
+              "1": "competition",
+              "2": "season",
+              "3": "fixture",
+              "4": "date",
+              "5": "homeTeam",
+              "6": "awayTeam"
+            },
+            "pattern": {
+              "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4})[-Matchdy\\s]*(\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]*([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
+              "flags": 64
+            }
+          }
+        ]
+      }
+    }
+  },
+  "pluginId": "64d08bc8-bd9f-11ea-b3de-0242ac130004",
+  "dataSourceId": "b5219118-a0b8-40d9-9b87-b10ff493c64b",
+  "baseUri": "https://galatamanhdfb.blogspot.com/",
+  "clazz": "self.me.matchday.model.Event",
+  "enabled": true
+}
