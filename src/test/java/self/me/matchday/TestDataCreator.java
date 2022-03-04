@@ -19,6 +19,7 @@
 
 package self.me.matchday;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,14 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.*;
 import self.me.matchday.model.*;
 import self.me.matchday.model.video.*;
-import self.me.matchday.plugin.datasource.parsing.PatternKit;
 import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -92,55 +89,24 @@ public class TestDataCreator {
     this.streamLocatorRepo = locatorRepo;
   }
 
-  // ======================== PatternKits ======================
-  private static void writeTestPatternKit(@NotNull PatternKit<?> patternKit, String filename) {
-
-    final String dataDir =
-        "C:\\Users\\Tomas\\Projects\\Source\\IdeaProjects\\matchday\\src\\test\\resources\\";
-    try (final BufferedWriter writer = new BufferedWriter(new FileWriter(dataDir + filename))) {
-      final Type type = TypeToken.get(patternKit.getClass()).getType();
-      final String json = JsonParser.toJson(patternKit, type);
-      writer.write(json);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
   // ======================== DATA SOURCE ========================
-  public DataSource readTestHtmlDataSource() {
-    final String filename = "test_html_blogger_datasource.json";
+  public DataSource<Event> readTestHtmlDataSource() {
+    final String filename = "data/datasource/test_html_blogger_datasource.json";
     return readTestDataSource(filename);
   }
 
-  public DataSource readTestJsonDataSource() {
-    final String filename = "test_json_blogger_datasource.json";
+  public DataSource<Event> readTestJsonDataSource() {
+    final String filename = "data/datasource/test_json_blogger_datasource.json";
     return readTestDataSource(filename);
   }
 
-  private DataSource readTestDataSource(@NotNull String filename) {
+  private DataSource<Event> readTestDataSource(@NotNull String filename) {
     final String dataSourceJson =
         ResourceFileReader.readTextResource(TestDataCreator.class, filename);
-    final DataSource testDataSource = JsonParser.fromJson(dataSourceJson, DataSource.class);
+    final Type type = new TypeReference<PlaintextDataSource<Event>>() {}.getType();
+    final DataSource<Event> testDataSource = JsonParser.fromJson(dataSourceJson, type);
     Log.i(LOG_TAG, "Read test datasource:\n" + testDataSource);
     return testDataSource;
-  }
-
-  public List<PatternKit<? extends Event>> createSeveralEventPatternKits() {
-
-    final String firstRegex =
-        "([\\p{L}\\d\\s]+) (\\d{2,4}/\\d{2,4})[-Matchdy\\s]*(\\d+)[\\s-]*([\\p{L}\\s-]+) "
-            + "vs.? ([\\p{L}\\s-]+) - (\\d{2}/\\d{2}/\\d{2,4})";
-    final String secondRegex =
-        "(?:FÚTBOL:\\s)*([\\p{L}\\s]*)[\\s-]*(\\d{2}/\\d{2}/\\d{2,4}) "
-            + "([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) _+";
-    final String thirdRegex =
-        "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4}) - "
-            + "(\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)";
-    final PatternKit<Event> pk1 = createEventPatternKitManually(firstRegex);
-    final PatternKit<Event> pk2 = createEventPatternKitManually(secondRegex);
-    final PatternKit<Event> pk3 = createEventPatternKitManually(thirdRegex);
-
-    return List.of(pk1, pk2, pk3);
   }
 
   public PatternKit<Event> createEventPatternKit() {
@@ -173,7 +139,8 @@ public class TestDataCreator {
   public PatternKit<Event> createEventPatternKitFromFile() {
 
     final String patternKitData =
-        ResourceFileReader.readTextResource(TestDataCreator.class, "test_event_pattern_kit.json");
+        ResourceFileReader.readTextResource(
+            TestDataCreator.class, "data/test_event_pattern_kit.json");
     final Type type = new TypeToken<PatternKit<Event>>() {}.getType();
     return JsonParser.fromJson(patternKitData, type);
   }
@@ -233,7 +200,7 @@ public class TestDataCreator {
 
     final String patternKitData =
         ResourceFileReader.readTextResource(
-            TestDataCreator.class, "test_filesource_pattern_kit.json");
+            TestDataCreator.class, "data/datasource/test_filesource_pattern_kit.json");
     final Type type = new TypeToken<PatternKit<VideoFileSource>>() {}.getType();
     return JsonParser.fromJson(patternKitData, type);
   }
@@ -261,47 +228,6 @@ public class TestDataCreator {
     patternKit.setPattern(pattern);
     patternKit.setFields(fields);
     return patternKit;
-  }
-
-  public PatternKit<PartIdentifier> createPartIdentifierPatternKit() {
-
-    final Pattern pattern = Pattern.compile("(Pre-|Post-|1st|First|2nd|Second|Trophy)");
-    final PatternKit<PartIdentifier> patternKit = new PatternKit<>(PartIdentifier.class);
-    final Map<Integer, String> fields = Map.of(1, "name");
-
-    patternKit.setPattern(pattern);
-    patternKit.setFields(fields);
-    return patternKit;
-  }
-
-  public PatternKit<URL> createUrlPatternKit() {
-
-    final Pattern pattern =
-        Pattern.compile("^http[s]?://[\\p{L}.]*filefox.cc/[\\w]+/[\\w-]*.(mkv|ts)");
-    final Map<Integer, String> fields = Map.of(0, "url");
-    final PatternKit<URL> urlPatternKit = new PatternKit<>(URL.class);
-
-    urlPatternKit.setPattern(pattern);
-    urlPatternKit.setFields(fields);
-    return urlPatternKit;
-  }
-
-  public List<? extends Event> getExpectedEntityParserTestEventData() {
-
-    final Type type = new TypeToken<List<? extends Event>>() {}.getType();
-    final String testDataJson =
-        ResourceFileReader.readTextResource(
-            TestDataCreator.class, "test_entity_parser_event_data.json");
-    return JsonParser.fromJson(testDataJson, type);
-  }
-
-  public List<? extends VideoFileSource> getExpectedEntityParserFileSourceData() {
-
-    final Type type = new TypeToken<List<? extends VideoFileSource>>() {}.getType();
-    final String testData =
-        ResourceFileReader.readTextResource(
-            TestDataCreator.class, "test_entity_parser_filesource_data.json");
-    return JsonParser.fromJson(testData, type);
   }
 
   // ================ EVENTS ======================
@@ -375,7 +301,6 @@ public class TestDataCreator {
     final Team team = new Team(name);
     return teamRepository.saveAndFlush(team);
   }
-
 
   @Transactional
   public void deleteTestTeam(@NotNull Team team) {
@@ -489,7 +414,7 @@ public class TestDataCreator {
 
   private @Nullable URL getTestUrl(@NotNull final String url) {
     try {
-      final String seed = "?rSeed=" + MD5String.generate();
+      final String seed = "?rSeed=" + UUID.randomUUID();
       return new URL(url + seed);
     } catch (MalformedURLException e) {
       e.printStackTrace();

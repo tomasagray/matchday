@@ -21,16 +21,17 @@ package self.me.matchday.plugin.datasource;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.model.*;
+import self.me.matchday.model.DataSource;
+import self.me.matchday.model.Snapshot;
+import self.me.matchday.model.SnapshotRequest;
 
 import java.util.UUID;
 import java.util.stream.Stream;
 
 @Component
-public class TestDataSourcePlugin implements DataSourcePlugin<Event> {
+public class TestDataSourcePlugin implements DataSourcePlugin {
 
   private final UUID pluginId = UUID.fromString("37149b7c-4dae-48c2-997a-a7427628b408");
   private final TestDataCreator testDataCreator;
@@ -56,22 +57,22 @@ public class TestDataSourcePlugin implements DataSourcePlugin<Event> {
     return "A description";
   }
 
-  @Contract("_ -> new")
-  @Override
-  public @NotNull Snapshot<Event> getAllSnapshots(@NotNull SnapshotRequest request) {
-    final Match testMatch = testDataCreator.createTestMatch();
-    return Snapshot.of(Stream.of(testMatch));
-  }
+  //  @Contract("_ -> new")
+  //  public @NotNull Snapshot<Event> getAllSnapshots(@NotNull SnapshotRequest request) {
+  //    final Match testMatch = testDataCreator.createTestMatch();
+  //    return Snapshot.of(Stream.of(testMatch));
+  //  }
 
+  @Override
   @Contract(pure = true)
-  @Override
-  public @Nullable Snapshot<Event> getSnapshot(
-      @NotNull SnapshotRequest request, @NotNull DataSource dataSource) {
-    return Snapshot.of(Stream.of(testDataCreator.createTestMatch()));
+  @SuppressWarnings("unchecked cast")
+  public <T> Snapshot<T> getSnapshot(
+      @NotNull SnapshotRequest request, @NotNull DataSource<T> dataSource) {
+    return Snapshot.of(Stream.of(testDataCreator.createTestMatch()).map(obj -> (T) obj));
   }
 
   @Override
-  public void validateDataSource(@NotNull DataSource dataSource) {
+  public void validateDataSource(@NotNull DataSource<?> dataSource) {
     if (!dataSource.getPluginId().equals(getPluginId())) {
       throw new IllegalArgumentException("Wrong pluginId for TestDataSourcePlugin");
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -50,7 +50,7 @@ class FFprobeTest {
   // Test constants
   private static final String FFPROBE_PATH = "plugin.ffmpeg.ffprobe-location";
   private static final String FFMPEG_PROPERTIES = "plugins\\ffmpeg\\ffmpeg.properties";
-  private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
+  private static final String SAMPLE_METADATA_JSON = "data/ffprobe_sample_metadata.json";
 
   // Test resources
   private static FFprobe ffProbe;
@@ -89,8 +89,7 @@ class FFprobeTest {
   @DisplayName("Verify FFprobe can read remote file metadata")
   void testGetFileMetadata() throws URISyntaxException, IOException {
 
-    final String baseUrl = testUrl.toString().replaceAll("\\?[\\w]*=[\\w]*", "");
-
+    final String baseUrl = testUrl.toString().replaceAll("\\?[\\w]*=[\\w-]*", "");
     Log.i(LOG_TAG, "Reading file data from: " + baseUrl);
     FFmpegMetadata actualMetadata = ffProbe.getFileMetadata(new URI(baseUrl));
 

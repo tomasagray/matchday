@@ -29,21 +29,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.DataSourceService;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.Snapshot;
-import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.plugin.datasource.parsing.PatternKit;
+import self.me.matchday.model.*;
+import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -55,8 +51,8 @@ class BloggerPluginTest {
   private static final String LOG_TAG = "BloggerPluginTest";
 
   private static BloggerPlugin plugin;
-  private static DataSource testHtmlDataSource;
-  private static DataSource testJsonDataSource;
+  //  private static DataSource<Event> testHtmlDataSource;
+  private static DataSource<Event> testJsonDataSource;
 
   @BeforeAll
   static void setUp(
@@ -64,12 +60,13 @@ class BloggerPluginTest {
       @Autowired BloggerPlugin bloggerPlugin,
       @Autowired @NotNull DataSourceService dataSourceService) {
 
-    plugin = bloggerPlugin;
-    final DataSource testHtmlDataSource = testDataCreator.readTestHtmlDataSource();
-    final DataSource testJsonDataSource = testDataCreator.readTestJsonDataSource();
+    BloggerPluginTest.plugin = bloggerPlugin;
+    //    final DataSource<Event> testHtmlDataSource = testDataCreator.readTestHtmlDataSource();
+    final DataSource<Event> testJsonDataSource = testDataCreator.readTestJsonDataSource();
 
     Log.i(LOG_TAG, "Adding test datasource to DB...");
-    BloggerPluginTest.testHtmlDataSource = dataSourceService.addDataSource(testHtmlDataSource);
+    //    BloggerPluginTest.testHtmlDataSource =
+    // dataSourceService.addDataSource(testHtmlDataSource);
     BloggerPluginTest.testJsonDataSource = dataSourceService.addDataSource(testJsonDataSource);
   }
 
@@ -106,49 +103,24 @@ class BloggerPluginTest {
   @DisplayName("Ensure that a DataSource can be added via the BloggerPlugin")
   void addDataSource() {
 
-    Log.i(LOG_TAG, "Added datasource:\n" + testHtmlDataSource);
-    assertThat(testHtmlDataSource).isNotNull();
-    assertThat(testHtmlDataSource.getBaseUri()).isNotNull();
-    final List<PatternKit<?>> metadataPatterns = testHtmlDataSource.getPatternKits();
+    Log.i(LOG_TAG, "Added datasource:\n" + testJsonDataSource);
+    assertThat(testJsonDataSource).isNotNull();
+    assertThat(testJsonDataSource.getBaseUri()).isNotNull();
+    final List<PatternKit<? extends Event>> metadataPatterns =
+        ((PlaintextDataSource<Event>) testJsonDataSource)
+            .getPatternKitPack()
+            .getPatternKitsFor(Event.class);
     assertThat(metadataPatterns).isNotNull();
-    assertThat(metadataPatterns.size()).isNotZero();
-  }
-
-  @Test
-  @DisplayName("Validate getting Snapshot of all plugin DataSources")
-  void getAllSnapshots() {
-
-    final int minEventCount = 5;
-    Log.i(LOG_TAG, "Attempting to get Snapshots from all Blogger DataSources...");
-
-    final SnapshotRequest request = SnapshotRequest.builder().build();
-    final Snapshot<? extends Event> snapshot = plugin.getAllSnapshots(request);
-
-    final Stream<? extends Event> data = snapshot.getData();
-    assertThat(data).isNotNull();
-
-    final AtomicInteger eventCounter = new AtomicInteger();
-    data.forEach(
-        event -> {
-          Log.i(LOG_TAG, "Refresh got Event:\n" + event);
-          assertThat(event).isNotNull();
-          assertThat(event.getCompetition()).isNotNull();
-          assertThat(event.getDate()).isNotNull().isAfter(LocalDateTime.MIN);
-          eventCounter.getAndIncrement();
-        });
-
-    final int eventCount = eventCounter.get();
-    Log.i(LOG_TAG, String.format("Pulled: %d Events", eventCount));
-    assertThat(eventCount).isGreaterThanOrEqualTo(minEventCount);
+    assertThat(metadataPatterns.size()).isNotZero().isEqualTo(1);
   }
 
   @Test
   @DisplayName("Get a Snapshot from the test HTML DataSource")
-  void getSnapshot() throws IOException {
+  void getHtmlSnapshot() throws IOException {
 
-    Log.i(LOG_TAG, "Getting Snapshot with DataSource:\n" + testHtmlDataSource.getId());
+    Log.i(LOG_TAG, "Getting Snapshot with DataSource:\n" + testJsonDataSource.getPluginId());
     final SnapshotRequest request = SnapshotRequest.builder().build();
-    final Snapshot<? extends Event> testSnapshot = plugin.getSnapshot(request, testHtmlDataSource);
+    final Snapshot<? extends Event> testSnapshot = plugin.getSnapshot(request, testJsonDataSource);
     assertThat(testSnapshot).isNotNull();
 
     final List<Event> testData = testSnapshot.getData().collect(Collectors.toList());
@@ -162,14 +134,18 @@ class BloggerPluginTest {
               Log.i(LOG_TAG, "Got Event:\n" + event);
               assertThat(event.getCompetition()).isNotNull();
               assertThat(event.getDate()).isNotNull().isAfter(LocalDateTime.MIN);
+              final Set<VideoFileSource> fileSources = event.getFileSources();
+              assertThat(fileSources).isNotNull();
+              assertThat(fileSources.size()).isNotZero();
             });
   }
 
   @Test
-  @DisplayName("Validate handling of JSON Blogger DataSource")
+  @DisplayName("Get a Snapshot from test JSON Blogger DataSource")
   void getJsonSnapshot() throws IOException {
 
-    Log.i(LOG_TAG, "Getting Snapshot of test DataSource: " + testJsonDataSource);
+    Log.i(
+        LOG_TAG, String.format("Getting Snapshot of test DataSource: %s%n%n", testJsonDataSource));
     final SnapshotRequest request = SnapshotRequest.builder().maxResults(25).build();
     final Snapshot<? extends Event> snapshot = plugin.getSnapshot(request, testJsonDataSource);
     assertThat(snapshot).isNotNull();

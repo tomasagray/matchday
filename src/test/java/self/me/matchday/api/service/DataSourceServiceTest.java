@@ -29,23 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.model.video.VideoFile;
-import self.me.matchday.model.video.VideoFilePack;
-import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.*;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 import self.me.matchday.plugin.datasource.TestDataSourcePlugin;
-import self.me.matchday.plugin.datasource.parsing.PatternKit;
-import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.Log;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -60,20 +49,20 @@ class DataSourceServiceTest {
 
   private static final String LOG_TAG = "DataSourceServiceTest";
 
-  private static TestDataCreator testDataCreator;
   private static DataSourceService dataSourceService;
+  private static TestDataCreator testDataCreator;
   private static EventService eventService;
-  private static DataSourcePlugin<Event> testDataSourcePlugin;
+  private static DataSourcePlugin testDataSourcePlugin;
 
   @BeforeAll
   static void setUp(
-      @Autowired TestDataCreator testDataCreator,
-      @Autowired final TestDataSourcePlugin testDataSourcePlugin,
-      @Autowired final @NotNull DataSourceService dataSourceService,
-      @Autowired final EventService eventService) {
+      @Autowired @NotNull DataSourceService dataSourceService,
+      @Autowired @NotNull TestDataCreator testDataCreator,
+      @Autowired EventService eventService,
+      @Autowired TestDataSourcePlugin testDataSourcePlugin) {
 
-    DataSourceServiceTest.testDataCreator = testDataCreator;
     DataSourceServiceTest.dataSourceService = dataSourceService;
+    DataSourceServiceTest.testDataCreator = testDataCreator;
     DataSourceServiceTest.eventService = eventService;
 
     // Create test plugin & register
@@ -91,14 +80,14 @@ class DataSourceServiceTest {
 
   @Test
   @DisplayName("Refresh all data sources")
-  void refreshDataSources() {
+  void refreshAllDataSources() throws IOException {
 
     final int expectedEventCount = 1;
 
     final SnapshotRequest testRequest = SnapshotRequest.builder().build();
     Log.i(LOG_TAG, "Testing Data Source Service refresh with Snapshot Request:\n" + testRequest);
 
-    final SnapshotRequest testResult = dataSourceService.refreshDataSources(testRequest);
+    final SnapshotRequest testResult = dataSourceService.refreshAllDataSources(testRequest);
     assertThat(testResult).isEqualTo(testRequest);
 
     // Ensure some data was collected by request
@@ -114,7 +103,7 @@ class DataSourceServiceTest {
 
     Log.i(LOG_TAG, "Attempting to retrieve test plugin: " + testDataSourcePlugin.getPluginId());
     // Retrieve test plugin
-    final Optional<DataSourcePlugin<Event>> pluginOptional =
+    final Optional<DataSourcePlugin> pluginOptional =
         dataSourceService.getDataSourcePlugin(
             DataSourceServiceTest.testDataSourcePlugin.getPluginId());
 
@@ -134,8 +123,8 @@ class DataSourceServiceTest {
     final boolean enabled = dataSourceService.enablePlugin(testPluginId);
     assertThat(enabled).isTrue();
     // Ensure plugin has been added to enabled plugins
-    final Set<DataSourcePlugin<Event>> enabledPlugins = dataSourceService.getEnabledPlugins();
-    final Optional<DataSourcePlugin<Event>> pluginOptional =
+    final Set<DataSourcePlugin> enabledPlugins = dataSourceService.getEnabledPlugins();
+    final Optional<DataSourcePlugin> pluginOptional =
         enabledPlugins.stream()
             .filter(plugin -> testPluginId.equals(plugin.getPluginId()))
             .findFirst();
@@ -158,8 +147,8 @@ class DataSourceServiceTest {
     assertThat(disabled).isTrue();
 
     // Ensure plugin is NOT enabled
-    final Set<DataSourcePlugin<Event>> enabledPlugins = dataSourceService.getEnabledPlugins();
-    final Optional<DataSourcePlugin<Event>> pluginOptional =
+    final Set<DataSourcePlugin> enabledPlugins = dataSourceService.getEnabledPlugins();
+    final Optional<DataSourcePlugin> pluginOptional =
         enabledPlugins.stream()
             .filter(plugin -> testPluginId.equals(plugin.getPluginId()))
             .findAny();
@@ -189,7 +178,7 @@ class DataSourceServiceTest {
     final int expectedPluginCount = 3;
 
     // Retrieve all data source plugins
-    final Set<DataSourcePlugin<Event>> dataSourcePlugins = dataSourceService.getDataSourcePlugins();
+    final Set<DataSourcePlugin> dataSourcePlugins = dataSourceService.getDataSourcePlugins();
     final int actualPluginCount = dataSourcePlugins.size();
     Log.i(LOG_TAG, String.format("Found: %s plugins", actualPluginCount));
 
@@ -202,7 +191,7 @@ class DataSourceServiceTest {
 
     final int expectedPluginCount = 2;
 
-    final Set<DataSourcePlugin<Event>> enabledPlugins = dataSourceService.getEnabledPlugins();
+    final Set<DataSourcePlugin> enabledPlugins = dataSourceService.getEnabledPlugins();
     final int actualPluginCount = enabledPlugins.size();
     Log.i(LOG_TAG, String.format("Found: %s enabled plugins", actualPluginCount));
 
@@ -213,47 +202,24 @@ class DataSourceServiceTest {
   @DisplayName("Validate that a DataSource can be added to the database")
   void addDataSource() {
 
-//    createTestFile();
-    final DataSource testDataSource = testDataCreator.readTestJsonDataSource();
+    final DataSource<Event> testDataSource = testDataCreator.readTestJsonDataSource();
     Log.i(LOG_TAG, "Read test DataSource:\n" + testDataSource);
-    final DataSource addedDataSource = dataSourceService.addDataSource(testDataSource);
+    final PatternKitPack testPatternKitPack =
+        ((PlaintextDataSource<Event>) testDataSource).getPatternKitPack();
+    assertThat(testPatternKitPack).isNotNull();
+
+    final DataSource<Event> addedDataSource = dataSourceService.addDataSource(testDataSource);
     Log.i(LOG_TAG, "Added DataSource to database:\n" + addedDataSource);
 
     assertThat(addedDataSource).isNotNull();
     assertThat(addedDataSource.getBaseUri()).isEqualTo(testDataSource.getBaseUri());
-    assertThat(addedDataSource.getPatternKits().size())
-        .isEqualTo(testDataSource.getPatternKits().size());
-  }
-
-  private static void createTestFile() {
-    final PatternKit<Event> eventPatternKit = testDataCreator.createEventPatternKit();
-    final PatternKit<VideoFileSource> fileSourcePatternKit =
-        testDataCreator.createFileSourcePatternKit();
-    final PatternKit<VideoFilePack> videoFilePackPatternKit =
-        testDataCreator.createVideoFilePackPatternKit();
-    final PatternKit<VideoFile> videoFilePatternKit = testDataCreator.createVideoFilePatternKit();
-    final PatternKit<URL> urlPatternKit = testDataCreator.createUrlPatternKit();
-    final List<PatternKit<?>> patternKits =
-        List.of(
-            eventPatternKit,
-            fileSourcePatternKit,
-            videoFilePackPatternKit,
-            videoFilePatternKit,
-            urlPatternKit);
-    final DataSource dataSource =
-        new DataSource(
-            UUID.fromString("37149b7c-4dae-48c2-997a-a7427628b408"),
-            URI.create("https://localhost:8081/"),
-            patternKits);
-    final String json = JsonParser.toJson(dataSource);
-
-    try (BufferedWriter writer =
-        new BufferedWriter(
-            new FileWriter(
-                "C:\\Users\\Tomas\\Projects\\Source\\IdeaProjects\\matchday\\src\\test\\resources\\test_json_blogger_datasource.json"))) {
-      writer.write(json);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    final PatternKitPack patternKitPack =
+        ((PlaintextDataSource<Event>) addedDataSource).getPatternKitPack();
+    assertThat(patternKitPack).isNotNull();
+    final List<PatternKit<? extends Event>> eventPatternKits =
+        patternKitPack.getPatternKitsFor(Event.class);
+    assertThat(eventPatternKits).isNotNull();
+    assertThat(eventPatternKits.size())
+        .isEqualTo(testPatternKitPack.getPatternKitsFor(Event.class).size());
   }
 }

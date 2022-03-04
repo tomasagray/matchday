@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -57,7 +57,7 @@ class FFmpegPluginTest {
   private static final String LOG_TAG = "FFmpegPluginTest";
   // Test constants
   private static final String STORAGE_LOCATION = "C:\\Users\\Public\\Matchday\\testing";
-  private static final String SAMPLE_METADATA_JSON = "ffprobe_sample_metadata.json";
+  private static final String SAMPLE_METADATA_JSON = "data/ffprobe_sample_metadata.json";
 
   // Test resources
   private static File storageLocation;
@@ -233,13 +233,13 @@ class FFmpegPluginTest {
 
     final URI uri = getTestUris().get(1);
     // Remove random seed
-    final String noQuery = uri.toString().replaceAll("\\?rSeed=\\w*", "");
+    final String noQuery = uri.toString().replaceAll("\\?rSeed=[\\w-]*", "");
     final URI testUri = URI.create(noQuery);
+    Log.i(LOG_TAG, "Getting data from URL: " + testUri);
 
     final FFmpegMetadata actualMetadata = ffmpegPlugin.readFileMetadata(testUri);
-    Log.i(LOG_TAG, "Validating metadata read from file at URL: " + testUri);
-
     assertThat(actualMetadata).isEqualTo(expectedMetadata);
+    Log.i(LOG_TAG, "The data matches!");
   }
 
   private List<URI> getTestUris() {
