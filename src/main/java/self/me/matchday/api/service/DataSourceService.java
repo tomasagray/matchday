@@ -21,41 +21,36 @@ package self.me.matchday.api.service;
 
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.DataSourceRepository;
 import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Event;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class DataSourceService {
 
   private static final String LOG_TAG = "DataSourceService";
 
+  private final SnapshotService snapshotService;
   private final DataSourceRepository dataSourceRepository;
-  @Getter private final Set<DataSourcePlugin<Event>> dataSourcePlugins;
-  @Getter private final Set<DataSourcePlugin<Event>> enabledPlugins = new HashSet<>();
-  private final EventService eventService;
+  @Getter private final Set<DataSourcePlugin> dataSourcePlugins;
+  @Getter private final Set<DataSourcePlugin> enabledPlugins = new HashSet<>();
 
-  @Autowired
   DataSourceService(
+      SnapshotService snapshotService,
       DataSourceRepository dataSourceRepository,
-      Set<DataSourcePlugin<Event>> dataSourcePlugins,
-      EventService eventService) {
+      Set<DataSourcePlugin> dataSourcePlugins) {
 
+    this.snapshotService = snapshotService;
     this.dataSourceRepository = dataSourceRepository;
     this.dataSourcePlugins = dataSourcePlugins;
-    this.eventService = eventService;
     // all enabled by default
     this.enabledPlugins.addAll(dataSourcePlugins);
   }
@@ -63,29 +58,55 @@ public class DataSourceService {
   /**
    * Refresh all data sources (Event source plugins) with the given Snapshot
    *
-   * @param snapshotRequest Refresh request details
+   * @param request Refresh request details
    * @return The SnapshotRequest, for additional processing
    */
-  public SnapshotRequest refreshDataSources(@NotNull final SnapshotRequest snapshotRequest) {
+  @Transactional
+  public SnapshotRequest refreshAllDataSources(@NotNull final SnapshotRequest request)
+      throws IOException {
 
-    // Refresh each data source plugin
-    enabledPlugins.forEach(
-        plugin -> {
-          try {
-            final Snapshot<? extends Event> snapshot = plugin.getAllSnapshots(snapshotRequest);
-            // Save Snapshot data to database
-            snapshot.getData().forEach(eventService::saveEvent);
+    for (DataSourcePlugin plugin : enabledPlugins) {
+      refreshDataSourcesForPlugin(request, plugin);
+    }
+    return request;
+  }
 
-          } catch (IOException | RuntimeException e) {
-            Log.e(
-                LOG_TAG,
-                String.format(
-                    "Could not refresh data from plugin: %s with SnapshotRequest: %s",
-                    plugin.getTitle(), snapshotRequest),
-                e);
-          }
-        });
-    return snapshotRequest;
+  @Transactional
+  public void refreshDataSourcesForPlugin(
+      @NotNull SnapshotRequest request, @NotNull DataSourcePlugin plugin) throws IOException {
+
+    final List<DataSource<?>> dataSources =
+        dataSourceRepository.findDataSourcesByPluginId(plugin.getPluginId());
+    for (final DataSource<?> dataSource : dataSources) {
+      refreshDataSource(request, dataSource);
+    }
+  }
+
+  @Transactional
+  public <T> void refreshDataSource(
+      @NotNull SnapshotRequest request, @NotNull DataSource<T> dataSource) throws IOException {
+
+    final DataSourcePlugin dataSourcePlugin = getEnabledPlugin(dataSource.getPluginId());
+    final Snapshot<T> snapshot = dataSourcePlugin.getSnapshot(request, dataSource);
+    snapshotService.saveSnapshot(snapshot, dataSource.getClazz());
+  }
+
+  public DataSourcePlugin getEnabledPlugin(UUID pluginId) {
+
+    return enabledPlugins.stream()
+        .filter(plugin -> plugin.getPluginId().equals(pluginId))
+        .findFirst()
+        .orElseThrow(
+            () -> {
+              final Optional<DataSourcePlugin> pluginOptional = getDataSourcePlugin(pluginId);
+              if (pluginOptional.isPresent()) {
+                return new IllegalArgumentException(
+                    String.format("DataSourcePlugin: %s is disabled", pluginId));
+              } else {
+                return new IllegalArgumentException(
+                    "No enabled DataSourcePlugin with ID matching: " + pluginId);
+              }
+            });
   }
 
   /**
@@ -94,7 +115,8 @@ public class DataSourceService {
    * @param pluginId The ID of the requested plugin
    * @return An Optional which may contain the requested plugin
    */
-  public Optional<DataSourcePlugin<Event>> getDataSourcePlugin(@NotNull final UUID pluginId) {
+  @Transactional
+  public Optional<DataSourcePlugin> getDataSourcePlugin(@NotNull final UUID pluginId) {
 
     return dataSourcePlugins.stream()
         .filter(plugin -> pluginId.equals(plugin.getPluginId()))
@@ -107,12 +129,13 @@ public class DataSourceService {
    * @param pluginId The ID of the plugin
    * @return True/false if the plugin was successfully enabled
    */
+  @Transactional
   public boolean enablePlugin(@NotNull final UUID pluginId) {
 
     Log.i(LOG_TAG, "Attempting to enable plugin: " + pluginId);
 
     // Find requested plugin
-    final Optional<DataSourcePlugin<Event>> pluginOptional =
+    final Optional<DataSourcePlugin> pluginOptional =
         dataSourcePlugins.stream()
             .filter(plugin -> pluginId.equals(plugin.getPluginId()))
             .findFirst();
@@ -127,16 +150,17 @@ public class DataSourceService {
    * @param pluginId The ID of the data plugin to disable
    * @return True/false if the given plugin was successfully disabled
    */
+  @Transactional
   public boolean disablePlugin(@NotNull final UUID pluginId) {
 
     Log.i(LOG_TAG, "Attempting to disable plugin: " + pluginId);
 
     // Find the requested plugin
-    final Optional<DataSourcePlugin<Event>> pluginOptional =
+    final Optional<DataSourcePlugin> pluginOptional =
         enabledPlugins.stream().filter(plugin -> pluginId.equals(plugin.getPluginId())).findFirst();
     if (pluginOptional.isPresent()) {
       // Remove from enabled plugins
-      final DataSourcePlugin<Event> plugin = pluginOptional.get();
+      final DataSourcePlugin plugin = pluginOptional.get();
       final boolean removed = enabledPlugins.remove(plugin);
       Log.i(LOG_TAG, String.format("Disabled plugin: %s? %s", plugin.getTitle(), removed));
       return removed;
@@ -156,19 +180,29 @@ public class DataSourceService {
     return enabledPlugins.stream().anyMatch(plugin -> pluginId.equals(plugin.getPluginId()));
   }
 
-  public DataSource addDataSource(@NotNull final DataSource dataSource) {
+  @Transactional
+  public <T> DataSource<T> addDataSource(@NotNull final DataSource<T> dataSource) {
+
+    final String errMsg =
+        String.format(
+            "Could not save DataSource with ID: %s; no DataSourcePlugin with ID: %s",
+            dataSource.getDataSourceId(), dataSource.getPluginId());
 
     return this.getDataSourcePlugin(dataSource.getPluginId())
-        .map(
-            plugin -> {
-              plugin.validateDataSource(dataSource);
-              return dataSourceRepository.saveAndFlush(dataSource);
-            })
-        .orElseThrow(
-            () -> new IllegalArgumentException("Could not save DataSource:\n" + dataSource));
+        .map(plugin -> saveDataSource(dataSource, plugin))
+        .orElseThrow(() -> new IllegalArgumentException(errMsg));
   }
 
-  public Optional<DataSource> getDataSourceById(@NotNull Long id) {
+  @NotNull
+  private <T> DataSource<T> saveDataSource(
+      @NotNull DataSource<T> dataSource, @NotNull DataSourcePlugin plugin) {
+    plugin.validateDataSource(dataSource);
+    return dataSourceRepository.saveAndFlush(dataSource);
+  }
+
+  public Optional<DataSource<?>> getDataSourceById(@NotNull UUID id) {
     return dataSourceRepository.findById(id);
   }
+
+  // TODO: update DataSource, delete DataSource
 }

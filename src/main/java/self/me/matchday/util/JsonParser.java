@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -37,6 +37,7 @@ public class JsonParser {
   static {
     gson =
         new GsonBuilder()
+            .setPrettyPrinting()
             .registerTypeAdapter(
                 LocalDateTime.class,
                 (JsonDeserializer<LocalDateTime>)

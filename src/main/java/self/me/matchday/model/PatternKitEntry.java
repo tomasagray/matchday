@@ -22,44 +22,52 @@ package self.me.matchday.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.db.converter.UriConverter;
 
 import javax.persistence.*;
-import java.net.URI;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
-@Entity
 @ToString
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class DataSource<T> {
+@Entity
+class PatternKitEntry<T> {
 
   @Type(type = "java.lang.Class")
   private final Class<T> clazz;
 
-  @Id
-  @GeneratedValue(generator = "uuid2")
-  @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  private UUID dataSourceId;
+  @OneToMany(targetEntity = PatternKit.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private final List<PatternKit<T>> patternKits = new ArrayList<>();
 
-  @Convert(converter = UriConverter.class)
-  private final URI baseUri;
+  @Id @GeneratedValue private Long id;
 
-  private UUID pluginId;
+  public PatternKitEntry(Class<T> clazz) {
+    this.clazz = clazz;
+  }
 
-  private boolean enabled = true;
-
-  public DataSource() {
-    this.baseUri = null;
+  public PatternKitEntry() {
     this.clazz = null;
   }
 
-  public DataSource(@NotNull URI baseUri, @NotNull Class<T> clazz) {
-    this.baseUri = baseUri;
-    this.clazz = clazz;
+  @SuppressWarnings("unchecked cast")
+  public void addPatternKit(@NotNull PatternKit<?> patternKit) {
+    this.getPatternKits().add((PatternKit<T>) patternKit);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    PatternKitEntry<?> that = (PatternKitEntry<?>) o;
+    return id != null && Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, clazz, patternKits);
   }
 }

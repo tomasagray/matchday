@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -45,6 +45,7 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   private UUID fileSrcId;
 
   @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+  @Builder.Default
   private List<VideoFilePack> videoFilePacks = new ArrayList<>();
 
   private String channel;

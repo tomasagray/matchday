@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -72,13 +72,7 @@ public class Event {
     return String.format("%s - %s, %s", competition, homeTeam, awayTeam);
   }
 
-  /**
-   * Encapsulates the file source TreeSet<> logic.
-   *
-   * @param fileSources A Collection<> of VideoFileSources
-   */
-  public void addFileSources(@NotNull final Collection<VideoFileSource> fileSources) {
-    // Add all collection elements to set
+  public void addFileSources(@NotNull final Collection<? extends VideoFileSource> fileSources) {
     this.fileSources.addAll(fileSources);
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -55,7 +55,7 @@ public class InitEventData {
       Log.i(LOG_TAG, String.format(INIT_MSG, snapshotRequest));
 
       // Refresh all data sources with default (empty) request
-      dataSourceService.refreshDataSources(snapshotRequest);
+      dataSourceService.refreshAllDataSources(snapshotRequest);
     };
   }
 }

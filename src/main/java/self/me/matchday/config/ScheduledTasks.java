@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -60,13 +60,13 @@ public class ScheduledTasks {
   }
 
   @Scheduled(cron = "${scheduled-tasks.cron.refresh-event-data}")
-  public void refreshEventData() {
+  public void refreshEventData() throws IOException {
 
     Log.i(LOG_TAG, "Refreshing all data sources...");
     // Create empty SnapshotRequest
     final SnapshotRequest snapshotRequest = SnapshotRequest.builder().build();
     // Refresh data sources
-    dataSourceService.refreshDataSources(snapshotRequest);
+    dataSourceService.refreshAllDataSources(snapshotRequest);
   }
 
   @Scheduled(cron = "${scheduled-tasks.cron.prune-video-data}")

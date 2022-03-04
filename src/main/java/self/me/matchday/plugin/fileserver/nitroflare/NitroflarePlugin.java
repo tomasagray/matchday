@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -31,18 +31,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import self.me.matchday.model.FileServerUser;
-import self.me.matchday.model.MD5String;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 public class NitroflarePlugin implements FileServerPlugin {
@@ -166,8 +168,40 @@ public class NitroflarePlugin implements FileServerPlugin {
     // Encode username
     final String username = URLEncoder.encode(fileServerUser.getUsername(), StandardCharsets.UTF_8);
     // Generate random token
-    final String token = MD5String.generate();
+    final String token = generateHash(Instant.now(), Math.random());
     // Return formatted request String
     return String.format(LOGIN_REQUEST_FORMAT, username, fileServerUser.getPassword(), token);
+  }
+
+  /**
+   * Generate an MD5 hash from a supplied data String.
+   *
+   * @param dataItems Data to be hashed.
+   * @return A 32-character MD5 hash String
+   */
+  private String generateHash(@NotNull final Object... dataItems) {
+
+    // Result container
+    String hash;
+    // Collate data
+    final List<String> strings =
+        Arrays.stream(dataItems).map(Object::toString).collect(Collectors.toList());
+    final String data = String.join("", strings);
+
+    try {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      byte[] messageDigest = md.digest(data.getBytes());
+      // Convert byte array into signum representation
+      BigInteger no = new BigInteger(1, messageDigest);
+      // Convert message digest into hex value
+      StringBuilder hashText = new StringBuilder(no.toString(16));
+      while (hashText.length() < 32) {
+        hashText.insert(0, "0");
+      }
+      hash = hashText.toString();
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
+    return hash;
   }
 }

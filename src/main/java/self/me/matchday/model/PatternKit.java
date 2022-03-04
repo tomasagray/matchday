@@ -19,47 +19,42 @@
 
 package self.me.matchday.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.db.converter.UriConverter;
+import self.me.matchday.db.converter.PatternConverter;
 
 import javax.persistence.*;
-import java.net.URI;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 @Getter
 @Setter
-@Entity
 @ToString
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class DataSource<T> {
+@AllArgsConstructor
+@Entity
+public class PatternKit<T> {
+
+  @Id @GeneratedValue private Long id;
 
   @Type(type = "java.lang.Class")
   private final Class<T> clazz;
 
-  @Id
-  @GeneratedValue(generator = "uuid2")
-  @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  private UUID dataSourceId;
+  @ElementCollection(fetch = FetchType.EAGER)
+  private Map<Integer, String> fields = new HashMap<>();
 
-  @Convert(converter = UriConverter.class)
-  private final URI baseUri;
+  @Column(columnDefinition = "LONGTEXT")
+  @Convert(converter = PatternConverter.class)
+  private Pattern pattern;
 
-  private UUID pluginId;
-
-  private boolean enabled = true;
-
-  public DataSource() {
-    this.baseUri = null;
-    this.clazz = null;
+  public PatternKit(final Class<T> clazz) {
+    this.clazz = clazz;
   }
 
-  public DataSource(@NotNull URI baseUri, @NotNull Class<T> clazz) {
-    this.baseUri = baseUri;
-    this.clazz = clazz;
+  public PatternKit() {
+    this(null);
   }
 }

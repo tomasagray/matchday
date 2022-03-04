@@ -22,6 +22,8 @@ package self.me.matchday.plugin.datasource.blogger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import self.me.matchday.model.DataSource;
+import self.me.matchday.model.PlaintextDataSource;
 
 import java.net.URI;
 import java.util.UUID;
@@ -38,7 +40,7 @@ public class DataSourceValidator {
 
   void validateDataSourcePluginId(@NotNull UUID pluginId, @NotNull UUID dataSourcePluginId) {
     if (!pluginId.equals(dataSourcePluginId)) {
-      throw new IllegalArgumentException("DataSource is not a Blogger (pluginId does not match)");
+      throw new IllegalArgumentException("DataSource is not a Blogger (Plugin ID does not match)");
     }
   }
 
@@ -49,7 +51,13 @@ public class DataSourceValidator {
     }
   }
 
-  Pattern getUrlPattern() {
+  void validateDataSourceType(@NotNull DataSource<?> dataSource) {
+    if (!(dataSource instanceof PlaintextDataSource)) {
+      throw new IllegalArgumentException("DataSource is not a Hypertext data source");
+    }
+  }
+
+  private Pattern getUrlPattern() {
     if (this.urlPattern == null) {
       this.urlPattern = Pattern.compile(bloggerUrlPattern);
     }

@@ -29,19 +29,16 @@ import self.me.matchday.api.resource.DataSourcePluginResource.DataSourcePluginRe
 import self.me.matchday.api.resource.MessageResource;
 import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Event;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
-import self.me.matchday.util.Log;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/data-sources")
 public class DataSourceController {
-
-  private static final String LOG_TAG = "DataSourceController";
 
   private final DataSourceService dataSourceService;
   private final MessageResource.MessageResourceAssembler messageResourceAssembler;
@@ -63,13 +60,9 @@ public class DataSourceController {
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SnapshotRequest> refreshAllSources(
-      @RequestBody SnapshotRequest snapshotRequest) {
+      @RequestBody SnapshotRequest snapshotRequest) throws IOException {
 
-    Log.i(
-        LOG_TAG,
-        String.format("Refreshing all data sources with SnapshotRequest: %s\n\n", snapshotRequest));
-
-    final SnapshotRequest status = dataSourceService.refreshDataSources(snapshotRequest);
+    final SnapshotRequest status = dataSourceService.refreshAllDataSources(snapshotRequest);
     return ResponseEntity.ok().body(status);
   }
 
@@ -80,7 +73,7 @@ public class DataSourceController {
   public CollectionModel<DataSourcePluginResource> getAllPlugins() {
 
     // Retrieve all plugins from service
-    final Set<DataSourcePlugin<Event>> dataSourcePlugins = dataSourceService.getDataSourcePlugins();
+    final Set<DataSourcePlugin> dataSourcePlugins = dataSourceService.getDataSourcePlugins();
     return pluginResourceAssembler.toCollectionModel(dataSourcePlugins);
   }
 
@@ -147,11 +140,12 @@ public class DataSourceController {
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MessageResource> addDataSource(@RequestBody DataSource dataSource) {
+  public ResponseEntity<MessageResource> addDataSource(@RequestBody DataSource<?> dataSource) {
 
-    final DataSource source = dataSourceService.addDataSource(dataSource);
+    final DataSource<?> source = dataSourceService.addDataSource(dataSource);
     final MessageResource messageResource =
-        messageResourceAssembler.toModel("Successfully added new DataSource: " + source.getId());
+        messageResourceAssembler.toModel(
+            "Successfully added new DataSource: " + source.getPluginId());
     return ResponseEntity.ok(messageResource);
   }
 
@@ -159,7 +153,8 @@ public class DataSourceController {
       value = "/get-data-source/{dataSourceId}",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<DataSource> getDataSource(@PathVariable("dataSourceId") Long dataSourceId) {
+  public ResponseEntity<? extends DataSource<?>> getDataSource(
+      @PathVariable("dataSourceId") UUID dataSourceId) {
 
     return dataSourceService
         .getDataSourceById(dataSourceId)

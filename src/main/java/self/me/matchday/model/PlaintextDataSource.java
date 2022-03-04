@@ -17,41 +17,38 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.parsing;
+package self.me.matchday.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Type;
-import self.me.matchday.db.converter.PatternConverter;
+import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.*;
-import java.util.Map;
-import java.util.regex.Pattern;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToOne;
+import java.net.URI;
 
 @Getter
 @Setter
-@ToString
-@AllArgsConstructor
+@ToString(callSuper = true)
 @Entity
-public class PatternKit<T> {
+@RequiredArgsConstructor
+public final class PlaintextDataSource<T> extends DataSource<T> {
 
-  @Type(type = "java.lang.Class")
-  private final Class<T> clazz;
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private final PatternKitPack patternKitPack;
 
-  @Id @GeneratedValue private Long id;
-  @ElementCollection private Map<Integer, String> fields;
-
-  @Column(columnDefinition = "LONGTEXT")
-  @Convert(converter = PatternConverter.class)
-  private Pattern pattern;
-
-  public PatternKit(final Class<T> clazz) {
-    this.clazz = clazz;
+  public PlaintextDataSource() {
+    super();
+    this.patternKitPack = null;
   }
 
-  public PatternKit() {
-    this(null);
+  public PlaintextDataSource(
+      @NotNull URI baseUri, @NotNull Class<T> clazz, @NotNull PatternKitPack patternKitPack) {
+    super(baseUri, clazz);
+    this.patternKitPack = patternKitPack;
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -26,21 +26,20 @@ import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Team;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface TeamRepository extends JpaRepository<Team, UUID> {
 
-  Optional<Team> findByName(String name);
-
   void deleteByName(String name);
 
-  @Query("SELECT DISTINCT ht FROM Match mt JOIN mt.homeTeam ht JOIN mt.competition cm "
-      + "WHERE cm.competitionId = :competitionId")
+  @Query(
+      "SELECT DISTINCT ht FROM MatchGame mt JOIN mt.homeTeam ht JOIN mt.competition cm "
+          + "WHERE cm.competitionId = :competitionId")
   List<Team> fetchHomeTeamsByCompetition(@Param("competitionId") UUID competitionId);
 
-  @Query("SELECT DISTINCT at FROM Match mt JOIN mt.awayTeam at JOIN mt.competition cm "
-      + "WHERE cm.competitionId = :competitionId")
+  @Query(
+      "SELECT DISTINCT at FROM MatchGame mt JOIN mt.awayTeam at JOIN mt.competition cm "
+          + "WHERE cm.competitionId = :competitionId")
   List<Team> fetchAwayTeamsByCompetition(@Param("competitionId") UUID competitionId);
 }

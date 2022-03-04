@@ -24,10 +24,13 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import self.me.matchday.model.PatternKit;
 import self.me.matchday.plugin.datasource.parsing.CreationStrategy.Priority;
+import self.me.matchday.plugin.datasource.parsing.strategy.UseRegisteredTypeHandlers;
+import self.me.matchday.plugin.datasource.parsing.strategy.UseStaticStringMethod;
+import self.me.matchday.plugin.datasource.parsing.strategy.UseStringConstructor;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -35,12 +38,12 @@ import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 @Component
-public class EntityParser {
+public class TextParser {
 
   private final MultiValueMap<Priority, CreationStrategy> creationStrategies =
       new LinkedMultiValueMap<>();
 
-  private EntityParser(@NotNull List<TypeHandler<?>> handlers) {
+  private TextParser(@NotNull List<TypeHandler<?>> handlers) {
     // register default strategies
     creationStrategies.add(Priority.HIGH, new UseRegisteredTypeHandlers(handlers));
     creationStrategies.add(Priority.NORMAL, new UseStaticStringMethod());
@@ -50,7 +53,11 @@ public class EntityParser {
   public <E> Stream<? extends E> createEntityStreams(
       @NotNull Collection<PatternKit<? extends E>> patternKits, @NotNull final String data) {
 
-    return patternKits.stream().flatMap(patternKit -> createEntityStream(patternKit, data));
+    Stream<? extends E> base = Stream.empty();
+    for (PatternKit<? extends E> patternKit : patternKits) {
+      base = (Stream<? extends E>) Stream.concat(base, createEntityStream(patternKit, data));
+    }
+    return base;
   }
 
   public <E> Stream<? extends E> createEntityStream(
@@ -92,25 +99,6 @@ public class EntityParser {
               }
             });
     return e;
-  }
-
-  @SuppressWarnings("unchecked")
-  private <E> Class<E> getSpecificPatternType(@NotNull PatternKit<E> patternKit) {
-    return (Class<E>)
-        ((ParameterizedType) patternKit.getClass().getGenericSuperclass())
-            .getActualTypeArguments()[0];
-  }
-
-  @Nullable
-  private Field getFieldByType(@NotNull Object obj, Class<?> clazz) {
-    final Field[] fields = obj.getClass().getDeclaredFields();
-    for (Field field : fields) {
-      final Object val = getFieldValue(field, obj);
-      if (field.getType().equals(clazz) && val == null) {
-        return field;
-      }
-    }
-    return null;
   }
 
   @Nullable

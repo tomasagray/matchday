@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -31,7 +31,6 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.DataSourceController;
 import self.me.matchday.api.service.DataSourceService;
-import self.me.matchday.model.Event;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 
 import java.util.UUID;
@@ -56,8 +55,7 @@ public class DataSourcePluginResource extends RepresentationModel<DataSourcePlug
 
   @Component
   public static class DataSourcePluginResourceAssembler
-      extends RepresentationModelAssemblerSupport<
-          DataSourcePlugin<Event>, DataSourcePluginResource> {
+      extends RepresentationModelAssemblerSupport<DataSourcePlugin, DataSourcePluginResource> {
 
     private final DataSourceService dataSourceService;
 
@@ -67,8 +65,7 @@ public class DataSourcePluginResource extends RepresentationModel<DataSourcePlug
     }
 
     @Override
-    public @NotNull DataSourcePluginResource toModel(
-        @NotNull final DataSourcePlugin<Event> plugin) {
+    public @NotNull DataSourcePluginResource toModel(@NotNull final DataSourcePlugin plugin) {
 
       // Determine if enabled
       final boolean pluginEnabled = dataSourceService.isPluginEnabled(plugin.getPluginId());
@@ -88,7 +85,7 @@ public class DataSourcePluginResource extends RepresentationModel<DataSourcePlug
 
     @Override
     public @NotNull CollectionModel<DataSourcePluginResource> toCollectionModel(
-        @NotNull Iterable<? extends DataSourcePlugin<Event>> plugins) {
+        @NotNull Iterable<? extends DataSourcePlugin> plugins) {
 
       final CollectionModel<DataSourcePluginResource> pluginResources =
           super.toCollectionModel(plugins);

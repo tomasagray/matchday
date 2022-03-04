@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -32,8 +32,6 @@ import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -248,104 +246,4 @@ public class HtmlBloggerParser implements BloggerParser {
     }
   }
 
-  static class BloggerEntryParser {
-
-    private final Element element;
-
-    BloggerEntryParser(@NotNull final Element element) {
-      this.element = element;
-    }
-
-    BloggerFeed.Generic<String> getId() {
-      final Evaluator.AttributeWithValue eval =
-          new Evaluator.AttributeWithValue("itemprop", "postId");
-      final Elements metas = element.select("meta");
-      return metas.stream()
-          .findFirst()
-          .map(
-              meta -> {
-                if (eval.matches(element, meta)) {
-                  return BloggerFeed.Generic.of(meta.attr("content"));
-                }
-                return null;
-              })
-          .orElse(null);
-    }
-
-    BloggerFeed.Generic<LocalDateTime> getPublished() {
-      return element.select("abbr.published").stream()
-          .findFirst()
-          .map(
-              elem -> {
-                final String title = elem.attr("title");
-                final LocalDateTime published =
-                    LocalDateTime.parse(title, DateTimeFormatter.ofPattern(DATETIME_PATTERN));
-                return BloggerFeed.Generic.of(published);
-              })
-          .orElse(null);
-    }
-
-    BloggerFeed.Str getStr() {
-      return element.select("h3.entry-Str").stream()
-          .findFirst()
-          .map(Element::text)
-          .map(BloggerFeed.Str::new)
-          .orElse(null);
-    }
-
-    BloggerFeed.Str getContent() {
-      return element.select("div.entry-content > div").stream()
-          .findFirst()
-          .map(Element::toString)
-          .map(BloggerFeed.Str::new)
-          .orElse(null);
-    }
-
-    List<BloggerFeed.Link> getLinks() {
-      final Evaluator.AttributeWithValue eval = new Evaluator.AttributeWithValue("itemprop", "url");
-      return element.select("meta").stream()
-          .filter(elem -> eval.matches(element, elem))
-          .map(elem -> elem.attr("content"))
-          .map(
-              _url -> {
-                try {
-                  final URL url = new URL(_url);
-                  final BloggerFeed.Link link = new BloggerFeed.Link();
-                  link.setHref(url);
-                  link.setRel("self");
-                  return link;
-                } catch (MalformedURLException ignored) {
-                }
-                return null;
-              })
-          .collect(Collectors.toList());
-    }
-
-    List<BloggerFeed.Author> getAuthors() {
-      final Evaluator.AttributeWithValue eval =
-          new Evaluator.AttributeWithValue("itemprop", "author");
-      return element.select("span").stream()
-          .filter(elem -> eval.matches(element, elem))
-          .map(Element::text)
-          .map(
-              auth -> {
-                final BloggerFeed.Author author = new BloggerFeed.Author();
-                author.setName(BloggerFeed.Generic.of(auth));
-                return author;
-              })
-          .collect(Collectors.toList());
-    }
-
-    List<BloggerFeed.Term> getTerms() {
-      return element.select("span.post-labels > a").stream()
-          .map(Element::text)
-          .map(
-              t -> {
-                final BloggerFeed.Term term = new BloggerFeed.Term();
-                term.setTerm(t);
-                return term;
-              })
-          .collect(Collectors.toList());
-    }
-  }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -48,7 +48,7 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
    * @return A List of Events which include this Team.
    */
   @Query(
-      "SELECT mt FROM Match mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
+      "SELECT mt FROM MatchGame mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
           + "WHERE ht.teamId = :teamId OR at.teamId = :teamId")
   Optional<List<Event>> fetchEventsByTeam(@Param("teamId") UUID teamId);
 }

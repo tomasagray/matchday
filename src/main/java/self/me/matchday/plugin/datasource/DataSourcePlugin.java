@@ -27,13 +27,11 @@ import self.me.matchday.plugin.Plugin;
 
 import java.io.IOException;
 
-public interface DataSourcePlugin<T> extends Plugin {
+public interface DataSourcePlugin extends Plugin {
 
-  Snapshot<? extends T> getAllSnapshots(@NotNull final SnapshotRequest request) throws IOException;
+  void validateDataSource(@NotNull DataSource<?> dataSource);
 
-  Snapshot<? extends T> getSnapshot(
-      @NotNull final SnapshotRequest request, @NotNull final DataSource dataSource)
+  <T> Snapshot<T> getSnapshot(
+      @NotNull final SnapshotRequest request, @NotNull final DataSource<T> dataSource)
       throws IOException;
-
-  void validateDataSource(@NotNull DataSource dataSource);
 }

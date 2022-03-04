@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -42,7 +42,7 @@ import java.util.UUID;
  */
 @Getter
 @Setter
-@Entity
+@Entity(name = "MatchGame")
 public class Match extends Event {
 
   public Match() {

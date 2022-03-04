@@ -17,15 +17,30 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db;
+package self.me.matchday.plugin.datasource.parsing;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import self.me.matchday.model.DataSource;
+import self.me.matchday.plugin.datasource.parsing.fabric.Folder;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
-public interface DataSourceRepository extends JpaRepository<DataSource<?>, UUID> {
+public class ListFolder<T> extends Folder<T, List<T>> {
 
-  List<DataSource<?>> findDataSourcesByPluginId(UUID pluginId);
+  @Override
+  public Supplier<List<T>> identity() {
+    return ArrayList::new;
+  }
+
+  @Override
+  public BiConsumer<T, List<T>> accumulator() {
+    return (t, list) -> list.add(t);
+  }
+
+  @Override
+  public BiPredicate<T, List<T>> isAccumulatorFull() {
+    return (t, list) -> false; // list holds all elements
+  }
 }

@@ -17,15 +17,14 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db;
+package self.me.matchday.plugin.datasource.parsing;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.DataSource;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.stream.Stream;
 
-public interface DataSourceRepository extends JpaRepository<DataSource<?>, UUID> {
+public interface DataSourceParser<T, D> {
 
-  List<DataSource<?>> findDataSourcesByPluginId(UUID pluginId);
+  Stream<? extends T> getEntityStream(@NotNull DataSource<T> dataSource, @NotNull D data);
 }
