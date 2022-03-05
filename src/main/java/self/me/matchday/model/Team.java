@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -30,10 +30,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.util.Abbreviator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
@@ -53,6 +50,7 @@ public class Team implements Serializable {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @Column(columnDefinition = "BINARY(16)")
   private UUID teamId;
 
   private String name;

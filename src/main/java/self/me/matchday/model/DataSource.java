@@ -44,11 +44,13 @@ public abstract class DataSource<T> {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @Column(columnDefinition = "BINARY(16)")
   private UUID dataSourceId;
 
   @Convert(converter = UriConverter.class)
   private final URI baseUri;
 
+  @Column(columnDefinition = "BINARY(16)")
   private UUID pluginId;
 
   private boolean enabled = true;

@@ -22,7 +22,6 @@ package self.me.matchday.model;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,16 +31,15 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-@ToString
 @RequiredArgsConstructor
 @Entity
 public class PatternKitPack {
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private final Map<String, PatternKitEntry<?>> patternKits =
-      new HashMap<>(); // todo - change String to Class<?>
-
   @Id @GeneratedValue private Long id;
+
+  // todo - change String to Class<?>
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private final Map<String, PatternKitEntry<?>> patternKits = new HashMap<>();
 
   public void addAllPatternKits(@NotNull Collection<PatternKit<?>> patternKits) {
     patternKits.forEach(this::addPatternKit);
@@ -85,5 +83,10 @@ public class PatternKitPack {
   @Override
   public int hashCode() {
     return Objects.hash(id, patternKits);
+  }
+
+  @Override
+  public String toString() {
+    return "PatternKitPack{" + ", id=" + id + "patternKits=" + getPatternKits() + '}';
   }
 }

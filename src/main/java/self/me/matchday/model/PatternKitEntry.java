@@ -21,7 +21,6 @@ package self.me.matchday.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
@@ -33,14 +32,13 @@ import java.util.Objects;
 
 @Getter
 @Setter
-@ToString
 @Entity
 class PatternKitEntry<T> {
 
   @Type(type = "java.lang.Class")
   private final Class<T> clazz;
 
-  @OneToMany(targetEntity = PatternKit.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(targetEntity = PatternKit.class, cascade = CascadeType.ALL)
   private final List<PatternKit<T>> patternKits = new ArrayList<>();
 
   @Id @GeneratedValue private Long id;
@@ -69,5 +67,17 @@ class PatternKitEntry<T> {
   @Override
   public int hashCode() {
     return Objects.hash(id, clazz, patternKits);
+  }
+
+  @Override
+  public String toString() {
+    return "PatternKitEntry{"
+        + ", id="
+        + id
+        + "clazz="
+        + clazz
+        + ", patternKits="
+        + getPatternKits()
+        + '}';
   }
 }
