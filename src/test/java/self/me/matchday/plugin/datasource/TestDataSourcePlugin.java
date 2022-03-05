@@ -57,12 +57,6 @@ public class TestDataSourcePlugin implements DataSourcePlugin {
     return "A description";
   }
 
-  //  @Contract("_ -> new")
-  //  public @NotNull Snapshot<Event> getAllSnapshots(@NotNull SnapshotRequest request) {
-  //    final Match testMatch = testDataCreator.createTestMatch();
-  //    return Snapshot.of(Stream.of(testMatch));
-  //  }
-
   @Override
   @Contract(pure = true)
   @SuppressWarnings("unchecked cast")

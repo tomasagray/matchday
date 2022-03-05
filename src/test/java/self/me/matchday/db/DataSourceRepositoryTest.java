@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
@@ -78,6 +79,7 @@ class DataSourceRepositoryTest {
   @SuppressWarnings("unchecked cast")
   @Test
   @DisplayName("Ensure valid data read when fetching by Plugin ID")
+  @Transactional
   void testFetchByPluginId() {
 
     final PlaintextDataSource<Event> eventDataSource =

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -45,10 +45,6 @@ public class EventController {
   @RequestMapping(value = "/events", method = RequestMethod.GET)
   public CollectionModel<EventResource> fetchAllEvents() {
 
-    return
-        eventService
-          .fetchAllEvents()
-          .map(resourceAssembler::toCollectionModel)
-          .orElse(null);
+    return eventService.fetchAllEvents().map(resourceAssembler::toCollectionModel).orElse(null);
   }
 }

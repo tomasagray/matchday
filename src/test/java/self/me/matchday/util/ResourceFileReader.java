@@ -23,18 +23,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class ResourceFileReader {
 
@@ -109,22 +102,6 @@ public class ResourceFileReader {
     return null;
   }
 
-  public static Stream<String> readTextResourcesIn(@NotNull Class<?> clazz, String subDirectoryPath)
-      throws IOException {
-
-    final Path resourcesDirectory = getResourcesDirectory(clazz).resolve(subDirectoryPath);
-    final DirectoryStream<Path> resourceFiles = Files.newDirectoryStream(resourcesDirectory);
-    return StreamSupport.stream(resourceFiles.spliterator(), true)
-        .map(
-            path -> {
-              try (BufferedReader reader = Files.newBufferedReader(path)) {
-                return reader.lines().collect(Collectors.joining("\n"));
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
-            });
-  }
-
   @NotNull
   private static Map<String, String> parsePropertiesData(@NotNull String data) {
 
@@ -180,16 +157,5 @@ public class ResourceFileReader {
     } catch (NumberFormatException e) {
       return null;
     }
-  }
-
-  private static Path getResourcesDirectory(@NotNull Class<?> clazz) {
-
-    final URL resourceUrl = clazz.getClassLoader().getResource(".");
-    assert resourceUrl != null;
-    final Path resourcePath = Path.of(resourceUrl.getPath());
-    if (resourcePath.toFile().isDirectory()) {
-      return resourcePath;
-    }
-    return resourcePath.getParent();
   }
 }

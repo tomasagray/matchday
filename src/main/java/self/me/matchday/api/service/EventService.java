@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -53,7 +53,8 @@ public class EventService {
   }
 
   // Getters   ==============================================================
-// todo - don't use optional
+  // todo - don't use optional
+  @Transactional
   public Optional<List<Event>> fetchAllEvents() {
 
     Log.i(LOG_TAG, "Fetching latest Events...");

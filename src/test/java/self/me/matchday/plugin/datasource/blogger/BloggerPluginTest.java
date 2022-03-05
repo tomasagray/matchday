@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.model.*;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.util.Log;
@@ -56,18 +55,13 @@ class BloggerPluginTest {
 
   @BeforeAll
   static void setUp(
-      @Autowired @NotNull TestDataCreator testDataCreator,
-      @Autowired BloggerPlugin bloggerPlugin,
-      @Autowired @NotNull DataSourceService dataSourceService) {
+      @Autowired @NotNull TestDataCreator testDataCreator, @Autowired BloggerPlugin bloggerPlugin) {
 
     BloggerPluginTest.plugin = bloggerPlugin;
-    //    final DataSource<Event> testHtmlDataSource = testDataCreator.readTestHtmlDataSource();
     final DataSource<Event> testJsonDataSource = testDataCreator.readTestJsonDataSource();
 
     Log.i(LOG_TAG, "Adding test datasource to DB...");
-    //    BloggerPluginTest.testHtmlDataSource =
-    // dataSourceService.addDataSource(testHtmlDataSource);
-    BloggerPluginTest.testJsonDataSource = dataSourceService.addDataSource(testJsonDataSource);
+    BloggerPluginTest.testJsonDataSource = testJsonDataSource;
   }
 
   @Test
@@ -111,7 +105,7 @@ class BloggerPluginTest {
             .getPatternKitPack()
             .getPatternKitsFor(Event.class);
     assertThat(metadataPatterns).isNotNull();
-    assertThat(metadataPatterns.size()).isNotZero().isEqualTo(1);
+    assertThat(metadataPatterns.size()).isNotZero().isEqualTo(2);
   }
 
   @Test
