@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.*;
 
 @Service
+@Transactional
 public class DataSourceService {
 
   private static final String LOG_TAG = "DataSourceService";
@@ -61,7 +62,6 @@ public class DataSourceService {
    * @param request Refresh request details
    * @return The SnapshotRequest, for additional processing
    */
-  @Transactional
   public SnapshotRequest refreshAllDataSources(@NotNull final SnapshotRequest request)
       throws IOException {
 
@@ -71,7 +71,6 @@ public class DataSourceService {
     return request;
   }
 
-  @Transactional
   public void refreshDataSourcesForPlugin(
       @NotNull SnapshotRequest request, @NotNull DataSourcePlugin plugin) throws IOException {
 
@@ -82,7 +81,6 @@ public class DataSourceService {
     }
   }
 
-  @Transactional
   public <T> void refreshDataSource(
       @NotNull SnapshotRequest request, @NotNull DataSource<T> dataSource) throws IOException {
 
@@ -115,7 +113,6 @@ public class DataSourceService {
    * @param pluginId The ID of the requested plugin
    * @return An Optional which may contain the requested plugin
    */
-  @Transactional
   public Optional<DataSourcePlugin> getDataSourcePlugin(@NotNull final UUID pluginId) {
 
     return dataSourcePlugins.stream()
@@ -129,7 +126,6 @@ public class DataSourceService {
    * @param pluginId The ID of the plugin
    * @return True/false if the plugin was successfully enabled
    */
-  @Transactional
   public boolean enablePlugin(@NotNull final UUID pluginId) {
 
     Log.i(LOG_TAG, "Attempting to enable plugin: " + pluginId);
@@ -150,7 +146,6 @@ public class DataSourceService {
    * @param pluginId The ID of the data plugin to disable
    * @return True/false if the given plugin was successfully disabled
    */
-  @Transactional
   public boolean disablePlugin(@NotNull final UUID pluginId) {
 
     Log.i(LOG_TAG, "Attempting to disable plugin: " + pluginId);
@@ -180,7 +175,6 @@ public class DataSourceService {
     return enabledPlugins.stream().anyMatch(plugin -> pluginId.equals(plugin.getPluginId()));
   }
 
-  @Transactional
   public <T> DataSource<T> addDataSource(@NotNull final DataSource<T> dataSource) {
 
     final String errMsg =
@@ -202,6 +196,10 @@ public class DataSourceService {
 
   public Optional<DataSource<?>> getDataSourceById(@NotNull UUID id) {
     return dataSourceRepository.findById(id);
+  }
+
+  public List<DataSource<?>> getDataSourcesForPlugin(@NotNull UUID pluginId) {
+    return dataSourceRepository.findDataSourcesByPluginId(pluginId);
   }
 
   // TODO: update DataSource, delete DataSource

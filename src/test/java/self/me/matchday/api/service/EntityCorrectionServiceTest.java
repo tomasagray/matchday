@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,433 +19,149 @@
 
 package self.me.matchday.api.service;
 
-import org.hibernate.Hibernate;
-import org.jetbrains.annotations.Contract;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.Corrected;
-import self.me.matchday.CorrectedOrNull;
+import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.db.EventRepository;
 import self.me.matchday.model.*;
-import self.me.matchday.util.Log;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing & validation for the Entity correction service")
+@Transactional
 class EntityCorrectionServiceTest {
 
-  private static final String LOG_TAG = "EntityCorrectionServiceTest";
+  private static final String UEFA_CHAMPIONS_LEAGUE = "UEFA Champions League";
+  private static final String FC_BARCELONA = "FC Barcelona";
+  private static final String ATLETICO_DE_MADRID = "Atletico de Madrid";
 
-  private static EntityCorrectionService correctionService;
+  private static final Logger logger = LogManager.getLogger(EntityCorrectionServiceTest.class);
+  private static EntityCorrectionService entityCorrectionService;
 
   @BeforeAll
-  static void setup(@Autowired EntityCorrectionService correctionService) {
-    EntityCorrectionServiceTest.correctionService = correctionService;
+  static void setup(
+      @Autowired EntityCorrectionService correctionService,
+      @Autowired @NotNull EventRepository eventRepository) {
+    EntityCorrectionServiceTest.entityCorrectionService = correctionService;
+    createProperEvent(eventRepository);
+    createSynonyms();
   }
 
-  @Contract(pure = true)
-  @NotNull
-  @Unmodifiable
-  private static List<String> getTestSynonymList() {
-    return List.of("testing", "checking", "probing");
-  }
-
-  @Test
-  @DisplayName("Test retrieval of synonyms for a given word")
-  void getSynonymsFor() {
-
-    final String testWord = "testing";
-    final List<String> words = getTestSynonymList();
-
-    System.out.println("Adding synonyms to database: " + words);
-    final Synonym addedSynonym = correctionService.createSynonymsFrom(words);
-    System.out.println("Added: " + addedSynonym);
-
-    System.out.println("Attempting to retrieve by keyword: " + testWord);
-    final Synonym retrievedSynonym = correctionService.getSynonymsFor(testWord);
-    System.out.println("Got Synonym from database:" + retrievedSynonym);
-    assertThat(retrievedSynonym).isNotNull().isEqualTo(addedSynonym);
-  }
-
-  @Test
-  @DisplayName("Test recursive entity correction")
-  void correctFields() throws ReflectiveOperationException {
-
-    // Create test data
-    final List<String> testWords = getTestSynonymList();
-    Log.i(LOG_TAG, "Adding synonym words: " + testWords);
-    // Save to DB
-    final Synonym synonym = correctionService.createSynonymsFrom(testWords);
-    Log.i(LOG_TAG, "Added Synonym to database: " + synonym);
-
-    final TestSubCorrectionEntity testSubCorrectionEntity1 =
-        new TestSubCorrectionEntity("checking", "no synonyms");
-    final TestCorrectionEntity testCorrectionEntity =
-        new TestCorrectionEntity("probing", testSubCorrectionEntity1);
-
-    Log.i(LOG_TAG, "Entity PRIOR to correction:\n" + testCorrectionEntity);
-    // Correct data
-    correctionService.correctFields(testCorrectionEntity);
-    Log.i(LOG_TAG, "Entity AFTER correction:\n" + testCorrectionEntity);
-
-    // Run test
-    final String correctedStringField = testCorrectionEntity.getCorrectedStringField();
-    final TestSubCorrectionEntity correctedSubEntity = testCorrectionEntity.getSubEntity();
-    assertThat(correctedSubEntity).isNotNull();
-    final String correctedSubStringField = correctedSubEntity.getCorrectedStringField();
-    final String uncorrectedStringField = correctedSubEntity.getUncorrectedString();
-
-    assertThat(correctedStringField).isEqualTo("testing");
-    assertThat(correctedSubStringField).isEqualTo("testing");
-    assertThat(uncorrectedStringField).isEqualTo("no synonyms");
-  }
-
-  @Test
-  @DisplayName("Validate handling of attempting to correct Entity with null dependency")
-  void getCorrectedEntityWithNullDependency() throws ReflectiveOperationException {
-
-    final TestCorrectionEntity testEntity = new TestCorrectionEntity("checking", null);
-    Log.i(LOG_TAG, "Created test Entity: " + testEntity);
-
-    correctionService.correctFields(testEntity);
-
-    Log.i(LOG_TAG, "Entity after performing correction:  " + testEntity);
-    assertThat(testEntity).isNotNull();
-    assertThat(testEntity.getCorrectedStringField()).isEqualTo("testing");
-    assertThat(testEntity.getSubEntity()).isNull();
-  }
-
-  @Test
-  @DisplayName("Test correction with null String value marked as @Corrected")
-  void nullStringValue() throws ReflectiveOperationException {
-
-    final TestCorrectionEntity testEntity = new TestCorrectionEntity(null, null);
-    Log.i(LOG_TAG, "Created Entity for testing:  " + testEntity);
-
-    try {
-      correctionService.correctFields(testEntity);
-      throw new InternalError("If you can read this, something is wrong in the test logic!");
-
-    } catch (IllegalArgumentException e) {
-      Log.i(LOG_TAG, "Attempting to correct null marked as @Corrected threw: " + e);
-      Log.i(LOG_TAG, "Entity after correction:  " + testEntity);
-      assertThat(e.getClass()).isEqualTo(IllegalArgumentException.class);
-    }
-  }
-
-  private static @NotNull Stream<Arguments> getWordsWithNoSynonyms() {
-    return Stream.of(
-            Arguments.of("I have no equal"),
-            Arguments.of("I have some equals"),
-            Arguments.of("I have a lot of equals"),
-            Arguments.of("Stop copying me!"),
-            Arguments.of("No!")
-    );
-  }
-
-  @ParameterizedTest
-  @MethodSource("getWordsWithNoSynonyms")
-  @DisplayName("Validate that a word with no Synonyms is not modified")
-  void testNoSynonymNoModify(String testString) throws ReflectiveOperationException {
-
-    final TestCorrectionEntity testEntity = new TestCorrectionEntity(testString);
-    correctionService.createSynonymsFrom(getTestSynonymList());
-    Log.i(LOG_TAG, "Created test resource:  " + testEntity);
-
-    correctionService.correctFields(testEntity);
-    Log.i(LOG_TAG, "Test resource after correction is:  " + testEntity);
-
-    assertThat(testEntity).isNotNull();
-    assertThat(testEntity.getSubEntity()).isNull();
-    assertThat(testEntity.getCorrectedStringField()).isEqualTo(testString);
-  }
-
-  @Test
-  @DisplayName("Validate correction of Event entity type")
-  void validateEventCorrection() throws ReflectiveOperationException {
-
-    // Create test data
-    final Synonym barcaSynonyms =
-        correctionService.createSynonymsFrom(List.of("FC Barcelona", "Barcelona", "Barca"));
-    final Synonym romaSynonyms = correctionService.createSynonymsFrom(List.of("AS Roma", "Roma"));
-    final Synonym laLigaSynonyms =
-        correctionService.createSynonymsFrom(List.of("La Liga", "La Liga Santander", "LL"));
-    final Event testMatch =
+  private static void createProperEvent(@NotNull EventRepository eventRepository) {
+    final Event properEvent =
         Event.builder()
-            .competition(new Competition("LL"))
-            .homeTeam(new Team("Barca"))
-            .awayTeam(new Team("Roma"))
-            .season(new Season())
-            .fixture(new Fixture())
+            .competition(new Competition(UEFA_CHAMPIONS_LEAGUE))
+            .homeTeam(new Team(FC_BARCELONA))
+            .awayTeam(new Team(ATLETICO_DE_MADRID))
             .date(LocalDateTime.now())
             .build();
+    logger.info("Saved proper event: " + eventRepository.saveAndFlush(properEvent));
+  }
 
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Created Synonyms: %n%s%n%s%n%s", barcaSynonyms, romaSynonyms, laLigaSynonyms));
-    Log.i(LOG_TAG, "Testing Match:\n" + testMatch);
-
-    correctionService.correctFields(testMatch);
-
-    Log.i(LOG_TAG, "Correction performed; Match is now:\n" + testMatch);
-
-    assertThat(testMatch).isNotNull();
-    assertThat(testMatch.getCompetition().getName()).isEqualTo("La Liga");
-    assertThat(testMatch.getHomeTeam().getName()).isEqualTo("FC Barcelona");
-    assertThat(testMatch.getAwayTeam().getName()).isEqualTo("AS Roma");
-    assertThat(testMatch.getSeason()).isNotNull();
-    assertThat(testMatch.getFixture().getFixtureNumber()).isZero();
-    assertThat(testMatch.getDate().toLocalDate()).isEqualTo(LocalDate.now());
+  private static void createSynonyms() {
+    final ProperName fcBarcelona = new ProperName(FC_BARCELONA);
+    final Synonym barca = new Synonym("Barca", fcBarcelona);
+    final Synonym barcelona = new Synonym("Barcelona", fcBarcelona);
+    final ProperName atletico = new ProperName(ATLETICO_DE_MADRID);
+    final Synonym atleti = new Synonym("Atleti", atletico);
+    final ProperName championsLeague = new ProperName(UEFA_CHAMPIONS_LEAGUE);
+    final Synonym ucl = new Synonym("UCL", championsLeague);
+    final List<Synonym> synonyms = List.of(barca, barcelona, atleti, ucl);
+    logger.info("Saving Synonyms: " + entityCorrectionService.addAllSynonyms(synonyms));
   }
 
   @Test
-  @DisplayName("Validate correction service does not corrupt unmatched entity")
-  void testCorrectionOfUnmatchedEntity() throws ReflectiveOperationException {
+  @DisplayName("Validate a Synonym can be added to & retrieved from database")
+  void testAddSynonym() {
 
-    // Create test data
-    final Synonym barcaSynonyms =
-        correctionService.createSynonymsFrom(List.of("FC Barcelona", "Barcelona", "Barca"));
-    final Synonym romaSynonyms = correctionService.createSynonymsFrom(List.of("AS Roma", "Roma"));
-    final Synonym laLigaSynonyms =
-        correctionService.createSynonymsFrom(List.of("La Liga", "La Liga Santander", "LL"));
-    final String uncorrectedCompetitionName = "EPL";
-    final String uncorrectedHomeTeamName = "Arsenal";
-    final String uncorrectedAwayTeamName = "Chelsea";
-    final Event testMatch =
-        Event.builder()
-            .competition(new Competition(uncorrectedCompetitionName))
-            .homeTeam(new Team(uncorrectedHomeTeamName))
-            .awayTeam(new Team(uncorrectedAwayTeamName))
-            .season(new Season())
-            .fixture(new Fixture())
-            .date(LocalDateTime.now())
-            .build();
+    final String synonymName = "Beth";
+    final ProperName elizabeth = new ProperName("Elizabeth");
+    final Synonym beth = new Synonym(synonymName, elizabeth);
+    final Synonym addedSynonym = entityCorrectionService.addSynonym(beth);
+    logger.info("Added Synonym: " + addedSynonym);
 
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Created Synonyms: %n%s%n%s%n%s", barcaSynonyms, romaSynonyms, laLigaSynonyms));
-    Log.i(LOG_TAG, "Testing Match:\n" + testMatch);
-
-    correctionService.correctFields(testMatch);
-
-    Log.i(LOG_TAG, "Correction performed; Match is now:\n" + testMatch);
-
-    assertThat(testMatch).isNotNull();
-    assertThat(testMatch.getCompetition().getName()).isEqualTo(uncorrectedCompetitionName);
-    assertThat(testMatch.getHomeTeam().getName()).isEqualTo(uncorrectedHomeTeamName);
-    assertThat(testMatch.getAwayTeam().getName()).isEqualTo(uncorrectedAwayTeamName);
-    assertThat(testMatch.getSeason()).isNotNull();
-    assertThat(testMatch.getFixture().getFixtureNumber()).isZero();
-    assertThat(testMatch.getDate().toLocalDate()).isEqualTo(LocalDate.now());
+    assertThat(addedSynonym.getProperName()).isEqualTo(elizabeth);
+    assertThat(addedSynonym.getName()).isEqualTo(synonymName);
   }
 
   @Test
-  @DisplayName("Validate rejection of Event with null Competition")
-  void rejectNullCompetition() {
+  @DisplayName("Validate Synonyms for a ProperName can be retrieved")
+  void testSynonymProperNameRetrieval() {
 
-    final Synonym synonym = new Synonym(List.of("Team", "Equipo", "Squad"));
-    Log.i(LOG_TAG, "Adding Synonym for test:  " + synonym);
-    correctionService.addSynonym(synonym);
+    final String synonymName = "Sammy";
+    final String properName = "Samuel";
+    final ProperName samuel = new ProperName(properName);
+    final Synonym sam = new Synonym(synonymName, samuel);
+    final Synonym synonym = entityCorrectionService.addSynonym(sam);
+    logger.info("Added Synonym: " + synonym);
+
+    final List<Synonym> synonyms = entityCorrectionService.getSynonymsFor(properName);
+    logger.info("Got Synonyms: " + synonyms);
+    assertThat(synonyms.size()).isNotZero();
+    synonyms.forEach(s -> assertThat(s.getProperName()).isEqualTo(samuel));
+  }
+
+  @Test
+  @DisplayName("Test correcting an Event")
+  void testEventEntityCorrection() throws ReflectiveOperationException {
 
     final Event testEvent =
         Event.builder()
-            // no Competition...
-            .homeTeam(new Team("Squad"))
-            .awayTeam(new Team("Equipo"))
-            .season(new Season())
-            .fixture(new Fixture())
+            .competition(new Competition("UCL"))
+            .homeTeam(new Team("Barca"))
+            .awayTeam(new Team("Atleti"))
             .date(LocalDateTime.now())
             .build();
-    try {
-      Log.i(LOG_TAG, "Performing test on Event:\n" + testEvent);
-      correctionService.correctFields(testEvent);
+    logger.info("Created uncorrected Event: " + testEvent);
 
-      Log.e(LOG_TAG, "We shouldn't even be here!");
-      throw new RuntimeException("Test should have failed, but didn't");
-    } catch (ReflectiveOperationException | IllegalArgumentException e) {
-      Log.i(LOG_TAG, "Caught exception: " + e);
-      assertThat(e.getClass()).isEqualTo(IllegalArgumentException.class);
-    }
+    entityCorrectionService.correctEntityFields(testEvent);
+    logger.info("Got corrected Event: " + testEvent);
+    assertThat(testEvent.getCompetition().getProperName().getName())
+        .isEqualTo(UEFA_CHAMPIONS_LEAGUE);
+    assertThat(testEvent.getHomeTeam().getProperName().getName()).isEqualTo(FC_BARCELONA);
+    assertThat(testEvent.getAwayTeam().getProperName().getName()).isEqualTo(ATLETICO_DE_MADRID);
   }
 
   @Test
-  @DisplayName("Validate creation of test resources")
-  void validateTestResources() {
+  @DisplayName("Ensure fields not marked for correction are not altered")
+  void testNonCorrectedFields() throws ReflectiveOperationException {
 
-    final TestCorrectionEntity emptyTestEntity = new TestCorrectionEntity();
-    final TestSubCorrectionEntity emptySubEntity = new TestSubCorrectionEntity();
-    emptySubEntity.setCorrectedStringField("Correct me, please.");
-    emptySubEntity.setUncorrectedString("No correcting me!");
-    emptyTestEntity.setCorrectedStringField("testing");
-    emptyTestEntity.setSubEntity(emptySubEntity);
+    final Season testSeason = new Season(2022, 2023);
+    final Fixture testFixture = new Fixture(16);
+    final LocalDateTime testDate = LocalDateTime.now();
+    final Event testEvent =
+        Event.builder()
+            .competition((new Competition("UCL")))
+            .homeTeam(new Team("Atleti"))
+            .awayTeam(new Team("Barcelona"))
+            .season(testSeason)
+            .fixture(testFixture)
+            .date(testDate)
+            .build();
+    logger.info("Created raw event: " + testEvent);
 
-    Log.i(LOG_TAG, "Created Entities with empty constructors:\n" + emptyTestEntity);
-    assertThat(emptyTestEntity).isNotNull();
-    assertThat(emptySubEntity).isNotNull();
-    assertThat(emptyTestEntity.getCorrectedStringField()).isNotNull();
-    assertThat(emptyTestEntity.getSubEntity()).isNotNull();
-    assertThat(emptySubEntity.getCorrectedStringField()).isNotNull();
-    assertThat(emptySubEntity.getUncorrectedString()).isNotNull();
+    entityCorrectionService.correctEntityFields(testEvent);
 
-    // exercise test classes
-    emptyTestEntity.setId(Long.MAX_VALUE);
-    Log.i(LOG_TAG, "Empty test entity ID set to: " + emptyTestEntity.getId());
-    emptySubEntity.setId(Long.MIN_VALUE);
-    Log.i(LOG_TAG, "Empty test sub entity ID set to: " + emptySubEntity.getId());
-  }
-
-  @Entity
-  static class TestCorrectionEntity {
-
-    @Id @GeneratedValue private Long id;
-
-    @Corrected private String correctedStringField;
-
-    @CorrectedOrNull
-    @OneToOne(targetEntity = TestSubCorrectionEntity.class)
-    private TestSubCorrectionEntity subEntity;
-
-    TestCorrectionEntity(String correctedStringField, TestSubCorrectionEntity subEntity) {
-      this.correctedStringField = correctedStringField;
-      this.subEntity = subEntity;
-    }
-
-    TestCorrectionEntity(String correctedStringField) {
-      this(correctedStringField, null);
-    }
-
-    TestCorrectionEntity() {
-      this(null, null);
-    }
-
-    public Long getId() {
-      return id;
-    }
-
-    public void setId(Long id) {
-      this.id = id;
-    }
-
-    public String getCorrectedStringField() {
-      return this.correctedStringField;
-    }
-
-    public void setCorrectedStringField(String correctedStringField) {
-      this.correctedStringField = correctedStringField;
-    }
-
-    public TestSubCorrectionEntity getSubEntity() {
-      return this.subEntity;
-    }
-
-    public void setSubEntity(TestSubCorrectionEntity subEntity) {
-      this.subEntity = subEntity;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-      TestCorrectionEntity that = (TestCorrectionEntity) o;
-      return id != null && Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-      return getClass().hashCode();
-    }
-
-    @Override
-    public String toString() {
-      return String.format(
-          "TestCorrectionEntity(id=%s;  stringField=%s;  SubEntity=%s)",
-          id, correctedStringField, subEntity);
-    }
-  }
-
-  @Entity
-  static class TestSubCorrectionEntity {
-
-    @Id @GeneratedValue private Long id;
-
-    @Corrected private String correctedStringField;
-
-    private String uncorrectedString;
-
-    TestSubCorrectionEntity(String correctedStringField, String uncorrectedString) {
-      this.correctedStringField = correctedStringField;
-      this.uncorrectedString = uncorrectedString;
-    }
-
-    TestSubCorrectionEntity() {
-      this(null, null);
-    }
-
-    public Long getId() {
-      return id;
-    }
-
-    public void setId(Long id) {
-      this.id = id;
-    }
-
-    public String getCorrectedStringField() {
-      return this.correctedStringField;
-    }
-
-    public void setCorrectedStringField(String correctedStringField) {
-      this.correctedStringField = correctedStringField;
-    }
-
-    public String getUncorrectedString() {
-      return uncorrectedString;
-    }
-
-    public void setUncorrectedString(String uncorrectedString) {
-      this.uncorrectedString = uncorrectedString;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-      TestSubCorrectionEntity that = (TestSubCorrectionEntity) o;
-      return id != null && Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-      return getClass().hashCode();
-    }
-
-    @Override
-    public String toString() {
-      return String.format(
-          "SubCorrectionEntity{id=%s;  correctedStringField=%s;  uncorrectedString=%s)",
-          id, correctedStringField, uncorrectedString);
-    }
+    logger.info("Event has been corrected to: " + testEvent);
+    assertThat(testEvent.getCompetition().getProperName().getName())
+        .isEqualTo(UEFA_CHAMPIONS_LEAGUE);
+    assertThat(testEvent.getHomeTeam().getProperName().getName()).isEqualTo(ATLETICO_DE_MADRID);
+    assertThat(testEvent.getAwayTeam().getProperName().getName()).isEqualTo(FC_BARCELONA);
+    assertThat(testEvent.getSeason()).isEqualTo(testSeason);
+    assertThat(testEvent.getFixture()).isEqualTo(testFixture);
+    assertThat(testEvent.getDate()).isEqualTo(testDate);
   }
 }

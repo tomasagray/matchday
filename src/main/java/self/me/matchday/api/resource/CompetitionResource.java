@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -52,7 +52,6 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
 
   private UUID id;
   private String name;
-  private String abbreviation;
   private Locale locale;
 
   @Component
@@ -79,8 +78,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       // populate DTO
       final UUID competitionId = competition.getCompetitionId();
       competitionResource.setId(competitionId);
-      competitionResource.setName(competition.getName());
-      competitionResource.setAbbreviation(competition.getAbbreviation());
+      competitionResource.setName(competition.getProperName().getName());
       competitionResource.setLocale(competition.getLocale());
 
       // Attach links:

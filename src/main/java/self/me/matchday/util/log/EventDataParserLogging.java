@@ -17,33 +17,34 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.util;
+package self.me.matchday.util.log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import self.me.matchday.plugin.datasource.parsing.EventDataParser;
+import self.me.matchday.util.JsonParser;
 
 @Aspect
 @Component
 public class EventDataParserLogging {
 
-  static final Logger logger = LogManager.getLogger(EventDataParserLogging.class);
-  private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+  static final Logger logger = LogManager.getLogger(EventDataParser.class);
 
-  @Around(
-      "execution(*  self.me.matchday.plugin.datasource.parsing.EventDataParser.getEntityStream(..))")
-  public Object logAroundEventParsing(@NotNull ProceedingJoinPoint jp) throws Throwable {
+  @Before(
+      "execution(* self.me.matchday.plugin.datasource.parsing.EventDataParser.getEntityStream(..))")
+  public void logAroundEventParsing(@NotNull JoinPoint jp) {
 
     final Object[] args = jp.getArgs();
-    logger.info("Argument count: " + args.length);
-    logger.info("Arguments: {}\n\n", args[0]);
-    logger.info("{}\n\n\n", JsonParser.toJson(args[1]));
-    return jp.proceed();
+    if (args.length == 2) {
+      logger.trace(
+          "Attempting to get Stream<Event> from data:\n{}\nUsing DataSource:\n{}",
+          args[1],
+          JsonParser.toJson(args[0]));
+    }
   }
 }

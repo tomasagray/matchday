@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -20,6 +20,16 @@
 package self.me.matchday.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Synonym;
 
-public interface SynonymRepository extends JpaRepository<Synonym, Long> {}
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface SynonymRepository extends JpaRepository<Synonym, Long> {
+
+  Optional<Synonym> findSynonymByNameContains(String name);
+
+  List<Synonym> findSynonymsByProperNameNameContains(String name);
+}

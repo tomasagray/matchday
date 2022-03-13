@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -147,7 +147,7 @@ class TeamServiceTest {
     assertThat(postUpdateTeamCount - initialTeamCount).isEqualTo(1);
 
     // Cleanup
-    teamService.deleteTeamByName(savingTestTeam.getName());
+    teamService.deleteTeamByName(savingTestTeam.getProperName().getName());
   }
 
   @Test
@@ -165,7 +165,7 @@ class TeamServiceTest {
     final int updatedTeamCount = updatedTeams.size();
 
     // Delete test team
-    teamService.deleteTeamByName(deleteTestTeam.getName());
+    teamService.deleteTeamByName(deleteTestTeam.getProperName().getName());
     // Get new team count
     final Optional<List<Team>> deletedTeamsListOptional = teamService.fetchAllTeams();
     assertThat(deletedTeamsListOptional).isPresent();

@@ -113,13 +113,13 @@ class BloggerPluginTest {
   void getHtmlSnapshot() throws IOException {
 
     Log.i(LOG_TAG, "Getting Snapshot with DataSource:\n" + testJsonDataSource.getPluginId());
-    final SnapshotRequest request = SnapshotRequest.builder().build();
+    final SnapshotRequest request = SnapshotRequest.builder().labels(List.of("Barcelona")).build();
     final Snapshot<? extends Event> testSnapshot = plugin.getSnapshot(request, testJsonDataSource);
     assertThat(testSnapshot).isNotNull();
 
     final List<Event> testData = testSnapshot.getData().collect(Collectors.toList());
     final int eventCount = testData.size();
-    Log.i(LOG_TAG, String.format("Found %d events%nData:%n%s", eventCount, testData));
+    Log.i(LOG_TAG, String.format("Found %d events%n", eventCount));
     assertThat(eventCount).isNotZero();
     testData.stream()
         .filter(Objects::nonNull)
@@ -138,9 +138,8 @@ class BloggerPluginTest {
   @DisplayName("Get a Snapshot from test JSON Blogger DataSource")
   void getJsonSnapshot() throws IOException {
 
-    Log.i(
-        LOG_TAG, String.format("Getting Snapshot of test DataSource: %s%n%n", testJsonDataSource));
-    final SnapshotRequest request = SnapshotRequest.builder().maxResults(25).build();
+    final SnapshotRequest request =
+        SnapshotRequest.builder().labels(List.of("Barcelona")).maxResults(25).build();
     final Snapshot<? extends Event> snapshot = plugin.getSnapshot(request, testJsonDataSource);
     assertThat(snapshot).isNotNull();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -52,7 +52,6 @@ public class TeamResource extends RepresentationModel<TeamResource> {
 
   private UUID id;
   private String name;
-  private String abbreviation;
   private Locale locale;
 
   @Component
@@ -75,8 +74,7 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       // initialize resource
       final UUID teamId = team.getTeamId();
       teamResource.setId(teamId);
-      teamResource.setName(team.getName());
-      teamResource.setAbbreviation(team.getAbbreviation());
+      teamResource.setName(team.getProperName().getName());
       teamResource.setLocale(team.getLocale());
       // attach links
       teamResource.add(

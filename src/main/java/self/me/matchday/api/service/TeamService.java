@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -55,7 +55,7 @@ public class TeamService {
     final List<Team> teams = teamRepository.findAll();
     if (teams.size() > 0) {
       // Sort Teams by name
-      teams.sort(Comparator.comparing(Team::getName));
+      teams.sort(Comparator.comparing(Team::getProperName));
       return Optional.of(teams);
     } else {
       Log.d(LOG_TAG, "Attempted to fetch all Teams, but nothing found.");
@@ -90,8 +90,12 @@ public class TeamService {
     // Convert back to a List<> for sorting
     List<Team> teamList = new ArrayList<>(teamSet);
     // Sort by Team name
-    teamList.sort(Comparator.comparing(Team::getName));
+    teamList.sort(Comparator.comparing(Team::getProperName));
     return Optional.of(teamList);
+  }
+
+  public Optional<Team> getTeamByName(@NotNull String name) {
+    return teamRepository.findTeamByProperNameName(name);
   }
 
   /**
@@ -119,7 +123,7 @@ public class TeamService {
   public void deleteTeamByName(@NotNull final String teamName) {
 
     Log.i(LOG_TAG, String.format("Deleting Team with ID: %s from database", teamName));
-    teamRepository.deleteByName(teamName);
+    teamRepository.deleteByProperNameName(teamName);
   }
 
   /**
@@ -129,6 +133,6 @@ public class TeamService {
    * @return true/false
    */
   private boolean isValidTeam(@NotNull final Team team) {
-    return team.getName() != null;
+    return team.getProperName() != null;
   }
 }

@@ -19,13 +19,16 @@
 
 package self.me.matchday.db;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Competition;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface CompetitionRepository extends JpaRepository<Competition, UUID> {
 
+  Optional<Competition> findCompetitionByProperNameName(@NotNull String name);
 }

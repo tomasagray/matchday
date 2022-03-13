@@ -19,6 +19,7 @@
 
 package self.me.matchday.db;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,12 +27,15 @@ import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Team;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface TeamRepository extends JpaRepository<Team, UUID> {
 
-  void deleteByName(String name);
+  Optional<Team> findTeamByProperNameName(@NotNull String name);
+
+  void deleteByProperNameName(String name);
 
   @Query(
       "SELECT DISTINCT ht FROM MatchGame mt JOIN mt.homeTeam ht JOIN mt.competition cm "

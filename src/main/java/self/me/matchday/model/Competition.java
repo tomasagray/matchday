@@ -24,15 +24,14 @@
 package self.me.matchday.model;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.util.Abbreviator;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -43,7 +42,6 @@ import java.util.UUID;
  */
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
 public class Competition implements Serializable {
 
@@ -53,40 +51,41 @@ public class Competition implements Serializable {
   @Column(columnDefinition = "BINARY(16)")
   private UUID competitionId;
 
-  private String name;
-  private String abbreviation;
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private final ProperName properName;
+
   private Locale locale;
   @OneToOne private Artwork emblem;
   @OneToOne private Artwork fanart;
   @OneToOne private Artwork monochromeEmblem;
   @OneToOne private Artwork landscape;
 
-  public Competition(@NotNull final String name) {
-    this(name, Abbreviator.abbreviate(name));
+  public Competition(@NotNull final String properName) {
+    this.properName = new ProperName(properName);
   }
 
-  public Competition(@NotNull final String name, @NotNull final String abbreviation) {
-    this.name = name;
-    this.abbreviation = abbreviation;
+  public Competition() {
+    this.properName = null;
   }
 
   @Override
   public String toString() {
-    return this.name;
+    final ProperName properName = getProperName();
+    return properName == null ? "null" : properName.getName();
   }
 
   @Override
-  public boolean equals(Object obj) {
-
-    if (!(obj instanceof Competition)) {
-      return false;
-    }
-    Competition competition = (Competition) obj;
-    return competition.getName().equals(this.getName());
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Competition)) return false;
+    Competition that = (Competition) o;
+    return Objects.equals(getCompetitionId(), that.getCompetitionId())
+        && Objects.equals(getProperName(), that.getProperName())
+        && Objects.equals(getLocale(), that.getLocale());
   }
 
   @Override
   public int hashCode() {
-    return name.hashCode() * competitionId.hashCode();
+    return Objects.hash(getCompetitionId(), getProperName(), getLocale());
   }
 }

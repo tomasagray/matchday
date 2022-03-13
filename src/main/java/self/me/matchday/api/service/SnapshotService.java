@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Snapshot;
-import self.me.matchday.util.Log;
 
 import java.util.stream.Stream;
 
@@ -44,7 +43,7 @@ public class SnapshotService {
     // todo - implement other Snapshot types
     if (clazz.equals(Event.class)) {
       final Stream<Event> data = (Stream<Event>) snapshot.getData();
-      data.peek(event -> Log.i("EVENT", "Got Event: " + event)).forEach(eventService::saveEvent);
+      data.forEach(eventService::saveEvent);
     }
   }
 }

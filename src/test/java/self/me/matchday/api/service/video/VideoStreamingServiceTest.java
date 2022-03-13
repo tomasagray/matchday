@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -49,6 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for video streaming service")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Disabled
 class VideoStreamingServiceTest {
 
   private static final String LOG_TAG = "VideoStreamingServiceTest";

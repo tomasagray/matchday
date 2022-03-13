@@ -110,7 +110,7 @@ class CompetitionControllerTest {
     return Bolt.of(names)
         .zipWithBecoming(
             testCompetitions.stream(),
-            (competition, name) -> Arguments.of(competition.getName(), name))
+            (competition, name) -> Arguments.of(competition.getProperName().getName(), name))
         .stream();
   }
 

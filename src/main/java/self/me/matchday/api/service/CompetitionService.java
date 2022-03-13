@@ -56,7 +56,7 @@ public class CompetitionService {
     final List<Competition> competitions = competitionRepository.findAll();
     if (competitions.size() > 0) {
       // Sort Competitions by name
-      competitions.sort(Comparator.comparing(Competition::getName));
+      competitions.sort(Comparator.comparing(Competition::getProperName));
       return Optional.of(competitions);
     } else {
       Log.i(LOG_TAG, "Attempted to fetch all Competitions, but none returned");
@@ -76,6 +76,10 @@ public class CompetitionService {
         LOG_TAG,
         String.format("Fetching competition with ID: %s from the database.", competitionId));
     return competitionRepository.findById(competitionId);
+  }
+
+  public Optional<Competition> getCompetitionByName(@NotNull String name) {
+    return competitionRepository.findCompetitionByProperNameName(name);
   }
 
   /**
@@ -116,6 +120,6 @@ public class CompetitionService {
    */
   private boolean isValidCompetition(@NotNull final Competition competition) {
 
-    return competition.getName() != null;
+    return competition.getProperName() != null;
   }
 }

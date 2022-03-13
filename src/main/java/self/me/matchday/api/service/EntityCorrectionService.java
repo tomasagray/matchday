@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -21,39 +21,52 @@ package self.me.matchday.api.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.Corrected;
 import self.me.matchday.CorrectedOrNull;
 import self.me.matchday.db.SynonymRepository;
+import self.me.matchday.model.Competition;
 import self.me.matchday.model.Synonym;
+import self.me.matchday.model.Team;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@Transactional
 public class EntityCorrectionService {
 
   private final SynonymRepository synonymRepository;
+  private final CompetitionService competitionService;
+  private final TeamService teamService;
 
-  public EntityCorrectionService(SynonymRepository synonymRepository) {
+  public EntityCorrectionService(
+      SynonymRepository synonymRepository,
+      CompetitionService competitionService,
+      TeamService teamService) {
+
     this.synonymRepository = synonymRepository;
+    this.competitionService = competitionService;
+    this.teamService = teamService;
   }
 
-  public <T> void correctFields(@NotNull T value) throws ReflectiveOperationException {
+  public <T> void correctEntityFields(@NotNull T entity) throws ReflectiveOperationException {
 
-    final Class<?> clazz = value.getClass();
+    final Class<?> clazz = entity.getClass();
     for (Field field : clazz.getDeclaredFields()) {
       if (!Modifier.isStatic(field.getModifiers())) {
         final Method getter = getGetterMethod(clazz, field);
-        final Object fieldValue = getter.invoke(value);
+        final Object currentValue = getter.invoke(entity);
 
-        validateCorrectedIsNotNull(field, fieldValue);
-        if (field.getType() == String.class) {
-          final String strVal = (String) fieldValue;
-          correctStringWithSynonym(value, field, strVal);
-        } else if (isCorrectable(field, fieldValue)) {
-          correctFields(fieldValue);
+        validateCorrectedIsNotNull(field, currentValue);
+        if (isCorrectable(field, currentValue)) {
+          final Method setter = getSetterMethod(clazz, field);
+          final Object correctedEntity = getCorrectedEntity(currentValue);
+          setter.invoke(entity, correctedEntity);
         }
       }
     }
@@ -75,37 +88,69 @@ public class EntityCorrectionService {
     return isCorrected || isCorrectedOrNull;
   }
 
-  private <T> void correctStringWithSynonym(@NotNull T value, @NotNull Field field, String strVal)
-      throws IllegalAccessException {
-
-    final Synonym synonym = this.getSynonymsFor(strVal);
-    final String primarySynonym = synonym != null ? synonym.getPrimary() : strVal;
-    final boolean accessState = field.canAccess(value);
-    field.setAccessible(true);
-    field.set(value, primarySynonym);
-    field.setAccessible(accessState);
-  }
-
   @NotNull
   private Method getGetterMethod(@NotNull Class<?> clazz, @NotNull Field field)
       throws NoSuchMethodException {
-    final String fieldName = field.getName();
-    final String methodNameStub = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-    return clazz.getDeclaredMethod("get" + methodNameStub);
+
+    final String methodStub = getAccessorMethodStub(field);
+    return clazz.getDeclaredMethod("get" + methodStub);
   }
 
-  public Synonym createSynonymsFrom(@NotNull List<String> synonyms) {
-    return this.addSynonym(new Synonym(synonyms));
+  @NotNull
+  private Method getSetterMethod(@NotNull Class<?> clazz, @NotNull Field field)
+      throws NoSuchMethodException {
+
+    final String methodStub = getAccessorMethodStub(field);
+    return clazz.getDeclaredMethod("set" + methodStub, field.getType());
+  }
+
+  private @NotNull String getAccessorMethodStub(@NotNull Field field) {
+    final String fieldName = field.getName();
+    return fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+  }
+
+  public Collection<Synonym> addAllSynonyms(@NotNull Collection<Synonym> synonyms) {
+    return synonymRepository.saveAll(synonyms);
   }
 
   public Synonym addSynonym(@NotNull Synonym synonym) {
-    return synonymRepository.saveAndFlush(synonym);
+    return synonymRepository.save(synonym);
   }
 
-  public Synonym getSynonymsFor(@NotNull String word) {
-    return synonymRepository.findAll().stream()
-        .filter(synonym -> synonym.getSynonyms().contains(word))
-        .findAny()
-        .orElse(null);
+  public List<Synonym> getSynonymsFor(@NotNull String word) {
+    return synonymRepository.findSynonymsByProperNameNameContains(word);
+  }
+
+  public <T> T getCorrectedEntity(@NotNull T entity) {
+
+    final String name = getName(entity);
+    return getEntityByName(entity, name)
+        .or(
+            () ->
+                synonymRepository
+                    .findSynonymByNameContains(name)
+                    .flatMap(synonym -> getEntityByName(entity, synonym.getProperName().getName())))
+        .orElse(entity);
+  }
+
+  private String getName(@NotNull Object o) {
+
+    try {
+      final Field field = o.getClass().getDeclaredField("name");
+      return (String) field.get(o);
+    } catch (ReflectiveOperationException ignore) {
+      // object does not have name field, or is not accessible
+      return o.toString();
+    }
+  }
+
+  @SuppressWarnings("unchecked cast")
+  private <T> Optional<T> getEntityByName(@NotNull T entity, @NotNull String name) {
+    if (entity instanceof Competition) {
+      return (Optional<T>) competitionService.getCompetitionByName(name);
+    } else if (entity instanceof Team) {
+      return (Optional<T>) teamService.getTeamByName(name);
+    }
+    return Optional.empty();
   }
 }

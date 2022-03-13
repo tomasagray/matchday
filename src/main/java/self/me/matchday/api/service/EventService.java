@@ -20,7 +20,7 @@
 package self.me.matchday.api.service;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.EventRepository;
@@ -28,6 +28,7 @@ import self.me.matchday.db.VideoFileSrcRepository;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
+import self.me.matchday.model.ProperName;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.util.Log;
 
@@ -37,6 +38,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 @Service
+@Transactional
 public class EventService {
 
   private static final String LOG_TAG = "EventService";
@@ -44,17 +46,19 @@ public class EventService {
 
   private final EventRepository eventRepository;
   private final VideoFileSrcRepository fileSrcRepository;
+  private final EntityCorrectionService entityCorrectionService;
 
-  @Autowired
   EventService(
-      final EventRepository eventRepository, final VideoFileSrcRepository fileSrcRepository) {
+      final EventRepository eventRepository,
+      final VideoFileSrcRepository fileSrcRepository,
+      EntityCorrectionService entityCorrectionService) {
     this.eventRepository = eventRepository;
     this.fileSrcRepository = fileSrcRepository;
+    this.entityCorrectionService = entityCorrectionService;
   }
 
   // Getters   ==============================================================
   // todo - don't use optional
-  @Transactional
   public Optional<List<Event>> fetchAllEvents() {
 
     Log.i(LOG_TAG, "Fetching latest Events...");
@@ -106,22 +110,35 @@ public class EventService {
    *
    * @param event The Event to be saved
    */
-  @Transactional
   public void saveEvent(@NotNull final Event event) {
+
     try {
       validateEvent(event);
+      entityCorrectionService.correctEntityFields(event);
       // See if Event already exists in DB
-      final UUID eventId = event.getEventId();
-      if (eventId != null) {
-        final Optional<Event> eventOptional = fetchById(eventId);
-        // Merge VideoFileSources
-        eventOptional.ifPresent(value -> event.getFileSources().addAll(value.getFileSources()));
+      final Optional<Event> eventOptional = eventRepository.findOne(getExampleEvent(event));
+      if (eventOptional.isPresent()) {
+        final Event existingEvent = eventOptional.get();
+        existingEvent.getFileSources().addAll(event.getFileSources());
+      } else {
+        eventRepository.saveAndFlush(event);
       }
-      // Save to DB
-      Log.i(LOG_TAG, "Saved event: " + eventRepository.saveAndFlush(event));
     } catch (Exception e) {
       Log.e(LOG_TAG, String.format("Event: %s was not saved to DB; %s", event, e.getMessage()), e);
     }
+  }
+
+  private @NotNull Example<Event> getExampleEvent(@NotNull Event event) {
+
+    final Event exampleEvent =
+        Event.builder()
+            .competition(event.getCompetition())
+            .homeTeam(event.getHomeTeam())
+            .awayTeam(event.getAwayTeam())
+            .season(event.getSeason())
+            .fixture(event.getFixture())
+            .build();
+    return Example.of(exampleEvent);
   }
 
   /**
@@ -165,8 +182,8 @@ public class EventService {
 
   private boolean isValidCompetition(final Competition competition) {
     if (competition != null) {
-      final String name = competition.getName();
-      return name != null && !("".equals(name));
+      final ProperName name = competition.getProperName();
+      return name != null && !("".equals(name.getName()));
     }
     return false;
   }

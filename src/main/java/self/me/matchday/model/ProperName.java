@@ -24,47 +24,54 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
 @Setter
 @Entity
-public class Synonym {
-
-  @Id @GeneratedValue private Long id;
+public class ProperName implements Comparable<ProperName> {
 
   private final String name;
+  @Id @GeneratedValue private Long id;
 
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-  private final ProperName properName;
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private List<Synonym> synonyms;
 
-  public Synonym() {
+  public ProperName() {
     this.name = null;
-    this.properName = null;
   }
 
-  public Synonym(@NotNull String name, ProperName properName) {
+  public ProperName(@NotNull String name) {
     this.name = name;
-    this.properName = properName;
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof Synonym)) return false;
-    Synonym synonym = (Synonym) o;
-    return Objects.equals(getId(), synonym.getId())
-        && Objects.equals(getName(), synonym.getName())
-        && Objects.equals(getProperName(), synonym.getProperName());
+    if (!(o instanceof ProperName)) return false;
+    ProperName that = (ProperName) o;
+    return Objects.equals(getId(), that.getId()) && Objects.equals(getName(), that.getName());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getName(), getProperName());
+    return Objects.hash(getId(), getName());
   }
 
   @Override
   public String toString() {
-    return String.format("Synonym{id=%s, name='%s', properName=%s}", id, name, getProperName());
+    return String.format("ProperName{id=%s, synonyms=%s, name='%s'}", id, getSynonyms(), name);
+  }
+
+  @Override
+  public int compareTo(@NotNull ProperName o) {
+    if (name == null) {
+      if (o.getName() == null) {
+        return 0;
+      }
+      return -1;
+    }
+    return name.compareTo(o.getName());
   }
 }

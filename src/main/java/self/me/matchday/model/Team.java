@@ -24,11 +24,9 @@
 package self.me.matchday.model;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.util.Abbreviator;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -43,7 +41,6 @@ import java.util.UUID;
  */
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
 public class Team implements Serializable {
 
@@ -53,20 +50,25 @@ public class Team implements Serializable {
   @Column(columnDefinition = "BINARY(16)")
   private UUID teamId;
 
-  private String name;
-  private String abbreviation;
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private final ProperName properName;
+
   private Locale locale;
   @OneToOne private Artwork emblem;
   @OneToOne private Artwork fanart;
 
-  public Team(@NotNull String name) {
-    this.name = name;
-    this.abbreviation = Abbreviator.abbreviate(this.name);
+  public Team(@NotNull String properName) {
+    this.properName = new ProperName(properName);
+  }
+
+  public Team() {
+    this.properName = null;
   }
 
   @Override
   public String toString() {
-    return this.name;
+    final ProperName properName = getProperName();
+    return properName == null ? "null" : properName.getName();
   }
 
   /**
@@ -87,11 +89,11 @@ public class Team implements Serializable {
 
     // Cast for comparison
     final Team team = (Team) obj;
-    return team.getName().equals(this.getName());
+    return team.getProperName().equals(this.getProperName());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(teamId, name, abbreviation, locale, emblem, fanart);
+    return Objects.hash(teamId, properName, locale, emblem, fanart);
   }
 }
