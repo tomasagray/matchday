@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import self.me.matchday.api.service.VideoFileService;
 import self.me.matchday.model.video.VideoFile;
@@ -48,6 +49,7 @@ import java.util.UUID;
 import static self.me.matchday.model.video.StreamJobState.JobStatus;
 
 @Service
+@Transactional
 class VideoStreamManager {
 
   private final VideoStreamLocatorPlaylistService playlistService;
@@ -99,7 +101,6 @@ class VideoStreamManager {
     playlistService.deleteVideoStreamPlaylist(playlist);
   }
 
-  // todo - extract to strategy pattern
   @SneakyThrows
   @Async("VideoStreamExecutor")
   public void beginStreaming(@NotNull final VideoStreamLocator streamLocator) {

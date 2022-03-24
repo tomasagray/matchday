@@ -74,7 +74,7 @@ public class EventDataParser implements DataSourceParser<Event, String> {
     return Bolt.of(links)
         .zipInto(videoFileStream, VideoFile::setExternalUrl)
         .foldInto(fileSourceStream, new VideoFilePackFolder<>(), VideoFileSource::addVideoFilePack)
-        .foldInto(eventStream, new ListFolder<>(), Event::addFileSources)
+        .foldInto(eventStream, new ListFolder<>(), Event::addAllFileSources)
         .stream();
   }
 

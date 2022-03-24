@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -20,6 +20,7 @@
 package self.me.matchday.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
@@ -29,7 +30,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.Executor;
 
 @Configuration
-@EnableAsync
+@EnableAsync(mode = AdviceMode.ASPECTJ)
 public class VideoStreamingConfig implements AsyncConfigurer {
 
   @Value("${video-resources.simultaneous-streams}")
@@ -42,7 +43,13 @@ public class VideoStreamingConfig implements AsyncConfigurer {
   private int MAX_POOL_SIZE;
 
   @Value("${video-resources.thread-name-prefix}")
-  private String THREAD_NAME_PREFIX;
+  private String STREAM_THREAD_PREFIX;
+
+  @Value("${video-resources.simultaneous-refresh}")
+  private int MAX_REFRESH;
+
+  @Value("${video-resources.refresh-task-prefix}")
+  private String REFRESH_THREAD_PREFIX;
 
   @Override
   @Bean(name = "VideoStreamExecutor")
@@ -52,7 +59,17 @@ public class VideoStreamingConfig implements AsyncConfigurer {
     executor.setCorePoolSize(SIMULTANEOUS_STREAMS);
     executor.setMaxPoolSize(MAX_POOL_SIZE);
     executor.setQueueCapacity(QUEUE_SIZE);
-    executor.setThreadNamePrefix(THREAD_NAME_PREFIX);
+    executor.setThreadNamePrefix(STREAM_THREAD_PREFIX);
+    executor.initialize();
+    return executor;
+  }
+
+  @Bean(name = "VideoFileRefresher")
+  public Executor getVideoFileRefresher() {
+
+    final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(MAX_REFRESH);
+    executor.setThreadNamePrefix(REFRESH_THREAD_PREFIX);
     executor.initialize();
     return executor;
   }

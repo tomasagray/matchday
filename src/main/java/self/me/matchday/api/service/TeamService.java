@@ -30,6 +30,7 @@ import self.me.matchday.util.Log;
 import java.util.*;
 
 @Service
+@Transactional
 public class TeamService {
 
   // todo - remove Optionals on Lists
@@ -104,7 +105,6 @@ public class TeamService {
    * @param team The Team to persist
    * @return The (now Spring-managed) Team, or null if invalid data was passed
    */
-  @Transactional
   public Team saveTeam(@NotNull final Team team) {
     if (isValidTeam(team)) {
       teamRepository.saveAndFlush(team);
@@ -119,7 +119,6 @@ public class TeamService {
    *
    * @param teamName The name of the Team to delete
    */
-  @Transactional
   public void deleteTeamByName(@NotNull final String teamName) {
 
     Log.i(LOG_TAG, String.format("Deleting Team with ID: %s from database", teamName));

@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,15 +31,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
-import self.me.matchday.util.Log;
-
-import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for VideoFile refresh service")
 class VideoFileServiceTest {
 
-  private static final String LOG_TAG = "VideoFileServiceTest";
+  private static final Logger logger = LogManager.getLogger(VideoFileServiceTest.class);
 
   // Test resources
   private static TestDataCreator testDataCreator;
@@ -77,14 +76,14 @@ class VideoFileServiceTest {
   @AfterAll
   static void tearDown() {
     // Remove test user from repo
-    Log.i(LOG_TAG, "Deleting test user: " + testFileServerUser);
+    logger.info("Deleting test user: {}", testFileServerUser);
     testDataCreator.deleteFileServerUser(testFileServerUser);
     testDataCreator.deleteVideoFileSource(testVideoFileSrc);
   }
 
   @Test
   @DisplayName("Refresh data for a test VideoFile")
-  void refreshVideoFileData() throws ExecutionException, InterruptedException {
+  void refreshVideoFileData() throws Exception {
 
     final int expectedStreamCount = 2;
 
@@ -95,11 +94,8 @@ class VideoFileServiceTest {
     final VideoFile testRefreshedVideoFile = videoFileService.refreshVideoFile(testVideoFile, true);
 
     // Perform tests
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Checking VideoFile: %s, internal URL: %s",
-            testVideoFile, testVideoFile.getInternalUrl()));
+    logger.info(
+        "Checking VideoFile: {}, internal URL: {}", testVideoFile, testVideoFile.getInternalUrl());
 
     final FFmpegMetadata metadata = testRefreshedVideoFile.getMetadata();
     // Test internal URL set

@@ -74,8 +74,8 @@ public class DataSourceService {
   public void refreshDataSourcesForPlugin(
       @NotNull SnapshotRequest request, @NotNull DataSourcePlugin plugin) throws IOException {
 
-    final List<DataSource<?>> dataSources = dataSourceRepository.findAll();
-    //        dataSourceRepository.findDataSourcesByPluginId(plugin.getPluginId());
+    final List<DataSource<?>> dataSources =
+        dataSourceRepository.findDataSourcesByPluginId(plugin.getPluginId());
     for (final DataSource<?> dataSource : dataSources) {
       refreshDataSource(request, dataSource);
     }

@@ -53,9 +53,10 @@ public class Team implements Serializable {
   @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   private final ProperName properName;
 
-  private Locale locale;
   @OneToOne private Artwork emblem;
   @OneToOne private Artwork fanart;
+
+  private Locale locale;
 
   public Team(@NotNull String properName) {
     this.properName = new ProperName(properName);
@@ -94,6 +95,6 @@ public class Team implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(teamId, properName, locale, emblem, fanart);
+    return Objects.hash(properName, locale, emblem, fanart);
   }
 }

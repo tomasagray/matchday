@@ -28,11 +28,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
 import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.video.*;
+import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;

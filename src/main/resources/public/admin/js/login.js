@@ -1,9 +1,28 @@
+/*
+ * Copyright (c) 2022.
+ *
+ * This file is part of Matchday.
+ *
+ * Matchday is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Matchday is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 const $baseUrl = "/file-servers/";
 
 $loadServers = function () {
     $.ajax({
         type: "GET",
-        url: $baseUrl + "all",
+        url: $baseUrl + "enabled",
         dataType: "json",
         success: function (data) {
             console.log("Load servers: Success", data);
@@ -11,7 +30,7 @@ $loadServers = function () {
             // Get data
             let $servers = data._embedded.fileservers;
             // Clear list
-            $('#server-list').html("");
+            $("#server-list").html("");
 
             // Add servers to list
             $servers.forEach(function (server) {
@@ -213,13 +232,14 @@ let shouldUploadCookies = function () {
 function displayMessage(data) {
 
     console.log("Displaying message", data);
+    let $messageContainer = $("#message-container");
 
     // Determine message type
     switch (data.status) {
         case 200:
             // Remove other class
-            $('#message-container').removeClass('error-message');
-            $('#message-container').addClass('success-message');
+            $messageContainer.removeClass('error-message');
+            $messageContainer.addClass('success-message');
             break;
         case 400:
         case 403:
@@ -227,8 +247,8 @@ function displayMessage(data) {
         case 415:
         case 500:
             // Remove other class
-            $('#message-container').removeClass('success-message');
-            $('#message-container').addClass('error-message');
+            $messageContainer.removeClass('success-message');
+            $messageContainer.addClass('error-message');
             break;
     }
 
@@ -237,8 +257,8 @@ function displayMessage(data) {
     $('#message-text').html($message);
 
     // Display message
-    $('#message-container').css('display', 'flex');
-    $('#message-container').animate({
+    $messageContainer.css('display', 'flex');
+    $messageContainer.animate({
         opacity: 1
     }, 500)
         .delay(2500)
@@ -247,7 +267,7 @@ function displayMessage(data) {
         }, {
             duration: 500,
             complete: function () {
-                $('#message-container').css('display', 'none');
+                $messageContainer.css('display', 'none');
             }
         });
 }

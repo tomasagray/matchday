@@ -1,0 +1,36 @@
+<!--
+  ~ Copyright (c) 2022.
+  ~
+  ~ This file is part of Matchday.
+  ~
+  ~ Matchday is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ Matchday is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE aspectj PUBLIC
+        "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+<aspectj>
+    <weaver>
+        <!-- only weave classes in our application-specific packages -->
+        <include within="self.me.matchday.api.service.*"/>
+        <include within="self.me.matchday.util.log.*"/>
+    </weaver>
+
+    <aspects>
+        <!-- weave in just these aspects -->
+        <aspect name="self.me.matchday.util.log.DataSourceServiceLog"/>
+        <aspect name="self.me.matchday.util.log.VideoFileServiceLog"/>
+        <aspect name="self.me.matchday.util.log.FileServerServiceLog"/>
+        <aspect name="self.me.matchday.util.log.EventServiceLog"/>
+    </aspects>
+</aspectj>

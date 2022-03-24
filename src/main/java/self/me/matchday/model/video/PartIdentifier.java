@@ -31,14 +31,18 @@ public enum PartIdentifier {
   TROPHY_CEREMONY("Trophy Ceremony"),
   POST_MATCH("Post-Match");
 
-  private final String name;
+  private final String partName;
 
-  PartIdentifier(@NotNull String name) {
-    this.name = name;
+  PartIdentifier(@NotNull String partName) {
+    this.partName = partName;
+  }
+
+  public String getPartName() {
+    return partName;
   }
 
   @Override
   public String toString() {
-    return this.name;
+    return name();
   }
 }

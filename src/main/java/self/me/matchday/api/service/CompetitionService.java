@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class CompetitionService {
 
   private static final String LOG_TAG = "CompetitionService";
@@ -88,7 +89,6 @@ public class CompetitionService {
    * @param competition The Competition to persist
    * @return The (now Spring-managed) Competition, or null if it was not saved
    */
-  @Transactional
   public Competition saveCompetition(@NotNull final Competition competition) {
 
     if (isValidCompetition(competition)) {
@@ -104,7 +104,6 @@ public class CompetitionService {
    *
    * @param competitionId The ID of the Competition to delete
    */
-  @Transactional
   public void deleteCompetitionById(@NotNull final UUID competitionId) {
 
     Log.i(

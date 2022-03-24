@@ -44,9 +44,7 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
   private UUID fileSrcId;
 
-  @OneToMany(
-      cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-      fetch = FetchType.EAGER)
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   @Builder.Default
   private List<VideoFilePack> videoFilePacks = new ArrayList<>();
 

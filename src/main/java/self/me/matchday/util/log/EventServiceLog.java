@@ -17,22 +17,25 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday;
+package self.me.matchday.util.log;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.EnableLoadTimeWeaving;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+import self.me.matchday.api.service.EventService;
 
-/** Main attachment point for the SpringBoot application. */
-@SpringBootApplication
-@EnableJpaRepositories
-@EnableScheduling
-@EnableLoadTimeWeaving
-public class MatchdayApplication {
+@Aspect
+@Component
+public class EventServiceLog {
 
-  public static void main(String[] args) {
-    SpringApplication.run(MatchdayApplication.class, args);
+  private static final Logger logger = LogManager.getLogger(EventService.class);
+
+  @Before("execution(* self.me.matchday.api.service.EventService.doSaveEvent(..))")
+  public void logSaveEvent(@NotNull JoinPoint jp) {
+    logger.info("Saving Event: {}", jp.getArgs());
   }
 }

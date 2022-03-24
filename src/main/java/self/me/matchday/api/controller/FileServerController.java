@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -36,14 +36,12 @@ import self.me.matchday.api.resource.MessageResource;
 import self.me.matchday.api.resource.MessageResource.MessageResourceAssembler;
 import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.model.FileServerUser;
-import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -75,9 +73,12 @@ public class FileServerController {
   // === GET ===
   @RequestMapping(value = "/all", method = RequestMethod.GET)
   public CollectionModel<FileServerResource> getAllFileServers() {
+    return serverResourceAssembler.toCollectionModel(fileServerService.getFileServerPlugins());
+  }
 
-    final Collection<FileServerPlugin> fileServerPlugins = fileServerService.getFileServerPlugins();
-    return serverResourceAssembler.toCollectionModel(fileServerPlugins);
+  @RequestMapping(value = "/enabled", method = RequestMethod.GET)
+  public CollectionModel<FileServerResource> getEnabledFileServers() {
+    return serverResourceAssembler.toCollectionModel(fileServerService.getEnabledPlugins());
   }
 
   @RequestMapping(value = "/file-server/{id}", method = RequestMethod.GET)

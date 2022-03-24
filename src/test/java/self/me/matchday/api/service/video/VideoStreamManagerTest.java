@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -25,10 +25,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday._DEVFIXTURES.plugin.TestFileServerPlugin;
 import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.video.StreamJobState.JobStatus;
@@ -36,6 +36,7 @@ import self.me.matchday.model.video.TaskListState;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
+import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
@@ -51,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @DisplayName("Testing for video stream manager")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@EnableAsync
 class VideoStreamManagerTest {
 
   private static final String LOG_TAG = "VideoStreamManagerTest";

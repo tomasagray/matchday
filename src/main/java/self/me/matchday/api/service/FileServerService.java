@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -51,7 +51,7 @@ public class FileServerService {
 
   private final List<FileServerPlugin> fileServerPlugins;
   private final List<FileServerPlugin> enabledPlugins =
-      Collections.synchronizedList(new ArrayList<>());
+      Collections.synchronizedList(new ArrayList<>()); // todo - remove this, use only 1 collection
   private final FileServerUserRepo userRepo;
   private final SecureDataService secureDataService;
   private final UserValidationService userValidationService;
