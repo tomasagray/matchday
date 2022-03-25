@@ -21,9 +21,11 @@ package self.me.matchday.util.log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.DataSourceService;
@@ -38,5 +40,15 @@ public class DataSourceServiceLog {
   public Object logDataSourceRefresh(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Method: {} called with args: {}", jp.getSignature().getName(), jp.getArgs());
     return jp.proceed();
+  }
+
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.enablePlugin(..))")
+  public void logEnableDataSourcePlugin(@NotNull JoinPoint jp) {
+    logger.info("Attempting to enable DataSourcePlugin: {}", jp.getArgs()[0]);
+  }
+
+  @Before("execution(* self(..))")
+  public void logDisableDataSourcePlugin(@NotNull JoinPoint jp) {
+    logger.info("Attempting to disable DataSourcePlugin: {}", jp.getArgs()[0]);
   }
 }

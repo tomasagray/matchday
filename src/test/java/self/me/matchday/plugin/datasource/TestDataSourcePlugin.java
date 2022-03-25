@@ -33,8 +33,9 @@ import java.util.stream.Stream;
 @Component
 public class TestDataSourcePlugin implements DataSourcePlugin {
 
-  private final UUID pluginId = UUID.fromString("37149b7c-4dae-48c2-997a-a7427628b408");
   private final TestDataCreator testDataCreator;
+  private final UUID pluginId = UUID.fromString("37149b7c-4dae-48c2-997a-a7427628b408");
+  private boolean enabled = true;
 
   public TestDataSourcePlugin(TestDataCreator testDataCreator) {
     this.testDataCreator = testDataCreator;
@@ -63,6 +64,16 @@ public class TestDataSourcePlugin implements DataSourcePlugin {
   public <T> Snapshot<T> getSnapshot(
       @NotNull SnapshotRequest request, @NotNull DataSource<T> dataSource) {
     return Snapshot.of(Stream.of(testDataCreator.createTestMatch()).map(obj -> (T) obj));
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return this.enabled;
+  }
+
+  @Override
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 
   @Override

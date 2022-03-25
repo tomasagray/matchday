@@ -43,38 +43,32 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@JsonRootName(value = "competition")
-@Relation(collectionRelation = "competitions")
+@JsonRootName(value = "datasource")
+@Relation(collectionRelation = "datasources")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class DataSourcePluginResource extends RepresentationModel<DataSourcePluginResource> {
 
   private UUID id;
   private String title;
   private String description;
-  private boolean enabled;
+  private boolean enabled = true;
 
   @Component
   public static class DataSourcePluginResourceAssembler
       extends RepresentationModelAssemblerSupport<DataSourcePlugin, DataSourcePluginResource> {
 
-    private final DataSourceService dataSourceService;
-
     DataSourcePluginResourceAssembler(@Autowired final DataSourceService dataSourceService) {
       super(DataSourceController.class, DataSourcePluginResource.class);
-      this.dataSourceService = dataSourceService;
     }
 
     @Override
     public @NotNull DataSourcePluginResource toModel(@NotNull final DataSourcePlugin plugin) {
 
-      // Determine if enabled
-      final boolean pluginEnabled = dataSourceService.isPluginEnabled(plugin.getPluginId());
-
       final DataSourcePluginResource pluginResource = instantiateModel(plugin);
       pluginResource.setId(plugin.getPluginId());
       pluginResource.setTitle(plugin.getTitle());
       pluginResource.setDescription(plugin.getDescription());
-      pluginResource.setEnabled(pluginEnabled);
+      pluginResource.setEnabled(plugin.isEnabled());
 
       // Attach self link
       pluginResource.add(

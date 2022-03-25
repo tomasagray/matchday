@@ -34,4 +34,8 @@ public interface DataSourcePlugin extends Plugin {
   <T> Snapshot<T> getSnapshot(
       @NotNull final SnapshotRequest request, @NotNull final DataSource<T> dataSource)
       throws IOException;
+
+  boolean isEnabled();
+
+  void setEnabled(boolean enabled);
 }

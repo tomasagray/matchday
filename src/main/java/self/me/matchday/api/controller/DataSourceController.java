@@ -20,7 +20,6 @@
 package self.me.matchday.api.controller;
 
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,10 +29,8 @@ import self.me.matchday.api.resource.MessageResource;
 import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.plugin.datasource.DataSourcePlugin;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -67,14 +64,11 @@ public class DataSourceController {
   }
 
   @RequestMapping(
-      value = {"", "/"},
+      value = {"/plugin/all"},
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public CollectionModel<DataSourcePluginResource> getAllPlugins() {
-
-    // Retrieve all plugins from service
-    final Set<DataSourcePlugin> dataSourcePlugins = dataSourceService.getDataSourcePlugins();
-    return pluginResourceAssembler.toCollectionModel(dataSourcePlugins);
+    return pluginResourceAssembler.toCollectionModel(dataSourceService.getDataSourcePlugins());
   }
 
   @RequestMapping(
@@ -99,18 +93,16 @@ public class DataSourceController {
   public ResponseEntity<MessageResource> enablePlugin(
       @PathVariable("pluginId") final UUID pluginId) {
 
-    HttpStatus status;
-    String message;
-    final boolean enabled = dataSourceService.enablePlugin(pluginId);
-
-    if (enabled) {
-      status = HttpStatus.ACCEPTED;
-      message = String.format("Plugin with ID: %s successfully enabled", pluginId);
-    } else {
-      status = HttpStatus.BAD_REQUEST;
-      message = String.format("Plugin with ID %s could not be enabled", pluginId);
+    try {
+      dataSourceService.enablePlugin(pluginId);
+      final String message = String.format("Plugin with ID: %s successfully enabled", pluginId);
+      return ResponseEntity.ok().body(messageResourceAssembler.toModel(message));
+    } catch (Throwable e) {
+      final String msg =
+          String.format(
+              "Plugin with ID %s could not be enabled; reason: %s", pluginId, e.getMessage());
+      return ResponseEntity.badRequest().body(messageResourceAssembler.toModel(msg));
     }
-    return ResponseEntity.status(status).body(messageResourceAssembler.toModel(message));
   }
 
   @RequestMapping(
@@ -121,18 +113,16 @@ public class DataSourceController {
   public ResponseEntity<MessageResource> disablePlugin(
       @PathVariable("pluginId") final UUID pluginId) {
 
-    HttpStatus status;
-    String message;
-    final boolean disabled = dataSourceService.disablePlugin(pluginId);
-
-    if (disabled) {
-      status = HttpStatus.OK;
-      message = String.format("Successfully disabled plugin with ID: %s", pluginId);
-    } else {
-      status = HttpStatus.BAD_REQUEST;
-      message = String.format("Could not disable plugin with ID: %s", pluginId);
+    try {
+      dataSourceService.disablePlugin(pluginId);
+      final String message = String.format("Plugin with ID: %s successfully disabled", pluginId);
+      return ResponseEntity.ok().body(messageResourceAssembler.toModel(message));
+    } catch (Throwable e) {
+      final String msg =
+          String.format(
+              "Plugin with ID %s could not be disabled; reason: %s", pluginId, e.getMessage());
+      return ResponseEntity.badRequest().body(messageResourceAssembler.toModel(msg));
     }
-    return ResponseEntity.status(status).body(messageResourceAssembler.toModel(message));
   }
 
   @RequestMapping(

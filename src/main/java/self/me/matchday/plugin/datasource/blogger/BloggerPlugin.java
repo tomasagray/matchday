@@ -48,6 +48,8 @@ public class BloggerPlugin implements DataSourcePlugin {
   private final QueryBuilderService queryBuilder;
   private final DataSourceValidator dataSourceValidator;
 
+  private boolean enabled = true;
+
   BloggerPlugin(
       @NotNull HypertextEntityParser entityParser,
       @NotNull BloggerPluginProperties pluginProperties,
@@ -101,6 +103,16 @@ public class BloggerPlugin implements DataSourcePlugin {
     final Stream<T> entityStream =
         hypertextStream.flatMap(data -> entityParser.getEntityStream(dataSource, data));
     return Snapshot.of(entityStream);
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return this.enabled;
+  }
+
+  @Override
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 
   @NotNull

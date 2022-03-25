@@ -35,9 +35,9 @@ import self.me.matchday.plugin.datasource.TestDataSourcePlugin;
 import self.me.matchday.util.Log;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -65,9 +65,8 @@ class DataSourceServiceTest {
     DataSourceServiceTest.testDataCreator = testDataCreator;
     DataSourceServiceTest.eventService = eventService;
 
-    // Create test plugin & register
     DataSourceServiceTest.testDataSourcePlugin = testDataSourcePlugin;
-    dataSourceService.getDataSourcePlugins().add(testDataSourcePlugin);
+    //    dataSourceService.getDataSourcePlugins().add(testDataSourcePlugin);
   }
 
   @AfterAll
@@ -116,14 +115,18 @@ class DataSourceServiceTest {
   @DisplayName("Ensure plugins can be enabled")
   void enablePlugin() {
 
-    dataSourceService.getDataSourcePlugins().add(testDataSourcePlugin);
     final UUID testPluginId = testDataSourcePlugin.getPluginId();
 
     // Attempt to enable plugin
-    final boolean enabled = dataSourceService.enablePlugin(testPluginId);
+    dataSourceService.enablePlugin(testPluginId);
+    final boolean enabled =
+        dataSourceService
+            .getDataSourcePlugin(testPluginId)
+            .map(DataSourcePlugin::isEnabled)
+            .orElse(false);
     assertThat(enabled).isTrue();
     // Ensure plugin has been added to enabled plugins
-    final Set<DataSourcePlugin> enabledPlugins = dataSourceService.getEnabledPlugins();
+    final Collection<DataSourcePlugin> enabledPlugins = dataSourceService.getEnabledPlugins();
     final Optional<DataSourcePlugin> pluginOptional =
         enabledPlugins.stream()
             .filter(plugin -> testPluginId.equals(plugin.getPluginId()))
@@ -143,20 +146,32 @@ class DataSourceServiceTest {
     Log.i(LOG_TAG, "Attempting to disable plugin: " + testPluginId);
 
     // Attempt to disable plugin
-    final boolean disabled = dataSourceService.disablePlugin(testPluginId);
-    assertThat(disabled).isTrue();
+    dataSourceService.disablePlugin(testPluginId);
+    final boolean enabled =
+        dataSourceService
+            .getDataSourcePlugin(testPluginId)
+            .map(DataSourcePlugin::isEnabled)
+            .orElse(true);
+    assertThat(enabled).isFalse();
+    Log.i(LOG_TAG, "Successfully disabled plugin.");
 
     // Ensure plugin is NOT enabled
-    final Set<DataSourcePlugin> enabledPlugins = dataSourceService.getEnabledPlugins();
+    final Collection<DataSourcePlugin> enabledPlugins = dataSourceService.getEnabledPlugins();
     final Optional<DataSourcePlugin> pluginOptional =
         enabledPlugins.stream()
             .filter(plugin -> testPluginId.equals(plugin.getPluginId()))
             .findAny();
 
     assertThat(pluginOptional).isNotPresent();
-    // Re-enable for other tests
-    final boolean enabled = dataSourceService.enablePlugin(testPluginId);
-    assertThat(enabled).isTrue();
+
+    Log.i(LOG_TAG, "Re-enabling test DataSourcePlugin: " + testPluginId);
+    dataSourceService.enablePlugin(testPluginId);
+    final boolean nowEnabled =
+        dataSourceService
+            .getDataSourcePlugin(testPluginId)
+            .map(DataSourcePlugin::isEnabled)
+            .orElse(false);
+    assertThat(nowEnabled).isTrue();
   }
 
   @Test
@@ -164,6 +179,8 @@ class DataSourceServiceTest {
   void isPluginEnabled() {
 
     final UUID testPluginId = testDataSourcePlugin.getPluginId();
+    Log.i(LOG_TAG, String.format("Ensuring DataSourcePlugin: %s is enabled...", testPluginId));
+    dataSourceService.enablePlugin(testPluginId);
     Log.i(LOG_TAG, String.format("Checking if test plugin: %s is enabled", testPluginId));
 
     final boolean pluginEnabled = dataSourceService.isPluginEnabled(testPluginId);
@@ -178,7 +195,7 @@ class DataSourceServiceTest {
     final int expectedPluginCount = 3;
 
     // Retrieve all data source plugins
-    final Set<DataSourcePlugin> dataSourcePlugins = dataSourceService.getDataSourcePlugins();
+    final Collection<DataSourcePlugin> dataSourcePlugins = dataSourceService.getDataSourcePlugins();
     final int actualPluginCount = dataSourcePlugins.size();
     Log.i(LOG_TAG, String.format("Found: %s plugins", actualPluginCount));
 
@@ -191,7 +208,7 @@ class DataSourceServiceTest {
 
     final int expectedPluginCount = 2;
 
-    final Set<DataSourcePlugin> enabledPlugins = dataSourceService.getEnabledPlugins();
+    final Collection<DataSourcePlugin> enabledPlugins = dataSourceService.getEnabledPlugins();
     final int actualPluginCount = enabledPlugins.size();
     Log.i(LOG_TAG, String.format("Found: %s enabled plugins", actualPluginCount));
 

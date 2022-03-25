@@ -28,36 +28,34 @@ import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
-import self.me.matchday.util.Log;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class DataSourceService {
 
-  private static final String LOG_TAG = "DataSourceService";
-
   private final SnapshotService snapshotService;
   private final DataSourceRepository dataSourceRepository;
-  @Getter private final Set<DataSourcePlugin> dataSourcePlugins;
-  @Getter private final Set<DataSourcePlugin> enabledPlugins = new HashSet<>();
+  @Getter private final Collection<DataSourcePlugin> dataSourcePlugins;
 
   DataSourceService(
       SnapshotService snapshotService,
       DataSourceRepository dataSourceRepository,
-      Set<DataSourcePlugin> dataSourcePlugins) {
+      Collection<DataSourcePlugin> dataSourcePlugins) {
 
     this.snapshotService = snapshotService;
     this.dataSourceRepository = dataSourceRepository;
     this.dataSourcePlugins = dataSourcePlugins;
-    // all enabled by default
-    this.enabledPlugins.addAll(dataSourcePlugins);
   }
 
   /**
-   * Refresh all data sources (Event source plugins) with the given Snapshot
+   * Refresh all <b>enabled</b> data sources with the given Snapshot
    *
    * @param request Refresh request details
    * @return The SnapshotRequest, for additional processing
@@ -65,7 +63,7 @@ public class DataSourceService {
   public SnapshotRequest refreshAllDataSources(@NotNull final SnapshotRequest request)
       throws IOException {
 
-    for (DataSourcePlugin plugin : enabledPlugins) {
+    for (DataSourcePlugin plugin : getEnabledPlugins()) {
       refreshDataSourcesForPlugin(request, plugin);
     }
     return request;
@@ -89,9 +87,16 @@ public class DataSourceService {
     snapshotService.saveSnapshot(snapshot, dataSource.getClazz());
   }
 
-  public DataSourcePlugin getEnabledPlugin(UUID pluginId) {
+  public List<DataSourcePlugin> getEnabledPlugins() {
 
-    return enabledPlugins.stream()
+    return dataSourcePlugins.stream()
+        .filter(DataSourcePlugin::isEnabled)
+        .collect(Collectors.toList());
+  }
+
+  private DataSourcePlugin getEnabledPlugin(UUID pluginId) {
+
+    return getEnabledPlugins().stream()
         .filter(plugin -> plugin.getPluginId().equals(pluginId))
         .findFirst()
         .orElseThrow(
@@ -121,48 +126,37 @@ public class DataSourceService {
   }
 
   /**
-   * Set a plugin at 'enabled' (active) by adding it to the enabledPlugins List
+   * Set a plugin as 'enabled' (active)
    *
    * @param pluginId The ID of the plugin
-   * @return True/false if the plugin was successfully enabled
    */
-  public boolean enablePlugin(@NotNull final UUID pluginId) {
+  public void enablePlugin(@NotNull final UUID pluginId) {
 
-    Log.i(LOG_TAG, "Attempting to enable plugin: " + pluginId);
-
-    // Find requested plugin
-    final Optional<DataSourcePlugin> pluginOptional =
-        dataSourcePlugins.stream()
-            .filter(plugin -> pluginId.equals(plugin.getPluginId()))
-            .findFirst();
-    return pluginOptional
-        .map(plugin -> enabledPlugins.contains(plugin) || enabledPlugins.add(plugin))
-        .orElse(false);
+    dataSourcePlugins.stream()
+        .filter(plugin -> pluginId.equals(plugin.getPluginId()))
+        .findFirst()
+        .ifPresentOrElse(
+            plugin -> plugin.setEnabled(true),
+            () -> {
+              throw new IllegalArgumentException("Could not find plugin with ID: " + pluginId);
+            });
   }
 
   /**
    * Disable the given plugin, so it is excluded from data refresh requests
    *
    * @param pluginId The ID of the data plugin to disable
-   * @return True/false if the given plugin was successfully disabled
    */
-  public boolean disablePlugin(@NotNull final UUID pluginId) {
+  public void disablePlugin(@NotNull final UUID pluginId) {
 
-    Log.i(LOG_TAG, "Attempting to disable plugin: " + pluginId);
-
-    // Find the requested plugin
-    final Optional<DataSourcePlugin> pluginOptional =
-        enabledPlugins.stream().filter(plugin -> pluginId.equals(plugin.getPluginId())).findFirst();
-    if (pluginOptional.isPresent()) {
-      // Remove from enabled plugins
-      final DataSourcePlugin plugin = pluginOptional.get();
-      final boolean removed = enabledPlugins.remove(plugin);
-      Log.i(LOG_TAG, String.format("Disabled plugin: %s? %s", plugin.getTitle(), removed));
-      return removed;
-    } else {
-      Log.i(LOG_TAG, "Could not find plugin with ID: " + pluginId);
-    }
-    return false;
+    dataSourcePlugins.stream()
+        .filter(plugin -> plugin.getPluginId().equals(pluginId))
+        .findFirst()
+        .ifPresentOrElse(
+            plugin -> plugin.setEnabled(false),
+            () -> {
+              throw new IllegalArgumentException("Could not find plugin with ID: " + pluginId);
+            });
   }
 
   /**
@@ -172,7 +166,10 @@ public class DataSourceService {
    * @return true/false if currently active
    */
   public boolean isPluginEnabled(@NotNull final UUID pluginId) {
-    return enabledPlugins.stream().anyMatch(plugin -> pluginId.equals(plugin.getPluginId()));
+
+    return getEnabledPlugins().stream()
+        .map(DataSourcePlugin::getPluginId)
+        .anyMatch(pluginId::equals);
   }
 
   public <T> DataSource<T> addDataSource(@NotNull final DataSource<T> dataSource) {
