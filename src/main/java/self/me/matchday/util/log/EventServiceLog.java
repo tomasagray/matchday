@@ -34,7 +34,7 @@ public class EventServiceLog {
 
   private static final Logger logger = LogManager.getLogger(EventService.class);
 
-  @Before("execution(* self.me.matchday.api.service.EventService.doSaveEvent(..))")
+  @Before("execution(* self.me.matchday.api.service.EventService.doSave(..))")
   public void logSaveEvent(@NotNull JoinPoint jp) {
     logger.info("Saving Event: {}", jp.getArgs());
   }

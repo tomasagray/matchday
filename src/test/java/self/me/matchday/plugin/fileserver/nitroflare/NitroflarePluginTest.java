@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -103,11 +103,12 @@ class NitroflarePluginTest {
     if (response.statusCode().isError()) {
       response.body((inputMessage, context) -> inputMessage.getBody());
     }
+    final String body = response.bodyToMono(String.class).block();
     Log.i(
         LOG_TAG,
         String.format(
             "Got response: [%s] \n%s\n\nCookies:\n%s",
-            response.statusCode(), response.bodyToMono(String.class), response.cookies()));
+            response.statusCode(), body, response.cookies()));
 
     // Perform test
     final boolean result = response.statusCode().is2xxSuccessful();

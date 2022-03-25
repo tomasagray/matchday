@@ -45,19 +45,21 @@ public class EventService {
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
   private final EventRepository eventRepository;
+
   private final VideoFileSrcRepository fileSrcRepository;
   private final EntityCorrectionService entityCorrectionService;
 
   EventService(
-      final EventRepository eventRepository,
-      final VideoFileSrcRepository fileSrcRepository,
+      EventRepository eventRepository,
+      CompetitionService competitionService,
+      TeamService teamService,
+      VideoFileSrcRepository fileSrcRepository,
       EntityCorrectionService entityCorrectionService) {
     this.eventRepository = eventRepository;
     this.fileSrcRepository = fileSrcRepository;
     this.entityCorrectionService = entityCorrectionService;
   }
 
-  // Getters   ==============================================================
   // todo - don't use optional
   public Optional<List<Event>> fetchAllEvents() {
 
@@ -103,8 +105,6 @@ public class EventService {
     return eventRepository.fetchEventsByTeam(teamId);
   }
 
-  // Setters   ==============================================================
-
   /**
    * Persist an Event; must pass validation, or will skip and make a note in logs.
    *
@@ -121,11 +121,15 @@ public class EventService {
         final Event existingEvent = eventOptional.get();
         existingEvent.getFileSources().addAll(event.getFileSources());
       } else {
-        eventRepository.saveAndFlush(event);
+        doSave(event);
       }
     } catch (Exception e) {
       Log.e(LOG_TAG, String.format("Event: %s was not saved to DB; %s", event, e.getMessage()), e);
     }
+  }
+
+  public void doSave(@NotNull Event event) {
+    eventRepository.save(event);
   }
 
   private @NotNull Example<Event> getExampleEvent(@NotNull Event event) {
@@ -161,7 +165,6 @@ public class EventService {
     if (event == null) {
       reject("Event is null");
     }
-
     final Competition competition = event.getCompetition();
     if (!isValidCompetition(competition)) {
       reject("invalid competition: " + competition);

@@ -28,13 +28,11 @@ import self.me.matchday.model.video.VideoFileSource;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /** A sporting Event */
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -54,10 +52,12 @@ public class Event {
 
   @CorrectedOrNull
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+  @JoinColumn(name = "home_team_id", nullable = false)
   protected Team homeTeam;
 
   @CorrectedOrNull
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+  @JoinColumn(name = "away_team_id", nullable = false)
   protected Team awayTeam;
 
   @Embedded protected Season season;
@@ -70,10 +70,10 @@ public class Event {
   protected LocalDateTime date;
 
   public String getTitle() {
-    return String.format("%s - %s, %s", competition, homeTeam, awayTeam);
+    return String.format("%s - %s vs. %s", competition, homeTeam, awayTeam);
   }
 
-  public void addFileSources(@NotNull final Collection<? extends VideoFileSource> fileSources) {
+  public void addAllFileSources(@NotNull final Collection<? extends VideoFileSource> fileSources) {
     this.fileSources.addAll(fileSources);
   }
 
@@ -100,25 +100,29 @@ public class Event {
 
   @Override
   public boolean equals(Object o) {
-
-    if (!(o instanceof Event)) {
-      return false;
-    }
-
-    // Cast for comparison
-    final Event event = (Event) o;
-    return this.getEventId().equals(event.getEventId()) && this.getTitle().equals(event.getTitle());
+    if (this == o) return true;
+    if (!(o instanceof Event)) return false;
+    Event event = (Event) o;
+    return Objects.equals(getCompetition(), event.getCompetition())
+        && Objects.equals(getHomeTeam(), event.getHomeTeam())
+        && Objects.equals(getAwayTeam(), event.getAwayTeam())
+        && Objects.equals(getSeason(), event.getSeason())
+        && Objects.equals(getFixture(), event.getFixture())
+        && Objects.equals(getFileSources(), event.getFileSources())
+        && Objects.equals(getDate(), event.getDate());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        eventId, competition, homeTeam, awayTeam, season, fixture, fileSources, date);
+    return Objects.hash(competition, homeTeam, awayTeam, season, fixture, fileSources, date);
   }
 
-  // Ensure consistent Event ID generation
-  protected static final DateTimeFormatter EVENT_ID_DATE_FORMATTER =
-      DateTimeFormatter.ofPattern("yyyy-MM-W");
+  @Override
+  public String toString() {
+    return String.format(
+        "Event{eventId=%s, competition=%s, homeTeam=%s, awayTeam=%s, season=%s, fixture=%s, fileSources=%s, date=%s}",
+        eventId, competition, homeTeam, awayTeam, season, fixture, fileSources, date);
+  }
 
   /** Defines default Event sorting order - reverse chronological. */
   public static class EventSorter implements Comparator<Event> {
