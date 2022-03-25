@@ -18,76 +18,79 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '2.5.2'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-	id 'java'
+    id 'org.springframework.boot' version '2.5.2'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
 }
 
 group = 'self.me'
 version = '0.0.1-SNAPSHOT'
 
 configurations {
-	developmentOnly
-	runtimeClasspath {
-		extendsFrom developmentOnly
-	}
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	def spring_version = '2.6.3'
+    def spring_version = '2.6.4'
 
-	implementation 'org.jsoup:jsoup:1.14.3'
-	implementation 'com.google.code.gson:gson:2.9.0'
-	implementation 'org.brotli:dec:0.1.2'
+    implementation 'org.jsoup:jsoup:1.14.3'
+    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'org.brotli:dec:0.1.2'
 
-	// Annotations
-	implementation 'org.jetbrains:annotations:22.0.0'
-	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$spring_version"
-	// Lombok
-	implementation 'org.projectlombok:lombok:1.18.22'
-	testImplementation 'org.projectlombok:lombok:1.18.22'
-	annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    // Annotations
+    implementation 'org.jetbrains:annotations:23.0.0'
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$spring_version"
+    // Lombok
+    implementation 'org.projectlombok:lombok:1.18.22'
+    testImplementation 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
-	// SpringBoot
-	implementation "org.springframework.boot:spring-boot-starter-data-jpa:$spring_version"
-	implementation "org.springframework.boot:spring-boot-starter-security:$spring_version"
-	implementation "org.springframework.boot:spring-boot-starter-web:$spring_version"
-	implementation "org.springframework.boot:spring-boot-starter-json:$spring_version"
-	implementation "org.springframework.boot:spring-boot-starter-webflux:$spring_version"
-	implementation "org.springframework.boot:spring-boot-starter-hateoas:$spring_version"
-	implementation "org.springframework.boot:spring-boot-starter-aop:$spring_version"
+    // SpringBoot
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:$spring_version"
+    implementation "org.springframework.boot:spring-boot-starter-security:$spring_version"
+    implementation "org.springframework.boot:spring-boot-starter-web:$spring_version"
+    implementation "org.springframework.boot:spring-boot-starter-json:$spring_version"
+    implementation "org.springframework.boot:spring-boot-starter-webflux:$spring_version"
+    implementation "org.springframework.boot:spring-boot-starter-hateoas:$spring_version"
+    implementation "org.springframework.boot:spring-boot-starter-aop:$spring_version"
+    implementation "org.springframework:spring-instrument:5.3.16"
+    implementation 'org.aspectj:aspectjrt:1.9.8'
+    implementation 'org.aspectj:aspectjweaver:1.9.8'
 
-	// MySQL
-	implementation 'mysql:mysql-connector-java:8.0.25'
+    // MySQL
+    implementation 'mysql:mysql-connector-java:8.0.28'
 
-	// Development
-	implementation 'com.google.code.findbugs:jsr305:3.0.2'
-	implementation 'org.flywaydb:flyway-core:7.11.2'
-	implementation 'com.h2database:h2'
-	// Remove to eliminate reflective access warning per: https://stackoverflow.com/a/61007739/4871490
-	developmentOnly "org.springframework.boot:spring-boot-devtools:$spring_version"
+    // Development
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'org.flywaydb:flyway-core:7.11.2'
+    implementation 'com.h2database:h2'
+    // Remove to eliminate reflective access warning per: https://stackoverflow.com/a/61007739/4871490
+    developmentOnly "org.springframework.boot:spring-boot-devtools:$spring_version"
 
-	// Testing
-	def jupiter_version = '5.8.2'
-	testImplementation("org.springframework.boot:spring-boot-starter-test:$spring_version") {
-		exclude group: 'org.junit.vintage', module: 'unit-vintage-engine'
-	}
-	testImplementation 'org.springframework.security:spring-security-test:5.5.1'
-	testImplementation "org.junit.jupiter:junit-jupiter:$jupiter_version"
-	testImplementation "org.junit.jupiter:junit-jupiter-params:$jupiter_version"
-	testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
+    // Testing
+    def jupiter_version = '5.8.2'
+    testImplementation("org.springframework.boot:spring-boot-starter-test:$spring_version") {
+        exclude group: 'org.junit.vintage', module: 'unit-vintage-engine'
+    }
+    testImplementation 'org.springframework.security:spring-security-test:5.6.2'
+    testImplementation "org.junit.jupiter:junit-jupiter:$jupiter_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$jupiter_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
 }
 
 bootRun {
-	if (project.hasProperty('args')) {
-		args = project.args.split(',')
-	}
+    if (project.hasProperty('args')) {
+        args = project.args.split(',')
+    }
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
