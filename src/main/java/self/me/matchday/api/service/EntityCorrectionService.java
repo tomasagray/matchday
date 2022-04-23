@@ -147,7 +147,7 @@ public class EntityCorrectionService {
   @SuppressWarnings("unchecked cast")
   private <T> Optional<T> getEntityByName(@NotNull T entity, @NotNull String name) {
     if (entity instanceof Competition) {
-      return (Optional<T>) competitionService.getCompetitionByName(name);
+      return (Optional<T>) competitionService.fetchCompetitionByName(name);
     } else if (entity instanceof Team) {
       return (Optional<T>) teamService.getTeamByName(name);
     }

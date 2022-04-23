@@ -38,7 +38,7 @@ class PatternKitEntry<T> {
   @Type(type = "java.lang.Class")
   private final Class<T> clazz;
 
-  @OneToMany(targetEntity = PatternKit.class, cascade = CascadeType.ALL)
+  @OneToMany(targetEntity = PatternKit.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private final List<PatternKit<T>> patternKits = new ArrayList<>();
 
   @Id @GeneratedValue private Long id;

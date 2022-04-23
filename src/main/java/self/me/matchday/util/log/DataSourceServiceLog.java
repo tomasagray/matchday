@@ -27,28 +27,66 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.DataSourceService;
 
+import java.util.Collection;
+import java.util.List;
+
 @Aspect
-@Component
 public class DataSourceServiceLog {
 
   private static final Logger logger = LogManager.getLogger(DataSourceService.class);
 
-  @Around("execution(* self.me.matchday.api.service.DataSourceService.refreshAllDataSources(..))")
-  public Object logDataSourceRefresh(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    logger.info("Method: {} called with args: {}", jp.getSignature().getName(), jp.getArgs());
-    return jp.proceed();
+  @Around("execution(* self.me.matchday.api.service.DataSourceService.getDataSourcePlugins(..))")
+  public Object logGetAllDataSourcePlugins(@NotNull ProceedingJoinPoint jp) throws Throwable {
+
+    logger.info("Retrieving all DataSourcePlugins from database...");
+    Object result = jp.proceed();
+    logger.info("Found {} DataSourcePlugins", countPlugins(result));
+    return result;
   }
 
-  @Before("execution(* self.me.matchday.api.service.DataSourceService.enablePlugin(..))")
-  public void logEnableDataSourcePlugin(@NotNull JoinPoint jp) {
-    logger.info("Attempting to enable DataSourcePlugin: {}", jp.getArgs()[0]);
+  private int countPlugins(Object result) {
+    int count = 0;
+    if (result instanceof Collection) {
+      count = ((Collection<?>) result).size();
+    }
+    return count;
   }
 
-  @Before("execution(* self(..))")
-  public void logDisableDataSourcePlugin(@NotNull JoinPoint jp) {
-    logger.info("Attempting to disable DataSourcePlugin: {}", jp.getArgs()[0]);
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.refreshAllDataSources(..))")
+  public void logDataSourceRefresh(@NotNull JoinPoint jp) {
+    logger.info("Refreshing all DataSources with SnapshotRequest: {}", jp.getArgs());
+  }
+
+  @Around("execution(* self.me.matchday.api.service.DataSourceService.enablePlugin(..))")
+  public Object logEnableDataSourcePlugin(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    Object arg = jp.getArgs()[0];
+    logger.info("Attempting to enable DataSourcePlugin: {}", arg);
+    Object result = jp.proceed();
+    logger.info("Successfully ENABLED DataSourcePlugin: {}", arg);
+    return result;
+  }
+
+  @Around("execution(* self.me.matchday.api.service.DataSourceService.disablePlugin(..))")
+  public Object logDisableDataSourcePlugin(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    Object arg = jp.getArgs()[0];
+    logger.info("Attempting to disable DataSourcePlugin: {}", arg);
+    Object result = jp.proceed();
+    logger.info("Successfully DISABLED DataSourcePlugin: {}", arg);
+    return result;
+  }
+
+  @Around("execution(* self.me.matchday.api.service.DataSourceService.getDataSourcesForPlugin(..))")
+  public Object logGetDataSourcesForPlugin(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.info("Fetching Data Sources for plugin ID: {}", jp.getArgs()[0]);
+    Object result = jp.proceed();
+    if (result instanceof List) {
+      final List<?> sources = (List<?>) result;
+      logger.info("Retrieved {} sources from database", sources.size());
+    } else {
+      logger.error("Database returned invalid data: {}", result);
+    }
+    return result;
   }
 }

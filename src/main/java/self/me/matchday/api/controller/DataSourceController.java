@@ -25,13 +25,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.DataSourcePluginResource;
 import self.me.matchday.api.resource.DataSourcePluginResource.DataSourcePluginResourceAssembler;
+import self.me.matchday.api.resource.DataSourceResource;
 import self.me.matchday.api.resource.MessageResource;
 import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.SnapshotRequest;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
+
+import static self.me.matchday.api.resource.DataSourceResource.DataSourceResourceAssembler;
 
 @RestController
 @RequestMapping(value = "/data-sources")
@@ -39,15 +43,18 @@ public class DataSourceController {
 
   private final DataSourceService dataSourceService;
   private final MessageResource.MessageResourceAssembler messageResourceAssembler;
+  private final DataSourceResourceAssembler dataSourceResourceAssembler;
   private final DataSourcePluginResourceAssembler pluginResourceAssembler;
 
   DataSourceController(
       DataSourceService dataSourceService,
       DataSourcePluginResourceAssembler pluginResourceAssembler,
+      DataSourceResourceAssembler dataSourceResourceAssembler,
       MessageResource.MessageResourceAssembler messageResourceAssembler) {
 
     this.dataSourceService = dataSourceService;
     this.pluginResourceAssembler = pluginResourceAssembler;
+    this.dataSourceResourceAssembler = dataSourceResourceAssembler;
     this.messageResourceAssembler = messageResourceAssembler;
   }
 
@@ -140,14 +147,26 @@ public class DataSourceController {
   }
 
   @RequestMapping(
+      value = "/plugin/{pluginId}/sources",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<CollectionModel<DataSourceResource>> getDataSourcesForPlugin(
+      @PathVariable("pluginId") UUID pluginId) {
+
+    List<DataSource<?>> dataSources = dataSourceService.getDataSourcesForPlugin(pluginId);
+    return ResponseEntity.ok(dataSourceResourceAssembler.toCollectionModel(dataSources));
+  }
+
+  @RequestMapping(
       value = "/get-data-source/{dataSourceId}",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<? extends DataSource<?>> getDataSource(
+  public ResponseEntity<DataSourceResource> getDataSource(
       @PathVariable("dataSourceId") UUID dataSourceId) {
 
     return dataSourceService
         .getDataSourceById(dataSourceId)
+        .map(dataSourceResourceAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }

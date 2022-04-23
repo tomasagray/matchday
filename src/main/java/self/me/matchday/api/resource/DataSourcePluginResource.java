@@ -23,14 +23,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.DataSourceController;
-import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 
 import java.util.UUID;
@@ -43,8 +41,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@JsonRootName(value = "datasource")
-@Relation(collectionRelation = "datasources")
+@JsonRootName(value = "data_source_plugin")
+@Relation(collectionRelation = "data_source_plugins")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class DataSourcePluginResource extends RepresentationModel<DataSourcePluginResource> {
 
@@ -57,7 +55,7 @@ public class DataSourcePluginResource extends RepresentationModel<DataSourcePlug
   public static class DataSourcePluginResourceAssembler
       extends RepresentationModelAssemblerSupport<DataSourcePlugin, DataSourcePluginResource> {
 
-    DataSourcePluginResourceAssembler(@Autowired final DataSourceService dataSourceService) {
+    DataSourcePluginResourceAssembler() {
       super(DataSourceController.class, DataSourcePluginResource.class);
     }
 
