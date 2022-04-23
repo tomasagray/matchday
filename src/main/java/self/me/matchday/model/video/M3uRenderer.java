@@ -64,7 +64,7 @@ public class M3uRenderer implements VideoPlaylistRenderer {
 
   /**
    * Output a standards-conforming, UTF-8 encoded playlist (.m3u8 file). See:
-   * https://tools.ietf.org/html/rfc8216
+   * <a href="https://tools.ietf.org/html/rfc8216">https://tools.ietf.org/html/rfc8216</a>
    *
    * @return The formatted playlist
    */
