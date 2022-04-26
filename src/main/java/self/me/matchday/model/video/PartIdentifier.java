@@ -43,6 +43,6 @@ public enum PartIdentifier {
 
   @Override
   public String toString() {
-    return name();
+    return getPartName();
   }
 }

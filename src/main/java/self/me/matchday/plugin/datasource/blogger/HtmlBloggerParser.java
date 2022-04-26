@@ -101,7 +101,7 @@ public class HtmlBloggerParser implements BloggerParser {
 
     private static final Pattern IdPattern = Pattern.compile("'blogId': '(\\d+)'");
     private static final Pattern TermPattern =
-        Pattern.compile("^http[s]?://[\\w.:/]*/search/label/([\\w%-.])+");
+        Pattern.compile("^https?://[\\w.:/]*/search/label/([\\w%-.])+");
 
     private final Document html;
 

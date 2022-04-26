@@ -210,7 +210,7 @@ public class TestDataCreator {
     final PatternKit<VideoFile> patternKit = new PatternKit<>(VideoFile.class);
     final Pattern pattern =
         Pattern.compile(
-            "^http[s]?://[\\p{L}.]*filefox.cc/[\\w]+/[\\w-]*.(mkv|ts)", Pattern.UNICODE_CASE);
+            "^https?://[\\p{L}.]*filefox.cc/\\w+/[\\w-]*.(mkv|ts)", Pattern.UNICODE_CASE);
     final Map<Integer, String> fields = new HashMap<>(Map.of(0, "externalUrl"));
 
     patternKit.setPattern(pattern);

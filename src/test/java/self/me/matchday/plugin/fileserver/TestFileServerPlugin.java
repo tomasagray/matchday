@@ -49,7 +49,7 @@ public class TestFileServerPlugin implements FileServerPlugin {
   }
 
   private final UUID pluginId = UUID.fromString("4636e383-2ddb-477e-85f2-36e6cd7a434b");
-  private final Pattern urlPattern = Pattern.compile("^http[s]?://[\\w-.:]+/data/");
+  private final Pattern urlPattern = Pattern.compile("^https?://[\\w-.:]+/data/");
 
   @Override
   public @NotNull ClientResponse login(@NotNull FileServerUser user) {
