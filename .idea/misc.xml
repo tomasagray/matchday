@@ -1,0 +1,1131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="EntryPointsManager">
+    <entry_points version="2.0">
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.VideoResourceInterceptor videoStreamingService" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.config.ScheduledTasks videoDataExpiredDays" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.BloggerPostParser bloggerPost" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.parser.BloggerUrlBuilder fetchBodies" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.parser.BloggerUrlBuilder fetchImages" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.parser.BloggerUrlBuilder maxResults" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.parser.BloggerUrlBuilder orderBy" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.parser.BloggerUrlBuilder pageToken" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.parser.BloggerUrlBuilder startDate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.parser.BloggerUrlBuilder status" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.util.Log.Level ASSERT" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.CodecType AUDIO" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.CodecType VIDEO" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.ICDPluginTest icdPlugin" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Match.MatchBuilder awayTeam" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Match.MatchBuilder competition" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Match.MatchBuilder date" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Match.MatchBuilder fixture" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Match.MatchBuilder homeTeam" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Match.MatchBuilder season" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Str $t" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Generator $t" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition _default" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties.ICDUrl app" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource approximateDuration" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition attached_pic" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource audioBitrate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource audioChannels" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource audioCodec" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource audioCodec" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerEntry author" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed author" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream avg_frame_rate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Event awayTeam" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventResource awayTeam" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties.ICDUrl BASE_URL_PATTERN" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.DataSource baseUri" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties baseUrl" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginProperties baseUrl" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream bit_rate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat bit_rate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource bitrate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream bits_per_raw_sample" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream bits_per_sample" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.BloggerPluginProperties bloggerUrlPattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.DataSourceValidator bloggerUrlPattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition captions" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerEntry category" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed category" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource channel" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource channel" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream channel_layout" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream channels" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata chapters" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream chroma_location" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.DataSource clazz" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKit clazz" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitEntry clazz" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.parsing.TypeHandler clazz" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition clean_effects" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream codec_long_name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream codec_name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream codec_tag" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream codec_tag_string" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream codec_time_base" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream codec_type" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask command" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition comment" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Event competition" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventResource competition" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Competition competitionId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.StreamJobState completionRatio" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatStreamTask CONCAT_FILENAME" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatStreamTask concatFile" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.LoginParser connectionManager" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerEntry content" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.FileServerUser cookies" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource cookies" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Artwork created" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Snapshot data" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegLogger dataDir" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask dataDir" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.DataSource dataSourceId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.DataSourceService dataSourcePlugins" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Event date" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventResource date" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season DATE_FORMATTER" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SnapshotRequest DATE_PATTERN" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.BloggerPluginProperties dateTimeFormatPattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties ddlFormErrorText" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DownloadLanding ddlSubmitUri" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DirectDownload ddlUrl" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFile DEFAULT_DURATION" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season DEFAULT_END_DAY" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season DEFAULT_START_DAY" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Fixture DEFAULT_TITLE" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season DEFAULT_YEAR" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.video.StreamDelayAdviceService defaultPingTime" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties defaultRefreshHours" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourcePluginResource description" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerResource description" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.PluginProperties description" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition descriptions" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties directDownloadUrlPattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.parsing.CreationStrategy.Priority DISABLE" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream display_aspect_ratio" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream disposition" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties.ICDUrl domain" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SecureCookie domain" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties downloadLimitPattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginProperties downloadLinkId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdMessage doz" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition dub" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream duration" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat duration" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoPlaylistRenderer.MediaSegment duration" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream duration_ts" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Author email" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.FileServerUser email" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource email" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Competition emblem" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Team emblem" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.DataSource enabled" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourcePluginResource enabled" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.DataSourceService enabledPlugins" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.Blogger encoding" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegChapter end" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season END_DATE" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegChapter end_time" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season endDate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SnapshotRequest endDate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed entry" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.Invalid error" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Event EVENT_ID_DATE_FORMATTER" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Event eventId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventResource eventId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource.VideoResourceAssembler eventId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFile externalUrl" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Competition fanart" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Team fanart" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.Blogger feed" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed feedId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SnapshotRequest fetchBodies" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SnapshotRequest fetchImages" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.VideoFileService.VideoFileRefreshTask fetchMetadata" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.VideoFileService.VideoFileRefreshTask ffmpegPlugin" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.video.StreamDelayAdviceService ffmpegStartUpTime" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKit fields" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFile fileId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Artwork fileName" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat filename" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Artwork filePath" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.VideoFileService.VideoFileRefreshTask fileServerService" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Artwork fileSize" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource filesize" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocatorPlaylist fileSource" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Event fileSources" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource fileSrcId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService fileStorageLocation" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.diskmanager.DiskManager fileSystemRoot" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Event fixture" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventResource fixture" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Fixture fixtureNumber" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition forced" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata format" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat format_long_name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat format_name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource framerate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource frameRate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Author gd$image" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed generator" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.parsing.TypeHandler handler" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream has_b_frames" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition hearing_impaired" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Artwork height" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Image height" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream height" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DownloadLanding hiddenQueryParams" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Event homeTeam" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventResource homeTeam" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Link href" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SecureCookie httpOnly" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Artwork id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.Blogger id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerEntry id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.CompetitionResource id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourcePluginResource id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegChapter id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerResource id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKit id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitEntry id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitPack id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.PluginProperties id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ProperName id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SecureCookie id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.StreamJobState id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Synonym id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.TeamResource id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFilePack id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocatorPlaylist id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream index" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFile internalUrl" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream is_avc" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerResource isEnabled" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.BloggerPluginProperties jsonUrlPattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition karaoke" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SnapshotRequest labels" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Competition landscape" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource languages" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource languages" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFile lastRefreshed" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream level" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerEntry link" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed link" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties linkButtonText" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties linkIdentifier" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties linkUrlPattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Competition locale" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.CompetitionResource locale" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Team locale" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.TeamResource locale" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatStreamTask LOG_TAG" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegSingleStreamTask LOG_TAG" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask LOG_TAG" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season LOG_TAG" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask logAdapter" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegLogger logEmitter" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegLogger LOGFILE_TIMESTAMP_FORMATTER" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegSingleStreamTask LOGFILE_TIMESTAMP_FORMATTER" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask LOGFILE_TIMESTAMP_FORMATTER" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DownloadLanding loggedIn" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DirectDownload loggedIn" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.Login loggedIn" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.Profile loggedIn" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.Invalid loggedIn" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.FileServerUser loggedIn" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource loggedIn" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties loggedOutText" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpeg loggingEnabled" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask loggingEnabled" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties.ICDUrl LOGIN_URI_PATTERN" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.LoginParser loginUri" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties loginUrl" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginProperties loginUrl" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition lyrics" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource MASTER_PLAYLIST" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream max_bit_rate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.config.VideoStreamingConfig MAX_POOL_SIZE" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season MAX_YEAR" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SecureCookie maxAge" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SnapshotRequest maxResults" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties.ICDUrl me" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource mediaContainer" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource mediaContainer" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Artwork mediaType" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdMessage message" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.MessageResource message" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition metadata" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFile metadata" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season MILLENNIUM" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season MIN_YEAR" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Artwork modified" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Competition monochromeEmblem" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream nal_length_size" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Author name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.CompetitionResource name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ProperName name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SecureCookie name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Synonym name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.TeamResource name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream nb_frames" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat nb_programs" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat nb_streams" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed openSearch$itemsPerPage" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed openSearch$startIndex" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed openSearch$totalResults" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SnapshotRequest orderBy" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition original" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.LoginParser pageEvaluator" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SnapshotRequest pageToken" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.FileServerUser password" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SecureCookie path" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKit pattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PlaintextDataSource patternKitPack" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitEntry patternKits" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitPack patternKits" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream pix_fmt" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoPlaylist playlist" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoPlaylistResource playlist" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.video.VideoStreamLocatorService PLAYLIST_NAME" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask playlistPath" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocator playlistPath" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.DataSource pluginId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.LoginParser pluginProperties" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.controller.CompetitionControllerTest port" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.controller.TeamControllerTest port" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DownloadLanding premium" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DirectDownload premium" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.Login premium" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.Profile premium" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.Invalid premium" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties premiumOnlyError" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat probe_score" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegLogger process" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask process" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream profile" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Competition properName" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Synonym properName" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Team properName" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties.ICDUrl protocol" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerEntry published" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.BloggerPluginProperties queryUrlPrefix" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.config.VideoStreamingConfig QUEUE_SIZE" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream r_frame_rate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties refreshHours" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginProperties refreshRateHours" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream refs" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Link rel" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Image rel" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource resolution" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource resolution" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.controller.CompetitionControllerTest restTemplate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.controller.TeamControllerTest restTemplate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdMessage result" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SecureCookie sameSite" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream sample_aspect_ratio" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream sample_fmt" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream sample_rate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Term scheme" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Event season" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventResource season" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SecureCookie secure" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Fixture serialVersionUID" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season serialVersionUID" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.FileServerUser serverId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.config.VideoStreamingConfig SIMULTANEOUS_STREAMS" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat size" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource source" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource source" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Image src" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegChapter start" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season START_DATE" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream start_pts" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream start_time" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat start_time" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegChapter start_time" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Season startDate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SnapshotRequest startDate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocator state" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocatorPlaylist state" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SnapshotRequest status" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.StreamJobState status" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.diskmanager.DiskManager storageLocation" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.diskmanager.DiskManagerProperties storageLocation" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocatorPlaylist storageLocation" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocator streamLocatorId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocatorPlaylist streamLocators" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata streams" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties.ICDUrl subdomain" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed subtitle" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ProperName synonyms" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream tags" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat tags" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.M3uRenderer targetDuration" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Team teamId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Term term" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerEntry thr$total" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.config.VideoStreamingConfig THREAD_NAME_PREFIX" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream time_base" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegChapter time_base" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.MessageResource timestamp" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Snapshot timestamp" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocator timestamp" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocatorPlaylist timestamp" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerEntry title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourcePluginResource title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventResource title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerResource title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Fixture title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.PluginProperties title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFile title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoPlaylistRenderer.MediaSegment title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource TRANSCODE_PLS_STREAM" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource TRANSCODE_STREAM" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask transcodeArgs" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Str type" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Link type" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerEntry updated" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed updated" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Author uri" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Generator uri" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegSingleStreamTask uri" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoPlaylistRenderer.MediaSegment uri" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatProtocolStreamTask uris" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatStreamTask uris" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties url" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties urlPattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginProperties urlPattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties.ICDUrl userAccess" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties userAgent" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties userAgent" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginProperties userAgent" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties userDataIdentifier" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.FileServerUser userId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource userId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.inclouddrive.IcdMessage userid" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.FileServerUser username" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource username" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.SecureCookie value" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource VARIANT_PLAYLIST" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.Blogger version" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Generator version" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource videoBitrate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource videoCodec" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoResource videoCodec" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.VideoFileService.VideoFileRefreshTask videoFile" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoStreamLocator videoFile" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFileSource videoFilePacks" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoFilePack videoFiles" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition visual_impaired" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoPlaylist waitMillis" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoPlaylistResource waitMillis" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Artwork width" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Image width" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream width" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed xmlns" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed xmlns$blogger" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed xmlns$gd" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed xmlns$georss" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed xmlns$openSearch" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed xmlns$thr" />
+    </entry_points>
+    <pattern value="self.me.matchday.config.AdminDashboardConfig" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" method="ArtworkController" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="CompetitionController" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="DataSourceController" />
+    <pattern value="self.me.matchday.api.controller.EventController" />
+    <pattern value="self.me.matchday.api.controller.EventController" method="EventController" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="FileServerController" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="getAllFileServers" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="getFileServerById" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="getFileServerUsers" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="getSegmentFile" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="getUserData" />
+    <pattern value="self.me.matchday.api.controller.HighlightController" />
+    <pattern value="self.me.matchday.api.controller.HighlightController" method="HighlightController" />
+    <pattern value="self.me.matchday.api.controller.RootController" />
+    <pattern value="self.me.matchday.api.controller.RootController.RootResource" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="loginToFileServer" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="logoutOfFileServer" />
+    <pattern value="self.me.matchday.api.controller.MatchController" />
+    <pattern value="self.me.matchday.api.controller.MatchController" method="MatchController" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="refreshAllSources" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="reloginToFileServer" />
+    <pattern value="self.me.matchday.api.controller.RootController" method="root" />
+    <pattern value="self.me.matchday.api.controller.TeamController" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="TeamController" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="VideoStreamingController" />
+    <pattern value="self.me.matchday.api.resource.CompetitionResource" />
+    <pattern value="self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler" method="CompetitionResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.EventResource" />
+    <pattern value="self.me.matchday.api.resource.EventResource.EventResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.EventResource.EventResourceAssembler" method="EventResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.FileServerResource" />
+    <pattern value="self.me.matchday.api.resource.FileServerResource.FileServerResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.FileServerResource.FileServerResourceAssembler" method="FileServerResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.FileServerUserResource" />
+    <pattern value="self.me.matchday.api.resource.MessageResource" />
+    <pattern value="self.me.matchday.api.resource.MessageResource.MessageResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.MessageResource.MessageResourceAssembler" method="MessageResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.TeamResource" />
+    <pattern value="self.me.matchday.api.resource.TeamResource.TeamResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.TeamResource.TeamResourceAssembler" method="TeamResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.FileServerUserResource.UserResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.FileServerUserResource.UserResourceAssembler" method="UserResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.VideoResource" />
+    <pattern value="self.me.matchday.api.resource.VideoResource.VideoResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.VideoResource.VideoResourceAssembler" method="VideoResourceAssembler" />
+    <pattern value="self.me.matchday.api.service.ArtworkService" />
+    <pattern value="self.me.matchday.api.service.ArtworkService" method="ArtworkService" />
+    <pattern value="self.me.matchday.api.service.DataSourceService" />
+    <pattern value="self.me.matchday.api.service.DataSourceService" method="DataSourceService" />
+    <pattern value="self.me.matchday.api.service.SecureDataService" method="encryptData" />
+    <pattern value="self.me.matchday.api.service.EventFileService" />
+    <pattern value="self.me.matchday.api.service.EventFileService" method="EventFileService" />
+    <pattern value="self.me.matchday.api.service.EventService" />
+    <pattern value="self.me.matchday.api.service.EventService" method="EventService" />
+    <pattern value="self.me.matchday.api.service.FileServerService" />
+    <pattern value="self.me.matchday.api.service.FileServerService" method="FileServerService" />
+    <pattern value="self.me.matchday.api.service.PlaylistLocatorService" method="getPlaylistLocator" />
+    <pattern value="self.me.matchday.api.service.HighlightService" />
+    <pattern value="self.me.matchday.api.service.HighlightService" method="HighlightService" />
+    <pattern value="self.me.matchday.api.service.SecureDataService" />
+    <pattern value="self.me.matchday.api.service.MasterPlaylistService" />
+    <pattern value="self.me.matchday.api.service.MasterPlaylistService" method="MasterPlaylistService" />
+    <pattern value="self.me.matchday.api.service.MatchService" />
+    <pattern value="self.me.matchday.api.service.MatchService" method="MatchService" />
+    <pattern value="self.me.matchday.api.service.PlaylistLocatorService" />
+    <pattern value="self.me.matchday.api.service.PlaylistLocatorService" method="PlaylistLocatorService" />
+    <pattern value="self.me.matchday.api.service.TeamService" />
+    <pattern value="self.me.matchday.api.service.TeamService" method="TeamService" />
+    <pattern value="self.me.matchday.api.service.VariantPlaylistService" />
+    <pattern value="self.me.matchday.api.service.VariantPlaylistService" method="VariantPlaylistService" />
+    <pattern value="self.me.matchday.api.service.VideoResourceInterceptor" />
+    <pattern value="self.me.matchday.api.service.VideoResourceInterceptor" method="VideoResourceInterceptor" />
+    <pattern value="self.me.matchday.api.service.VideoStreamingService" />
+    <pattern value="self.me.matchday.api.service.VideoStreamingService" method="VideoStreamingService" />
+    <pattern value="self.me.matchday.config.ScheduledTasks" method="pruneVideoData" />
+    <pattern value="self.me.matchday.config.ScheduledTasks" method="refreshEventData" />
+    <pattern value="self.me.matchday.config.ScheduledTasks" />
+    <pattern value="self.me.matchday.config.ScheduledTasks" method="ScheduledTasks" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginProperties" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPost" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.BloggerPostBuilder" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPostParser" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPostParser" method="BloggerPostParser" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.BloggerUrlBuilder" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GalatamanEventMetadataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GalatamanEventMetadataParser" method="GalatamanEventMetadataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.BloggerPostBuilder" method="getBloggerPost" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GManPlugin" method="getSnapshot" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFPlugin" method="getSnapshot" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GManEventFileSourceParser" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GManEventFileSourceParser" method="GManEventFileSourceParser" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GManFileSourceMetadataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GManFileSourceMetadataParser" method="GManFileSourceMetadataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GManPatterns" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GManPlugin" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GmanPluginProperties" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.html.HtmlBloggerBuilder" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.html.HtmlBloggerBuilder" method="HtmlBloggerBuilder" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.html.HtmlBloggerPostBuilder" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.html.HtmlBloggerPostBuilder" method="HtmlBloggerPostBuilder" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.html.HtmlPostBuilderFactory" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.json.JsonPostBuilderFactory" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFPatterns" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.InvalidBloggerFeedException" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.InvalidBloggerFeedException" method="InvalidBloggerFeedException" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.InvalidBloggerPostException" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.InvalidBloggerPostException" method="InvalidBloggerPostException" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.json.JsonBloggerBuilder" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.json.JsonBloggerBuilder" method="JsonBloggerBuilder" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.json.JsonBloggerPostBuilder" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.parser.json.JsonBloggerPostBuilder" method="JsonBloggerPostBuilder" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GManFileSourceMetadataParser.MetadataTuple" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GManFileSourceMetadataParser.MetadataTuple" method="MetadataTuple" />
+    <pattern value="self.me.matchday.plugin.datasource.galataman.GmanPluginProperties" method="setBaseUrl" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFPluginProperties" method="setBaseUrl" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventFileSourceParser" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventFileSourceParser" method="ZKFEventFileSourceParser" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventMetadataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventMetadataParser" method="ZKFEventMetadataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFMetadataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFMetadataParser" method="ZKFMetadataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFPlugin" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFPluginProperties" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPlugin" method="acceptsUrl" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.CodecType" />
+    <pattern value="self.me.matchday.plugin.io.diskmanager.DiskManager" />
+    <pattern value="self.me.matchday.plugin.io.diskmanager.DiskManager" method="DiskManager" />
+    <pattern value="self.me.matchday.plugin.io.diskmanager.DiskManagerProperties" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpeg" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpeg" method="FFmpeg" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegChapter" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream.FFmpegDisposition" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegFormat" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin" method="FFmpegPlugin" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginProperties" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata.FFmpegStream" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFprobe" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFprobe" method="FFprobe" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPlugin" method="getDescription" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPlugin" method="getDownloadURL" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFprobe" method="getFileMetadata" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpeg" method="getHlsStreamTask" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPlugin" method="getPluginId" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPlugin" method="getRefreshRate" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPlugin" method="getTitle" />
+    <pattern value="self.me.matchday.util.Log" method="i" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdMessage" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPlugin" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPlugin" method="IcdPlugin" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties.ICDUrl" />
+    <pattern value="self.me.matchday.startup.InitEventData" />
+    <pattern value="self.me.matchday.startup.InitEventData" method="initialEventDataLoad" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin" method="interruptStreamTasks" />
+    <pattern value="self.me.matchday.util.Log.Level" />
+    <pattern value="self.me.matchday.util.Log" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPlugin" method="login" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginProperties" method="setFFmpegLocation" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginProperties" method="setFFprobeLocation" />
+    <pattern value="self.me.matchday.plugin.io.diskmanager.DiskManagerProperties" method="setStorageLocation" />
+    <pattern value="self.me.matchday.util.Log" method="v" />
+    <pattern value="self.me.matchday.util.Log" method="w" />
+    <pattern value="self.me.matchday.plugin.fileserver.FileServerUser" />
+    <pattern value="self.me.matchday.plugin.fileserver.FileServerUser" method="FileServerUser" />
+    <pattern value="self.me.matchday.model.FileSize" />
+    <pattern value="self.me.matchday.model.Fixture" />
+    <pattern value="self.me.matchday.model.Fixture" method="Fixture" />
+    <pattern value="self.me.matchday.model.Highlight" />
+    <pattern value="self.me.matchday.model.Highlight" method="Highlight" />
+    <pattern value="self.me.matchday.model.Match" />
+    <pattern value="self.me.matchday.model.Match" method="Match" />
+    <pattern value="self.me.matchday.model.FileSize" method="ofBytes" />
+    <pattern value="self.me.matchday.model.Snapshot" />
+    <pattern value="self.me.matchday.model.Snapshot" method="Snapshot" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePlugin" method="acceptsUrl" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePlugin" method="getDescription" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePlugin" method="getDownloadURL" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePlugin" method="getPluginId" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePlugin" method="getRefreshRate" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePlugin" method="getTitle" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginProperties" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePlugin" method="login" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePlugin" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePlugin" method="NitroflarePlugin" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventFileSourceParserTest.TestBloggerPost.TestBloggerEntry" method="getContent" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventFileSourceParserTest.TestBloggerPost.TestBloggerEntryType" method="getText" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventFileSourceParserTest.TestBloggerPost.TestBloggerEntry" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventFileSourceParserTest.TestBloggerPost.TestBloggerEntryId" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventFileSourceParserTest.TestBloggerPost.TestBloggerEntryType" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventFileSourceParserTest.TestBloggerPost.TestBloggerEntryId" method="setT" />
+    <pattern value="self.me.matchday.plugin.datasource.zkfootball.ZKFEventFileSourceParserTest.TestBloggerPost" />
+    <pattern value="self.me.matchday.api.service.EventFileService.EventFileRefreshTask" method="EventFileRefreshTask" />
+    <pattern value="self.me.matchday.model.EventFile" />
+    <pattern value="self.me.matchday.model.EventFile.EventPartIdentifier" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatProtocolStreamTask" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatProtocolStreamTask" method="FFmpegConcatProtocolStreamTask" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatStreamTask" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatStreamTask" method="FFmpegConcatStreamTask" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegSingleStreamTask" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegSingleStreamTask" method="FFmpegSingleStreamTask" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask" />
+    <pattern value="self.me.matchday.model.EventFile" method="getDuration" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatProtocolStreamTask" method="getExecCommand" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask" method="getInputString" />
+    <pattern value="self.me.matchday.model.EventFile.EventPartIdentifier" method="getOrder" />
+    <pattern value="self.me.matchday.io.JsonStreamReader" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegConcatProtocolStreamTask" method="prepareStream" />
+    <pattern value="self.me.matchday.io.JsonStreamReader" method="readLocal" />
+    <pattern value="self.me.matchday.io.TextFileReader" method="readStream" />
+    <pattern value="self.me.matchday.io.TextFileReader" />
+    <pattern value="self.me.matchday.plugin.datasource.DataSourcePlugin" method="addDataSource" />
+    <pattern value="self.me.matchday.plugin.datasource.DataSourcePlugin" method="getSnapshot" />
+    <pattern value="self.me.matchday.util.Log" method="d" />
+    <pattern value="self.me.matchday.util.ResourceFileReader" method="getObjectFromProperties" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Image" />
+    <pattern value="self.me.matchday.model.video.VideoFileSource.Resolution" method="getHeight" />
+    <pattern value="self.me.matchday.model.video.VideoFileSource.Resolution" method="getWidth" />
+    <pattern value="self.me.matchday.model.video.VideoFileSource.Resolution" />
+    <pattern value="self.me.matchday.model.FileSize" method="ofKilobytes" />
+    <pattern value="self.me.matchday.model.FileSize" method="ofMegabytes" />
+    <pattern value="self.me.matchday._DEVFIXTURES.plugin.TestMatchServer" method="addDataSource" />
+    <pattern value="self.me.matchday._DEVFIXTURES.plugin.TestMatchServer" method="getSnapshot" />
+    <pattern value="self.me.matchday._DEVFIXTURES.plugin.PreferencesManager" />
+    <pattern value="self.me.matchday._DEVFIXTURES.plugin.PreferencesManager" method="setPreference" />
+    <pattern value="self.me.matchday._DEVFIXTURES.plugin.TestMatchServer" />
+    <pattern value="self.me.matchday.model.Match.MatchBuilder" />
+    <pattern value="self.me.matchday.model.Match.MatchBuilder" method="setAwayTeam" />
+    <pattern value="self.me.matchday.model.Match.MatchBuilder" method="setCompetition" />
+    <pattern value="self.me.matchday.model.Match.MatchBuilder" method="setDate" />
+    <pattern value="self.me.matchday.model.Match.MatchBuilder" method="setFixture" />
+    <pattern value="self.me.matchday.model.Match.MatchBuilder" method="setHomeTeam" />
+    <pattern value="self.me.matchday.model.Match.MatchBuilder" method="setSeason" />
+    <pattern value="self.me.matchday.model.Match" method="getTitle" />
+    <pattern value="self.me.matchday.util.AbbreviatorTest" method="abbreviate" />
+    <pattern value="self.me.matchday.util.AbbreviatorTest" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginTest" method="acceptsUrl" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.ICDPluginTest" method="acceptsUrl" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginTest" method="acceptsUrl" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginTest" method="addDataSource" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="addDataSource" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="addDataSource" />
+    <pattern value="self.me.matchday.model.Event" method="addFileSource" />
+    <pattern value="self.me.matchday.model.Artwork" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" />
+    <pattern value="self.me.matchday.api.service.ArtworkServiceTest" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Author" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManagerTest" method="beginStreaming" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.model.Blogger" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.model.BloggerEntry" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPlugin" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPlugin" method="BloggerPlugin" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginTest" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerQueryBuilderTest" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.model.Bubble" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerQueryBuilderTest" method="buildHtmlQueryFrom" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerQueryBuilderTest" method="buildJsonQueryFrom" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFprobeTest" method="checkFFprobeCreation" />
+    <pattern value="self.me.matchday.model.Competition" />
+    <pattern value="self.me.matchday.model.Competition" method="Competition" />
+    <pattern value="self.me.matchday.api.controller.CompetitionControllerTest" />
+    <pattern value="self.me.matchday.api.service.CompetitionService" />
+    <pattern value="self.me.matchday.api.service.CompetitionService" method="CompetitionService" />
+    <pattern value="self.me.matchday.api.service.CompetitionServiceTest" />
+    <pattern value="self.me.matchday.api.service.video.StreamDelayAdviceService" method="computeWaitMillis" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.ConnectionManager" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.ConnectionManager" method="ConnectionManager" />
+    <pattern value="self.me.matchday.model.DataSourceTest" method="createNewDataSource" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorServiceTest" method="createNewPlaylistLocator" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManagerTest" method="createVideoStreamFrom" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.CreationStrategy" />
+    <pattern value="self.me.matchday.model.DataSource" />
+    <pattern value="self.me.matchday.model.DataSource" method="DataSource" />
+    <pattern value="self.me.matchday.plugin.datasource.DataSourcePlugin" />
+    <pattern value="self.me.matchday.api.resource.DataSourcePluginResource" />
+    <pattern value="self.me.matchday.api.resource.DataSourcePluginResource.DataSourcePluginResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.DataSourcePluginResource.DataSourcePluginResourceAssembler" method="DataSourcePluginResourceAssembler" />
+    <pattern value="self.me.matchday.db.DataSourceRepositoryTest" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" />
+    <pattern value="self.me.matchday.model.DataSourceTest" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.DataSourceValidator" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.DefaultBoltTest" />
+    <pattern value="self.me.matchday.api.service.CompetitionService" method="deleteCompetitionById" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="deleteEvent" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManagerTest" method="deleteLocalStream" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorServiceTest" method="deletePlaylistLocator" />
+    <pattern value="self.me.matchday.api.service.TeamServiceTest" method="deleteTeamById" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="deleteUser" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="deleteVideoData" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="deleteVideoData" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DirectDownload" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="disableFileServerPlugin" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="disablePlugin" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="disablePlugin" />
+    <pattern value="self.me.matchday.plugin.io.diskmanager.DiskManagerTest" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DownloadLanding" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.DownloadParser" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.DownloadParser" method="DownloadParser" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="enableFileServerPlugin" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="enablePlugin" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="enablePlugin" />
+    <pattern value="self.me.matchday.api.service.EntityCorrectionService" />
+    <pattern value="self.me.matchday.api.service.EntityCorrectionService" method="EntityCorrectionService" />
+    <pattern value="self.me.matchday.util.log.EntityCorrectionServiceLogging" />
+    <pattern value="self.me.matchday.api.service.EntityCorrectionServiceTest" />
+    <pattern value="self.me.matchday.model.Event" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.EventDataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.EventDataParser" method="EventDataParser" />
+    <pattern value="self.me.matchday.util.log.EventDataParserLogging" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.EventDataParserTest" />
+    <pattern value="self.me.matchday.db.EventRepositoryTest" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.FabricTest" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="fetchAllCompetitions" />
+    <pattern value="self.me.matchday.api.service.CompetitionServiceTest" method="fetchAllCompetitions" />
+    <pattern value="self.me.matchday.api.controller.CompetitionControllerTest" method="fetchAllCompetitions" />
+    <pattern value="self.me.matchday.api.controller.EventController" method="fetchAllEvents" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="fetchAllEvents" />
+    <pattern value="self.me.matchday.api.controller.HighlightController" method="fetchAllHighlights" />
+    <pattern value="self.me.matchday.api.service.HighlightServiceTest" method="fetchAllHighlights" />
+    <pattern value="self.me.matchday.api.controller.MatchController" method="fetchAllMatches" />
+    <pattern value="self.me.matchday.api.service.MatchServiceTest" method="fetchAllMatches" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="fetchAllTeams" />
+    <pattern value="self.me.matchday.api.service.TeamServiceTest" method="fetchAllTeams" />
+    <pattern value="self.me.matchday.api.controller.TeamControllerTest" method="fetchAllTeams" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="fetchById" />
+    <pattern value="self.me.matchday.api.service.CompetitionServiceTest" method="fetchCompetitionById" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="fetchCompetitionById" />
+    <pattern value="self.me.matchday.api.controller.CompetitionControllerTest" method="fetchCompetitionByName" />
+    <pattern value="self.me.matchday.api.service.ArtworkServiceTest" method="fetchCompetitionEmblem" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" method="fetchCompetitionEmblem" />
+    <pattern value="self.me.matchday.api.controller.CompetitionControllerTest" method="fetchCompetitionEvents" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="fetchCompetitionEvents" />
+    <pattern value="self.me.matchday.api.service.ArtworkServiceTest" method="fetchCompetitionFanart" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" method="fetchCompetitionFanart" />
+    <pattern value="self.me.matchday.api.service.ArtworkServiceTest" method="fetchCompetitionLandscape" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" method="fetchCompetitionLandscape" />
+    <pattern value="self.me.matchday.api.service.ArtworkServiceTest" method="fetchCompetitionMonochromeEmblem" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" method="fetchCompetitionMonochromeEmblem" />
+    <pattern value="self.me.matchday.api.controller.CompetitionControllerTest" method="fetchCompetitionTeams" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="fetchCompetitionTeams" />
+    <pattern value="self.me.matchday.api.service.ArtworkServiceTest" method="fetchDefaultTeamEmblem" />
+    <pattern value="self.me.matchday.api.service.ArtworkServiceTest" method="fetchDefaultTeamFanart" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="fetchEventsForCompetition" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="fetchEventsForTeam" />
+    <pattern value="self.me.matchday.api.controller.TeamControllerTest" method="fetchEventsForTeam" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="fetchEventsForTeam" />
+    <pattern value="self.me.matchday.api.service.HighlightServiceTest" method="fetchHighlight" />
+    <pattern value="self.me.matchday.api.controller.HighlightController" method="fetchHighlightById" />
+    <pattern value="self.me.matchday.api.service.MatchServiceTest" method="fetchMatch" />
+    <pattern value="self.me.matchday.api.controller.MatchController" method="fetchMatchById" />
+    <pattern value="self.me.matchday.api.service.TeamServiceTest" method="fetchTeamById" />
+    <pattern value="self.me.matchday.api.controller.TeamControllerTest" method="fetchTeamByName" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="fetchTeamByName" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" method="fetchTeamEmblem" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" method="fetchTeamFanart" />
+    <pattern value="self.me.matchday.api.service.TeamServiceTest" method="fetchTeamsByCompetitionId" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="fetchVideoFileSources" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="fetchVideoFileSrc" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegLogger" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginTest" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegTest" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFprobeTest" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPlugin" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPlugin" method="FileFoxPlugin" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginPropertiesTest" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginTest" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" />
+    <pattern value="self.me.matchday.model.FileServerUser" />
+    <pattern value="self.me.matchday.model.FileServerUser" method="FileServerUser" />
+    <pattern value="self.me.matchday.model.video.VideoFilePack" method="firstPart" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.type.FixtureHandler" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.type.FixtureHandler" method="FixtureHandler" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.FabricTest" method="fold" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.model.Foo" />
+    <pattern value="self.me.matchday.util.JsonParser" method="fromJson" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Generator" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorServiceTest" method="getAllPlaylistLocators" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="getAllPlugins" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="getAllServerUsers" />
+    <pattern value="self.me.matchday.config.VideoStreamingConfig" method="getAsyncExecutor" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties" method="getBaseUrl" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties" method="getBaseUrl" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginProperties" method="getBaseUrl" />
+    <pattern value="self.me.matchday.api.service.VideoFileSelectorService" method="getBestVideoFile" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginProperties" method="getBloggerUrlPattern" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="getDataSource" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="getDataSourcePlugin" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="getDataSourcePlugin" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="getDataSourcePlugins" />
+    <pattern value="self.me.matchday.api.service.DataSourceService" method="getDataSourcesForPlugin" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginProperties" method="getDateTimeFormatter" />
+    <pattern value="self.me.matchday.api.service.video.StreamDelayAdviceServiceTest" method="getDelayAdvice" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginTest" method="getDescription" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginPropertiesTest" method="getDescription" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginTest" method="getDescription" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties" method="getDirectDownloadUrlPattern" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginPropertiesTest" method="getDirectDownloadUrlPattern" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties" method="getDownloadLimitPattern" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginTest" method="getDownloadURL" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="getDownloadUrl" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginTest" method="getDownloadURL" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="getEnabledPlugins" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginProperties" method="getFFmpegLocation" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginProperties" method="getFFprobeLocation" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="getFileServerPlugins" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="getFileServerRefreshRate" />
+    <pattern value="self.me.matchday.plugin.io.diskmanager.DiskManagerTest" method="getFreeDiskSpace" />
+    <pattern value="self.me.matchday.model.video.Resolution" method="getHeight" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginTest" method="getHtmlSnapshot" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginPropertiesTest" method="getId" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginTest" method="getJsonSnapshot" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginProperties" method="getJsonUrlPattern" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties" method="getLinkUrlPattern" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginPropertiesTest" method="getLinkUrlPattern" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManagerTest" method="getLocalStreamFor" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.IcdPluginProperties" method="getLoginUri" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginProperties" method="getLoginUrl" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="getMasterPlaylist" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.model.Bubble" method="getName" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.model.Foo" method="getName" />
+    <pattern value="self.me.matchday.model.PatternKitPackTest" method="getNonExistent" />
+    <pattern value="self.me.matchday.api.service.VideoFileSelectorServiceTest" method="getPlaylistFiles" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorServiceTest" method="getPlaylistLocator" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="getPluginById" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginTest" method="getPluginId" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginTest" method="getPluginId" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginPropertiesTest" method="getRefreshHours" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginTest" method="getRefreshRate" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginTest" method="getRefreshRate" />
+    <pattern value="self.me.matchday.plugin.datasource.TestDataSourcePlugin" method="getSnapshot" />
+    <pattern value="self.me.matchday.plugin.io.diskmanager.DiskManagerProperties" method="getStorageLocation" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginTest" method="getTitle" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginPropertiesTest" method="getTitle" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginTest" method="getTitle" />
+    <pattern value="self.me.matchday.plugin.io.diskmanager.DiskManagerTest" method="getUsedSpace" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginPropertiesTest" method="getUserAgent" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="getUserById" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="getVideoPartPlaylist" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="getVideoResources" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="getVideoSegmentResource" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="getVideoStreamPlaylist" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="getVideoStreamPlaylist" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="getVideoStreamPlsPlaylist" />
+    <pattern value="self.me.matchday.model.video.Resolution" method="getWidth" />
+    <pattern value="self.me.matchday.api.service.HighlightServiceTest" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.HypertextEntityParser" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.HypertextEntityParser" method="HypertextEntityParser" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.ICDPluginTest" />
+    <pattern value="self.me.matchday.MatchdayApplication" />
+    <pattern value="self.me.matchday.api.service.MatchServiceTest" />
+    <pattern value="self.me.matchday.api.service.NetscapeCookiesServiceTest" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginTest" />
+    <pattern value="self.me.matchday.model.PatternKitPackTest" />
+    <pattern value="self.me.matchday.model.PatternKitTest" />
+    <pattern value="self.me.matchday.plugin.PluginProperties" />
+    <pattern value="self.me.matchday.util.ResourceFileReaderTest" />
+    <pattern value="self.me.matchday.api.service.video.StreamDelayAdviceServiceTest" />
+    <pattern value="self.me.matchday.db.SynonymRepositoryTest" />
+    <pattern value="self.me.matchday.api.controller.TeamControllerTest" />
+    <pattern value="self.me.matchday.api.service.TeamServiceTest" />
+    <pattern value="self.me.matchday.TestingServer" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.TypeHandler" />
+    <pattern value="self.me.matchday.util.URLQueryDecoderTest" />
+    <pattern value="self.me.matchday.api.service.VideoFileSelectorServiceTest" />
+    <pattern value="self.me.matchday.api.service.VideoFileServiceTest" />
+    <pattern value="self.me.matchday.config.VideoStreamingConfig" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorServiceTest" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManagerTest" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginTest" method="interruptAllStreamTasks" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.Invalid" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage" method="isLoggedIn" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="isPluginEnabled" />
+    <pattern value="self.me.matchday.plugin.io.diskmanager.DiskManagerTest" method="isSpaceAvailable" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManagerTest" method="isStreamReady" />
+    <pattern value="self.me.matchday.model.PatternKitPackTest" method="jsonEncodePatternKitPack" />
+    <pattern value="self.me.matchday.util.JsonParser" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="killAllStreamingTasks" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManagerTest" method="killAllStreamsFor" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="killStreamingFor" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginTest" method="killStreamingTask" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="killStreamTasks" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Link" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.type.LocalDateTimeHandler" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.type.LocalDateTimeHandler" method="LocalDateTimeHandler" />
+    <pattern value="self.me.matchday.util.log.EntityCorrectionServiceLogging" method="logAroundEntityCorrection" />
+    <pattern value="self.me.matchday.util.log.EventDataParserLogging" method="logAroundEventParsing" />
+    <pattern value="self.me.matchday.util.log.EntityCorrectionServiceLogging" method="logBeforeCorrectedEntityRetrieval" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.Login" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginTest" method="login" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginTest" method="login" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="loginAndLogout" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.LoginParser" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.LoginParser" method="LoginParser" />
+    <pattern value="self.me.matchday.api.controller.FileServerController" method="loginWithCookies" />
+    <pattern value="self.me.matchday.model.video.M3uRenderer" />
+    <pattern value="self.me.matchday.MatchdayApplication" method="main" />
+    <pattern value="self.me.matchday.model.video.VideoPlaylistRenderer.MediaSegment" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegTest" method="minArgLength" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegTest" method="outputPath" />
+    <pattern value="self.me.matchday.model.PatternKitPackTest" method="overstuffed" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.PageEvaluator" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.PageEvaluator" method="PageEvaluator" />
+    <pattern value="self.me.matchday.api.service.NetscapeCookiesServiceTest" method="parseNetscapeCookies" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.type.PartIdentifierHandler" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.type.PartIdentifierHandler" method="PartIdentifierHandler" />
+    <pattern value="self.me.matchday.model.PatternKit" />
+    <pattern value="self.me.matchday.model.PatternKit" method="PatternKit" />
+    <pattern value="self.me.matchday.model.PatternKitEntry" />
+    <pattern value="self.me.matchday.model.PatternKitEntry" method="PatternKitEntry" />
+    <pattern value="self.me.matchday.model.PatternKitPack" />
+    <pattern value="self.me.matchday.model.PlaintextDataSource" />
+    <pattern value="self.me.matchday.model.PlaintextDataSource" method="PlaintextDataSource" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.CreationStrategy.Priority" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.Profile" />
+    <pattern value="self.me.matchday.model.ProperName" />
+    <pattern value="self.me.matchday.model.ProperName" method="ProperName" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginTest" method="readFileMetadata" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFprobe" method="readFileMetadata" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="readPlaylistFile" />
+    <pattern value="self.me.matchday.io.TextFileReader" method="readRemote" />
+    <pattern value="self.me.matchday.TestDataCreator" method="readTestHtmlDataSource" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="refreshAllDataSources" />
+    <pattern value="self.me.matchday.api.service.DataSourceService" method="refreshDataSourcesForPlugin" />
+    <pattern value="self.me.matchday.api.service.VideoFileServiceTest" method="refreshVideoFileData" />
+    <pattern value="self.me.matchday.model.video.VideoFileSource" method="removeVideoFilePack" />
+    <pattern value="self.me.matchday.model.video.Resolution" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.type.ResolutionHandler" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.type.ResolutionHandler" method="ResolutionHandler" />
+    <pattern value="self.me.matchday.util.ResourceFileReader" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.DefaultBoltTest" method="reverseZipAndFold" />
+    <pattern value="self.me.matchday.api.service.CompetitionService" method="saveCompetition" />
+    <pattern value="self.me.matchday.api.service.TeamServiceTest" method="saveTeam" />
+    <pattern value="self.me.matchday.api.service.video.StreamDelayAdviceServiceTest" method="scheduleFileServerPings" />
+    <pattern value="self.me.matchday.model.Season" />
+    <pattern value="self.me.matchday.model.Season" method="Season" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.type.SeasonHandler" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.type.SeasonHandler" method="SeasonHandler" />
+    <pattern value="self.me.matchday.model.SecureCookie" />
+    <pattern value="self.me.matchday.model.SecureCookie" method="SecureCookie" />
+    <pattern value="self.me.matchday.api.service.CompetitionServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.plugin.io.diskmanager.DiskManagerTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.EntityCorrectionServiceTest" method="setup" />
+    <pattern value="self.me.matchday.db.EventRepositoryTest" method="setup" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginTest" method="setUp" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginPropertiesTest" method="setUp" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.ICDPluginTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.NetscapeCookiesServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginTest" method="setup" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerQueryBuilderTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.video.StreamDelayAdviceServiceTest" method="setup" />
+    <pattern value="self.me.matchday.db.SynonymRepositoryTest" method="setup" />
+    <pattern value="self.me.matchday.api.controller.CompetitionControllerTest" method="setup" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegTest" method="setUp" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFprobeTest" method="setUp" />
+    <pattern value="self.me.matchday.model.PatternKitPackTest" method="setup" />
+    <pattern value="self.me.matchday.model.PatternKitTest" method="setup" />
+    <pattern value="self.me.matchday.api.controller.TeamControllerTest" method="setup" />
+    <pattern value="self.me.matchday.api.service.ArtworkServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginTest" method="setUp" />
+    <pattern value="self.me.matchday.db.DataSourceRepositoryTest" method="setup" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.EventDataParserTest" method="setup" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManagerTest" method="setup" />
+    <pattern value="self.me.matchday.api.service.HighlightServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.MatchServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.TeamServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.VideoFileSelectorServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.VideoFileServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.model.DataSourceTest" method="setup" />
+    <pattern value="self.me.matchday.model.video.SingleStreamLocator" />
+    <pattern value="self.me.matchday.model.video.SingleStreamLocator" method="SingleStreamLocator" />
+    <pattern value="self.me.matchday.model.SnapshotRequest" />
+    <pattern value="self.me.matchday.api.service.SnapshotService" />
+    <pattern value="self.me.matchday.api.service.SnapshotService" method="SnapshotService" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Str" />
+    <pattern value="self.me.matchday.api.service.video.StreamDelayAdviceService" />
+    <pattern value="self.me.matchday.api.service.video.StreamDelayAdviceService" method="StreamDelayAdviceService" />
+    <pattern value="self.me.matchday.model.video.StreamJobState" />
+    <pattern value="self.me.matchday.model.Synonym" />
+    <pattern value="self.me.matchday.model.Synonym" method="Synonym" />
+    <pattern value="self.me.matchday.model.Team" />
+    <pattern value="self.me.matchday.model.Team" method="Team" />
+    <pattern value="self.me.matchday.api.service.ArtworkServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.controller.CompetitionControllerTest" method="teardown" />
+    <pattern value="self.me.matchday.api.service.CompetitionServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.service.HighlightServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.service.MatchServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.controller.TeamControllerTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.service.TeamServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.service.VideoFileServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorServiceTest" method="tearDown" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorServiceTest" method="tearDownDependencies" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Term" />
+    <pattern value="self.me.matchday.util.AbbreviatorTest" method="testAbbreviate" />
+    <pattern value="self.me.matchday.model.PatternKitPackTest" method="testAddAllPatternKits" />
+    <pattern value="self.me.matchday.api.service.EntityCorrectionServiceTest" method="testAddSynonym" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.EventDataParserTest" method="testBloggerEntryParsing" />
+    <pattern value="self.me.matchday.plugin.fileserver.nitroflare.NitroflarePluginTest" method="testCanGetDownloadUrlWithCookies" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegTest" method="testCommandFormat" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginTest" method="testConcatStreamUris" />
+    <pattern value="self.me.matchday.TestDataCreator" />
+    <pattern value="self.me.matchday.TestDataCreator" method="TestDataCreator" />
+    <pattern value="self.me.matchday.plugin.datasource.TestDataSourcePlugin" />
+    <pattern value="self.me.matchday.plugin.datasource.TestDataSourcePlugin" method="TestDataSourcePlugin" />
+    <pattern value="self.me.matchday.util.URLQueryDecoderTest" method="testDecode" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.ICDPluginTest" method="testDownloadURLParsing" />
+    <pattern value="self.me.matchday.api.service.EntityCorrectionServiceTest" method="testEventEntityCorrection" />
+    <pattern value="self.me.matchday.model.PatternKitPackTest" method="testEventPatternKitPacking" />
+    <pattern value="self.me.matchday.db.DataSourceRepositoryTest" method="testFetchByPluginId" />
+    <pattern value="self.me.matchday.model.PatternKitTest" method="testFileAndManualPatternEquals" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.DefaultBoltTest" method="testFluentStreamFolding" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.FabricTest" method="testFoldingAndZipping" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.DefaultBoltTest" method="testGenericFabric" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFprobeTest" method="testGetFileMetadata" />
+    <pattern value="self.me.matchday.db.SynonymRepositoryTest" method="testGetSynonymForWord" />
+    <pattern value="self.me.matchday.plugin.fileserver.inclouddrive.ICDPluginTest" method="testLoginFunction" />
+    <pattern value="self.me.matchday.db.EventRepositoryTest" method="testMatchingEventRetrieval" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.FabricTest" method="testMultiStreamZip" />
+    <pattern value="self.me.matchday.api.service.EntityCorrectionServiceTest" method="testNonCorrectedFields" />
+    <pattern value="self.me.matchday.api.service.FileServerServiceTest" method="testPluginEnableAndDisable" />
+    <pattern value="self.me.matchday.util.ResourceFileReaderTest" method="testReadPropertiesResourceFile" />
+    <pattern value="self.me.matchday.db.DataSourceRepositoryTest" method="testSaveToDatabase" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginTest" method="testSingleHlsStream" />
+    <pattern value="self.me.matchday.api.service.EntityCorrectionServiceTest" method="testSynonymProperNameRetrieval" />
+    <pattern value="self.me.matchday.db.SynonymRepositoryTest" method="testSynonymRepo" />
+    <pattern value="self.me.matchday.api.service.VideoFileSelectorServiceTest" method="testVideoFileOrder" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.TextParser" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.TextParser" method="TextParser" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.EventDataParserTest" method="validateTestHtml" />
+    <pattern value="self.me.matchday.model.video.VideoFile" />
+    <pattern value="self.me.matchday.model.video.VideoFilePack" />
+    <pattern value="self.me.matchday.model.video.VideoFilePack" method="VideoFilePack" />
+    <pattern value="self.me.matchday.api.service.VideoFileService.VideoFileRefreshTask" />
+    <pattern value="self.me.matchday.api.service.VideoFileSelectorService" />
+    <pattern value="self.me.matchday.api.service.VideoFileService" />
+    <pattern value="self.me.matchday.api.service.VideoFileService" method="VideoFileService" />
+    <pattern value="self.me.matchday.model.video.VideoFileSource" />
+    <pattern value="self.me.matchday.model.video.VideoPlaylist" />
+    <pattern value="self.me.matchday.model.video.VideoPlaylistRenderer" />
+    <pattern value="self.me.matchday.api.resource.VideoPlaylistResource" />
+    <pattern value="self.me.matchday.api.resource.VideoPlaylistResource.VideoPlaylistResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.VideoPlaylistResource.VideoPlaylistResourceAssembler" method="VideoPlaylistResourceAssembler" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingService" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingService" method="VideoStreamingService" />
+    <pattern value="self.me.matchday.model.video.VideoStreamLocator" />
+    <pattern value="self.me.matchday.model.video.VideoStreamLocatorPlaylist" />
+    <pattern value="self.me.matchday.model.video.VideoStreamLocatorPlaylist" method="VideoStreamLocatorPlaylist" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService" method="VideoStreamLocatorPlaylistService" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorService" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorService" method="VideoStreamLocatorService" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManager" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManager" method="VideoStreamManager" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.FabricTest" method="zip" />
+  </component>
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$" />
+  </component>
+  <component name="PWA">
+    <option name="wasEnabledAtLeastOnce" value="true" />
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="jpab" />
+  </component>
+  <component name="UnicodeBrowser">
+    <option name="fontName" value="Consolas" />
+  </component>
+</project>
