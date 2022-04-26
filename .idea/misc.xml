@@ -1125,6 +1125,11 @@
   <component name="ProjectType">
     <option name="id" value="jpab" />
   </component>
+  <component name="SwUserDefinedSpecifications">
+    <option name="specTypeByUrl">
+      <map />
+    </option>
+  </component>
   <component name="UnicodeBrowser">
     <option name="fontName" value="Consolas" />
   </component>
