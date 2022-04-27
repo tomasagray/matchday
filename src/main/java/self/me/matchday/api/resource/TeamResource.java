@@ -66,6 +66,7 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       super(TeamController.class, TeamResource.class);
     }
 
+    @SneakyThrows
     @NotNull
     @Override
     public TeamResource toModel(@NotNull Team team) {

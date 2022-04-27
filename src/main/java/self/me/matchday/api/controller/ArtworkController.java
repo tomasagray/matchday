@@ -19,30 +19,30 @@
 
 package self.me.matchday.api.controller;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.service.ArtworkService;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/artwork")
 public class ArtworkController {
 
+  private static final Logger logger = LogManager.getLogger(ArtworkService.class);
   private final ArtworkService artworkService;
 
   @Autowired
   public ArtworkController(final ArtworkService artworkService) {
     this.artworkService = artworkService;
   }
-
-
-  // Competitions   ==============================================================
 
   /**
    * Publishes the Competition emblem image to the API.
@@ -55,7 +55,7 @@ public class ArtworkController {
       produces = MediaType.IMAGE_PNG_VALUE,
       method = RequestMethod.GET
   )
-  public ResponseEntity<byte[]> fetchCompetitionEmblem(@PathVariable final UUID competitionId) {
+  public ResponseEntity<byte[]> fetchCompetitionEmblem(@PathVariable final UUID competitionId) throws IOException {
 
     return
         artworkService
@@ -79,7 +79,7 @@ public class ArtworkController {
       produces = MediaType.IMAGE_JPEG_VALUE,
       method = RequestMethod.GET
   )
-  public ResponseEntity<byte[]> fetchCompetitionFanart(@PathVariable final UUID competitionId) {
+  public ResponseEntity<byte[]> fetchCompetitionFanart(@PathVariable final UUID competitionId) throws IOException {
 
     return
         artworkService
@@ -104,7 +104,7 @@ public class ArtworkController {
       method = RequestMethod.GET
   )
   public ResponseEntity<byte[]> fetchCompetitionMonochromeEmblem(
-      @PathVariable final UUID competitionId) {
+      @PathVariable final UUID competitionId) throws IOException {
 
     return
         artworkService
@@ -128,7 +128,7 @@ public class ArtworkController {
       produces = MediaType.IMAGE_JPEG_VALUE,
       method = RequestMethod.GET
   )
-  public ResponseEntity<byte[]> fetchCompetitionLandscape(@PathVariable final UUID competitionId) {
+  public ResponseEntity<byte[]> fetchCompetitionLandscape(@PathVariable final UUID competitionId) throws IOException {
 
     return
         artworkService
@@ -141,8 +141,6 @@ public class ArtworkController {
             .orElse(ResponseEntity.notFound().build());
   }
 
-  // Teams   ==============================================================
-
   /**
    * Publishes the Team emblem image to the API.
    *
@@ -154,7 +152,7 @@ public class ArtworkController {
       produces = MediaType.IMAGE_PNG_VALUE,
       method = RequestMethod.GET
   )
-  public ResponseEntity<byte[]> fetchTeamEmblem(@PathVariable final UUID teamId) {
+  public ResponseEntity<byte[]> fetchTeamEmblem(@PathVariable final UUID teamId) throws IOException {
 
     return
         artworkService
@@ -178,7 +176,7 @@ public class ArtworkController {
       produces = MediaType.IMAGE_JPEG_VALUE,
       method = RequestMethod.GET
   )
-  public ResponseEntity<byte[]> fetchTeamFanart(@PathVariable final UUID teamId) {
+  public ResponseEntity<byte[]> fetchTeamFanart(@PathVariable final UUID teamId) throws IOException {
 
     return
         artworkService
@@ -189,5 +187,13 @@ public class ArtworkController {
                     .contentType(MediaType.IMAGE_JPEG)
                     .body(image))
             .orElse(ResponseEntity.notFound().build());
+  }
+
+  @ExceptionHandler(IOException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ResponseEntity<String> handleIoException(@NotNull IOException e) {
+    String message = e.getMessage();
+    logger.error("Error reading data from disk: {}", message);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
   }
 }

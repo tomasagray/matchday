@@ -69,6 +69,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       super(CompetitionController.class, CompetitionResource.class);
     }
 
+    @SneakyThrows
     @NotNull
     @Override
     public CompetitionResource toModel(@NotNull Competition competition) {

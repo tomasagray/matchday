@@ -34,7 +34,7 @@ public class ArtworkServiceLog {
     result.ifPresentOrElse(
         img -> {
           if (defaultSizes.contains(img.length)) {
-            logger.info("Emblem not found for {}: {}; returning default", actionType, arg);
+            logger.info("Emblem not found for {}: {}; using default", actionType, arg);
           } else {
             logger.info("Emblem found for {}: {}, size: {}", actionType, arg, img.length);
           }

@@ -39,6 +39,7 @@ import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -238,13 +239,11 @@ public class VideoStreamingService {
   }
 
   private void readBufferFromDisk(@NotNull DataBuffer buffer, @NotNull StringBuilder sb) {
-    try {
-      final InputStream inputStream = buffer.asInputStream();
+    try (final InputStream inputStream = buffer.asInputStream()) {
       final String data = new String(inputStream.readAllBytes());
       sb.append(data);
     } catch (IOException e) {
-      e.printStackTrace();    // todo - handle this better!
-      throw new RuntimeException(e);
+      throw new UncheckedIOException(e);
     }
   }
 

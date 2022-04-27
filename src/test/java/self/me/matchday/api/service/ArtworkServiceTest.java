@@ -33,6 +33,7 @@ import self.me.matchday.model.Competition;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -80,7 +81,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validate default team emblem retrieval")
-  void fetchDefaultTeamEmblem() {
+  void fetchDefaultTeamEmblem() throws IOException {
 
     final UUID teamId = testTeam.getTeamId();
     Log.i(LOG_TAG, "Getting emblem artwork for team ID: " + teamId);
@@ -95,7 +96,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validate default team fanart retrieval")
-  void fetchDefaultTeamFanart() {
+  void fetchDefaultTeamFanart() throws IOException {
 
     final Optional<byte[]> optionalBytes = artworkService.fetchTeamFanart(testTeam.getTeamId());
     assertThat(optionalBytes).isPresent();
@@ -109,7 +110,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validate retrieval of default competition emblem")
-  void fetchCompetitionEmblem() {
+  void fetchCompetitionEmblem() throws IOException {
 
     final Optional<byte[]> optionalBytes =
         artworkService.fetchCompetitionEmblem(testCompetition.getCompetitionId());
@@ -125,7 +126,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validation for default competition fanart retrieval")
-  void fetchCompetitionFanart() {
+  void fetchCompetitionFanart() throws IOException {
 
     final Optional<byte[]> optionalBytes =
         artworkService.fetchCompetitionFanart(testCompetition.getCompetitionId());
@@ -140,7 +141,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validate default competition monochrome emblem lookup")
-  void fetchCompetitionMonochromeEmblem() {
+  void fetchCompetitionMonochromeEmblem() throws IOException {
 
     final Optional<byte[]> optionalBytes =
         artworkService.fetchCompetitionMonochromeEmblem(testCompetition.getCompetitionId());
@@ -156,7 +157,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validate default competition landscape art retrieval")
-  void fetchCompetitionLandscape() {
+  void fetchCompetitionLandscape() throws IOException {
 
     final Optional<byte[]> optionalBytes =
         artworkService.fetchCompetitionLandscape(testCompetition.getCompetitionId());

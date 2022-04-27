@@ -4,6 +4,21 @@
       "name": "video-resources.file-storage-location",
       "type": "java.lang.String",
       "description": "Default file storage location for video files."
+    },
+    {
+      "name": "artwork.default-fanart",
+      "type": "java.lang.String",
+      "description": "Fanart used when specific art is not available."
+    },
+    {
+      "name": "artwork.default-team-emblem",
+      "type": "java.lang.String",
+      "description": "Default team emblem art when specific art is not available."
+    },
+    {
+      "name": "artwork.default-competition-emblem",
+      "type": "java.lang.String",
+      "description": "Default competition emblem art when specific art is not available."
     }
   ]
 }
