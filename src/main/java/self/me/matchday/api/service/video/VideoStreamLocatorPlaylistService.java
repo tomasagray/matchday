@@ -87,7 +87,7 @@ public class VideoStreamLocatorPlaylistService {
       final String msg =
           String.format(
               "Could not create VideoStreamLocatorPlaylist from file source: %s; has no video files!",
-              fileSource);
+              fileSource.getFileSrcId());
       throw new IllegalArgumentException(msg);
     }
 

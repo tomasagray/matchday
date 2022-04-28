@@ -45,7 +45,9 @@ public class VideoFile implements Comparable<VideoFile> {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @Column(columnDefinition = "BINARY(16)")
   private UUID fileId;
+
   private URL externalUrl;
   private PartIdentifier title;
 
