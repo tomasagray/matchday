@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,13 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpCookie;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.util.Log;
+import self.me.matchday.util.ResourceFileReader;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,8 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for Netscape cookie parsing service")
 class NetscapeCookiesServiceTest {
 
-  private static final String LOG_TAG = "NetscapeCookiesServiceTest";
-  private static final String COOKIE_FILE = "src/test/secure_resources/nitroflare.cookies";
+  private static final Logger logger = LogManager.getLogger(NetscapeCookiesServiceTest.class);
+  private static final String COOKIE_FILEPATH = "data/test-netscape-cookies.txt";
 
   private static NetscapeCookiesService cookiesService;
   private static String cookieFile;
@@ -53,13 +52,11 @@ class NetscapeCookiesServiceTest {
 
     NetscapeCookiesServiceTest.cookiesService = cookiesService;
 
-    // Read test resource from disk
-    final BufferedReader reader = new BufferedReader(new FileReader(COOKIE_FILE));
-    cookieFile = reader.lines().collect(Collectors.joining("\n"));
-
-    // Ensure file was read successfully
+    logger.info("Attempting to read cookie data from: {}", COOKIE_FILEPATH);
+    cookieFile =
+        ResourceFileReader.readTextResource(NetscapeCookiesServiceTest.class, COOKIE_FILEPATH);
     assertThat(cookieFile).isNotNull().isNotEmpty();
-    Log.i(LOG_TAG, "Read cookie data from file: " + COOKIE_FILE);
+    logger.info("Read cookie data from file: {}", COOKIE_FILEPATH);
   }
 
   @Test
@@ -73,10 +70,11 @@ class NetscapeCookiesServiceTest {
 
     actualCookies.forEach(
         httpCookie -> {
-          Log.i(LOG_TAG, "Testing cookie:\n" + httpCookie + "\n");
+          logger.info("Testing cookie:\n{}", httpCookie);
           assertThat(httpCookie).isNotNull();
           assertThat(httpCookie.getName()).isNotNull().isNotEmpty();
           assertThat(httpCookie.getValue()).isNotNull().isNotEmpty();
+          logger.info("Cookie passed inspection.");
         });
   }
 }

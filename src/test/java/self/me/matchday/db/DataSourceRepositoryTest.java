@@ -19,6 +19,8 @@
 
 package self.me.matchday.db;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +35,6 @@ import self.me.matchday.model.Event;
 import self.me.matchday.model.PatternKitPack;
 import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.util.JsonParser;
-import self.me.matchday.util.Log;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Validation of DataSource repository")
 class DataSourceRepositoryTest {
 
-  private static final String LOG_TAG = "DataSourceRepositoryTest";
+  private static final Logger logger = LogManager.getLogger(DataSourceRepositoryTest.class);
 
   private static TestDataCreator testDataCreator;
   private static DataSourceRepository repository;
@@ -67,13 +68,14 @@ class DataSourceRepositoryTest {
     // update ID
     dataSource.setDataSourceId(savedDataSource.getDataSourceId());
 
-    Log.i(LOG_TAG, "Saved DataSource: " + savedDataSource);
+    logger.info("Saved DataSource: {}", savedDataSource);
     assertThat(savedDataSource).isNotNull();
     assertThat(savedDataSource.getDataSourceId()).isEqualTo(dataSource.getDataSourceId());
     assertThat(savedDataSource.getPluginId()).isEqualTo(dataSource.getPluginId());
     assertThat(savedDataSource.getClazz()).isEqualTo(dataSource.getClazz());
     assertThat(savedDataSource.getBaseUri()).isEqualTo(dataSource.getBaseUri());
     assertThat(savedPkp.getPatternKits().size()).isEqualTo(readPkp.getPatternKits().size());
+    logger.info("Saved Data Source was not corrupted");
   }
 
   @SuppressWarnings("unchecked cast")
@@ -85,18 +87,19 @@ class DataSourceRepositoryTest {
     final PlaintextDataSource<Event> eventDataSource =
         (PlaintextDataSource<Event>) testDataCreator.readTestJsonDataSource();
     final PlaintextDataSource<Event> savedDataSource = repository.save(eventDataSource);
-    Log.i(LOG_TAG, "Saved DataSource:\n" + savedDataSource);
+    logger.info("Saved DataSource:\n{}", savedDataSource);
 
-    Log.i(LOG_TAG, "Attempting to fetch test DataSource by Plugin ID...");
+    logger.info("Attempting to fetch test DataSource by Plugin ID...");
     final List<DataSource<?>> dataSourcesByPluginId =
         repository.findDataSourcesByPluginId(eventDataSource.getPluginId());
     final int dataSourceCount = dataSourcesByPluginId.size();
     assertThat(dataSourceCount).isNotZero();
 
-    Log.i(LOG_TAG, String.format("Found: %d DataSources...", dataSourceCount));
+    logger.info("Found: {} DataSources...", dataSourceCount);
+    // use most recent data source
     final PlaintextDataSource<Event> testDataSource =
-        (PlaintextDataSource<Event>) dataSourcesByPluginId.get(0);
-    Log.i(LOG_TAG, "Testing retrieved DataSource:\n" + JsonParser.toJson(testDataSource));
+        (PlaintextDataSource<Event>) dataSourcesByPluginId.get(dataSourceCount - 1);
+    logger.info("Testing retrieved DataSource:\n{}", JsonParser.toJson(testDataSource));
 
     assertThat(testDataSource.getPatternKitPack().getPatternKitsFor(Event.class).size())
         .isEqualTo(eventDataSource.getPatternKitPack().getPatternKitsFor(Event.class).size());

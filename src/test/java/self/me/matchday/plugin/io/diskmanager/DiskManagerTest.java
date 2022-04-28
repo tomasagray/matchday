@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.io.diskmanager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,14 +31,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.model.FileSize;
-import self.me.matchday.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,10 +47,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("DiskManagerTest - Verify DiskManager plugin")
 class DiskManagerTest {
 
-  // Test constants
-  private static final String LOG_TAG = "DiskManagerTest";
+  private static final Logger logger = LogManager.getLogger(DiskManagerTest.class);
 
-  // Test criteria
   private static final Long SPACE_ENOUGH_FOR = FileSize.ofGigabytes(1);
   private static final Long TOO_MUCH_SPACE = FileSize.ofGigabytes(Long.MAX_VALUE);
   public static final int TEST_DATA_LINES = 10_000;
@@ -56,30 +56,34 @@ class DiskManagerTest {
   private static DiskManager diskManager;
 
   @BeforeAll
-  static void setUp(@Autowired final DiskManager diskManager) {
+  static void setUp(@Autowired @NotNull DiskManager diskManager) throws IOException {
+
     DiskManagerTest.diskManager = diskManager;
+
+    // ensure test location exists
+    Path storagePath = diskManager.getStorageLocation().toAbsolutePath();
+    if (!Files.exists(storagePath)) {
+      logger.warn("Test storage location: {} not found!\nCreating...", storagePath);
+      Files.createDirectories(storagePath);
+      // check again...
+      assertThat(Files.exists(storagePath)).isTrue();
+    }
   }
 
   @Test
   @DisplayName("Ensure accurately detects adequate free space")
   void isSpaceAvailable() throws IOException {
 
-    boolean minSpaceAvailable;
+    boolean isSpaceAvailable;
     boolean tooMuchSpaceAvailable;
 
-    // test
-    minSpaceAvailable = diskManager.isSpaceAvailable(SPACE_ENOUGH_FOR);
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Ensuring at least %s bytes free... %s", SPACE_ENOUGH_FOR, minSpaceAvailable));
-    assertThat(minSpaceAvailable).isTrue();
+    logger.info("Ensuring at least {} bytes free...", SPACE_ENOUGH_FOR);
+    isSpaceAvailable = diskManager.isSpaceAvailable(SPACE_ENOUGH_FOR);
+    logger.info("Found  enough space? {}", isSpaceAvailable);
+    assertThat(isSpaceAvailable).isTrue();
 
     tooMuchSpaceAvailable = diskManager.isSpaceAvailable(TOO_MUCH_SPACE);
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Ensuring there is NOT %s bytes free... %s", TOO_MUCH_SPACE, tooMuchSpaceAvailable));
+    logger.info("Ensuring there is NOT too much (more than {}) free space", TOO_MUCH_SPACE);
     assertThat(tooMuchSpaceAvailable).isFalse();
   }
 
@@ -88,7 +92,7 @@ class DiskManagerTest {
   void getFreeDiskSpace() {
 
     final Long freeDiskSpace = diskManager.getFreeDiskSpace();
-    Log.i(LOG_TAG, "Found free disk space: " + freeDiskSpace);
+    logger.info("Found free disk space: {}", freeDiskSpace);
 
     // Ensure value is logical
     Assertions.assertNotEquals(0, freeDiskSpace);
@@ -105,11 +109,8 @@ class DiskManagerTest {
       long actualUsedSpace;
       final long expectedMinUsedSpace = testData.length();
       actualUsedSpace = diskManager.getUsedSpace();
-      Log.i(
-          LOG_TAG,
-          String.format(
-              "Found %s bytes used in:\n\t%s\\",
-              actualUsedSpace, diskManager.getStorageLocation()));
+      logger.info(
+          "Found {} bytes used in:\n\t{}\\", actualUsedSpace, diskManager.getStorageLocation());
 
       // tests
       assertThat(actualUsedSpace).isGreaterThanOrEqualTo(expectedMinUsedSpace);
@@ -118,7 +119,7 @@ class DiskManagerTest {
     } finally {
       if (testData != null) {
         final boolean deleted = testData.delete();
-        Log.i(LOG_TAG, "Test successfully deleted test data? " + deleted);
+        logger.info("Test successfully deleted test data? " + deleted);
         assertThat(deleted).isTrue();
       }
     }
@@ -127,20 +128,16 @@ class DiskManagerTest {
   @NotNull
   private File createDiskSpaceTestData() throws IOException {
 
-    final File testDataFile =
-        new File(
-            Paths.get(diskManager.getStorageLocation().toAbsolutePath().toString(), "TEST_FILE.txt")
-                .toFile()
-                .getAbsolutePath());
+    Path storagePath = diskManager.getStorageLocation().toAbsolutePath();
+    final File testDataFile = new File(storagePath.resolve("TEST_FILE.txt").toString());
     final boolean fileCreated = testDataFile.createNewFile();
-    Log.i(LOG_TAG, String.format("Created file %s? %s", testDataFile, fileCreated));
+    logger.info(String.format("Created file %s? %s", testDataFile, fileCreated));
 
     final String data = "All work and no play makes Jack a dull boy.\n".repeat(TEST_DATA_LINES);
     final OutputStreamWriter writer =
         new OutputStreamWriter(new FileOutputStream(testDataFile), StandardCharsets.UTF_8);
     writer.write(data);
     writer.close();
-
     return testDataFile;
   }
 }

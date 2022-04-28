@@ -1,0 +1,13 @@
+# Netscape HTTP Cookie File
+# http://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file!  Do not edit.
+
+www.microsoft.com	FALSE	/en-us/p/lively-wallpaper	FALSE	0	O4ERdSSO	1
+docs.microsoft.com	FALSE	/	TRUE	1682558008	MicrosoftApplicationsTelemetryDeviceId	9bf3394d-7ff5-4baa-938f-b237e8454a69
+.microsoft.com	TRUE	/	TRUE	1684718014	MUID	51bf859e9fae4e36a832dd11e8361a0f
+.c1.microsoft.com	TRUE	/	TRUE	1684718014	SRM_I	51bf859e9fae4e36a832dd11e8361a0f
+.microsoft.com	TRUE	/	TRUE	1679033084	MC1	GUID=51bf859e9fae4e36a832dd11e8361a0f&HASH=a55f&LV=222203&V=4&LU=16422297082868
+docs.microsoft.com	FALSE	/	TRUE	1679033085	MsFPC	GUID=51bf859e9fae4e36a832dd11e8361a0f&HASH=a25f&LV=202233&V=4&LU=1643321082868
+.developer.microsoft.com	TRUE	/	TRUE	0	ARRAffinitySameSite	51bf859e9fae4e36a832dd11e8361a0f51bf859e9fae4e36a832dd11e8361a0f
+www.microsoft.com	FALSE	/	TRUE	1679036293	X-FD-FEATURES	ids=51bf859e9fae4e36a832dd11e8361a0f51bf859e9fae4e36a832dd11e8361a0f51bf859e9fae4e36a832dd11e8361a0f51bf859e9fae4e36a832dd11e8361a0f
+www.microsoft.com	FALSE	/	TRUE	1679036291	cartMuid	51bf859e9fae4e36a832dd11e8361a0f
