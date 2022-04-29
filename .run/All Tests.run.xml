@@ -7,7 +7,8 @@
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="package" />
-    <option name="VM_PARAMETERS" value="-ea -javaagent:C:\Users\tomas\.gradle\caches\modules-2\files-2.1\org.aspectj\aspectjweaver\1.9.8\860849bd5fbb047279d138006f0fe613bf00962\aspectjweaver-1.9.8.jar -javaagent:C:\Users\tomas\.gradle\caches\modules-2\files-2.1\org.springframework\spring-instrument\5.3.16\f4aff1bc5f5f99d666434381ac5aaa60048ed13e\spring-instrument-5.3.16.jar" />
+    <option name="VM_PARAMETERS"
+            value="-ea -javaagent:C:\Users\tomas\.gradle\caches\modules-2\files-2.1\org.aspectj\aspectjweaver\1.9.9.1\dcd2703279a94ad909fa3f3d08671cb0f2dabf7\aspectjweaver-1.9.9.1.jar -javaagent:C:\Users\tomas\.gradle\caches\modules-2\files-2.1\org.springframework\spring-instrument\5.3.19\2fccf203fa9843e7df84d81b0f6d4a5f093c5c83\spring-instrument-5.3.19.jar"/>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

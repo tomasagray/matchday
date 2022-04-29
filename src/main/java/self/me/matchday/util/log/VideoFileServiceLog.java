@@ -26,7 +26,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import self.me.matchday.api.service.VideoFileService;
+import self.me.matchday.api.service.video.VideoFileService;
 import self.me.matchday.model.video.VideoFile;
 
 import java.net.URL;
@@ -39,7 +39,7 @@ public class VideoFileServiceLog {
 
   private static final Logger logger = LogManager.getLogger(VideoFileService.class);
 
-  @Around("execution(* self.me.matchday.api.service.VideoFileService.refreshVideoFile(..))")
+  @Around("execution(* self.me.matchday.api.service.video.VideoFileService.refreshVideoFile(..))")
   public Object logRefreshVideoFile(@NotNull ProceedingJoinPoint joinPoint) throws Throwable {
 
     final VideoFile arg = (VideoFile) joinPoint.getArgs()[0];
@@ -56,7 +56,7 @@ public class VideoFileServiceLog {
     return result;
   }
 
-  @Around("execution(* self.me.matchday.api.service.VideoFileService.doVideoFileRefresh(..))")
+  @Around("execution(* self.me.matchday.api.service.video.VideoFileService.doVideoFileRefresh(..))")
   public Object logDoRefreshTask(@NotNull ProceedingJoinPoint jp) throws Throwable {
 
     final VideoFile videoFile = (VideoFile) jp.getArgs()[0];

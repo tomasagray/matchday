@@ -32,7 +32,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.service.EventService;
-import self.me.matchday.api.service.VideoFileSelectorService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.video.*;
 import self.me.matchday.util.Log;

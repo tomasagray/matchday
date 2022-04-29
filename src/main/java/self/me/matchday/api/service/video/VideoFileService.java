@@ -17,13 +17,14 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.api.service;
+package self.me.matchday.api.service.video;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
+import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;

@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
+import self.me.matchday.api.service.video.VideoFileService;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;

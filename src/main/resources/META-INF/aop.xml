@@ -28,7 +28,7 @@
         <include within="self.me.matchday.api.service.EntityCorrectionService"/>
         <include within="self.me.matchday.api.service.EventService"/>
         <include within="self.me.matchday.api.service.FileServerService"/>
-        <include within="self.me.matchday.api.service.VideoFileService"/>
+        <include within="self.me.matchday.api.service.video.VideoFileService"/>
         <include within="self.me.matchday.plugin.datasource.parsing.EventDataParser"/>
 
         <include within="self.me.matchday.util.log.*"/>

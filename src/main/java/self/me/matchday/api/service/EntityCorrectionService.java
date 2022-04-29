@@ -126,10 +126,17 @@ public class EntityCorrectionService {
     final String name = getName(entity);
     return getEntityByName(entity, name)
         .or(
-            () ->
-                synonymRepository
-                    .findSynonymByNameContains(name)
-                    .flatMap(synonym -> getEntityByName(entity, synonym.getProperName().getName())))
+            () -> {
+              System.out.println("Name is : " + name);
+              System.out.println("Type is: " + name.getClass());
+              Optional<Synonym> synonym1 = synonymRepository.findSynonymByNameContains(name);
+              System.out.println("Found Synonym: " + synonym1);
+              Optional<T> t =
+                  synonym1.flatMap(
+                      synonym -> getEntityByName(entity, synonym.getProperName().getName()));
+              System.out.println("Result: " + t);
+              return t;
+            })
         .orElse(entity);
   }
 
@@ -146,6 +153,7 @@ public class EntityCorrectionService {
 
   @SuppressWarnings("unchecked cast")
   private <T> Optional<T> getEntityByName(@NotNull T entity, @NotNull String name) {
+    System.out.println("Getting entity for: " + name + ", entity: " + entity);
     if (entity instanceof Competition) {
       return (Optional<T>) competitionService.fetchCompetitionByName(name);
     } else if (entity instanceof Team) {
