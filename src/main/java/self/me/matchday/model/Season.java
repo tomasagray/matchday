@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -39,7 +39,6 @@ import java.util.Objects;
 @Embeddable
 public final class Season implements Serializable {
 
-  private static final String LOG_TAG = "SeasonClass";
   private static final long serialVersionUID = 123456L; // for cross-platform serialization
 
   // Default parameters
@@ -54,7 +53,6 @@ public final class Season implements Serializable {
   private static final LocalDate END_DATE = LocalDate.of(DEFAULT_YEAR, Month.MAY, DEFAULT_END_DAY);
   private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
-  //  @Id @GeneratedValue private Long seasonId;
   private final LocalDate startDate;
   private final LocalDate endDate;
 
