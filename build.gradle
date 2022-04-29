@@ -18,7 +18,7 @@
  */
 
 plugins {
-    id 'org.springframework.boot' version '2.5.2'
+    id 'org.springframework.boot' version '2.6.7'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
@@ -38,7 +38,7 @@ repositories {
 }
 
 dependencies {
-    def spring_version = '2.6.4'
+    def spring_version = '2.6.7'
 
     implementation 'org.jsoup:jsoup:1.14.3'
     implementation 'com.google.code.gson:gson:2.9.0'
@@ -48,9 +48,9 @@ dependencies {
     implementation 'org.jetbrains:annotations:23.0.0'
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$spring_version"
     // Lombok
-    implementation 'org.projectlombok:lombok:1.18.22'
-    testImplementation 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    implementation 'org.projectlombok:lombok:1.18.24'
+    testImplementation 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
     // SpringBoot
     implementation "org.springframework.boot:spring-boot-starter-data-jpa:$spring_version"
@@ -60,9 +60,9 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-webflux:$spring_version"
     implementation "org.springframework.boot:spring-boot-starter-hateoas:$spring_version"
     implementation "org.springframework.boot:spring-boot-starter-aop:$spring_version"
-    implementation "org.springframework:spring-instrument:5.3.16"
-    implementation 'org.aspectj:aspectjrt:1.9.8'
-    implementation 'org.aspectj:aspectjweaver:1.9.8'
+    implementation 'org.springframework:spring-instrument:5.3.19'
+    implementation 'org.aspectj:aspectjrt:1.9.9.1'
+    implementation 'org.aspectj:aspectjweaver:1.9.9.1'
 
     // MySQL
     implementation 'mysql:mysql-connector-java:8.0.28'
@@ -79,7 +79,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test:$spring_version") {
         exclude group: 'org.junit.vintage', module: 'unit-vintage-engine'
     }
-    testImplementation 'org.springframework.security:spring-security-test:5.6.2'
+    testImplementation 'org.springframework.security:spring-security-test:5.6.3'
     testImplementation "org.junit.jupiter:junit-jupiter:$jupiter_version"
     testImplementation "org.junit.jupiter:junit-jupiter-params:$jupiter_version"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
