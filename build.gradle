@@ -1,22 +1,3 @@
-/*
- * Copyright (c) 2021.
- *
- * This file is part of Matchday.
- *
- * Matchday is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Matchday is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 plugins {
     id 'org.springframework.boot' version '2.6.7'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
@@ -40,19 +21,7 @@ repositories {
 dependencies {
     def spring_version = '2.6.7'
 
-    implementation 'org.jsoup:jsoup:1.14.3'
-    implementation 'com.google.code.gson:gson:2.9.0'
-    implementation 'org.brotli:dec:0.1.2'
-
-    // Annotations
-    implementation 'org.jetbrains:annotations:23.0.0'
-    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$spring_version"
-    // Lombok
-    implementation 'org.projectlombok:lombok:1.18.24'
-    testImplementation 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
-
-    // SpringBoot
+    // Spring Boot
     implementation "org.springframework.boot:spring-boot-starter-data-jpa:$spring_version"
     implementation "org.springframework.boot:spring-boot-starter-security:$spring_version"
     implementation "org.springframework.boot:spring-boot-starter-web:$spring_version"
@@ -64,14 +33,28 @@ dependencies {
     implementation 'org.aspectj:aspectjrt:1.9.9.1'
     implementation 'org.aspectj:aspectjweaver:1.9.9.1'
 
-    // MySQL
+    // Database
     implementation 'mysql:mysql-connector-java:8.0.28'
+    implementation 'org.flywaydb:flyway-mysql:8.5.9'
+    implementation 'org.flywaydb:flyway-core:8.5.9'
+    implementation 'com.h2database:h2'
+
+    // Annotations
+    implementation 'org.jetbrains:annotations:23.0.0'
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$spring_version"
+    // Lombok
+    implementation 'org.projectlombok:lombok:1.18.24'
+    testImplementation 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    // Parsing
+    implementation 'org.jsoup:jsoup:1.14.3'
+    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'org.brotli:dec:0.1.2'
 
     // Development
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    implementation 'org.flywaydb:flyway-core:7.11.2'
-    implementation 'com.h2database:h2'
-    // Remove to eliminate reflective access warning per: https://stackoverflow.com/a/61007739/4871490
+    // Remove to eliminate reflective access warning, per: https://stackoverflow.com/a/61007739/4871490
     developmentOnly "org.springframework.boot:spring-boot-devtools:$spring_version"
 
     // Testing
