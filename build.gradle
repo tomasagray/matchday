@@ -1,3 +1,9 @@
+buildscript {
+    dependencies {
+        classpath "net.uberfoo.gradle:gradle-aspectj:2.2"
+    }
+}
+
 plugins {
     id 'org.springframework.boot' version '2.6.7'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
@@ -14,10 +20,6 @@ configurations {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     def spring_version = '2.6.7'
 
@@ -30,6 +32,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-hateoas:$spring_version"
     implementation "org.springframework.boot:spring-boot-starter-aop:$spring_version"
     implementation 'org.springframework:spring-instrument:5.3.19'
+    implementation 'org.springframework:spring-aspects:5.3.19'
     implementation 'org.aspectj:aspectjrt:1.9.9.1'
     implementation 'org.aspectj:aspectjweaver:1.9.9.1'
 
@@ -76,4 +79,8 @@ bootRun {
 
 test {
     useJUnitPlatform()
+}
+
+repositories {
+    mavenCentral()
 }
