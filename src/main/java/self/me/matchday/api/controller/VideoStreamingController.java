@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -123,8 +123,7 @@ public class VideoStreamingController {
       @PathVariable("fileSrcId") UUID fileSrcId,
       @PathVariable("partId") Long partId) {
 
-    final Optional<String> playlistFile =
-        streamingService.readPlaylistFile(eventId, fileSrcId, partId);
+    final Optional<String> playlistFile = streamingService.readPlaylistFile(partId);
     return ResponseEntity.of(playlistFile);
   }
 
@@ -139,7 +138,7 @@ public class VideoStreamingController {
       @PathVariable("segmentId") String segmentId) {
 
     final Resource videoSegmentResource =
-        streamingService.getVideoSegmentResource(eventId, fileSrcId, partId, segmentId);
+        streamingService.getVideoSegmentResource(partId, segmentId);
     return videoSegmentResource != null
         ? ResponseEntity.ok(videoSegmentResource)
         : ResponseEntity.notFound().build();

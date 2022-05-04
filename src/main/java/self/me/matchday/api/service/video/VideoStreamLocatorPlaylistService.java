@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -30,7 +30,6 @@ import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-import self.me.matchday.util.Log;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -39,10 +38,8 @@ import java.util.UUID;
 
 @Service
 @PropertySource("classpath:video.properties")
+@Transactional
 public class VideoStreamLocatorPlaylistService {
-
-  private static final String LOG_TAG = "VideoStreamPlaylistService";
-
   private final VideoStreamLocatorPlaylistRepo playlistRepo;
   private final VideoStreamLocatorService videoStreamLocatorService;
   private final VideoFileSelectorService videoFileSelectorService;
@@ -76,39 +73,26 @@ public class VideoStreamLocatorPlaylistService {
    * @param fileSource The VideoFileSource from which the stream will be created
    * @return The playlist of video streams
    */
-  @Transactional
   public VideoStreamLocatorPlaylist createVideoStreamPlaylist(
       @NotNull final VideoFileSource fileSource) {
 
-    // Get list of "best" VideoFiles for each event part
     final VideoFilePack playlistFiles = videoFileSelectorService.getPlaylistFiles(fileSource);
     if (playlistFiles == null || playlistFiles.size() == 0) {
-      final String msg =
-          String.format(
-              "Could not create VideoStreamLocatorPlaylist from file source: %s; has no video files!",
-              fileSource.getFileSrcId());
-      throw new IllegalArgumentException(msg);
+      throw new EmptyVideoFileSourceException(fileSource);
     }
 
-    // Create storage path
     final UUID fileSrcId = fileSource.getFileSrcId();
     final Path storageLocation = fileStorageLocation.resolve(fileSrcId.toString());
-    // Create stream playlist
     final VideoStreamLocatorPlaylist streamPlaylist =
         new VideoStreamLocatorPlaylist(fileSource, storageLocation);
 
-    // Create locator for each file stream
     playlistFiles.forEach(
         (title, videoFile) -> {
-          // Create storage path for each task
           final VideoStreamLocator playlistLocator =
               videoStreamLocatorService.createStreamLocator(storageLocation, videoFile);
-          // Add  playlist locator to VideoStreamPlaylist
           streamPlaylist.addStreamLocator(playlistLocator);
         });
-    // Save VideoStreamPlaylist & return
-    Log.i(LOG_TAG, "Saved VideoStreamPlaylist: " + playlistRepo.saveAndFlush(streamPlaylist));
-    return streamPlaylist;
+    return playlistRepo.saveAndFlush(streamPlaylist);
   }
 
   /**

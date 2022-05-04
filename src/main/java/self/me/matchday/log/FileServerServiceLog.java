@@ -17,34 +17,34 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.util.log;
+package self.me.matchday.log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import self.me.matchday.plugin.datasource.parsing.EventDataParser;
-import self.me.matchday.util.JsonParser;
+import self.me.matchday.api.service.FileServerService;
 
 @Aspect
 @Component
-public class EventDataParserLogging {
+public class FileServerServiceLog {
 
-  static final Logger logger = LogManager.getLogger(EventDataParser.class);
+  private static final Logger logger = LogManager.getLogger(FileServerService.class);
 
-  @Before(
-      "execution(* self.me.matchday.plugin.datasource.parsing.EventDataParser.getEntityStream(..))")
-  public void logAroundEventParsing(@NotNull JoinPoint jp) {
+  @AfterReturning(
+      value =
+          "execution(* self.me.matchday.api.service.FileServerService.getFileServerPlugins(..))",
+      returning = "allPlugins")
+  public void logGetAllFileServerPlugins(@NotNull Object allPlugins) {
+    logger.info("Found all FileServerPlugins: {}", allPlugins);
+  }
 
-    final Object[] args = jp.getArgs();
-    if (args.length == 2) {
-      logger.trace(
-          "Attempting to get Stream<Event> from data:\n{}\nUsing DataSource:\n{}",
-          args[1],
-          JsonParser.toJson(args[0]));
-    }
+  @AfterReturning(
+      value = "execution(* self.me.matchday.api.service.FileServerService.getEnabledPlugins(..))",
+      returning = "enabledPlugins")
+  public void logGetEnabledFileServerPlugins(@NotNull Object enabledPlugins) {
+    logger.info("Found ENABLED FileServerPlugins: {}", enabledPlugins);
   }
 }

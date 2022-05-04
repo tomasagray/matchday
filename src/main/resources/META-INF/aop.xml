@@ -29,18 +29,24 @@
         <include within="self.me.matchday.api.service.EventService"/>
         <include within="self.me.matchday.api.service.FileServerService"/>
         <include within="self.me.matchday.api.service.video.VideoFileService"/>
+        <include within="self.me.matchday.api.service.video.VideoStreamingService"/>
+        <include within="self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService"/>
+        <include within="self.me.matchday.api.service.video.VideoStreamManager"/>
         <include within="self.me.matchday.plugin.datasource.parsing.EventDataParser"/>
 
-        <include within="self.me.matchday.util.log.*"/>
+        <include within="self.me.matchday.log.*"/>
     </weaver>
 
     <aspects>
         <!-- weave in just these aspects -->
-        <aspect name="self.me.matchday.util.log.ArtworkServiceLog"/>
-        <aspect name="self.me.matchday.util.log.CompetitionServiceLog"/>
-        <aspect name="self.me.matchday.util.log.DataSourceServiceLog"/>
-        <aspect name="self.me.matchday.util.log.VideoFileServiceLog"/>
-        <aspect name="self.me.matchday.util.log.FileServerServiceLog"/>
-        <aspect name="self.me.matchday.util.log.EventServiceLog"/>
+        <aspect name="self.me.matchday.log.ArtworkServiceLog"/>
+        <aspect name="self.me.matchday.log.CompetitionServiceLog"/>
+        <aspect name="self.me.matchday.log.DataSourceServiceLog"/>
+        <aspect name="self.me.matchday.log.EventServiceLog"/>
+        <aspect name="self.me.matchday.log.FileServerServiceLog"/>
+        <aspect name="self.me.matchday.log.VideoFileServiceLog"/>
+        <aspect name="self.me.matchday.log.VideoStreamingServiceLog"/>
+        <aspect name="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog"/>
+        <aspect name="self.me.matchday.log.VideoStreamManagerLog"/>
     </aspects>
 </aspectj>

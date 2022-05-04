@@ -209,10 +209,7 @@ class VideoStreamingServiceTest {
 
     // Read test playlist file
     final Optional<String> actualPlaylistFile =
-        streamingService.readPlaylistFile(
-            testMatch.getEventId(),
-            VideoStreamingServiceTest.testFileSource.getFileSrcId(),
-            testStreamLocator.getStreamLocatorId());
+        streamingService.readPlaylistFile(testStreamLocator.getStreamLocatorId());
 
     // Perform tests
     assertThat(actualPlaylistFile).isNotNull().isNotEmpty().isPresent();
@@ -230,7 +227,7 @@ class VideoStreamingServiceTest {
   @DisplayName("Validate reading of video segment (.ts) from disk")
   void getVideoSegmentResource() throws IOException {
 
-    final int minContentLength = 500_000;
+    final long minContentLength = 500_000L;
 
     final VideoStreamLocator testStreamLocator = getTestStreamLocator();
 
@@ -243,12 +240,12 @@ class VideoStreamingServiceTest {
     Log.i(
         LOG_TAG,
         String.format(
-            "Testing video segment reading with Event ID: %s, File Source ID: %s, Stream Locator ID: %s, Segment ID: %s",
+            "Testing video segment reading with Event ID: %s, File Source ID: %s, "
+                + "Stream Locator ID: %s, Segment ID: %s",
             testEventId, testVideoFileSrcId, testStreamLocatorId, segmentId));
     // Read video resource
     final Resource actualVideoResource =
-        streamingService.getVideoSegmentResource(
-            testEventId, testVideoFileSrcId, testStreamLocatorId, segmentId);
+        streamingService.getVideoSegmentResource(testStreamLocatorId, segmentId);
 
     Log.d(LOG_TAG, "Read video segment: " + actualVideoResource);
     assertThat(actualVideoResource).isNotNull();

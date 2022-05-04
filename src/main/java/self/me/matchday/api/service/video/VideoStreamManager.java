@@ -21,7 +21,6 @@ package self.me.matchday.api.service.video;
 
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +32,6 @@ import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegLogger;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask;
-import self.me.matchday.util.Log;
 
 import java.io.*;
 import java.net.URI;
@@ -49,14 +47,13 @@ import static self.me.matchday.model.video.StreamJobState.JobStatus;
 
 @Service
 @Transactional
-class VideoStreamManager {
+public class VideoStreamManager {
 
   private final VideoStreamLocatorPlaylistService playlistService;
   private final VideoStreamLocatorService locatorService;
   private final VideoFileService videoFileService;
   private final FFmpegPlugin ffmpegPlugin;
 
-  @Autowired
   public VideoStreamManager(
       final VideoStreamLocatorPlaylistService playlistService,
       final VideoStreamLocatorService locatorService,
@@ -81,7 +78,6 @@ class VideoStreamManager {
   public void deleteLocalStream(@NotNull final VideoStreamLocatorPlaylist playlist)
       throws IOException {
 
-    Log.i("VideoStreamManager", "Deleting stream locator playlist: " + playlist.getId());
     final List<VideoStreamLocator> streamLocators = playlist.getStreamLocators();
     for (VideoStreamLocator streamLocator : streamLocators) {
       locatorService.deleteStreamLocatorWithData(streamLocator);
@@ -119,8 +115,8 @@ class VideoStreamManager {
         streamWithLogging(streamLocator, streamTask);
       } else {
         streamWithoutLog(streamTask);
-        updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0);
       }
+      updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0);
     } catch (Throwable e) {
       updateLocatorTaskState(streamLocator, JobStatus.ERROR, -1.0);
       throw e;

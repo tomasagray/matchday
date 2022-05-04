@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -145,7 +145,7 @@ public class VideoStreamingService {
     return null;
   }
 
-  private @NotNull VideoPlaylist renderPlaylist(
+  public @NotNull VideoPlaylist renderPlaylist(
       @NotNull UUID eventId,
       @NotNull UUID fileSrcId,
       @NotNull VideoPlaylistRenderer renderer,
@@ -184,7 +184,7 @@ public class VideoStreamingService {
    * @param videoFileSource Video source from which to create playlist
    * @return The video playlist
    */
-  private @NotNull VideoPlaylist createPlaylist(@NotNull final VideoFileSource videoFileSource) {
+  public @NotNull VideoPlaylist createPlaylist(@NotNull final VideoFileSource videoFileSource) {
 
     final VideoStreamLocatorPlaylist playlist =
         videoStreamManager.createVideoStreamFrom(videoFileSource);
@@ -196,24 +196,11 @@ public class VideoStreamingService {
   /**
    * Read playlist file from disk and return as a String
    *
-   * @param eventId The ID of the Event of this video data
-   * @param fileSrcId The ID of the video data variant (VideoFileSource)
    * @param partId Playlist locator ID
    * @return The playlist as a String
    */
-  public Optional<String> readPlaylistFile(
-      @NotNull final UUID eventId, @NotNull final UUID fileSrcId, @NotNull final Long partId) {
-
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Attempting to read playlist file for Event: %s, File Source: %s, Locator ID: %s",
-            eventId, fileSrcId, partId));
-
-    // Get data to locate playlist file on disk
-    final Optional<VideoStreamLocator> locatorOptional =
-        videoStreamLocatorService.getStreamLocator(partId);
-    return locatorOptional.map(this::readLocatorPlaylist);
+  public Optional<String> readPlaylistFile(@NotNull final Long partId) {
+    return videoStreamLocatorService.getStreamLocator(partId).map(this::readLocatorPlaylist);
   }
 
   /**
@@ -249,23 +236,13 @@ public class VideoStreamingService {
   /**
    * Read video segment (.ts) data from disk
    *
-   * @param eventId The ID of the Event for this video data
-   * @param fileSrcId The ID of the video variant (VideoFileSource)
    * @param partId Playlist locator ID
    * @param segmentId The filename of the requested segment (.ts extension assumed)
    * @return The video data as a Resource
    */
   public Resource getVideoSegmentResource(
-      @NotNull final UUID eventId,
-      @NotNull final UUID fileSrcId,
       @NotNull final Long partId,
       @NotNull final String segmentId) {
-
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Reading video segment resource for Event: %s, File Source: %s, Locator ID: %s, Segment: %s",
-            eventId, fileSrcId, partId, segmentId));
 
     final Optional<VideoStreamLocator> locatorOptional =
         videoStreamLocatorService.getStreamLocator(partId);

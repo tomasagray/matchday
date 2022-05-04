@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -53,19 +53,14 @@ public class ArtworkController {
   @RequestMapping(
       value = "/competition/{competitionId}/emblem",
       produces = MediaType.IMAGE_PNG_VALUE,
-      method = RequestMethod.GET
-  )
-  public ResponseEntity<byte[]> fetchCompetitionEmblem(@PathVariable final UUID competitionId) throws IOException {
+      method = RequestMethod.GET)
+  public ResponseEntity<byte[]> fetchCompetitionEmblem(@PathVariable final UUID competitionId)
+      throws IOException {
 
-    return
-        artworkService
-            .fetchCompetitionEmblem(competitionId)
-            .map(image ->
-                ResponseEntity
-                    .ok()
-                    .contentType(MediaType.IMAGE_PNG)
-                    .body(image))
-            .orElse(ResponseEntity.notFound().build());
+    return artworkService
+        .fetchCompetitionEmblem(competitionId)
+        .map(image -> ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image))
+        .orElse(ResponseEntity.notFound().build());
   }
 
   /**
@@ -77,19 +72,14 @@ public class ArtworkController {
   @RequestMapping(
       value = "/competition/{competitionId}/fanart",
       produces = MediaType.IMAGE_JPEG_VALUE,
-      method = RequestMethod.GET
-  )
-  public ResponseEntity<byte[]> fetchCompetitionFanart(@PathVariable final UUID competitionId) throws IOException {
+      method = RequestMethod.GET)
+  public ResponseEntity<byte[]> fetchCompetitionFanart(@PathVariable final UUID competitionId)
+      throws IOException {
 
-    return
-        artworkService
-            .fetchCompetitionFanart(competitionId)
-            .map(image ->
-                ResponseEntity
-                    .ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(image))
-            .orElse(ResponseEntity.notFound().build());
+    return artworkService
+        .fetchCompetitionFanart(competitionId)
+        .map(image -> ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image))
+        .orElse(ResponseEntity.notFound().build());
   }
 
   /**
@@ -101,20 +91,14 @@ public class ArtworkController {
   @RequestMapping(
       value = "/competition/{competitionId}/monochrome-emblem",
       produces = MediaType.IMAGE_PNG_VALUE,
-      method = RequestMethod.GET
-  )
+      method = RequestMethod.GET)
   public ResponseEntity<byte[]> fetchCompetitionMonochromeEmblem(
       @PathVariable final UUID competitionId) throws IOException {
 
-    return
-        artworkService
-            .fetchCompetitionMonochromeEmblem(competitionId)
-            .map(image ->
-                ResponseEntity
-                    .ok()
-                    .contentType(MediaType.IMAGE_PNG)
-                    .body(image))
-            .orElse(ResponseEntity.notFound().build());
+    return artworkService
+        .fetchCompetitionMonochromeEmblem(competitionId)
+        .map(image -> ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image))
+        .orElse(ResponseEntity.notFound().build());
   }
 
   /**
@@ -126,19 +110,14 @@ public class ArtworkController {
   @RequestMapping(
       value = "/competition/{competitionId}/landscape",
       produces = MediaType.IMAGE_JPEG_VALUE,
-      method = RequestMethod.GET
-  )
-  public ResponseEntity<byte[]> fetchCompetitionLandscape(@PathVariable final UUID competitionId) throws IOException {
+      method = RequestMethod.GET)
+  public ResponseEntity<byte[]> fetchCompetitionLandscape(@PathVariable final UUID competitionId)
+      throws IOException {
 
-    return
-        artworkService
-            .fetchCompetitionLandscape(competitionId)
-            .map(image ->
-                ResponseEntity
-                    .ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(image))
-            .orElse(ResponseEntity.notFound().build());
+    return artworkService
+        .fetchCompetitionLandscape(competitionId)
+        .map(image -> ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image))
+        .orElse(ResponseEntity.notFound().build());
   }
 
   /**
@@ -150,19 +129,14 @@ public class ArtworkController {
   @RequestMapping(
       value = "/team/{teamId}/emblem",
       produces = MediaType.IMAGE_PNG_VALUE,
-      method = RequestMethod.GET
-  )
-  public ResponseEntity<byte[]> fetchTeamEmblem(@PathVariable final UUID teamId) throws IOException {
+      method = RequestMethod.GET)
+  public ResponseEntity<byte[]> fetchTeamEmblem(@PathVariable final UUID teamId)
+      throws IOException {
 
-    return
-        artworkService
-            .fetchTeamEmblem(teamId)
-            .map(image ->
-                ResponseEntity
-                    .ok()
-                    .contentType(MediaType.IMAGE_PNG)
-                    .body(image))
-            .orElse(ResponseEntity.notFound().build());
+    return artworkService
+        .fetchTeamEmblem(teamId)
+        .map(image -> ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image))
+        .orElse(ResponseEntity.notFound().build());
   }
 
   /**
@@ -174,26 +148,22 @@ public class ArtworkController {
   @RequestMapping(
       value = "/team/{teamId}/fanart",
       produces = MediaType.IMAGE_JPEG_VALUE,
-      method = RequestMethod.GET
-  )
-  public ResponseEntity<byte[]> fetchTeamFanart(@PathVariable final UUID teamId) throws IOException {
+      method = RequestMethod.GET)
+  public ResponseEntity<byte[]> fetchTeamFanart(@PathVariable final UUID teamId)
+      throws IOException {
 
-    return
-        artworkService
-            .fetchTeamFanart(teamId)
-            .map(image ->
-                ResponseEntity
-                    .ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(image))
-            .orElse(ResponseEntity.notFound().build());
+    return artworkService
+        .fetchTeamFanart(teamId)
+        .map(image -> ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image))
+        .orElse(ResponseEntity.notFound().build());
   }
 
   @ExceptionHandler(IOException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ResponseEntity<String> handleIoException(@NotNull IOException e) {
     String message = e.getMessage();
-    logger.error("Error reading data from disk: {}", message);
+    final Throwable cause = e.getCause();
+    logger.error("Error reading data from disk: {}; caused by: {}", message, cause.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
   }
 }

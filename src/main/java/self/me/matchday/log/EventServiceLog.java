@@ -17,39 +17,25 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.util.log;
+package self.me.matchday.log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import self.me.matchday.api.service.EntityCorrectionService;
+import self.me.matchday.api.service.EventService;
 
 @Aspect
 @Component
-public class EntityCorrectionServiceLogging {
+public class EventServiceLog {
 
-  static final Logger logger = LogManager.getLogger(EntityCorrectionService.class);
+  private static final Logger logger = LogManager.getLogger(EventService.class);
 
-  @Before(
-      "execution(* self.me.matchday.api.service.EntityCorrectionService.correctEntityFields(..))")
-  public void logAroundEntityCorrection(@NotNull JoinPoint jp) {
-    logger.info("Applying Entity correction to: {}", jp.getArgs());
-  }
-
-  @Around(
-      "execution(* self.me.matchday.api.service.EntityCorrectionService.getCorrectedEntity(..))")
-  public Object logBeforeCorrectedEntityRetrieval(@NotNull ProceedingJoinPoint jp)
-      throws Throwable {
-
-    logger.info("Attempting to correct @Correctable Entity: {}", jp.getArgs());
-    final Object result = jp.proceed();
-    logger.info("Entity corrected to: " + result);
-    return result;
+  @Before("execution(* self.me.matchday.api.service.EventService.doSave(..))")
+  public void logSaveEvent(@NotNull JoinPoint jp) {
+    logger.info("Saving Event: {}", jp.getArgs());
   }
 }
