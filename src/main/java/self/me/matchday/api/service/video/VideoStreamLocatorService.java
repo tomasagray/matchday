@@ -28,7 +28,6 @@ import self.me.matchday.db.VideoStreamLocatorRepo;
 import self.me.matchday.model.video.SingleStreamLocator;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoStreamLocator;
-import self.me.matchday.util.Log;
 import self.me.matchday.util.RecursiveDirectoryDeleter;
 
 import java.io.File;
@@ -44,8 +43,6 @@ public class VideoStreamLocatorService {
 
   @Value("${video-resources.playlist-name}")
   private String PLAYLIST_NAME;
-
-  private static final String LOG_TAG = "PlaylistLocatorService";
 
   private final VideoStreamLocatorRepo streamLocatorRepo;
 
@@ -101,18 +98,13 @@ public class VideoStreamLocatorService {
   public VideoStreamLocator createStreamLocator(
       @NotNull final Path storageLocation, @NotNull final VideoFile videoFile) {
 
-    // Create streaming storage path
     final UUID fileId = videoFile.getFileId();
     final Path playlistPath = storageLocation.resolve(fileId.toString()).resolve(PLAYLIST_NAME);
-    // Create playlist locator
-    final VideoStreamLocator streamLocator = new SingleStreamLocator(playlistPath, videoFile);
-    // Save locator to database & return
-    Log.i(LOG_TAG, "Saving stream locator: " + streamLocatorRepo.saveAndFlush(streamLocator));
-    return streamLocator;
+    return new SingleStreamLocator(playlistPath, videoFile);
   }
 
   @Transactional
-  public void saveStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
+  public void updateStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
     streamLocatorRepo.saveAndFlush(streamLocator);
   }
 
@@ -146,8 +138,5 @@ public class VideoStreamLocatorService {
     // delete the data
     final Path streamDataDir = playlistPath.getParent();
     Files.walkFileTree(streamDataDir, new RecursiveDirectoryDeleter());
-    Log.i(
-        LOG_TAG,
-        "Successfully deleted local data associated with Video Stream Locator: " + streamLocator);
   }
 }

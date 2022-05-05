@@ -173,6 +173,6 @@ public class VideoStreamManager {
       @NotNull final JobStatus status,
       final Double completionRatio) {
     streamLocator.updateState(status, completionRatio);
-    locatorService.saveStreamLocator(streamLocator);
+    locatorService.updateStreamLocator(streamLocator);
   }
 }

@@ -89,6 +89,6 @@ public class FFmpegLogAdapter implements Consumer<String> {
 
   private void updateStreamLocatorState(final double completionRatio) {
     streamLocator.updateState(JobStatus.STREAMING, completionRatio);
-    locatorService.saveStreamLocator(streamLocator);
+    locatorService.updateStreamLocator(streamLocator);
   }
 }
