@@ -43,7 +43,7 @@ public class VideoFileSelectorService {
   public VideoFileSource getBestFileSource(@NotNull final Event event) {
 
     // sort file sources
-    final ArrayList<VideoFileSource> fileSources = new ArrayList<>(event.getFileSources());
+    final List<VideoFileSource> fileSources = new ArrayList<>(event.getFileSources());
     fileSources.sort(
         Comparator.comparing(VideoFileSource::getResolution)
             .thenComparing(VideoFileSource::getVideoBitrate)

@@ -21,6 +21,7 @@ package self.me.matchday.model;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.logging.log4j.util.Strings;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
@@ -42,12 +43,15 @@ public final class FileServerUser implements Serializable {
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
   @Column(columnDefinition = "BINARY(16)")
+  @Setter
   private UUID userId;
 
   private final String username;
   private final String password;
   private final String email;
   private boolean loggedIn;
+
+  @Column(columnDefinition = "BINARY(16)")
   private UUID serverId;
 
   @OneToMany(

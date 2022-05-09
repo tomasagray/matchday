@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -48,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EventServiceTest {
 
   private static final String LOG_TAG = "EventServiceTest";
+  private static final Logger logger = LogManager.getLogger(EventServiceTest.class);
 
   // Test resources
   private static TestDataCreator testDataCreator;
@@ -76,11 +79,12 @@ class EventServiceTest {
     assertThat(fileSourceOptional).isPresent();
     testFileSource = fileSourceOptional.get();
 
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Saved Event w/ID: %s, Competition ID: %s, Team ID: %s; FileSrcID: %s",
-            testMatch.getEventId(), testCompetition, testTeam, testFileSource.getFileSrcId()));
+    logger.info(
+        "Saved Event w/ID: {}, Competition ID: {}, Team ID: {}; FileSrcID: {}",
+        testMatch.getEventId(),
+        testCompetition,
+        testTeam,
+        testFileSource.getFileSrcId());
   }
 
   @AfterAll
@@ -94,20 +98,15 @@ class EventServiceTest {
   void fetchAllEvents() {
 
     final int expectedEventCount = 1; // minimum
-    final Optional<List<Event>> eventsOptional = eventService.fetchAllEvents();
-    assertThat(eventsOptional).isPresent();
+    final List<Event> events = eventService.fetchAllEvents();
 
-    eventsOptional.ifPresent(
-        events -> {
-          // Perform tests
-          final int actualEventCount = events.size();
-          Log.i(
-              LOG_TAG,
-              String.format(
-                  "Testing Event count: expected: %s, actual: %s",
-                  expectedEventCount, actualEventCount));
-          assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
-        });
+    // Perform tests
+    final int actualEventCount = events.size();
+    Log.i(
+        LOG_TAG,
+        String.format(
+            "Testing Event count: expected: %s, actual: %s", expectedEventCount, actualEventCount));
+    assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
   }
 
   @Test
@@ -153,15 +152,10 @@ class EventServiceTest {
   @DisplayName("Ensure fetches Events for a given Competition")
   void fetchEventsForCompetition() {
 
-    // Minimum expected events
-    final int expectedEventCount = 1;
-
-    final Optional<List<Event>> optionalEvents =
+    final int minExpectedEventCount = 1;
+    final List<Event> events =
         eventService.fetchEventsForCompetition(testCompetition.getCompetitionId());
-
-    assertThat(optionalEvents).isPresent();
-    optionalEvents.ifPresent(
-        events -> assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount));
+    assertThat(events.size()).isGreaterThanOrEqualTo(minExpectedEventCount);
   }
 
   @Test
@@ -172,12 +166,8 @@ class EventServiceTest {
     final int expectedEventCount = 1;
 
     // Fetch Events for Team:
-    final Optional<List<Event>> optionalEvents =
-        eventService.fetchEventsForTeam(testTeam.getTeamId());
-    assertThat(optionalEvents).isPresent();
-
-    optionalEvents.ifPresent(
-        events -> assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount));
+    final List<Event> events = eventService.fetchEventsForTeam(testTeam.getTeamId());
+    assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount);
   }
 
   @Test
@@ -187,20 +177,16 @@ class EventServiceTest {
     // Create test data
     final Match saveEvent = testDataCreator.createTestMatch();
 
-    final Optional<List<Event>> initialEvents = eventService.fetchAllEvents();
-    assertThat(initialEvents).isPresent();
-    final int initialEventCount = initialEvents.get().size();
+    final List<Event> initialEvents = eventService.fetchAllEvents();
+    final int initialEventCount = initialEvents.size();
     assertThat(initialEventCount).isNotZero();
 
     // Delete test data
     eventService.deleteEvent(saveEvent);
 
     // Verify Event count has returned to previous of test
-    final Optional<List<Event>> optionalEventsPostTest = eventService.fetchAllEvents();
-    assertThat(optionalEventsPostTest).isPresent();
-    final List<Event> postTestEvents = optionalEventsPostTest.get();
+    final List<Event> postTestEvents = eventService.fetchAllEvents();
     final int postTestEventCount = postTestEvents.size();
-
     assertThat(postTestEventCount).isEqualTo(initialEventCount - 1);
   }
 }

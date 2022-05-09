@@ -60,20 +60,12 @@ public class EventService {
     this.entityCorrectionService = entityCorrectionService;
   }
 
-  // todo - don't use optional
-  public Optional<List<Event>> fetchAllEvents() {
-
-    Log.i(LOG_TAG, "Fetching latest Events...");
-
-    // Fetch Events from database
+  public List<Event> fetchAllEvents() {
     final List<Event> events = eventRepository.findAll();
-    // Sort Events
     if (events.size() > 0) {
       events.sort(EVENT_SORTER);
-      return Optional.of(events);
     }
-    // None found
-    return Optional.empty();
+    return events;
   }
 
   public Optional<Event> fetchById(@NotNull final UUID eventId) {
@@ -90,7 +82,7 @@ public class EventService {
    * @param competitionId The ID of the Competition.
    * @return A CollectionModel containing all Events for the specified Competition.
    */
-  public Optional<List<Event>> fetchEventsForCompetition(@NotNull final UUID competitionId) {
+  public List<Event> fetchEventsForCompetition(@NotNull final UUID competitionId) {
     return eventRepository.fetchEventsByCompetition(competitionId);
   }
 
@@ -100,8 +92,7 @@ public class EventService {
    * @param teamId The name of the Team.
    * @return A CollectionModel containing the Events.
    */
-  public Optional<List<Event>> fetchEventsForTeam(@NotNull final UUID teamId) {
-    // todo - remove Optional
+  public List<Event> fetchEventsForTeam(@NotNull final UUID teamId) {
     return eventRepository.fetchEventsByTeam(teamId);
   }
 
@@ -110,26 +101,18 @@ public class EventService {
    *
    * @param event The Event to be saved
    */
-  public void saveEvent(@NotNull final Event event) {
+  public void saveEvent(@NotNull final Event event) throws ReflectiveOperationException {
 
-    try {
-      validateEvent(event);
-      entityCorrectionService.correctEntityFields(event);
-      // See if Event already exists in DB
-      final Optional<Event> eventOptional = eventRepository.findOne(getExampleEvent(event));
-      if (eventOptional.isPresent()) {
-        final Event existingEvent = eventOptional.get();
-        existingEvent.getFileSources().addAll(event.getFileSources());
-      } else {
-        doSave(event);
-      }
-    } catch (Exception e) {
-      Log.e(LOG_TAG, String.format("Event: %s was not saved to DB; %s", event, e.getMessage()), e);
+    validateEvent(event);
+    entityCorrectionService.correctEntityFields(event);
+    // See if Event already exists in DB
+    final Optional<Event> eventOptional = eventRepository.findOne(getExampleEvent(event));
+    if (eventOptional.isPresent()) {
+      final Event existingEvent = eventOptional.get();
+      existingEvent.getFileSources().addAll(event.getFileSources());
+    } else {
+      eventRepository.save(event);
     }
-  }
-
-  public void doSave(@NotNull Event event) {
-    eventRepository.save(event);
   }
 
   private @NotNull Example<Event> getExampleEvent(@NotNull Event event) {

@@ -113,10 +113,11 @@ public class VideoStreamManager {
       updateLocatorTaskState(streamLocator, JobStatus.STREAMING, 0.0);
       if (streamTask.isLoggingEnabled()) {
         streamWithLogging(streamLocator, streamTask);
+        // ^ JobStatus updated to COMPLETED in above method
       } else {
         streamWithoutLog(streamTask);
+        updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0);
       }
-      updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0);
     } catch (Throwable e) {
       updateLocatorTaskState(streamLocator, JobStatus.ERROR, -1.0);
       throw e;

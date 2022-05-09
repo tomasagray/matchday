@@ -7,19 +7,19 @@
         <sourceRoots />
       </configuration>
     </facet>
+    <facet type="Spring" name="Spring">
+      <configuration />
+    </facet>
     <facet type="jpa" name="JPA">
       <configuration>
         <setting name="validation-enabled" value="true" />
         <setting name="provider-name" value="Hibernate" />
         <datasource-mapping>
           <factory-entry name="entityManagerFactory" />
-          <factory-entry name="matchday.test" />
+          <factory-entry name="matchday.test" value="dd94b845-2baf-4a7e-b2b5-b3941d7a87bb" />
         </datasource-mapping>
         <naming-strategy-map />
       </configuration>
-    </facet>
-    <facet type="Spring" name="Spring">
-      <configuration />
     </facet>
   </component>
   <component name="NewModuleRootManager">
@@ -28,6 +28,9 @@
     <content url="file://$MODULE_DIR$/../../src/test">
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/resources" type="java-test-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/../../src/test/java/self/me/matchday/_DEVFIXTURES" />
+      <excludeFolder url="file://$MODULE_DIR$/../../src/test/data" />
+      <excludeFolder url="file://$MODULE_DIR$/../../src/test/secure_resources" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

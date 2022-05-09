@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -75,10 +75,8 @@ public class CompetitionController {
       value = {"", "/"},
       method = RequestMethod.GET)
   public CollectionModel<CompetitionResource> fetchAllCompetitions() {
-    return competitionService
-        .fetchAllCompetitions()
-        .map(competitionResourceAssembler::toCollectionModel)
-        .orElse(null);
+    return competitionResourceAssembler.toCollectionModel(
+        competitionService.fetchAllCompetitions());
   }
 
   /**
@@ -108,10 +106,8 @@ public class CompetitionController {
   public CollectionModel<TeamResource> fetchCompetitionTeams(
       @PathVariable final UUID competitionId) {
 
-    return teamService
-        .fetchTeamsByCompetitionId(competitionId)
-        .map(teamResourceAssembler::toCollectionModel)
-        .orElse(null);
+    return teamResourceAssembler.toCollectionModel(
+        teamService.fetchTeamsByCompetitionId(competitionId));
   }
 
   /**
@@ -124,9 +120,7 @@ public class CompetitionController {
   public CollectionModel<EventResource> fetchCompetitionEvents(
       @PathVariable final UUID competitionId) {
 
-    return eventService
-        .fetchEventsForCompetition(competitionId)
-        .map(eventResourceAssembler::toCollectionModel)
-        .orElse(null);
+    return eventResourceAssembler.toCollectionModel(
+        eventService.fetchEventsForCompetition(competitionId));
   }
 }

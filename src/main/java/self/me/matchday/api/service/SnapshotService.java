@@ -43,7 +43,13 @@ public class SnapshotService {
     // todo - implement other Snapshot types
     if (clazz.equals(Event.class)) {
       final Stream<Event> data = (Stream<Event>) snapshot.getData();
-      data.forEach(eventService::saveEvent);
+      data.forEach(
+          event -> {
+            try {
+              eventService.saveEvent(event);
+            } catch (Throwable ignored) {
+            }
+          });
     }
   }
 }

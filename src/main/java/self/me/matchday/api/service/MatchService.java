@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -50,20 +50,14 @@ public class MatchService {
    *
    * @return Collection of assembled resources.
    */
-  public Optional<List<Match>> fetchAllMatches() {
+  public List<Match> fetchAllMatches() {
 
     Log.i(LOG_TAG, "Fetching all Matches from database.");
-    // Retrieve all matches from repo
     final List<Match> matches = matchRepository.findAll();
-
     if (matches.size() > 0) {
-      // Sort by date (descending) & return
       matches.sort(EVENT_SORTER);
-      return Optional.of(matches);
-    } else {
-      Log.d(LOG_TAG, "Attempting to retrieve all Matches, but none found");
-      return Optional.empty();
     }
+    return matches;
   }
 
   /**

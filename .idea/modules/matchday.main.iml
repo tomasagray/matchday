@@ -12,8 +12,8 @@
         <setting name="validation-enabled" value="true" />
         <setting name="provider-name" value="Hibernate" />
         <datasource-mapping>
-          <factory-entry name="entityManagerFactory" value="ac0b3abb-1786-4fe1-9d1a-e30f9e698d78" />
-          <factory-entry name="matchday.main" value="5bad7432-82b4-4594-87be-086651d526aa" />
+          <factory-entry name="entityManagerFactory" value="2ee209bb-c745-4a22-bdc0-6ba521ac2cce" />
+          <factory-entry name="matchday.main" value="3ec0eed5-e19d-4ba7-bea8-4c26ac60c3f5" />
         </datasource-mapping>
         <naming-strategy-map />
       </configuration>

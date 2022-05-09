@@ -34,7 +34,6 @@ import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.video.*;
-import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,8 +49,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 public class VideoStreamingService {
-
-  private static final String LOG_TAG = "VideoStreamingService";
 
   private final EventService eventService;
   private final VideoFileSelectorService selectorService;
@@ -155,27 +152,33 @@ public class VideoStreamingService {
     String renderedPlaylist = null;
 
     if (delayAdviceService.isStreamReady(playlist)) {
-      // Create a segment for each playlist entry
       playlist
           .getStreamLocators()
-          .forEach(
-              locator -> {
-                final VideoFile videoFile = locator.getVideoFile();
-                final Long streamLocatorId = locator.getStreamLocatorId();
-                final URI playlistUri =
-                    linkTo(
-                            methodOn(VideoStreamingController.class)
-                                .getVideoPartPlaylist(eventId, fileSrcId, streamLocatorId))
-                        .toUri();
-                final String title = videoFile.getTitle().toString();
-                final double duration = videoFile.getDuration();
-                renderer.addMediaSegment(playlistUri, title, duration);
-              });
+          .forEach(locator -> addLocator(eventId, fileSrcId, renderer, locator));
       renderedPlaylist = renderer.renderPlaylist();
     } else {
       waitMillis = delayAdviceService.getDelayAdvice(playlist);
     }
     return VideoPlaylist.builder().waitMillis(waitMillis).playlist(renderedPlaylist).build();
+  }
+
+  private void addLocator(
+      @NotNull UUID eventId,
+      @NotNull UUID fileSrcId,
+      @NotNull VideoPlaylistRenderer renderer,
+      @NotNull VideoStreamLocator locator) {
+
+    final VideoFile videoFile = locator.getVideoFile();
+    final Long streamLocatorId = locator.getStreamLocatorId();
+    final URI playlistUri =
+        linkTo(
+                methodOn(VideoStreamingController.class)
+                    .getVideoPartPlaylist(eventId, fileSrcId, streamLocatorId))
+            .toUri();
+    final PartIdentifier identifier = videoFile.getTitle();
+    final String title = identifier != null ? identifier.toString() : "";
+    final double duration = videoFile.getDuration();
+    renderer.addMediaSegment(playlistUri, title, duration);
   }
 
   /**
@@ -213,7 +216,6 @@ public class VideoStreamingService {
 
     final StringBuilder sb = new StringBuilder();
     final Path playlistPath = streamLocator.getPlaylistPath();
-    Log.i(LOG_TAG, "Reading playlist from: " + playlistPath);
     final Flux<DataBuffer> fluxBuffer =
         DataBufferUtils.read(playlistPath, new DefaultDataBufferFactory(), 4096);
     fluxBuffer
@@ -241,8 +243,7 @@ public class VideoStreamingService {
    * @return The video data as a Resource
    */
   public Resource getVideoSegmentResource(
-      @NotNull final Long partId,
-      @NotNull final String segmentId) {
+      @NotNull final Long partId, @NotNull final String segmentId) {
 
     final Optional<VideoStreamLocator> locatorOptional =
         videoStreamLocatorService.getStreamLocator(partId);

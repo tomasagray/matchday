@@ -79,15 +79,10 @@ class TeamServiceTest {
 
     final int expectedTeamCount = 1;
 
-    final Optional<List<Team>> teamsOptional = teamService.fetchAllTeams();
-    assertThat(teamsOptional).isPresent();
-
-    teamsOptional.ifPresent(
-        teams -> {
-          Log.i(LOG_TAG, "Got teams:\n" + teams);
-          assertThat(teams.size()).isGreaterThanOrEqualTo(expectedTeamCount);
-          assertThat(teams).contains(testTeam);
-        });
+    final List<Team> teams = teamService.fetchAllTeams();
+    Log.i(LOG_TAG, "Got teams:\n" + teams);
+    assertThat(teams.size()).isGreaterThanOrEqualTo(expectedTeamCount);
+    assertThat(teams).contains(testTeam);
   }
 
   @Test
@@ -108,17 +103,12 @@ class TeamServiceTest {
   @DisplayName("Validate retrieval of teams for a given Competition")
   void fetchTeamsByCompetitionId() {
 
-    final Optional<List<Team>> teamsOptional =
+    final List<Team> teams =
         teamService.fetchTeamsByCompetitionId(testCompetition.getCompetitionId());
-    assertThat(teamsOptional).isPresent();
-
-    teamsOptional.ifPresent(
-        teams -> {
-          Log.i(
-              LOG_TAG,
-              String.format("Found %s teams for Competition: %s", teams.size(), testCompetition));
-          assertThat(teams).contains(testTeam);
-        });
+    Log.i(
+        LOG_TAG,
+        String.format("Found %s teams for Competition: %s", teams.size(), testCompetition));
+    assertThat(teams).contains(testTeam);
   }
 
   @Test
@@ -127,10 +117,7 @@ class TeamServiceTest {
 
     final Team savingTestTeam = new Team("Saving Test Team");
 
-    final Optional<List<Team>> optionalTeams = teamService.fetchAllTeams();
-    assertThat(optionalTeams).isPresent();
-
-    final List<Team> teams = optionalTeams.get();
+    final List<Team> teams = teamService.fetchAllTeams();
     final int initialTeamCount = teams.size();
 
     // Save team to database
@@ -138,11 +125,8 @@ class TeamServiceTest {
     Log.i(LOG_TAG, "Successfully saved Team: " + savedTeam);
 
     // Get new team list
-    final Optional<List<Team>> optionalTeamsPostUpdate = teamService.fetchAllTeams();
-    assertThat(optionalTeamsPostUpdate).isPresent();
-    final List<Team> postUpdateTeams = optionalTeamsPostUpdate.get();
-    final int postUpdateTeamCount = postUpdateTeams.size();
-
+    final List<Team> teamsPostUpdate = teamService.fetchAllTeams();
+    final int postUpdateTeamCount = teamsPostUpdate.size();
     assertThat(postUpdateTeamCount).isGreaterThan(initialTeamCount);
     assertThat(postUpdateTeamCount - initialTeamCount).isEqualTo(1);
 
@@ -159,19 +143,14 @@ class TeamServiceTest {
     teamService.saveTeam(deleteTestTeam);
 
     // Get team count
-    final Optional<List<Team>> optionalTeams = teamService.fetchAllTeams();
-    assertThat(optionalTeams).isPresent();
-    final List<Team> updatedTeams = optionalTeams.get();
+    final List<Team> updatedTeams = teamService.fetchAllTeams();
     final int updatedTeamCount = updatedTeams.size();
 
     // Delete test team
     teamService.deleteTeamByName(deleteTestTeam.getProperName().getName());
     // Get new team count
-    final Optional<List<Team>> deletedTeamsListOptional = teamService.fetchAllTeams();
-    assertThat(deletedTeamsListOptional).isPresent();
-    final List<Team> deletedTeamsList = deletedTeamsListOptional.get();
+    final List<Team> deletedTeamsList = teamService.fetchAllTeams();
     final int deletedTeamsCount = deletedTeamsList.size();
-
     assertThat(updatedTeamCount).isGreaterThan(deletedTeamsCount);
     assertThat(updatedTeamCount - deletedTeamsCount).isEqualTo(1);
   }

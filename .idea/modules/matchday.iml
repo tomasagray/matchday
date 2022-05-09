@@ -5,10 +5,14 @@
     <content url="file://$MODULE_DIR$/../..">
       <excludeFolder url="file://$MODULE_DIR$/../../.gradle" />
       <excludeFolder url="file://$MODULE_DIR$/../../build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../research" />
+      <excludeFolder url="file://$MODULE_DIR$/../../lib" />
+      <excludeFolder url="file://$MODULE_DIR$/../../secure_data" />
       <excludeFolder url="file://$MODULE_DIR$/../dataSources" />
       <excludeFolder url="file://$MODULE_DIR$/../httpRequests" />
       <excludeFolder url="file://$MODULE_DIR$/../libraries" />
       <excludeFolder url="file://$MODULE_DIR$" />
+      <excludeFolder url="file://$MODULE_DIR$/../ZeppelinRemoteNotebooks" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -70,7 +70,6 @@ public class TextParser {
         final E e = parseEntity(patternKit, matcher);
         streamBuilder.add(e);
       } catch (ReflectiveOperationException ignore) {
-        // TODO - handle better?
         // nothing will be added to stream
       }
     }

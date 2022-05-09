@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -79,15 +79,11 @@ class MatchServiceTest {
   void fetchAllMatches() {
 
     final int expectedMatchCount = 1; // minimum
-    final Optional<List<Match>> optionalMatches = matchService.fetchAllMatches();
-    assertThat(optionalMatches).isPresent();
+    final List<Match> matches = matchService.fetchAllMatches();
 
-    optionalMatches.ifPresent(
-        matches -> {
-          final int actualMatchCount = matches.size();
-          Log.i(LOG_TAG, String.format("Found: %s Matches", actualMatchCount));
-          assertThat(actualMatchCount).isGreaterThanOrEqualTo(expectedMatchCount);
-        });
+    final int actualMatchCount = matches.size();
+    Log.i(LOG_TAG, String.format("Found: %s Matches", actualMatchCount));
+    assertThat(actualMatchCount).isGreaterThanOrEqualTo(expectedMatchCount);
   }
 
   @Test

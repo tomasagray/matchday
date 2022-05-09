@@ -29,7 +29,10 @@ import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.video.VideoStreamLocator;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.UUID;
 
 @Aspect
@@ -48,7 +51,7 @@ public class VideoStreamingServiceLog {
   }
 
   @Around(
-      "execution(* self.me.matchday.api.service.video.VideoStreamingService.getVideoStreamPlaylist(..))")
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.getBestVideoStreamPlaylist(..))")
   public Object logGetBestVideoStreamPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info(
         "Getting optimal VideoStreamPlaylist for Event: {} using Renderer: {}",
@@ -73,14 +76,28 @@ public class VideoStreamingServiceLog {
     return result;
   }
 
+  @SuppressWarnings("unchecked cast")
   @Around(
       "execution(* self.me.matchday.api.service.video.VideoStreamingService.readPlaylistFile(..))")
   public Object logReadPlaylistFile(@NotNull ProceedingJoinPoint jp) throws Throwable {
 
-    logger.info("Attempting to read playlist file for Locator ID: {}", jp.getArgs()[0]);
-    final Object result = jp.proceed();
-    logger.info("Read playlist file: {}", result);
+    final Long locatorId = (Long) jp.getArgs()[0];
+    logger.info("Attempting to read playlist file for Locator ID: {}", locatorId);
+    final Optional<String> result = (Optional<String>) jp.proceed();
+    if (result.isPresent()) {
+      final byte[] bytes = result.get().getBytes(StandardCharsets.UTF_8);
+      logger.info("Read {} bytes from playlist file", bytes.length);
+    } else {
+      logger.debug("No data returned (Optional.empty())");
+    }
     return result;
+  }
+
+  @Before(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.readLocatorPlaylist(..))")
+  public void logReadLocatorPlaylist(@NotNull JoinPoint jp) {
+    final VideoStreamLocator streamLocator = (VideoStreamLocator) jp.getArgs()[0];
+    logger.info("Reading playlist from: {}", streamLocator.getPlaylistPath());
   }
 
   @Around(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -50,21 +50,14 @@ public class HighlightService {
    *
    * @return Optional collection model of highlight show resources.
    */
-  public Optional<List<Highlight>> fetchAllHighlights() {
+  public List<Highlight> fetchAllHighlights() {
 
     Log.i(LOG_TAG, "Fetching all Highlight Shows from the database.");
-    // Retrieve highlights from database
     final List<Highlight> highlights = highlightRepository.findAll();
-
     if (highlights.size() > 0) {
-      // Sort in reverse chronological order
       highlights.sort(EVENT_SORTER);
-      // return DTO
-      return Optional.of(highlights);
-    } else {
-      Log.d(LOG_TAG, "Attempting to retrieve all Highlight Shows, but none found");
-      return Optional.empty();
     }
+    return highlights;
   }
 
   /**

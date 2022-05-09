@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -72,15 +72,10 @@ class HighlightServiceTest {
 
     final int expectedHighlightCount = 1;
 
-    final Optional<List<Highlight>> highlightsOptional = highlightService.fetchAllHighlights();
-    assertThat(highlightsOptional).isPresent();
-
-    highlightsOptional.ifPresent(
-        highlights -> {
-          Log.i(LOG_TAG, "Found Highlight data: " + highlights);
-          assertThat(highlights.size()).isGreaterThanOrEqualTo(expectedHighlightCount);
-          assertThat(highlights).contains(testHighlight);
-        });
+    final List<Highlight> highlights = highlightService.fetchAllHighlights();
+    Log.i(LOG_TAG, "Found Highlight data: " + highlights);
+    assertThat(highlights.size()).isGreaterThanOrEqualTo(expectedHighlightCount);
+    assertThat(highlights).contains(testHighlight);
   }
 
   @Test

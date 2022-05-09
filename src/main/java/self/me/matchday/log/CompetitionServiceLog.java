@@ -28,25 +28,22 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.CompetitionService;
+import self.me.matchday.model.Competition;
 
-import java.util.Optional;
+import java.util.List;
 
 @Aspect
 public class CompetitionServiceLog {
 
   private static final Logger logger = LogManager.getLogger(CompetitionService.class);
 
+  @SuppressWarnings("unchecked cast")
   @Around("execution(* self.me.matchday.api.service.CompetitionService.fetchAllCompetitions(..))")
   public Object logFetchAllCompetitions(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Retrieving all Competitions from database...");
-    Object result = jp.proceed();
-    if (result != null) {
-      final Optional<?> opt = (Optional<?>) result;
-      if (opt.isEmpty()) {
-        logger.info("Attempted to fetch all Competitions, but none returned");
-      }
-    }
-    return result;
+    List<Competition> competitions = (List<Competition>) jp.proceed();
+    logger.info("Database returned: {} Competitions.", competitions.size());
+    return competitions;
   }
 
   @Around("execution(* self.me.matchday.api.service.CompetitionService.fetchCompetitionBy*(..))")

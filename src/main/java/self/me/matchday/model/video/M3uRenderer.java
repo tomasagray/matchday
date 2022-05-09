@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -84,13 +84,9 @@ public class M3uRenderer implements VideoPlaylistRenderer {
             .append(TARGET_DURATION)
             .append(getTargetDuration())
             .append("\n")
-            .append("\n")
-            .append("\n")
-            // Start at 0
-            .append(MEDIA_SEQUENCE)
+            .append(MEDIA_SEQUENCE) // Start at 0
             .append(0)
             .append("\n");
-    // Print each MediaSegment
     mediaSegments.forEach(
         segment -> {
           final String entry =
@@ -100,7 +96,6 @@ public class M3uRenderer implements VideoPlaylistRenderer {
           sb.append(entry);
         });
     sb.append(ENDLIST).append("\n");
-    // Export playlist
     return sb.toString();
   }
 }

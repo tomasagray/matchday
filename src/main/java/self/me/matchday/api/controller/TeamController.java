@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -32,7 +32,9 @@ import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.TeamService;
+import self.me.matchday.model.Event;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -69,8 +71,7 @@ public class TeamController {
       value = {"", "/"},
       method = RequestMethod.GET)
   public CollectionModel<TeamResource> fetchAllTeams() {
-
-    return teamService.fetchAllTeams().map(teamResourceAssembler::toCollectionModel).orElse(null);
+    return teamResourceAssembler.toCollectionModel(teamService.fetchAllTeams());
   }
 
   /**
@@ -99,16 +100,11 @@ public class TeamController {
   public ResponseEntity<CollectionModel<EventResource>> fetchEventsForTeam(
       @PathVariable final UUID teamId) {
 
-    return eventService
-        .fetchEventsForTeam(teamId)
-        .map(eventResourceAssembler::toCollectionModel)
-        // add self link to each EventResource
-        .map(
-            eventResources ->
-                eventResources.add(
-                    linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId))
-                        .withSelfRel()))
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+    final List<Event> events = eventService.fetchEventsForTeam(teamId);
+    final CollectionModel<EventResource> eventResources =
+        eventResourceAssembler
+            .toCollectionModel(events)
+            .add(linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId)).withSelfRel());
+    return ResponseEntity.ok(eventResources);
   }
 }

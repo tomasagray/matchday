@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -22,11 +22,7 @@ package self.me.matchday.api.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.EventResource;
 import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
 import self.me.matchday.api.service.MatchService;
@@ -58,8 +54,7 @@ public class MatchController {
       method = RequestMethod.GET)
   @ResponseBody
   public CollectionModel<EventResource> fetchAllMatches() {
-
-    return matchService.fetchAllMatches().map(resourceAssembler::toCollectionModel).orElse(null);
+    return resourceAssembler.toCollectionModel(matchService.fetchAllMatches());
   }
 
   /**

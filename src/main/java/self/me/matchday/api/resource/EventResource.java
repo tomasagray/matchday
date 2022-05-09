@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -140,16 +140,12 @@ public class EventResource extends RepresentationModel<EventResource> {
     public @NotNull CollectionModel<EventResource> toCollectionModel(
         @NotNull Iterable<? extends Event> entities) {
 
-      // Sort Events
       final List<? extends Event> sortedEvents =
           StreamSupport.stream(entities.spliterator(), false)
               .sorted(new Event.EventSorter())
               .collect(Collectors.toList());
-      // Instantiate from super method
       final CollectionModel<EventResource> eventResources = super.toCollectionModel(sortedEvents);
-      // Add self link
       eventResources.add(linkTo(methodOn(EventController.class).fetchAllEvents()).withSelfRel());
-
       return eventResources;
     }
   }

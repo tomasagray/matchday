@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -100,7 +100,7 @@ public class VideoStreamLocatorService {
 
     final UUID fileId = videoFile.getFileId();
     final Path playlistPath = storageLocation.resolve(fileId.toString()).resolve(PLAYLIST_NAME);
-    return new SingleStreamLocator(playlistPath, videoFile);
+    return streamLocatorRepo.saveAndFlush(new SingleStreamLocator(playlistPath, videoFile));
   }
 
   @Transactional

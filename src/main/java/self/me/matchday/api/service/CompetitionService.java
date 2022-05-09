@@ -47,16 +47,13 @@ public class CompetitionService {
    *
    * @return A CollectionModel of Competition resources.
    */
-  public Optional<List<Competition>> fetchAllCompetitions() {
+  public List<Competition> fetchAllCompetitions() {
 
     final List<Competition> competitions = competitionRepository.findAll();
     if (competitions.size() > 0) {
-      // Sort Competitions by name
       competitions.sort(Comparator.comparing(Competition::getProperName));
-      return Optional.of(competitions);
-    } else {
-      return Optional.empty();
     }
+    return competitions;
   }
 
   /**

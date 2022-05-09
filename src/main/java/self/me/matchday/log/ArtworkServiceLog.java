@@ -57,7 +57,6 @@ public class ArtworkServiceLog {
           } else {
             logger.info("Emblem found for {}: {}, size: {}", actionType, arg, img.length);
           }
-          // todo: what to do with errors?
         },
         () -> logger.warn("{}: {} not found in database", actionType, arg));
     return result;

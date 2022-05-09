@@ -128,7 +128,6 @@ public abstract class BloggerQueryBuilder {
     @NotNull
     protected String getParams() {
 
-      // todo - other query params?
       final String maxResults = getMaxResults();
       final String updatedMin = getUpdatedMin();
       final String updatedMax = getUpdatedMax();

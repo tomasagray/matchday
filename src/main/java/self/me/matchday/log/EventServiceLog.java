@@ -21,12 +21,14 @@ package self.me.matchday.log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.EventService;
+import self.me.matchday.model.Event;
 
 @Aspect
 @Component
@@ -34,8 +36,20 @@ public class EventServiceLog {
 
   private static final Logger logger = LogManager.getLogger(EventService.class);
 
-  @Before("execution(* self.me.matchday.api.service.EventService.doSave(..))")
-  public void logSaveEvent(@NotNull JoinPoint jp) {
-    logger.info("Saving Event: {}", jp.getArgs());
+  @Before("execution(* self.me.matchday.api.service.EventService.fetchAllEvents())")
+  public void logFetchAllEvents() {
+    logger.info("Fetching latest Events...");
+  }
+
+  @Around("execution(* self.me.matchday.api.service.EventService.saveEvent(..))")
+  public Object logSaveEvent(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    final Event event = (Event) jp.getArgs()[0];
+    logger.info("Saving Event: {}", event);
+    try {
+      return jp.proceed();
+    } catch (Throwable e) {
+      logger.error("Event: {} was not saved to DB; {}", event, e.getMessage());
+      throw e;
+    }
   }
 }

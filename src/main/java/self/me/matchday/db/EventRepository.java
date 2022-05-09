@@ -26,7 +26,6 @@ import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Event;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -39,7 +38,7 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
    * @return A List of Competitions.
    */
   @Query("SELECT ev FROM Event ev JOIN ev.competition cm WHERE cm.competitionId = :competitionId")
-  Optional<List<Event>> fetchEventsByCompetition(@Param("competitionId") UUID competitionId);
+  List<Event> fetchEventsByCompetition(@Param("competitionId") UUID competitionId);
 
   /**
    * Retrieve all Events associated with the specified Team.
@@ -50,5 +49,5 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
   @Query(
       "SELECT mt FROM MatchGame mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
           + "WHERE ht.teamId = :teamId OR at.teamId = :teamId")
-  Optional<List<Event>> fetchEventsByTeam(@Param("teamId") UUID teamId);
+  List<Event> fetchEventsByTeam(@Param("teamId") UUID teamId);
 }

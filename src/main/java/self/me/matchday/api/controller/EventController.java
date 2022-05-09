@@ -44,7 +44,6 @@ public class EventController {
   @ResponseBody
   @RequestMapping(value = "/events", method = RequestMethod.GET)
   public CollectionModel<EventResource> fetchAllEvents() {
-
-    return eventService.fetchAllEvents().map(resourceAssembler::toCollectionModel).orElse(null);
+    return resourceAssembler.toCollectionModel(eventService.fetchAllEvents());
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -54,11 +54,7 @@ public class HighlightController {
   @RequestMapping(value = "/highlight-shows", method = RequestMethod.GET)
   @ResponseBody
   public CollectionModel<EventResource> fetchAllHighlights() {
-
-    return highlightService
-        .fetchAllHighlights()
-        .map(resourceAssembler::toCollectionModel)
-        .orElse(null);
+    return resourceAssembler.toCollectionModel(highlightService.fetchAllHighlights());
   }
 
   /**

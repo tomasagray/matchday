@@ -33,8 +33,6 @@ import java.util.*;
 @Transactional
 public class TeamService {
 
-  // todo - remove Optionals on Lists
-
   private static final String LOG_TAG = "TeamService";
 
   private final TeamRepository teamRepository;
@@ -47,9 +45,9 @@ public class TeamService {
   /**
    * Fetch all teams from the local database.
    *
-   * @return Optional containing a collection model of Team resources.
+   * @return A collection of Teams.
    */
-  public Optional<List<Team>> fetchAllTeams() {
+  public List<Team> fetchAllTeams() {
 
     Log.i(LOG_TAG, "Fetching all Teams from local database.");
 
@@ -57,11 +55,8 @@ public class TeamService {
     if (teams.size() > 0) {
       // Sort Teams by name
       teams.sort(Comparator.comparing(Team::getProperName));
-      return Optional.of(teams);
-    } else {
-      Log.d(LOG_TAG, "Attempted to fetch all Teams, but nothing found.");
-      return Optional.empty();
     }
+    return teams;
   }
 
   /**
@@ -80,7 +75,7 @@ public class TeamService {
    * @param competitionId The ID of the Competition.
    * @return All Teams which have Events in the given Competition.
    */
-  public Optional<List<Team>> fetchTeamsByCompetitionId(@NotNull final UUID competitionId) {
+  public List<Team> fetchTeamsByCompetitionId(@NotNull final UUID competitionId) {
 
     final List<Team> homeTeams = teamRepository.fetchHomeTeamsByCompetition(competitionId);
     final List<Team> awayTeams = teamRepository.fetchAwayTeamsByCompetition(competitionId);
@@ -88,11 +83,9 @@ public class TeamService {
     // Combine results in a Set<> to ensure no duplicates
     Set<Team> teamSet = new LinkedHashSet<>(homeTeams);
     teamSet.addAll(awayTeams);
-    // Convert back to a List<> for sorting
     List<Team> teamList = new ArrayList<>(teamSet);
-    // Sort by Team name
     teamList.sort(Comparator.comparing(Team::getProperName));
-    return Optional.of(teamList);
+    return teamList;
   }
 
   public Optional<Team> getTeamByName(@NotNull String name) {
