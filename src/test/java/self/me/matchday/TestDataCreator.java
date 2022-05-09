@@ -101,8 +101,7 @@ public class TestDataCreator {
   }
 
   private DataSource<Event> readTestDataSource(@NotNull String filename) {
-    final String dataSourceJson =
-        ResourceFileReader.readTextResource(TestDataCreator.class, filename);
+    final String dataSourceJson = ResourceFileReader.readTextResource(filename);
     final Type type = new TypeReference<PlaintextDataSource<Event>>() {}.getType();
     final DataSource<Event> testDataSource = JsonParser.fromJson(dataSourceJson, type);
     Log.i(LOG_TAG, "Read test datasource:\n" + testDataSource);
@@ -139,8 +138,7 @@ public class TestDataCreator {
   public PatternKit<Event> createEventPatternKitFromFile() {
 
     final String patternKitData =
-        ResourceFileReader.readTextResource(
-            TestDataCreator.class, "data/test_event_pattern_kit.json");
+        ResourceFileReader.readTextResource("data/test_event_pattern_kit.json");
     final Type type = new TypeToken<PatternKit<Event>>() {}.getType();
     return JsonParser.fromJson(patternKitData, type);
   }
@@ -199,8 +197,7 @@ public class TestDataCreator {
   public PatternKit<VideoFileSource> createFileSourcePatternFromFile() {
 
     final String patternKitData =
-        ResourceFileReader.readTextResource(
-            TestDataCreator.class, "data/datasource/test_filesource_pattern_kit.json");
+        ResourceFileReader.readTextResource("data/datasource/test_filesource_pattern_kit.json");
     final Type type = new TypeToken<PatternKit<VideoFileSource>>() {}.getType();
     return JsonParser.fromJson(patternKitData, type);
   }

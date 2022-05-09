@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -21,7 +21,6 @@ package self.me.matchday.util;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import self.me.matchday.plugin.io.diskmanager.DiskManager;
 
 import java.util.Map;
 
@@ -36,8 +35,7 @@ class ResourceFileReaderTest {
   @DisplayName("Ensure reads and splits resource file key/value pairs correctly")
   void testReadPropertiesResourceFile() {
 
-    Map<String, String> resourceFile =
-        ResourceFileReader.readPropertiesResource(DiskManager.class, PROPERTIES_FILE);
+    Map<String, String> resourceFile = ResourceFileReader.readPropertiesResource(PROPERTIES_FILE);
 
     // Perform tests
     assertThat(resourceFile.size()).isGreaterThan(0);

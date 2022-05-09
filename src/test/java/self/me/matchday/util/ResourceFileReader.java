@@ -40,7 +40,7 @@ public class ResourceFileReader {
       // Instantiate object
       final T instance = t_class.getConstructor().newInstance();
       // Read properties file from disk
-      final Map<String, String> properties = readPropertiesResource(t_class, filename);
+      final Map<String, String> properties = readPropertiesResource(filename);
       properties.forEach(
           (prop, val) -> {
             try {
@@ -79,22 +79,20 @@ public class ResourceFileReader {
     return null;
   }
 
-  public static <T> @NotNull Map<String, String> readPropertiesResource(
-      @NotNull final Class<T> t_class, @NotNull final String filename) {
+  public static @NotNull Map<String, String> readPropertiesResource(
+      @NotNull final String filename) {
 
-    final String data = readTextResource(t_class, filename);
+    final String data = readTextResource(filename);
     assert data != null;
     return parsePropertiesData(data);
   }
 
-  public static <T> @Nullable String readTextResource(
-      @NotNull final Class<T> t_class, @NotNull final String filename) {
+  public static @Nullable String readTextResource(@NotNull final String filename) {
 
-    // todo - remove class param
-    InputStream resourceAsStream = t_class.getClassLoader().getResourceAsStream(filename);
+    InputStream resourceAsStream =
+        ResourceFileReader.class.getClassLoader().getResourceAsStream(filename);
     assert resourceAsStream != null;
-    try (InputStreamReader inputStreamReader = new InputStreamReader(resourceAsStream);
-        BufferedReader reader = new BufferedReader(inputStreamReader)) {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
       return reader.lines().collect(Collectors.joining("\n"));
     } catch (Exception e) {
       e.printStackTrace();

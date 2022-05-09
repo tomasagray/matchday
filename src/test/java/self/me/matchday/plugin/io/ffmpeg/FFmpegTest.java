@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -27,7 +27,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.MatchdayApplication;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
@@ -65,7 +64,7 @@ class FFmpegTest {
 
     // Read configuration resources
     final Map<String, String> resources =
-        ResourceFileReader.readPropertiesResource(MatchdayApplication.class, "video.properties");
+        ResourceFileReader.readPropertiesResource("video.properties");
 
     // Create URLs
     final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();

@@ -59,11 +59,9 @@ class FFprobeTest {
   static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator) {
 
     // Read plugin resources file
-    Map<String, String> resources =
-        ResourceFileReader.readPropertiesResource(FFprobe.class, FFMPEG_PROPERTIES);
+    Map<String, String> resources = ResourceFileReader.readPropertiesResource(FFMPEG_PROPERTIES);
     // Read test metadata & deserialize
-    String sampleMetadata =
-        ResourceFileReader.readTextResource(FFprobeTest.class, SAMPLE_METADATA_JSON);
+    String sampleMetadata = ResourceFileReader.readTextResource(SAMPLE_METADATA_JSON);
     // Parse JSON to object
     expectedMetadata = JsonParser.fromJson(sampleMetadata, FFmpegMetadata.class);
 

@@ -76,8 +76,7 @@ public class EventDataParserTest {
   }
 
   private static void readTestResources() {
-    EventDataParserTest.testHtml =
-        ResourceFileReader.readTextResource(EventDataParserTest.class, TEST_DATA_FILE);
+    EventDataParserTest.testHtml = ResourceFileReader.readTextResource(TEST_DATA_FILE);
     assertThat(testHtml).isNotNull().isNotEmpty();
   }
 

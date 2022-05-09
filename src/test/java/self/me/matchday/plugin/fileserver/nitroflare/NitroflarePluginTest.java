@@ -81,8 +81,7 @@ class NitroflarePluginTest {
 
     // Read test cookie data
     final String cookieData =
-        ResourceFileReader.readTextResource(
-            NitroflarePluginTest.class, "../secure_resources/nitroflare.cookies");
+        ResourceFileReader.readTextResource("../secure_resources/nitroflare.cookies");
     assertThat(cookieData).isNotNull();
     // Parse cookie data
     NitroflarePluginTest.testCookies = netscapeCookiesService.parseNetscapeCookies(cookieData);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -53,8 +53,7 @@ class NetscapeCookiesServiceTest {
     NetscapeCookiesServiceTest.cookiesService = cookiesService;
 
     logger.info("Attempting to read cookie data from: {}", COOKIE_FILEPATH);
-    cookieFile =
-        ResourceFileReader.readTextResource(NetscapeCookiesServiceTest.class, COOKIE_FILEPATH);
+    cookieFile = ResourceFileReader.readTextResource(COOKIE_FILEPATH);
     assertThat(cookieFile).isNotNull().isNotEmpty();
     logger.info("Read cookie data from file: {}", COOKIE_FILEPATH);
   }
