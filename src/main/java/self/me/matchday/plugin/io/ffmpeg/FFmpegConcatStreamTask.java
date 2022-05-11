@@ -23,7 +23,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.logging.log4j.util.Strings;
-import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,7 +36,6 @@ import java.util.stream.Collectors;
 @Data
 public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
 
-  private static final String LOG_TAG = "FFmpegConcatStreamTask";
   private static final String CONCAT_FILENAME = "concat.txt";
   private final List<URI> uris;
   private Path concatFile;
@@ -75,7 +73,6 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
     Files.createDirectories(this.getDataDir());
     // Create URI list text file
     this.concatFile = createConcatFile();
-    Log.i(LOG_TAG, "Created concat text file: " + concatFile);
   }
 
   @Override

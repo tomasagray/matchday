@@ -21,6 +21,7 @@ package self.me.matchday.log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -29,6 +30,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.Event;
+
+import java.util.List;
 
 @Aspect
 @Component
@@ -51,5 +54,44 @@ public class EventServiceLog {
       logger.error("Event: {} was not saved to DB; {}", event, e.getMessage());
       throw e;
     }
+  }
+
+  @Around("execution(* self.me.matchday.api.service.EventService.fetchById(..))")
+  public Object logGetEventById(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.info("Fetching Event with ID: {} from database...", jp.getArgs()[0]);
+    Object result = jp.proceed();
+    logger.info("... Retrieved Event: {}", result);
+    return result;
+  }
+
+  @Around("execution(* self.me.matchday.api.service.EventService.fetchVideoFileSrc(..))")
+  public Object logFetchVideoFileSource(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.info("Fetching VideoFileSource with ID: {} from database...", jp.getArgs()[0]);
+    Object result = jp.proceed();
+    logger.info("... Retrieved VideoFileSource: {}", result);
+    return result;
+  }
+
+  @Around("execution(* self.me.matchday.api.service.EventService.fetchEventsForCompetition(..))")
+  public Object logFetchEventsForCompetition(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    Object competitionId = jp.getArgs()[0];
+    logger.info("Fetching Events for Competition: {}", competitionId);
+    List<?> events = (List<?>) jp.proceed();
+    logger.info("Retrieved: {} Events for Competition: {}", events.size(), competitionId);
+    return events;
+  }
+
+  @Around("execution(* self.me.matchday.api.service.EventService.fetchEventsForTeam(..))")
+  public Object logFetchEventsForTeam(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    Object teamId = jp.getArgs()[0];
+    logger.info("Fetching Events for Team: {}", teamId);
+    List<?> events = (List<?>) jp.proceed();
+    logger.info("Retrieved: {} Events for Team: {}", events.size(), teamId);
+    return events;
+  }
+
+  @Before("execution(* self.me.matchday.api.service.EventService.deleteEvent(..))")
+  public void logDeleteEvent(@NotNull JoinPoint jp) {
+    logger.info("Deleting Event: {}", jp.getArgs()[0]);
   }
 }

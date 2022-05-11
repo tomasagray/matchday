@@ -19,28 +19,24 @@
 
 package self.me.matchday.startup;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.util.Log;
 
-/**
- * Class to refresh database with data from all remote sources on startup.
- */
+/** Class to refresh database with data from all remote sources on startup. */
 @Configuration
 public class InitEventData {
 
-  private static final String LOG_TAG = "InitEventData";
-  private static final String INIT_MSG =
-      "Performing first time data refresh of all data sources using empty SnapshotRequest:\n%s";
-
+  private static final Logger logger = LogManager.getLogger(InitEventData.class);
 
   @Bean
-  CommandLineRunner initialEventDataLoad(final DataSourceService dataSourceService,
-      final Environment env) {
+  CommandLineRunner initialEventDataLoad(
+      final DataSourceService dataSourceService, final Environment env) {
 
     return args -> {
       final String property = env.getProperty("startup-refresh");
@@ -48,13 +44,9 @@ public class InitEventData {
         return;
       }
 
-      Log.i(LOG_TAG, "Startup refresh CLI option set; performing initial Event data refresh...");
-
-      // Create empty Snapshot request
+      logger.info(
+          "*** Startup refresh CLI option set; performing initial Event data refresh... ***");
       final SnapshotRequest snapshotRequest = SnapshotRequest.builder().build();
-      Log.i(LOG_TAG, String.format(INIT_MSG, snapshotRequest));
-
-      // Refresh all data sources with default (empty) request
       dataSourceService.refreshAllDataSources(snapshotRequest);
     };
   }

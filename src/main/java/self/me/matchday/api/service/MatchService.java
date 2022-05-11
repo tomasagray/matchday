@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Match;
-import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +33,6 @@ import java.util.UUID;
 @Service
 public class MatchService {
 
-  private static final String LOG_TAG = "MatchController";
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
   private final MatchRepository matchRepository;
@@ -52,7 +50,6 @@ public class MatchService {
    */
   public List<Match> fetchAllMatches() {
 
-    Log.i(LOG_TAG, "Fetching all Matches from database.");
     final List<Match> matches = matchRepository.findAll();
     if (matches.size() > 0) {
       matches.sort(EVENT_SORTER);
@@ -67,8 +64,6 @@ public class MatchService {
    * @return An optional containing the match resource, if it was found.
    */
   public Optional<Match> fetchMatch(@NotNull UUID matchId) {
-
-    Log.i(LOG_TAG, String.format("Fetching Match with ID: %s from the database.", matchId));
     return matchRepository.findById(matchId);
   }
 }

@@ -29,9 +29,7 @@ import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.video.VideoFileService;
 import self.me.matchday.model.video.VideoFile;
 
-import java.net.URL;
 import java.sql.Timestamp;
-import java.util.Optional;
 
 @Aspect
 @Component
@@ -62,20 +60,5 @@ public class VideoFileServiceLog {
     final VideoFile videoFile = (VideoFile) jp.getArgs()[0];
     logger.info("Refreshing data for VideoFile: {}", videoFile);
     return jp.proceed();
-  }
-
-  @SuppressWarnings("unchecked cast")
-  @Around("execution(* self.me.matchday.api.service.FileServerService.getDownloadUrl(..))")
-  public Object logVideoFileInternalUrlRefresh(@NotNull ProceedingJoinPoint jp) throws Throwable {
-
-    final URL externalUrl = (URL) jp.getArgs()[0];
-    logger.info("Attempting to get internal URL for external URL: {}", externalUrl);
-    final Optional<URL> result = (Optional<URL>) jp.proceed();
-    if (result.isPresent()) {
-      logger.info("Successfully updated internal URL to: {}", result.get());
-    } else {
-      logger.error("Could not update internal URL from external URL: {}", externalUrl);
-    }
-    return result;
   }
 }

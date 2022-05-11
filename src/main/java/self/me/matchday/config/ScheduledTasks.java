@@ -19,6 +19,7 @@
 
 package self.me.matchday.config;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -28,18 +29,17 @@ import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.util.Log;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 /** Regularly run tasks. Configuration in external properties file. */
 @Component
 @PropertySource("classpath:scheduled-tasks.properties")
 public class ScheduledTasks {
-
-  private static final String LOG_TAG = "ScheduledTasks";
 
   private final DataSourceService dataSourceService;
   private final VideoStreamLocatorPlaylistService streamPlaylistService;
@@ -61,45 +61,24 @@ public class ScheduledTasks {
 
   @Scheduled(cron = "${scheduled-tasks.cron.refresh-event-data}")
   public void refreshEventData() throws IOException {
-
-    Log.i(LOG_TAG, "Refreshing all data sources...");
-    // Create empty SnapshotRequest
     final SnapshotRequest snapshotRequest = SnapshotRequest.builder().build();
-    // Refresh data sources
     dataSourceService.refreshAllDataSources(snapshotRequest);
   }
 
   @Scheduled(cron = "${scheduled-tasks.cron.prune-video-data}")
-  public void pruneVideoData() {
+  public void pruneVideoData() throws IOException {
+    List<VideoStreamLocatorPlaylist> playlists = streamPlaylistService.getAllVideoStreamPlaylists();
+    for (VideoStreamLocatorPlaylist playlist : playlists) {
+      if (videoDataIsStale(playlist)) {
+        videoStreamingService.deleteVideoData(playlist);
+      }
+    }
+  }
 
-    Log.i(LOG_TAG, "Pruning video data more than 2 weeks old...");
-
-    // Examine each playlist & related data
-    streamPlaylistService
-        .getAllVideoStreamPlaylists()
-        .forEach(
-            videoStreamPlaylist -> {
-              try {
-                // Read creation date of playlist file
-                final Instant creationTime = videoStreamPlaylist.getTimestamp();
-                final Duration sinceCreation = Duration.between(creationTime, Instant.now());
-                final Duration expiredDays = Duration.ofDays(videoDataExpiredDays);
-
-                // If the video stream is older than allowed
-                if (sinceCreation.compareTo(expiredDays) > 0) {
-                  Log.i(
-                      LOG_TAG,
-                      String.format(
-                          "Video data is more than %s old; deleting for %s",
-                          expiredDays, videoStreamPlaylist));
-                  // This video data is expired; delete it
-                  videoStreamingService.deleteVideoData(videoStreamPlaylist);
-                }
-              } catch (IOException e) {
-                Log.e(LOG_TAG, "Error running scheduled delete of video data", e);
-                // Wrap exception
-                throw new RuntimeException(e);
-              }
-            });
+  private boolean videoDataIsStale(@NotNull VideoStreamLocatorPlaylist playlist) {
+    final Instant creationTime = playlist.getTimestamp();
+    final Duration sinceCreation = Duration.between(creationTime, Instant.now());
+    final Duration expiredDays = Duration.ofDays(videoDataExpiredDays);
+    return sinceCreation.compareTo(expiredDays) > 0;
   }
 }

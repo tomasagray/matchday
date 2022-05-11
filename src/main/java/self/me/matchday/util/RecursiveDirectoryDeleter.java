@@ -19,7 +19,6 @@
 
 package self.me.matchday.util;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -29,25 +28,15 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class RecursiveDirectoryDeleter extends SimpleFileVisitor<Path> {
 
-  private static final String LOG_TAG = "RecursiveDirectoryDeleter";
-
   @Override
   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-    try {
-      Files.delete(file);
-    } catch (FileNotFoundException e) {
-      Log.i(LOG_TAG, "There was a request to delete a file which does not exist:\n" + file);
-    }
+    Files.delete(file);
     return FileVisitResult.CONTINUE;
   }
 
   @Override
   public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-    try {
-      Files.delete(dir);
-    } catch (FileNotFoundException e) {
-      Log.i(LOG_TAG, "There was a request to delete a directory which does not exist:\n" + dir);
-    }
+    Files.delete(dir);
     return FileVisitResult.CONTINUE;
   }
 }

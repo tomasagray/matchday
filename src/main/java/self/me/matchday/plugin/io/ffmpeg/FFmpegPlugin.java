@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import self.me.matchday.plugin.Plugin;
-import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.net.URI;
@@ -33,8 +32,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 @Component
 public class FFmpegPlugin implements Plugin {
-
-  private static final String LOG_TAG = "FFmpegPlugin";
 
   private final FFmpegPluginProperties pluginProperties;
   private final FFmpeg ffmpeg;
@@ -73,17 +70,7 @@ public class FFmpegPlugin implements Plugin {
 
   /** Cancels all streaming tasks running in the background */
   public void interruptAllStreamTasks() {
-
-    // kill each task
-    streamingTasks.forEach(
-        (pid, ffmpegTask) -> {
-          Log.i(LOG_TAG, "Killing streaming task with thread ID: " + pid);
-          final boolean killed = ffmpegTask.kill();
-          if (!killed) {
-            throw new RuntimeException("Could not kill task with PID: " + pid);
-          }
-        });
-    // clear task list
+    streamingTasks.forEach((pid, ffmpegTask) -> interruptStreamingTask(ffmpegTask.getDataDir()));
     streamingTasks.clear();
   }
 
@@ -100,16 +87,11 @@ public class FFmpegPlugin implements Plugin {
     final FFmpegStreamTask streamingTask = streamingTasks.get(absolutePath);
     if (streamingTask != null) {
       // kill task
-      Log.i(LOG_TAG, "Killing streaming task to file: " + absolutePath);
       final boolean processKilled = streamingTask.kill();
-      Log.i(
-          LOG_TAG, String.format("Streaming task to [%s] killed? %s", absolutePath, processKilled));
       if (processKilled) {
         streamingTasks.remove(absolutePath);
       }
-      return;
     }
-    Log.i(LOG_TAG, "No task found for output file: " + absolutePath);
   }
 
   /**

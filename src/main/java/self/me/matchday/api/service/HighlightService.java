@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import self.me.matchday.db.HighlightRepository;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Highlight;
-import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +33,6 @@ import java.util.UUID;
 @Service
 public class HighlightService {
 
-  private static final String LOG_TAG = "HighlightService";
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
   private final HighlightRepository highlightRepository;
@@ -52,7 +50,6 @@ public class HighlightService {
    */
   public List<Highlight> fetchAllHighlights() {
 
-    Log.i(LOG_TAG, "Fetching all Highlight Shows from the database.");
     final List<Highlight> highlights = highlightRepository.findAll();
     if (highlights.size() > 0) {
       highlights.sort(EVENT_SORTER);
@@ -67,8 +64,6 @@ public class HighlightService {
    * @return The requested Highlight, or empty().
    */
   public Optional<Highlight> fetchHighlight(@NotNull UUID highlightShowId) {
-
-    Log.i(LOG_TAG, "Fetching Highlight Show for ID: " + highlightShowId);
     return highlightRepository.findById(highlightShowId);
   }
 }

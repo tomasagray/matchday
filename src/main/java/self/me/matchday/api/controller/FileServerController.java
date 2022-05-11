@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.controller;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
@@ -36,7 +38,6 @@ import self.me.matchday.api.resource.MessageResource;
 import self.me.matchday.api.resource.MessageResource.MessageResourceAssembler;
 import self.me.matchday.api.service.FileServerService;
 import self.me.matchday.model.FileServerUser;
-import self.me.matchday.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,7 +51,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/file-servers")
 public class FileServerController {
 
-  private static final String LOG_TAG = "FileServerController";
+  private static final Logger logger = LogManager.getLogger(FileServerController.class);
 
   private final FileServerService fileServerService;
   private final FileServerResourceAssembler serverResourceAssembler;
@@ -143,7 +144,8 @@ public class FileServerController {
       @PathVariable("id") final UUID fileServerId,
       @RequestParam("username") final String username,
       @RequestParam("password") final String password,
-      @RequestParam("cookie-file") final MultipartFile cookies) {
+      @RequestParam("cookie-file") final MultipartFile cookies)
+      throws IOException {
 
     final String cookieData = readPostTextData(cookies);
     final FileServerUser user = new FileServerUser(username, password);
@@ -210,7 +212,6 @@ public class FileServerController {
 
     ResponseEntity<MessageResource> response;
 
-    Log.i(LOG_TAG, "Attempting to disable file server plugin: " + pluginId);
     if (fileServerService.disablePlugin(pluginId)) {
       response =
           ResponseEntity.status(HttpStatus.OK)
@@ -238,8 +239,6 @@ public class FileServerController {
       @PathVariable("id") final UUID pluginId) {
 
     ResponseEntity<MessageResource> response;
-
-    Log.i(LOG_TAG, "Attempting to enable file server plugin with ID: " + pluginId);
     if (fileServerService.enablePlugin(pluginId)) {
       response =
           ResponseEntity.status(HttpStatus.OK)
@@ -265,7 +264,7 @@ public class FileServerController {
    * @param response The ClientResponse from the file server
    * @return The response body as a String (not null)
    */
-  private @NotNull String getResponseMessage(ClientResponse response) {
+  private @NotNull String getResponseMessage(@NotNull ClientResponse response) {
     // Extract response message
     final String responseText = response.bodyToMono(String.class).block();
     // Ensure response message is not null & return
@@ -278,21 +277,25 @@ public class FileServerController {
    * @param file The file pointer for the text data
    * @return A String (may be null)
    */
-  private String readPostTextData(final MultipartFile file) {
+  private String readPostTextData(final @NotNull MultipartFile file) throws IOException {
 
-    // Result container
-    String result = null;
-
+    String result;
     try (InputStream is = file.getInputStream();
         final BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-
-      // Read POST data
       result = reader.lines().collect(Collectors.joining("\n"));
-
-    } catch (IOException e) {
-      Log.i(LOG_TAG, "Could not read text from multi-part POST data");
     }
-
     return result;
+  }
+
+  @ExceptionHandler(IOException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ResponseEntity<String> handleIoException(@NotNull IOException e) {
+    String message = e.getMessage();
+    final Throwable cause = e.getCause();
+    logger.error(
+        "Could not read text from multi-part POST data: {} with root cause: {}",
+        message,
+        cause.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
   }
 }

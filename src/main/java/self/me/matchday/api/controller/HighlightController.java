@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.EventResource;
 import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
 import self.me.matchday.api.service.HighlightService;
-import self.me.matchday.util.Log;
 
 import java.util.UUID;
 
@@ -34,7 +33,6 @@ import java.util.UUID;
 @RequestMapping(value = "/highlights")
 public class HighlightController {
 
-  private static final String LOG_TAG = "HighlightController";
   private final HighlightService highlightService;
   private final EventResourceAssembler resourceAssembler;
 
@@ -66,8 +64,6 @@ public class HighlightController {
   @RequestMapping(value = "/highlight-shows/highlight/{eventId}", method = RequestMethod.GET)
   @ResponseBody
   public ResponseEntity<EventResource> fetchHighlightById(@PathVariable UUID eventId) {
-
-    Log.i(LOG_TAG, "Fetching Highlight Show with ID: " + eventId);
 
     return highlightService
         .fetchHighlight(eventId)

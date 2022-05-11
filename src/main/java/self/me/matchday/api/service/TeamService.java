@@ -25,15 +25,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.TeamRepository;
 import self.me.matchday.model.Team;
-import self.me.matchday.util.Log;
 
 import java.util.*;
 
 @Service
 @Transactional
 public class TeamService {
-
-  private static final String LOG_TAG = "TeamService";
 
   private final TeamRepository teamRepository;
 
@@ -48,12 +45,8 @@ public class TeamService {
    * @return A collection of Teams.
    */
   public List<Team> fetchAllTeams() {
-
-    Log.i(LOG_TAG, "Fetching all Teams from local database.");
-
     final List<Team> teams = teamRepository.findAll();
     if (teams.size() > 0) {
-      // Sort Teams by name
       teams.sort(Comparator.comparing(Team::getProperName));
     }
     return teams;
@@ -113,8 +106,6 @@ public class TeamService {
    * @param teamName The name of the Team to delete
    */
   public void deleteTeamByName(@NotNull final String teamName) {
-
-    Log.i(LOG_TAG, String.format("Deleting Team with ID: %s from database", teamName));
     teamRepository.deleteByProperNameName(teamName);
   }
 

@@ -23,7 +23,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import reactor.core.publisher.Flux;
-import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -34,7 +33,6 @@ import java.util.List;
 @Data
 public abstract class FFmpegStreamTask extends Thread {
 
-  private static final String LOG_TAG = "FFmpegStreamTask";
   private static final DateTimeFormatter LOGFILE_TIMESTAMP_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
 
@@ -49,7 +47,6 @@ public abstract class FFmpegStreamTask extends Thread {
   public Process execute() throws IOException {
     prepareStream();
     final String command = getExecCommand();
-    Log.i(LOG_TAG, "Executing command:\n" + command);
     this.process = Runtime.getRuntime().exec(command);
     return this.process;
   }

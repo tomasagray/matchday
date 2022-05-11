@@ -32,7 +32,6 @@ import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.UUID;
 
 @Aspect
@@ -51,7 +50,7 @@ public class VideoStreamingServiceLog {
   }
 
   @Around(
-      "execution(* self.me.matchday.api.service.video.VideoStreamingService.getBestVideoStreamPlaylist(..))")
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.getVideoStreamPlaylist(..))")
   public Object logGetBestVideoStreamPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info(
         "Getting optimal VideoStreamPlaylist for Event: {} using Renderer: {}",
@@ -67,7 +66,7 @@ public class VideoStreamingServiceLog {
   public Object logGetVideoStreamPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
 
     logger.info(
-        "Geting VideoStreamPlaylist for Event: {}, File Source: {}, using renderer {}",
+        "Getting VideoStreamPlaylist for Event: {}, File Source: {}, using renderer {}",
         jp.getArgs()[0],
         jp.getArgs()[1],
         jp.getArgs()[2].getClass().getSimpleName());
@@ -76,28 +75,27 @@ public class VideoStreamingServiceLog {
     return result;
   }
 
-  @SuppressWarnings("unchecked cast")
   @Around(
       "execution(* self.me.matchday.api.service.video.VideoStreamingService.readPlaylistFile(..))")
   public Object logReadPlaylistFile(@NotNull ProceedingJoinPoint jp) throws Throwable {
 
-    final Long locatorId = (Long) jp.getArgs()[0];
-    logger.info("Attempting to read playlist file for Locator ID: {}", locatorId);
-    final Optional<String> result = (Optional<String>) jp.proceed();
-    if (result.isPresent()) {
-      final byte[] bytes = result.get().getBytes(StandardCharsets.UTF_8);
-      logger.info("Read {} bytes from playlist file", bytes.length);
-    } else {
-      logger.debug("No data returned (Optional.empty())");
-    }
+    logger.info("Attempting to read playlist file for Locator ID: {}", jp.getArgs()[0]);
+    final Object result = jp.proceed();
+    logger.info("Read playlist file: {}", result);
     return result;
   }
 
-  @Before(
+  @Around(
       "execution(* self.me.matchday.api.service.video.VideoStreamingService.readLocatorPlaylist(..))")
-  public void logReadLocatorPlaylist(@NotNull JoinPoint jp) {
-    final VideoStreamLocator streamLocator = (VideoStreamLocator) jp.getArgs()[0];
-    logger.info("Reading playlist from: {}", streamLocator.getPlaylistPath());
+  public Object logReadPlaylistDataForLocator(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    VideoStreamLocator locator = (VideoStreamLocator) jp.getArgs()[0];
+    Long streamLocatorId = locator.getStreamLocatorId();
+    logger.info("Reading playlist data from disk for VideoStreamLocator: {}", streamLocatorId);
+    String result = (String) jp.proceed();
+    long byteCount = result != null ? result.getBytes(StandardCharsets.UTF_8).length : 0;
+    logger.info(
+        "Read: {} bytes for playlist of VideoStreamLocator: {}", byteCount, streamLocatorId);
+    return result;
   }
 
   @Around(

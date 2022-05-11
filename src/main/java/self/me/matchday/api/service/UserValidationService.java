@@ -22,7 +22,6 @@ package self.me.matchday.api.service;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import self.me.matchday.model.FileServerUser;
-import self.me.matchday.util.Log;
 
 import java.util.regex.Pattern;
 
@@ -44,19 +43,12 @@ public class UserValidationService {
   }
 
   public boolean isValidEmailAddress(final String email) {
-
     final Pattern emailPattern = Pattern.compile(EMAIL_REGEX);
-    // Match email address
-    final boolean isValid = (email != null) && emailPattern.matcher(email).find();
-    Log.i("UserValidation", String.format("Email: %s is valid? %s", email, isValid));
-    return isValid;
+    return (email != null) && emailPattern.matcher(email).find();
   }
 
   public boolean isValidPassword(final String password) {
-
     final Pattern passwordPattern = Pattern.compile(PASSWORD_REGEX);
-    final boolean isValid = (password != null) && passwordPattern.matcher(password).find();
-    Log.i("UserValidation", String.format("Password is valid? %s", isValid));
-    return isValid;
+    return (password != null) && passwordPattern.matcher(password).find();
   }
 }

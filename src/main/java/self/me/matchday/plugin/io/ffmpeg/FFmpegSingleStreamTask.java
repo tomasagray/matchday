@@ -35,7 +35,6 @@ import java.util.List;
 @Data
 public class FFmpegSingleStreamTask extends FFmpegStreamTask {
 
-  public static final String LOG_TAG = "FFmpegSingleStreamTask";
   private static final DateTimeFormatter LOGFILE_TIMESTAMP_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
 

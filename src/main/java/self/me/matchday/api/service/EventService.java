@@ -30,7 +30,6 @@ import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.util.Log;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,7 +40,6 @@ import java.util.*;
 @Transactional
 public class EventService {
 
-  private static final String LOG_TAG = "EventService";
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
   private final EventRepository eventRepository;
@@ -134,7 +132,6 @@ public class EventService {
    * @param event The Event to delete
    */
   public void deleteEvent(@NotNull final Event event) {
-    Log.i(LOG_TAG, "Deleting Event with ID: " + event.getEventId());
     eventRepository.delete(event);
   }
 
