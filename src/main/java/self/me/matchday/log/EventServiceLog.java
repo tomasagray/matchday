@@ -44,7 +44,7 @@ public class EventServiceLog {
     logger.info("Fetching latest Events...");
   }
 
-  @Around("execution(* self.me.matchday.api.service.EventService.saveEvent(..))")
+  @Around("execution(* self.me.matchday.api.service.EventService.save(..))")
   public Object logSaveEvent(@NotNull ProceedingJoinPoint jp) throws Throwable {
     final Event event = (Event) jp.getArgs()[0];
     logger.info("Saving Event: {}", event);
@@ -90,7 +90,7 @@ public class EventServiceLog {
     return events;
   }
 
-  @Before("execution(* self.me.matchday.api.service.EventService.deleteEvent(..))")
+  @Before("execution(* self.me.matchday.api.service.EventService.delete(..))")
   public void logDeleteEvent(@NotNull JoinPoint jp) {
     logger.info("Deleting Event: {}", jp.getArgs()[0]);
   }

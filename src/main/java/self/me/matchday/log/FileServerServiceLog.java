@@ -111,8 +111,8 @@ public class FileServerServiceLog {
 
   @Around("execution(* self.me.matchday.api.service.FileServerService.loginWithCookies(..))")
   public Object logLoginUserWithCookies(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    FileServerUser user = (FileServerUser) jp.getArgs()[0];
-    UUID pluginId = (UUID) jp.getArgs()[1];
+    UUID pluginId = (UUID) jp.getArgs()[0];
+    FileServerUser user = (FileServerUser) jp.getArgs()[1];
     logger.info(
         "Attempting to login User: {} to FileServerPlugin: {} using cookies", user, pluginId);
     ClientResponse response = (ClientResponse) jp.proceed();

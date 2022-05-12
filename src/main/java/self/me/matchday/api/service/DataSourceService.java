@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class DataSourceService {
+public class DataSourceService implements EntityService<DataSource<?>> {
 
   private final SnapshotService snapshotService;
   private final DataSourceRepository dataSourceRepository;
@@ -119,7 +119,6 @@ public class DataSourceService {
    * @return An Optional which may contain the requested plugin
    */
   public Optional<DataSourcePlugin> getDataSourcePlugin(@NotNull final UUID pluginId) {
-
     return dataSourcePlugins.stream()
         .filter(plugin -> pluginId.equals(plugin.getPluginId()))
         .findFirst();
@@ -172,7 +171,8 @@ public class DataSourceService {
         .anyMatch(pluginId::equals);
   }
 
-  public <T> DataSource<T> addDataSource(@NotNull final DataSource<T> dataSource) {
+  @Override
+  public DataSource<?> save(@NotNull final DataSource<?> dataSource) {
 
     final String errMsg =
         String.format(
@@ -182,6 +182,11 @@ public class DataSourceService {
     return this.getDataSourcePlugin(dataSource.getPluginId())
         .map(plugin -> saveDataSource(dataSource, plugin))
         .orElseThrow(() -> new IllegalArgumentException(errMsg));
+  }
+
+  @Override
+  public void delete(@NotNull DataSource<?> dataSource) {
+    dataSourceRepository.delete(dataSource);
   }
 
   @NotNull

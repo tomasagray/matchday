@@ -19,37 +19,47 @@
 
 package self.me.matchday.api.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.model.Event;
 import self.me.matchday.model.Snapshot;
 
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 @Service
 public class SnapshotService {
 
-  private final EventService eventService;
+  private static final Logger logger = LogManager.getLogger(SnapshotService.class);
 
-  public SnapshotService(EventService eventService) {
-    this.eventService = eventService;
+  private final EntityServiceRegistry registry;
+
+  public SnapshotService(EntityServiceRegistry registry) {
+    this.registry = registry;
   }
 
   @Transactional
-  @SuppressWarnings("unchecked cast")
   public <T> void saveSnapshot(@NotNull Snapshot<T> snapshot, @NotNull Class<T> clazz) {
 
-    // todo - implement other Snapshot types
-    if (clazz.equals(Event.class)) {
-      final Stream<Event> data = (Stream<Event>) snapshot.getData();
-      data.forEach(
-          event -> {
-            try {
-              eventService.saveEvent(event);
-            } catch (Throwable ignored) {
-            }
-          });
-    }
+    final EntityService<T> service = registry.getServiceFor(clazz);
+    final Stream<T> data = snapshot.getData();
+    data.forEach(
+        datum -> {
+          try {
+            // send to appropriate service
+            service.save(datum);
+
+          } catch (Exception e) {
+            final LocalDateTime timestamp = LocalDateTime.from(snapshot.getTimestamp());
+            logger.error(
+                "Error saving an Entity of type: [{}] from Snapshot taken at: {}; problem was: {}",
+                clazz.getName(),
+                timestamp,
+                e.getMessage(),
+                e);
+          }
+        });
   }
 }

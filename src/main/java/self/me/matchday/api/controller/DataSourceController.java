@@ -139,7 +139,7 @@ public class DataSourceController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<MessageResource> addDataSource(@RequestBody DataSource<?> dataSource) {
 
-    final DataSource<?> source = dataSourceService.addDataSource(dataSource);
+    final DataSource<?> source = dataSourceService.save(dataSource);
     final MessageResource messageResource =
         messageResourceAssembler.toModel(
             "Successfully added new DataSource: " + source.getPluginId());

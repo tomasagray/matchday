@@ -182,7 +182,7 @@ class EventServiceTest {
     assertThat(initialEventCount).isNotZero();
 
     // Delete test data
-    eventService.deleteEvent(saveEvent);
+    eventService.delete(saveEvent);
 
     // Verify Event count has returned to previous of test
     final List<Event> postTestEvents = eventService.fetchAllEvents();

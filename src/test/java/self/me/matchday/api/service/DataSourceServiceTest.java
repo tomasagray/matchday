@@ -216,6 +216,7 @@ class DataSourceServiceTest {
 
   @Test
   @DisplayName("Validate that a DataSource can be added to the database")
+  @SuppressWarnings("unchecked cast")
   void addDataSource() {
 
     final DataSource<Event> testDataSource = testDataCreator.readTestJsonDataSource();
@@ -224,7 +225,8 @@ class DataSourceServiceTest {
         ((PlaintextDataSource<Event>) testDataSource).getPatternKitPack();
     assertThat(testPatternKitPack).isNotNull();
 
-    final DataSource<Event> addedDataSource = dataSourceService.addDataSource(testDataSource);
+    final DataSource<Event> addedDataSource =
+        (DataSource<Event>) dataSourceService.save(testDataSource);
     Log.i(LOG_TAG, "Added DataSource to database:\n" + addedDataSource);
 
     assertThat(addedDataSource).isNotNull();

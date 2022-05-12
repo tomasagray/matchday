@@ -38,7 +38,7 @@ import java.util.*;
 
 @Service
 @Transactional
-public class EventService {
+public class EventService implements EntityService<Event> {
 
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
@@ -99,7 +99,8 @@ public class EventService {
    *
    * @param event The Event to be saved
    */
-  public void saveEvent(@NotNull final Event event) throws ReflectiveOperationException {
+  @Override
+  public Event save(@NotNull final Event event) throws ReflectiveOperationException {
 
     validateEvent(event);
     entityCorrectionService.correctEntityFields(event);
@@ -108,9 +109,8 @@ public class EventService {
     if (eventOptional.isPresent()) {
       final Event existingEvent = eventOptional.get();
       existingEvent.getFileSources().addAll(event.getFileSources());
-    } else {
-      eventRepository.save(event);
     }
+    return eventRepository.save(event);
   }
 
   private @NotNull Example<Event> getExampleEvent(@NotNull Event event) {
@@ -131,7 +131,8 @@ public class EventService {
    *
    * @param event The Event to delete
    */
-  public void deleteEvent(@NotNull final Event event) {
+  @Override
+  public void delete(@NotNull final Event event) {
     eventRepository.delete(event);
   }
 

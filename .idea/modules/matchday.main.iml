@@ -33,6 +33,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/../../src/main/java/self/me/matchday/_DEVFIXTURES" />
     </content>
+    <content url="file://$MODULE_DIR$/../../src/main/java/self/me/matchday/_DEVFIXTURES/env" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-data-jpa:2.6.7" level="project" />
