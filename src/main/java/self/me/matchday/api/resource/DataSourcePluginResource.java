@@ -31,7 +31,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
-import self.me.matchday.api.controller.DataSourceController;
+import self.me.matchday.api.controller.DataSourcePluginController;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 
 import java.util.UUID;
@@ -58,7 +58,7 @@ public class DataSourcePluginResource extends RepresentationModel<DataSourcePlug
       extends RepresentationModelAssemblerSupport<DataSourcePlugin, DataSourcePluginResource> {
 
     DataSourcePluginResourceAssembler() {
-      super(DataSourceController.class, DataSourcePluginResource.class);
+      super(DataSourcePluginController.class, DataSourcePluginResource.class);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class DataSourcePluginResource extends RepresentationModel<DataSourcePlug
 
       // Attach self link
       pluginResource.add(
-          linkTo(methodOn(DataSourceController.class).getAllPlugins()).withSelfRel());
+          linkTo(methodOn(DataSourcePluginController.class).getAllPlugins()).withSelfRel());
 
       return pluginResource;
     }
@@ -85,7 +85,7 @@ public class DataSourcePluginResource extends RepresentationModel<DataSourcePlug
           super.toCollectionModel(plugins);
       // Add self link
       pluginResources.add(
-          linkTo(methodOn(DataSourceController.class).getAllPlugins()).withSelfRel());
+          linkTo(methodOn(DataSourcePluginController.class).getAllPlugins()).withSelfRel());
       return pluginResources;
     }
   }

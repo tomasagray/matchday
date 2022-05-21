@@ -22,7 +22,6 @@ package self.me.matchday.model;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.apache.logging.log4j.util.Strings;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 
@@ -102,13 +101,8 @@ public final class FileServerUser implements Serializable {
   @Override
   public String toString() {
     return String.format(
-        "UserID: %s, Username: %s, Password: *****, Logged in: %s, Email: %s, Server ID: %s, Cookies: %s",
-        getUserId(),
-        getUsername(),
-        isLoggedIn(),
-        getEmail(),
-        getServerId(),
-        Strings.join(cookies, ','));
+        "UserID: %s, Username: %s, Password: *****, Logged in: %s, Email: %s, Server ID: %s, cookie count: %d",
+        getUserId(), getUsername(), isLoggedIn(), getEmail(), getServerId(), cookies.size());
   }
 
   @Override

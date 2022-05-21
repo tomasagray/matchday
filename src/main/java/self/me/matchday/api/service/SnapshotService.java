@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.model.Snapshot;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.stream.Stream;
 
 @Service
@@ -52,7 +53,8 @@ public class SnapshotService {
             service.save(datum);
 
           } catch (Exception e) {
-            final LocalDateTime timestamp = LocalDateTime.from(snapshot.getTimestamp());
+            final LocalDateTime timestamp =
+                LocalDateTime.ofInstant(snapshot.getTimestamp(), ZoneOffset.systemDefault());
             logger.error(
                 "Error saving an Entity of type: [{}] from Snapshot taken at: {}; problem was: {}",
                 clazz.getName(),

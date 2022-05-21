@@ -29,7 +29,6 @@ import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.DataSourceService;
 
-import java.util.Collection;
 import java.util.List;
 
 @Aspect
@@ -37,44 +36,14 @@ public class DataSourceServiceLog {
 
   private static final Logger logger = LogManager.getLogger(DataSourceService.class);
 
-  @Around("execution(* self.me.matchday.api.service.DataSourceService.getDataSourcePlugins(..))")
-  public Object logGetAllDataSourcePlugins(@NotNull ProceedingJoinPoint jp) throws Throwable {
-
-    logger.info("Retrieving all DataSourcePlugins from database...");
-    Object result = jp.proceed();
-    logger.info("Found {} DataSourcePlugins", countPlugins(result));
-    return result;
-  }
-
-  private int countPlugins(Object result) {
-    int count = 0;
-    if (result instanceof Collection) {
-      count = ((Collection<?>) result).size();
-    }
-    return count;
-  }
-
   @Before("execution(* self.me.matchday.api.service.DataSourceService.refreshAllDataSources(..))")
   public void logDataSourceRefresh(@NotNull JoinPoint jp) {
     logger.info("Refreshing all DataSources with SnapshotRequest: {}", jp.getArgs());
   }
 
-  @Around("execution(* self.me.matchday.api.service.DataSourceService.enablePlugin(..))")
-  public Object logEnableDataSourcePlugin(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    Object arg = jp.getArgs()[0];
-    logger.info("Attempting to enable DataSourcePlugin: {}", arg);
-    Object result = jp.proceed();
-    logger.info("Successfully ENABLED DataSourcePlugin: {}", arg);
-    return result;
-  }
-
-  @Around("execution(* self.me.matchday.api.service.DataSourceService.disablePlugin(..))")
-  public Object logDisableDataSourcePlugin(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    Object arg = jp.getArgs()[0];
-    logger.info("Attempting to disable DataSourcePlugin: {}", arg);
-    Object result = jp.proceed();
-    logger.info("Successfully DISABLED DataSourcePlugin: {}", arg);
-    return result;
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.save(..))")
+  public void logSaveNewDataSource(@NotNull JoinPoint jp) {
+    logger.info("Attempting to save new DataSource: {}", jp.getArgs()[0]);
   }
 
   @Around("execution(* self.me.matchday.api.service.DataSourceService.getDataSourcesForPlugin(..))")
@@ -88,5 +57,15 @@ public class DataSourceServiceLog {
       logger.error("Database returned invalid data: {}", result);
     }
     return result;
+  }
+
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.getDataSourceById(..))")
+  public void logGetDataSourceById(@NotNull JoinPoint jp) {
+    logger.info("Getting DataSource with ID: {}", jp.getArgs()[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.delete(..))")
+  public void logDeleteDataSource(@NotNull JoinPoint jp) {
+    logger.info("Deleting Data Source: {}", jp.getArgs()[0]);
   }
 }
