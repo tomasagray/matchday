@@ -33,14 +33,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
-import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,7 +49,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for Event service")
 class EventServiceTest {
 
-  private static final String LOG_TAG = "EventServiceTest";
   private static final Logger logger = LogManager.getLogger(EventServiceTest.class);
 
   // Test resources
@@ -57,7 +56,7 @@ class EventServiceTest {
   private static EventService eventService;
 
   // Test data
-  private static Match testMatch;
+  private static Event testMatch;
   private static VideoFileSource testFileSource;
   private static Competition testCompetition;
   private static Team testTeam;
@@ -70,7 +69,7 @@ class EventServiceTest {
     EventServiceTest.testDataCreator = testDataCreator;
     EventServiceTest.eventService = eventService;
 
-    testMatch = testDataCreator.createTestMatch();
+    testMatch = testDataCreator.createTestMatch("EventServiceTest");
     testCompetition = testMatch.getCompetition();
     testTeam = testMatch.getHomeTeam();
 
@@ -82,8 +81,8 @@ class EventServiceTest {
     logger.info(
         "Saved Event w/ID: {}, Competition ID: {}, Team ID: {}; FileSrcID: {}",
         testMatch.getEventId(),
-        testCompetition,
-        testTeam,
+        testCompetition.getCompetitionId(),
+        testTeam.getTeamId(),
         testFileSource.getFileSrcId());
   }
 
@@ -94,18 +93,61 @@ class EventServiceTest {
   }
 
   @Test
-  @DisplayName("Ensure fetchAllEvents() returns all Events; at least @MIN_EVENT_COUNT")
+  @DisplayName("Test saving an Event to database")
+  void save() {
+    final List<Event> initialEvents = eventService.fetchAll();
+    final int initialCount = initialEvents.size();
+    logger.info("Initial database has: {} Events", initialCount);
+    final Event testMatch = testDataCreator.createTestMatch("SaveTest");
+    logger.info("Created Test Event: {}", testMatch);
+
+    final Event savedEvent = eventService.save(testMatch);
+    logger.info("Saved Event: {}", savedEvent);
+    assertThat(savedEvent).isNotNull();
+
+    final List<Event> afterEvents = eventService.fetchAll();
+    final int afterCount = afterEvents.size();
+    logger.info("After saving, database contains: {} Events", afterCount);
+    final int diff = afterCount - initialCount;
+    assertThat(diff).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("Test saving several Events")
+  void saveAll() {
+
+    final int SAVE_COUNT = 5;
+
+    final List<Event> initialEvents = eventService.fetchAll();
+    final int initialCount = initialEvents.size();
+    logger.info("Initial database has: {} Events", initialCount);
+
+    final List<Event> testEvents =
+        IntStream.range(0, SAVE_COUNT)
+            .mapToObj(i -> testDataCreator.createTestMatch("Match " + i))
+            .collect(Collectors.toList());
+    final List<Event> savedEvents = eventService.saveAll(testEvents);
+    logger.info("Saved Event: {}", savedEvents);
+    assertThat(savedEvents).isNotNull().isNotEmpty();
+
+    final List<Event> afterEvents = eventService.fetchAll();
+    final int afterCount = afterEvents.size();
+    logger.info("After saving, database contains: {} Events", afterCount);
+    final int diff = afterCount - initialCount;
+    assertThat(diff).isEqualTo(testEvents.size());
+  }
+
+  @Test
+  @DisplayName("Ensure fetchAll() returns all Events; at least @MIN_EVENT_COUNT")
   void fetchAllEvents() {
 
     final int expectedEventCount = 1; // minimum
-    final List<Event> events = eventService.fetchAllEvents();
+    final List<Event> events = eventService.fetchAll();
 
     // Perform tests
     final int actualEventCount = events.size();
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Testing Event count: expected: %s, actual: %s", expectedEventCount, actualEventCount));
+    logger.info(
+        "Testing Event count: expected: {}, actual: {}", expectedEventCount, actualEventCount);
     assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
   }
 
@@ -116,8 +158,12 @@ class EventServiceTest {
     // Fetch data from database
     final Optional<Event> eventOptional = eventService.fetchById(testMatch.getEventId());
     assertThat(eventOptional).isPresent();
-
-    eventOptional.ifPresent(event -> assertThat(event).isEqualTo(testMatch));
+    eventOptional.ifPresent(
+        event -> {
+          // normalize date times
+          event.setDate(testMatch.getDate());
+          assertThat(event).isEqualTo(testMatch);
+        });
   }
 
   @Test
@@ -135,7 +181,7 @@ class EventServiceTest {
     // Get file source ID
     final VideoFileSource testFileSource = testFileSrcOptional.get();
     final UUID testFileSourceId = testFileSource.getFileSrcId();
-    Log.i(LOG_TAG, "Test VideoFileSource ID: " + testFileSourceId);
+    logger.info("Test VideoFileSource ID: {}", testFileSourceId);
 
     final Optional<VideoFileSource> fileSourceOptional =
         eventService.fetchVideoFileSrc(testFileSourceId);
@@ -143,7 +189,7 @@ class EventServiceTest {
 
     fileSourceOptional.ifPresent(
         videoFileSource -> {
-          Log.i(LOG_TAG, "Retrieved file source from database: " + videoFileSource);
+          logger.info("Retrieved file source from database: {}", videoFileSource);
           assertThat(videoFileSource).isEqualTo(EventServiceTest.testFileSource);
         });
   }
@@ -164,10 +210,49 @@ class EventServiceTest {
 
     // Minimum expected Events
     final int expectedEventCount = 1;
+    logger.info("All Matches in database:\n{}", eventService.fetchAll());
 
-    // Fetch Events for Team:
+    logger.info("Fetching Matches for Team: {}", testTeam);
     final List<Event> events = eventService.fetchEventsForTeam(testTeam.getTeamId());
+    logger.info("Got Matches:\n{}", events);
     assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount);
+  }
+
+  @Test
+  @DisplayName("Validate updating Event in database")
+  void update() {
+    final List<Event> events = eventService.fetchAll();
+    if (events.size() == 0) {
+      // make sure there is at least one event to test...
+      events.add(testDataCreator.createTestMatch("MinimumEvent"));
+      eventService.saveAll(events);
+    }
+    assertThat(events.size()).isGreaterThanOrEqualTo(1);
+    final Event originalEvent = events.get(0);
+    logger.info("Original Event: {}", originalEvent);
+
+    final Event testEvent = getPristineEventCopy(originalEvent);
+    final Competition updatedCompetition = new Competition("Updated Competition");
+    updatedCompetition.setCompetitionId(UUID.randomUUID());
+    testEvent.setCompetition(updatedCompetition);
+    logger.info("Attempting to update Event with: {}", testEvent);
+
+    final Event updatedEvent = eventService.update(testEvent);
+    logger.info("Got updated Event: {}", updatedEvent);
+    assertThat(updatedEvent).isNotEqualTo(originalEvent);
+  }
+
+  private @NotNull Event getPristineEventCopy(@NotNull Event event) {
+    final Event pristine = new Event();
+    pristine.setEventId(event.getEventId());
+    pristine.setCompetition(event.getCompetition());
+    pristine.setHomeTeam(event.getHomeTeam());
+    pristine.setAwayTeam(event.getAwayTeam());
+    pristine.setDate(event.getDate());
+    pristine.setFixture(event.getFixture());
+    pristine.setSeason(event.getSeason());
+    pristine.addAllFileSources(event.getFileSources());
+    return pristine;
   }
 
   @Test
@@ -175,9 +260,9 @@ class EventServiceTest {
   void deleteEvent() {
 
     // Create test data
-    final Match saveEvent = testDataCreator.createTestMatch();
+    final Event saveEvent = testDataCreator.createTestMatch();
 
-    final List<Event> initialEvents = eventService.fetchAllEvents();
+    final List<Event> initialEvents = eventService.fetchAll();
     final int initialEventCount = initialEvents.size();
     assertThat(initialEventCount).isNotZero();
 
@@ -185,7 +270,7 @@ class EventServiceTest {
     eventService.delete(saveEvent);
 
     // Verify Event count has returned to previous of test
-    final List<Event> postTestEvents = eventService.fetchAllEvents();
+    final List<Event> postTestEvents = eventService.fetchAll();
     final int postTestEventCount = postTestEvents.size();
     assertThat(postTestEventCount).isEqualTo(initialEventCount - 1);
   }

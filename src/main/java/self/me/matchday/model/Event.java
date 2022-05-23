@@ -108,7 +108,6 @@ public class Event {
         && Objects.equals(getAwayTeam(), event.getAwayTeam())
         && Objects.equals(getSeason(), event.getSeason())
         && Objects.equals(getFixture(), event.getFixture())
-        && Objects.equals(getFileSources(), event.getFileSources())
         && Objects.equals(getDate(), event.getDate());
   }
 
@@ -120,8 +119,8 @@ public class Event {
   @Override
   public String toString() {
     return String.format(
-        "Event{eventId=%s, competition=%s, homeTeam=%s, awayTeam=%s, season=%s, fixture=%s, fileSources=%s, date=%s}",
-        eventId, competition, homeTeam, awayTeam, season, fixture, fileSources, date);
+        "Event{eventId=%s, competition=%s, homeTeam=%s, awayTeam=%s, season=%s, fixture=%s, date=%s}",
+        eventId, competition, homeTeam, awayTeam, season, fixture, date);
   }
 
   /** Defines default Event sorting order - reverse chronological. */

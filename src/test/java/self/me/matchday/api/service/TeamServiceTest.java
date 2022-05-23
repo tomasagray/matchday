@@ -31,7 +31,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
-import self.me.matchday.model.Match;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
 
@@ -52,7 +52,7 @@ class TeamServiceTest {
   private static TeamService teamService;
   private static Competition testCompetition;
   private static Team testTeam;
-  private static Match testMatch;
+  private static Event testMatch;
 
   @BeforeAll
   static void setUp(
@@ -131,7 +131,7 @@ class TeamServiceTest {
     assertThat(postUpdateTeamCount - initialTeamCount).isEqualTo(1);
 
     // Cleanup
-    teamService.deleteTeamByName(savingTestTeam.getProperName().getName());
+    teamService.deleteTeamByName(savingTestTeam.getName().getName());
   }
 
   @Test
@@ -147,7 +147,7 @@ class TeamServiceTest {
     final int updatedTeamCount = updatedTeams.size();
 
     // Delete test team
-    teamService.deleteTeamByName(deleteTestTeam.getProperName().getName());
+    teamService.deleteTeamByName(deleteTestTeam.getName().getName());
     // Get new team count
     final List<Team> deletedTeamsList = teamService.fetchAllTeams();
     final int deletedTeamsCount = deletedTeamsList.size();

@@ -39,7 +39,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.model.Event;
-import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 import self.me.matchday.plugin.datasource.parsing.fabric.Bolt;
 import self.me.matchday.util.Log;
@@ -77,7 +76,7 @@ class TeamControllerTest {
         IntStream.range(0, 10)
             .mapToObj(
                 i -> {
-                  final Match testMatch = testDataCreator.createTestMatch(NAME + i);
+                  final Event testMatch = testDataCreator.createTestMatch(NAME + i);
                   testMatches.add(testMatch);
                   return testMatch;
                 })

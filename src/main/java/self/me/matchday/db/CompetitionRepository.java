@@ -30,5 +30,5 @@ import java.util.UUID;
 @Repository
 public interface CompetitionRepository extends JpaRepository<Competition, UUID> {
 
-  Optional<Competition> findCompetitionByProperNameName(@NotNull String name);
+  Optional<Competition> findCompetitionByNameName(@NotNull String name);
 }

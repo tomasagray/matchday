@@ -75,7 +75,7 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       // initialize resource
       final UUID teamId = team.getTeamId();
       teamResource.setId(teamId);
-      teamResource.setName(team.getProperName().getName());
+      teamResource.setName(team.getName().getName());
       teamResource.setLocale(team.getLocale());
       // attach links
       teamResource.add(

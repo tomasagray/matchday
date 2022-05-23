@@ -79,7 +79,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       // populate DTO
       final UUID competitionId = competition.getCompetitionId();
       competitionResource.setId(competitionId);
-      competitionResource.setName(competition.getProperName().getName());
+      competitionResource.setName(competition.getName().getName());
       competitionResource.setLocale(competition.getLocale());
 
       // Attach links:

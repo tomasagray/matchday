@@ -24,6 +24,7 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,7 +37,7 @@ public class ProperName implements Comparable<ProperName> {
   @Id @GeneratedValue private Long id;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private List<Synonym> synonyms;
+  private List<Synonym> synonyms = new ArrayList<>();
 
   public ProperName() {
     this.name = null;
@@ -44,6 +45,10 @@ public class ProperName implements Comparable<ProperName> {
 
   public ProperName(@NotNull String name) {
     this.name = name;
+  }
+
+  public void addSynonym(@NotNull Synonym synonym) {
+    this.synonyms.add(synonym);
   }
 
   @Override
@@ -61,7 +66,7 @@ public class ProperName implements Comparable<ProperName> {
 
   @Override
   public String toString() {
-    return String.format("ProperName{id=%s, synonyms=%s, name='%s'}", id, getSynonyms(), name);
+    return String.format("ProperName{id=%s, name='%s'}", id, name);
   }
 
   @Override

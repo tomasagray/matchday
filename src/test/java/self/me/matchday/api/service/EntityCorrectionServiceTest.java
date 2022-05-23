@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.db.EventRepository;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.*;
 
 import java.time.LocalDateTime;
@@ -50,25 +50,28 @@ class EntityCorrectionServiceTest {
 
   private static final Logger logger = LogManager.getLogger(EntityCorrectionServiceTest.class);
   private static EntityCorrectionService entityCorrectionService;
+  private static TestDataCreator testDataCreator;
+  private static EventService eventService;
 
   @BeforeAll
   static void setup(
       @Autowired EntityCorrectionService correctionService,
-      @Autowired @NotNull EventRepository eventRepository) {
+      @Autowired TestDataCreator testDataCreator,
+      @Autowired @NotNull EventService eventService) {
+
     EntityCorrectionServiceTest.entityCorrectionService = correctionService;
-    createProperEvent(eventRepository);
+    EntityCorrectionServiceTest.testDataCreator = testDataCreator;
+    EntityCorrectionServiceTest.eventService = eventService;
+    createProperEvent();
     createSynonyms();
   }
 
-  private static void createProperEvent(@NotNull EventRepository eventRepository) {
-    final Event properEvent =
-        Event.builder()
-            .competition(new Competition(UEFA_CHAMPIONS_LEAGUE))
-            .homeTeam(new Team(FC_BARCELONA))
-            .awayTeam(new Team(ATLETICO_DE_MADRID))
-            .date(LocalDateTime.now())
-            .build();
-    logger.info("Saved proper event: " + eventRepository.saveAndFlush(properEvent));
+  private static void createProperEvent() {
+    final Event properEvent = testDataCreator.createTestMatch("Test Match");
+    properEvent.setHomeTeam(new Team(FC_BARCELONA));
+    properEvent.setAwayTeam(new Team(ATLETICO_DE_MADRID));
+    properEvent.setCompetition(new Competition(UEFA_CHAMPIONS_LEAGUE));
+    logger.info("Saved proper event: " + eventService.save(properEvent));
   }
 
   private static void createSynonyms() {
@@ -83,7 +86,7 @@ class EntityCorrectionServiceTest {
     final Synonym ucl = new Synonym("UCL", championsLeague);
 
     final List<Synonym> synonyms = List.of(barca, barcelona, atleti, ucl);
-    logger.info("Saving Synonyms: " + entityCorrectionService.addAllSynonyms(synonyms));
+    logger.info("Saved Synonyms: " + entityCorrectionService.addAllSynonyms(synonyms));
   }
 
   @Test
@@ -132,10 +135,9 @@ class EntityCorrectionServiceTest {
 
     entityCorrectionService.correctEntityFields(testEvent);
     logger.info("Got corrected Event: " + testEvent);
-    assertThat(testEvent.getCompetition().getProperName().getName())
-        .isEqualTo(UEFA_CHAMPIONS_LEAGUE);
-    assertThat(testEvent.getHomeTeam().getProperName().getName()).isEqualTo(FC_BARCELONA);
-    assertThat(testEvent.getAwayTeam().getProperName().getName()).isEqualTo(ATLETICO_DE_MADRID);
+    assertThat(testEvent.getCompetition().getName().getName()).isEqualTo(UEFA_CHAMPIONS_LEAGUE);
+    assertThat(testEvent.getHomeTeam().getName().getName()).isEqualTo(FC_BARCELONA);
+    assertThat(testEvent.getAwayTeam().getName().getName()).isEqualTo(ATLETICO_DE_MADRID);
   }
 
   @Test
@@ -159,10 +161,9 @@ class EntityCorrectionServiceTest {
     entityCorrectionService.correctEntityFields(testEvent);
 
     logger.info("Event has been corrected to: " + testEvent);
-    assertThat(testEvent.getCompetition().getProperName().getName())
-        .isEqualTo(UEFA_CHAMPIONS_LEAGUE);
-    assertThat(testEvent.getHomeTeam().getProperName().getName()).isEqualTo(ATLETICO_DE_MADRID);
-    assertThat(testEvent.getAwayTeam().getProperName().getName()).isEqualTo(FC_BARCELONA);
+    assertThat(testEvent.getCompetition().getName().getName()).isEqualTo(UEFA_CHAMPIONS_LEAGUE);
+    assertThat(testEvent.getHomeTeam().getName().getName()).isEqualTo(ATLETICO_DE_MADRID);
+    assertThat(testEvent.getAwayTeam().getName().getName()).isEqualTo(FC_BARCELONA);
     assertThat(testEvent.getSeason()).isEqualTo(testSeason);
     assertThat(testEvent.getFixture()).isEqualTo(testFixture);
     assertThat(testEvent.getDate()).isEqualTo(testDate);

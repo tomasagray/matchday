@@ -51,25 +51,26 @@ public class Team implements Serializable {
   private UUID teamId;
 
   @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-  private final ProperName properName;
+  private final ProperName name;
 
   @OneToOne private Artwork emblem;
   @OneToOne private Artwork fanart;
 
   private Locale locale;
 
-  public Team(@NotNull String properName) {
-    this.properName = new ProperName(properName);
+  public Team(@NotNull String name) {
+    this.name = new ProperName(name);
   }
 
   public Team() {
-    this.properName = null;
+    this.name = null;
   }
 
   @Override
   public String toString() {
-    final ProperName properName = getProperName();
-    return properName == null ? "null" : properName.getName();
+    final ProperName properName = getName();
+    final String name = properName == null ? "UNKNOWN" : properName.getName();
+    return String.format("%s [%s]", name, getTeamId());
   }
 
   /**
@@ -90,11 +91,11 @@ public class Team implements Serializable {
 
     // Cast for comparison
     final Team team = (Team) obj;
-    return team.getProperName().equals(this.getProperName());
+    return team.getName().equals(this.getName());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(properName, locale, emblem, fanart);
+    return Objects.hash(name, locale, emblem, fanart);
   }
 }

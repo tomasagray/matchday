@@ -57,7 +57,6 @@ public class TestDataCreator {
   private static final Random numGen = new Random();
 
   private final EventRepository eventRepository;
-  private final MatchRepository matchRepository;
   private final HighlightRepository highlightRepository;
   private final CompetitionRepository competitionRepository;
   private final TeamRepository teamRepository;
@@ -69,7 +68,6 @@ public class TestDataCreator {
   @Autowired
   public TestDataCreator(
       @NotNull final EventRepository eventRepository,
-      @NotNull final MatchRepository matchRepository,
       @NotNull final HighlightRepository highlightRepository,
       @NotNull final CompetitionRepository competitionRepository,
       @NotNull final TeamRepository teamRepository,
@@ -79,7 +77,6 @@ public class TestDataCreator {
       @NotNull final VideoStreamLocatorRepo locatorRepo) {
 
     this.eventRepository = eventRepository;
-    this.matchRepository = matchRepository;
     this.highlightRepository = highlightRepository;
     this.competitionRepository = competitionRepository;
     this.teamRepository = teamRepository;
@@ -111,10 +108,6 @@ public class TestDataCreator {
   public PatternKit<Event> createEventPatternKit() {
 
     final PatternKit<Event> patternKit;
-    //    patternKit = createEventPatternKitManually("([\\p{L}\\d\\s]+)
-    // (\\d{2,4}/\\d{2,4})[-Matchdy\\s]*(\\d+)[\\s-]*([\\p{L}\\s-]+) "
-    //                + "vs.? ([\\p{L}\\s-]+) - (\\d{2}/\\d{2}/\\d{2,4})");
-    //    writeTestPatternKit(patternKit, "test_event_pattern_kit.json");
     patternKit = createEventPatternKitFromFile();
     return patternKit;
   }
@@ -147,7 +140,6 @@ public class TestDataCreator {
 
     final PatternKit<VideoFileSource> patternKit;
     //    patternKit = createFileSourcePatternKitManually();
-    //    writeTestPatternKit(patternKit, "test_filesource_pattern_kit.json");
     patternKit = createFileSourcePatternFromFile();
     return patternKit;
   }
@@ -231,18 +223,18 @@ public class TestDataCreator {
 
   @Transactional
   @NotNull
-  public Match createTestMatch() {
+  public Event createTestMatch() {
     return this.createTestMatch("");
   }
 
   @Transactional
   @NotNull
-  public Match createTestMatch(@NotNull String competitionName) {
+  public Event createTestMatch(@NotNull String competitionName) {
     // Create & save test match & VideoFileSource
     final Competition testCompetition = createTestCompetition(competitionName);
     final Team testTeam = createTestTeam(competitionName);
-    final Match testMatch =
-        Match.matchBuilder()
+    final Event testEvent =
+        Event.builder()
             .date(LocalDateTime.now())
             .competition(testCompetition)
             .homeTeam(testTeam)
@@ -253,10 +245,10 @@ public class TestDataCreator {
 
     // Create file source & event files
     final VideoFileSource testFileSource = createTestVideoFileSource();
-    testMatch.getFileSources().add(testFileSource);
+    testEvent.getFileSources().add(testFileSource);
 
-    Log.i(LOG_TAG, "Created test Event: " + testMatch);
-    return matchRepository.saveAndFlush(testMatch);
+    Log.i(LOG_TAG, "Created test Event: " + testEvent);
+    return eventRepository.saveAndFlush(testEvent);
   }
 
   @Transactional

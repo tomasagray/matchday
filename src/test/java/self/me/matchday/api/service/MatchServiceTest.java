@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
@@ -52,7 +53,7 @@ class MatchServiceTest {
   // Test data
   private static Competition testCompetition;
   private static Team testTeam;
-  private static Match testMatch;
+  private static Event testMatch;
 
   @BeforeAll
   static void setUp(

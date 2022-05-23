@@ -51,7 +51,7 @@ public class CompetitionService {
 
     final List<Competition> competitions = competitionRepository.findAll();
     if (competitions.size() > 0) {
-      competitions.sort(Comparator.comparing(Competition::getProperName));
+      competitions.sort(Comparator.comparing(Competition::getName));
     }
     return competitions;
   }
@@ -67,7 +67,7 @@ public class CompetitionService {
   }
 
   public Optional<Competition> fetchCompetitionByName(@NotNull String name) {
-    return competitionRepository.findCompetitionByProperNameName(name);
+    return competitionRepository.findCompetitionByNameName(name);
   }
 
   /**
@@ -102,6 +102,6 @@ public class CompetitionService {
    * @return true/false
    */
   private boolean isValidCompetition(@NotNull final Competition competition) {
-    return competition.getProperName() != null;
+    return competition.getName() != null;
   }
 }

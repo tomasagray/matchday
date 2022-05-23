@@ -43,7 +43,6 @@ import self.me.matchday.api.resource.EventResource;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
-import self.me.matchday.model.Match;
 import self.me.matchday.plugin.datasource.parsing.fabric.Bolt;
 import self.me.matchday.util.Log;
 
@@ -80,7 +79,7 @@ class CompetitionControllerTest {
         IntStream.range(0, 10)
             .mapToObj(
                 i -> {
-                  final Match testMatch = testDataCreator.createTestMatch(NAME + i);
+                  final Event testMatch = testDataCreator.createTestMatch(NAME + i);
                   testMatches.add(testMatch);
                   return testMatch;
                 })
@@ -110,7 +109,7 @@ class CompetitionControllerTest {
     return Bolt.of(names)
         .zipWithBecoming(
             testCompetitions.stream(),
-            (competition, name) -> Arguments.of(competition.getProperName().getName(), name))
+            (competition, name) -> Arguments.of(competition.getName().getName(), name))
         .stream();
   }
 

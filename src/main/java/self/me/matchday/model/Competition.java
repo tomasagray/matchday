@@ -52,7 +52,7 @@ public class Competition implements Serializable {
   private UUID competitionId;
 
   @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-  private final ProperName properName;
+  private final ProperName name;
 
   private Locale locale;
   @OneToOne private Artwork emblem;
@@ -60,18 +60,19 @@ public class Competition implements Serializable {
   @OneToOne private Artwork monochromeEmblem;
   @OneToOne private Artwork landscape;
 
-  public Competition(@NotNull final String properName) {
-    this.properName = new ProperName(properName);
+  public Competition(@NotNull final String name) {
+    this.name = new ProperName(name);
   }
 
   public Competition() {
-    this.properName = null;
+    this.name = null;
   }
 
   @Override
   public String toString() {
-    final ProperName properName = getProperName();
-    return properName == null ? "null" : properName.getName();
+    final ProperName properName = getName();
+    final String name = properName == null ? "UNKNOWN" : properName.getName();
+    return String.format("%s [%s]", name, getCompetitionId());
   }
 
   @Override
@@ -80,12 +81,12 @@ public class Competition implements Serializable {
     if (!(o instanceof Competition)) return false;
     Competition that = (Competition) o;
     return Objects.equals(getCompetitionId(), that.getCompetitionId())
-        && Objects.equals(getProperName(), that.getProperName())
+        && Objects.equals(getName(), that.getName())
         && Objects.equals(getLocale(), that.getLocale());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getCompetitionId(), getProperName(), getLocale());
+    return Objects.hash(getCompetitionId(), getName(), getLocale());
   }
 }

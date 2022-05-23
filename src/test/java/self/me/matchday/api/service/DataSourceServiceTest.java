@@ -71,7 +71,7 @@ class DataSourceServiceTest {
     assertThat(testResult).isEqualTo(testRequest);
 
     // Ensure some data was collected by request
-    final List<Event> events = eventService.fetchAllEvents();
+    final List<Event> events = eventService.fetchAll();
     final int actualEventCount = events.size();
     assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
   }

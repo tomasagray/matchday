@@ -26,6 +26,7 @@ import self.me.matchday.Corrected;
 import self.me.matchday.CorrectedOrNull;
 import self.me.matchday.db.SynonymRepository;
 import self.me.matchday.model.Competition;
+import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Synonym;
 import self.me.matchday.model.Team;
 
@@ -137,7 +138,14 @@ public class EntityCorrectionService {
 
     try {
       final Field field = o.getClass().getDeclaredField("name");
-      return (String) field.get(o);
+      final boolean accessible = field.canAccess(o);
+      field.setAccessible(true);
+      final Object value = field.get(o);
+      field.setAccessible(accessible);
+      if (value instanceof ProperName) {
+        return ((ProperName) value).getName();
+      }
+      return (String) value;
     } catch (ReflectiveOperationException ignore) {
       // object does not have name field, or is not accessible
       return o.toString();
@@ -150,7 +158,8 @@ public class EntityCorrectionService {
       return (Optional<T>) competitionService.fetchCompetitionByName(name);
     } else if (entity instanceof Team) {
       return (Optional<T>) teamService.getTeamByName(name);
+    } else {
+      return Optional.empty();
     }
-    return Optional.empty();
   }
 }

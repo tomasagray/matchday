@@ -42,7 +42,7 @@ import java.util.UUID;
  */
 @Getter
 @Setter
-@Entity(name = "MatchGame")
+@Entity(name = "Match")
 public class Match extends Event {
 
   public Match() {

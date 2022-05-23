@@ -47,7 +47,7 @@ public class TeamService {
   public List<Team> fetchAllTeams() {
     final List<Team> teams = teamRepository.findAll();
     if (teams.size() > 0) {
-      teams.sort(Comparator.comparing(Team::getProperName));
+      teams.sort(Comparator.comparing(Team::getName));
     }
     return teams;
   }
@@ -77,12 +77,12 @@ public class TeamService {
     Set<Team> teamSet = new LinkedHashSet<>(homeTeams);
     teamSet.addAll(awayTeams);
     List<Team> teamList = new ArrayList<>(teamSet);
-    teamList.sort(Comparator.comparing(Team::getProperName));
+    teamList.sort(Comparator.comparing(Team::getName));
     return teamList;
   }
 
   public Optional<Team> getTeamByName(@NotNull String name) {
-    return teamRepository.findTeamByProperNameName(name);
+    return teamRepository.findTeamByNameName(name);
   }
 
   /**
@@ -106,7 +106,7 @@ public class TeamService {
    * @param teamName The name of the Team to delete
    */
   public void deleteTeamByName(@NotNull final String teamName) {
-    teamRepository.deleteByProperNameName(teamName);
+    teamRepository.deleteByNameName(teamName);
   }
 
   /**
@@ -116,6 +116,6 @@ public class TeamService {
    * @return true/false
    */
   private boolean isValidTeam(@NotNull final Team team) {
-    return team.getProperName() != null;
+    return team.getName() != null;
   }
 }

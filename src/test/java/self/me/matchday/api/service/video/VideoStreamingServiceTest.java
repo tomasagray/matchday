@@ -29,8 +29,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.FileServerUser;
-import self.me.matchday.model.Match;
 import self.me.matchday.model.video.*;
 import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.util.Log;
@@ -62,7 +62,7 @@ class VideoStreamingServiceTest {
   private static VideoStreamLocatorPlaylistService locatorPlaylistService;
 
   // Test data
-  private static Match testMatch;
+  private static Event testMatch;
   private static FileServerUser testFileServerUser;
   private static VideoStreamLocatorService streamLocatorService;
   private static VideoFile testVideoFile;

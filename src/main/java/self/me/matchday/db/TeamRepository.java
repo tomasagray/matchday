@@ -33,17 +33,17 @@ import java.util.UUID;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, UUID> {
 
-  Optional<Team> findTeamByProperNameName(@NotNull String name);
+  Optional<Team> findTeamByNameName(@NotNull String name);
 
-  void deleteByProperNameName(String name);
+  void deleteByNameName(String name);
 
   @Query(
-      "SELECT DISTINCT ht FROM MatchGame mt JOIN mt.homeTeam ht JOIN mt.competition cm "
+      "SELECT DISTINCT ht FROM Event mt JOIN mt.homeTeam ht JOIN mt.competition cm "
           + "WHERE cm.competitionId = :competitionId")
   List<Team> fetchHomeTeamsByCompetition(@Param("competitionId") UUID competitionId);
 
   @Query(
-      "SELECT DISTINCT at FROM MatchGame mt JOIN mt.awayTeam at JOIN mt.competition cm "
+      "SELECT DISTINCT at FROM Event mt JOIN mt.awayTeam at JOIN mt.competition cm "
           + "WHERE cm.competitionId = :competitionId")
   List<Team> fetchAwayTeamsByCompetition(@Param("competitionId") UUID competitionId);
 }
