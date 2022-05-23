@@ -32,17 +32,14 @@ import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.Event;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Aspect
 @Component
 public class EventServiceLog {
 
   private static final Logger logger = LogManager.getLogger(EventService.class);
-
-  @Before("execution(* self.me.matchday.api.service.EventService.fetchAllEvents())")
-  public void logFetchAllEvents() {
-    logger.info("Fetching latest Events...");
-  }
 
   @Around("execution(* self.me.matchday.api.service.EventService.save(..))")
   public Object logSaveEvent(@NotNull ProceedingJoinPoint jp) throws Throwable {
@@ -54,6 +51,19 @@ public class EventServiceLog {
       logger.error("Event: {} was not saved to DB; {}", event, e.getMessage());
       throw e;
     }
+  }
+
+  @Before("execution(* self.me.matchday.api.service.EventService.saveAll(..))")
+  public void logSaveManyEvents(@NotNull JoinPoint jp) {
+    final Iterable<?> events = (Iterable<?>) jp.getArgs()[0];
+    final List<?> eventList =
+        StreamSupport.stream(events.spliterator(), false).collect(Collectors.toList());
+    logger.info("Saving: {} Events...", eventList.size());
+  }
+
+  @Before("execution(* self.me.matchday.api.service.EventService.fetchAll())")
+  public void logFetchAllEvents() {
+    logger.info("Fetching latest Events...");
   }
 
   @Around("execution(* self.me.matchday.api.service.EventService.fetchById(..))")
@@ -90,8 +100,29 @@ public class EventServiceLog {
     return events;
   }
 
+  @Before("execution(* self.me.matchday.api.service.EventService.update(..))")
+  public void logUpdateEvent(@NotNull JoinPoint jp) {
+    logger.info("Attempting to update Event: {}", jp.getArgs()[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.EventService.updateAll(..))")
+  public void logUpdateManyEvents(@NotNull JoinPoint jp) {
+    final Iterable<?> events = (Iterable<?>) jp.getArgs()[0];
+    final List<?> eventsList =
+        StreamSupport.stream(events.spliterator(), false).collect(Collectors.toList());
+    logger.info("Updating: {} Events...", eventsList.size());
+  }
+
   @Before("execution(* self.me.matchday.api.service.EventService.delete(..))")
   public void logDeleteEvent(@NotNull JoinPoint jp) {
     logger.info("Deleting Event: {}", jp.getArgs()[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.EventService.deleteAll(..))")
+  public void logDeleteManyEvents(@NotNull JoinPoint jp) {
+    final Iterable<?> events = (Iterable<?>) jp.getArgs()[0];
+    final List<?> eventList =
+        StreamSupport.stream(events.spliterator(), false).collect(Collectors.toList());
+    logger.info("Deleting: {} Events...", eventList.size());
   }
 }

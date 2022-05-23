@@ -75,10 +75,13 @@ class EntityCorrectionServiceTest {
     final ProperName fcBarcelona = new ProperName(FC_BARCELONA);
     final Synonym barca = new Synonym("Barca", fcBarcelona);
     final Synonym barcelona = new Synonym("Barcelona", fcBarcelona);
+
     final ProperName atletico = new ProperName(ATLETICO_DE_MADRID);
     final Synonym atleti = new Synonym("Atleti", atletico);
+
     final ProperName championsLeague = new ProperName(UEFA_CHAMPIONS_LEAGUE);
     final Synonym ucl = new Synonym("UCL", championsLeague);
+
     final List<Synonym> synonyms = List.of(barca, barcelona, atleti, ucl);
     logger.info("Saving Synonyms: " + entityCorrectionService.addAllSynonyms(synonyms));
   }

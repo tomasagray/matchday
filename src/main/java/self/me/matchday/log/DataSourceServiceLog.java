@@ -28,8 +28,11 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.DataSourceService;
+import self.me.matchday.model.DataSource;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Aspect
 public class DataSourceServiceLog {
@@ -46,6 +49,14 @@ public class DataSourceServiceLog {
     logger.info("Attempting to save new DataSource: {}", jp.getArgs()[0]);
   }
 
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.saveAll(..))")
+  public void logSaveAllDataSources(@NotNull JoinPoint jp) {
+    final Iterable<?> sources = (Iterable<?>) jp.getArgs()[0];
+    final List<?> sourceList =
+        StreamSupport.stream(sources.spliterator(), false).collect(Collectors.toList());
+    logger.info("Saving: {} Data Sources...", sourceList.size());
+  }
+
   @Around("execution(* self.me.matchday.api.service.DataSourceService.getDataSourcesForPlugin(..))")
   public Object logGetDataSourcesForPlugin(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Fetching Data Sources for plugin ID: {}", jp.getArgs()[0]);
@@ -59,13 +70,40 @@ public class DataSourceServiceLog {
     return result;
   }
 
-  @Before("execution(* self.me.matchday.api.service.DataSourceService.getDataSourceById(..))")
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.fetchById(..))")
   public void logGetDataSourceById(@NotNull JoinPoint jp) {
     logger.info("Getting DataSource with ID: {}", jp.getArgs()[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.fetchAll())")
+  public void logGetAllDataSources() {
+    logger.info("Retrieving ALL DataSources from database...");
+  }
+
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.update(..))")
+  public void logUpdateDataSource(@NotNull JoinPoint jp) {
+    final DataSource<?> dataSource = (DataSource<?>) jp.getArgs()[0];
+    logger.info("Updating DataSource with ID: {} to: {}", dataSource.getDataSourceId(), dataSource);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.updateAll(..))")
+  public void logUpdateManyDataSources(@NotNull JoinPoint jp) {
+    final Iterable<?> sources = (Iterable<?>) jp.getArgs()[0];
+    final List<?> sourceList =
+        StreamSupport.stream(sources.spliterator(), false).collect(Collectors.toList());
+    logger.info("Updating: {} DataSources...", sourceList.size());
   }
 
   @Before("execution(* self.me.matchday.api.service.DataSourceService.delete(..))")
   public void logDeleteDataSource(@NotNull JoinPoint jp) {
     logger.info("Deleting Data Source: {}", jp.getArgs()[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.deleteAll(..))")
+  public void logDeleteManyDataSources(@NotNull JoinPoint jp) {
+    final Iterable<?> sources = (Iterable<?>) jp.getArgs()[0];
+    final List<?> sourceList =
+        StreamSupport.stream(sources.spliterator(), false).collect(Collectors.toList());
+    logger.info("Deleting: {} DataSources...", sourceList.size());
   }
 }

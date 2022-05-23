@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
@@ -91,19 +93,28 @@ public class DataSourceService implements EntityService<DataSource<?>> {
     return dataSourceRepository.saveAndFlush(dataSource);
   }
 
+  @Override
+  public List<DataSource<?>> saveAll(@NotNull Iterable<? extends DataSource<?>> entities) {
+    return StreamSupport.stream(entities.spliterator(), false)
+        .map(this::save)
+        .collect(Collectors.toList());
+  }
+
   public List<DataSource<?>> getDataSourcesForPlugin(@NotNull UUID pluginId) {
     return dataSourceRepository.findDataSourcesByPluginId(pluginId);
   }
 
-  public Optional<DataSource<?>> getDataSourceById(@NotNull UUID id) {
+  @Override
+  public Optional<DataSource<?>> fetchById(@NotNull UUID id) {
     return dataSourceRepository.findById(id);
   }
 
   @Override
-  public void delete(@NotNull DataSource<?> dataSource) {
-    dataSourceRepository.delete(dataSource);
+  public List<DataSource<?>> fetchAll() {
+    return dataSourceRepository.findAll();
   }
 
+  @Override
   public DataSource<?> update(@NotNull final DataSource<?> dataSource) {
     final UUID dataSourceId = dataSource.getDataSourceId();
     final Optional<DataSource<?>> sourceOptional = dataSourceRepository.findById(dataSourceId);
@@ -114,5 +125,22 @@ public class DataSourceService implements EntityService<DataSource<?>> {
     // else...
     throw new IllegalArgumentException(
         "Attempting to update nonexistent DataSource with ID: " + dataSourceId);
+  }
+
+  @Override
+  public List<DataSource<?>> updateAll(@NotNull Iterable<? extends DataSource<?>> entities) {
+    return StreamSupport.stream(entities.spliterator(), false)
+        .map(this::update)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public void delete(@NotNull DataSource<?> dataSource) {
+    dataSourceRepository.delete(dataSource);
+  }
+
+  @Override
+  public void deleteAll(@NotNull Iterable<? extends DataSource<?>> entities) {
+    dataSourceRepository.deleteAll(entities);
   }
 }

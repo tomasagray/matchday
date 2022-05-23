@@ -35,6 +35,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
@@ -58,7 +60,38 @@ public class EventService implements EntityService<Event> {
     this.entityCorrectionService = entityCorrectionService;
   }
 
-  public List<Event> fetchAllEvents() {
+  /**
+   * Persist an Event; must pass validation, or will skip and make a note in logs.
+   *
+   * @param event The Event to be saved
+   */
+  @Override
+  public Event save(@NotNull final Event event) {
+
+    validateEvent(event);
+    try {
+      entityCorrectionService.correctEntityFields(event);
+      // See if Event already exists in DB
+      final Optional<Event> eventOptional = eventRepository.findOne(getExampleEvent(event));
+      if (eventOptional.isPresent()) {
+        final Event existingEvent = eventOptional.get();
+        existingEvent.getFileSources().addAll(event.getFileSources());
+      }
+      return eventRepository.save(event);
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public List<Event> saveAll(@NotNull Iterable<? extends Event> entities) {
+    return StreamSupport.stream(entities.spliterator(), false)
+        .map(this::save)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Event> fetchAll() {
     final List<Event> events = eventRepository.findAll();
     if (events.size() > 0) {
       events.sort(EVENT_SORTER);
@@ -66,6 +99,25 @@ public class EventService implements EntityService<Event> {
     return events;
   }
 
+  @Override
+  public Event update(@NotNull Event event) {
+    final UUID eventId = event.getEventId();
+    final Optional<Event> optional = fetchById(eventId);
+    if (optional.isPresent()) {
+      return save(event);
+    }
+    // else..
+    throw new IllegalArgumentException("Trying to update non-existent Event with ID: " + eventId);
+  }
+
+  @Override
+  public List<Event> updateAll(@NotNull Iterable<? extends Event> events) {
+    return StreamSupport.stream(events.spliterator(), false)
+        .map(this::update)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public Optional<Event> fetchById(@NotNull final UUID eventId) {
     return eventRepository.findById(eventId);
   }
@@ -94,25 +146,6 @@ public class EventService implements EntityService<Event> {
     return eventRepository.fetchEventsByTeam(teamId);
   }
 
-  /**
-   * Persist an Event; must pass validation, or will skip and make a note in logs.
-   *
-   * @param event The Event to be saved
-   */
-  @Override
-  public Event save(@NotNull final Event event) throws ReflectiveOperationException {
-
-    validateEvent(event);
-    entityCorrectionService.correctEntityFields(event);
-    // See if Event already exists in DB
-    final Optional<Event> eventOptional = eventRepository.findOne(getExampleEvent(event));
-    if (eventOptional.isPresent()) {
-      final Event existingEvent = eventOptional.get();
-      existingEvent.getFileSources().addAll(event.getFileSources());
-    }
-    return eventRepository.save(event);
-  }
-
   private @NotNull Example<Event> getExampleEvent(@NotNull Event event) {
 
     final Event exampleEvent =
@@ -134,6 +167,13 @@ public class EventService implements EntityService<Event> {
   @Override
   public void delete(@NotNull final Event event) {
     eventRepository.delete(event);
+  }
+
+  @Override
+  public void deleteAll(@NotNull Iterable<? extends Event> events) {
+    for (Event event : events) {
+      delete(event);
+    }
   }
 
   /**
@@ -166,7 +206,7 @@ public class EventService implements EntityService<Event> {
 
   private boolean isValidCompetition(final Competition competition) {
     if (competition != null) {
-      final ProperName name = competition.getProperName();
+      final ProperName name = competition.getName();
       return name != null && !("".equals(name.getName()));
     }
     return false;

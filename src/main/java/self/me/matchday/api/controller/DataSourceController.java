@@ -92,7 +92,7 @@ public class DataSourceController {
       @PathVariable("dataSourceId") UUID dataSourceId) {
 
     return dataSourceService
-        .getDataSourceById(dataSourceId)
+        .fetchById(dataSourceId)
         .map(dataSourceResourceAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());

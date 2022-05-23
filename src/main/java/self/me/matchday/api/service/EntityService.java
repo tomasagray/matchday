@@ -19,9 +19,27 @@
 
 package self.me.matchday.api.service;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 public interface EntityService<T> {
 
-  T save(T entity) throws Exception;
+  T save(@NotNull T entity);
 
-  void delete(T entity);
+  List<T> saveAll(@NotNull Iterable<? extends T> entities);
+
+  Optional<T> fetchById(@NotNull UUID id);
+
+  List<T> fetchAll();
+
+  T update(@NotNull T entity);
+
+  List<T> updateAll(@NotNull Iterable<? extends T> entities);
+
+  void delete(@NotNull T entity);
+
+  void deleteAll(@NotNull Iterable<? extends T> entities);
 }

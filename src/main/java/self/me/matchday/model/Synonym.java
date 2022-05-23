@@ -46,6 +46,9 @@ public class Synonym {
   public Synonym(@NotNull String name, ProperName properName) {
     this.name = name;
     this.properName = properName;
+    if (this.properName != null) {
+      this.properName.addSynonym(this);
+    }
   }
 
   @Override
