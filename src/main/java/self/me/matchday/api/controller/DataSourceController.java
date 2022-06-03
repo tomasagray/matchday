@@ -52,6 +52,15 @@ public class DataSourceController {
   }
 
   @RequestMapping(
+      value = "/all",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<CollectionModel<DataSourceResource>> fetchAllDataSources() {
+    final List<DataSource<?>> dataSources = dataSourceService.fetchAll();
+    return ResponseEntity.ok(dataSourceResourceAssembler.toCollectionModel(dataSources));
+  }
+
+  @RequestMapping(
       value = "/refresh/all",
       method = {RequestMethod.POST, RequestMethod.GET},
       consumes = MediaType.APPLICATION_JSON_VALUE,

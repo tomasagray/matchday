@@ -23,7 +23,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
-import self.me.matchday.model.*;
+import self.me.matchday.model.DataSource;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.PatternKit;
+import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.plugin.datasource.parsing.fabric.Bolt;
@@ -47,29 +50,19 @@ public class EventDataParser implements DataSourceParser<Event, String> {
   @Override
   public Stream<? extends Event> getEntityStream(
       @NotNull DataSource<Event> dataSource, @NotNull String data) {
-    return getEventStream(((PlaintextDataSource<Event>) dataSource).getPatternKitPack(), data);
-  }
-
-  private Stream<? extends Event> getEventStream(
-      @NotNull PatternKitPack patternKitPack, @NotNull String data) {
-
-    final List<PatternKit<? extends Event>> eventPatterns =
-        patternKitPack.getPatternKitsFor(Event.class);
-    final List<PatternKit<? extends VideoFileSource>> fileSourcePatterns =
-        patternKitPack.getPatternKitsFor(VideoFileSource.class);
-    final List<PatternKit<? extends VideoFile>> videoFilePatterns =
-        patternKitPack.getPatternKitsFor(VideoFile.class);
-    final List<PatternKit<? extends URL>> urlPatterns = patternKitPack.getPatternKitsFor(URL.class);
 
     final Document document = Jsoup.parse(data);
     final String text = document.text();
 
-    final Stream<? extends Event> eventStream = textParser.createEntityStreams(eventPatterns, text);
+    final PlaintextDataSource<Event> plaintextDataSource = (PlaintextDataSource<Event>) dataSource;
+    final Stream<? extends Event> eventStream =
+        getStreamForType(plaintextDataSource.getPatternKitsFor(Event.class), text);
     final Stream<? extends VideoFileSource> fileSourceStream =
-        textParser.createEntityStreams(fileSourcePatterns, text);
-    final Stream<? extends VideoFile> videoFileStream =
-        textParser.createEntityStreams(videoFilePatterns, text);
-    final Stream<URL> links = createUrlStreams(document, urlPatterns);
+        getStreamForType(plaintextDataSource.getPatternKitsFor(VideoFileSource.class), text);
+    final Stream<VideoFile> videoFileStream =
+        getStreamForType(plaintextDataSource.getPatternKitsFor(VideoFile.class), text);
+    final Stream<URL> links =
+        createUrlStreams(plaintextDataSource.getPatternKitsFor(URL.class), document);
 
     return Bolt.of(links)
         .zipInto(videoFileStream, VideoFile::setExternalUrl)
@@ -78,8 +71,14 @@ public class EventDataParser implements DataSourceParser<Event, String> {
         .stream();
   }
 
+  @SuppressWarnings("unchecked cast")
+  private <T> Stream<T> getStreamForType(
+      @NotNull List<PatternKit<? extends T>> patternKits, String data) {
+    return (Stream<T>) textParser.createEntityStreams(patternKits, data);
+  }
+
   private Stream<URL> createUrlStreams(
-      @NotNull Document document, @NotNull Collection<PatternKit<? extends URL>> patternKits) {
+      @NotNull Collection<PatternKit<? extends URL>> patternKits, @NotNull Document document) {
 
     Stream<URL> base = Stream.empty();
     for (PatternKit<? extends URL> patternKit : patternKits) {

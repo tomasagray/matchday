@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2022.
+ *
+ * This file is part of Matchday.
+ *
+ * Matchday is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Matchday is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package self.me.matchday.api.resource;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -10,10 +29,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.DataSourceController;
 import self.me.matchday.model.DataSource;
-import self.me.matchday.model.PatternKitPack;
+import self.me.matchday.model.PatternKit;
 import self.me.matchday.model.PlaintextDataSource;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
@@ -34,11 +54,13 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
   private UUID pluginId;
   private boolean enabled;
 
+  @Getter
+  @Setter
   @JsonRootName(value = "data_source")
   @Relation(collectionRelation = "data_source")
   static class PlaintextDataSourceResource extends DataSourceResource {
 
-    @Getter @Setter private PatternKitPack patternKitPack;
+    private List<? extends PatternKit<?>> patternKits;
 
     PlaintextDataSourceResource(@NotNull DataSourceResource base) {
       this.setDataSourceId(base.dataSourceId);
@@ -73,7 +95,8 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
       if (entity instanceof PlaintextDataSource) {
         final PlaintextDataSource<?> plaintextEntity = (PlaintextDataSource<?>) entity;
         PlaintextDataSourceResource plaintextResource = new PlaintextDataSourceResource(resource);
-        plaintextResource.setPatternKitPack(plaintextEntity.getPatternKitPack());
+        final List<PatternKit<?>> patternKits = plaintextEntity.getPatternKits();
+        plaintextResource.setPatternKits(patternKits);
         return plaintextResource;
       }
       return resource;

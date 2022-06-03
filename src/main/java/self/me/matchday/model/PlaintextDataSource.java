@@ -20,35 +20,42 @@
 package self.me.matchday.model;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@Getter
-@Setter
 @ToString(callSuper = true)
 @Entity
-@RequiredArgsConstructor
 public final class PlaintextDataSource<T> extends DataSource<T> {
 
-  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private final PatternKitPack patternKitPack;
+  @Getter
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private final List<PatternKit<?>> patternKits = new ArrayList<>();
 
   public PlaintextDataSource() {
     super();
-    this.patternKitPack = null;
   }
 
   public PlaintextDataSource(
-      @NotNull URI baseUri, @NotNull Class<T> clazz, @NotNull PatternKitPack patternKitPack) {
+      @NotNull URI baseUri, @NotNull Class<T> clazz, @NotNull List<PatternKit<?>> patternKits) {
     super(baseUri, clazz);
-    this.patternKitPack = patternKitPack;
+    this.patternKits.addAll(patternKits);
+  }
+
+  @SuppressWarnings("unchecked cast")
+  public <S> List<PatternKit<? extends S>> getPatternKitsFor(@NotNull Class<S> clazz) {
+
+    return patternKits.stream()
+        .filter(patternKit -> patternKit.getClazz().equals(clazz))
+        .map(patternKit -> (PatternKit<? extends S>) patternKit)
+        .collect(Collectors.toList());
   }
 }

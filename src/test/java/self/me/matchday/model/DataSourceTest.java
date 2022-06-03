@@ -19,6 +19,8 @@
 
 package self.me.matchday.model;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.plugin.datasource.parsing.TextParser;
-import self.me.matchday.util.Log;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -48,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Validation for DataSource entity")
 class DataSourceTest {
 
-  private static final String LOG_TAG = "DataSourceTest";
+  private static final Logger logger = LogManager.getLogger(DataSourceTest.class);
 
   private static PlaintextDataSource<Artwork> dataSource;
   private static TextParser textParser;
@@ -64,22 +65,20 @@ class DataSourceTest {
     patternKit.setPattern(
         Pattern.compile("<img[\\w=\":;%\\s-]*src=\"([\\w.:/]*)\" [\\w\\s=\":;%_-]*/?>"));
     patternKit.setFields(Map.of(1, "filePath"));
-    final PatternKitPack patternKitPack = new PatternKitPack();
-    patternKitPack.addPatternKit(patternKit);
-    DataSourceTest.dataSource = new PlaintextDataSource<>(uri, Artwork.class, patternKitPack);
-    Log.i(LOG_TAG, "Created PlaintextDataSource:\n" + dataSource);
+    DataSourceTest.dataSource = new PlaintextDataSource<>(uri, Artwork.class, List.of(patternKit));
+    logger.info("Created PlaintextDataSource:\n{}", dataSource);
   }
 
   private static Stream<Arguments> createArtworkStream() {
 
     final URI baseUri = DataSourceTest.dataSource.getBaseUri();
-    Log.i(LOG_TAG, "Getting data from: " + baseUri);
+    logger.info("Getting data from: {}", baseUri);
     final String data = getDataFromUri(baseUri);
-    Log.i(LOG_TAG, "Got data:\n" + data);
+    logger.info("Got data:\n{}", data);
     assertThat(data).isNotNull().isNotEmpty();
 
     final List<PatternKit<? extends Artwork>> patternKits =
-        dataSource.getPatternKitPack().getPatternKitsFor(Artwork.class);
+        dataSource.getPatternKitsFor(Artwork.class);
     final Stream<? extends Artwork> artworkStream =
         textParser.createEntityStreams(patternKits, data);
     assertThat(artworkStream).isNotNull();
@@ -107,7 +106,7 @@ class DataSourceTest {
   @DisplayName("Validate data retrieval from test DataSource")
   void createNewDataSource(Artwork artwork) {
 
-    Log.i(LOG_TAG, "Got Artwork: " + artwork);
+    logger.info("Got Artwork: {}", artwork);
     assertThat(artwork).isNotNull();
     assertThat(artwork.getFilePath()).isNotNull().isNotEmpty();
   }

@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
-import self.me.matchday.model.PatternKitPack;
+import self.me.matchday.model.PatternKit;
 import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.util.JsonParser;
 
@@ -62,9 +62,10 @@ class DataSourceRepositoryTest {
   void testSaveToDatabase() {
     final DataSource<Event> dataSource = testDataCreator.readTestJsonDataSource();
     final DataSource<Event> savedDataSource = repository.save(dataSource);
-    final PatternKitPack readPkp = ((PlaintextDataSource<Event>) dataSource).getPatternKitPack();
-    final PatternKitPack savedPkp =
-        ((PlaintextDataSource<Event>) savedDataSource).getPatternKitPack();
+    final PlaintextDataSource<Event> plaintextDataSource = (PlaintextDataSource<Event>) dataSource;
+    final List<PatternKit<?>> readPkp = plaintextDataSource.getPatternKits();
+    final List<PatternKit<?>> savedPkp =
+        ((PlaintextDataSource<Event>) savedDataSource).getPatternKits();
     // update ID
     dataSource.setDataSourceId(savedDataSource.getDataSourceId());
 
@@ -74,7 +75,7 @@ class DataSourceRepositoryTest {
     assertThat(savedDataSource.getPluginId()).isEqualTo(dataSource.getPluginId());
     assertThat(savedDataSource.getClazz()).isEqualTo(dataSource.getClazz());
     assertThat(savedDataSource.getBaseUri()).isEqualTo(dataSource.getBaseUri());
-    assertThat(savedPkp.getPatternKits().size()).isEqualTo(readPkp.getPatternKits().size());
+    assertThat(savedPkp.size()).isEqualTo(readPkp.size());
     logger.info("Saved Data Source was not corrupted");
   }
 
@@ -101,7 +102,7 @@ class DataSourceRepositoryTest {
         (PlaintextDataSource<Event>) dataSourcesByPluginId.get(dataSourceCount - 1);
     logger.info("Testing retrieved DataSource:\n{}", JsonParser.toJson(testDataSource));
 
-    assertThat(testDataSource.getPatternKitPack().getPatternKitsFor(Event.class).size())
-        .isEqualTo(eventDataSource.getPatternKitPack().getPatternKitsFor(Event.class).size());
+    assertThat(testDataSource.getPatternKitsFor(Event.class).size())
+        .isEqualTo(eventDataSource.getPatternKitsFor(Event.class).size());
   }
 }

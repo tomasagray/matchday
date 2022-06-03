@@ -101,9 +101,7 @@ class BloggerPluginTest {
     assertThat(testJsonDataSource).isNotNull();
     assertThat(testJsonDataSource.getBaseUri()).isNotNull();
     final List<PatternKit<? extends Event>> metadataPatterns =
-        ((PlaintextDataSource<Event>) testJsonDataSource)
-            .getPatternKitPack()
-            .getPatternKitsFor(Event.class);
+        ((PlaintextDataSource<Event>) testJsonDataSource).getPatternKitsFor(Event.class);
     assertThat(metadataPatterns).isNotNull();
     assertThat(metadataPatterns.size()).isNotZero().isEqualTo(2);
   }
