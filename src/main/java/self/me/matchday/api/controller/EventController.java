@@ -21,16 +21,15 @@ package self.me.matchday.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.EventResource;
 import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
 import self.me.matchday.api.service.EventService;
 
-import java.util.UUID;
-
 @RestController
-@RequestMapping("/events")
 public class EventController {
 
   private final EventService eventService;
@@ -43,25 +42,8 @@ public class EventController {
   }
 
   @ResponseBody
-  @RequestMapping(value = "/all", method = RequestMethod.GET)
+  @RequestMapping(value = "/events", method = RequestMethod.GET)
   public CollectionModel<EventResource> fetchAllEvents() {
     return resourceAssembler.toCollectionModel(eventService.fetchAll());
-  }
-
-  /**
-   * Fetch a specific Match from the local DB, specified by the Match ID
-   *
-   * @param eventId Identifier for the Match
-   * @return A Match as an HttpEntity
-   */
-  @RequestMapping(value = "/event/{eventId}", method = RequestMethod.GET)
-  @ResponseBody
-  public ResponseEntity<EventResource> fetchMatchById(@PathVariable UUID eventId) {
-
-    return eventService
-        .fetchById(eventId)
-        .map(resourceAssembler::toModel)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2020.
  *
  * This file is part of Matchday.
  *
@@ -36,7 +36,7 @@ public class RootController {
 
   // Link relation identifiers
   private static final LinkRelation EVENTS_REL = LinkRelation.of("events");
-  //  private static final LinkRelation MATCHES_REL = LinkRelation.of("matches");
+  private static final LinkRelation MATCHES_REL = LinkRelation.of("matches");
   private static final LinkRelation HIGHLIGHTS_REL = LinkRelation.of("highlights");
   private static final LinkRelation TEAMS_REL = LinkRelation.of("teams");
   private static final LinkRelation COMPETITIONS_REL = LinkRelation.of("competitions");
@@ -54,6 +54,7 @@ public class RootController {
 
     // attach top-level links
     root.add(linkTo(methodOn(EventController.class).fetchAllEvents()).withRel(EVENTS_REL));
+    root.add(linkTo(methodOn(MatchController.class).fetchAllMatches()).withRel(MATCHES_REL));
     root.add(
         linkTo(methodOn(HighlightController.class).fetchAllHighlights()).withRel(HIGHLIGHTS_REL));
     root.add(linkTo(methodOn(TeamController.class).fetchAllTeams()).withRel(TEAMS_REL));
