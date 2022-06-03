@@ -107,10 +107,10 @@ public class FileServerService {
   }
 
   /**
-   * Get the required fileserver plugin by its ID
+   * Get the required file server plugin by its ID
    *
-   * @param plugId The ID of the fileserver plugin
-   * @return The requested fileserver plugin, or null if not found
+   * @param plugId The ID of the file server plugin
+   * @return The requested file server plugin, or null if not found
    */
   public Optional<FileServerPlugin> getPluginById(@Nullable final UUID plugId) {
 
@@ -165,7 +165,7 @@ public class FileServerService {
    * Log a file server user (FileServerUser) into the appropriate file server.
    *
    * @param user The User.
-   * @param pluginId The pluginId of the fileserver plugin
+   * @param pluginId The pluginId of the file server plugin
    * @return Was login successful? (true/false)
    */
   @Transactional
@@ -332,9 +332,9 @@ public class FileServerService {
   // === Users ===
 
   /**
-   * Get all users associated with a particular fileserver plugin
+   * Get all users associated with a particular file server plugin
    *
-   * @param pluginId ID of the fileserver plugin
+   * @param pluginId ID of the file server plugin
    * @return A List of FSUsers
    */
   public List<FileServerUser> getAllServerUsers(@NotNull final UUID pluginId) {
@@ -404,12 +404,12 @@ public class FileServerService {
    * Returns the recommended refresh rate for data associated with the given URL. If this cannot be
    * determined from the URL, returns a default value instead.
    *
-   * @param url The external URL for the fileserver
+   * @param url The external URL for the file server
    * @return The recommended refresh rate.
    */
   public Duration getFileServerRefreshRate(@NotNull final URL url) {
 
-    // Get the fileserver manager for this URL
+    // Get the file server manager for this URL
     final FileServerPlugin fileServerPlugin = getEnabledPluginForUrl(url);
     // Return the recommended refresh rate for this FS manager
     return (fileServerPlugin != null) ? fileServerPlugin.getRefreshRate() : DEFAULT_REFRESH_RATE;
@@ -419,7 +419,7 @@ public class FileServerService {
    * Find the first registered file server manager which can decode the given URL.
    *
    * @param url The external URL
-   * @return The first registered fileserver manager which can handle the URL.
+   * @return The first registered file server manager which can handle the URL.
    */
   public @Nullable FileServerPlugin getEnabledPluginForUrl(@NotNull final URL url) {
     // search only ENABLED plugins
@@ -436,7 +436,7 @@ public class FileServerService {
    * Find a suitable user to user for download page translation.
    *
    * @param pluginId The ID of the file server plugin
-   * @return A logged-in fileserver user, or null if none found
+   * @return A logged-in file server user, or null if none found
    */
   private @Nullable FileServerUser getDownloadUser(@NotNull final UUID pluginId) {
     // Get logged-in users for this repo

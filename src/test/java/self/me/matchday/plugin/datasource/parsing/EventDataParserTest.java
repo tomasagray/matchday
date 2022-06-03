@@ -94,7 +94,6 @@ public class EventDataParserTest {
 
     final Pattern linkPattern =
         ((PlaintextDataSource<Event>) testDataSource)
-            .getPatternKitPack()
             .getPatternKitsFor(URL.class)
             .get(0)
             .getPattern();

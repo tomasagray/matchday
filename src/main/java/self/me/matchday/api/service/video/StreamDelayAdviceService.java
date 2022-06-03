@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -90,9 +90,9 @@ public class StreamDelayAdviceService {
   }
 
   /**
-   * Ping the specified fileserver and record the result
+   * Ping the specified file server and record the result
    *
-   * @param fileServerPlugin A fileserver
+   * @param fileServerPlugin A file server
    */
   public void pingFileServer(@NotNull final FileServerPlugin fileServerPlugin) {
 

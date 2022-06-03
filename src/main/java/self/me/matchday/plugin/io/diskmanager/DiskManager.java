@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 @Component
 public class DiskManager {
@@ -65,12 +66,12 @@ public class DiskManager {
 
   public Long getUsedSpace() throws IOException {
 
-    return Files.walk(storageLocation)
-        // find all files
-        .filter(path -> path.toFile().isFile())
-        // sum file sizes
-        .mapToLong(path -> path.toFile().length())
-        .sum();
+    try (Stream<Path> walker = Files.walk(storageLocation)) {
+      return walker
+          .filter(path -> path.toFile().isFile()) // find all files
+          .mapToLong(path -> path.toFile().length()) // sum file sizes
+          .sum();
+    }
   }
 
   private Path determineFileSystemRoot() {

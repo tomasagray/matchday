@@ -1112,6 +1112,24 @@
     <pattern value="self.me.matchday.api.service.video.VideoStreamManager" />
     <pattern value="self.me.matchday.api.service.video.VideoStreamManager" method="VideoStreamManager" />
     <pattern value="self.me.matchday.plugin.datasource.parsing.fabric.FabricTest" method="zip" />
+    <pattern value="self.me.matchday.api.service.EntityService" method="delete" />
+    <pattern value="self.me.matchday.api.service.EntityService" method="deleteAll" />
+    <pattern value="self.me.matchday.util.Log" method="e" />
+    <pattern value="self.me.matchday.api.service.EntityService" />
+    <pattern value="self.me.matchday.api.service.EntityService" method="fetchAll" />
+    <pattern value="self.me.matchday.api.service.EntityService" method="fetchById" />
+    <pattern value="self.me.matchday.api.service.video.VideoFileSelectorService" method="getBestVideoFile" />
+    <pattern value="self.me.matchday.api.service.EntityService" method="saveAll" />
+    <pattern value="self.me.matchday.util.JsonParser" method="toJson" />
+    <pattern value="self.me.matchday.api.service.EntityService" method="update" />
+    <pattern value="self.me.matchday.api.service.EntityService" method="updateAll" />
+    <pattern value="self.me.matchday.api.service.video.VideoFileSelectorService" />
+    <pattern value="self.me.matchday.api.service.DataSourceService" method="delete" />
+    <pattern value="self.me.matchday.api.service.DataSourceService" method="deleteAll" />
+    <pattern value="self.me.matchday.api.service.EventService" method="deleteAll" />
+    <pattern value="self.me.matchday.api.service.DataSourceService" method="saveAll" />
+    <pattern value="self.me.matchday.api.service.DataSourceService" method="updateAll" />
+    <pattern value="self.me.matchday.api.service.EventService" method="updateAll" />
   </component>
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$" />

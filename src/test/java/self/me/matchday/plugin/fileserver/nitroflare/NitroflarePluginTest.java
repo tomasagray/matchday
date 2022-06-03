@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@DisplayName("Testing for Nitroflare fileserver manager")
+@DisplayName("Testing for Nitroflare file server manager")
 @Disabled
 class NitroflarePluginTest {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -37,15 +37,15 @@ import java.util.Set;
 public interface FileServerPlugin extends Plugin {
 
   /**
-   * Get the hostname of the fileserver as a URL
+   * Get the hostname of the file server as a URL
    *
-   * @return Hostname of fileserver
+   * @return Hostname of file server
    */
   @NotNull
   URL getHostname();
 
   /**
-   * Get the maximum age before data retrieved by this fileserver manager should be considered
+   * Get the maximum age before data retrieved by this file server manager should be considered
    * stale.
    *
    * @return The maximum age before data should be refreshed.

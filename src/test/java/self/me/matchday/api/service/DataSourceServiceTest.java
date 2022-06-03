@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +31,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.*;
-import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.util.List;
@@ -41,7 +42,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DisplayName("Testing for all data source refresh service")
 class DataSourceServiceTest {
 
-  private static final String LOG_TAG = "DataSourceServiceTest";
+  private static final Logger logger = LogManager.getLogger(DataSourceServiceTest.class);
 
   private static DataSourceService dataSourceService;
   private static TestDataCreator testDataCreator;
@@ -65,7 +66,7 @@ class DataSourceServiceTest {
     final int expectedEventCount = 1;
 
     final SnapshotRequest testRequest = SnapshotRequest.builder().build();
-    Log.i(LOG_TAG, "Testing Data Source Service refresh with Snapshot Request:\n" + testRequest);
+    logger.info("Testing Data Source Service refresh with Snapshot Request:\n{}", testRequest);
 
     final SnapshotRequest testResult = dataSourceService.refreshAllDataSources(testRequest);
     assertThat(testResult).isEqualTo(testRequest);
@@ -82,24 +83,25 @@ class DataSourceServiceTest {
   void addDataSource() {
 
     final DataSource<Event> testDataSource = testDataCreator.readTestJsonDataSource();
-    Log.i(LOG_TAG, "Read test DataSource:\n" + testDataSource);
-    final PatternKitPack testPatternKitPack =
-        ((PlaintextDataSource<Event>) testDataSource).getPatternKitPack();
+    logger.info("Read test DataSource:\n{}", testDataSource);
+    final PlaintextDataSource<?> testPlaintextDataSource = (PlaintextDataSource<?>) testDataSource;
+    final List<PatternKit<?>> testPatternKitPack = testPlaintextDataSource.getPatternKits();
     assertThat(testPatternKitPack).isNotNull();
 
     final DataSource<Event> addedDataSource =
         (DataSource<Event>) dataSourceService.save(testDataSource);
-    Log.i(LOG_TAG, "Added DataSource to database:\n" + addedDataSource);
+    logger.info("Added DataSource to database:\n{}", addedDataSource);
 
     assertThat(addedDataSource).isNotNull();
     assertThat(addedDataSource.getBaseUri()).isEqualTo(testDataSource.getBaseUri());
-    final PatternKitPack patternKitPack =
-        ((PlaintextDataSource<Event>) addedDataSource).getPatternKitPack();
+    final PlaintextDataSource<Event> plaintextDataSource =
+        (PlaintextDataSource<Event>) addedDataSource;
+    final List<PatternKit<?>> patternKitPack = plaintextDataSource.getPatternKits();
     assertThat(patternKitPack).isNotNull();
     final List<PatternKit<? extends Event>> eventPatternKits =
-        patternKitPack.getPatternKitsFor(Event.class);
+        plaintextDataSource.getPatternKitsFor(Event.class);
     assertThat(eventPatternKits).isNotNull();
     assertThat(eventPatternKits.size())
-        .isEqualTo(testPatternKitPack.getPatternKitsFor(Event.class).size());
+        .isEqualTo(testPlaintextDataSource.getPatternKitsFor(Event.class).size());
   }
 }

@@ -31,7 +31,6 @@ import org.springframework.http.HttpCookie;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.util.ResourceFileReader;
 
-import java.io.IOException;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +47,7 @@ class NetscapeCookiesServiceTest {
   private static String cookieFile;
 
   @BeforeAll
-  static void setUp(@Autowired final NetscapeCookiesService cookiesService) throws IOException {
+  static void setUp(@Autowired final NetscapeCookiesService cookiesService) {
 
     NetscapeCookiesServiceTest.cookiesService = cookiesService;
 

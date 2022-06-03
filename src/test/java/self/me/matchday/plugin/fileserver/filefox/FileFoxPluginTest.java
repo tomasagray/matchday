@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -52,7 +52,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@DisplayName("Testing for FileFox fileserver manager")
+@DisplayName("Testing for FileFox file server manager")
 @Disabled
 class FileFoxPluginTest {
 

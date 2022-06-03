@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -44,7 +44,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonRootName(value = "fileserver")
+@JsonRootName(value = "file-server")
 @Relation(collectionRelation = "fileservers")
 @JsonInclude(value = Include.NON_NULL)
 public class FileServerResource extends RepresentationModel<FileServerResource> {
