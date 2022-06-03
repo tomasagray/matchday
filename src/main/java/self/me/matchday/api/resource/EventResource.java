@@ -32,12 +32,13 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.EventController;
-import self.me.matchday.api.controller.HighlightController;
-import self.me.matchday.api.controller.MatchController;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
-import self.me.matchday.model.*;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.Fixture;
+import self.me.matchday.model.Season;
+import self.me.matchday.model.Team;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -113,26 +114,18 @@ public class EventResource extends RepresentationModel<EventResource> {
           linkTo(methodOn(VideoStreamingController.class).getVideoResources(entity.getEventId()))
               .withRel(VIDEO_LINK));
 
-      // Handle subtypes
-      if (entity instanceof Match) {
-        // Cast to Match
-        final Match match = (Match) entity;
-        final Team homeTeam = match.getHomeTeam();
-        final Team awayTeam = match.getAwayTeam();
-        if (homeTeam != null) {
-          eventResource.setHomeTeam(teamResourceAssembler.toModel(homeTeam));
-        }
-        if (awayTeam != null) {
-          eventResource.setAwayTeam(teamResourceAssembler.toModel(awayTeam));
-        }
-        eventResource.add(
-            linkTo(methodOn(MatchController.class).fetchMatchById(match.getEventId()))
-                .withSelfRel());
-      } else {
-        eventResource.add(
-            linkTo(methodOn(HighlightController.class).fetchHighlightById(entity.getEventId()))
-                .withSelfRel());
+      final Team homeTeam = entity.getHomeTeam();
+      final Team awayTeam = entity.getAwayTeam();
+      if (homeTeam != null) {
+        eventResource.setHomeTeam(teamResourceAssembler.toModel(homeTeam));
       }
+      if (awayTeam != null) {
+        eventResource.setAwayTeam(teamResourceAssembler.toModel(awayTeam));
+      }
+      eventResource.add(
+          linkTo(methodOn(EventController.class).fetchMatchById(entity.getEventId()))
+              .withSelfRel());
+
       return eventResource;
     }
 
