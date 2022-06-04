@@ -54,12 +54,12 @@ public class Match extends Event {
 
   @CorrectedOrNull
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
-  @JoinColumn(name = "home_team_id", nullable = false, referencedColumnName = "teamId")
+  @JoinColumn(nullable = false)
   private Team homeTeam;
 
   @CorrectedOrNull
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
-  @JoinColumn(name = "away_team_id", nullable = false, referencedColumnName = "teamId")
+  @JoinColumn(nullable = false)
   private Team awayTeam;
 
   @Builder
