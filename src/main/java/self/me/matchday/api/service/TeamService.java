@@ -23,9 +23,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.db.TeamRepository;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Team;
-import self.me.matchday.model.db.TeamRepository;
 
 import java.util.*;
 

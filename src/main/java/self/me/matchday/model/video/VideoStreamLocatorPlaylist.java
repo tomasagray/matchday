@@ -26,7 +26,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.db.converter.PathConverter;
+import self.me.matchday.db.converter.PathConverter;
 
 import javax.persistence.*;
 import java.nio.file.Path;

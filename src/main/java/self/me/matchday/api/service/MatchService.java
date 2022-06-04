@@ -23,11 +23,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
+import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Match;
-import self.me.matchday.model.db.MatchRepository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
+@Transactional
 public class MatchService implements EntityService<Match> {
 
   private static final EventSorter EVENT_SORTER = new EventSorter();
@@ -98,10 +100,11 @@ public class MatchService implements EntityService<Match> {
       // See if Event already exists in DB
       final Optional<Match> eventOptional = matchRepository.findOne(getExampleEvent(match));
       if (eventOptional.isPresent()) {
-        final Event existingEvent = eventOptional.get();
+        final Match existingEvent = eventOptional.get();
         existingEvent.getFileSources().addAll(match.getFileSources());
+        return existingEvent;
       }
-      return matchRepository.saveAndFlush(match);
+      return matchRepository.save(match);
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }

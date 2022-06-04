@@ -22,9 +22,9 @@ package self.me.matchday.api.service;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import self.me.matchday.db.HighlightRepository;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Highlight;
-import self.me.matchday.model.db.HighlightRepository;
 
 import java.util.List;
 import java.util.Optional;

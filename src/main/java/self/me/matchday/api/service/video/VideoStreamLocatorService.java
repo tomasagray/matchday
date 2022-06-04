@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.model.db.VideoStreamLocatorRepo;
+import self.me.matchday.db.VideoStreamLocatorRepo;
 import self.me.matchday.model.video.SingleStreamLocator;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoStreamLocator;

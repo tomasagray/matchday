@@ -17,21 +17,24 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model.db;
+package self.me.matchday.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.video.VideoFile;
-import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.FileServerUser;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface VideoStreamLocatorRepo extends JpaRepository<VideoStreamLocator, Long> {
+public interface FileServerUserRepo extends JpaRepository<FileServerUser, UUID> {
+
+  @Query("SELECT user FROM FileServerUser user WHERE user.serverId = :serverId")
+  List<FileServerUser> fetchAllUsersForServer(@Param("serverId") UUID serverId);
 
   @Query(
-      "SELECT vsl FROM VideoStreamLocator vsl WHERE vsl.videoFile = :videoFile ORDER BY vsl.timestamp")
-  List<VideoStreamLocator> getStreamLocatorsFor(@Param("videoFile") VideoFile videoFile);
+      "SELECT user FROM FileServerUser user WHERE user.serverId = :serverId AND user.loggedIn = true")
+  List<FileServerUser> fetchLoggedInUsersForServer(@Param("serverId") UUID serverId);
 }

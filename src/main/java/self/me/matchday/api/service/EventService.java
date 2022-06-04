@@ -22,10 +22,10 @@ package self.me.matchday.api.service;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.db.EventRepository;
+import self.me.matchday.db.VideoFileSrcRepository;
 import self.me.matchday.model.*;
 import self.me.matchday.model.Event.EventSorter;
-import self.me.matchday.model.db.EventRepository;
-import self.me.matchday.model.db.VideoFileSrcRepository;
 import self.me.matchday.model.video.VideoFileSource;
 
 import java.time.LocalDate;

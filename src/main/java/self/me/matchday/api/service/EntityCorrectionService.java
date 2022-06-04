@@ -24,11 +24,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.Corrected;
 import self.me.matchday.CorrectedOrNull;
+import self.me.matchday.db.SynonymRepository;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Synonym;
 import self.me.matchday.model.Team;
-import self.me.matchday.model.db.SynonymRepository;
 import self.me.matchday.util.ReflectionUtils;
 
 import java.lang.reflect.Field;

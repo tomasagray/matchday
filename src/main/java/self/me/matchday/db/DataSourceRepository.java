@@ -17,27 +17,15 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model.db;
+package self.me.matchday.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-import self.me.matchday.model.Event;
+import self.me.matchday.model.DataSource;
 
 import java.util.List;
 import java.util.UUID;
 
-@Repository
-public interface EventRepository extends JpaRepository<Event, UUID> {
+public interface DataSourceRepository extends JpaRepository<DataSource<?>, UUID> {
 
-  /**
-   * Retrieve all Events associated with the specified competition.
-   *
-   * @param competitionId The name of the Competition.
-   * @return A List of Competitions.
-   */
-  @Query("SELECT ev FROM Event ev JOIN ev.competition cm WHERE cm.competitionId = :competitionId")
-  List<Event> fetchEventsByCompetition(@Param("competitionId") UUID competitionId);
-
+  List<DataSource<?>> findDataSourcesByPluginId(UUID pluginId);
 }

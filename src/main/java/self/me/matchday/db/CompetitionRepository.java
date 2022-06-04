@@ -17,25 +17,18 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model.db;
+package self.me.matchday.db;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
+import self.me.matchday.model.Competition;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface VideoStreamLocatorPlaylistRepo
-    extends JpaRepository<VideoStreamLocatorPlaylist, Long> {
+public interface CompetitionRepository extends JpaRepository<Competition, UUID> {
 
-  @Query(
-      "SELECT vslp FROM VideoStreamLocatorPlaylist vslp "
-          + "WHERE vslp.fileSource.fileSrcId = :fileSrcId "
-          + "ORDER BY vslp.timestamp")
-  List<VideoStreamLocatorPlaylist> fetchPlaylistsForFileSrc(
-      @Param("fileSrcId") final UUID fileSrcId);
+  Optional<Competition> findCompetitionByNameName(@NotNull String name);
 }

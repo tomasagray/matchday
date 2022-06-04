@@ -24,8 +24,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.db.converter.FFmpegMetadataConverter;
-import self.me.matchday.model.db.converter.TimestampConverter;
+import self.me.matchday.db.converter.FFmpegMetadataConverter;
+import self.me.matchday.db.converter.TimestampConverter;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 
 import javax.persistence.*;

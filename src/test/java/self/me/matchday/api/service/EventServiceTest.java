@@ -31,12 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.model.Competition;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.Match;
-import self.me.matchday.model.Team;
+import self.me.matchday.model.*;
+import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,6 +43,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static self.me.matchday.model.video.Resolution.R_1080p;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -92,13 +92,41 @@ class EventServiceTest {
     testDataCreator.deleteTestEvent(testMatch);
   }
 
+  private @NotNull Match createUnsavedMatch(String name) {
+    final Match match =
+        Match.builder()
+            .competition(new Competition(name))
+            .homeTeam(new Team(name + " Home"))
+            .awayTeam(new Team(name + " Away"))
+            .fixture(new Fixture(5))
+            .season(new Season())
+            .date(LocalDateTime.now())
+            .build();
+    match.getFileSources().add(createVideoFileSource());
+    return match;
+  }
+
+  private VideoFileSource createVideoFileSource() {
+
+    final int fileSetCount = 1;
+    final List<VideoFilePack> videoFilePacks = testDataCreator.createTestVideoFiles(fileSetCount);
+    return VideoFileSource.builder()
+        .channel("Event Service Test Channel")
+        .resolution(R_1080p)
+        .languages("English")
+        .videoBitrate(8_000L)
+        .videoFilePacks(videoFilePacks)
+        .filesize(FileSize.ofGigabytes(8))
+        .build();
+  }
+
   @Test
   @DisplayName("Test saving an Event to database")
   void save() {
     final List<Event> initialEvents = eventService.fetchAll();
     final int initialCount = initialEvents.size();
     logger.info("Initial database has: {} Events", initialCount);
-    final Event testMatch = testDataCreator.createTestMatch("SaveTest");
+    final Event testMatch = createUnsavedMatch("SaveTest " + Math.random());
     logger.info("Created Test Event: {}", testMatch);
 
     final Event savedEvent = eventService.save(testMatch);
@@ -124,7 +152,7 @@ class EventServiceTest {
 
     final List<Event> testEvents =
         IntStream.range(0, SAVE_COUNT)
-            .mapToObj(i -> testDataCreator.createTestMatch("Match " + i))
+            .mapToObj(i -> createUnsavedMatch("SaveAllMatch " + i))
             .collect(Collectors.toList());
     final List<Event> savedEvents = eventService.saveAll(testEvents);
     logger.info("Saved Event: {}", savedEvents);
@@ -203,8 +231,6 @@ class EventServiceTest {
         eventService.fetchEventsForCompetition(testCompetition.getCompetitionId());
     assertThat(events.size()).isGreaterThanOrEqualTo(minExpectedEventCount);
   }
-
-
 
   @Test
   @DisplayName("Validate updating Event in database")

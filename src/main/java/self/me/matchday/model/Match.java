@@ -49,17 +49,17 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
+@Entity(name = "MatchGame")
 public class Match extends Event {
 
   @CorrectedOrNull
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
-  @JoinColumn(name = "home_team_id", nullable = false)
+  @JoinColumn(name = "home_team_id", nullable = false, referencedColumnName = "teamId")
   private Team homeTeam;
 
   @CorrectedOrNull
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
-  @JoinColumn(name = "away_team_id", nullable = false)
+  @JoinColumn(name = "away_team_id", nullable = false, referencedColumnName = "teamId")
   private Team awayTeam;
 
   @Builder

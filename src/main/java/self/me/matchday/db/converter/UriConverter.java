@@ -17,22 +17,22 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model.db.converter;
+package self.me.matchday.db.converter;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.net.URI;
 
 @Converter
-public class TimestampConverter implements AttributeConverter<Timestamp, Long> {
+public class UriConverter implements AttributeConverter<URI, String> {
+
   @Override
-  public Long convertToDatabaseColumn(Timestamp attribute) {
-    return attribute == null ? null : attribute.toInstant().toEpochMilli();
+  public String convertToDatabaseColumn(URI attribute) {
+    return (attribute == null) ? null : attribute.toString();
   }
 
   @Override
-  public Timestamp convertToEntityAttribute(Long dbData) {
-    return dbData == null ? null : Timestamp.from(Instant.ofEpochMilli(dbData));
+  public URI convertToEntityAttribute(String dbData) {
+    return (dbData == null) ? null : URI.create(dbData);
   }
 }

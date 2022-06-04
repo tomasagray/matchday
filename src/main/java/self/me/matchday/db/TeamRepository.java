@@ -17,29 +17,33 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model.db;
+package self.me.matchday.db;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.Match;
+import self.me.matchday.model.Team;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface MatchRepository extends JpaRepository<Match, UUID> {
+public interface TeamRepository extends JpaRepository<Team, UUID> {
 
-  /**
-   * Retrieve all Events associated with the specified Team.
-   *
-   * @param teamId The name of the Team.
-   * @return A List of Events which include this Team.
-   */
+  Optional<Team> findTeamByNameName(@NotNull String name);
+
+  void deleteByNameName(String name);
+
   @Query(
-      "SELECT mt FROM Match mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
-          + "WHERE ht.teamId = :teamId OR at.teamId = :teamId")
-  List<Event> fetchMatchesByTeam(@Param("teamId") UUID teamId);
+      "SELECT DISTINCT ht FROM MatchGame mt JOIN mt.homeTeam ht JOIN mt.competition cm "
+          + "WHERE cm.competitionId = :competitionId")
+  List<Team> fetchHomeTeamsByCompetition(@Param("competitionId") UUID competitionId);
+
+  @Query(
+      "SELECT DISTINCT at FROM MatchGame mt JOIN mt.awayTeam at JOIN mt.competition cm "
+          + "WHERE cm.competitionId = :competitionId")
+  List<Team> fetchAwayTeamsByCompetition(@Param("competitionId") UUID competitionId);
 }

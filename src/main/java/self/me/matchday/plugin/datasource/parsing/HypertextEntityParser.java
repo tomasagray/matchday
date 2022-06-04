@@ -40,7 +40,8 @@ public class HypertextEntityParser {
 
   public <T> Stream<? extends T> getEntityStream(
       @NotNull DataSource<T> dataSource, @NotNull String data) {
-    return getParserForType(dataSource.getClazz()).getEntityStream(dataSource, data);
+    final DataSourceParser<T, String> parser = getParserForType(dataSource.getClazz());
+    return parser.getEntityStream(dataSource, data);
   }
 
   @SuppressWarnings("unchecked cast")

@@ -31,8 +31,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.service.EventService;
+import self.me.matchday.db.*;
 import self.me.matchday.model.*;
-import self.me.matchday.model.db.*;
 import self.me.matchday.model.video.*;
 import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.ResourceFileReader;
@@ -312,7 +312,7 @@ public class TestDataCreator {
     final VideoFileSource fileSource =
         VideoFileSource.builder()
             .fileSrcId(UUID.randomUUID())
-            .channel("Event Service Test Channel")
+            .channel("Test Channel")
             .resolution(R_1080p)
             .languages("English")
             .videoBitrate(8_000L)

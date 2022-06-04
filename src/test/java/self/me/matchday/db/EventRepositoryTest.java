@@ -30,7 +30,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Example;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.model.*;
-import self.me.matchday.model.db.EventRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;

@@ -17,18 +17,22 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model.db;
+package self.me.matchday.db.converter;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import self.me.matchday.model.Competition;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
+import java.util.regex.Pattern;
 
-import java.util.Optional;
-import java.util.UUID;
+@Converter
+public class PatternConverter implements AttributeConverter<Pattern, String> {
 
-@Repository
-public interface CompetitionRepository extends JpaRepository<Competition, UUID> {
+  @Override
+  public String convertToDatabaseColumn(Pattern attribute) {
+    return attribute != null ? attribute.toString() : null;
+  }
 
-  Optional<Competition> findCompetitionByNameName(@NotNull String name);
+  @Override
+  public Pattern convertToEntityAttribute(String dbData) {
+    return dbData != null ? Pattern.compile(dbData, Pattern.UNICODE_CASE) : null;
+  }
 }

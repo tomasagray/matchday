@@ -26,11 +26,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
+import self.me.matchday.db.CompetitionRepository;
+import self.me.matchday.db.TeamRepository;
 import self.me.matchday.model.Artwork;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Team;
-import self.me.matchday.model.db.CompetitionRepository;
-import self.me.matchday.model.db.TeamRepository;
 
 import java.io.IOException;
 import java.util.Optional;

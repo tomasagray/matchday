@@ -17,22 +17,20 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model.db.converter;
+package self.me.matchday.db;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
-import java.net.URI;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import self.me.matchday.model.Synonym;
 
-@Converter
-public class UriConverter implements AttributeConverter<URI, String> {
+import java.util.List;
+import java.util.Optional;
 
-  @Override
-  public String convertToDatabaseColumn(URI attribute) {
-    return (attribute == null) ? null : attribute.toString();
-  }
+@Repository
+public interface SynonymRepository extends JpaRepository<Synonym, Long> {
 
-  @Override
-  public URI convertToEntityAttribute(String dbData) {
-    return (dbData == null) ? null : URI.create(dbData);
-  }
+  Optional<Synonym> findSynonymByNameContains(@Param("name") String name);
+
+  List<Synonym> findSynonymsByProperNameNameContains(@Param("name") String name);
 }

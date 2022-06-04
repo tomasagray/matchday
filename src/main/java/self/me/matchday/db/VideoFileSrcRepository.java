@@ -17,24 +17,11 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model.db.converter;
+package self.me.matchday.db;
 
-import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
-import self.me.matchday.util.JsonParser;
+import org.springframework.data.jpa.repository.JpaRepository;
+import self.me.matchday.model.video.VideoFileSource;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import java.util.UUID;
 
-@Converter
-public class FFmpegMetadataConverter implements AttributeConverter<FFmpegMetadata, String> {
-
-  @Override
-  public String convertToDatabaseColumn(FFmpegMetadata attribute) {
-    return JsonParser.toJson(attribute);
-  }
-
-  @Override
-  public FFmpegMetadata convertToEntityAttribute(String dbData) {
-    return JsonParser.fromJson(dbData, FFmpegMetadata.class);
-  }
-}
+public interface VideoFileSrcRepository extends JpaRepository<VideoFileSource, UUID> {}

@@ -17,22 +17,15 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model.db.converter;
+package self.me.matchday.db;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
-import java.nio.file.Path;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import self.me.matchday.model.Highlight;
 
-@Converter
-public class PathConverter implements AttributeConverter<Path, String> {
+import java.util.UUID;
 
-  @Override
-  public String convertToDatabaseColumn(Path attribute) {
-    return attribute == null ? null : attribute.toString();
-  }
+@Repository
+public interface HighlightRepository extends JpaRepository<Highlight, UUID> {
 
-  @Override
-  public Path convertToEntityAttribute(String dbData) {
-    return dbData == null ? null : Path.of(dbData);
-  }
 }

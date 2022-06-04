@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.db.converter.PathConverter;
+import self.me.matchday.db.converter.PathConverter;
 
 import javax.persistence.*;
 import java.nio.file.Path;

@@ -31,7 +31,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.*;
-import self.me.matchday.model.db.DataSourceRepository;
 import self.me.matchday.util.JsonParser;
 
 import java.util.List;

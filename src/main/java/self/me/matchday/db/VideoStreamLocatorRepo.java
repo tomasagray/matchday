@@ -17,22 +17,21 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model.db.converter;
+package self.me.matchday.db;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
-import java.util.regex.Pattern;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoStreamLocator;
 
-@Converter
-public class PatternConverter implements AttributeConverter<Pattern, String> {
+import java.util.List;
 
-  @Override
-  public String convertToDatabaseColumn(Pattern attribute) {
-    return attribute != null ? attribute.toString() : null;
-  }
+@Repository
+public interface VideoStreamLocatorRepo extends JpaRepository<VideoStreamLocator, Long> {
 
-  @Override
-  public Pattern convertToEntityAttribute(String dbData) {
-    return dbData != null ? Pattern.compile(dbData, Pattern.UNICODE_CASE) : null;
-  }
+  @Query(
+      "SELECT vsl FROM VideoStreamLocator vsl WHERE vsl.videoFile = :videoFile ORDER BY vsl.timestamp")
+  List<VideoStreamLocator> getStreamLocatorsFor(@Param("videoFile") VideoFile videoFile);
 }
