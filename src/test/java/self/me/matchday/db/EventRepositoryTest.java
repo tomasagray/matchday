@@ -30,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Example;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.model.*;
+import self.me.matchday.model.db.EventRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -55,7 +56,7 @@ class EventRepositoryTest {
   void testMatchingEventRetrieval() {
 
     final Event testEvent =
-        Event.builder()
+        Match.builder()
             .competition(new Competition("UEFA Champions League"))
             .homeTeam(new Team("Chelsea"))
             .awayTeam(new Team("AC Milan"))
@@ -66,7 +67,7 @@ class EventRepositoryTest {
     logger.info("Saved Event: {}", eventRepository.saveAndFlush(testEvent));
 
     final Event example =
-        Event.builder()
+        Match.builder()
             .competition(new Competition("UEFA Champions League"))
             .homeTeam(new Team("Chelsea"))
             .awayTeam(new Team("AC Milan"))

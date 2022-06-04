@@ -19,11 +19,13 @@
 
 package self.me.matchday.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.Corrected;
-import self.me.matchday.CorrectedOrNull;
 import self.me.matchday.model.video.VideoFileSource;
 
 import javax.persistence.*;
@@ -35,10 +37,9 @@ import java.util.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-public class Event {
+// @Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Event {
 
   @Id
   @GeneratedValue(generator = "uuid2")
@@ -50,16 +51,6 @@ public class Event {
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
   protected Competition competition;
 
-  @CorrectedOrNull
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
-  @JoinColumn(name = "home_team_id", nullable = false)
-  protected Team homeTeam;
-
-  @CorrectedOrNull
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
-  @JoinColumn(name = "away_team_id", nullable = false)
-  protected Team awayTeam;
-
   @Embedded protected Season season;
 
   @Embedded protected Fixture fixture;
@@ -68,10 +59,6 @@ public class Event {
   protected final Set<VideoFileSource> fileSources = new HashSet<>();
 
   protected LocalDateTime date;
-
-  public String getTitle() {
-    return String.format("%s - %s vs. %s", competition, homeTeam, awayTeam);
-  }
 
   public void addAllFileSources(@NotNull final Collection<? extends VideoFileSource> fileSources) {
     this.fileSources.addAll(fileSources);
@@ -98,14 +85,14 @@ public class Event {
     return null;
   }
 
+  public abstract String getTitle();
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof Event)) return false;
     Event event = (Event) o;
     return Objects.equals(getCompetition(), event.getCompetition())
-        && Objects.equals(getHomeTeam(), event.getHomeTeam())
-        && Objects.equals(getAwayTeam(), event.getAwayTeam())
         && Objects.equals(getSeason(), event.getSeason())
         && Objects.equals(getFixture(), event.getFixture())
         && Objects.equals(getDate(), event.getDate());
@@ -113,14 +100,14 @@ public class Event {
 
   @Override
   public int hashCode() {
-    return Objects.hash(competition, homeTeam, awayTeam, season, fixture, fileSources, date);
+    return Objects.hash(competition, season, fixture, fileSources, date);
   }
 
   @Override
   public String toString() {
     return String.format(
-        "Event{eventId=%s, competition=%s, homeTeam=%s, awayTeam=%s, season=%s, fixture=%s, date=%s}",
-        eventId, competition, homeTeam, awayTeam, season, fixture, date);
+        "Event{eventId=%s, competition=%s, season=%s, fixture=%s, date=%s}",
+        eventId, competition, season, fixture, date);
   }
 
   /** Defines default Event sorting order - reverse chronological. */

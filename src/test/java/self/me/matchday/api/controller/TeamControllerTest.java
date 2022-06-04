@@ -39,6 +39,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 import self.me.matchday.plugin.datasource.parsing.fabric.Bolt;
 import self.me.matchday.util.Log;
@@ -76,11 +77,11 @@ class TeamControllerTest {
         IntStream.range(0, 10)
             .mapToObj(
                 i -> {
-                  final Event testMatch = testDataCreator.createTestMatch(NAME + i);
+                  final Match testMatch = testDataCreator.createTestMatch(NAME + i);
                   testMatches.add(testMatch);
                   return testMatch;
                 })
-            .map(Event::getHomeTeam)
+            .map(Match::getHomeTeam)
             .collect(Collectors.toList());
   }
 
@@ -151,15 +152,15 @@ class TeamControllerTest {
     final String url = String.format("http://localhost:%d/teams/team/%s", port, teamId);
     Log.i(LOG_TAG, String.format("Getting Events for Team: %s @ URL: %s", teamId, url));
 
-    final ResponseEntity<CollectionModel<Event>> response =
+    final ResponseEntity<CollectionModel<Match>> response =
         restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
     Log.i(LOG_TAG, "Got response: " + response);
     assertThat(response).isNotNull();
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
-    final CollectionModel<Event> body = response.getBody();
+    final CollectionModel<Match> body = response.getBody();
     assertThat(body).isNotNull();
-    final Collection<Event> events = body.getContent();
+    final Collection<Match> events = body.getContent();
     events.forEach(
         event -> {
           Log.i(LOG_TAG, "Got Event: " + event);

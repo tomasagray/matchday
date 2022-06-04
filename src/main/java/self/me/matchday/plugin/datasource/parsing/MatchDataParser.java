@@ -24,7 +24,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
 import self.me.matchday.model.PatternKit;
 import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.model.video.VideoFile;
@@ -39,24 +39,26 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 @Component
-public class EventDataParser implements DataSourceParser<Event, String> {
+public class MatchDataParser implements DataSourceParser<Match, String> {
 
   private final TextParser textParser;
 
-  public EventDataParser(TextParser textParser) {
+  public MatchDataParser(TextParser textParser) {
     this.textParser = textParser;
   }
 
+  @SuppressWarnings("unchecked cast")
   @Override
-  public Stream<? extends Event> getEntityStream(
-      @NotNull DataSource<Event> dataSource, @NotNull String data) {
+  public Stream<? extends Match> getEntityStream(
+      @NotNull DataSource<? extends Match> dataSource, @NotNull String data) {
 
     final Document document = Jsoup.parse(data);
     final String text = document.text();
 
-    final PlaintextDataSource<Event> plaintextDataSource = (PlaintextDataSource<Event>) dataSource;
-    final Stream<? extends Event> eventStream =
-        getStreamForType(plaintextDataSource.getPatternKitsFor(Event.class), text);
+    final PlaintextDataSource<Match> plaintextDataSource = (PlaintextDataSource<Match>) dataSource;
+    final List<PatternKit<? extends Match>> eventPatternKits =
+        plaintextDataSource.getPatternKitsFor(Match.class);
+    final Stream<? extends Match> eventStream = getStreamForType(eventPatternKits, text);
     final Stream<? extends VideoFileSource> fileSourceStream =
         getStreamForType(plaintextDataSource.getPatternKitsFor(VideoFileSource.class), text);
     final Stream<VideoFile> videoFileStream =
@@ -67,7 +69,7 @@ public class EventDataParser implements DataSourceParser<Event, String> {
     return Bolt.of(links)
         .zipInto(videoFileStream, VideoFile::setExternalUrl)
         .foldInto(fileSourceStream, new VideoFilePackFolder<>(), VideoFileSource::addVideoFilePack)
-        .foldInto(eventStream, new ListFolder<>(), Event::addAllFileSources)
+        .foldInto(eventStream, new ListFolder<>(), Match::addAllFileSources)
         .stream();
   }
 

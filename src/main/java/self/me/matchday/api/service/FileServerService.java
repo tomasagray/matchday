@@ -27,9 +27,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.db.FileServerUserRepo;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
+import self.me.matchday.model.db.FileServerUserRepo;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
 import java.io.IOException;

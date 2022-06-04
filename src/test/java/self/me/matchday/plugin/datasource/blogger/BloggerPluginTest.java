@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +32,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.*;
 import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -47,21 +48,22 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DisplayName("Verification tests for BloggerPlugin")
 class BloggerPluginTest {
 
-  private static final String LOG_TAG = "BloggerPluginTest";
+  private static final Logger logger = LogManager.getLogger(BloggerPluginTest.class);
 
   private static BloggerPlugin plugin;
   //  private static DataSource<Event> testHtmlDataSource;
-  private static DataSource<Event> testJsonDataSource;
+  private static DataSource<Match> testHtmlDataSource;
+  // todo - add JSON data source
 
   @BeforeAll
   static void setUp(
       @Autowired @NotNull TestDataCreator testDataCreator, @Autowired BloggerPlugin bloggerPlugin) {
 
     BloggerPluginTest.plugin = bloggerPlugin;
-    final DataSource<Event> testJsonDataSource = testDataCreator.readTestJsonDataSource();
+    final DataSource<Match> testJsonDataSource = testDataCreator.readTestJsonDataSource();
 
-    Log.i(LOG_TAG, "Adding test datasource to DB...");
-    BloggerPluginTest.testJsonDataSource = testJsonDataSource;
+    logger.info("Adding test datasource to DB...");
+    BloggerPluginTest.testHtmlDataSource = testJsonDataSource;
   }
 
   @Test
@@ -69,7 +71,7 @@ class BloggerPluginTest {
   void getPluginId() {
     final UUID expectedPluginId = UUID.fromString("64d08bc8-bd9f-11ea-b3de-0242ac130004");
     final UUID actualPluginId = plugin.getPluginId();
-    Log.i(LOG_TAG, "Testing plugin ID: " + actualPluginId);
+    logger.info("Testing plugin ID: {}", actualPluginId);
     assertThat(actualPluginId).isEqualTo(expectedPluginId);
   }
 
@@ -78,7 +80,7 @@ class BloggerPluginTest {
   void getTitle() {
     final String expectedTitle = "Blogger";
     final String actualTitle = plugin.getTitle();
-    Log.i(LOG_TAG, "Testing title: " + actualTitle);
+    logger.info("Testing title: {}", actualTitle);
     assertThat(actualTitle).isEqualTo(expectedTitle);
   }
 
@@ -89,7 +91,7 @@ class BloggerPluginTest {
         "Reads a Blogger blog from either HTML or JSON sources, and makes it "
             + "available to the containing application as a POJO. Implements the DataSourcePlugin<> interface.";
     final String actualDescription = plugin.getDescription();
-    Log.i(LOG_TAG, "Testing description: " + actualDescription);
+    logger.info("Testing description: {}", actualDescription);
     assertThat(actualDescription).isEqualTo(expectedTitle);
   }
 
@@ -97,33 +99,37 @@ class BloggerPluginTest {
   @DisplayName("Ensure that a DataSource can be added via the BloggerPlugin")
   void addDataSource() {
 
-    Log.i(LOG_TAG, "Added datasource:\n" + testJsonDataSource);
-    assertThat(testJsonDataSource).isNotNull();
-    assertThat(testJsonDataSource.getBaseUri()).isNotNull();
-    final List<PatternKit<? extends Event>> metadataPatterns =
-        ((PlaintextDataSource<Event>) testJsonDataSource).getPatternKitsFor(Event.class);
+    final int minimumPatternKitCount = 2;
+    logger.info("Added datasource:\n{}", testHtmlDataSource);
+    assertThat(testHtmlDataSource).isNotNull();
+    assertThat(testHtmlDataSource.getBaseUri()).isNotNull();
+    final List<PatternKit<? extends Match>> metadataPatterns =
+        ((PlaintextDataSource<? extends Match>) testHtmlDataSource).getPatternKitsFor(Match.class);
     assertThat(metadataPatterns).isNotNull();
-    assertThat(metadataPatterns.size()).isNotZero().isEqualTo(2);
+    assertThat(metadataPatterns.size()).isNotZero().isGreaterThanOrEqualTo(minimumPatternKitCount);
   }
 
   @Test
   @DisplayName("Get a Snapshot from the test HTML DataSource")
   void getHtmlSnapshot() throws IOException {
 
-    Log.i(LOG_TAG, "Getting Snapshot with DataSource:\n" + testJsonDataSource.getPluginId());
+    logger.info(
+        "Getting Snapshot with DataSource:\n{}  --  {}",
+        testHtmlDataSource.getPluginId(),
+        testHtmlDataSource.getBaseUri());
     final SnapshotRequest request = SnapshotRequest.builder().labels(List.of("Barcelona")).build();
-    final Snapshot<? extends Event> testSnapshot = plugin.getSnapshot(request, testJsonDataSource);
+    final Snapshot<? extends Match> testSnapshot = plugin.getSnapshot(request, testHtmlDataSource);
     assertThat(testSnapshot).isNotNull();
 
-    final List<Event> testData = testSnapshot.getData().collect(Collectors.toList());
+    final List<Match> testData = testSnapshot.getData().collect(Collectors.toList());
     final int eventCount = testData.size();
-    Log.i(LOG_TAG, String.format("Found %d events%n", eventCount));
+    logger.info("Found {} events\n", eventCount);
     assertThat(eventCount).isNotZero();
     testData.stream()
         .filter(Objects::nonNull)
         .forEach(
             event -> {
-              Log.i(LOG_TAG, "Got Event:\n" + event);
+              logger.info("Got Event:\n{}", event);
               assertThat(event.getCompetition()).isNotNull();
               assertThat(event.getDate()).isNotNull().isAfter(LocalDateTime.MIN);
               final Set<VideoFileSource> fileSources = event.getFileSources();
@@ -138,17 +144,17 @@ class BloggerPluginTest {
 
     final SnapshotRequest request =
         SnapshotRequest.builder().labels(List.of("Barcelona")).maxResults(25).build();
-    final Snapshot<? extends Event> snapshot = plugin.getSnapshot(request, testJsonDataSource);
+    final Snapshot<? extends Event> snapshot = plugin.getSnapshot(request, testHtmlDataSource);
     assertThat(snapshot).isNotNull();
 
     final List<Event> events = snapshot.getData().collect(Collectors.toList());
     final int eventCount = events.size();
-    Log.i(LOG_TAG, "Events pulled from DataSource: " + eventCount);
+    logger.info("Events pulled from DataSource: {}", eventCount);
     assertThat(eventCount).isNotZero();
 
     events.forEach(
         event -> {
-          Log.i(LOG_TAG, "Read Event:\n" + event);
+          logger.info("Read Event:\n{}", event);
           assertThat(event).isNotNull();
           assertThat(event.getCompetition()).isNotNull();
           assertThat(event.getDate()).isNotNull().isAfter(LocalDateTime.MIN);

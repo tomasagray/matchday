@@ -24,6 +24,7 @@ import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +34,9 @@ public class EntityServiceRegistry {
 
   private final List<Entry<?>> registry = new ArrayList<>();
 
-  public EntityServiceRegistry(EventService eventService) {
+  public EntityServiceRegistry(EventService eventService, MatchService matchService) {
     registry.add(new Entry<>(Event.class, eventService));
+    registry.add(new Entry<>(Match.class, matchService));
   }
 
   @SuppressWarnings("unchecked cast")

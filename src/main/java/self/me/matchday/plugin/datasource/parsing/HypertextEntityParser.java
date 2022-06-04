@@ -22,7 +22,7 @@ package self.me.matchday.plugin.datasource.parsing;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,9 +33,9 @@ public class HypertextEntityParser {
 
   private final Set<ParserEntry<?>> parsers = new HashSet<>();
 
-  public HypertextEntityParser(EventDataParser eventDataParser) {
+  public HypertextEntityParser(MatchDataParser matchDataParser) {
     // register autowired parsers
-    parsers.add(new ParserEntry<>(Event.class, eventDataParser));
+    parsers.add(new ParserEntry<>(Match.class, matchDataParser));
   }
 
   public <T> Stream<? extends T> getEntityStream(

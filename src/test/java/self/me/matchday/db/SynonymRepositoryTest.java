@@ -32,6 +32,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Synonym;
+import self.me.matchday.model.db.SynonymRepository;
 
 import java.util.List;
 import java.util.Optional;

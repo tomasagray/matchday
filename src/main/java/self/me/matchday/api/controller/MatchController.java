@@ -54,7 +54,7 @@ public class MatchController {
       method = RequestMethod.GET)
   @ResponseBody
   public CollectionModel<EventResource> fetchAllMatches() {
-    return resourceAssembler.toCollectionModel(matchService.fetchAllMatches());
+    return resourceAssembler.toCollectionModel(matchService.fetchAll());
   }
 
   /**
@@ -68,7 +68,7 @@ public class MatchController {
   public ResponseEntity<EventResource> fetchMatchById(@PathVariable UUID matchId) {
 
     return matchService
-        .fetchMatch(matchId)
+        .fetchById(matchId)
         .map(resourceAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());

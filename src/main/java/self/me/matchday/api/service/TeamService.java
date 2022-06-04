@@ -23,8 +23,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.db.TeamRepository;
+import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Team;
+import self.me.matchday.model.db.TeamRepository;
 
 import java.util.*;
 
@@ -92,12 +93,9 @@ public class TeamService {
    * @return The (now Spring-managed) Team, or null if invalid data was passed
    */
   public Team saveTeam(@NotNull final Team team) {
-    if (isValidTeam(team)) {
-      teamRepository.saveAndFlush(team);
-      return team;
-    }
-    // invalid data...
-    return null;
+    validateTeam(team);
+    teamRepository.saveAndFlush(team);
+    return team;
   }
 
   /**
@@ -113,9 +111,14 @@ public class TeamService {
    * Team data validation
    *
    * @param team The Team to validate
-   * @return true/false
    */
-  private boolean isValidTeam(@NotNull final Team team) {
-    return team.getName() != null;
+  public void validateTeam(Team team) {
+    if (team == null) {
+      throw new IllegalArgumentException("Team was null");
+    }
+    final ProperName properName = team.getName();
+    if (properName == null || properName.getName() == null || properName.getName().equals("")) {
+      throw new IllegalArgumentException("Team has invalid name");
+    }
   }
 }

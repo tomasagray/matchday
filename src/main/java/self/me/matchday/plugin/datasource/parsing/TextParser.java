@@ -29,6 +29,7 @@ import self.me.matchday.plugin.datasource.parsing.CreationStrategy.Priority;
 import self.me.matchday.plugin.datasource.parsing.strategy.UseRegisteredTypeHandlers;
 import self.me.matchday.plugin.datasource.parsing.strategy.UseStaticStringMethod;
 import self.me.matchday.plugin.datasource.parsing.strategy.UseStringConstructor;
+import self.me.matchday.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -103,7 +104,7 @@ public class TextParser {
   @Nullable
   private Field getFieldByName(@NotNull Object obj, String name) {
 
-    final Field[] fields = obj.getClass().getDeclaredFields();
+    final Field[] fields = ReflectionUtils.getAllFields(obj.getClass());
     for (Field field : fields) {
       final Object value = getFieldValue(field, obj);
       if (field.getName().equals(name) && value == null) {

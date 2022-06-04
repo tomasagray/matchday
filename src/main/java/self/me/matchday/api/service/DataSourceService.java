@@ -22,10 +22,10 @@ package self.me.matchday.api.service;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.db.DataSourceRepository;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
+import self.me.matchday.model.db.DataSourceRepository;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 
 import java.io.IOException;

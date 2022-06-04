@@ -31,6 +31,7 @@ import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.EventService;
+import self.me.matchday.api.service.MatchService;
 import self.me.matchday.api.service.TeamService;
 import self.me.matchday.model.Event;
 
@@ -46,19 +47,20 @@ public class TeamController {
 
   private final TeamService teamService;
   private final TeamResourceAssembler teamResourceAssembler;
-  private final EventService eventService;
+  private final MatchService matchService;
   private final EventResourceAssembler eventResourceAssembler;
 
   @Autowired
   public TeamController(
-      final TeamService teamService,
-      final TeamResourceAssembler teamResourceAssembler,
-      final EventService eventService,
-      final EventResourceAssembler eventResourceAssembler) {
+      TeamService teamService,
+      TeamResourceAssembler teamResourceAssembler,
+      EventService eventService,
+      MatchService matchService,
+      EventResourceAssembler eventResourceAssembler) {
 
     this.teamService = teamService;
     this.teamResourceAssembler = teamResourceAssembler;
-    this.eventService = eventService;
+    this.matchService = matchService;
     this.eventResourceAssembler = eventResourceAssembler;
   }
 
@@ -96,11 +98,11 @@ public class TeamController {
    * @param teamId The name of the Team.
    * @return A CollectionModel of Events.
    */
-  @RequestMapping(value = "/team/{teamId}/events", method = RequestMethod.GET)
+  @RequestMapping(value = "/team/{teamId}/matches", method = RequestMethod.GET)
   public ResponseEntity<CollectionModel<EventResource>> fetchEventsForTeam(
       @PathVariable final UUID teamId) {
 
-    final List<Event> events = eventService.fetchEventsForTeam(teamId);
+    final List<Event> events = matchService.fetchMatchesForTeam(teamId);
     final CollectionModel<EventResource> eventResources =
         eventResourceAssembler
             .toCollectionModel(events)

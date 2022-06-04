@@ -30,10 +30,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.PatternKit;
-import self.me.matchday.model.PlaintextDataSource;
+import self.me.matchday.model.*;
+import self.me.matchday.model.db.DataSourceRepository;
 import self.me.matchday.util.JsonParser;
 
 import java.util.List;
@@ -60,12 +58,12 @@ class DataSourceRepositoryTest {
   @Test
   @DisplayName("Ensure DataSource is not corrupted when saving to DB")
   void testSaveToDatabase() {
-    final DataSource<Event> dataSource = testDataCreator.readTestJsonDataSource();
-    final DataSource<Event> savedDataSource = repository.save(dataSource);
-    final PlaintextDataSource<Event> plaintextDataSource = (PlaintextDataSource<Event>) dataSource;
+    final DataSource<Match> dataSource = testDataCreator.readTestJsonDataSource();
+    final DataSource<Match> savedDataSource = repository.save(dataSource);
+    final PlaintextDataSource<Match> plaintextDataSource = (PlaintextDataSource<Match>) dataSource;
     final List<PatternKit<?>> readPkp = plaintextDataSource.getPatternKits();
     final List<PatternKit<?>> savedPkp =
-        ((PlaintextDataSource<Event>) savedDataSource).getPatternKits();
+        ((PlaintextDataSource<Match>) savedDataSource).getPatternKits();
     // update ID
     dataSource.setDataSourceId(savedDataSource.getDataSourceId());
 
@@ -85,9 +83,9 @@ class DataSourceRepositoryTest {
   @Transactional
   void testFetchByPluginId() {
 
-    final PlaintextDataSource<Event> eventDataSource =
-        (PlaintextDataSource<Event>) testDataCreator.readTestJsonDataSource();
-    final PlaintextDataSource<Event> savedDataSource = repository.save(eventDataSource);
+    final PlaintextDataSource<Match> eventDataSource =
+        (PlaintextDataSource<Match>) testDataCreator.readTestJsonDataSource();
+    final PlaintextDataSource<Match> savedDataSource = repository.save(eventDataSource);
     logger.info("Saved DataSource:\n{}", savedDataSource);
 
     logger.info("Attempting to fetch test DataSource by Plugin ID...");

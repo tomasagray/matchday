@@ -21,6 +21,8 @@ package self.me.matchday;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.reflect.TypeToken;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +30,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.db.*;
+import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.*;
+import self.me.matchday.model.db.*;
 import self.me.matchday.model.video.*;
 import self.me.matchday.util.JsonParser;
-import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
 import java.lang.reflect.Type;
@@ -51,12 +53,13 @@ import static self.me.matchday.model.video.Resolution.R_1080p;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class TestDataCreator {
 
-  private static final String LOG_TAG = "CreateTestData";
+  private static final Logger logger = LogManager.getLogger(TestDataCreator.class);
 
   private static final String BASE_URL = "http://192.168.0.107:7000";
   private static final Random numGen = new Random();
 
   private final EventRepository eventRepository;
+  private final EventService eventService;
   private final HighlightRepository highlightRepository;
   private final CompetitionRepository competitionRepository;
   private final TeamRepository teamRepository;
@@ -67,16 +70,18 @@ public class TestDataCreator {
 
   @Autowired
   public TestDataCreator(
-      @NotNull final EventRepository eventRepository,
-      @NotNull final HighlightRepository highlightRepository,
-      @NotNull final CompetitionRepository competitionRepository,
-      @NotNull final TeamRepository teamRepository,
-      @NotNull final VideoFileSrcRepository fileSrcRepository,
-      @NotNull final FileServerUserRepo userRepo,
-      @NotNull final VideoStreamLocatorPlaylistRepo locatorPlaylistRepo,
-      @NotNull final VideoStreamLocatorRepo locatorRepo) {
+      EventRepository eventRepository,
+      EventService eventService,
+      HighlightRepository highlightRepository,
+      CompetitionRepository competitionRepository,
+      TeamRepository teamRepository,
+      VideoFileSrcRepository fileSrcRepository,
+      FileServerUserRepo userRepo,
+      VideoStreamLocatorPlaylistRepo locatorPlaylistRepo,
+      VideoStreamLocatorRepo locatorRepo) {
 
     this.eventRepository = eventRepository;
+    this.eventService = eventService;
     this.highlightRepository = highlightRepository;
     this.competitionRepository = competitionRepository;
     this.teamRepository = teamRepository;
@@ -87,21 +92,21 @@ public class TestDataCreator {
   }
 
   // ======================== DATA SOURCE ========================
-  public DataSource<Event> readTestHtmlDataSource() {
+  public DataSource<Match> readTestHtmlDataSource() {
     final String filename = "data/datasource/test_html_blogger_datasource.json";
     return readTestDataSource(filename);
   }
 
-  public DataSource<Event> readTestJsonDataSource() {
+  public DataSource<Match> readTestJsonDataSource() {
     final String filename = "data/datasource/test_json_blogger_datasource.json";
     return readTestDataSource(filename);
   }
 
-  private DataSource<Event> readTestDataSource(@NotNull String filename) {
+  private DataSource<Match> readTestDataSource(@NotNull String filename) {
     final String dataSourceJson = ResourceFileReader.readTextResource(filename);
-    final Type type = new TypeReference<PlaintextDataSource<Event>>() {}.getType();
-    final DataSource<Event> testDataSource = JsonParser.fromJson(dataSourceJson, type);
-    Log.i(LOG_TAG, "Read test datasource:\n" + testDataSource);
+    final Type type = new TypeReference<PlaintextDataSource<Match>>() {}.getType();
+    final DataSource<Match> testDataSource = JsonParser.fromJson(dataSourceJson, type);
+    logger.info("Read test datasource:\n{}", testDataSource);
     return testDataSource;
   }
 
@@ -223,18 +228,18 @@ public class TestDataCreator {
 
   @Transactional
   @NotNull
-  public Event createTestMatch() {
-    return this.createTestMatch("");
+  public Match createTestMatch() {
+    return this.createTestMatch("<DEFAULT>");
   }
 
   @Transactional
   @NotNull
-  public Event createTestMatch(@NotNull String competitionName) {
+  public Match createTestMatch(@NotNull String competitionName) {
     // Create & save test match & VideoFileSource
     final Competition testCompetition = createTestCompetition(competitionName);
     final Team testTeam = createTestTeam(competitionName);
     final Event testEvent =
-        Event.builder()
+        Match.builder()
             .date(LocalDateTime.now())
             .competition(testCompetition)
             .homeTeam(testTeam)
@@ -247,13 +252,13 @@ public class TestDataCreator {
     final VideoFileSource testFileSource = createTestVideoFileSource();
     testEvent.getFileSources().add(testFileSource);
 
-    Log.i(LOG_TAG, "Created test Event: " + testEvent);
-    return eventRepository.saveAndFlush(testEvent);
+    logger.info("Created test Event: {}", testEvent);
+    return (Match) eventService.save(testEvent);
   }
 
   @Transactional
   public void deleteTestEvent(@NotNull final Event event) {
-    Log.i(LOG_TAG, "Deleting Event: " + event);
+    logger.info("Deleting Event: {}", event);
     eventRepository.delete(event);
   }
 
@@ -268,13 +273,13 @@ public class TestDataCreator {
   @NotNull
   public Competition createTestCompetition(@NotNull String name) {
     final Competition competition = new Competition(name);
-    Log.i(LOG_TAG, "Created test competition: " + competition);
+    logger.info("Created test competition: {}", competition);
     return competitionRepository.saveAndFlush(competition);
   }
 
   @Transactional
   public void deleteTestCompetition(Competition competition) {
-    Log.i(LOG_TAG, "Deleting test Competition: " + competition);
+    logger.info("Deleting test Competition: {}", competition);
     competitionRepository.delete(competition);
   }
 
@@ -293,7 +298,7 @@ public class TestDataCreator {
 
   @Transactional
   public void deleteTestTeam(@NotNull Team team) {
-    Log.i(LOG_TAG, "Deleting test Team: " + team);
+    logger.info("Deleting test Team: {}", team);
     teamRepository.delete(team);
   }
 
@@ -319,7 +324,7 @@ public class TestDataCreator {
 
   @Transactional
   public void deleteVideoFileSource(@NotNull final VideoFileSource fileSource) {
-    Log.i(LOG_TAG, "Deleting VideoFileSource: " + fileSource);
+    logger.info("Deleting VideoFileSource: {}", fileSource);
     fileSrcRepository.delete(fileSource);
   }
 
@@ -368,7 +373,7 @@ public class TestDataCreator {
         });
 
     final VideoStreamLocatorPlaylist locatorPlaylist = locatorPlaylistRepo.saveAndFlush(playlist);
-    Log.i(LOG_TAG, "Created VideoStreamLocatorPlaylist:\n" + locatorPlaylist);
+    logger.info("Created VideoStreamLocatorPlaylist:\n{}", locatorPlaylist);
     return locatorPlaylist;
   }
 
@@ -377,7 +382,7 @@ public class TestDataCreator {
     final VideoStreamLocator locator = new SingleStreamLocator();
     locator.setVideoFile(videoFile);
     final VideoStreamLocator streamLocator = streamLocatorRepo.saveAndFlush(locator);
-    Log.i(LOG_TAG, "Created VideoStreamLocator: " + streamLocator);
+    logger.info("Created VideoStreamLocator: {}", streamLocator);
     return streamLocator;
   }
 
@@ -426,7 +431,7 @@ public class TestDataCreator {
 
   @Transactional
   public void deleteFileServerUser(@NotNull final FileServerUser user) {
-    Log.i(LOG_TAG, "Deleting FileServerUser: " + user);
+    logger.info("Deleting FileServerUser: {}", user);
     userRepo.delete(user);
   }
 

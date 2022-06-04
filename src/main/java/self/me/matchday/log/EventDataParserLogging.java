@@ -26,17 +26,17 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import self.me.matchday.plugin.datasource.parsing.EventDataParser;
+import self.me.matchday.plugin.datasource.parsing.MatchDataParser;
 import self.me.matchday.util.JsonParser;
 
 @Aspect
 @Component
 public class EventDataParserLogging {
 
-  static final Logger logger = LogManager.getLogger(EventDataParser.class);
+  static final Logger logger = LogManager.getLogger(MatchDataParser.class);
 
   @Before(
-      "execution(* self.me.matchday.plugin.datasource.parsing.EventDataParser.getEntityStream(..))")
+      "execution(* self.me.matchday.plugin.datasource.parsing.MatchDataParser.getEntityStream(..))")
   public void logAroundEventParsing(@NotNull JoinPoint jp) {
 
     final Object[] args = jp.getArgs();

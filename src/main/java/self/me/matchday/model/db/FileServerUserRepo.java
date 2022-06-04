@@ -17,37 +17,24 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db;
+package self.me.matchday.model.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.Event;
+import self.me.matchday.model.FileServerUser;
 
 import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface EventRepository extends JpaRepository<Event, UUID> {
+public interface FileServerUserRepo extends JpaRepository<FileServerUser, UUID> {
 
-  /**
-   * Retrieve all Events associated with the specified competition.
-   *
-   * @param competitionId The name of the Competition.
-   * @return A List of Competitions.
-   */
-  @Query("SELECT ev FROM Event ev JOIN ev.competition cm WHERE cm.competitionId = :competitionId")
-  List<Event> fetchEventsByCompetition(@Param("competitionId") UUID competitionId);
+  @Query("SELECT user FROM FileServerUser user WHERE user.serverId = :serverId")
+  List<FileServerUser> fetchAllUsersForServer(@Param("serverId") UUID serverId);
 
-  /**
-   * Retrieve all Events associated with the specified Team.
-   *
-   * @param teamId The name of the Team.
-   * @return A List of Events which include this Team.
-   */
   @Query(
-      "SELECT mt FROM Event mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
-          + "WHERE ht.teamId = :teamId OR at.teamId = :teamId")
-  List<Event> fetchEventsByTeam(@Param("teamId") UUID teamId);
+      "SELECT user FROM FileServerUser user WHERE user.serverId = :serverId AND user.loggedIn = true")
+  List<FileServerUser> fetchLoggedInUsersForServer(@Param("serverId") UUID serverId);
 }

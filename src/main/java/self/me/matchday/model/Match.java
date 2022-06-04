@@ -25,13 +25,19 @@ package self.me.matchday.model;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.CorrectedOrNull;
+import self.me.matchday.model.video.VideoFileSource;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -42,22 +48,37 @@ import java.util.UUID;
  */
 @Getter
 @Setter
-@Entity(name = "Match")
+@NoArgsConstructor
+@Entity
 public class Match extends Event {
 
-  public Match() {
-    super();
-  }
+  @CorrectedOrNull
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+  @JoinColumn(name = "home_team_id", nullable = false)
+  private Team homeTeam;
 
-  @Builder(builderMethodName = "matchBuilder")
-  public Match(UUID eventId, Competition competition, Team homeTeam, Team awayTeam, Season season, Fixture fixture, LocalDateTime date) {
-    super(eventId, competition, homeTeam, awayTeam, season, fixture, date);
+  @CorrectedOrNull
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+  @JoinColumn(name = "away_team_id", nullable = false)
+  private Team awayTeam;
+
+  @Builder
+  public Match(
+      UUID eventId,
+      Competition competition,
+      Team homeTeam,
+      Team awayTeam,
+      Season season,
+      Fixture fixture,
+      LocalDateTime date) {
+    super(eventId, competition, season, fixture, date);
+    this.homeTeam = homeTeam;
+    this.awayTeam = awayTeam;
   }
 
   @NotNull
   @Override
   public String getTitle() {
-
     return competition
         + ": "
         + homeTeam
@@ -66,11 +87,55 @@ public class Match extends Event {
         + ((fixture != null) ? ", " + fixture : "");
   }
 
+  // Next 7 methods included for reflection
+  @Override
+  public UUID getEventId() {
+    return super.getEventId();
+  }
+
+  @Override
+  public Competition getCompetition() {
+    return super.getCompetition();
+  }
+
+  @Override
+  public void setCompetition(Competition competition) {
+    super.setCompetition(competition);
+  }
+
+  @Override
+  public Season getSeason() {
+    return super.getSeason();
+  }
+
+  @Override
+  public Fixture getFixture() {
+    return super.getFixture();
+  }
+
+  @Override
+  public Set<VideoFileSource> getFileSources() {
+    return super.getFileSources();
+  }
+
+  @Override
+  public LocalDateTime getDate() {
+    return super.getDate();
+  }
+  // End redundant reflection overrides
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    if (!(o instanceof Match)) return false;
+    if (!super.equals(o)) return false;
     Match match = (Match) o;
-    return eventId != null && Objects.equals(eventId, match.eventId);
+    return Objects.equals(getHomeTeam(), match.getHomeTeam())
+        && Objects.equals(getAwayTeam(), match.getAwayTeam());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), getHomeTeam(), getAwayTeam());
   }
 }

@@ -35,7 +35,7 @@
         <include within="self.me.matchday.api.service.video.VideoStreamingService"/>
         <include within="self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService"/>
         <include within="self.me.matchday.api.service.video.VideoStreamManager"/>
-        <include within="self.me.matchday.plugin.datasource.parsing.EventDataParser"/>
+        <include within="self.me.matchday.plugin.datasource.parsing.MatchDataParser"/>
         <include within="self.me.matchday.plugin.io.ffmpeg.*"/>
 
         <include within="self.me.matchday.log.*"/>

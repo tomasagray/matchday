@@ -33,6 +33,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 import self.me.matchday.model.video.VideoFileSource;
 
@@ -56,10 +57,9 @@ class EventServiceTest {
   private static EventService eventService;
 
   // Test data
-  private static Event testMatch;
+  private static Match testMatch;
   private static VideoFileSource testFileSource;
   private static Competition testCompetition;
-  private static Team testTeam;
 
   @BeforeAll
   static void setUp(
@@ -71,7 +71,7 @@ class EventServiceTest {
 
     testMatch = testDataCreator.createTestMatch("EventServiceTest");
     testCompetition = testMatch.getCompetition();
-    testTeam = testMatch.getHomeTeam();
+    Team testTeam = testMatch.getHomeTeam();
 
     final Optional<VideoFileSource> fileSourceOptional =
         testMatch.getFileSources().stream().findFirst();
@@ -204,46 +204,35 @@ class EventServiceTest {
     assertThat(events.size()).isGreaterThanOrEqualTo(minExpectedEventCount);
   }
 
-  @Test
-  @DisplayName("Ensure fetches all Events for specified Team")
-  void fetchEventsForTeam() {
 
-    // Minimum expected Events
-    final int expectedEventCount = 1;
-    logger.info("All Matches in database:\n{}", eventService.fetchAll());
-
-    logger.info("Fetching Matches for Team: {}", testTeam);
-    final List<Event> events = eventService.fetchEventsForTeam(testTeam.getTeamId());
-    logger.info("Got Matches:\n{}", events);
-    assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount);
-  }
 
   @Test
   @DisplayName("Validate updating Event in database")
   void update() {
+
+    final Match originalEvent = testDataCreator.createTestMatch("MinimumEvent");
     final List<Event> events = eventService.fetchAll();
     if (events.size() == 0) {
       // make sure there is at least one event to test...
-      events.add(testDataCreator.createTestMatch("MinimumEvent"));
+      events.add(originalEvent);
       eventService.saveAll(events);
     }
     assertThat(events.size()).isGreaterThanOrEqualTo(1);
-    final Event originalEvent = events.get(0);
     logger.info("Original Event: {}", originalEvent);
 
-    final Event testEvent = getPristineEventCopy(originalEvent);
+    final Match testEvent = getPristineEventCopy(originalEvent);
     final Competition updatedCompetition = new Competition("Updated Competition");
     updatedCompetition.setCompetitionId(UUID.randomUUID());
     testEvent.setCompetition(updatedCompetition);
     logger.info("Attempting to update Event with: {}", testEvent);
 
-    final Event updatedEvent = eventService.update(testEvent);
+    final Match updatedEvent = (Match) eventService.update(testEvent);
     logger.info("Got updated Event: {}", updatedEvent);
     assertThat(updatedEvent).isNotEqualTo(originalEvent);
   }
 
-  private @NotNull Event getPristineEventCopy(@NotNull Event event) {
-    final Event pristine = new Event();
+  private @NotNull Match getPristineEventCopy(@NotNull Match event) {
+    final Match pristine = new Match();
     pristine.setEventId(event.getEventId());
     pristine.setCompetition(event.getCompetition());
     pristine.setHomeTeam(event.getHomeTeam());

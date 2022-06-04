@@ -101,7 +101,7 @@ public class EventResource extends RepresentationModel<EventResource> {
           competitionResourceAssembler.toModel(entity.getCompetition());
       // populate DTO
       eventResource.setEventId(entity.getEventId());
-      eventResource.setTitle(entity.getTitle());
+      eventResource.setTitle(entity.toString());
       eventResource.setCompetition(competitionResource);
       eventResource.setSeason(entity.getSeason());
       eventResource.setFixture(entity.getFixture());

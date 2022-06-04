@@ -24,7 +24,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Type;
-import self.me.matchday.db.converter.PatternConverter;
+import self.me.matchday.model.db.converter.PatternConverter;
 
 import javax.persistence.*;
 import java.util.HashMap;

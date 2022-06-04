@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -21,42 +21,77 @@ package self.me.matchday.model;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.model.video.VideoFileSource;
 
 import javax.persistence.Entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 /** A highlight show, week in review or other non-Match televised Event. */
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 public class Highlight extends Event implements Serializable {
-
-  public Highlight() {
-    super();
-  }
 
   @Builder(builderMethodName = "highlightBuilder")
   public Highlight(
       UUID eventId, Competition competition, Season season, Fixture fixture, LocalDateTime date) {
-    super(eventId, competition, null, null, season, fixture, date);
+    super(eventId, competition, season, fixture, date);
   }
 
-  // Overrides
+  @Override
+  public String getTitle() {
+    return String.format("Highlights: %s", getCompetition());
+  }
+
+  // Next 7 methods included for reflection
+  @Override
+  public UUID getEventId() {
+    return super.getEventId();
+  }
+
+  @Override
+  public Competition getCompetition() {
+    return super.getCompetition();
+  }
+
+  @Override
+  public void setCompetition(Competition competition) {
+    super.setCompetition(competition);
+  }
+
+  @Override
+  public Season getSeason() {
+    return super.getSeason();
+  }
+
+  @Override
+  public Fixture getFixture() {
+    return super.getFixture();
+  }
+
+  @Override
+  public Set<VideoFileSource> getFileSources() {
+    return super.getFileSources();
+  }
+
+  @Override
+  public LocalDateTime getDate() {
+    return super.getDate();
+  }
+  // End redundant reflection overrides
+
   @Override
   public @NotNull String toString() {
-    return getTitle()
-        + " ("
-        + getCompetition()
-        + " "
-        + getSeason().getStartDate().getYear()
-        + "/"
-        + getSeason().getEndDate().getYear()
-        + "), "
-        + getFixture();
+    return String.format(
+        "Highlight{eventId=%s, competition=%s, season=%s, fixture=%s, date=%s}",
+        eventId, competition, season, fixture, date);
   }
 
   @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. 
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -17,15 +17,20 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db;
+package self.me.matchday.model.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.Highlight;
+import self.me.matchday.model.Synonym;
 
-import java.util.UUID;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface HighlightRepository extends JpaRepository<Highlight, UUID> {
+public interface SynonymRepository extends JpaRepository<Synonym, Long> {
 
+  Optional<Synonym> findSynonymByNameContains(@Param("name") String name);
+
+  List<Synonym> findSynonymsByProperNameNameContains(@Param("name") String name);
 }

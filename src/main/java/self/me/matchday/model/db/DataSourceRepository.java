@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -17,22 +17,15 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db.converter;
+package self.me.matchday.model.db;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
-import java.sql.Timestamp;
-import java.time.Instant;
+import org.springframework.data.jpa.repository.JpaRepository;
+import self.me.matchday.model.DataSource;
 
-@Converter
-public class TimestampConverter implements AttributeConverter<Timestamp, Long> {
-  @Override
-  public Long convertToDatabaseColumn(Timestamp attribute) {
-    return attribute == null ? null : attribute.toInstant().toEpochMilli();
-  }
+import java.util.List;
+import java.util.UUID;
 
-  @Override
-  public Timestamp convertToEntityAttribute(Long dbData) {
-    return dbData == null ? null : Timestamp.from(Instant.ofEpochMilli(dbData));
-  }
+public interface DataSourceRepository extends JpaRepository<DataSource<?>, UUID> {
+
+  List<DataSource<?>> findDataSourcesByPluginId(UUID pluginId);
 }

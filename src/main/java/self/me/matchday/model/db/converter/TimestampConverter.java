@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -17,22 +17,22 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db.converter;
+package self.me.matchday.model.db.converter;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-import java.util.regex.Pattern;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 @Converter
-public class PatternConverter implements AttributeConverter<Pattern, String> {
-
+public class TimestampConverter implements AttributeConverter<Timestamp, Long> {
   @Override
-  public String convertToDatabaseColumn(Pattern attribute) {
-    return attribute != null ? attribute.toString() : null;
+  public Long convertToDatabaseColumn(Timestamp attribute) {
+    return attribute == null ? null : attribute.toInstant().toEpochMilli();
   }
 
   @Override
-  public Pattern convertToEntityAttribute(String dbData) {
-    return dbData != null ? Pattern.compile(dbData, Pattern.UNICODE_CASE) : null;
+  public Timestamp convertToEntityAttribute(Long dbData) {
+    return dbData == null ? null : Timestamp.from(Instant.ofEpochMilli(dbData));
   }
 }

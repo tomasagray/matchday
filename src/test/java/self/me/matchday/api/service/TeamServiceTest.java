@@ -31,7 +31,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
-import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.Log;
 
@@ -52,7 +52,7 @@ class TeamServiceTest {
   private static TeamService teamService;
   private static Competition testCompetition;
   private static Team testTeam;
-  private static Event testMatch;
+  private static Match testMatch;
 
   @BeforeAll
   static void setUp(

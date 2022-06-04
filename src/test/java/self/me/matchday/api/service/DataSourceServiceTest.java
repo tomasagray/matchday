@@ -82,7 +82,7 @@ class DataSourceServiceTest {
   @SuppressWarnings("unchecked cast")
   void addDataSource() {
 
-    final DataSource<Event> testDataSource = testDataCreator.readTestJsonDataSource();
+    final DataSource<Match> testDataSource = testDataCreator.readTestJsonDataSource();
     logger.info("Read test DataSource:\n{}", testDataSource);
     final PlaintextDataSource<?> testPlaintextDataSource = (PlaintextDataSource<?>) testDataSource;
     final List<PatternKit<?>> testPatternKitPack = testPlaintextDataSource.getPatternKits();

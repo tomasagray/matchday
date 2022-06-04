@@ -17,14 +17,27 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.plugin.datasource.parsing;
+package self.me.matchday.util;
 
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.DataSource;
 
-import java.util.stream.Stream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public interface DataSourceParser<T, D> {
+public class ReflectionUtils {
 
-  Stream<? extends T> getEntityStream(@NotNull DataSource<? extends T> dataSource, @NotNull D data);
+  public static Field @NotNull [] getAllFields(@NotNull Class<?> clazz) {
+
+    final Field[] allFields = {};
+    final Field[] declaredFields = clazz.getDeclaredFields();
+    final Field[] superClassFields = clazz.getSuperclass().getDeclaredFields();
+    final List<Field> fieldContainer =
+        new ArrayList<>(declaredFields.length + superClassFields.length);
+
+    Collections.addAll(fieldContainer, declaredFields);
+    Collections.addAll(fieldContainer, superClassFields);
+    return fieldContainer.toArray(allFields);
+  }
 }

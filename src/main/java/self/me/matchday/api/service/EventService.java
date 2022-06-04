@@ -20,15 +20,12 @@
 package self.me.matchday.api.service;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.db.EventRepository;
-import self.me.matchday.db.VideoFileSrcRepository;
-import self.me.matchday.model.Competition;
-import self.me.matchday.model.Event;
+import self.me.matchday.model.*;
 import self.me.matchday.model.Event.EventSorter;
-import self.me.matchday.model.ProperName;
+import self.me.matchday.model.db.EventRepository;
+import self.me.matchday.model.db.VideoFileSrcRepository;
 import self.me.matchday.model.video.VideoFileSource;
 
 import java.time.LocalDate;
@@ -45,19 +42,22 @@ public class EventService implements EntityService<Event> {
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
   private final EventRepository eventRepository;
-
   private final VideoFileSrcRepository fileSrcRepository;
-  private final EntityCorrectionService entityCorrectionService;
+  private final MatchService matchService;
+  private final HighlightService highlightService;
 
   EventService(
       EventRepository eventRepository,
+      EntityCorrectionService entityCorrectionService,
+      MatchService matchService,
+      HighlightService highlightService,
       CompetitionService competitionService,
       TeamService teamService,
-      VideoFileSrcRepository fileSrcRepository,
-      EntityCorrectionService entityCorrectionService) {
+      VideoFileSrcRepository fileSrcRepository) {
     this.eventRepository = eventRepository;
     this.fileSrcRepository = fileSrcRepository;
-    this.entityCorrectionService = entityCorrectionService;
+    this.matchService = matchService;
+    this.highlightService = highlightService;
   }
 
   /**
@@ -69,18 +69,14 @@ public class EventService implements EntityService<Event> {
   public Event save(@NotNull final Event event) {
 
     validateEvent(event);
-    try {
-      entityCorrectionService.correctEntityFields(event);
-      // See if Event already exists in DB
-      final Optional<Event> eventOptional = eventRepository.findOne(getExampleEvent(event));
-      if (eventOptional.isPresent()) {
-        final Event existingEvent = eventOptional.get();
-        existingEvent.getFileSources().addAll(event.getFileSources());
-      }
-      return eventRepository.save(event);
-    } catch (ReflectiveOperationException e) {
-      throw new RuntimeException(e);
+    if (event instanceof Match) {
+      return matchService.save((Match) event);
+    } else if (event instanceof Highlight) {
+      return highlightService.save((Highlight) event);
     }
+    // else...
+    throw new IllegalArgumentException(
+        "Trying to save unknown type: " + event.getClass().getName());
   }
 
   @Override
@@ -101,13 +97,12 @@ public class EventService implements EntityService<Event> {
 
   @Override
   public Event update(@NotNull Event event) {
-    final UUID eventId = event.getEventId();
-    final Optional<Event> optional = fetchById(eventId);
-    if (optional.isPresent()) {
-      return save(event);
+    if (event instanceof Match) {
+      return matchService.update((Match) event);
+    } else if (event instanceof Highlight) {
+      return highlightService.update((Highlight) event);
     }
-    // else..
-    throw new IllegalArgumentException("Trying to update non-existent Event with ID: " + eventId);
+    throw new IllegalArgumentException("Could not determine type for Event: " + event);
   }
 
   @Override
@@ -137,29 +132,6 @@ public class EventService implements EntityService<Event> {
   }
 
   /**
-   * Retrieve all Events associated with the specified Team.
-   *
-   * @param teamId The name of the Team.
-   * @return A CollectionModel containing the Events.
-   */
-  public List<Event> fetchEventsForTeam(@NotNull final UUID teamId) {
-    return eventRepository.fetchEventsByTeam(teamId);
-  }
-
-  private @NotNull Example<Event> getExampleEvent(@NotNull Event event) {
-
-    final Event exampleEvent =
-        Event.builder()
-            .competition(event.getCompetition())
-            .homeTeam(event.getHomeTeam())
-            .awayTeam(event.getAwayTeam())
-            .season(event.getSeason())
-            .fixture(event.getFixture())
-            .build();
-    return Example.of(exampleEvent);
-  }
-
-  /**
    * Delete the given Event from the database
    *
    * @param event The Event to delete
@@ -171,9 +143,7 @@ public class EventService implements EntityService<Event> {
 
   @Override
   public void deleteAll(@NotNull Iterable<? extends Event> events) {
-    for (Event event : events) {
-      delete(event);
-    }
+    eventRepository.deleteAll(events);
   }
 
   /**
@@ -184,24 +154,20 @@ public class EventService implements EntityService<Event> {
   private void validateEvent(final Event event) {
 
     if (event == null) {
-      reject("Event is null");
+      throw new IllegalArgumentException("Event is null");
     }
     final Competition competition = event.getCompetition();
     if (!isValidCompetition(competition)) {
-      reject("invalid competition: " + competition);
+      throw new IllegalArgumentException("invalid competition: " + competition);
     }
     final LocalDateTime date = event.getDate();
     if (!isValidDate(date)) {
-      reject("invalid date: " + date);
+      throw new IllegalArgumentException("invalid date: " + date);
     }
     final Set<VideoFileSource> fileSources = event.getFileSources();
     if (!isValidVideoFiles(fileSources)) {
-      reject("no video files!");
+      throw new IllegalArgumentException("no video files!");
     }
-  }
-
-  private void reject(@NotNull final String message) {
-    throw new IllegalArgumentException("Event rejected; " + message);
   }
 
   private boolean isValidCompetition(final Competition competition) {

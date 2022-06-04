@@ -36,6 +36,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
 import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.plugin.datasource.blogger.HtmlBloggerParser;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerEntry;
@@ -53,30 +54,30 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@DisplayName("Validation for EventDataParser - HTML to Events")
-public class EventDataParserTest {
+@DisplayName("Validation for MatchDataParser - HTML to Events")
+public class MatchDataParserTest {
 
-  private static final String LOG_TAG = "EventDataParserTest";
+  private static final String LOG_TAG = "MatchDataParserTest";
   private static final String TEST_DATA_FILE = "data/blogger/blogger_html_single_team.html";
 
-  private static EventDataParser eventDataParser;
+  private static MatchDataParser matchDataParser;
 
   // test resources
-  private static DataSource<Event> testDataSource;
+  private static DataSource<Match> testDataSource;
   private static String testHtml;
 
   @BeforeAll
   static void setup(
       @Autowired @NotNull TestDataCreator testDataCreator,
-      @Autowired EventDataParser eventDataParser) {
-    EventDataParserTest.eventDataParser = eventDataParser;
-    EventDataParserTest.testDataSource =
+      @Autowired MatchDataParser matchDataParser) {
+    MatchDataParserTest.matchDataParser = matchDataParser;
+    MatchDataParserTest.testDataSource =
         testDataCreator.readTestJsonDataSource(); // .readTestHtmlDataSource();
-    EventDataParserTest.readTestResources();
+    MatchDataParserTest.readTestResources();
   }
 
   private static void readTestResources() {
-    EventDataParserTest.testHtml = ResourceFileReader.readTextResource(TEST_DATA_FILE);
+    MatchDataParserTest.testHtml = ResourceFileReader.readTextResource(TEST_DATA_FILE);
     assertThat(testHtml).isNotNull().isNotEmpty();
   }
 
@@ -93,7 +94,7 @@ public class EventDataParserTest {
     final int expectedUrlCount = 16;
 
     final Pattern linkPattern =
-        ((PlaintextDataSource<Event>) testDataSource)
+        ((PlaintextDataSource<Match>) testDataSource)
             .getPatternKitsFor(URL.class)
             .get(0)
             .getPattern();
@@ -119,7 +120,7 @@ public class EventDataParserTest {
 
     final String data = entry.getContent().getData();
     final Stream<? extends Event> events =
-        EventDataParserTest.eventDataParser.getEntityStream(testDataSource, data);
+        MatchDataParserTest.matchDataParser.getEntityStream(testDataSource, data);
 
     AtomicInteger elementCount = new AtomicInteger(0);
     events.forEach(

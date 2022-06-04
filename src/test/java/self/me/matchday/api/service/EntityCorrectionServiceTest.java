@@ -67,7 +67,7 @@ class EntityCorrectionServiceTest {
   }
 
   private static void createProperEvent() {
-    final Event properEvent = testDataCreator.createTestMatch("Test Match");
+    final Match properEvent = testDataCreator.createTestMatch("Test Match");
     properEvent.setHomeTeam(new Team(FC_BARCELONA));
     properEvent.setAwayTeam(new Team(ATLETICO_DE_MADRID));
     properEvent.setCompetition(new Competition(UEFA_CHAMPIONS_LEAGUE));
@@ -124,8 +124,8 @@ class EntityCorrectionServiceTest {
   @DisplayName("Test correcting an Event")
   void testEventEntityCorrection() throws ReflectiveOperationException {
 
-    final Event testEvent =
-        Event.builder()
+    final Match testEvent =
+        Match.builder()
             .competition(new Competition("UCL"))
             .homeTeam(new Team("Barca"))
             .awayTeam(new Team("Atleti"))
@@ -147,8 +147,8 @@ class EntityCorrectionServiceTest {
     final Season testSeason = new Season(2022, 2023);
     final Fixture testFixture = new Fixture(16);
     final LocalDateTime testDate = LocalDateTime.now();
-    final Event testEvent =
-        Event.builder()
+    final Match testEvent =
+        Match.builder()
             .competition((new Competition("UCL")))
             .homeTeam(new Team("Atleti"))
             .awayTeam(new Team("Barcelona"))

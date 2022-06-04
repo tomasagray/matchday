@@ -17,15 +17,11 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db;
+package self.me.matchday.model.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import self.me.matchday.model.DataSource;
+import self.me.matchday.model.video.VideoFileSource;
 
-import java.util.List;
 import java.util.UUID;
 
-public interface DataSourceRepository extends JpaRepository<DataSource<?>, UUID> {
-
-  List<DataSource<?>> findDataSourcesByPluginId(UUID pluginId);
-}
+public interface VideoFileSrcRepository extends JpaRepository<VideoFileSource, UUID> {}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -17,21 +17,25 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db;
+package self.me.matchday.model.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.video.VideoFile;
-import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface VideoStreamLocatorRepo extends JpaRepository<VideoStreamLocator, Long> {
+public interface VideoStreamLocatorPlaylistRepo
+    extends JpaRepository<VideoStreamLocatorPlaylist, Long> {
 
   @Query(
-      "SELECT vsl FROM VideoStreamLocator vsl WHERE vsl.videoFile = :videoFile ORDER BY vsl.timestamp")
-  List<VideoStreamLocator> getStreamLocatorsFor(@Param("videoFile") VideoFile videoFile);
+      "SELECT vslp FROM VideoStreamLocatorPlaylist vslp "
+          + "WHERE vslp.fileSource.fileSrcId = :fileSrcId "
+          + "ORDER BY vslp.timestamp")
+  List<VideoStreamLocatorPlaylist> fetchPlaylistsForFileSrc(
+      @Param("fileSrcId") final UUID fileSrcId);
 }

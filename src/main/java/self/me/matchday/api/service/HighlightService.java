@@ -22,16 +22,18 @@ package self.me.matchday.api.service;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import self.me.matchday.db.HighlightRepository;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Highlight;
+import self.me.matchday.model.db.HighlightRepository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class HighlightService {
+public class HighlightService implements EntityService<Highlight> {
+
+  // TODO - implement methods
 
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
@@ -66,4 +68,40 @@ public class HighlightService {
   public Optional<Highlight> fetchHighlight(@NotNull UUID highlightShowId) {
     return highlightRepository.findById(highlightShowId);
   }
+
+  @Override
+  public Highlight save(@NotNull Highlight entity) {
+    return null;
+  }
+
+  @Override
+  public List<Highlight> saveAll(@NotNull Iterable<? extends Highlight> entities) {
+    return null;
+  }
+
+  @Override
+  public Optional<Highlight> fetchById(@NotNull UUID id) {
+    return Optional.empty();
+  }
+
+  @Override
+  public List<Highlight> fetchAll() {
+    return null;
+  }
+
+  @Override
+  public Highlight update(@NotNull Highlight entity) {
+    return null;
+  }
+
+  @Override
+  public List<Highlight> updateAll(@NotNull Iterable<? extends Highlight> entities) {
+    return null;
+  }
+
+  @Override
+  public void delete(@NotNull Highlight entity) {}
+
+  @Override
+  public void deleteAll(@NotNull Iterable<? extends Highlight> entities) {}
 }

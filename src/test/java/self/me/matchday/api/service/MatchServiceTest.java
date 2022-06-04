@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +34,6 @@ import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
-import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for Match service")
 class MatchServiceTest {
 
-  private static final String LOG_TAG = "MatchServiceTest";
+  private static final Logger logger = LogManager.getLogger(MatchServiceTest.class);
 
   private static TestDataCreator testDataCreator;
   private static MatchService matchService;
@@ -53,7 +54,7 @@ class MatchServiceTest {
   // Test data
   private static Competition testCompetition;
   private static Team testTeam;
-  private static Event testMatch;
+  private static Match testMatch;
 
   @BeforeAll
   static void setUp(
@@ -80,10 +81,10 @@ class MatchServiceTest {
   void fetchAllMatches() {
 
     final int expectedMatchCount = 1; // minimum
-    final List<Match> matches = matchService.fetchAllMatches();
+    final List<Match> matches = matchService.fetchAll();
 
     final int actualMatchCount = matches.size();
-    Log.i(LOG_TAG, String.format("Found: %s Matches", actualMatchCount));
+    logger.info("Found: {} Matches", actualMatchCount);
     assertThat(actualMatchCount).isGreaterThanOrEqualTo(expectedMatchCount);
   }
 
@@ -92,15 +93,29 @@ class MatchServiceTest {
   void fetchMatch() {
 
     final UUID testMatchId = testMatch.getEventId();
-    Log.i(LOG_TAG, "Attempting to retrieve Match from database; ID: " + testMatchId);
-    final Optional<Match> optionalMatch = matchService.fetchMatch(testMatchId);
+    logger.info("Attempting to retrieve Match from database; ID: {}", testMatchId);
+    final Optional<Match> optionalMatch = matchService.fetchById(testMatchId);
 
     assertThat(optionalMatch).isPresent();
     optionalMatch.ifPresent(
         match -> {
-          Log.i(LOG_TAG, "Got match: " + match);
+          logger.info("Got match: {}", match);
           assertThat(match.getHomeTeam()).isEqualTo(testTeam);
           assertThat(match.getCompetition()).isEqualTo(testCompetition);
         });
+  }
+
+  @Test
+  @DisplayName("Ensure fetches all Matches for specified Team")
+  void fetchMatchesForTeam() {
+
+    // Minimum expected Events
+    final int expectedEventCount = 1;
+    logger.info("All Matches in database:\n{}", matchService.fetchAll());
+
+    logger.info("Fetching Matches for Team: {}", testTeam);
+    final List<Event> events = matchService.fetchMatchesForTeam(testTeam.getTeamId());
+    logger.info("Got Matches:\n{}", events);
+    assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount);
   }
 }

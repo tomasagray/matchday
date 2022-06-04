@@ -21,26 +21,36 @@ package self.me.matchday.api.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
-import self.me.matchday.db.MatchRepository;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Match;
+import self.me.matchday.model.db.MatchRepository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
-public class MatchService {
+public class MatchService implements EntityService<Match> {
 
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
   private final MatchRepository matchRepository;
+  private final EntityCorrectionService entityCorrectionService;
+  private final TeamService teamService;
 
   @Autowired
-  public MatchService(final MatchRepository matchRepository) {
-
+  public MatchService(
+      MatchRepository matchRepository,
+      EntityCorrectionService entityCorrectionService,
+      TeamService teamService) {
     this.matchRepository = matchRepository;
+    this.entityCorrectionService = entityCorrectionService;
+    this.teamService = teamService;
   }
 
   /**
@@ -48,7 +58,8 @@ public class MatchService {
    *
    * @return Collection of assembled resources.
    */
-  public List<Match> fetchAllMatches() {
+  @Override
+  public List<Match> fetchAll() {
 
     final List<Match> matches = matchRepository.findAll();
     if (matches.size() > 0) {
@@ -63,7 +74,89 @@ public class MatchService {
    * @param matchId The ID of the match we want.
    * @return An optional containing the match resource, if it was found.
    */
-  public Optional<Match> fetchMatch(@NotNull UUID matchId) {
+  @Override
+  public Optional<Match> fetchById(@NotNull UUID matchId) {
     return matchRepository.findById(matchId);
+  }
+
+  /**
+   * Retrieve all Events associated with the specified Team.
+   *
+   * @param teamId The name of the Team.
+   * @return A CollectionModel containing the Events.
+   */
+  public List<Event> fetchMatchesForTeam(@NotNull final UUID teamId) {
+    return matchRepository.fetchMatchesByTeam(teamId);
+  }
+
+  @Override
+  public Match save(@NotNull Match match) {
+
+    validateMatch(match);
+    try {
+      entityCorrectionService.correctEntityFields(match);
+      // See if Event already exists in DB
+      final Optional<Match> eventOptional = matchRepository.findOne(getExampleEvent(match));
+      if (eventOptional.isPresent()) {
+        final Event existingEvent = eventOptional.get();
+        existingEvent.getFileSources().addAll(match.getFileSources());
+      }
+      return matchRepository.saveAndFlush(match);
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void validateMatch(@NotNull Match match) {
+    teamService.validateTeam(match.getHomeTeam());
+    teamService.validateTeam(match.getAwayTeam());
+  }
+
+  private @NotNull Example<Match> getExampleEvent(@NotNull Match match) {
+
+    final Match exampleEvent =
+        Match.builder()
+            .competition(match.getCompetition())
+            .season(match.getSeason())
+            .fixture(match.getFixture())
+            .homeTeam(match.getHomeTeam())
+            .awayTeam(match.getAwayTeam())
+            .build();
+    return Example.of(exampleEvent);
+  }
+
+  @Override
+  public List<Match> saveAll(@NotNull Iterable<? extends Match> entities) {
+    return StreamSupport.stream(entities.spliterator(), false)
+        .map(this::save)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public Match update(@NotNull Match match) {
+    final UUID eventId = match.getEventId();
+    final Optional<Match> optional = fetchById(eventId);
+    if (optional.isPresent()) {
+      return save(match);
+    }
+    // else..
+    throw new IllegalArgumentException("Trying to update non-existent Match with ID: " + eventId);
+  }
+
+  @Override
+  public List<Match> updateAll(@NotNull Iterable<? extends Match> matches) {
+    return StreamSupport.stream(matches.spliterator(), false)
+        .map(this::update)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public void delete(@NotNull Match match) {
+    matchRepository.delete(match);
+  }
+
+  @Override
+  public void deleteAll(@NotNull Iterable<? extends Match> matches) {
+    matchRepository.deleteAll(matches);
   }
 }

@@ -25,7 +25,7 @@ import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.db.converter.UriConverter;
+import self.me.matchday.model.db.converter.UriConverter;
 
 import javax.persistence.*;
 import java.net.URI;

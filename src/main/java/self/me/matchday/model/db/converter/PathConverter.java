@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -17,24 +17,22 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db.converter;
-
-import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
-import self.me.matchday.util.JsonParser;
+package self.me.matchday.model.db.converter;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+import java.nio.file.Path;
 
 @Converter
-public class FFmpegMetadataConverter implements AttributeConverter<FFmpegMetadata, String> {
+public class PathConverter implements AttributeConverter<Path, String> {
 
   @Override
-  public String convertToDatabaseColumn(FFmpegMetadata attribute) {
-    return JsonParser.toJson(attribute);
+  public String convertToDatabaseColumn(Path attribute) {
+    return attribute == null ? null : attribute.toString();
   }
 
   @Override
-  public FFmpegMetadata convertToEntityAttribute(String dbData) {
-    return JsonParser.fromJson(dbData, FFmpegMetadata.class);
+  public Path convertToEntityAttribute(String dbData) {
+    return dbData == null ? null : Path.of(dbData);
   }
 }
