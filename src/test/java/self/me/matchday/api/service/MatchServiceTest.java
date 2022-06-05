@@ -31,7 +31,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
-import self.me.matchday.model.Event;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 
@@ -114,7 +113,7 @@ class MatchServiceTest {
     logger.info("All Matches in database:\n{}", matchService.fetchAll());
 
     logger.info("Fetching Matches for Team: {}", testTeam);
-    final List<Event> events = matchService.fetchMatchesForTeam(testTeam.getTeamId());
+    final List<Match> events = matchService.fetchMatchesForTeam(testTeam.getTeamId());
     logger.info("Got Matches:\n{}", events);
     assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount);
   }

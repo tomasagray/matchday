@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -62,7 +62,8 @@ public final class Fixture implements Serializable {
   @Contract(pure = true)
   @Override
   public String toString() {
-    return String.format("%s #%s", title, fixtureNumber);
+    final String fixture = fixtureNumber > 0 ? " #" + fixtureNumber : "";
+    return title + fixture;
   }
 
   @Override

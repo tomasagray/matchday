@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.MatchRepository;
-import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Match;
 
@@ -87,7 +86,7 @@ public class MatchService implements EntityService<Match> {
    * @param teamId The name of the Team.
    * @return A CollectionModel containing the Events.
    */
-  public List<Event> fetchMatchesForTeam(@NotNull final UUID teamId) {
+  public List<Match> fetchMatchesForTeam(@NotNull final UUID teamId) {
     return matchRepository.fetchMatchesByTeam(teamId);
   }
 

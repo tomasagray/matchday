@@ -79,11 +79,11 @@ public class Match extends Event {
   @NotNull
   @Override
   public String getTitle() {
-    return competition
+    return competition.getName().getName()
         + ": "
-        + homeTeam
+        + homeTeam.getName().getName()
         + " vs. "
-        + awayTeam
+        + awayTeam.getName().getName()
         + ((fixture != null) ? ", " + fixture : "");
   }
 

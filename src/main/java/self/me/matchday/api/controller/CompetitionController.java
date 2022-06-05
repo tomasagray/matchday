@@ -28,8 +28,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.CompetitionResource;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
-import self.me.matchday.api.resource.EventResource;
-import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
+import self.me.matchday.api.resource.EventsResource;
+import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.CompetitionService;
@@ -117,10 +117,10 @@ public class CompetitionController {
    * @return A ResponseEntity containing the CollectionModel of Events.
    */
   @RequestMapping(value = "/competition/{competitionId}/events", method = RequestMethod.GET)
-  public CollectionModel<EventResource> fetchCompetitionEvents(
+  public ResponseEntity<EventsResource> fetchCompetitionEvents(
       @PathVariable final UUID competitionId) {
 
-    return eventResourceAssembler.toCollectionModel(
-        eventService.fetchEventsForCompetition(competitionId));
+    return ResponseEntity.ok(
+        eventResourceAssembler.toModel(eventService.fetchEventsForCompetition(competitionId)));
   }
 }

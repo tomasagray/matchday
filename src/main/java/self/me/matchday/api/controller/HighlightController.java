@@ -20,11 +20,11 @@
 package self.me.matchday.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import self.me.matchday.api.resource.EventResource;
-import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
+import self.me.matchday.api.resource.EventsResource;
+import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
+import self.me.matchday.api.resource.HighlightResource;
 import self.me.matchday.api.service.HighlightService;
 
 import java.util.UUID;
@@ -34,14 +34,18 @@ import java.util.UUID;
 public class HighlightController {
 
   private final HighlightService highlightService;
-  private final EventResourceAssembler resourceAssembler;
+  private final EventResourceAssembler eventAssembler;
+  private final HighlightResource.HighlightResourceAssembler highlightAssembler;
 
   @Autowired
   public HighlightController(
-      final HighlightService highlightService, final EventResourceAssembler resourceAssembler) {
+      HighlightService highlightService,
+      EventResourceAssembler eventAssembler,
+      HighlightResource.HighlightResourceAssembler highlightAssembler) {
 
     this.highlightService = highlightService;
-    this.resourceAssembler = resourceAssembler;
+    this.eventAssembler = eventAssembler;
+    this.highlightAssembler = highlightAssembler;
   }
 
   /**
@@ -51,8 +55,8 @@ public class HighlightController {
    */
   @RequestMapping(value = "/highlight-shows", method = RequestMethod.GET)
   @ResponseBody
-  public CollectionModel<EventResource> fetchAllHighlights() {
-    return resourceAssembler.toCollectionModel(highlightService.fetchAllHighlights());
+  public ResponseEntity<EventsResource> fetchAllHighlights() {
+    return ResponseEntity.ok(eventAssembler.toModel(highlightService.fetchAllHighlights()));
   }
 
   /**
@@ -63,11 +67,11 @@ public class HighlightController {
    */
   @RequestMapping(value = "/highlight-shows/highlight/{eventId}", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<EventResource> fetchHighlightById(@PathVariable UUID eventId) {
+  public ResponseEntity<HighlightResource> fetchHighlightById(@PathVariable UUID eventId) {
 
     return highlightService
         .fetchHighlight(eventId)
-        .map(resourceAssembler::toModel)
+        .map(highlightAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }

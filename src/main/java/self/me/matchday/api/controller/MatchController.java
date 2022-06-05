@@ -20,11 +20,12 @@
 package self.me.matchday.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import self.me.matchday.api.resource.EventResource;
-import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
+import self.me.matchday.api.resource.EventsResource;
+import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
+import self.me.matchday.api.resource.MatchResource;
+import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
 import self.me.matchday.api.service.MatchService;
 
 import java.util.UUID;
@@ -34,14 +35,18 @@ import java.util.UUID;
 public class MatchController {
 
   private final MatchService matchService;
-  private final EventResourceAssembler resourceAssembler;
+  private final EventResourceAssembler eventAssembler;
+  private final MatchResourceAssembler matchAssembler;
 
   @Autowired
   public MatchController(
-      final MatchService matchService, final EventResourceAssembler resourceAssembler) {
+      MatchService matchService,
+      EventResourceAssembler eventAssembler,
+      MatchResourceAssembler matchAssembler) {
 
     this.matchService = matchService;
-    this.resourceAssembler = resourceAssembler;
+    this.eventAssembler = eventAssembler;
+    this.matchAssembler = matchAssembler;
   }
 
   /**
@@ -53,8 +58,8 @@ public class MatchController {
       value = {"", "/"},
       method = RequestMethod.GET)
   @ResponseBody
-  public CollectionModel<EventResource> fetchAllMatches() {
-    return resourceAssembler.toCollectionModel(matchService.fetchAll());
+  public ResponseEntity<EventsResource> fetchAllMatches() {
+    return ResponseEntity.ok(eventAssembler.toModel(matchService.fetchAll()));
   }
 
   /**
@@ -65,11 +70,11 @@ public class MatchController {
    */
   @RequestMapping(value = "/match/{matchId}", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<EventResource> fetchMatchById(@PathVariable UUID matchId) {
+  public ResponseEntity<MatchResource> fetchMatchById(@PathVariable UUID matchId) {
 
     return matchService
         .fetchById(matchId)
-        .map(resourceAssembler::toModel)
+        .map(matchAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }

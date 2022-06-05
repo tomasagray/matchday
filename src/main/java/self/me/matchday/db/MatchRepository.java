@@ -23,7 +23,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.Event;
 import self.me.matchday.model.Match;
 
 import java.util.List;
@@ -41,5 +40,5 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
   @Query(
       "SELECT mt FROM MatchGame mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
           + "WHERE ht.teamId = :teamId OR at.teamId = :teamId")
-  List<Event> fetchMatchesByTeam(@Param("teamId") UUID teamId);
+  List<Match> fetchMatchesByTeam(@Param("teamId") UUID teamId);
 }

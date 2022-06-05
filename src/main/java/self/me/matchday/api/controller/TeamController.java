@@ -26,14 +26,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import self.me.matchday.api.resource.EventResource;
-import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
+import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
+import self.me.matchday.api.resource.MatchResource;
+import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.MatchService;
 import self.me.matchday.api.service.TeamService;
-import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
 
 import java.util.List;
 import java.util.UUID;
@@ -48,7 +49,7 @@ public class TeamController {
   private final TeamService teamService;
   private final TeamResourceAssembler teamResourceAssembler;
   private final MatchService matchService;
-  private final EventResourceAssembler eventResourceAssembler;
+  private final MatchResourceAssembler matchAssembler;
 
   @Autowired
   public TeamController(
@@ -56,12 +57,13 @@ public class TeamController {
       TeamResourceAssembler teamResourceAssembler,
       EventService eventService,
       MatchService matchService,
-      EventResourceAssembler eventResourceAssembler) {
+      EventResourceAssembler eventResourceAssembler,
+      MatchResourceAssembler matchAssembler) {
 
     this.teamService = teamService;
     this.teamResourceAssembler = teamResourceAssembler;
     this.matchService = matchService;
-    this.eventResourceAssembler = eventResourceAssembler;
+    this.matchAssembler = matchAssembler;
   }
 
   /**
@@ -99,12 +101,12 @@ public class TeamController {
    * @return A CollectionModel of Events.
    */
   @RequestMapping(value = "/team/{teamId}/matches", method = RequestMethod.GET)
-  public ResponseEntity<CollectionModel<EventResource>> fetchEventsForTeam(
+  public ResponseEntity<CollectionModel<MatchResource>> fetchEventsForTeam(
       @PathVariable final UUID teamId) {
 
-    final List<Event> events = matchService.fetchMatchesForTeam(teamId);
-    final CollectionModel<EventResource> eventResources =
-        eventResourceAssembler
+    final List<Match> events = matchService.fetchMatchesForTeam(teamId);
+    final CollectionModel<MatchResource> eventResources =
+        matchAssembler
             .toCollectionModel(events)
             .add(linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId)).withSelfRel());
     return ResponseEntity.ok(eventResources);

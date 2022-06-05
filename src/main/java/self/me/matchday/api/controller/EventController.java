@@ -20,13 +20,13 @@
 package self.me.matchday.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import self.me.matchday.api.resource.EventResource;
-import self.me.matchday.api.resource.EventResource.EventResourceAssembler;
+import self.me.matchday.api.resource.EventsResource;
+import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
 import self.me.matchday.api.service.EventService;
 
 @RestController
@@ -43,7 +43,7 @@ public class EventController {
 
   @ResponseBody
   @RequestMapping(value = "/events", method = RequestMethod.GET)
-  public CollectionModel<EventResource> fetchAllEvents() {
-    return resourceAssembler.toCollectionModel(eventService.fetchAll());
+  public ResponseEntity<EventsResource> fetchAllEvents() {
+    return ResponseEntity.ok(resourceAssembler.toModel(eventService.fetchAll()));
   }
 }

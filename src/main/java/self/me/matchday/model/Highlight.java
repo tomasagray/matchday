@@ -29,6 +29,7 @@ import self.me.matchday.model.video.VideoFileSource;
 import javax.persistence.Entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,7 +48,9 @@ public class Highlight extends Event implements Serializable {
 
   @Override
   public String getTitle() {
-    return String.format("Highlights: %s", getCompetition());
+    return String.format(
+        "%s Highlights, %s",
+        getCompetition().getName().getName(), getDate().format(DateTimeFormatter.ISO_DATE));
   }
 
   // Next 7 methods included for reflection

@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.controller;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -39,12 +41,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.resource.CompetitionResource;
-import self.me.matchday.api.resource.EventResource;
+import self.me.matchday.api.resource.EventsResource;
+import self.me.matchday.api.resource.MatchResource;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
 import self.me.matchday.plugin.datasource.parsing.fabric.Bolt;
-import self.me.matchday.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Competition REST controller integration test")
 class CompetitionControllerTest {
 
-  private static final String LOG_TAG = "CompetitionControllerTest";
+  private static final Logger logger = LogManager.getLogger(CompetitionControllerTest.class);
 
   @LocalServerPort private int port;
   @Autowired private TestRestTemplate restTemplate;
@@ -91,7 +93,7 @@ class CompetitionControllerTest {
   static void teardown() {
     testMatches.forEach(
         match -> {
-          Log.i(LOG_TAG, "Deleting test Match: " + match);
+          logger.info("Deleting test Match: {}", match);
           testDataCreator.deleteTestEvent(match);
         });
   }
@@ -99,7 +101,7 @@ class CompetitionControllerTest {
   private Stream<Arguments> getAllTestCompetitionsArgs() {
 
     final String url = "http://localhost:" + port + "/competitions/";
-    Log.i(LOG_TAG, "Fetching all Competitions from: " + url);
+    logger.info("Fetching all Competitions from: {}", url);
     final ResponseEntity<CollectionModel<CompetitionResource>> response =
         restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
     final CollectionModel<CompetitionResource> body = response.getBody();
@@ -117,7 +119,7 @@ class CompetitionControllerTest {
   @MethodSource("getAllTestCompetitionsArgs")
   @DisplayName("Validate REST controller retrieval of all Competitions")
   void fetchAllCompetitions(String actual, String expected) {
-    Log.i(LOG_TAG, "Testing name: " + actual);
+    logger.info("Testing name: {}", actual);
     assertThat(actual).isEqualTo(expected);
   }
 
@@ -128,7 +130,7 @@ class CompetitionControllerTest {
   private ResponseEntity<CompetitionResource> getCompetition(@NotNull UUID teamId) {
     final String url =
         String.format("http://localhost:%d/competitions/competition/%s", port, teamId);
-    Log.i(LOG_TAG, "Getting data from URL: " + url);
+    logger.info("Getting data from URL: {}", url);
     return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
   }
 
@@ -138,13 +140,13 @@ class CompetitionControllerTest {
   void fetchCompetitionByName(@NotNull Competition competition) {
 
     final UUID competitionId = competition.getCompetitionId();
-    Log.i(LOG_TAG, "Testing with Competition Name: " + competitionId);
+    logger.info("Testing with Competition Name: {}", competitionId);
     final ResponseEntity<CompetitionResource> response = getCompetition(competitionId);
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
     final CompetitionResource body = response.getBody();
     assertThat(body).isNotNull();
-    Log.i(LOG_TAG, "Got response: " + body);
+    logger.info("Got response: {}", body);
     assertThat(body.getId()).isEqualTo(competitionId);
   }
 
@@ -157,21 +159,21 @@ class CompetitionControllerTest {
         String.format(
             "http://localhost:%d/competitions/competition/%s/teams",
             port, competition.getCompetitionId());
-    Log.i(LOG_TAG, "Getting teams from database for Competition: " + competition);
-    Log.i(LOG_TAG, "Using URL: " + url);
+    logger.info("Getting teams from database for Competition: {}", competition);
+    logger.info("Using URL: {}", url);
 
     final ResponseEntity<CollectionModel<TeamResource>> response =
         restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
     final CollectionModel<TeamResource> body = response.getBody();
-    Log.i(LOG_TAG, "Got response: " + body);
+    logger.info("Got response: {}", body);
 
     assertThat(body).isNotNull();
     final Collection<TeamResource> content = body.getContent();
     assertThat(content.size()).isNotZero();
     content.forEach(
         teamResource -> {
-          Log.i(LOG_TAG, "Team resource: " + teamResource);
+          logger.info("Team resource: {}", teamResource);
           assertThat(teamResource).isNotNull();
         });
   }
@@ -183,19 +185,20 @@ class CompetitionControllerTest {
 
     final String url =
         String.format(
-            "http://localhost:%d/competitions/competition/%s/events", port, competition.getCompetitionId());
-    final ResponseEntity<CollectionModel<EventResource>> response =
+            "http://localhost:%d/competitions/competition/%s/events",
+            port, competition.getCompetitionId());
+    final ResponseEntity<EventsResource> response =
         restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-    final CollectionModel<EventResource> body = response.getBody();
-    Log.i(LOG_TAG, "Got response: " + body);
+    final EventsResource body = response.getBody();
+    logger.info("Got response: {}", body);
     assertThat(body).isNotNull();
 
-    final Collection<EventResource> eventResources = body.getContent();
-    assertThat(eventResources.size()).isNotZero();
-    eventResources.forEach(
+    final List<MatchResource> matchResources = body.getMatches();
+    assertThat(matchResources.size()).isNotZero();
+    matchResources.forEach(
         eventResource -> {
-          Log.i(LOG_TAG, "Got EventResource: " + eventResource);
+          logger.info("Got MatchResource: {}", eventResource);
           assertThat(eventResource).isNotNull();
         });
   }
