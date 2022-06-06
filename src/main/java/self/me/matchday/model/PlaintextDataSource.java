@@ -45,8 +45,11 @@ public final class PlaintextDataSource<T> extends DataSource<T> {
   }
 
   public PlaintextDataSource(
-      @NotNull URI baseUri, @NotNull Class<T> clazz, @NotNull List<PatternKit<?>> patternKits) {
-    super(baseUri, clazz);
+      @NotNull String title,
+      @NotNull URI baseUri,
+      @NotNull Class<T> clazz,
+      @NotNull List<PatternKit<?>> patternKits) {
+    super(title, baseUri, clazz);
     this.patternKits.addAll(patternKits);
   }
 

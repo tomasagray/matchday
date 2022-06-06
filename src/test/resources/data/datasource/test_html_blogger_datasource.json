@@ -79,6 +79,7 @@
   "pluginId": "64d08bc8-bd9f-11ea-b3de-0242ac130004",
   "dataSourceId": "74674887-eeb6-48c5-b7bf-3f5b51e58a5a",
   "baseUri": "https://galatamanhdfb.blogspot.com/",
+  "title": "GaLaTaMaN HD Football",
   "clazz": "self.me.matchday.model.Match",
   "enabled": true
 }

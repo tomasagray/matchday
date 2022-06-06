@@ -65,7 +65,9 @@ class DataSourceTest {
     patternKit.setPattern(
         Pattern.compile("<img[\\w=\":;%\\s-]*src=\"([\\w.:/]*)\" [\\w\\s=\":;%_-]*/?>"));
     patternKit.setFields(Map.of(1, "filePath"));
-    DataSourceTest.dataSource = new PlaintextDataSource<>(uri, Artwork.class, List.of(patternKit));
+    DataSourceTest.dataSource =
+        new PlaintextDataSource<>(
+            "Test Plaintext DataSource", uri, Artwork.class, List.of(patternKit));
     logger.info("Created PlaintextDataSource:\n{}", dataSource);
   }
 

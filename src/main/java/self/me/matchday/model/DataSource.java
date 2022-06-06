@@ -38,14 +38,16 @@ import java.util.UUID;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class DataSource<T> {
 
-  @Type(type = "java.lang.Class")
-  private final Class<T> clazz;
-
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
   @Column(columnDefinition = "BINARY(16)")
   private UUID dataSourceId;
+
+  @Type(type = "java.lang.Class")
+  private final Class<T> clazz;
+
+  private final String title;
 
   @Convert(converter = UriConverter.class)
   private final URI baseUri;
@@ -56,11 +58,13 @@ public abstract class DataSource<T> {
   private boolean enabled = true;
 
   public DataSource() {
+    this.title = null;
     this.baseUri = null;
     this.clazz = null;
   }
 
-  public DataSource(@NotNull URI baseUri, @NotNull Class<T> clazz) {
+  public DataSource(@NotNull String title, @NotNull URI baseUri, @NotNull Class<T> clazz) {
+    this.title = title;
     this.baseUri = baseUri;
     this.clazz = clazz;
   }

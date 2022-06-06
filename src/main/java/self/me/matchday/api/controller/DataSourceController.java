@@ -27,6 +27,7 @@ import self.me.matchday.api.resource.DataSourcePluginResource.DataSourcePluginRe
 import self.me.matchday.api.resource.DataSourceResource;
 import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.model.DataSource;
+import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.model.SnapshotRequest;
 
 import java.io.IOException;
@@ -105,5 +106,17 @@ public class DataSourceController {
         .map(dataSourceResourceAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
+  }
+
+  @RequestMapping(
+      value = "/data-source/{dataSourceId}/update",
+      method = RequestMethod.PATCH,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<DataSourceResource> updatePlaintextDataSource(
+      @RequestBody PlaintextDataSource<?> dataSource) {
+
+    final DataSource<?> updatedDataSource = dataSourceService.update(dataSource);
+    return ResponseEntity.ok(dataSourceResourceAssembler.toModel(updatedDataSource));
   }
 }

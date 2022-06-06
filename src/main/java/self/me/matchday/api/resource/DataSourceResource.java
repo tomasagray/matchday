@@ -50,6 +50,7 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
 
   private UUID dataSourceId;
   private Class<?> clazz;
+  private String title;
   private URI baseUri;
   private UUID pluginId;
   private boolean enabled;
@@ -65,6 +66,7 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
     PlaintextDataSourceResource(@NotNull DataSourceResource base) {
       this.setDataSourceId(base.dataSourceId);
       this.setClazz(base.clazz);
+      this.setTitle(base.title);
       this.setBaseUri(base.baseUri);
       this.setPluginId(base.pluginId);
       this.setEnabled(base.enabled);
@@ -85,6 +87,7 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
       DataSourceResource resource = instantiateModel(entity);
       resource.setDataSourceId(entity.getDataSourceId());
       resource.setClazz(entity.getClazz());
+      resource.setTitle(entity.getTitle());
       resource.setBaseUri(entity.getBaseUri());
       resource.setPluginId(entity.getPluginId());
       resource.setEnabled(entity.isEnabled());
