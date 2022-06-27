@@ -21,9 +21,6 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.video.VideoFilePack"
-    },
-    {
       "clazz": "self.me.matchday.model.video.VideoFileSource",
       "fields": {
         "1": "channel",

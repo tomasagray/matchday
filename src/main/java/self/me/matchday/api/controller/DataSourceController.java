@@ -78,7 +78,8 @@ public class DataSourceController {
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<DataSource<?>> addDataSource(@RequestBody DataSource<?> dataSource) {
+  public ResponseEntity<DataSource<?>> addPlaintextDataSource(
+      @RequestBody PlaintextDataSource<?> dataSource) {
     final DataSource<?> source = dataSourceService.save(dataSource);
     return ResponseEntity.ok(source);
   }
@@ -119,4 +120,12 @@ public class DataSourceController {
     final DataSource<?> updatedDataSource = dataSourceService.update(dataSource);
     return ResponseEntity.ok(dataSourceResourceAssembler.toModel(updatedDataSource));
   }
+
+  @RequestMapping(value = "/data-source/{dataSourceId}/delete", method = RequestMethod.DELETE)
+  public ResponseEntity<UUID> deleteDataSource(@PathVariable("dataSourceId") UUID dataSourceID) {
+    dataSourceService.delete(dataSourceID);
+    return ResponseEntity.ok(dataSourceID);
+  }
+
+  // todo - add exception handlers
 }

@@ -17,29 +17,17 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.api.service;
+package self.me.matchday.db;
 
-import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import self.me.matchday.model.PatternKitTemplate;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-public interface EntityService<T> {
+@Repository
+public interface PatternKitTemplateRepository extends JpaRepository<PatternKitTemplate, Long> {
 
-  T save(@NotNull T entity);
-
-  List<T> saveAll(@NotNull Iterable<? extends T> entities);
-
-  Optional<T> fetchById(@NotNull UUID id);
-
-  List<T> fetchAll();
-
-  T update(@NotNull T entity);
-
-  List<T> updateAll(@NotNull Iterable<? extends T> entities);
-
-  void delete(@NotNull UUID id);
-
-  void deleteAll(@NotNull Iterable<? extends T> entities);
+  Optional<PatternKitTemplate> findPatternKitTemplateByNameEquals(@Param("name") String name);
 }

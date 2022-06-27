@@ -43,12 +43,12 @@ public class PatternKit<T> {
   @Type(type = "java.lang.Class")
   private final Class<T> clazz;
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  private Map<Integer, String> fields = new HashMap<>();
-
   @Column(columnDefinition = "LONGTEXT")
   @Convert(converter = PatternConverter.class)
   private Pattern pattern;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  private Map<Integer, String> fields = new HashMap<>();
 
   public PatternKit(final Class<T> clazz) {
     this.clazz = clazz;

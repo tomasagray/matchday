@@ -134,11 +134,11 @@ public class EventService implements EntityService<Event> {
   /**
    * Delete the given Event from the database
    *
-   * @param event The Event to delete
+   * @param eventId The ID of the Event to delete
    */
   @Override
-  public void delete(@NotNull final Event event) {
-    eventRepository.delete(event);
+  public void delete(@NotNull final UUID eventId) {
+    eventRepository.deleteById(eventId);
   }
 
   @Override

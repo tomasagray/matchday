@@ -17,29 +17,24 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.api.service;
+package self.me.matchday.log;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.api.service.EntityServiceRegistry;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+@Aspect
+public class EntityServiceRegistryLog {
 
-public interface EntityService<T> {
+  private static final Logger logger = LogManager.getLogger(EntityServiceRegistry.class);
 
-  T save(@NotNull T entity);
-
-  List<T> saveAll(@NotNull Iterable<? extends T> entities);
-
-  Optional<T> fetchById(@NotNull UUID id);
-
-  List<T> fetchAll();
-
-  T update(@NotNull T entity);
-
-  List<T> updateAll(@NotNull Iterable<? extends T> entities);
-
-  void delete(@NotNull UUID id);
-
-  void deleteAll(@NotNull Iterable<? extends T> entities);
+  @Before("execution(* self.me.matchday.api.service.EntityServiceRegistry.getServiceFor(..))")
+  public void logGetServiceForClass(@NotNull JoinPoint jp) {
+    final Class<?> clazz = (Class<?>) jp.getArgs()[0];
+    logger.info("Getting Entity Service for class: {}", clazz.getName());
+  }
 }

@@ -135,8 +135,8 @@ public class DataSourceService implements EntityService<DataSource<?>> {
   }
 
   @Override
-  public void delete(@NotNull DataSource<?> dataSource) {
-    dataSourceRepository.delete(dataSource);
+  public void delete(@NotNull UUID dataSourceId) {
+    dataSourceRepository.deleteById(dataSourceId);
   }
 
   @Override

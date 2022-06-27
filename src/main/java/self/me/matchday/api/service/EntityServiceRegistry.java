@@ -32,7 +32,7 @@ import java.util.List;
 @Component
 public class EntityServiceRegistry {
 
-  private final List<Entry<?>> registry = new ArrayList<>();
+  private final List<Entry<?, ?>> registry = new ArrayList<>();
 
   public EntityServiceRegistry(EventService eventService, MatchService matchService) {
     registry.add(new Entry<>(Event.class, eventService));
@@ -51,8 +51,8 @@ public class EntityServiceRegistry {
 
   @Data
   @AllArgsConstructor
-  private static class Entry<T> {
-    private Class<T> clazz;
-    private EntityService<T> service;
+  private static class Entry<T, S extends EntityService<T>> {
+    private final Class<T> clazz;
+    private final S service;
   }
 }

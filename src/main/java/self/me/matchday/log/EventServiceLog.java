@@ -27,7 +27,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.Event;
 
@@ -36,7 +35,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Aspect
-@Component
 public class EventServiceLog {
 
   private static final Logger logger = LogManager.getLogger(EventService.class);

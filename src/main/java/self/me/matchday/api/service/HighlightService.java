@@ -100,7 +100,9 @@ public class HighlightService implements EntityService<Highlight> {
   }
 
   @Override
-  public void delete(@NotNull Highlight entity) {}
+  public void delete(@NotNull UUID highlightId) {
+    throw new RuntimeException("This method is not implemented!");
+  }
 
   @Override
   public void deleteAll(@NotNull Iterable<? extends Highlight> entities) {}

@@ -119,8 +119,7 @@ public class MatchService implements EntityService<Match> {
     final Match exampleEvent =
         Match.builder()
             .competition(match.getCompetition())
-            .season(match.getSeason())
-            .fixture(match.getFixture())
+            .date(match.getDate())
             .homeTeam(match.getHomeTeam())
             .awayTeam(match.getAwayTeam())
             .build();
@@ -153,8 +152,8 @@ public class MatchService implements EntityService<Match> {
   }
 
   @Override
-  public void delete(@NotNull Match match) {
-    matchRepository.delete(match);
+  public void delete(@NotNull UUID matchId) {
+    matchRepository.deleteById(matchId);
   }
 
   @Override

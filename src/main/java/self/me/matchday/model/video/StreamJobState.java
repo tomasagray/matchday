@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -41,13 +41,13 @@ public abstract class StreamJobState {
   private Double completionRatio = 0.0;
 
   public enum JobStatus {
+    ERROR,
     CREATED,
     STARTED,
+    STOPPED,
     BUFFERING,
     STREAMING,
     COMPLETED,
-    STOPPED,
-    ERROR,
   }
 
   @Override
