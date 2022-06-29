@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service.video;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +31,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-import self.me.matchday.util.Log;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for video stream wait delay advice service")
 class StreamDelayAdviceServiceTest {
 
-  private static final String LOG_TAG = "StreamDelayAdviceServiceTest";
+  private static final Logger logger = LogManager.getLogger(StreamDelayAdviceServiceTest.class);
 
   private static StreamDelayAdviceService delayAdviceService;
   private static VideoStreamLocatorPlaylist testLocatorPlaylist;
@@ -58,9 +59,9 @@ class StreamDelayAdviceServiceTest {
   void getDelayAdvice() {
 
     final int expectedDelayAdvice = 16_750;
-    Log.i(LOG_TAG, "Attempting to get delay advice for locator playlist:\n" + testLocatorPlaylist);
+    logger.info("Attempting to get delay advice for locator playlist:\n{}", testLocatorPlaylist);
     final long delayAdvice = delayAdviceService.getDelayAdvice(testLocatorPlaylist);
-    Log.i(LOG_TAG, "Got stream wait advice: " + delayAdvice);
+    logger.info("Got stream wait advice: {}", delayAdvice);
     assertThat(delayAdvice).isNotZero().isEqualTo(expectedDelayAdvice);
   }
 

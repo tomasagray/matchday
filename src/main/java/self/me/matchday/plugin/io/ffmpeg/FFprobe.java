@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -81,13 +81,11 @@ public class FFprobe {
     // Fetch remote data
     try (InputStream is = process.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-
       // Read data and collect as a String
       result = reader.lines().collect(Collectors.joining(""));
 
     } finally {
       // Ensure process closed
-      int processResult = process.exitValue();
       process.destroy();
     }
   }

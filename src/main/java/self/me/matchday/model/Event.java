@@ -19,10 +19,7 @@
 
 package self.me.matchday.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.Corrected;
@@ -55,17 +52,20 @@ public abstract class Event {
 
   @Embedded protected Fixture fixture;
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @Setter(AccessLevel.NONE)
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   protected final Set<VideoFileSource> fileSources = new HashSet<>();
 
   protected LocalDateTime date;
 
   public void addAllFileSources(@NotNull final Collection<? extends VideoFileSource> fileSources) {
-    this.fileSources.addAll(fileSources);
+    fileSources.forEach(this::addFileSource);
   }
 
   public void addFileSource(@NotNull final VideoFileSource fileSource) {
-    this.fileSources.add(fileSource);
+    // replace existing with updated
+    fileSources.remove(fileSource);
+    fileSources.add(fileSource);
   }
 
   /**

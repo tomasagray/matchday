@@ -1130,6 +1130,23 @@
     <pattern value="self.me.matchday.api.service.DataSourceService" method="saveAll" />
     <pattern value="self.me.matchday.api.service.DataSourceService" method="updateAll" />
     <pattern value="self.me.matchday.api.service.EventService" method="updateAll" />
+    <pattern value="self.me.matchday.model.PatternKitTemplate" method="addAllTemplates" />
+    <pattern value="self.me.matchday.api.service.PatternKitTemplateService" method="delete" />
+    <pattern value="self.me.matchday.api.service.HighlightService" method="delete" />
+    <pattern value="self.me.matchday.api.service.MatchService" method="delete" />
+    <pattern value="self.me.matchday.api.service.HighlightService" method="deleteAll" />
+    <pattern value="self.me.matchday.api.service.MatchService" method="deleteAll" />
+    <pattern value="self.me.matchday.api.service.HighlightService" method="fetchAll" />
+    <pattern value="self.me.matchday.api.service.PatternKitTemplateService" method="fetchById" />
+    <pattern value="self.me.matchday.api.service.HighlightService" method="fetchById" />
+    <pattern value="self.me.matchday.model.Event" method="getTitle" />
+    <pattern value="self.me.matchday.model.PatternKitTemplate" />
+    <pattern value="self.me.matchday.api.service.PatternKitTemplateService" />
+    <pattern value="self.me.matchday.api.service.HighlightService" method="saveAll" />
+    <pattern value="self.me.matchday.api.service.MatchService" method="saveAll" />
+    <pattern value="self.me.matchday.api.service.PatternKitTemplateService" method="update" />
+    <pattern value="self.me.matchday.api.service.HighlightService" method="updateAll" />
+    <pattern value="self.me.matchday.api.service.MatchService" method="updateAll" />
   </component>
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$" />

@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.datasource.parsing;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,12 +42,10 @@ import self.me.matchday.model.Match;
 import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.plugin.datasource.blogger.HtmlBloggerParser;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerEntry;
-import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,7 +57,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DisplayName("Validation for MatchDataParser - HTML to Events")
 public class MatchDataParserTest {
 
-  private static final String LOG_TAG = "MatchDataParserTest";
+  private static final Logger logger = LogManager.getLogger(MatchDataParserTest.class);
   private static final String TEST_DATA_FILE = "data/blogger/blogger_html_single_team.html";
 
   private static MatchDataParser matchDataParser;
@@ -105,11 +105,11 @@ public class MatchDataParserTest {
             .collect(Collectors.toList());
 
     for (final Element link : links) {
-      Log.i(LOG_TAG, "Got link URL: " + link);
+      logger.info("Got link URL: {}", link);
       assertThat(link).isNotNull();
     }
     final int actualUrlCount = links.size();
-    Log.i(LOG_TAG, "URL count: " + actualUrlCount);
+    logger.info("URL count: {}", actualUrlCount);
     assertThat(actualUrlCount).isEqualTo(expectedUrlCount);
   }
 
@@ -119,19 +119,19 @@ public class MatchDataParserTest {
   void testBloggerEntryParsing(@NotNull BloggerEntry entry) {
 
     final String data = entry.getContent().getData();
-    final Stream<? extends Event> events =
-        MatchDataParserTest.matchDataParser.getEntityStream(testDataSource, data);
+    final List<? extends Event> events =
+        matchDataParser.getEntityStream(testDataSource, data).collect(Collectors.toList());
+    final int actualEventCount = events.size();
+    logger.info("Found: {} Events in current data", actualEventCount);
+    assertThat(actualEventCount).isNotZero();
 
-    AtomicInteger elementCount = new AtomicInteger(0);
     events.forEach(
         event -> {
-          Log.i(LOG_TAG, "Got Event:\n" + event);
+          logger.info("Got Event:\n{}", event);
           assertThat(event).isNotNull();
           assertThat(event.getFileSources()).isNotNull();
           assertThat(event.getFileSources().size()).isNotZero();
           assertThat(event.getCompetition()).isNotNull();
-          elementCount.getAndIncrement();
         });
-    assertThat(elementCount.get()).isNotZero();
   }
 }

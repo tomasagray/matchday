@@ -23,7 +23,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -40,26 +39,28 @@ public abstract class StreamJobState {
   private JobStatus status = JobStatus.CREATED;
   private Double completionRatio = 0.0;
 
-  public enum JobStatus {
-    ERROR,
-    CREATED,
-    STARTED,
-    STOPPED,
-    BUFFERING,
-    STREAMING,
-    COMPLETED,
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    if (!(o instanceof StreamJobState)) return false;
     StreamJobState that = (StreamJobState) o;
-    return id != null && Objects.equals(id, that.id);
+    return Objects.equals(getId(), that.getId())
+        && getStatus() == that.getStatus()
+        && Objects.equals(getCompletionRatio(), that.getCompletionRatio());
   }
 
   @Override
   public int hashCode() {
-    return 0;
+    return Objects.hash(getId(), getStatus(), getCompletionRatio());
+  }
+
+  public enum JobStatus {
+    ERROR,
+    STOPPED,
+    CREATED,
+    STARTED,
+    BUFFERING,
+    STREAMING,
+    COMPLETED,
   }
 }

@@ -69,7 +69,6 @@ public class PatternKitTemplateController {
         .fetchByClassName(className)
         .map(templateResourceAssembler::toModel)
         .map(ResponseEntity::ok)
-        .orElseThrow(
-            () -> new IllegalArgumentException("No Pattern Kit Template found for request"));
+        .orElse(ResponseEntity.notFound().build());
   }
 }

@@ -36,11 +36,11 @@ public class VideoStreamingConfig implements AsyncConfigurer {
   @Value("${video-resources.simultaneous-streams}")
   private int SIMULTANEOUS_STREAMS;
 
-  @Value("${video-resources.queue-size}")
-  private int QUEUE_SIZE;
-
   @Value("${video-resources.max-pool-size}")
   private int MAX_POOL_SIZE;
+
+  @Value("${video-resources.queue-size}")
+  private int QUEUE_SIZE;
 
   @Value("${video-resources.thread-name-prefix}")
   private String STREAM_THREAD_PREFIX;

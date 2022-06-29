@@ -67,19 +67,16 @@ public final class Fixture implements Serializable {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (obj == this) {
-      return true;
-    }
-    if (!(obj instanceof Fixture)) {
-      return false;
-    }
-    Fixture fixture = (Fixture) obj;
-    return fixture.getFixtureNumber().intValue() == this.getFixtureNumber().intValue();
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Fixture)) return false;
+    Fixture fixture = (Fixture) o;
+    return Objects.equals(getTitle(), fixture.getTitle())
+        && Objects.equals(getFixtureNumber(), fixture.getFixtureNumber());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(title, fixtureNumber);
+    return Objects.hash(getTitle(), getFixtureNumber());
   }
 }

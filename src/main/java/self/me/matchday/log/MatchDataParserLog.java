@@ -22,16 +22,23 @@ package self.me.matchday.log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import self.me.matchday.model.PatternKit;
 import self.me.matchday.plugin.datasource.parsing.MatchDataParser;
 import self.me.matchday.util.JsonParser;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Aspect
 @Component
-public class EventDataParserLogging {
+public class MatchDataParserLog {
 
   static final Logger logger = LogManager.getLogger(MatchDataParser.class);
 
@@ -46,5 +53,32 @@ public class EventDataParserLogging {
           args[1],
           JsonParser.toJson(args[0]));
     }
+  }
+
+  @SuppressWarnings("unchecked cast")
+  @Around(
+      "execution(* self.me.matchday.plugin.datasource.parsing.MatchDataParser.getStreamForType(..))")
+  public Object logGetStreamForType(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    final List<PatternKit<?>> patternKits = (List<PatternKit<?>>) jp.getArgs()[0];
+    final PatternKit<?> firstPatternKit = patternKits.get(0);
+    final String type = firstPatternKit.getClazz().getName();
+    final Object data = jp.getArgs()[1];
+    logger.debug(
+        "Attempting to parse text data with {} PatternKits of type: {}", patternKits.size(), type);
+    logger.debug("Parsing text data:\n{}", data);
+
+    final Stream<?> result = (Stream<?>) jp.proceed();
+    final List<?> collected = result.collect(Collectors.toList());
+    logger.debug("Found {} elements of type: {}", collected.size(), type);
+    return collected.stream();
+  }
+
+  @Around(
+      "execution(* self.me.matchday.plugin.datasource.parsing.MatchDataParser.createUrlStreams(..))")
+  public Object logCreateUrlStream(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    final Stream<?> urls = (Stream<?>) jp.proceed();
+    final List<?> collected = urls.collect(Collectors.toList());
+    logger.debug("Found {} URLs...", collected.size());
+    return collected.stream();
   }
 }

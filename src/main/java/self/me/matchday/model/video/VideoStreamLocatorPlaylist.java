@@ -22,7 +22,6 @@ package self.me.matchday.model.video;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.Hibernate;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.jetbrains.annotations.NotNull;
@@ -69,48 +68,37 @@ public class VideoStreamLocatorPlaylist {
 
   public void addStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
     this.streamLocators.add(streamLocator);
+    this.state.addTaskState(streamLocator.getState());
   }
 
   public TaskListState getState() {
     // ensure state is fresh
-    computePlaylistState();
+    this.state.computeState();
     return this.state;
-  }
-
-  /** Compute the aggregate state of the playlist from the states of each of its locators */
-  private void computePlaylistState() {
-
-    // compute aggregate state
-    Double aggregateCompletionTotal = 0.0;
-    final TaskListState listState = this.state;
-    final List<VideoStreamLocator> streamLocators = this.getStreamLocators();
-
-    for (VideoStreamLocator streamLocator : streamLocators) {
-      final TaskState taskState = streamLocator.getState();
-      final StreamJobState.JobStatus jobStatus = taskState.getStatus();
-      // increase job status to highest of subtasks
-      if (jobStatus.compareTo(listState.getStatus()) > 0) {
-        listState.setStatus(jobStatus);
-      }
-      aggregateCompletionTotal += taskState.getCompletionRatio();
-    }
-    // compute aggregate completion total
-    final double playlistCompletionRatio = aggregateCompletionTotal / streamLocators.size();
-    listState.setCompletionRatio(playlistCompletionRatio);
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-    VideoStreamLocatorPlaylist that = (VideoStreamLocatorPlaylist) o;
-
-    return Objects.equals(id, that.id);
+    if (!(o instanceof VideoStreamLocatorPlaylist)) return false;
+    VideoStreamLocatorPlaylist playlist = (VideoStreamLocatorPlaylist) o;
+    return Objects.equals(getFileSource(), playlist.getFileSource())
+        && Objects.equals(getStreamLocators(), playlist.getStreamLocators())
+        && Objects.equals(getStorageLocation(), playlist.getStorageLocation())
+        && Objects.equals(getTimestamp(), playlist.getTimestamp())
+        && Objects.equals(getId(), playlist.getId())
+        && Objects.equals(getState(), playlist.getState());
   }
 
   @Override
   public int hashCode() {
-    return 1304080917;
+    return Objects.hash(
+        getFileSource(),
+        getStreamLocators(),
+        getStorageLocation(),
+        getTimestamp(),
+        getId(),
+        getState());
   }
 
   @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -41,18 +41,13 @@ public class VideoFilePack {
   @Column(columnDefinition = "BINARY(16)")
   private UUID id;
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   @MapKeyEnumerated
   @MapKeyColumn(name = "pack_id")
-  private final Map<PartIdentifier, VideoFile> videoFiles;
+  private final Map<PartIdentifier, VideoFile> videoFiles = new ConcurrentSkipListMap<>();
 
-  public VideoFilePack() {
-    this.videoFiles = new ConcurrentSkipListMap<>();
-  }
-
-  public boolean put(@NotNull VideoFile videoFile) {
-    final VideoFile added = videoFiles.putIfAbsent(videoFile.getTitle(), videoFile);
-    return added == null;
+  public void put(@NotNull VideoFile videoFile) {
+    videoFiles.putIfAbsent(videoFile.getTitle(), videoFile);
   }
 
   public VideoFile get(@NotNull PartIdentifier title) {

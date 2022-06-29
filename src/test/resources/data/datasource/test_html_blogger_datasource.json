@@ -1,30 +1,29 @@
 {
+  "dataSourceId": "f493b151-0d0d-4e3d-8624-68aebd120c0e",
+  "clazz": "self.me.matchday.model.Match",
+  "title": "GaLaTaMaN HD Football",
+  "baseUri": "https://galatamanhdfb.blogspot.com/",
+  "pluginId": "64d08bc8-bd9f-11ea-b3de-0242ac130004",
+  "enabled": true,
   "patternKits": [
     {
+      "id": 1,
       "clazz": "self.me.matchday.model.video.VideoFile",
-      "fields": {
-        "0": "title"
-      },
       "pattern": {
         "pattern": "[1st2ndFirSeco-]+ Half|[Postre]+-Match",
         "flags": 0
-      }
-    },
-    {
-      "clazz": "java.net.URL",
-      "fields": {
-        "0": "url"
       },
-      "pattern": {
-        "pattern": "^http[s]?://[\\p{L}.]*filefox.cc/[\\w]+/[\\w-]*.(mkv|ts)",
-        "flags": 0
+      "fields": {
+        "0": "title"
       }
     },
     {
-      "clazz": "self.me.matchday.model.video.VideoFilePack"
-    },
-    {
+      "id": 3,
       "clazz": "self.me.matchday.model.video.VideoFileSource",
+      "pattern": {
+        "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\d\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\s\\d-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\d+\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+) (\\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
+        "flags": 64
+      },
       "fields": {
         "1": "channel",
         "2": "source",
@@ -39,14 +38,15 @@
         "11": "approximateDuration",
         "12": "filesize",
         "13": "resolution"
-      },
-      "pattern": {
-        "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\d\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\s\\d-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\d+\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+) (\\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
-        "flags": 64
       }
     },
     {
+      "id": 4,
       "clazz": "self.me.matchday.model.Match",
+      "pattern": {
+        "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]* (\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]* ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
+        "flags": 64
+      },
       "fields": {
         "1": "competition",
         "2": "season",
@@ -54,14 +54,31 @@
         "4": "date",
         "5": "homeTeam",
         "6": "awayTeam"
-      },
-      "pattern": {
-        "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4})[-Matchdy\\s]*(\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]*([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
-        "flags": 64
       }
     },
     {
+      "id": 5,
       "clazz": "self.me.matchday.model.Match",
+      "pattern": {
+        "pattern": "([\\p{L}\\d\\s]+) (\\d{2}\\/\\d{2}) -([SemiFinalLegstndrdth\\d\\s-]*) (\\d{1,2}[\\p{L}\\s]+) - ([\\p{L}\\d\\s-]+) vs.? ([\\p{L}\\d\\s-]+) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "4": "fixture",
+        "5": "homeTeam",
+        "6": "awayTeam",
+        "7": "date"
+      }
+    },
+    {
+      "id": 6,
+      "clazz": "self.me.matchday.model.Match",
+      "pattern": {
+        "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]*(\\d+) - ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
+        "flags": 64
+      },
       "fields": {
         "1": "competition",
         "2": "season",
@@ -69,17 +86,66 @@
         "4": "homeTeam",
         "5": "awayTeam",
         "6": "date"
-      },
+      }
+    },
+    {
+      "id": 7,
+      "clazz": "self.me.matchday.model.Match",
       "pattern": {
-        "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4})[-Matchdy\\s]*(\\d+) - ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
+        "pattern": "([\\s\\p{L}]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
         "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "fixture",
+        "4": "homeTeam",
+        "5": "awayTeam",
+        "6": "date"
+      }
+    },
+    {
+      "id": 8,
+      "clazz": "self.me.matchday.model.Match",
+      "pattern": {
+        "pattern": "([\\s\\p{L}]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "fixture",
+        "4": "date",
+        "5": "homeTeam",
+        "6": "awayTeam"
+      }
+    },
+    {
+      "id": 31,
+      "clazz": "java.net.URL",
+      "pattern": {
+        "pattern": "^http[s]?://[\\p{L}.]*filefox.cc/[\\w]+/[\\w-]*.(mkv|ts)",
+        "flags": 64
+      },
+      "fields": {
+        "0": "url"
+      }
+    },
+    {
+      "id": 42,
+      "clazz": "self.me.matchday.model.Match",
+      "pattern": {
+        "pattern": "([\\p{L}\\d\\s]+) (\\d{2}\\/\\d{2}) - ([PlayofLeg\\d\\s-]*) (\\d{1,2}) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}) ([\\p{L}\\d\\s-]+) vs.? ([\\p{L}\\d\\s-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "4": "fixture",
+        "5": "date",
+        "6": "homeTeam",
+        "7": "awayTeam"
       }
     }
-  ],
-  "pluginId": "64d08bc8-bd9f-11ea-b3de-0242ac130004",
-  "dataSourceId": "74674887-eeb6-48c5-b7bf-3f5b51e58a5a",
-  "baseUri": "https://galatamanhdfb.blogspot.com/",
-  "title": "GaLaTaMaN HD Football",
-  "clazz": "self.me.matchday.model.Match",
-  "enabled": true
+  ]
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,30 +19,46 @@
 
 package self.me.matchday.model.video;
 
-import lombok.*;
-import org.hibernate.Hibernate;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import java.util.Objects;
+import javax.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
-@ToString
 @RequiredArgsConstructor
 @Builder
 @Entity
 public class TaskListState extends StreamJobState {
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-    TaskListState that = (TaskListState) o;
-    return getId() != null && Objects.equals(getId(), that.getId());
+  @OneToMany(cascade = CascadeType.ALL)
+  private final List<TaskState> taskStates = new ArrayList<>();
+
+  public void addTaskState(@NotNull TaskState state) {
+    taskStates.add(state);
   }
 
-  @Override
-  public int hashCode() {
-    return 0;
+  public void computeState() {
+
+    Double aggregateCompletionTotal = 0.0;
+    for (final TaskState state : taskStates) {
+      final JobStatus status = state.getStatus();
+      if (status.equals(JobStatus.STOPPED) || status.equals(JobStatus.ERROR)) {
+        setStatus(status);
+        return;
+      } else if (status.compareTo(this.getStatus()) > 0) {
+        setStatus(status);
+      }
+      aggregateCompletionTotal += state.getCompletionRatio();
+    }
+    final double playlistCompletionRatio = aggregateCompletionTotal / taskStates.size();
+    setCompletionRatio(playlistCompletionRatio);
   }
 }

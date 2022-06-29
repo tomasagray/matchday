@@ -89,15 +89,6 @@ public class EventServiceLog {
     return events;
   }
 
-  @Around("execution(* self.me.matchday.api.service.EventService.fetchEventsForTeam(..))")
-  public Object logFetchEventsForTeam(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    Object teamId = jp.getArgs()[0];
-    logger.info("Fetching Events for Team: {}", teamId);
-    List<?> events = (List<?>) jp.proceed();
-    logger.info("Retrieved: {} Events for Team: {}", events.size(), teamId);
-    return events;
-  }
-
   @Before("execution(* self.me.matchday.api.service.EventService.update(..))")
   public void logUpdateEvent(@NotNull JoinPoint jp) {
     logger.info("Attempting to update Event: {}", jp.getArgs()[0]);

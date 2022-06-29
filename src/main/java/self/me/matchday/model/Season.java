@@ -93,22 +93,16 @@ public final class Season implements Serializable {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (obj == this) {
-      return true;
-    }
-    if (!(obj instanceof Season)) {
-      return false;
-    }
-
-    // Cast for comparison
-    Season season = (Season) obj;
-    return season.getStartDate().isEqual(this.getStartDate())
-        && season.getEndDate().isEqual(this.getEndDate());
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Season)) return false;
+    Season season = (Season) o;
+    return Objects.equals(getStartDate(), season.getStartDate())
+        && Objects.equals(getEndDate(), season.getEndDate());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(startDate, endDate);
+    return Objects.hash(getStartDate(), getEndDate());
   }
 }

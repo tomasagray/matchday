@@ -45,7 +45,7 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   @Column(columnDefinition = "BINARY(16)")
   private UUID fileSrcId;
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   @Builder.Default
   private List<VideoFilePack> videoFilePacks = new ArrayList<>();
 
@@ -63,8 +63,8 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   private int framerate;
   private String audioChannels;
 
-  public boolean addVideoFilePack(@NotNull VideoFilePack filePack) {
-    return this.videoFilePacks.add(filePack);
+  public void addVideoFilePack(@NotNull VideoFilePack filePack) {
+    this.videoFilePacks.add(filePack);
   }
 
   public boolean removeVideoFilePack(VideoFilePack filePack) {
@@ -81,18 +81,23 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   }
 
   @Override
-  public boolean equals(final Object o) {
-    if (!(o instanceof VideoFileSource)) {
-      return false;
-    }
-    // Cast for comparison
-    final VideoFileSource videoFileSource = (VideoFileSource) o;
-    return this.getChannel() != null
-        && this.getChannel().equals(videoFileSource.getChannel())
-        && this.getLanguages() != null
-        && this.getLanguages().equals(videoFileSource.getLanguages())
-        && this.getResolution() != null
-        && this.getResolution().equals(videoFileSource.getResolution());
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof VideoFileSource)) return false;
+    VideoFileSource that = (VideoFileSource) o;
+    return getFramerate() == that.getFramerate()
+        && Objects.equals(getChannel(), that.getChannel())
+        && Objects.equals(getSource(), that.getSource())
+        && Objects.equals(getApproximateDuration(), that.getApproximateDuration())
+        && Objects.equals(getLanguages(), that.getLanguages())
+        && getResolution() == that.getResolution()
+        && Objects.equals(getMediaContainer(), that.getMediaContainer())
+        && Objects.equals(getVideoCodec(), that.getVideoCodec())
+        && Objects.equals(getAudioCodec(), that.getAudioCodec())
+        && Objects.equals(getVideoBitrate(), that.getVideoBitrate())
+        && Objects.equals(getAudioBitrate(), that.getAudioBitrate())
+        && Objects.equals(getFilesize(), that.getFilesize())
+        && Objects.equals(getAudioChannels(), that.getAudioChannels());
   }
 
   @Override
@@ -110,8 +115,6 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   @Override
   public int hashCode() {
     return Objects.hash(
-        fileSrcId,
-        videoFilePacks,
         channel,
         source,
         approximateDuration,

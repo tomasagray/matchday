@@ -57,8 +57,13 @@ public class StreamDelayAdviceService {
 
   public long getDelayAdvice(@NotNull final VideoStreamLocatorPlaylist locatorPlaylist) {
 
+    final JobStatus status = locatorPlaylist.getState().getStatus();
+    if (status.equals(JobStatus.ERROR)) {
+      throw new IllegalStateException(
+          String.format(
+              "VideoStreamLocatorPlaylist: %s is in ERROR status", locatorPlaylist.getId()));
+    }
     if (!isStreamReady(locatorPlaylist)) {
-      final JobStatus status = locatorPlaylist.getState().getStatus();
       final int stepsToComplete = JobStatus.COMPLETED.compareTo(status);
       final int locatorCount = locatorPlaylist.getStreamLocators().size();
       final long pingTime = getPingTime(locatorPlaylist);
@@ -134,16 +139,16 @@ public class StreamDelayAdviceService {
    * Formula to compute the recommended retry delay
    *
    * @param numStreams The number of video streams in the locator playlist
-   * @param stepToComplete The number of streaming phases before COMPLETED is reached
+   * @param stepsToComplete The number of streaming phases before COMPLETED is reached
    * @param pingTime The ping time for the file server
    * @param ffmpegOverhead The startup time for FFMPEG
    * @return The recommended retry delay
    */
   private long computeWaitMillis(
       final int numStreams,
-      final int stepToComplete,
+      final int stepsToComplete,
       final long pingTime,
       final long ffmpegOverhead) {
-    return stepToComplete * pingTime + ffmpegOverhead;
+    return stepsToComplete * pingTime + ffmpegOverhead;
   }
 }

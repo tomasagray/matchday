@@ -37,10 +37,9 @@ public class BloggerPluginLog {
   @Around("execution(* self.me.matchday.plugin.datasource.blogger.BloggerPlugin.getSnapshot(..))")
   public Object logGetSnapshot(@NotNull ProceedingJoinPoint jp) throws Throwable {
     final Object[] args = jp.getArgs();
-    logger.info("Getting Snapshot using Request: {}, Data Source: {}", args[0], args[1]);
-    final Object result = jp.proceed();
-    logger.info("Got Snapshot: {}", result);
-    return result;
+    logger.info("Getting Snapshot using Request: {}", args[0]);
+    logger.debug("Getting Snapshot using Request: {}, Data Source: {}", args[0], args[1]);
+    return jp.proceed();
   }
 
   @Around("execution(* self.me.matchday.plugin.datasource.blogger.BloggerPlugin.isEnabled())")

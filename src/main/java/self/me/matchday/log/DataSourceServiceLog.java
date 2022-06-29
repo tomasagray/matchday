@@ -83,7 +83,7 @@ public class DataSourceServiceLog {
   @Before("execution(* self.me.matchday.api.service.DataSourceService.update(..))")
   public void logUpdateDataSource(@NotNull JoinPoint jp) {
     final DataSource<?> dataSource = (DataSource<?>) jp.getArgs()[0];
-    logger.info("Updating DataSource with ID: {} to: {}", dataSource.getDataSourceId(), dataSource);
+    logger.info("Updating DataSource with ID: {}...", dataSource.getDataSourceId());
   }
 
   @Before("execution(* self.me.matchday.api.service.DataSourceService.updateAll(..))")

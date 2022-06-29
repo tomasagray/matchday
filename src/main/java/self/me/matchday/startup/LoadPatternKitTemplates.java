@@ -29,7 +29,7 @@ import self.me.matchday.model.PatternKitTemplate;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 
-import java.net.URI;
+import java.net.URL;
 import java.util.Optional;
 
 @Component
@@ -101,7 +101,7 @@ public class LoadPatternKitTemplates implements CommandLineRunner {
   PatternKitTemplate readUrlTemplate() {
 
     logger.info("Reading PatternKitTemplate for: URI");
-    final PatternKitTemplate template = new PatternKitTemplate(URI.class);
+    final PatternKitTemplate template = new PatternKitTemplate(URL.class);
     template.addFields("url");
     return template;
   }

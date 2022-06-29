@@ -32,7 +32,7 @@ import self.me.matchday.api.service.EntityCorrectionService;
 
 @Aspect
 @Component
-public class EntityCorrectionServiceLogging {
+public class EntityCorrectionServiceLog {
 
   static final Logger logger = LogManager.getLogger(EntityCorrectionService.class);
 

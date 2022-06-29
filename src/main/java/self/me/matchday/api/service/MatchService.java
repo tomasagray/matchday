@@ -100,7 +100,7 @@ public class MatchService implements EntityService<Match> {
       final Optional<Match> eventOptional = matchRepository.findOne(getExampleEvent(match));
       if (eventOptional.isPresent()) {
         final Match existingEvent = eventOptional.get();
-        existingEvent.getFileSources().addAll(match.getFileSources());
+        existingEvent.addAllFileSources(match.getFileSources());
         return existingEvent;
       }
       return matchRepository.save(match);
@@ -119,7 +119,8 @@ public class MatchService implements EntityService<Match> {
     final Match exampleEvent =
         Match.builder()
             .competition(match.getCompetition())
-            .date(match.getDate())
+            .season(match.getSeason())
+            .fixture(match.getFixture())
             .homeTeam(match.getHomeTeam())
             .awayTeam(match.getAwayTeam())
             .build();

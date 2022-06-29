@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service.video;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.FileServerService;
@@ -36,7 +39,6 @@ import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
-import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -53,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class VideoStreamManagerTest {
 
-  private static final String LOG_TAG = "VideoStreamManagerTest";
+  private static final Logger logger = LogManager.getLogger(VideoStreamManagerTest.class);
   private static VideoStreamManager streamManager;
 
   // test resources
@@ -86,9 +88,8 @@ class VideoStreamManagerTest {
     final double expectedCompletionRatio = 0.0;
     final int expectedStreamLocatorCount = 4;
 
-    Log.i(
-        LOG_TAG,
-        "Testing VideoStreamLocatorPlaylist creation using File Source:\n" + testFileSource);
+    logger.info(
+        "Testing VideoStreamLocatorPlaylist creation using File Source:\n{}", testFileSource);
 
     // get test data
     final VideoStreamLocatorPlaylist actualLocatorPlaylist =
@@ -99,9 +100,8 @@ class VideoStreamManagerTest {
     final Double actualCompletionRatio = actualState.getCompletionRatio();
     final List<VideoStreamLocator> actualStreamLocators = actualLocatorPlaylist.getStreamLocators();
 
-    Log.i(
-        LOG_TAG,
-        "VideoStreamManager created VideoStreamLocatorPlaylist:\n" + actualLocatorPlaylist);
+    logger.info(
+        "VideoStreamManager created VideoStreamLocatorPlaylist:\n{}", actualLocatorPlaylist);
 
     assertThat(actualStateStatus).isEqualTo(expectedStateStatus);
     assertThat(actualCompletionRatio).isEqualTo(expectedCompletionRatio);
@@ -114,14 +114,13 @@ class VideoStreamManagerTest {
   void getLocalStreamFor() {
 
     final UUID testFileSrcId = VideoStreamManagerTest.testFileSource.getFileSrcId();
-    Log.i(
-        LOG_TAG,
-        "Attempting VideoStreamLocatorPlaylist lookup for file source ID: " + testFileSrcId);
+    logger.info(
+        "Attempting VideoStreamLocatorPlaylist lookup for file source ID: {}", testFileSrcId);
 
     final Optional<VideoStreamLocatorPlaylist> playlistOptional =
         streamManager.getLocalStreamFor(testFileSrcId);
     assertThat(playlistOptional).isPresent();
-    Log.i(LOG_TAG, "Successfully retrieved locator playlist: " + playlistOptional.get());
+    logger.info("Successfully retrieved locator playlist: {}", playlistOptional.get());
   }
 
   @Test
@@ -135,13 +134,13 @@ class VideoStreamManagerTest {
     VideoStreamManagerTest.testStreamLocator = testPlaylist.getStreamLocators().get(0);
     assertThat(testStreamLocator).isNotNull();
 
-    Log.i(LOG_TAG, "Beginning streaming of locator: " + testStreamLocator);
+    logger.info("Beginning streaming of locator: {}", testStreamLocator);
     streamManager.beginStreaming(testStreamLocator);
-    Log.i(LOG_TAG, String.format("Giving stream a %d-second head start", streamHeadStartSeconds));
+    logger.info(String.format("Giving stream a %d-second head start", streamHeadStartSeconds));
     TimeUnit.SECONDS.sleep(streamHeadStartSeconds);
 
     final JobStatus actualStatus = testStreamLocator.getState().getStatus();
-    Log.i(LOG_TAG, "Locator status after starting stream: " + actualStatus);
+    logger.info("Locator status after starting stream: {}", actualStatus);
     assertThat(actualStatus).isGreaterThanOrEqualTo(JobStatus.STARTED);
   }
 
@@ -152,48 +151,47 @@ class VideoStreamManagerTest {
 
     final long waitSeconds = 30;
 
-    Log.i(
-        LOG_TAG,
+    logger.info(
         "Testing status of Stream for VideoStreamLocator: "
             + testStreamLocator.getStreamLocatorId());
-    Log.i(LOG_TAG, String.format("Waiting %d seconds before checking stream...", waitSeconds));
+    logger.info(String.format("Waiting %d seconds before checking stream...", waitSeconds));
     TimeUnit.SECONDS.sleep(waitSeconds);
-    Log.i(LOG_TAG, "Done waiting, checking stream status...");
+    logger.info("Done waiting, checking stream status...");
 
     final JobStatus actualStreamStatus = testStreamLocator.getState().getStatus();
-    Log.i(LOG_TAG, "Stream status was: " + actualStreamStatus);
+    logger.info("Stream status was: {}", actualStreamStatus);
     assertThat(actualStreamStatus).isGreaterThanOrEqualTo(JobStatus.STREAMING);
   }
 
   @Test
   @Order(5)
   @DisplayName("Validate VideoStreamManager can interrupt streaming tasks")
+  @Transactional
   void killAllStreamsFor() throws InterruptedException {
 
-    final int waitToDie = 30;
+    final int waitToDie = 10;
 
     final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
-    Log.i(LOG_TAG, "Attempting to kill all streams for VideoStreamLocatorPlaylist: " + playlist);
+    logger.info("Attempting to kill all streams for VideoStreamLocatorPlaylist: {}", playlist);
     streamManager.killAllStreamsFor(playlist);
 
-    Log.i(LOG_TAG, String.format("Waiting %d seconds for streaming tasks to die...", waitToDie));
-    TimeUnit.SECONDS.sleep(10);
+    logger.info(String.format("Waiting %d seconds for streaming tasks to die...", waitToDie));
+    TimeUnit.SECONDS.sleep(waitToDie);
 
-    Log.i(LOG_TAG, "Ensuring all tasks are dead");
+    logger.info("Ensuring all tasks are dead");
     final VideoStreamLocatorPlaylist deadPlaylist = getStreamLocatorPlaylist();
     final JobStatus killedStatus = deadPlaylist.getState().getStatus();
     final boolean streamReady =
         killedStatus == JobStatus.COMPLETED || killedStatus == JobStatus.STREAMING;
-    Log.i(LOG_TAG, "JobStatus: " + killedStatus);
+    logger.info("JobStatus: {}", killedStatus);
     deadPlaylist
         .getStreamLocators()
         .forEach(
             locator ->
-                Log.i(
-                    LOG_TAG,
-                    String.format(
-                        "Stream Locator: %s, status: %s",
-                        locator.getStreamLocatorId(), locator.getState().getStatus())));
+                logger.info(
+                    "Stream Locator: {}, status: {}",
+                    locator.getStreamLocatorId(),
+                    locator.getState().getStatus()));
     assertThat(streamReady).isFalse();
     assertThat(killedStatus).isEqualTo(JobStatus.STOPPED);
   }
@@ -206,11 +204,11 @@ class VideoStreamManagerTest {
     final UUID fileSrcId = testFileSource.getFileSrcId();
     final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
     final Path storageLocation = playlist.getStorageLocation();
-    Log.i(LOG_TAG, "Deleting local data associated with VideoStreamLocatorPlaylist: " + playlist);
+    logger.info("Deleting local data associated with VideoStreamLocatorPlaylist: {}", playlist);
 
     streamManager.deleteLocalStream(playlist);
 
-    Log.i(LOG_TAG, "Ensuring local data is actually gone...");
+    logger.info("Ensuring local data is actually gone...");
     assertThat(storageLocation).doesNotExist();
     final Optional<VideoStreamLocatorPlaylist> optionalAfterDelete =
         streamManager.getLocalStreamFor(fileSrcId);

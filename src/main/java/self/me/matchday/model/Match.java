@@ -114,6 +114,11 @@ public class Match extends Event {
   }
 
   @Override
+  public VideoFileSource getFileSource(@NotNull UUID fileSrcId) {
+    return super.getFileSource(fileSrcId);
+  }
+
+  @Override
   public Set<VideoFileSource> getFileSources() {
     return super.getFileSources();
   }
