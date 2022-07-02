@@ -103,10 +103,11 @@ class FileServerPluginServiceTest {
   @DisplayName("Validate retrieval of all file server plugins")
   void getFileServerPlugins() {
 
+    final int expectedPluginCount = 2;
     final List<FileServerPlugin> fileServerPlugins = fileServerPluginService.getFileServerPlugins();
-
-    final int expectedPluginCount = 4;
     final int actualPluginCount = fileServerPlugins.size();
+    logger.info("Found FileServerPlugins:\n{}", fileServerPlugins);
+    logger.info("Found: {} plugins; expected: {}", actualPluginCount, expectedPluginCount);
 
     assertThat(actualPluginCount).isGreaterThanOrEqualTo(expectedPluginCount);
     assertThat(fileServerPlugins).contains(testFileServerPlugin);
