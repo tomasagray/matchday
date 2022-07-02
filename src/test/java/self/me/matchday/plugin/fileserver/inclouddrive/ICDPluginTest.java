@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.fileserver.inclouddrive;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,10 +30,9 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
-import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.net.URL;
@@ -50,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Disabled
 class ICDPluginTest {
 
-  private static final String LOG_TAG = "ICDMTest";
+  private static final Logger logger = LogManager.getLogger(ICDPluginTest.class);
 
   // Test constants
   private static final String FILE_LINK =
@@ -64,7 +65,7 @@ class ICDPluginTest {
 
   @BeforeAll
   static void setUp(
-      @Autowired final IcdPlugin icdPlugin, @Autowired final FileServerService fileServerService)
+      @Autowired final IcdPlugin icdPlugin, @Autowired final FileServerUserService userService)
       throws IOException {
 
     ICDPluginTest.icdPlugin = icdPlugin;
@@ -72,11 +73,11 @@ class ICDPluginTest {
     // Parse URL
     fileUrl = new URL(FILE_LINK);
 
-    final List<FileServerUser> users = fileServerService.getAllServerUsers(icdPlugin.getPluginId());
+    final List<FileServerUser> users = userService.getAllServerUsers(icdPlugin.getPluginId());
     assertThat(users.size()).isGreaterThan(0);
     fileServerUser = users.get(0);
     assertThat(fileServerUser).isNotNull();
-    Log.i(LOG_TAG, "Testing with user:\n" + fileServerUser);
+    logger.info("Testing with user:\n" + fileServerUser);
   }
 
   @Test
@@ -84,15 +85,15 @@ class ICDPluginTest {
   @DisplayName("Validate login function")
   void testLoginFunction() {
 
-    Log.i(LOG_TAG, String.format("Testing login functionality with user: %s", fileServerUser));
+    logger.info(String.format("Testing login functionality with user: %s", fileServerUser));
 
     // Attempt login of user
     final ClientResponse clientResponse = icdPlugin.login(fileServerUser);
 
     // Extract response body
     final String responseText = clientResponse.bodyToMono(String.class).block();
-    Log.i(LOG_TAG, "Got response:\n" + responseText);
-    Log.i(LOG_TAG, "Login response: " + clientResponse.statusCode());
+    logger.info("Got response:\n" + responseText);
+    logger.info("Login response: " + clientResponse.statusCode());
 
     assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
     assertThat(responseText).isNotNull().isNotEmpty();
@@ -103,7 +104,7 @@ class ICDPluginTest {
         .toSingleValueMap()
         .forEach(
             (s, responseCookie) -> {
-              Log.i(LOG_TAG, "Got cookie: " + responseCookie);
+              logger.info("Got cookie: " + responseCookie);
               assertThat(responseCookie.getName()).isNotEmpty().isNotNull();
             });
   }
@@ -113,7 +114,7 @@ class ICDPluginTest {
   @DisplayName("Verify properly determines that a supplied link is acceptable")
   void acceptsUrl() {
 
-    Log.i(LOG_TAG, String.format("Testing link: %s", FILE_LINK));
+    logger.info("Testing link: {}", FILE_LINK);
     // Perform test
     assertThat(icdPlugin.acceptsUrl(fileUrl)).isTrue();
   }
@@ -123,7 +124,7 @@ class ICDPluginTest {
   @DisplayName("Verify can translate an input URL into a download URL")
   void testDownloadURLParsing() throws IOException {
 
-    Log.i(LOG_TAG, String.format("Getting download link for: %s", FILE_LINK));
+    logger.info("Getting download link for: {}}", FILE_LINK);
 
     // Get user cookies to perform server interaction
     final Set<HttpCookie> cookies =
@@ -133,11 +134,10 @@ class ICDPluginTest {
     // Ensure cookies mapped successfully
     assertThat(cookies).isNotNull().isNotEmpty();
 
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Attempting link extraction with user: %s\nCookies:\n%s",
-            fileServerUser.getUsername(), cookies));
+    logger.info(
+        "Attempting link extraction with user:{}\nCookies:\n{}",
+        fileServerUser.getUsername(),
+        cookies);
 
     // Get download (direct) link
     final Optional<URL> downloadURL = icdPlugin.getDownloadURL(fileUrl, cookies);
@@ -146,7 +146,7 @@ class ICDPluginTest {
 
     downloadURL.ifPresent(
         url -> {
-          Log.i(LOG_TAG, String.format("Successfully retrieved URL: %s", url));
+          logger.info(String.format("Successfully retrieved URL: %s", url));
 
           // Perform URL pattern test
           final Pattern pattern = Pattern.compile(URL_PATTERN);

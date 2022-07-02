@@ -24,7 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
-import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
@@ -47,11 +47,11 @@ public class VideoFileService {
 
   // already refreshing VideoFiles
   private final List<VideoFile> lockedVideoFiles = new ArrayList<>();
-  private final FileServerService fileServerService;
+  private final FileServerPluginService fileServerService;
   private final FFmpegPlugin ffmpegPlugin;
 
   public VideoFileService(
-      final FileServerService fileServerService, final FFmpegPlugin ffmpegPlugin) {
+      final FileServerPluginService fileServerService, final FFmpegPlugin ffmpegPlugin) {
 
     this.fileServerService = fileServerService;
     this.ffmpegPlugin = ffmpegPlugin;

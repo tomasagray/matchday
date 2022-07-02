@@ -21,7 +21,6 @@ package self.me.matchday.api.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -57,17 +56,18 @@ class VideoFileServiceTest {
 
   @BeforeAll
   static void setUp(
-      @Autowired @NotNull final TestDataCreator testDataCreator,
-      @Autowired @NotNull final VideoFileService videoFileService,
-      @Autowired @NotNull final FileServerService fileServerService,
-      @Autowired @NotNull final TestFileServerPlugin testFileServerPlugin) {
+      @Autowired TestDataCreator testDataCreator,
+      @Autowired VideoFileService videoFileService,
+      @Autowired FileServerPluginService fileServerPluginService,
+      @Autowired FileServerUserService userService,
+      @Autowired TestFileServerPlugin testFileServerPlugin) {
 
     VideoFileServiceTest.testDataCreator = testDataCreator;
     VideoFileServiceTest.videoFileService = videoFileService;
 
     // Create test user & login
     VideoFileServiceTest.testFileServerUser = testDataCreator.createTestFileServerUser();
-    fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
+    userService.login(testFileServerUser, testFileServerPlugin.getPluginId());
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Create test VideoFileSource

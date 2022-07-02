@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -20,18 +20,15 @@
 package self.me.matchday.api.resource;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.time.Instant;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
-import self.me.matchday.api.controller.FileServerController;
+import self.me.matchday.api.controller.FileServerPluginController;
+
+import java.time.Instant;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -50,8 +47,8 @@ public class MessageResource extends RepresentationModel<MessageResource> {
       RepresentationModelAssemblerSupport<String, MessageResource> {
 
     public MessageResourceAssembler() {
-      // todo: What about other controllers? Depends on FileServerController.class
-      super(FileServerController.class, MessageResource.class);
+      // todo: What about other controllers? Depends on FileServerPluginController.class
+      super(FileServerPluginController.class, MessageResource.class);
     }
 
     @Override

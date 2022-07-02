@@ -19,24 +19,17 @@
 
 package self.me.matchday.api.controller;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.api.resource.FileServerResource;
-import self.me.matchday.api.resource.FileServerResource.FileServerResourceAssembler;
 import self.me.matchday.api.resource.FileServerUserResource;
 import self.me.matchday.api.resource.FileServerUserResource.UserResourceAssembler;
 import self.me.matchday.api.resource.MessageResource;
-import self.me.matchday.api.resource.MessageResource.MessageResourceAssembler;
-import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.FileServerUser;
 
 import java.io.BufferedReader;
@@ -47,57 +40,33 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static self.me.matchday.api.resource.MessageResource.MessageResourceAssembler;
+
 @RestController
-@RequestMapping(value = "/file-servers")
-public class FileServerController {
+@RequestMapping("/file-server-users")
+public class FileServerUserController {
 
-  private static final Logger logger = LogManager.getLogger(FileServerController.class);
-
-  private final FileServerService fileServerService;
-  private final FileServerResourceAssembler serverResourceAssembler;
+  private final FileServerUserService userService;
   private final UserResourceAssembler userResourceAssembler;
   private final MessageResourceAssembler messageResourceAssembler;
 
-  @Autowired
-  public FileServerController(
-      @NotNull final FileServerService fileServerService,
-      @NotNull final FileServerResourceAssembler serverResourceAssembler,
-      @NotNull final UserResourceAssembler userResourceAssembler,
-      @NotNull final MessageResourceAssembler messageResourceAssembler) {
-
-    this.fileServerService = fileServerService;
-    this.serverResourceAssembler = serverResourceAssembler;
+  public FileServerUserController(
+      FileServerUserService userService,
+      UserResourceAssembler userResourceAssembler,
+      MessageResourceAssembler messageResourceAssembler) {
+    this.userService = userService;
     this.userResourceAssembler = userResourceAssembler;
     this.messageResourceAssembler = messageResourceAssembler;
   }
 
-  // === GET ===
-  @RequestMapping(value = "/all", method = RequestMethod.GET)
-  public CollectionModel<FileServerResource> getAllFileServers() {
-    return serverResourceAssembler.toCollectionModel(fileServerService.getFileServerPlugins());
-  }
-
-  @RequestMapping(value = "/enabled", method = RequestMethod.GET)
-  public CollectionModel<FileServerResource> getEnabledFileServers() {
-    return serverResourceAssembler.toCollectionModel(fileServerService.getEnabledPlugins());
-  }
-
-  @RequestMapping(value = "/file-server/{id}", method = RequestMethod.GET)
-  public ResponseEntity<FileServerResource> getFileServerById(
-      @PathVariable("id") final UUID pluginId) {
-
-    return fileServerService
-        .getPluginById(pluginId)
-        .map(serverResourceAssembler::toModel)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-  }
-
-  @RequestMapping(value = "/file-server/{id}/users", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/users/file-server/{id}",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CollectionModel<FileServerUserResource>> getFileServerUsers(
       @PathVariable("id") final UUID pluginId) {
 
-    final List<FileServerUser> users = fileServerService.getAllServerUsers(pluginId);
+    final List<FileServerUser> users = userService.getAllServerUsers(pluginId);
     if (users.size() > 0) {
       return ResponseEntity.ok().body(userResourceAssembler.toCollectionModel(users));
     } else {
@@ -105,10 +74,13 @@ public class FileServerController {
     }
   }
 
-  @RequestMapping(value = "/users/{userId}", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/users/{userId}",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<FileServerUserResource> getUserData(
       @PathVariable("userId") final UUID userId) {
-    return fileServerService
+    return userService
         .getUserById(userId)
         .map(userResourceAssembler::toModel)
         .map(ResponseEntity::ok)
@@ -125,7 +97,7 @@ public class FileServerController {
       @RequestBody final FileServerUser user, @PathVariable("id") final UUID fileServerId) {
 
     // Login to correct file server & parse response
-    final ClientResponse response = fileServerService.login(user, fileServerId);
+    final ClientResponse response = userService.login(user, fileServerId);
     final String messageText = getResponseMessage(response);
     final MessageResource messageResource = messageResourceAssembler.toModel(messageText);
 
@@ -151,8 +123,7 @@ public class FileServerController {
     final FileServerUser user = new FileServerUser(username, password);
 
     // Login via file server service
-    final ClientResponse response =
-        fileServerService.loginWithCookies(fileServerId, user, cookieData);
+    final ClientResponse response = userService.loginWithCookies(fileServerId, user, cookieData);
     final String messageText = getResponseMessage(response);
     final MessageResource message = messageResourceAssembler.toModel(messageText);
 
@@ -171,7 +142,7 @@ public class FileServerController {
       @RequestBody final FileServerUser user, @PathVariable("id") final UUID fileServerId) {
 
     // Perform logout request
-    final ClientResponse response = fileServerService.logout(user, fileServerId);
+    final ClientResponse response = userService.logout(user, fileServerId);
     // Extract response message
     final String responseText = getResponseMessage(response);
     final MessageResource messageResource = messageResourceAssembler.toModel(responseText);
@@ -191,7 +162,7 @@ public class FileServerController {
       @PathVariable("id") final UUID fileServerId) {
 
     // Perform login request
-    final ClientResponse response = fileServerService.relogin(fileServerUser, fileServerId);
+    final ClientResponse response = userService.relogin(fileServerUser, fileServerId);
     // Extract message
     final String responseText = getResponseMessage(response);
     final MessageResource messageResource = messageResourceAssembler.toModel(responseText);
@@ -199,62 +170,6 @@ public class FileServerController {
     return ResponseEntity.status(response.statusCode())
         .contentType(MediaType.APPLICATION_JSON)
         .body(messageResource);
-  }
-
-  // === Plugin management ===
-  @RequestMapping(
-      value = "/file-server/{id}/disable",
-      method = {RequestMethod.POST, RequestMethod.GET},
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public @ResponseBody ResponseEntity<MessageResource> disableFileServerPlugin(
-      @PathVariable("id") final UUID pluginId) {
-
-    ResponseEntity<MessageResource> response;
-
-    if (fileServerService.disablePlugin(pluginId)) {
-      response =
-          ResponseEntity.status(HttpStatus.OK)
-              .contentType(MediaType.APPLICATION_JSON)
-              .body(
-                  messageResourceAssembler.toModel(
-                      "Successfully disabled plugin with ID: " + pluginId));
-    } else {
-      response =
-          ResponseEntity.status(HttpStatus.BAD_REQUEST)
-              .contentType(MediaType.APPLICATION_JSON)
-              .body(
-                  messageResourceAssembler.toModel(
-                      "Could not disable plugin with ID: " + pluginId));
-    }
-    return response;
-  }
-
-  @RequestMapping(
-      value = "/file-server/{id}/enable",
-      method = {RequestMethod.POST, RequestMethod.GET},
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MessageResource> enableFileServerPlugin(
-      @PathVariable("id") final UUID pluginId) {
-
-    ResponseEntity<MessageResource> response;
-    if (fileServerService.enablePlugin(pluginId)) {
-      response =
-          ResponseEntity.status(HttpStatus.OK)
-              .contentType(MediaType.APPLICATION_JSON)
-              .body(
-                  messageResourceAssembler.toModel(
-                      "Enabled file server plugin with ID: " + pluginId));
-    } else {
-      response =
-          ResponseEntity.status(HttpStatus.BAD_REQUEST)
-              .contentType(MediaType.APPLICATION_JSON)
-              .body(
-                  messageResourceAssembler.toModel(
-                      "Could not enable file server plugin with ID: " + pluginId));
-    }
-    return response;
   }
 
   // === Helpers ===
@@ -285,17 +200,5 @@ public class FileServerController {
       result = reader.lines().collect(Collectors.joining("\n"));
     }
     return result;
-  }
-
-  @ExceptionHandler(IOException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ResponseEntity<String> handleIoException(@NotNull IOException e) {
-    String message = e.getMessage();
-    final Throwable cause = e.getCause();
-    logger.error(
-        "Could not read text from multi-part POST data: {} with root cause: {}",
-        message,
-        cause.getMessage());
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
   }
 }

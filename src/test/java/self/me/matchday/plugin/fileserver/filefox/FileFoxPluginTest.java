@@ -34,7 +34,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
 import self.me.matchday.util.Log;
@@ -61,16 +61,16 @@ class FileFoxPluginTest {
   private static final String LOGIN_DATA = "src/test/secure_resources/filefox_login.csv";
 
   private static FileFoxPlugin plugin;
-  private static FileServerService fileServerService;
+  private static FileServerUserService userService;
   private static URL testDownloadLink;
   private static Pattern directDownloadLinkPattern;
 
   @BeforeAll
-  static void setUp(@Autowired FileFoxPlugin plugin, @Autowired FileServerService fileServerService)
+  static void setUp(@Autowired FileFoxPlugin plugin, @Autowired FileServerUserService userService)
       throws IOException {
 
     FileFoxPluginTest.plugin = plugin;
-    FileFoxPluginTest.fileServerService = fileServerService;
+    FileFoxPluginTest.userService = userService;
 
     FileFoxPluginTest.testDownloadLink =
         new URL("https://filefox.cc/k5impa7zfhdc/20210210-EVE-TOT-FAC_1-1080.mkv");
@@ -79,7 +79,7 @@ class FileFoxPluginTest {
   }
 
   private static FileServerUser getLoggedInUser() {
-    final List<FileServerUser> users = fileServerService.getAllServerUsers(plugin.getPluginId());
+    final List<FileServerUser> users = userService.getAllServerUsers(plugin.getPluginId());
     assertThat(users.size()).isGreaterThan(0);
     return users.get(0);
   }

@@ -31,7 +31,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.api.service.FileServerPluginService;
+import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.video.StreamJobState.JobStatus;
 import self.me.matchday.model.video.TaskListState;
@@ -64,17 +65,18 @@ class VideoStreamManagerTest {
 
   @BeforeAll
   public static void setup(
-      @Autowired @NotNull final TestDataCreator testDataCreator,
-      @Autowired @NotNull final FileServerService fileServerService,
-      @Autowired @NotNull final TestFileServerPlugin testFileServerPlugin,
-      @Autowired final VideoStreamManager streamManager) {
+      @Autowired TestDataCreator testDataCreator,
+      @Autowired FileServerPluginService fileServerPluginService,
+      @Autowired FileServerUserService userService,
+      @Autowired TestFileServerPlugin testFileServerPlugin,
+      @Autowired VideoStreamManager streamManager) {
 
     VideoStreamManagerTest.streamManager = streamManager;
     VideoStreamManagerTest.testFileSource = testDataCreator.createTestVideoFileSource();
 
     final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
     final ClientResponse loginResponse =
-        fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
+        userService.login(testFileServerUser, testFileServerPlugin.getPluginId());
     final HttpStatus loginStatus = loginResponse.statusCode();
     assertThat(loginStatus).isEqualTo(HttpStatus.OK);
   }

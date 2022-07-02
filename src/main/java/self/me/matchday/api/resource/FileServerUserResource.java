@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -28,7 +28,8 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
-import self.me.matchday.api.controller.FileServerController;
+import self.me.matchday.api.controller.FileServerPluginController;
+import self.me.matchday.api.controller.FileServerUserController;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
 
@@ -59,7 +60,7 @@ public class FileServerUserResource extends RepresentationModel<FileServerUserRe
       extends RepresentationModelAssemblerSupport<FileServerUser, FileServerUserResource> {
 
     public UserResourceAssembler() {
-      super(FileServerController.class, FileServerUserResource.class);
+      super(FileServerPluginController.class, FileServerUserResource.class);
     }
 
     @Override
@@ -74,7 +75,7 @@ public class FileServerUserResource extends RepresentationModel<FileServerUserRe
 
       // Add HATEOAS self link
       resource.add(
-          linkTo(methodOn(FileServerController.class).getUserData(entity.getUserId()))
+          linkTo(methodOn(FileServerUserController.class).getUserData(entity.getUserId()))
               .withSelfRel());
 
       return resource;

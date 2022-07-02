@@ -41,7 +41,7 @@ public class DataSourceServiceLog {
 
   @Before("execution(* self.me.matchday.api.service.DataSourceService.refreshAllDataSources(..))")
   public void logDataSourceRefresh(@NotNull JoinPoint jp) {
-    logger.info("Refreshing all DataSources with SnapshotRequest: {}", jp.getArgs());
+    logger.info("Refreshing all DataSources with SnapshotRequest: {}", jp.getArgs()[0]);
   }
 
   @Before("execution(* self.me.matchday.api.service.DataSourceService.save(..))")

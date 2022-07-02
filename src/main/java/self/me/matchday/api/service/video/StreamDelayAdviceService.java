@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.model.video.TaskListState;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
@@ -41,7 +41,7 @@ import static self.me.matchday.model.video.StreamJobState.JobStatus;
 @Service
 public class StreamDelayAdviceService {
 
-  private final FileServerService fileServerService;
+  private final FileServerPluginService fileServerService;
   private final Map<FileServerPlugin, Long> delayIndex = new HashMap<>();
 
   @Value("${video-resources.default-ping-time}")
@@ -51,7 +51,7 @@ public class StreamDelayAdviceService {
   private long ffmpegStartUpTime;
 
   @Autowired
-  public StreamDelayAdviceService(final FileServerService fileServerService) {
+  public StreamDelayAdviceService(final FileServerPluginService fileServerService) {
     this.fileServerService = fileServerService;
   }
 

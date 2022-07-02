@@ -30,8 +30,8 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
-import self.me.matchday.api.controller.FileServerController;
-import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.api.controller.FileServerPluginController;
+import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
 import java.util.UUID;
@@ -58,11 +58,12 @@ public class FileServerResource extends RepresentationModel<FileServerResource> 
   public static class FileServerResourceAssembler extends
       RepresentationModelAssemblerSupport<FileServerPlugin, FileServerResource> {
 
-    private final FileServerService fileServerService;
+    private final FileServerPluginService fileServerPluginService;
 
-    public FileServerResourceAssembler(@Autowired final FileServerService fileServerService) {
-      super(FileServerController.class, FileServerResource.class);
-      this.fileServerService = fileServerService;
+    public FileServerResourceAssembler(
+        @Autowired final FileServerPluginService fileServerPluginService) {
+      super(FileServerPluginController.class, FileServerResource.class);
+      this.fileServerPluginService = fileServerPluginService;
     }
 
     @Override
@@ -71,7 +72,7 @@ public class FileServerResource extends RepresentationModel<FileServerResource> 
       FileServerResource resource = instantiateModel(plugin);
 
       // is currently active?
-      final boolean isEnabled = fileServerService.isPluginEnabled(plugin.getPluginId());
+      final boolean isEnabled = fileServerPluginService.isPluginEnabled(plugin.getPluginId());
 
       // Add data
       resource.setId(plugin.getPluginId());
@@ -80,10 +81,9 @@ public class FileServerResource extends RepresentationModel<FileServerResource> 
       resource.setEnabled(isEnabled);
 
       // Add HATEOAS self link
-      resource.add(linkTo(
-          methodOn(FileServerController.class)
-              .getFileServerById(plugin.getPluginId()))
-          .withSelfRel());
+      resource.add(
+          linkTo(methodOn(FileServerPluginController.class).getFileServerById(plugin.getPluginId()))
+              .withSelfRel());
 
       return resource;
     }
@@ -96,10 +96,8 @@ public class FileServerResource extends RepresentationModel<FileServerResource> 
           super.toCollectionModel(entities);
 
       // Add HATEOAS self link & return
-      collectionModel
-          .add(linkTo(
-              methodOn(FileServerController.class)
-                  .getAllFileServers())
+      collectionModel.add(
+          linkTo(methodOn(FileServerPluginController.class).getAllFileServerPlugins())
               .withSelfRel());
       return collectionModel;
     }

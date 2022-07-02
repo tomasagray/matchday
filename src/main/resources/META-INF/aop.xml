@@ -30,7 +30,7 @@
         <include within="self.me.matchday.api.service.EntityCorrectionService"/>
         <include within="self.me.matchday.api.service.EntityServiceRegistry"/>
         <include within="self.me.matchday.api.service.EventService"/>
-        <include within="self.me.matchday.api.service.FileServerService"/>
+        <include within="self.me.matchday.api.service.FileServerPluginService"/>
         <include within="self.me.matchday.api.service.MatchService"/>
         <include within="self.me.matchday.api.service.TeamService"/>
         <include within="self.me.matchday.api.service.UserValidationService"/>
@@ -58,7 +58,7 @@
         <aspect name="self.me.matchday.log.MatchDataParserLog"/>
         <aspect name="self.me.matchday.log.EventServiceLog"/>
         <aspect name="self.me.matchday.log.FFmpegLog"/>
-        <aspect name="self.me.matchday.log.FileServerServiceLog"/>
+        <aspect name="self.me.matchday.log.FileServerPluginServiceLog"/>
         <aspect name="self.me.matchday.log.MatchServiceLog"/>
         <aspect name="self.me.matchday.log.MatchDataParserLog"/>
         <aspect name="self.me.matchday.log.ScheduledTaskLog"/>

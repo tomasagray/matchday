@@ -28,7 +28,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.api.service.FileServerService;
+import self.me.matchday.api.service.FileServerPluginService;
+import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.video.*;
@@ -74,7 +75,8 @@ class VideoStreamingServiceTest {
       @Autowired @NotNull final VideoStreamingService streamingService,
       @Autowired @NotNull final VideoStreamLocatorPlaylistService locatorPlaylistService,
       @Autowired @NotNull final VideoStreamLocatorService streamLocatorService,
-      @Autowired @NotNull final FileServerService fileServerService,
+      @Autowired @NotNull final FileServerPluginService fileServerPluginService,
+      @Autowired FileServerUserService userService,
       @Autowired @NotNull final TestFileServerPlugin testFileServerPlugin) {
 
     VideoStreamingServiceTest.testDataCreator = testDataCreator;
@@ -84,7 +86,7 @@ class VideoStreamingServiceTest {
 
     // Create test user & login
     testFileServerUser = testDataCreator.createTestFileServerUser();
-    fileServerService.login(testFileServerUser, testFileServerPlugin.getPluginId());
+    userService.login(testFileServerUser, testFileServerPlugin.getPluginId());
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Create test data
