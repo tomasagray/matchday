@@ -32,7 +32,7 @@ public class UserValidationServiceLog {
 
   private static final Logger logger = LogManager.getLogger(UserValidationService.class);
 
-  @Around("execution(* self.me.matchday.api.service.UserValidationService.isValidUserData(..))")
+  @Around("execution(* self.me.matchday.api.service.UserValidationService.validateUser(..))")
   public Object logIsValidUserData(@NotNull ProceedingJoinPoint jp) throws Throwable {
     Object user = jp.getArgs()[0];
     logger.info("Validating User: {}", user);

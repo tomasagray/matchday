@@ -34,6 +34,7 @@ import self.me.matchday.api.service.EventService;
 import self.me.matchday.db.*;
 import self.me.matchday.model.*;
 import self.me.matchday.model.video.*;
+import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.ResourceFileReader;
 
@@ -425,7 +426,9 @@ public class TestDataCreator {
     // ensure different userdata each time
     final String username = String.format("user-%s@server.com", numGen.nextInt(Integer.MAX_VALUE));
     final String password = String.format("password-%s", numGen.nextInt(Integer.MAX_VALUE));
-    final FileServerUser user = new FileServerUser(username, password);
+    final FileServerUser user =
+        new FileServerUser(username, password, TestFileServerPlugin.pluginId);
+    user.setLoggedIntoServer(TestFileServerPlugin.pluginId, new ArrayList<>());
     return userRepo.saveAndFlush(user);
   }
 

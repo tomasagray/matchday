@@ -20,7 +20,6 @@
 package self.me.matchday.api.service;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -37,13 +36,13 @@ public class FileServerUserService {
 
   private final FileServerUserRepo userRepo;
   private final UserValidationService userValidationService;
-  private final NetscapeCookiesService cookiesService;
+  private final CookiesService cookiesService;
   private final FileServerPluginService pluginService;
 
   public FileServerUserService(
       FileServerUserRepo userRepo,
       UserValidationService userValidationService,
-      NetscapeCookiesService cookiesService,
+      CookiesService cookiesService,
       FileServerPluginService pluginService) {
     this.userRepo = userRepo;
     this.userValidationService = userValidationService;
@@ -57,168 +56,118 @@ public class FileServerUserService {
    * Log a file server user (FileServerUser) into the appropriate file server.
    *
    * @param user The User.
-   * @param pluginId The pluginId of the file server plugin
    * @return Was login successful? (true/false)
    */
   @Transactional
-  public ClientResponse login(@NotNull final FileServerUser user, @NotNull final UUID pluginId) {
+  public FileServerUser login(@NotNull final FileServerUser user) {
 
-    // TODO: refactor this method, use immutable login object
-    // Result container
-    HttpStatus status = HttpStatus.BAD_REQUEST;
-    String message;
+    userValidationService.validateUser(user);
 
-    if (userValidationService.isValidUserData(user)) {
-      // Validate login data
-      final Optional<FileServerPlugin> pluginOptional = pluginService.getPluginById(pluginId);
-      if (pluginOptional.isPresent()) {
-        final FileServerPlugin serverPlugin = pluginOptional.get();
-        final ClientResponse loginResponse = serverPlugin.login(user);
-        // If login successful
-        if (loginResponse.statusCode().is2xxSuccessful()) {
-          // Extract cookies
-          final List<SecureCookie> cookies =
-              loginResponse.cookies().values().stream()
-                  .flatMap(Collection::stream)
-                  .map(SecureCookie::fromSpringCookie)
-                  .collect(Collectors.toList());
-          // Login user to server
-          user.setLoggedIntoServer(serverPlugin.getPluginId(), cookies);
-          // Save user to repo
-          final FileServerUser flushedUser = userRepo.saveAndFlush(user);
-          // Return successful response
-          status = HttpStatus.OK;
-          message =
-              String.format(
-                  "User: %s successfully logged into file server: %s",
-                  flushedUser.getUsername(), serverPlugin.getTitle());
-        } else {
-          return loginResponse;
-        }
+    final UUID pluginId = user.getServerId();
+    final Optional<FileServerPlugin> pluginOptional = pluginService.getPluginById(pluginId);
+    if (pluginOptional.isPresent()) {
+      final FileServerPlugin serverPlugin = pluginOptional.get();
+      final ClientResponse loginResponse = serverPlugin.login(user);
+
+      if (loginResponse.statusCode().is2xxSuccessful()) {
+        final List<SecureCookie> cookies = readResponseCookies(loginResponse);
+        user.setLoggedIntoServer(serverPlugin.getPluginId(), cookies);
+        return userRepo.saveAndFlush(user);
       } else {
-        // Plugin not found; bad request
-        message = String.format("File server plugin not found: %s", pluginId);
+        final String message = loginResponse.bodyToMono(String.class).block();
+        throw new FileServerLoginException(message);
       }
     } else {
-      message = "Invalid user data passed: " + user;
+      throw new PluginNotFoundException(
+          "Attempting to login to non-existent file server: " + pluginId);
     }
-    // Return login response
-    return ClientResponse.create(status).body(message).build();
+  }
+
+  @NotNull
+  private List<SecureCookie> readResponseCookies(@NotNull ClientResponse loginResponse) {
+    return loginResponse.cookies().values().stream()
+        .flatMap(Collection::stream)
+        .map(SecureCookie::fromSpringCookie)
+        .collect(Collectors.toList());
   }
 
   /**
-   * Login a user to a file server using previously gathered cookies
+   * Login a user to a file server using previously gathered cookieData. Overwrites any cookieData
+   * which may be present in the FileServerUser instance.
    *
-   * @param pluginId The ID of the file server
    * @param user The user to login
-   * @param cookieData A collection of cookies necessary to access secure parts of the server
+   * @param cookieData A String representing a cookies file
    * @return The response
    */
   @Transactional
-  public ClientResponse loginWithCookies(
-      @NotNull final UUID pluginId,
-      @NotNull final FileServerUser user,
-      @NotNull final String cookieData) {
+  public FileServerUser loginWithCookies(
+      @NotNull final FileServerUser user, @NotNull final String cookieData) {
 
-    // Result containers
-    HttpStatus status = HttpStatus.BAD_REQUEST;
-    String message;
+    userValidationService.validateUser(user);
 
-    // Parse cookies
-    final List<SecureCookie> cookies =
-        cookiesService.parseNetscapeCookies(cookieData).stream()
-            .map(SecureCookie::fromSpringCookie)
-            .collect(Collectors.toList());
+    final UUID pluginId = user.getServerId();
+    final Optional<FileServerPlugin> pluginOptional = pluginService.getPluginById(pluginId);
+    if (pluginOptional.isPresent()) {
+      final FileServerPlugin serverPlugin = pluginOptional.get();
+      final Collection<SecureCookie> cookies = parseCookieData(cookieData);
+      cookiesService.validateCookies(cookies);
 
-    // Validate user data
-    if (userValidationService.isValidUserData(user)) {
-      // Validate cookies
-      if (!cookies.isEmpty()) {
-        // Validate plugin ID
-        final Optional<FileServerPlugin> pluginOptional = pluginService.getPluginById(pluginId);
-        if (pluginOptional.isPresent()) {
-          final FileServerPlugin serverPlugin = pluginOptional.get();
-          // Login user to appropriate server
-          user.setLoggedIntoServer(serverPlugin.getPluginId(), cookies);
-          // Save to repo
-          userRepo.save(user);
-          // Return successful response
-          status = HttpStatus.OK;
-          message =
-              String.format(
-                  "User: %s successfully logged into file server: %s",
-                  user.getUsername(), serverPlugin.getTitle());
-        } else {
-          message = String.format("File server ID: %s NOT FOUND", pluginId);
-        }
-      } else {
-        message = "Not cookies supplied with login request";
-      }
+      // Login user to appropriate server
+      user.setLoggedIntoServer(serverPlugin.getPluginId(), cookies);
+      return userRepo.saveAndFlush(user);
     } else {
-      message = "Invalid user data for user: " + user.getUsername();
+      throw new PluginNotFoundException("No file server found with ID: " + pluginId);
     }
-    return ClientResponse.create(status).body(message).build();
+  }
+
+  @NotNull
+  private List<SecureCookie> parseCookieData(@NotNull String cookieData) {
+    return cookiesService.parseCookies(cookieData).stream()
+        .map(SecureCookie::fromSpringCookie)
+        .collect(Collectors.toList());
   }
 
   /**
    * Log a user out of a given file server
    *
-   * @param user The user to be logged out
-   * @param pluginId The ID of the plugin for the file server
-   * @return The response from the file server upon logging out
+   * @param userId The ID of user to be logged out
+   * @return The updated User
+   * @throws IllegalArgumentException if user not found
    */
   @Transactional
-  public ClientResponse logout(@NotNull final FileServerUser user, @NotNull final UUID pluginId) {
-
-    final StringJoiner failureMessage = new StringJoiner(" ");
-    failureMessage.add("User logout failed:");
+  public FileServerUser logout(@NotNull final UUID userId) {
 
     // Find required user
-    final Optional<FileServerUser> userOptional = userRepo.findById(user.getUserId());
+    final Optional<FileServerUser> userOptional = userRepo.findById(userId);
     if (userOptional.isPresent()) {
-      final FileServerUser userData = userOptional.get();
-      // Validate server ID
-      if (userData.getServerId().equals(pluginId)) {
-        // Perform logout request
-        userData.setLoggedOut();
-        // Save data
-        userRepo.saveAndFlush(userData);
-        return ClientResponse.create(HttpStatus.OK)
-            .body(String.format("User %s successfully logged out", userData.getUsername()))
-            .build();
-      } else {
-        failureMessage.add("Invalid server ID");
-      }
+      final FileServerUser user = userOptional.get();
+      // Perform logout request
+      user.setLoggedOut();
+      user.setCookies(new ArrayList<>());
+      // Save data
+      return userRepo.saveAndFlush(user);
     } else {
-      failureMessage.add(String.format("User with ID: %s not found", user.getUserId()));
+      throw new IllegalArgumentException(String.format("User with ID: %s not found", userId));
     }
-    return ClientResponse.create(HttpStatus.BAD_REQUEST).body(failureMessage.toString()).build();
   }
 
   /**
    * Re-login a user which is already registered with the specified plugin.
    *
-   * @param user The user to be re-logged in
-   * @param pluginId The ID of the file server plugin
-   * @return The login response
+   * @param userId The ID user to be re-logged in
+   * @return The logged-in user
    */
   @Transactional
-  public ClientResponse relogin(@NotNull final FileServerUser user, @NotNull final UUID pluginId) {
+  public FileServerUser relogin(@NotNull final UUID userId) {
 
-    String message;
-    // Get complete user data
-    final Optional<FileServerUser> userOptional = userRepo.findById(user.getUserId());
+    final Optional<FileServerUser> userOptional = userRepo.findById(userId);
     if (userOptional.isPresent()) {
       final FileServerUser fileServerUser = userOptional.get();
-      if (!fileServerUser.isLoggedIn()) {
-        return login(fileServerUser, pluginId);
-      } else {
-        message = String.format("User: %s already logged in", user.getUsername());
-      }
+      return login(fileServerUser);
     } else {
-      message = String.format("Relogin failed: User %s not found", user.getUsername());
+      throw new IllegalArgumentException(
+          String.format("Relogin failed: User %s not found", userId));
     }
-    return ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build();
   }
 
   // === Users ===
@@ -251,11 +200,12 @@ public class FileServerUserService {
   @Transactional
   public void deleteUser(@NotNull final UUID userId) {
 
-    // Ensure user is in DB
     final Optional<FileServerUser> userOptional = userRepo.findById(userId);
     if (userOptional.isPresent()) {
       final FileServerUser fileServerUser = userOptional.get();
       userRepo.delete(fileServerUser);
+    } else {
+      throw new IllegalArgumentException("Trying to DELETE non-existent user: " + userId);
     }
   }
 }

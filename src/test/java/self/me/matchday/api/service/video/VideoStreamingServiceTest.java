@@ -86,7 +86,7 @@ class VideoStreamingServiceTest {
 
     // Create test user & login
     testFileServerUser = testDataCreator.createTestFileServerUser();
-    userService.login(testFileServerUser, testFileServerPlugin.getPluginId());
+    userService.login(testFileServerUser);
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Create test data

@@ -21,7 +21,6 @@ package self.me.matchday.api.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,10 +46,7 @@ class VideoFileServiceTest {
 
   private static final Logger logger = LogManager.getLogger(VideoFileServiceTest.class);
 
-  // Test resources
-  private static TestDataCreator testDataCreator;
   private static VideoFileService videoFileService;
-
   private static VideoFileSource testVideoFileSrc;
   private static FileServerUser testFileServerUser;
 
@@ -62,24 +58,15 @@ class VideoFileServiceTest {
       @Autowired FileServerUserService userService,
       @Autowired TestFileServerPlugin testFileServerPlugin) {
 
-    VideoFileServiceTest.testDataCreator = testDataCreator;
     VideoFileServiceTest.videoFileService = videoFileService;
 
     // Create test user & login
     VideoFileServiceTest.testFileServerUser = testDataCreator.createTestFileServerUser();
-    userService.login(testFileServerUser, testFileServerPlugin.getPluginId());
+    userService.login(testFileServerUser);
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Create test VideoFileSource
     testVideoFileSrc = testDataCreator.createTestVideoFileSource();
-  }
-
-  @AfterAll
-  static void tearDown() {
-    // Remove test user from repo
-    logger.info("Deleting test user: {}", testFileServerUser);
-    testDataCreator.deleteFileServerUser(testFileServerUser);
-    testDataCreator.deleteVideoFileSource(testVideoFileSrc);
   }
 
   @Test

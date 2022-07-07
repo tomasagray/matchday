@@ -38,18 +38,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for Netscape cookie parsing service")
-class NetscapeCookiesServiceTest {
+class CookiesServiceTest {
 
-  private static final Logger logger = LogManager.getLogger(NetscapeCookiesServiceTest.class);
+  private static final Logger logger = LogManager.getLogger(CookiesServiceTest.class);
   private static final String COOKIE_FILEPATH = "data/test-netscape-cookies.txt";
 
-  private static NetscapeCookiesService cookiesService;
+  private static CookiesService cookiesService;
   private static String cookieFile;
 
   @BeforeAll
-  static void setUp(@Autowired final NetscapeCookiesService cookiesService) {
+  static void setUp(@Autowired final CookiesService cookiesService) {
 
-    NetscapeCookiesServiceTest.cookiesService = cookiesService;
+    CookiesServiceTest.cookiesService = cookiesService;
 
     logger.info("Attempting to read cookie data from: {}", COOKIE_FILEPATH);
     cookieFile = ResourceFileReader.readTextResource(COOKIE_FILEPATH);
@@ -63,7 +63,7 @@ class NetscapeCookiesServiceTest {
 
     final int expectedCookieCount = 9;
 
-    final Set<HttpCookie> actualCookies = cookiesService.parseNetscapeCookies(cookieFile);
+    final Set<HttpCookie> actualCookies = cookiesService.parseCookies(cookieFile);
     assertThat(actualCookies.size()).isEqualTo(expectedCookieCount);
 
     actualCookies.forEach(

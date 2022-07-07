@@ -22,7 +22,6 @@ package self.me.matchday.api.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,12 +71,6 @@ class FileServerPluginServiceTest {
     FileServerPluginServiceTest.testFileServerPlugin = testFileServerPlugin;
 
     testFileServerUser = testDataCreator.createTestFileServerUser();
-  }
-
-  @AfterAll
-  static void tearDown() {
-    // delete test data
-    testDataCreator.deleteFileServerUser(testFileServerUser);
   }
 
   @Test
@@ -139,7 +132,7 @@ class FileServerPluginServiceTest {
   void getDownloadUrl() throws IOException {
 
     // Ensure user is logged in
-    userService.login(testFileServerUser, testFileServerPlugin.getPluginId());
+    userService.login(testFileServerUser);
 
     final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
     assertThat(firstHalfUrl).isNotNull();

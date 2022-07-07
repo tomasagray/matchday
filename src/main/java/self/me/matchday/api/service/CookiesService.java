@@ -23,14 +23,16 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
+import self.me.matchday.model.SecureCookie;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class NetscapeCookiesService {
+public class CookiesService {
 
   // Cookie field indices
   private static final int DOMAIN_IDX = 0;
@@ -46,7 +48,7 @@ public class NetscapeCookiesService {
    * @param cookieText The text of cookies.txt
    * @return A List<> of Sprint cookies
    */
-  public Set<HttpCookie> parseNetscapeCookies(@NotNull final String cookieText) {
+  public Set<HttpCookie> parseCookies(@NotNull final String cookieText) {
 
     // Split on newline, remove blanks, & map to cookies
     return Arrays.stream(cookieText.split("\n"))
@@ -61,7 +63,7 @@ public class NetscapeCookiesService {
    * @param cookieText The text of the cookie (one line)
    * @return A Spring cookie
    */
-  private HttpCookie parseCookie(@NotNull final String cookieText) {
+  public HttpCookie parseCookie(@NotNull final String cookieText) {
 
     // Split the cookie text on tabs
     final List<String> fields =
@@ -87,6 +89,32 @@ public class NetscapeCookiesService {
         .secure(secure)
         .maxAge(maxAge)
         .build();
+  }
+
+  /**
+   * Validate a collection of cookies
+   *
+   * @param cookies The cookies
+   */
+  public void validateCookies(@NotNull final Collection<SecureCookie> cookies) {
+    if (cookies.isEmpty()) {
+      throw new InvalidCookieException("Empty cookie collection");
+    }
+    cookies.forEach(this::validateCookie);
+  }
+
+  /**
+   * Ensure a cookie meets minimum logical requirements
+   *
+   * @param cookie The cookie to validate
+   */
+  public void validateCookie(@NotNull final SecureCookie cookie) {
+    final String name = cookie.getName();
+    final String value = cookie.getValue();
+    final String path = cookie.getPath();
+    if ("".equals(name) || "".equals(value) || "".equals(path)) {
+      throw new InvalidCookieException("Cookie was blank: " + cookie);
+    }
   }
 
   private boolean isCookie(final String line) {

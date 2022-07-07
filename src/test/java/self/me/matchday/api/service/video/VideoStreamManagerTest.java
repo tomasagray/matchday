@@ -26,10 +26,8 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.api.service.FileServerUserService;
@@ -75,10 +73,9 @@ class VideoStreamManagerTest {
     VideoStreamManagerTest.testFileSource = testDataCreator.createTestVideoFileSource();
 
     final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
-    final ClientResponse loginResponse =
-        userService.login(testFileServerUser, testFileServerPlugin.getPluginId());
-    final HttpStatus loginStatus = loginResponse.statusCode();
-    assertThat(loginStatus).isEqualTo(HttpStatus.OK);
+    final FileServerUser loggedInUser = userService.login(testFileServerUser);
+    final boolean loginStatus = loggedInUser.isLoggedIn();
+    assertThat(loginStatus).isTrue();
   }
 
   @Test

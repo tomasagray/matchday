@@ -48,7 +48,7 @@ public class TestFileServerPlugin implements FileServerPlugin {
     }
   }
 
-  private final UUID pluginId = UUID.fromString("4636e383-2ddb-477e-85f2-36e6cd7a434b");
+  public static final UUID pluginId = UUID.fromString("4636e383-2ddb-477e-85f2-36e6cd7a434b");
   private final Pattern urlPattern = Pattern.compile("^https?://[\\w-.:]+/data/");
 
   @Override
@@ -61,7 +61,7 @@ public class TestFileServerPlugin implements FileServerPlugin {
     final String password = user.getPassword();
 
     return (userPattern.matcher(username).find() && passwordPattern.matcher(password).find())
-        ? ClientResponse.create(HttpStatus.OK).build()
+        ? ClientResponse.create(HttpStatus.OK).cookie("test-cookie", "test-value").build()
         : ClientResponse.create(HttpStatus.UNAUTHORIZED).build();
   }
 

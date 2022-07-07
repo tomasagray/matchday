@@ -65,9 +65,13 @@ public final class FileServerUser implements Serializable {
     this.password = null;
   }
 
-  public FileServerUser(@NotNull final String username, @NotNull final String password) {
+  public FileServerUser(
+      @NotNull final String username,
+      @NotNull final String password,
+      @NotNull final UUID serverId) {
     this.username = this.email = username;
     this.password = password;
+    this.serverId = serverId;
   }
 
   /**

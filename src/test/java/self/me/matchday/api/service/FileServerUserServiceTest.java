@@ -28,10 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
@@ -84,28 +82,24 @@ public class FileServerUserServiceTest {
 
     // Login
     logger.info("Attempting login with user: " + testFileServerUser);
-    final ClientResponse actualResponse = userService.login(testFileServerUser, testPluginId);
+    final FileServerUser loggedInUser = userService.login(testFileServerUser);
 
-    logger.info("Got login response: " + actualResponse.statusCode());
-    // Ensure successful login
-    assertThat(actualResponse.statusCode()).isEqualTo(HttpStatus.OK);
+    logger.info("Got logged in user: " + loggedInUser);
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Logout
-    final ClientResponse logoutResponse = userService.logout(testFileServerUser, testPluginId);
-    logger.info("Got logout response: " + logoutResponse.statusCode());
-    assertThat(logoutResponse.statusCode().is2xxSuccessful()).isTrue();
+    userService.logout(testFileServerUser.getUserId());
     // Get fresh managed copy
     final FileServerUser userAfterLogout = getFreshManagedUser();
     assertThat(userAfterLogout.isLoggedIn()).isFalse();
 
     // Re-login
-    userService.relogin(testFileServerUser, testPluginId);
+    userService.relogin(testFileServerUser.getUserId());
     final FileServerUser userAfterReLogin = getFreshManagedUser();
     assertThat(userAfterReLogin.isLoggedIn()).isTrue();
 
     // Cleanup
-    userService.logout(testFileServerUser, testPluginId);
+    userService.logout(testFileServerUser.getUserId());
   }
 
   // === Users ===
@@ -119,7 +113,7 @@ public class FileServerUserServiceTest {
         "Logging in user: {} to file server plugin: {}",
         testFileServerUser,
         testFileServerPlugin.getPluginId());
-    userService.login(testFileServerUser, testFileServerPlugin.getPluginId());
+    userService.login(testFileServerUser);
 
     final List<FileServerUser> fileServerUsers =
         userService.getAllServerUsers(testFileServerPlugin.getPluginId());
@@ -136,8 +130,8 @@ public class FileServerUserServiceTest {
     final UUID testPluginId = testFileServerPlugin.getPluginId();
     final FileServerUser testUser = testDataCreator.createTestFileServerUser();
     logger.info("Logging in to File Server Plugin: {}%n with user: {}", testPluginId, testUser);
-    final ClientResponse loginResponse = userService.login(testUser, testPluginId);
-    logger.info("Got login response: " + loginResponse.statusCode());
+    final FileServerUser loggedInUser = userService.login(testUser);
+    logger.info("Got logged-in user: " + loggedInUser);
 
     final UUID testUserId = testUser.getUserId();
     logger.info("Attempting to retrieve user with ID: " + testUserId);
@@ -150,7 +144,7 @@ public class FileServerUserServiceTest {
           assertThat(fileServerUser).isEqualTo(testUser);
         });
 
-    userService.logout(testUser, testPluginId);
+    userService.logout(testUser.getUserId());
   }
 
   @Test

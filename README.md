@@ -1,6 +1,6 @@
 # Matchday Streaming Football
-Matchday is a simple microservice to collate online football videos and serve them as HLS streams 
-via a REST-ful API.
+Matchday is a simple microservice to collate online football videos and serve them as HLS streams
+via a REST-ful API, built using the Spring Boot framework.
 
 ## Disclaimer
 Matchday is intended for educational purposes only and may not be used to violate copyright law.

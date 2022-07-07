@@ -21,15 +21,16 @@ package self.me.matchday.api.controller;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.api.resource.FileServerUserResource;
 import self.me.matchday.api.resource.FileServerUserResource.UserResourceAssembler;
-import self.me.matchday.api.resource.MessageResource;
+import self.me.matchday.api.service.FileServerLoginException;
 import self.me.matchday.api.service.FileServerUserService;
+import self.me.matchday.api.service.InvalidCookieException;
 import self.me.matchday.model.FileServerUser;
 
 import java.io.BufferedReader;
@@ -40,23 +41,17 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static self.me.matchday.api.resource.MessageResource.MessageResourceAssembler;
-
 @RestController
 @RequestMapping("/file-server-users")
 public class FileServerUserController {
 
   private final FileServerUserService userService;
   private final UserResourceAssembler userResourceAssembler;
-  private final MessageResourceAssembler messageResourceAssembler;
 
   public FileServerUserController(
-      FileServerUserService userService,
-      UserResourceAssembler userResourceAssembler,
-      MessageResourceAssembler messageResourceAssembler) {
+      FileServerUserService userService, UserResourceAssembler userResourceAssembler) {
     this.userService = userService;
     this.userResourceAssembler = userResourceAssembler;
-    this.messageResourceAssembler = messageResourceAssembler;
   }
 
   @RequestMapping(
@@ -75,7 +70,7 @@ public class FileServerUserController {
   }
 
   @RequestMapping(
-      value = "/users/{userId}",
+      value = "/user/{userId}",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<FileServerUserResource> getUserData(
@@ -89,101 +84,81 @@ public class FileServerUserController {
 
   // === Login ===
   @RequestMapping(
-      value = "/file-server/{id}/login",
+      value = "/login",
       method = {RequestMethod.POST, RequestMethod.GET},
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MessageResource> loginToFileServer(
-      @RequestBody final FileServerUser user, @PathVariable("id") final UUID fileServerId) {
+  public ResponseEntity<FileServerUser> loginToFileServer(@RequestBody final FileServerUser user) {
 
-    // Login to correct file server & parse response
-    final ClientResponse response = userService.login(user, fileServerId);
-    final String messageText = getResponseMessage(response);
-    final MessageResource messageResource = messageResourceAssembler.toModel(messageText);
-
-    // Send response to end user
-    return ResponseEntity.status(response.statusCode())
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(messageResource);
+    return ResponseEntity.ok(userService.login(user));
   }
 
   @RequestMapping(
-      value = "/file-server/{id}/login-with-cookies",
+      value = "/login-with-cookies/file-server/{id}",
       method = {RequestMethod.POST, RequestMethod.GET},
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<MessageResource> loginWithCookies(
+  public ResponseEntity<FileServerUser> loginWithCookies(
       @PathVariable("id") final UUID fileServerId,
       @RequestParam("username") final String username,
       @RequestParam("password") final String password,
-      @RequestParam("cookie-file") final MultipartFile cookies)
+      @RequestParam("cookie-file") final MultipartFile cookieData)
       throws IOException {
 
-    final String cookieData = readPostTextData(cookies);
-    final FileServerUser user = new FileServerUser(username, password);
-
-    // Login via file server service
-    final ClientResponse response = userService.loginWithCookies(fileServerId, user, cookieData);
-    final String messageText = getResponseMessage(response);
-    final MessageResource message = messageResourceAssembler.toModel(messageText);
-
-    // Return response
-    return ResponseEntity.status(response.statusCode())
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(message);
+    final String cookies = readPostTextData(cookieData);
+    final FileServerUser user = new FileServerUser(username, password, fileServerId);
+    return ResponseEntity.ok(userService.loginWithCookies(user, cookies));
   }
 
   @RequestMapping(
-      value = "/file-server/{id}/logout",
+      value = "/user/{userId}/logout",
       method = {RequestMethod.POST, RequestMethod.GET},
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  public @ResponseBody ResponseEntity<MessageResource> logoutOfFileServer(
-      @RequestBody final FileServerUser user, @PathVariable("id") final UUID fileServerId) {
+  public ResponseEntity<FileServerUser> logoutOfFileServer(@PathVariable("userId") UUID userId) {
 
-    // Perform logout request
-    final ClientResponse response = userService.logout(user, fileServerId);
-    // Extract response message
-    final String responseText = getResponseMessage(response);
-    final MessageResource messageResource = messageResourceAssembler.toModel(responseText);
-
-    return ResponseEntity.status(response.statusCode())
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(messageResource);
+    final FileServerUser user = userService.logout(userId);
+    return ResponseEntity.ok(user);
   }
 
   @RequestMapping(
-      value = "/file-server/{id}/relogin",
+      value = "/user/{userId}/relogin",
       method = {RequestMethod.POST, RequestMethod.GET},
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  public @ResponseBody ResponseEntity<MessageResource> reloginToFileServer(
-      @RequestBody final FileServerUser fileServerUser,
-      @PathVariable("id") final UUID fileServerId) {
+  public ResponseEntity<FileServerUser> reloginToFileServer(
+      @PathVariable("userId") final UUID userId) {
 
-    // Perform login request
-    final ClientResponse response = userService.relogin(fileServerUser, fileServerId);
-    // Extract message
-    final String responseText = getResponseMessage(response);
-    final MessageResource messageResource = messageResourceAssembler.toModel(responseText);
-
-    return ResponseEntity.status(response.statusCode())
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(messageResource);
+    final FileServerUser user = userService.relogin(userId);
+    return ResponseEntity.ok(user);
   }
 
-  // === Helpers ===
-  /**
-   * Extract body message from a client response
-   *
-   * @param response The ClientResponse from the file server
-   * @return The response body as a String (not null)
-   */
-  private @NotNull String getResponseMessage(@NotNull ClientResponse response) {
-    // Extract response message
-    final String responseText = response.bodyToMono(String.class).block();
-    // Ensure response message is not null & return
-    return (responseText != null) ? responseText : "";
+  @RequestMapping(
+      value = "/user/{userId}/delete",
+      method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<UUID> deleteFileServerUser(@PathVariable("userId") UUID userId) {
+    userService.deleteUser(userId);
+    return ResponseEntity.ok(userId);
+  }
+
+  @ExceptionHandler({
+    IOException.class,
+    FileServerLoginException.class,
+    InvalidCookieException.class
+  })
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public String handleIoException(@NotNull Exception e) {
+    return e.getMessage();
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public String handleUserNotFound(@NotNull Exception e) {
+    return e.getMessage();
   }
 
   /**
@@ -194,11 +169,9 @@ public class FileServerUserController {
    */
   private String readPostTextData(final @NotNull MultipartFile file) throws IOException {
 
-    String result;
     try (InputStream is = file.getInputStream();
         final BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-      result = reader.lines().collect(Collectors.joining("\n"));
+      return reader.lines().collect(Collectors.joining("\n"));
     }
-    return result;
   }
 }

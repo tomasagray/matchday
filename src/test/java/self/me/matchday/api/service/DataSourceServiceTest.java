@@ -82,10 +82,14 @@ class DataSourceServiceTest {
   @SuppressWarnings("unchecked cast")
   void addDataSource() {
 
-    final DataSource<Match> testDataSource = testDataCreator.readTestJsonDataSource();
+    final List<DataSource<?>> preliminaryDataSources = dataSourceService.fetchAll();
+    logger.info("Before adding, there are: {} DataSources", preliminaryDataSources.size());
+    logger.info("Preliminary DataSources:\n{}", preliminaryDataSources);
+
+    final PlaintextDataSource<?> testDataSource =
+        (PlaintextDataSource<?>) testDataCreator.readTestJsonDataSource();
     logger.info("Read test DataSource:\n{}", testDataSource);
-    final PlaintextDataSource<?> testPlaintextDataSource = (PlaintextDataSource<?>) testDataSource;
-    final List<PatternKit<?>> testPatternKitPack = testPlaintextDataSource.getPatternKits();
+    final List<PatternKit<?>> testPatternKitPack = testDataSource.getPatternKits();
     assertThat(testPatternKitPack).isNotNull();
 
     final DataSource<Event> addedDataSource =
@@ -102,6 +106,6 @@ class DataSourceServiceTest {
         plaintextDataSource.getPatternKitsFor(Event.class);
     assertThat(eventPatternKits).isNotNull();
     assertThat(eventPatternKits.size())
-        .isEqualTo(testPlaintextDataSource.getPatternKitsFor(Event.class).size());
+        .isEqualTo(testDataSource.getPatternKitsFor(Event.class).size());
   }
 }

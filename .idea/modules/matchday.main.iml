@@ -31,7 +31,6 @@
     <content url="file://$MODULE_DIR$/../../src/main">
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
-      <excludeFolder url="file://$MODULE_DIR$/../../src/main/java/self/me/matchday/_DEVFIXTURES" />
     </content>
     <content url="file://$MODULE_DIR$/../../src/main/java/self/me/matchday/_DEVFIXTURES/env" />
     <orderEntry type="inheritedJdk" />

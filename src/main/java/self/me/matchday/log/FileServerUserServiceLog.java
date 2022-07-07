@@ -27,7 +27,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.FileServerUser;
 
@@ -42,50 +41,40 @@ public class FileServerUserServiceLog {
   @Around("execution(* self.me.matchday.api.service.FileServerUserService.login(..))")
   public Object logLoginUser(@NotNull ProceedingJoinPoint jp) throws Throwable {
     FileServerUser user = (FileServerUser) jp.getArgs()[0];
-    UUID pluginId = (UUID) jp.getArgs()[1];
-    logger.info("Attempting to login User: {} to FileServerPlugin: {}", user, pluginId);
-    ClientResponse response = (ClientResponse) jp.proceed();
-    if (response.statusCode().is2xxSuccessful()) {
-      logger.info("Login SUCCESSFUL for User: {} to FileServerPlugin: {}", user, pluginId);
-    } else {
-      logger.error("Login FAILED for User: {} to FileServerPlugin: {}", user, pluginId);
-    }
-    return response;
+    logger.info("Attempting to login User: {} to FileServerPlugin: {}", user, user.getServerId());
+    FileServerUser loggedInUser = (FileServerUser) jp.proceed();
+    logger.info(
+        "User: {} logged in successfully? {}", loggedInUser.getUserId(), loggedInUser.isLoggedIn());
+    return loggedInUser;
   }
 
   @Around("execution(* self.me.matchday.api.service.FileServerUserService.loginWithCookies(..))")
   public Object logLoginUserWithCookies(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    UUID pluginId = (UUID) jp.getArgs()[0];
-    FileServerUser user = (FileServerUser) jp.getArgs()[1];
+    FileServerUser user = (FileServerUser) jp.getArgs()[0];
     logger.info(
-        "Attempting to login User: {} to FileServerPlugin: {} using cookies", user, pluginId);
-    ClientResponse response = (ClientResponse) jp.proceed();
-    if (response.statusCode().is2xxSuccessful()) {
-      logger.info("Login SUCCESSFUL for User: {} to FileServerPlugin: {}", user, pluginId);
-    } else {
-      logger.error("Login FAILED for User: {} to FileServerPlugin: {}", user, pluginId);
-    }
-    return response;
+        "Attempting to login User: {} to FileServerPlugin: {} using cookies",
+        user,
+        user.getServerId());
+    FileServerUser loggedInUser = (FileServerUser) jp.proceed();
+    logger.info("User: {} logged in successfully? {}", user.getUserId(), user.isLoggedIn());
+    return loggedInUser;
   }
 
   @Around("execution(* self.me.matchday.api.service.FileServerUserService.logout(..))")
   public Object logLogoutUser(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    FileServerUser user = (FileServerUser) jp.getArgs()[0];
-    UUID pluginId = (UUID) jp.getArgs()[1];
-    logger.info("Attempting to LOGOUT User: {} from FileServerPlugin: {}", user, pluginId);
-    ClientResponse response = (ClientResponse) jp.proceed();
-    if (response.statusCode().is2xxSuccessful()) {
-      logger.info("Successfully logged out User: {} from FileServerPlugin: {}", user, pluginId);
-    } else {
-      logger.error("Could not log out User: {} from FileServerPlugin: {}", user, pluginId);
-    }
-    return response;
+    UUID userId = (UUID) jp.getArgs()[0];
+    logger.info("Attempting to LOGOUT User: {} ", userId);
+    FileServerUser loggedOutUser = (FileServerUser) jp.proceed();
+    logger.info(
+        "User: {} logged out successfully? {}",
+        loggedOutUser.getUserId(),
+        !loggedOutUser.isLoggedIn());
+    return loggedOutUser;
   }
 
   @Before("execution(* self.me.matchday.api.service.FileServerUserService.relogin(..))")
   public void logReloginUser(@NotNull JoinPoint jp) {
-    Object[] args = jp.getArgs();
-    logger.info("Attempting to RE-LOGIN User: {} to FileServerPlugin: {}", args[0], args[1]);
+    logger.info("Attempting to RE-LOGIN User: {}", jp.getArgs()[0]);
   }
 
   @SuppressWarnings("unchecked cast")

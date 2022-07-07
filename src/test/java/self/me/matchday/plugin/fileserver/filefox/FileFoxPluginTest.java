@@ -95,7 +95,7 @@ class FileFoxPluginTest {
             .filter(s -> !s.equals(",") && !"".equals(s))
             .collect(Collectors.toList());
     assertThat(strings.size()).isEqualTo(2);
-    return new FileServerUser(strings.get(0), strings.get(1));
+    return new FileServerUser(strings.get(0), strings.get(1), plugin.getPluginId());
   }
 
   @Test

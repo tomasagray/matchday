@@ -38,8 +38,12 @@ public class UserValidationService {
   private static final String PASSWORD_REGEX =
       "^[a-zA-Z\\d,_\\-()!@#$%^&*=+{\\[}\\];:'\"<>/?~`]{8,}$";
 
-  public boolean isValidUserData(@NotNull final FileServerUser user) {
-    return isValidEmailAddress(user.getUsername()) && isValidPassword(user.getPassword());
+  public void validateUser(@NotNull final FileServerUser user) {
+    final boolean isValid =
+        isValidEmailAddress(user.getUsername()) && isValidPassword(user.getPassword());
+    if (!isValid) {
+      throw new FileServerLoginException("Invalid user data: " + user);
+    }
   }
 
   public boolean isValidEmailAddress(final String email) {
