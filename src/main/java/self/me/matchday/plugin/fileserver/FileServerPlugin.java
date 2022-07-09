@@ -77,4 +77,8 @@ public interface FileServerPlugin extends Plugin {
    */
   Optional<URL> getDownloadURL(@NotNull final URL url, @NotNull final Set<HttpCookie> cookies)
       throws IOException;
+
+  boolean isEnabled();
+
+  void setEnabled(boolean enabled);
 }

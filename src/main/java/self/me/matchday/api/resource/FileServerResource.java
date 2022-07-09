@@ -24,14 +24,12 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.FileServerPluginController;
-import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
 import java.util.UUID;
@@ -55,30 +53,22 @@ public class FileServerResource extends RepresentationModel<FileServerResource> 
   private boolean isEnabled;
 
   @Component
-  public static class FileServerResourceAssembler extends
-      RepresentationModelAssemblerSupport<FileServerPlugin, FileServerResource> {
+  public static class FileServerResourceAssembler
+      extends RepresentationModelAssemblerSupport<FileServerPlugin, FileServerResource> {
 
-    private final FileServerPluginService fileServerPluginService;
-
-    public FileServerResourceAssembler(
-        @Autowired final FileServerPluginService fileServerPluginService) {
+    public FileServerResourceAssembler() {
       super(FileServerPluginController.class, FileServerResource.class);
-      this.fileServerPluginService = fileServerPluginService;
     }
 
     @Override
     public @NotNull FileServerResource toModel(@NotNull final FileServerPlugin plugin) {
 
       FileServerResource resource = instantiateModel(plugin);
-
-      // is currently active?
-      final boolean isEnabled = fileServerPluginService.isPluginEnabled(plugin.getPluginId());
-
       // Add data
       resource.setId(plugin.getPluginId());
       resource.setTitle(plugin.getTitle());
       resource.setDescription(plugin.getDescription());
-      resource.setEnabled(isEnabled);
+      resource.setEnabled(plugin.isEnabled());
 
       // Add HATEOAS self link
       resource.add(
@@ -92,8 +82,7 @@ public class FileServerResource extends RepresentationModel<FileServerResource> 
     public @NotNull CollectionModel<FileServerResource> toCollectionModel(
         @NotNull final Iterable<? extends FileServerPlugin> entities) {
 
-      final CollectionModel<FileServerResource> collectionModel =
-          super.toCollectionModel(entities);
+      final CollectionModel<FileServerResource> collectionModel = super.toCollectionModel(entities);
 
       // Add HATEOAS self link & return
       collectionModel.add(

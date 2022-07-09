@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -44,6 +44,7 @@ public class FileFoxPlugin implements FileServerPlugin {
   private final FileFoxPluginProperties pluginProperties;
   private final LoginParser loginParser;
   private final DownloadParser downloadParser;
+  private boolean enabled = true;
 
   public FileFoxPlugin(
       @Autowired FileFoxPluginProperties pluginProperties,
@@ -108,5 +109,15 @@ public class FileFoxPlugin implements FileServerPlugin {
     } catch (URISyntaxException e) {
       throw new IOException("Error parsing download page: " + e.getMessage(), e);
     }
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return this.enabled;
+  }
+
+  @Override
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 }

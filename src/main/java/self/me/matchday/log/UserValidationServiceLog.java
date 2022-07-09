@@ -21,9 +21,9 @@ package self.me.matchday.log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.UserValidationService;
 
@@ -32,29 +32,22 @@ public class UserValidationServiceLog {
 
   private static final Logger logger = LogManager.getLogger(UserValidationService.class);
 
-  @Around("execution(* self.me.matchday.api.service.UserValidationService.validateUser(..))")
-  public Object logIsValidUserData(@NotNull ProceedingJoinPoint jp) throws Throwable {
+  @Before(
+      "execution(* self.me.matchday.api.service.UserValidationService.validateUserForLogin(..))")
+  public void logIsValidUserData(@NotNull JoinPoint jp) {
     Object user = jp.getArgs()[0];
     logger.info("Validating User: {}", user);
-    Object valid = jp.proceed();
-    logger.info("User: {} is valid? {}", user, valid);
-    return valid;
   }
 
-  @Around("execution(* self.me.matchday.api.service.UserValidationService.isValidEmailAddress(..))")
-  public Object logIsValidEmailAddress(@NotNull ProceedingJoinPoint jp) throws Throwable {
+  @Before(
+      "execution(* self.me.matchday.api.service.UserValidationService.validateEmailAddress(..))")
+  public void logIsValidEmailAddress(@NotNull JoinPoint jp) {
     Object email = jp.getArgs()[0];
     logger.info("Validating email address: {} ...", email);
-    Object valid = jp.proceed();
-    logger.info("Email address: {} is valid? {}", email, valid);
-    return valid;
   }
 
-  @Around("execution(* self.me.matchday.api.service.UserValidationService.isValidPassword(..))")
-  public Object logIsValidPassword(@NotNull ProceedingJoinPoint jp) throws Throwable {
+  @Before("execution(* self.me.matchday.api.service.UserValidationService.validatePassword(..))")
+  public void logIsValidPassword() {
     logger.info("Validating password: ***** ...");
-    Object result = jp.proceed();
-    logger.info("Password is valid? {}", result);
-    return result;
   }
 }

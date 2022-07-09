@@ -19,7 +19,9 @@
 
 package self.me.matchday.api.controller;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -127,5 +129,10 @@ public class DataSourceController {
     return ResponseEntity.ok(dataSourceID);
   }
 
-  // todo - add exception handlers
+  @ExceptionHandler(IllegalArgumentException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public String handleIllegalArgumentException(@NotNull IllegalArgumentException e) {
+    return e.getMessage();
+  }
 }

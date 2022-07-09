@@ -88,26 +88,28 @@ public class FileServerUserController {
       method = {RequestMethod.POST, RequestMethod.GET},
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<FileServerUser> loginToFileServer(@RequestBody final FileServerUser user) {
+  public ResponseEntity<FileServerUserResource> loginToFileServer(
+      @RequestBody final FileServerUser user) {
 
-    return ResponseEntity.ok(userService.login(user));
+    final FileServerUser loggedInUser = userService.login(user);
+    return ResponseEntity.ok(userResourceAssembler.toModel(loggedInUser));
   }
 
   @RequestMapping(
-      value = "/login-with-cookies/file-server/{id}",
-      method = {RequestMethod.POST, RequestMethod.GET},
-      produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<FileServerUser> loginWithCookies(
-      @PathVariable("id") final UUID fileServerId,
+      value = "/user/login-with-cookies",
+      method = {RequestMethod.GET, RequestMethod.POST},
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<FileServerUserResource> loginWithCookies(
       @RequestParam("username") final String username,
-      @RequestParam("password") final String password,
-      @RequestParam("cookie-file") final MultipartFile cookieData)
+      @RequestParam("serverId") final UUID pluginId,
+      @RequestParam("cookies") final MultipartFile cookieData)
       throws IOException {
 
     final String cookies = readPostTextData(cookieData);
-    final FileServerUser user = new FileServerUser(username, password, fileServerId);
-    return ResponseEntity.ok(userService.loginWithCookies(user, cookies));
+    final FileServerUser user = new FileServerUser(username, "", pluginId);
+    final FileServerUser loggedInUser = userService.loginWithCookies(user, cookies);
+    return ResponseEntity.ok(userResourceAssembler.toModel(loggedInUser));
   }
 
   @RequestMapping(
@@ -115,10 +117,11 @@ public class FileServerUserController {
       method = {RequestMethod.POST, RequestMethod.GET},
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<FileServerUser> logoutOfFileServer(@PathVariable("userId") UUID userId) {
+  public ResponseEntity<FileServerUserResource> logoutOfFileServer(
+      @PathVariable("userId") UUID userId) {
 
     final FileServerUser user = userService.logout(userId);
-    return ResponseEntity.ok(user);
+    return ResponseEntity.ok(userResourceAssembler.toModel(user));
   }
 
   @RequestMapping(
@@ -126,11 +129,11 @@ public class FileServerUserController {
       method = {RequestMethod.POST, RequestMethod.GET},
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<FileServerUser> reloginToFileServer(
+  public ResponseEntity<FileServerUserResource> reloginToFileServer(
       @PathVariable("userId") final UUID userId) {
 
     final FileServerUser user = userService.relogin(userId);
-    return ResponseEntity.ok(user);
+    return ResponseEntity.ok(userResourceAssembler.toModel(user));
   }
 
   @RequestMapping(

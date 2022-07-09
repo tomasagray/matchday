@@ -45,9 +45,15 @@ public final class FileServerUser implements Serializable {
   @Setter
   private UUID userId;
 
+  @Column(columnDefinition = "TEXT")
   private final String username;
+
+  @Column(columnDefinition = "TEXT")
   private final String password;
+
+  @Column(columnDefinition = "TEXT")
   private final String email;
+
   private boolean loggedIn;
 
   @Column(columnDefinition = "BINARY(16)")

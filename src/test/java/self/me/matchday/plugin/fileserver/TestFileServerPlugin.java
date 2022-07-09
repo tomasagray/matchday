@@ -40,6 +40,8 @@ public class TestFileServerPlugin implements FileServerPlugin {
 
   private static URL url;
 
+  private boolean enabled = true;
+
   static {
     try {
       url = new URL("https://www.google.com");
@@ -89,6 +91,16 @@ public class TestFileServerPlugin implements FileServerPlugin {
       Log.e("TestFileServerPlugin", "Artificial refresh delay was interrupted!");
     }
     return Optional.of(url);
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return this.enabled;
+  }
+
+  @Override
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 
   @Override

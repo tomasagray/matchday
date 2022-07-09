@@ -20,7 +20,7 @@
 package self.me.matchday.api.service;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.HighlightRepository;
 import self.me.matchday.model.Event.EventSorter;
@@ -29,20 +29,22 @@ import self.me.matchday.model.Highlight;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class HighlightService implements EntityService<Highlight> {
 
-  // TODO - implement methods
-
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
   private final HighlightRepository highlightRepository;
+  private final EntityCorrectionService entityCorrectionService;
 
-  @Autowired
-  public HighlightService(final HighlightRepository highlightRepository) {
+  public HighlightService(
+      HighlightRepository highlightRepository, EntityCorrectionService entityCorrectionService) {
 
     this.highlightRepository = highlightRepository;
+    this.entityCorrectionService = entityCorrectionService;
   }
 
   /**
@@ -50,7 +52,8 @@ public class HighlightService implements EntityService<Highlight> {
    *
    * @return Optional collection model of highlight show resources.
    */
-  public List<Highlight> fetchAllHighlights() {
+  @Override
+  public List<Highlight> fetchAll() {
 
     final List<Highlight> highlights = highlightRepository.findAll();
     if (highlights.size() > 0) {
@@ -65,45 +68,73 @@ public class HighlightService implements EntityService<Highlight> {
    * @param highlightShowId ID of the Highlight Show.
    * @return The requested Highlight, or empty().
    */
-  public Optional<Highlight> fetchHighlight(@NotNull UUID highlightShowId) {
+  @Override
+  public Optional<Highlight> fetchById(@NotNull UUID highlightShowId) {
     return highlightRepository.findById(highlightShowId);
   }
 
   @Override
-  public Highlight save(@NotNull Highlight entity) {
-    return null;
+  public Highlight save(@NotNull Highlight highlight) {
+    try {
+      entityCorrectionService.correctEntityFields(highlight);
+      // See if Event already exists in DB
+      final Optional<Highlight> eventOptional =
+          highlightRepository.findOne(getExampleEvent(highlight));
+      if (eventOptional.isPresent()) {
+        final Highlight existingEvent = eventOptional.get();
+        existingEvent.addAllFileSources(highlight.getFileSources());
+        return existingEvent;
+      }
+      return highlightRepository.save(highlight);
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private @NotNull Example<Highlight> getExampleEvent(@NotNull Highlight highlight) {
+    final Highlight example =
+        Highlight.highlightBuilder()
+            .competition(highlight.getCompetition())
+            .season(highlight.getSeason())
+            .fixture(highlight.getFixture())
+            .date(highlight.getDate())
+            .build();
+    return Example.of(example);
   }
 
   @Override
-  public List<Highlight> saveAll(@NotNull Iterable<? extends Highlight> entities) {
-    return null;
+  public List<Highlight> saveAll(@NotNull Iterable<? extends Highlight> highlights) {
+    return StreamSupport.stream(highlights.spliterator(), false)
+        .map(this::save)
+        .collect(Collectors.toList());
   }
 
   @Override
-  public Optional<Highlight> fetchById(@NotNull UUID id) {
-    return Optional.empty();
+  public Highlight update(@NotNull Highlight highlight) {
+    final UUID eventId = highlight.getEventId();
+    final Optional<Highlight> optional = fetchById(eventId);
+    if (optional.isPresent()) {
+      return save(highlight);
+    }
+    // else..
+    throw new IllegalArgumentException(
+        "Trying to update non-existent Highlight Show with ID: " + eventId);
   }
 
   @Override
-  public List<Highlight> fetchAll() {
-    return null;
-  }
-
-  @Override
-  public Highlight update(@NotNull Highlight entity) {
-    return null;
-  }
-
-  @Override
-  public List<Highlight> updateAll(@NotNull Iterable<? extends Highlight> entities) {
-    return null;
+  public List<Highlight> updateAll(@NotNull Iterable<? extends Highlight> highlights) {
+    return StreamSupport.stream(highlights.spliterator(), false)
+        .map(this::update)
+        .collect(Collectors.toList());
   }
 
   @Override
   public void delete(@NotNull UUID highlightId) {
-    throw new RuntimeException("This method is not implemented!");
+    highlightRepository.deleteById(highlightId);
   }
 
   @Override
-  public void deleteAll(@NotNull Iterable<? extends Highlight> entities) {}
+  public void deleteAll(@NotNull Iterable<? extends Highlight> highlights) {
+    highlightRepository.deleteAll(highlights);
+  }
 }

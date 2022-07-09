@@ -61,7 +61,7 @@ public class FileServerUserService {
   @Transactional
   public FileServerUser login(@NotNull final FileServerUser user) {
 
-    userValidationService.validateUser(user);
+    userValidationService.validateUserForLogin(user);
 
     final UUID pluginId = user.getServerId();
     final Optional<FileServerPlugin> pluginOptional = pluginService.getPluginById(pluginId);
@@ -71,8 +71,7 @@ public class FileServerUserService {
 
       if (loginResponse.statusCode().is2xxSuccessful()) {
         final List<SecureCookie> cookies = readResponseCookies(loginResponse);
-        user.setLoggedIntoServer(serverPlugin.getPluginId(), cookies);
-        return userRepo.saveAndFlush(user);
+        return setUserLoggedInToServer(user, serverPlugin.getPluginId(), cookies);
       } else {
         final String message = loginResponse.bodyToMono(String.class).block();
         throw new FileServerLoginException(message);
@@ -103,20 +102,33 @@ public class FileServerUserService {
   public FileServerUser loginWithCookies(
       @NotNull final FileServerUser user, @NotNull final String cookieData) {
 
-    userValidationService.validateUser(user);
-
+    userValidationService.validateEmailAddress(user.getUsername());
     final UUID pluginId = user.getServerId();
     final Optional<FileServerPlugin> pluginOptional = pluginService.getPluginById(pluginId);
     if (pluginOptional.isPresent()) {
       final FileServerPlugin serverPlugin = pluginOptional.get();
       final Collection<SecureCookie> cookies = parseCookieData(cookieData);
       cookiesService.validateCookies(cookies);
-
       // Login user to appropriate server
-      user.setLoggedIntoServer(serverPlugin.getPluginId(), cookies);
-      return userRepo.saveAndFlush(user);
+      return setUserLoggedInToServer(user, serverPlugin.getPluginId(), cookies);
     } else {
       throw new PluginNotFoundException("No file server found with ID: " + pluginId);
+    }
+  }
+
+  private @NotNull FileServerUser setUserLoggedInToServer(
+      @NotNull FileServerUser user,
+      @NotNull UUID serverId,
+      @NotNull Collection<SecureCookie> cookies) {
+
+    final Optional<FileServerUser> loggedInOptional = userRepo.findByUsername(user.getUsername());
+    if (loggedInOptional.isPresent()) {
+      final FileServerUser loggedInUser = loggedInOptional.get();
+      loggedInUser.setLoggedIntoServer(serverId, cookies);
+      return loggedInUser;
+    } else {
+      user.setLoggedIntoServer(serverId, cookies);
+      return userRepo.saveAndFlush(user);
     }
   }
 

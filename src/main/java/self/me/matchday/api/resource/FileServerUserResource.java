@@ -33,8 +33,10 @@ import self.me.matchday.api.controller.FileServerUserController;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -52,8 +54,9 @@ public class FileServerUserResource extends RepresentationModel<FileServerUserRe
   private UUID userId;
   private String username;
   private String email;
+  private boolean hasPassword;
   private boolean loggedIn;
-  private Collection<SecureCookie> cookies;
+  private Collection<NetscapeCookie> cookies;
 
   @Component
   public static class UserResourceAssembler
@@ -71,14 +74,45 @@ public class FileServerUserResource extends RepresentationModel<FileServerUserRe
       resource.setUsername(entity.getUsername());
       resource.setEmail(entity.getEmail());
       resource.setLoggedIn(entity.isLoggedIn());
-      resource.setCookies(entity.getCookies());
+      resource.setHasPassword(!("".equals(entity.getPassword())));
+      resource.setCookies(getNetscapeCookies(entity.getCookies()));
 
       // Add HATEOAS self link
       resource.add(
           linkTo(methodOn(FileServerUserController.class).getUserData(entity.getUserId()))
               .withSelfRel());
-
       return resource;
+    }
+
+    private Collection<NetscapeCookie> getNetscapeCookies(
+        @NotNull Collection<SecureCookie> cookies) {
+      return cookies.stream().map(NetscapeCookie::new).collect(Collectors.toList());
+    }
+  }
+
+  @Data
+  static class NetscapeCookie {
+    private final Long id;
+    private final String domain;
+    private final boolean secure;
+    private final String path;
+    private final String sameSite;
+    private final boolean httpOnly;
+    private final long maxAge;
+    private final String name;
+    private final String value;
+
+    NetscapeCookie(@NotNull SecureCookie cookie) {
+      this.id = cookie.getId();
+      this.name = cookie.getName();
+      this.value = cookie.getValue();
+      final Duration maxAge = cookie.getMaxAge();
+      this.maxAge = maxAge != null ? maxAge.toSeconds() : 0;
+      this.domain = cookie.getDomain();
+      this.path = cookie.getPath();
+      this.secure = cookie.isSecure();
+      this.httpOnly = cookie.isHttpOnly();
+      this.sameSite = cookie.getSameSite();
     }
   }
 }

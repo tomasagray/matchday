@@ -19,16 +19,14 @@
 
 package self.me.matchday.api.controller;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.DataSourcePluginResource;
 import self.me.matchday.api.resource.DataSourcePluginResource.DataSourcePluginResourceAssembler;
-import self.me.matchday.api.resource.MessageResource;
 import self.me.matchday.api.service.DataSourcePluginService;
 
 import java.util.UUID;
@@ -39,15 +37,12 @@ public class DataSourcePluginController {
 
   private final DataSourcePluginService dataSourcePluginService;
   private final DataSourcePluginResourceAssembler pluginResourceAssembler;
-  private final MessageResource.MessageResourceAssembler messageResourceAssembler;
 
   DataSourcePluginController(
       DataSourcePluginService dataSourcePluginService,
-      DataSourcePluginResourceAssembler pluginResourceAssembler,
-      MessageResource.MessageResourceAssembler messageResourceAssembler) {
+      DataSourcePluginResourceAssembler pluginResourceAssembler) {
     this.dataSourcePluginService = dataSourcePluginService;
     this.pluginResourceAssembler = pluginResourceAssembler;
-    this.messageResourceAssembler = messageResourceAssembler;
   }
 
   @RequestMapping(
@@ -78,19 +73,9 @@ public class DataSourcePluginController {
       method = {RequestMethod.POST, RequestMethod.GET},
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MessageResource> enablePlugin(
-      @PathVariable("pluginId") final UUID pluginId) {
-
-    try {
-      dataSourcePluginService.enablePlugin(pluginId);
-      final String message = String.format("Plugin with ID: %s successfully enabled", pluginId);
-      return ResponseEntity.ok().body(messageResourceAssembler.toModel(message));
-    } catch (Throwable e) {
-      final String msg =
-          String.format(
-              "Plugin with ID %s could not be enabled; reason: %s", pluginId, e.getMessage());
-      return ResponseEntity.badRequest().body(messageResourceAssembler.toModel(msg));
-    }
+  public @ResponseBody UUID enablePlugin(@PathVariable("pluginId") final UUID pluginId) {
+    dataSourcePluginService.enablePlugin(pluginId);
+    return pluginId;
   }
 
   @RequestMapping(
@@ -98,18 +83,15 @@ public class DataSourcePluginController {
       method = {RequestMethod.POST, RequestMethod.GET},
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MessageResource> disablePlugin(
-      @PathVariable("pluginId") final UUID pluginId) {
+  public @ResponseBody UUID disablePlugin(@PathVariable("pluginId") final UUID pluginId) {
+    dataSourcePluginService.disablePlugin(pluginId);
+    return pluginId;
+  }
 
-    try {
-      dataSourcePluginService.disablePlugin(pluginId);
-      final String message = String.format("Plugin with ID: %s successfully disabled", pluginId);
-      return ResponseEntity.ok().body(messageResourceAssembler.toModel(message));
-    } catch (Throwable e) {
-      final String msg =
-          String.format(
-              "Plugin with ID %s could not be disabled; reason: %s", pluginId, e.getMessage());
-      return ResponseEntity.badRequest().body(messageResourceAssembler.toModel(msg));
-    }
+  @ExceptionHandler(IllegalArgumentException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public String handleIllegalArgumentException(@NotNull IllegalArgumentException e) {
+    return e.getMessage();
   }
 }

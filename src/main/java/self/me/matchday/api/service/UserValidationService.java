@@ -37,22 +37,29 @@ public class UserValidationService {
           + "\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])";
   private static final String PASSWORD_REGEX =
       "^[a-zA-Z\\d,_\\-()!@#$%^&*=+{\\[}\\];:'\"<>/?~`]{8,}$";
+  public static final int MIN_PASSWORD_LEN = 5;
 
-  public void validateUser(@NotNull final FileServerUser user) {
-    final boolean isValid =
-        isValidEmailAddress(user.getUsername()) && isValidPassword(user.getPassword());
+  public void validateUserForLogin(@NotNull final FileServerUser user) {
+    validateEmailAddress(user.getUsername());
+    validatePassword(user.getPassword());
+  }
+
+  public void validateEmailAddress(final String email) {
+    final Pattern emailPattern = Pattern.compile(EMAIL_REGEX);
+    final boolean isValid = (email != null) && emailPattern.matcher(email).find();
     if (!isValid) {
-      throw new FileServerLoginException("Invalid user data: " + user);
+      throw new FileServerLoginException("Username is invalid");
     }
   }
 
-  public boolean isValidEmailAddress(final String email) {
-    final Pattern emailPattern = Pattern.compile(EMAIL_REGEX);
-    return (email != null) && emailPattern.matcher(email).find();
-  }
-
-  public boolean isValidPassword(final String password) {
+  public void validatePassword(final String password) {
     final Pattern passwordPattern = Pattern.compile(PASSWORD_REGEX);
-    return (password != null) && passwordPattern.matcher(password).find();
+    final boolean isValid =
+        (password != null)
+            && password.length() > MIN_PASSWORD_LEN
+            && passwordPattern.matcher(password).find();
+    if (!isValid) {
+      throw new FileServerLoginException("Password is invalid");
+    }
   }
 }

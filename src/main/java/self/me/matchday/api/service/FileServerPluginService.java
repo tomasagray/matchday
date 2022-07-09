@@ -31,7 +31,10 @@ import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -44,8 +47,6 @@ public class FileServerPluginService {
   private static final Duration DEFAULT_REFRESH_RATE = Duration.ofHours(4);
 
   private final List<FileServerPlugin> fileServerPlugins;
-  private final List<FileServerPlugin> enabledPlugins =
-      Collections.synchronizedList(new ArrayList<>()); // todo - remove this, use only 1 collection
   private final FileServerUserRepo userRepo;
   private final SecureDataService secureDataService;
 
@@ -55,8 +56,6 @@ public class FileServerPluginService {
       SecureDataService secureDataService) {
 
     this.fileServerPlugins = fileServerPlugins;
-    // Default: all plugins enabled
-    this.enabledPlugins.addAll(fileServerPlugins);
     this.userRepo = userRepo;
     this.secureDataService = secureDataService;
   }
@@ -73,7 +72,9 @@ public class FileServerPluginService {
   }
 
   public List<FileServerPlugin> getEnabledPlugins() {
-    return this.enabledPlugins;
+    return this.fileServerPlugins.stream()
+        .filter(FileServerPlugin::isEnabled)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -86,7 +87,7 @@ public class FileServerPluginService {
 
     boolean enabledContains = false;
     // determine if any plugin in the enabled list matches given ID
-    for (FileServerPlugin plugin : enabledPlugins) {
+    for (FileServerPlugin plugin : getEnabledPlugins()) {
       if (pluginId.equals(plugin.getPluginId())) {
         enabledContains = true;
         break;
@@ -115,18 +116,16 @@ public class FileServerPluginService {
    * Enable a previously disabled file server plugin
    *
    * @param pluginId The ID of the plugin to enable
-   * @return True/false - if the plugin was successfully enabled
+   * @throws PluginNotFoundException if pluginId not found
    */
-  public boolean enablePlugin(@NotNull final UUID pluginId) {
+  public void enablePlugin(@NotNull final UUID pluginId) {
 
-    // Retrieve requested plugin
     final Optional<FileServerPlugin> pluginOptional = getPluginById(pluginId);
     if (pluginOptional.isPresent()) {
       final FileServerPlugin fileServerPlugin = pluginOptional.get();
-      // Add to enabled plugins
-      return enabledPlugins.add(fileServerPlugin);
+      fileServerPlugin.setEnabled(true);
     } else {
-      return false;
+      throw new PluginNotFoundException("Could not enable non-existent plugin: " + pluginId);
     }
   }
 
@@ -134,17 +133,16 @@ public class FileServerPluginService {
    * Disable a specific file server plugin
    *
    * @param pluginId The ID of the plugin
-   * @return True/false - was the plugin disabled
+   * @throws PluginNotFoundException if pluginId not found
    */
-  public boolean disablePlugin(@NotNull final UUID pluginId) {
+  public void disablePlugin(@NotNull final UUID pluginId) {
 
     final Optional<FileServerPlugin> pluginOptional = getPluginById(pluginId);
     if (pluginOptional.isPresent()) {
       final FileServerPlugin fileServerPlugin = pluginOptional.get();
-      // Remove from enabled plugins list
-      return enabledPlugins.remove(fileServerPlugin);
+      fileServerPlugin.setEnabled(false);
     } else {
-      return false;
+      throw new PluginNotFoundException("Could not disable non-existent plugin: " + pluginId);
     }
   }
 
@@ -204,7 +202,7 @@ public class FileServerPluginService {
    */
   public @Nullable FileServerPlugin getEnabledPluginForUrl(@NotNull final URL url) {
     // search only ENABLED plugins
-    for (final FileServerPlugin plugin : this.enabledPlugins) {
+    for (final FileServerPlugin plugin : getEnabledPlugins()) {
       if (plugin.acceptsUrl(url)) {
         return plugin;
       }

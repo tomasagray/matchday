@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.controller;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,9 +31,9 @@ import self.me.matchday.api.service.PluginNotFoundException;
 class PluginNotFoundAdvice {
 
   @ResponseBody
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
   @ExceptionHandler(PluginNotFoundException.class)
-  String pluginNotFoundHandler(PluginNotFoundException e) {
+  String pluginNotFoundHandler(@NotNull PluginNotFoundException e) {
     return e.getMessage();
   }
 }

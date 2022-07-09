@@ -51,19 +51,14 @@ class BloggerPluginTest {
   private static final Logger logger = LogManager.getLogger(BloggerPluginTest.class);
 
   private static BloggerPlugin plugin;
-  //  private static DataSource<Event> testHtmlDataSource;
-  private static DataSource<Match> testHtmlDataSource;
-  // todo - add JSON data source
+  private static DataSource<Match> testDataSource;
 
   @BeforeAll
   static void setUp(
       @Autowired @NotNull TestDataCreator testDataCreator, @Autowired BloggerPlugin bloggerPlugin) {
 
     BloggerPluginTest.plugin = bloggerPlugin;
-    final DataSource<Match> testJsonDataSource = testDataCreator.readTestJsonDataSource();
-
-    logger.info("Adding test datasource to DB...");
-    BloggerPluginTest.testHtmlDataSource = testJsonDataSource;
+    testDataSource = testDataCreator.readTestJsonDataSource();
   }
 
   @Test
@@ -100,11 +95,11 @@ class BloggerPluginTest {
   void addDataSource() {
 
     final int minimumPatternKitCount = 2;
-    logger.info("Added datasource:\n{}", testHtmlDataSource);
-    assertThat(testHtmlDataSource).isNotNull();
-    assertThat(testHtmlDataSource.getBaseUri()).isNotNull();
+    logger.info("Added datasource:\n{}", testDataSource);
+    assertThat(testDataSource).isNotNull();
+    assertThat(testDataSource.getBaseUri()).isNotNull();
     final List<PatternKit<? extends Match>> metadataPatterns =
-        ((PlaintextDataSource<? extends Match>) testHtmlDataSource).getPatternKitsFor(Match.class);
+        ((PlaintextDataSource<? extends Match>) testDataSource).getPatternKitsFor(Match.class);
     assertThat(metadataPatterns).isNotNull();
     assertThat(metadataPatterns.size()).isNotZero().isGreaterThanOrEqualTo(minimumPatternKitCount);
   }
@@ -115,10 +110,10 @@ class BloggerPluginTest {
 
     logger.info(
         "Getting Snapshot with DataSource:\n{}  --  {}",
-        testHtmlDataSource.getPluginId(),
-        testHtmlDataSource.getBaseUri());
+        testDataSource.getPluginId(),
+        testDataSource.getBaseUri());
     final SnapshotRequest request = SnapshotRequest.builder().labels(List.of("Barcelona")).build();
-    final Snapshot<? extends Match> testSnapshot = plugin.getSnapshot(request, testHtmlDataSource);
+    final Snapshot<? extends Match> testSnapshot = plugin.getSnapshot(request, testDataSource);
     assertThat(testSnapshot).isNotNull();
 
     final List<Match> testData = testSnapshot.getData().collect(Collectors.toList());
@@ -144,7 +139,7 @@ class BloggerPluginTest {
 
     final SnapshotRequest request =
         SnapshotRequest.builder().labels(List.of("Barcelona")).maxResults(25).build();
-    final Snapshot<? extends Event> snapshot = plugin.getSnapshot(request, testHtmlDataSource);
+    final Snapshot<? extends Event> snapshot = plugin.getSnapshot(request, testDataSource);
     assertThat(snapshot).isNotNull();
 
     final List<Event> events = snapshot.getData().collect(Collectors.toList());

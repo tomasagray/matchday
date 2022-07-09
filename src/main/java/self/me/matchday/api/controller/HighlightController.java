@@ -56,7 +56,7 @@ public class HighlightController {
   @RequestMapping(value = "/highlight-shows", method = RequestMethod.GET)
   @ResponseBody
   public ResponseEntity<EventsResource> fetchAllHighlights() {
-    return ResponseEntity.ok(eventAssembler.toModel(highlightService.fetchAllHighlights()));
+    return ResponseEntity.ok(eventAssembler.toModel(highlightService.fetchAll()));
   }
 
   /**
@@ -70,7 +70,7 @@ public class HighlightController {
   public ResponseEntity<HighlightResource> fetchHighlightById(@PathVariable UUID eventId) {
 
     return highlightService
-        .fetchHighlight(eventId)
+        .fetchById(eventId)
         .map(highlightAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());

@@ -44,7 +44,9 @@ public class FileServerUserServiceLog {
     logger.info("Attempting to login User: {} to FileServerPlugin: {}", user, user.getServerId());
     FileServerUser loggedInUser = (FileServerUser) jp.proceed();
     logger.info(
-        "User: {} logged in successfully? {}", loggedInUser.getUserId(), loggedInUser.isLoggedIn());
+        "User: {} logged in successfully? {}",
+        loggedInUser.getUsername(),
+        loggedInUser.isLoggedIn());
     return loggedInUser;
   }
 
@@ -56,8 +58,17 @@ public class FileServerUserServiceLog {
         user,
         user.getServerId());
     FileServerUser loggedInUser = (FileServerUser) jp.proceed();
-    logger.info("User: {} logged in successfully? {}", user.getUserId(), user.isLoggedIn());
+    logger.info("User: {} logged in successfully? {}", user.getUsername(), user.isLoggedIn());
     return loggedInUser;
+  }
+
+  @Before(
+      "execution(* self.me.matchday.api.service.FileServerUserService.setUserLoggedInToServer(..))")
+  public void logSetUserLoggedInToServer(@NotNull JoinPoint jp) {
+    final FileServerUser user = (FileServerUser) jp.getArgs()[0];
+    final UUID serverId = (UUID) jp.getArgs()[1];
+    logger.info(
+        "Determining if user: {} already exists for server: {}", user.getUsername(), serverId);
   }
 
   @Around("execution(* self.me.matchday.api.service.FileServerUserService.logout(..))")
@@ -67,7 +78,7 @@ public class FileServerUserServiceLog {
     FileServerUser loggedOutUser = (FileServerUser) jp.proceed();
     logger.info(
         "User: {} logged out successfully? {}",
-        loggedOutUser.getUserId(),
+        loggedOutUser.getUsername(),
         !loggedOutUser.isLoggedIn());
     return loggedOutUser;
   }

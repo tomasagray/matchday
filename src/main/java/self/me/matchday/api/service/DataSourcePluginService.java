@@ -69,8 +69,8 @@ public class DataSourcePluginService {
                 return new IllegalArgumentException(
                     String.format("DataSourcePlugin: %s is disabled", pluginId));
               } else {
-                return new IllegalArgumentException(
-                    "No enabled DataSourcePlugin with ID matching: " + pluginId);
+                return new PluginNotFoundException(
+                    "No DataSourcePlugin with ID matching: " + pluginId);
               }
             });
   }
@@ -88,7 +88,8 @@ public class DataSourcePluginService {
         .ifPresentOrElse(
             plugin -> plugin.setEnabled(true),
             () -> {
-              throw new IllegalArgumentException("Could not find plugin with ID: " + pluginId);
+              throw new PluginNotFoundException(
+                  "Could not enable non-existent DataSourcePlugin: " + pluginId);
             });
   }
 
@@ -105,7 +106,8 @@ public class DataSourcePluginService {
         .ifPresentOrElse(
             plugin -> plugin.setEnabled(false),
             () -> {
-              throw new IllegalArgumentException("Could not find plugin with ID: " + pluginId);
+              throw new PluginNotFoundException(
+                  "Could not disable non-existent DataSourcePlugin: " + pluginId);
             });
   }
 

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Repository;
 import self.me.matchday.model.FileServerUser;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -37,4 +38,6 @@ public interface FileServerUserRepo extends JpaRepository<FileServerUser, UUID> 
   @Query(
       "SELECT user FROM FileServerUser user WHERE user.serverId = :serverId AND user.loggedIn = true")
   List<FileServerUser> fetchLoggedInUsersForServer(@Param("serverId") UUID serverId);
+
+  Optional<FileServerUser> findByUsername(@Param("username") String username);
 }

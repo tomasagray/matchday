@@ -110,9 +110,8 @@ public class CookiesService {
    */
   public void validateCookie(@NotNull final SecureCookie cookie) {
     final String name = cookie.getName();
-    final String value = cookie.getValue();
     final String path = cookie.getPath();
-    if ("".equals(name) || "".equals(value) || "".equals(path)) {
+    if ("".equals(name) || "".equals(path)) {
       throw new InvalidCookieException("Cookie was blank: " + cookie);
     }
   }

@@ -19,15 +19,14 @@
 
 package self.me.matchday.api.controller;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.VideoPlaylistResource;
 import self.me.matchday.api.resource.VideoPlaylistResource.VideoPlaylistResourceAssembler;
 import self.me.matchday.api.resource.VideoResource;
@@ -75,7 +74,6 @@ public class VideoStreamingController {
         .orElse(ResponseEntity.notFound().build());
   }
 
-  // todo - update API, make more sense
   @RequestMapping(
       value = "/playlist/master",
       method = RequestMethod.GET,
@@ -173,5 +171,12 @@ public class VideoStreamingController {
             "Killed %s streaming tasks for Event: %s, file source: %s",
             killedTasks, eventId, fileSrcId);
     return ResponseEntity.ok(message);
+  }
+
+  @ExceptionHandler(IOException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  public String handleIoError(@NotNull IOException e) {
+    return e.getMessage();
   }
 }

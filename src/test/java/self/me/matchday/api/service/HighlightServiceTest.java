@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,7 +32,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Highlight;
-import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for Highlight Show service")
 class HighlightServiceTest {
 
-  private static final String LOG_TAG = "HighlightServiceTest";
+  private static final Logger logger = LogManager.getLogger(HighlightServiceTest.class);
 
   private static TestDataCreator testDataCreator;
   private static HighlightService highlightService;
@@ -72,8 +73,8 @@ class HighlightServiceTest {
 
     final int expectedHighlightCount = 1;
 
-    final List<Highlight> highlights = highlightService.fetchAllHighlights();
-    Log.i(LOG_TAG, "Found Highlight data: " + highlights);
+    final List<Highlight> highlights = highlightService.fetchAll();
+    logger.info("Found Highlight data: {}", highlights);
     assertThat(highlights.size()).isGreaterThanOrEqualTo(expectedHighlightCount);
     assertThat(highlights).contains(testHighlight);
   }
@@ -83,12 +84,12 @@ class HighlightServiceTest {
   void fetchHighlight() {
 
     final Optional<Highlight> highlightOptional =
-        highlightService.fetchHighlight(testHighlight.getEventId());
+        highlightService.fetchById(testHighlight.getEventId());
     assertThat(highlightOptional).isPresent();
 
     highlightOptional.ifPresent(
         highlight -> {
-          Log.i(LOG_TAG, "Retrieved Highlight Show: " + highlight);
+          logger.info("Retrieved Highlight Show: {}", highlight);
           final boolean equals = highlight.equals(testHighlight);
           assertThat(equals).isTrue();
           assertThat(highlight).isEqualTo(testHighlight);
