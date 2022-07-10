@@ -102,7 +102,6 @@ public class FileFoxPlugin implements FileServerPlugin {
       final URI uri = url.toURI();
       final LinkedMultiValueMap<String, String> cookieJar = new LinkedMultiValueMap<>();
       cookies.forEach(cookie -> cookieJar.add(cookie.getName(), cookie.getValue()));
-
       // Parse download page
       return downloadParser.parseDownloadRequest(uri, cookieJar);
 

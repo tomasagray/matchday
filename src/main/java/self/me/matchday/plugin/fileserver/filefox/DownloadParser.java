@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -51,7 +51,7 @@ public class DownloadParser {
     final String downloadLandingHtml = downloadLandingResponse.bodyToMono(String.class).block();
     final FileFoxPage page = pageEvaluator.getFileFoxPage(downloadLandingHtml);
     if (!(page instanceof FileFoxPage.DownloadLanding && page.isPremium())) {
-      throw new RuntimeException("Response from FileFox was not a Premium download page");
+      throw new FileFoxParsingException("Response from FileFox was not a Premium download page");
     }
 
     final FileFoxPage.DownloadLanding downloadLanding = (FileFoxPage.DownloadLanding) page;
@@ -68,7 +68,7 @@ public class DownloadParser {
       final FileFoxPage.DirectDownload directDownload = (FileFoxPage.DirectDownload) ddlPage;
       return Optional.of(directDownload.getDdlUrl());
     }
-    // todo - don't use optional, throw exceptions
-    return Optional.empty();
+    throw new FileFoxParsingException(
+        "Not a DirectDownload page, or could not parse page: " + ddlPage.getText());
   }
 }

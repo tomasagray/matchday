@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -21,7 +21,6 @@ package self.me.matchday.plugin.fileserver.filefox;
 
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -46,9 +45,9 @@ public class LoginParser {
   private final URI loginUri;
 
   public LoginParser(
-      @Autowired ConnectionManager connectionManager,
-      @Autowired PageEvaluator pageEvaluator,
-      @Autowired FileFoxPluginProperties pluginProperties)
+      ConnectionManager connectionManager,
+      PageEvaluator pageEvaluator,
+      @NotNull FileFoxPluginProperties pluginProperties)
       throws URISyntaxException {
 
     this.connectionManager = connectionManager;
@@ -65,19 +64,23 @@ public class LoginParser {
     return evaluateLoginResponse(loginResponse);
   }
 
-  private ClientResponse evaluateLoginResponse(@NotNull final ClientResponse loginResponse) {
+  private @NotNull ClientResponse evaluateLoginResponse(
+      @NotNull final ClientResponse loginResponse) {
 
     final HttpStatus statusCode = loginResponse.statusCode();
     final String body = loginResponse.bodyToMono(String.class).block();
     final FileFoxPage page = pageEvaluator.getFileFoxPage(body);
 
     if (!(page instanceof FileFoxPage.Profile)) {
-      return loginResponse.mutate().statusCode(HttpStatus.UNAUTHORIZED).build();
+      return loginResponse
+          .mutate()
+          .statusCode(HttpStatus.UNAUTHORIZED)
+          .body(page.getText())
+          .build();
     }
-    // todo - follow redirect? do we need more cookies?
     if (statusCode.is3xxRedirection()) {
       // Correct status code
-      return loginResponse.mutate().statusCode(HttpStatus.OK).build();
+      return loginResponse.mutate().statusCode(HttpStatus.OK).body(page.getText()).build();
     }
     return loginResponse;
   }

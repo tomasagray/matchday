@@ -78,8 +78,6 @@ public class FileServerUserServiceTest {
   @DisplayName("Validate login, logout & re-login functionality of file server service")
   void loginAndLogout() {
 
-    final UUID testPluginId = testFileServerPlugin.getPluginId();
-
     // Login
     logger.info("Attempting login with user: " + testFileServerUser);
     final FileServerUser loggedInUser = userService.login(testFileServerUser);

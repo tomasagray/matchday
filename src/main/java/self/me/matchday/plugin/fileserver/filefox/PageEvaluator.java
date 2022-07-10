@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,6 +19,7 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -56,7 +57,7 @@ public class PageEvaluator {
     try {
       return getPageType(html);
     } catch (Throwable e) {
-      return new FileFoxPage.Invalid();
+      return FileFoxPage.Invalid.builder().build();
     }
   }
 
@@ -68,43 +69,44 @@ public class PageEvaluator {
     final Elements buttons = page.select(BUTTON_SELECTOR);
     final Matcher dlLimit = pluginProperties.getDownloadLimitPattern().matcher(pageText);
     final Optional<Element> ddlSubmitButton =
-            buttons.stream()
-                    .filter(button -> button.text().equalsIgnoreCase(pluginProperties.getLinkButtonText()))
-                    .findAny();
+        buttons.stream()
+            .filter(button -> button.text().equalsIgnoreCase(pluginProperties.getLinkButtonText()))
+            .findAny();
     final Optional<URL> ddlUrlOptional = getDirectDownloadUrl(page);
 
     if (navBar.text().contains(pluginProperties.getLoggedOutText())) {
-      return new FileFoxPage.Login();
+      return FileFoxPage.Login.builder().text(pageText).build();
     }
     if (pageText.contains(pluginProperties.getPremiumOnlyError())) {
-      return FileFoxPage.DownloadLanding.builder().premium(false).loggedIn(true).build();
+      return FileFoxPage.DownloadLanding.builder()
+          .premium(false)
+          .loggedIn(true)
+          .text(pageText)
+          .build();
     }
     if (dlLimit.find()) {
-      final FileFoxPage.Invalid invalidPage = new FileFoxPage.Invalid();
-      invalidPage.setError(dlLimit.group());
-      return invalidPage;
+      return FileFoxPage.Invalid.builder().error(dlLimit.group()).text(pageText).build();
     }
     if (ddlSubmitButton.isPresent()) {
       final Map<String, String> queryParams = getHiddenQueryParams(page);
       final URI ddlSubmitUri = getHiddenFormUri(page);
       return FileFoxPage.DownloadLanding.builder()
-              .hiddenQueryParams(queryParams)
-              .ddlSubmitUri(ddlSubmitUri)
-              .loggedIn(true)
-              .premium(true)
-              .build();
+          .hiddenQueryParams(queryParams)
+          .ddlSubmitUri(ddlSubmitUri)
+          .loggedIn(true)
+          .premium(true)
+          .text(pageText)
+          .build();
     }
     if (ddlUrlOptional.isPresent()) {
       final URL ddlUrl = ddlUrlOptional.get();
-      return FileFoxPage.DirectDownload.builder()
-              .ddlUrl(ddlUrl)
-              .build();
+      return FileFoxPage.DirectDownload.builder().ddlUrl(ddlUrl).text(pageText).build();
     }
     // Default
-    return new FileFoxPage.Invalid();
+    return FileFoxPage.Invalid.builder().text(pageText).build();
   }
 
-  private Map<String, String> getHiddenQueryParams(final Document document) {
+  private @NotNull Map<String, String> getHiddenQueryParams(@NotNull final Document document) {
 
     final FormElement hiddenForm = document.getAllElements().forms().get(0);
     final Elements hiddenInputs = hiddenForm.select(HIDDEN_INPUT);
@@ -119,7 +121,9 @@ public class PageEvaluator {
     return hiddenValues;
   }
 
-  private URI getHiddenFormUri(final Document document) throws URISyntaxException {
+  @Contract("_ -> new")
+  private @NotNull URI getHiddenFormUri(@NotNull final Document document)
+      throws URISyntaxException {
 
     final Optional<Element> formOptional = document.getElementsByTag("form").stream().findFirst();
     if (formOptional.isPresent()) {
@@ -132,7 +136,7 @@ public class PageEvaluator {
   }
 
   @NotNull
-  private Optional<URL> getDirectDownloadUrl(Document document) {
+  private Optional<URL> getDirectDownloadUrl(@NotNull Document document) {
 
     final Elements links = document.getElementsByTag("a");
     return links.stream()
@@ -144,7 +148,7 @@ public class PageEvaluator {
               try {
                 return new URL(href);
               } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
+                throw new FileFoxParsingException(e);
               }
             });
   }

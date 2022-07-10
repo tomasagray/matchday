@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.log.plugin;
+package self.me.matchday.log.plugin.blogger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

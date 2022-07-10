@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -53,7 +53,7 @@ public class FileFoxPluginProperties extends PluginProperties {
     try {
       return new URL(baseUrl);
     } catch (MalformedURLException e) {
-      throw new RuntimeException("Could not parse FileFox base URL: " + baseUrl, e);
+      throw new FileFoxParsingException("Could not parse FileFox base URL: " + baseUrl, e);
     }
   }
 
@@ -61,7 +61,7 @@ public class FileFoxPluginProperties extends PluginProperties {
     try {
       return new URL(loginUrl);
     } catch (MalformedURLException e) {
-      throw new RuntimeException("Could not parse FileFox login URL: " + loginUrl, e);
+      throw new FileFoxParsingException("Could not parse FileFox login URL: " + loginUrl, e);
     }
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,16 +19,22 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 
+@SuperBuilder
+@Getter
 public abstract class FileFoxPage {
+
+  protected final boolean premium;
+  protected final boolean loggedIn;
+  protected String text;
 
   abstract boolean isLoggedIn();
 
@@ -36,27 +42,44 @@ public abstract class FileFoxPage {
 
   @EqualsAndHashCode(callSuper = true)
   @Data
-  @Builder
+  @SuperBuilder
   public static class DownloadLanding extends FileFoxPage {
 
-    private final boolean premium;
-    private final boolean loggedIn;
     private final Map<String, String> hiddenQueryParams;
     private final URI ddlSubmitUri;
+
+    @Override
+    boolean isLoggedIn() {
+      return this.loggedIn;
+    }
+
+    @Override
+    boolean isPremium() {
+      return this.premium;
+    }
   }
 
   @EqualsAndHashCode(callSuper = true)
   @Data
-  @Builder
+  @SuperBuilder
   public static class DirectDownload extends FileFoxPage {
 
-    private final boolean premium = true;
-    private final boolean loggedIn = true;
     private final URL ddlUrl;
+
+    @Override
+    boolean isLoggedIn() {
+      return this.loggedIn;
+    }
+
+    @Override
+    boolean isPremium() {
+      return this.premium;
+    }
   }
 
   @EqualsAndHashCode(callSuper = true)
   @Data
+  @SuperBuilder
   public static class Login extends FileFoxPage {
 
     private final boolean premium = false;
@@ -65,7 +88,7 @@ public abstract class FileFoxPage {
 
   @EqualsAndHashCode(callSuper = true)
   @Data
-  @Builder
+  @SuperBuilder
   public static class Profile extends FileFoxPage {
 
     private final boolean premium;
@@ -74,10 +97,10 @@ public abstract class FileFoxPage {
 
   @EqualsAndHashCode(callSuper = true)
   @Data
-  @NoArgsConstructor
+  @SuperBuilder
   public static class Invalid extends FileFoxPage {
     private final boolean loggedIn = false;
     private final boolean premium = false;
-    private String error = "Could not parse FileFox page";
+    private String error;
   }
 }

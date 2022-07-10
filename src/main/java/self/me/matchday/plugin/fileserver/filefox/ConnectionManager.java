@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -115,8 +115,8 @@ public class ConnectionManager {
     }
   }
 
-  private ClientResponse performPost(
-      @NotNull HttpURLConnection connection, @NotNull String query) throws IOException {
+  private ClientResponse performPost(@NotNull HttpURLConnection connection, @NotNull String query)
+      throws IOException {
 
     configurePostConnection(connection);
     final byte[] queryBytes = query.getBytes(StandardCharsets.UTF_8);
@@ -150,7 +150,7 @@ public class ConnectionManager {
   }
 
   private InputStream getInputStream(@NotNull final HttpURLConnection connection)
-          throws IOException {
+      throws IOException {
 
     InputStream is;
     // Check for error response
@@ -190,5 +190,4 @@ public class ConnectionManager {
     connection.setRequestProperty("TE", "Trailers");
     connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
   }
-
 }

@@ -43,9 +43,12 @@
         <include within="self.me.matchday.plugin.datasource.blogger.BloggerPlugin"/>
         <include within="self.me.matchday.plugin.datasource.parsing.MatchDataParser"/>
         <include within="self.me.matchday.plugin.io.ffmpeg.*"/>
+        <include within="self.me.matchday.plugin.fileserver.filefox.*"/>
 
         <include within="self.me.matchday.log.*"/>
-        <include within="self.me.matchday.log.plugin.*"/>
+        <include within="self.me.matchday.log.plugin.blogger.*"/>
+        <include within="self.me.matchday.log.plugin.ffmpeg.*"/>
+        <include within="self.me.matchday.log.plugin.filefox.*"/>
     </weaver>
 
     <aspects>
@@ -57,7 +60,6 @@
         <aspect name="self.me.matchday.log.EntityCorrectionServiceLog"/>
         <aspect name="self.me.matchday.log.EntityServiceRegistryLog"/>
         <aspect name="self.me.matchday.log.EventServiceLog"/>
-        <aspect name="self.me.matchday.log.FFmpegLog"/>
         <aspect name="self.me.matchday.log.FileServerPluginServiceLog"/>
         <aspect name="self.me.matchday.log.FileServerUserServiceLog"/>
         <aspect name="self.me.matchday.log.MatchDataParserLog"/>
@@ -73,6 +75,8 @@
         <aspect name="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog"/>
         <aspect name="self.me.matchday.log.VideoStreamLocatorServiceLog"/>
         <aspect name="self.me.matchday.log.VideoStreamManagerLog"/>
-        <aspect name="self.me.matchday.log.plugin.BloggerPluginLog"/>
+        <aspect name="self.me.matchday.log.plugin.blogger.BloggerPluginLog"/>
+        <aspect name="self.me.matchday.log.plugin.ffmpeg.FFmpegLog"/>
+        <aspect name="self.me.matchday.log.plugin.filefox.LoginParserLog"/>
     </aspects>
 </aspectj>
