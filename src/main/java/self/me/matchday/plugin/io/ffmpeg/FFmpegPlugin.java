@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -70,7 +70,9 @@ public class FFmpegPlugin implements Plugin {
 
   /** Cancels all streaming tasks running in the background */
   public void interruptAllStreamTasks() {
-    streamingTasks.forEach((pid, ffmpegTask) -> interruptStreamingTask(ffmpegTask.getDataDir()));
+    ProcessHandle.allProcesses()
+        .filter(p -> p.info().command().map(c -> c.contains("ffmpeg")).orElse(false))
+        .forEach(ProcessHandle::destroyForcibly);
     streamingTasks.clear();
   }
 
@@ -87,11 +89,9 @@ public class FFmpegPlugin implements Plugin {
     final FFmpegStreamTask streamingTask = streamingTasks.get(absolutePath);
     if (streamingTask != null) {
       // kill task
-      final boolean processKilled = streamingTask.kill();
-      if (processKilled) {
-        streamingTasks.remove(absolutePath);
-      }
+      streamingTask.kill();
     }
+    streamingTasks.remove(absolutePath);
   }
 
   /**

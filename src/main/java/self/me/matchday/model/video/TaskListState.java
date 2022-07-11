@@ -48,7 +48,7 @@ public class TaskListState extends StreamJobState {
   public void computeState() {
 
     Double aggregateCompletionTotal = 0.0;
-    for (final TaskState state : taskStates) {
+    for (final TaskState state : getTaskStates()) {
       final JobStatus status = state.getStatus();
       if (status.equals(JobStatus.STOPPED) || status.equals(JobStatus.ERROR)) {
         setStatus(status);

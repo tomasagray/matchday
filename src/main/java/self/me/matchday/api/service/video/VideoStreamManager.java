@@ -19,7 +19,6 @@
 
 package self.me.matchday.api.service.video;
 
-import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -96,7 +95,6 @@ public class VideoStreamManager {
     playlistService.deleteVideoStreamPlaylist(playlist);
   }
 
-  @SneakyThrows
   @Async("VideoStreamExecutor")
   public void beginStreaming(@NotNull final VideoStreamLocator streamLocator) {
     try {
@@ -120,7 +118,7 @@ public class VideoStreamManager {
       }
     } catch (Throwable e) {
       updateLocatorTaskState(streamLocator, JobStatus.ERROR, -1.0);
-      throw e;
+      throw new VideoStreamingException(e);
     }
   }
 

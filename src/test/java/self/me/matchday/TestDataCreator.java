@@ -217,9 +217,12 @@ public class TestDataCreator {
   }
 
   @Transactional
-  public void deleteTestEvent(@NotNull final Event event) {
+  public void deleteTestEvent(Event event) {
     logger.info("Deleting Event: {}", event);
-    eventService.delete(event.getEventId());
+    if (event != null && event.getEventId() != null) {
+      eventService.delete(event.getEventId());
+    }
+    // if id == null, Event is not managed
   }
 
   @Transactional
@@ -390,12 +393,6 @@ public class TestDataCreator {
         new FileServerUser(username, password, TestFileServerPlugin.pluginId);
     //    user.setLoggedIntoServer(TestFileServerPlugin.pluginId, new ArrayList<>());
     return userService.login(user);
-  }
-
-  @Transactional
-  public void deleteFileServerUser(@NotNull final FileServerUser user) {
-    logger.info("Deleting FileServerUser: {}", user);
-    userService.deleteUser(user.getUserId());
   }
 
   @Transactional

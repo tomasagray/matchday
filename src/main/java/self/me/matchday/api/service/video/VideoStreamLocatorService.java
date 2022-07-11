@@ -131,7 +131,8 @@ public class VideoStreamLocatorService {
     if (!playlistFile.isFile()) {
       final String msg =
           String.format(
-              "VideoStreamLocator: %s does not refer to a file! Will not delete", streamLocator);
+              "VideoStreamLocator: %s does not refer to a file! Will not delete",
+              streamLocator.getStreamLocatorId());
       throw new IllegalArgumentException(msg);
     }
 

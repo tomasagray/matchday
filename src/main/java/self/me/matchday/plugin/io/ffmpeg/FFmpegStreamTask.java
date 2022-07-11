@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -67,8 +67,12 @@ public abstract class FFmpegStreamTask extends Thread {
   public final boolean kill() {
     // Ensure process exists
     if (process != null) {
+      ProcessHandle.allProcesses()
+          .filter(p -> p.pid() == process.pid())
+          .findFirst()
+          .ifPresent(ProcessHandle::destroyForcibly);
       // Ensure process is dead
-      return !(process.destroyForcibly().isAlive());
+      return !process.isAlive();
     }
     return false;
   }

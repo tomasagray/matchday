@@ -19,6 +19,8 @@
 
 package self.me.matchday.model;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.util.Log;
 
 import java.util.stream.Stream;
 
@@ -41,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Validation for PatternKit<> class")
 class PatternKitTest {
 
-  private static final String LOG_TAG = "PatternKitTest";
+  private static final Logger logger = LogManager.getLogger(PatternKitTest.class);
 
   private static TestDataCreator testDataCreator;
 
@@ -70,8 +71,8 @@ class PatternKitTest {
   @DisplayName("Test similarity of programmatically created PatternKits vs. those read from JSON")
   void testFileAndManualPatternEquals(PatternKit<?> manualKit, PatternKit<?> fromFileKit) {
 
-    Log.i(LOG_TAG, "Manually created Kit:\n" + manualKit);
-    Log.i(LOG_TAG, "Kit from file:\n" + fromFileKit);
+    logger.info("Manually created Kit:\n" + manualKit);
+    logger.info("Kit from file:\n" + fromFileKit);
 
     assertThat(manualKit).isNotNull();
     assertThat(fromFileKit).isNotNull();

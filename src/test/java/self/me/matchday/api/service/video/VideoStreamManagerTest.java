@@ -63,9 +63,9 @@ class VideoStreamManagerTest {
 
   @BeforeAll
   public static void setup(
-      @Autowired TestDataCreator testDataCreator,
+      @Autowired @NotNull TestDataCreator testDataCreator,
+      @Autowired @NotNull FileServerUserService userService,
       @Autowired FileServerPluginService fileServerPluginService,
-      @Autowired FileServerUserService userService,
       @Autowired TestFileServerPlugin testFileServerPlugin,
       @Autowired VideoStreamManager streamManager) {
 
