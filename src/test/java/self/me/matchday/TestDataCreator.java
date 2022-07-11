@@ -30,8 +30,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.api.service.EventService;
-import self.me.matchday.db.*;
+import self.me.matchday.api.service.*;
+import self.me.matchday.db.VideoFileSrcRepository;
+import self.me.matchday.db.VideoStreamLocatorPlaylistRepo;
+import self.me.matchday.db.VideoStreamLocatorRepo;
 import self.me.matchday.model.*;
 import self.me.matchday.model.video.*;
 import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
@@ -59,35 +61,32 @@ public class TestDataCreator {
   private static final String BASE_URL = "http://192.168.0.107:7000";
   private static final Random numGen = new Random();
 
-  private final EventRepository eventRepository;
   private final EventService eventService;
-  private final HighlightRepository highlightRepository;
-  private final CompetitionRepository competitionRepository;
-  private final TeamRepository teamRepository;
   private final VideoFileSrcRepository fileSrcRepository;
-  private final FileServerUserRepo userRepo;
+  private final HighlightService highlightService;
+  private final CompetitionService competitionService;
+  private final TeamService teamService;
+  private final FileServerUserService userService;
   private final VideoStreamLocatorPlaylistRepo locatorPlaylistRepo;
   private final VideoStreamLocatorRepo streamLocatorRepo;
 
   @Autowired
   public TestDataCreator(
-      EventRepository eventRepository,
       EventService eventService,
-      HighlightRepository highlightRepository,
-      CompetitionRepository competitionRepository,
-      TeamRepository teamRepository,
       VideoFileSrcRepository fileSrcRepository,
-      FileServerUserRepo userRepo,
+      HighlightService highlightService,
+      CompetitionService competitionService,
+      TeamService teamService,
+      FileServerUserService userService,
       VideoStreamLocatorPlaylistRepo locatorPlaylistRepo,
       VideoStreamLocatorRepo locatorRepo) {
 
-    this.eventRepository = eventRepository;
     this.eventService = eventService;
-    this.highlightRepository = highlightRepository;
-    this.competitionRepository = competitionRepository;
-    this.teamRepository = teamRepository;
     this.fileSrcRepository = fileSrcRepository;
-    this.userRepo = userRepo;
+    this.highlightService = highlightService;
+    this.competitionService = competitionService;
+    this.teamService = teamService;
+    this.userService = userService;
     this.locatorPlaylistRepo = locatorPlaylistRepo;
     this.streamLocatorRepo = locatorRepo;
   }
@@ -109,13 +108,6 @@ public class TestDataCreator {
     final DataSource<Match> testDataSource = JsonParser.fromJson(dataSourceJson, type);
     logger.info("Read test datasource:\n{}", testDataSource);
     return testDataSource;
-  }
-
-  public PatternKit<Event> createEventPatternKit() {
-
-    final PatternKit<Event> patternKit;
-    patternKit = createEventPatternKitFromFile();
-    return patternKit;
   }
 
   public @NotNull PatternKit<Event> createEventPatternKitManually(@NotNull String regex) {
@@ -140,14 +132,6 @@ public class TestDataCreator {
         ResourceFileReader.readTextResource("data/test_event_pattern_kit.json");
     final Type type = new TypeToken<PatternKit<Event>>() {}.getType();
     return JsonParser.fromJson(patternKitData, type);
-  }
-
-  public PatternKit<VideoFileSource> createFileSourcePatternKit() {
-
-    final PatternKit<VideoFileSource> patternKit;
-    //    patternKit = createFileSourcePatternKitManually();
-    patternKit = createFileSourcePatternFromFile();
-    return patternKit;
   }
 
   @NotNull
@@ -200,59 +184,34 @@ public class TestDataCreator {
     return JsonParser.fromJson(patternKitData, type);
   }
 
-  public PatternKit<VideoFilePack> createVideoFilePackPatternKit() {
-
-    final PatternKit<VideoFile> patternKit = new PatternKit<>(VideoFile.class);
-    final Pattern pattern =
-        Pattern.compile(
-            "^https?://[\\p{L}.]*filefox.cc/\\w+/[\\w-]*.(mkv|ts)", Pattern.UNICODE_CASE);
-    final Map<Integer, String> fields = new HashMap<>(Map.of(0, "externalUrl"));
-
-    patternKit.setPattern(pattern);
-    patternKit.setFields(fields);
-    return new PatternKit<>(VideoFilePack.class);
-  }
-
-  public PatternKit<VideoFile> createVideoFilePatternKit() {
-
-    final PatternKit<VideoFile> patternKit = new PatternKit<>(VideoFile.class);
-
-    final Pattern pattern = Pattern.compile("[1st2ndFirSeco-]+ Half|[Postre]+-Match");
-    final Map<Integer, String> fields = Map.of(0, "title");
-
-    patternKit.setPattern(pattern);
-    patternKit.setFields(fields);
-    return patternKit;
-  }
-
   // ================ EVENTS ======================
 
   @Transactional
   @NotNull
   public Match createTestMatch() {
-    return this.createTestMatch("<DEFAULT>");
+    return this.createTestMatch("Test ");
   }
 
   @Transactional
   @NotNull
-  public Match createTestMatch(@NotNull String competitionName) {
+  public Match createTestMatch(@NotNull String name) {
     // Create & save test match & VideoFileSource
-    final Competition testCompetition = createTestCompetition(competitionName);
-    final Team testTeam = createTestTeam(competitionName);
+    final Competition testCompetition = createTestCompetition("Competition " + name);
+    final Team homeTeam = createTestTeam("Home Team " + name);
+    final Team awayTeam = createTestTeam("Away Team " + name);
     final Event testEvent =
         Match.builder()
             .date(LocalDateTime.now())
             .competition(testCompetition)
-            .homeTeam(testTeam)
-            .awayTeam(testTeam)
+            .homeTeam(homeTeam)
+            .awayTeam(awayTeam)
             .fixture(new Fixture(1))
             .season(new Season())
             .build();
 
     // Create file source & event files
-    final VideoFileSource testFileSource = createTestVideoFileSource();
+    final VideoFileSource testFileSource = createVideoFileSource();
     testEvent.getFileSources().add(testFileSource);
-
     logger.info("Created test Event: {}", testEvent);
     return (Match) eventService.save(testEvent);
   }
@@ -260,7 +219,7 @@ public class TestDataCreator {
   @Transactional
   public void deleteTestEvent(@NotNull final Event event) {
     logger.info("Deleting Event: {}", event);
-    eventRepository.delete(event);
+    eventService.delete(event.getEventId());
   }
 
   @Transactional
@@ -275,13 +234,13 @@ public class TestDataCreator {
   public Competition createTestCompetition(@NotNull String name) {
     final Competition competition = new Competition(name);
     logger.info("Created test competition: {}", competition);
-    return competitionRepository.saveAndFlush(competition);
+    return competitionService.saveCompetition(competition);
   }
 
   @Transactional
   public void deleteTestCompetition(Competition competition) {
     logger.info("Deleting test Competition: {}", competition);
-    competitionRepository.delete(competition);
+    competitionService.deleteCompetitionById(competition.getCompetitionId());
   }
 
   @Transactional
@@ -294,33 +253,34 @@ public class TestDataCreator {
   @NotNull
   public Team createTestTeam(@NotNull String name) {
     final Team team = new Team(name);
-    return teamRepository.saveAndFlush(team);
+    return teamService.saveTeam(team);
   }
 
   @Transactional
   public void deleteTestTeam(@NotNull Team team) {
     logger.info("Deleting test Team: {}", team);
-    teamRepository.delete(team);
+    teamService.deleteTeamByName(team.getName().getName());
   }
 
   @Transactional
   @NotNull
-  public VideoFileSource createTestVideoFileSource() {
+  public VideoFileSource createVideoFileSourceAndSave() {
+    return fileSrcRepository.saveAndFlush(createVideoFileSource());
+  }
 
+  public VideoFileSource createVideoFileSource() {
     final int fileSetCount = 1;
 
     final List<VideoFilePack> videoFilePacks = createTestVideoFiles(fileSetCount);
-    final VideoFileSource fileSource =
-        VideoFileSource.builder()
-            .fileSrcId(UUID.randomUUID())
-            .channel("Test Channel")
-            .resolution(R_1080p)
-            .languages("English")
-            .videoBitrate(8_000L)
-            .videoFilePacks(videoFilePacks)
-            .filesize(FileSize.ofGigabytes(8))
-            .build();
-    return fileSrcRepository.saveAndFlush(fileSource);
+    return VideoFileSource.builder()
+        //        .fileSrcId(UUID.randomUUID())
+        .channel("Test Channel")
+        .resolution(R_1080p)
+        .languages("English")
+        .videoBitrate(8_000L)
+        .videoFilePacks(videoFilePacks)
+        .filesize(FileSize.ofGigabytes(8))
+        .build();
   }
 
   @Transactional
@@ -362,7 +322,7 @@ public class TestDataCreator {
   @Transactional
   public @NotNull VideoStreamLocatorPlaylist createStreamLocatorPlaylist() {
 
-    final VideoFileSource fileSource = createTestVideoFileSource();
+    final VideoFileSource fileSource = createVideoFileSourceAndSave();
     final Path locatorPath = Path.of("C:\\Users\\Public\\Matchday\\testing");
     final VideoStreamLocatorPlaylist playlist =
         new VideoStreamLocatorPlaylist(fileSource, locatorPath);
@@ -428,14 +388,14 @@ public class TestDataCreator {
     final String password = String.format("password-%s", numGen.nextInt(Integer.MAX_VALUE));
     final FileServerUser user =
         new FileServerUser(username, password, TestFileServerPlugin.pluginId);
-    user.setLoggedIntoServer(TestFileServerPlugin.pluginId, new ArrayList<>());
-    return userRepo.saveAndFlush(user);
+    //    user.setLoggedIntoServer(TestFileServerPlugin.pluginId, new ArrayList<>());
+    return userService.login(user);
   }
 
   @Transactional
   public void deleteFileServerUser(@NotNull final FileServerUser user) {
     logger.info("Deleting FileServerUser: {}", user);
-    userRepo.delete(user);
+    userService.deleteUser(user.getUserId());
   }
 
   @Transactional
@@ -454,6 +414,6 @@ public class TestDataCreator {
             .season(testSeason)
             .date(LocalDateTime.now())
             .build();
-    return highlightRepository.saveAndFlush(highlight);
+    return highlightService.save(highlight);
   }
 }

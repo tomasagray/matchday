@@ -32,7 +32,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.*;
+import self.me.matchday.model.video.PartIdentifier;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFilePack;
+import self.me.matchday.model.video.VideoFileSource;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,49 +51,60 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 class EntityCorrectionServiceTest {
 
-  private static final String UEFA_CHAMPIONS_LEAGUE = "UEFA Champions League";
-  private static final String FC_BARCELONA = "FC Barcelona";
-  private static final String ATLETICO_DE_MADRID = "Atletico de Madrid";
+  static final String UEFA_CHAMPIONS_LEAGUE = "UEFA Champions League ";
+  private static final String FC_BARCELONA = "FC Barcelona ";
+  private static final String ATLETICO_DE_MADRID = "Atletico de Madrid ";
 
   private static final Logger logger = LogManager.getLogger(EntityCorrectionServiceTest.class);
   private static EntityCorrectionService entityCorrectionService;
-  private static TestDataCreator testDataCreator;
   private static EventService eventService;
 
   @BeforeAll
   static void setup(
       @Autowired EntityCorrectionService correctionService,
       @Autowired TestDataCreator testDataCreator,
-      @Autowired @NotNull EventService eventService) {
+      @Autowired @NotNull EventService eventService)
+      throws MalformedURLException {
 
     EntityCorrectionServiceTest.entityCorrectionService = correctionService;
-    EntityCorrectionServiceTest.testDataCreator = testDataCreator;
     EntityCorrectionServiceTest.eventService = eventService;
     createProperEvent();
     createSynonyms();
   }
 
-  private static void createProperEvent() {
-    final Match properEvent = testDataCreator.createTestMatch("Test Match");
-    properEvent.setHomeTeam(new Team(FC_BARCELONA));
-    properEvent.setAwayTeam(new Team(ATLETICO_DE_MADRID));
-    properEvent.setCompetition(new Competition(UEFA_CHAMPIONS_LEAGUE));
+  private static void createProperEvent() throws MalformedURLException {
+    final Match properEvent =
+        Match.builder()
+            .competition(new Competition(UEFA_CHAMPIONS_LEAGUE))
+            .homeTeam(new Team(FC_BARCELONA))
+            .awayTeam(new Team(ATLETICO_DE_MADRID))
+            .date(LocalDate.now().atStartOfDay())
+            .build();
+    final VideoFileSource fileSource = new VideoFileSource();
+    final VideoFilePack filePack = new VideoFilePack();
+    filePack.put(new VideoFile(PartIdentifier.FIRST_HALF, new URL("https://wwww.testing.com/")));
+    fileSource.addVideoFilePack(filePack);
+    properEvent.addFileSource(fileSource);
     logger.info("Saved proper event: " + eventService.save(properEvent));
   }
 
   private static void createSynonyms() {
     final ProperName fcBarcelona = new ProperName(FC_BARCELONA);
-    final Synonym barca = new Synonym("Barca", fcBarcelona);
-    final Synonym barcelona = new Synonym("Barcelona", fcBarcelona);
-
+    createSynonym("Barca", fcBarcelona);
     final ProperName atletico = new ProperName(ATLETICO_DE_MADRID);
-    final Synonym atleti = new Synonym("Atleti", atletico);
-
+    createSynonym("Atleti", atletico);
     final ProperName championsLeague = new ProperName(UEFA_CHAMPIONS_LEAGUE);
-    final Synonym ucl = new Synonym("UCL", championsLeague);
+    createSynonym("UCL", championsLeague);
+  }
 
-    final List<Synonym> synonyms = List.of(barca, barcelona, atleti, ucl);
-    logger.info("Saved Synonyms: " + entityCorrectionService.addAllSynonyms(synonyms));
+  private static void createSynonym(@NotNull String name, ProperName properName) {
+    final List<Synonym> synonyms = entityCorrectionService.getSynonymsFor(name);
+    if (synonyms.size() == 0) {
+      final Synonym synonym = entityCorrectionService.addSynonym(new Synonym(name, properName));
+      logger.info("Added Synonym: {}", synonym);
+    } else {
+      logger.info("Synonym already exists for name: {}", name);
+    }
   }
 
   @Test
@@ -151,7 +169,7 @@ class EntityCorrectionServiceTest {
         Match.builder()
             .competition((new Competition("UCL")))
             .homeTeam(new Team("Atleti"))
-            .awayTeam(new Team("Barcelona"))
+            .awayTeam(new Team("Barca"))
             .season(testSeason)
             .fixture(testFixture)
             .date(testDate)

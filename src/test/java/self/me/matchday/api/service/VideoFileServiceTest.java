@@ -66,7 +66,7 @@ class VideoFileServiceTest {
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Create test VideoFileSource
-    testVideoFileSrc = testDataCreator.createTestVideoFileSource();
+    testVideoFileSrc = testDataCreator.createVideoFileSourceAndSave();
   }
 
   @Test

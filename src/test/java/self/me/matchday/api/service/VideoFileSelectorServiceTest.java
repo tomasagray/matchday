@@ -60,7 +60,7 @@ class VideoFileSelectorServiceTest {
     VideoFileSelectorServiceTest.fileSelectorService = fileSelectorService;
 
     // Create test data
-    testVideoFileSource = testDataCreator.createTestVideoFileSource();
+    testVideoFileSource = testDataCreator.createVideoFileSourceAndSave();
     // Set internal urls for testing
     setInternalUrls(testVideoFileSource.getVideoFilePacks());
   }

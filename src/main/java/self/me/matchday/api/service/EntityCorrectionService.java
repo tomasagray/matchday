@@ -121,7 +121,7 @@ public class EntityCorrectionService {
   }
 
   public List<Synonym> getSynonymsFor(@NotNull String word) {
-    return synonymRepository.findSynonymsByProperNameNameContains(word);
+    return synonymRepository.findSynonymsFor(word);
   }
 
   public <T> T getCorrectedEntity(@NotNull T entity) {
@@ -131,7 +131,7 @@ public class EntityCorrectionService {
         .or(
             () ->
                 synonymRepository
-                    .findSynonymByNameContains(name)
+                    .findSynonymByName(name)
                     .flatMap(synonym -> getEntityByName(entity, synonym.getProperName().getName())))
         .orElse(entity);
   }

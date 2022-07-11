@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.CompetitionRepository;
 import self.me.matchday.model.Competition;
+import self.me.matchday.model.ProperName;
 
 import java.util.Comparator;
 import java.util.List;
@@ -78,12 +79,10 @@ public class CompetitionService {
    */
   public Competition saveCompetition(@NotNull final Competition competition) {
 
-    if (isValidCompetition(competition)) {
-      competitionRepository.saveAndFlush(competition);
-      return competition;
-    }
-    // invalid data...
-    return null;
+    validateCompetition(competition);
+    final Optional<Competition> competitionOptional =
+        competitionRepository.findCompetitionByNameName(competition.getName().getName());
+    return competitionOptional.orElseGet(() -> competitionRepository.saveAndFlush(competition));
   }
 
   /**
@@ -99,9 +98,11 @@ public class CompetitionService {
    * Data validation for Competition objects
    *
    * @param competition The Competition to scrutinize
-   * @return true/false
    */
-  private boolean isValidCompetition(@NotNull final Competition competition) {
-    return competition.getName() != null;
+  private void validateCompetition(@NotNull final Competition competition) {
+    final ProperName name = competition.getName();
+    if (name == null || "".equals(name.getName())) {
+      throw new IllegalArgumentException("Competition name was blank or null");
+    }
   }
 }

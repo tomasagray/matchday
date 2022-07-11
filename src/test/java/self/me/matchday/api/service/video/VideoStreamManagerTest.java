@@ -70,7 +70,7 @@ class VideoStreamManagerTest {
       @Autowired VideoStreamManager streamManager) {
 
     VideoStreamManagerTest.streamManager = streamManager;
-    VideoStreamManagerTest.testFileSource = testDataCreator.createTestVideoFileSource();
+    VideoStreamManagerTest.testFileSource = testDataCreator.createVideoFileSourceAndSave();
 
     final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
     final FileServerUser loggedInUser = userService.login(testFileServerUser);

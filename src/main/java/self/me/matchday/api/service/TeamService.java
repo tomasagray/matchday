@@ -94,8 +94,8 @@ public class TeamService {
    */
   public Team saveTeam(@NotNull final Team team) {
     validateTeam(team);
-    teamRepository.saveAndFlush(team);
-    return team;
+    final Optional<Team> teamOptional = teamRepository.findTeamByNameName(team.getName().getName());
+    return teamOptional.orElseGet(() -> teamRepository.saveAndFlush(team));
   }
 
   /**

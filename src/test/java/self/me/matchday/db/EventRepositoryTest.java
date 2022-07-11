@@ -33,6 +33,7 @@ import self.me.matchday.model.*;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,11 +55,15 @@ class EventRepositoryTest {
   @DisplayName("Fetch Event by matching characteristics")
   void testMatchingEventRetrieval() {
 
+    final int seed = ThreadLocalRandom.current().nextInt();
+    final String competitionName = "UEFA Champions League " + seed;
+    final String homeTeamName = "Chelsea " + seed;
+    final String awayTeamName = "AC Milan " + seed;
     final Event testEvent =
         Match.builder()
-            .competition(new Competition("UEFA Champions League"))
-            .homeTeam(new Team("Chelsea"))
-            .awayTeam(new Team("AC Milan"))
+            .competition(new Competition(competitionName))
+            .homeTeam(new Team(homeTeamName))
+            .awayTeam(new Team(awayTeamName))
             .season(new Season(2024, 2025))
             .fixture(new Fixture(34))
             .date(LocalDate.now().atStartOfDay())
@@ -67,9 +72,9 @@ class EventRepositoryTest {
 
     final Event example =
         Match.builder()
-            .competition(new Competition("UEFA Champions League"))
-            .homeTeam(new Team("Chelsea"))
-            .awayTeam(new Team("AC Milan"))
+            .competition(new Competition(competitionName))
+            .homeTeam(new Team(homeTeamName))
+            .awayTeam(new Team(awayTeamName))
             .date(LocalDate.now().atStartOfDay())
             .build();
     final Optional<Event> eventOptional = eventRepository.findOne(Example.of(example));

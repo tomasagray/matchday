@@ -68,7 +68,7 @@ class SynonymRepositoryTest {
     repository.saveAllAndFlush(List.of(beth, lizzie, betty));
 
     logger.info("Fetching Synonyms for: {}...", testName);
-    final List<Synonym> synonyms = repository.findSynonymsByProperNameNameContains(testName);
+    final List<Synonym> synonyms = repository.findSynonymsFor(testName);
     logger.info("Got Synonyms: {}", synonyms);
     assertThat(synonyms).isNotNull().isNotEmpty();
     assertThat(synonyms.size()).isEqualTo(3);
@@ -90,7 +90,7 @@ class SynonymRepositoryTest {
     final Synonym walk = new Synonym(synonymWord, perambulate);
     repository.save(walk);
 
-    final Optional<Synonym> optional = repository.findSynonymByNameContains(synonymWord);
+    final Optional<Synonym> optional = repository.findSynonymByName(synonymWord);
     assertThat(optional).isPresent();
     final Synonym synonym = optional.get();
     logger.info("Got Synonym: " + synonym);

@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.*;
 import self.me.matchday.model.video.VideoFilePack;
@@ -48,6 +49,7 @@ import static self.me.matchday.model.video.Resolution.R_1080p;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for Event service")
+@Transactional
 class EventServiceTest {
 
   private static final Logger logger = LogManager.getLogger(EventServiceTest.class);
@@ -58,6 +60,7 @@ class EventServiceTest {
 
   // Test data
   private static Match testMatch;
+  private static Match unUpdatedEvent;
   private static VideoFileSource testFileSource;
   private static Competition testCompetition;
 
@@ -84,12 +87,16 @@ class EventServiceTest {
         testCompetition.getCompetitionId(),
         testTeam.getTeamId(),
         testFileSource.getFileSrcId());
+
+    // create Event for updating test
+    EventServiceTest.unUpdatedEvent = testDataCreator.createTestMatch("Non-Updated Event");
+    logger.info("Created Event for update() test: {}", unUpdatedEvent);
   }
 
   @AfterAll
   static void tearDown() {
     // delete test data
-    testDataCreator.deleteTestEvent(testMatch);
+    //    testDataCreator.deleteTestEvent(testMatch);
   }
 
   private @NotNull Match createUnsavedMatch(String name) {
@@ -157,12 +164,7 @@ class EventServiceTest {
     final List<Event> savedEvents = eventService.saveAll(testEvents);
     logger.info("Saved Event: {}", savedEvents);
     assertThat(savedEvents).isNotNull().isNotEmpty();
-
-    final List<Event> afterEvents = eventService.fetchAll();
-    final int afterCount = afterEvents.size();
-    logger.info("After saving, database contains: {} Events", afterCount);
-    final int diff = afterCount - initialCount;
-    assertThat(diff).isEqualTo(testEvents.size());
+    assertThat(savedEvents.size()).isEqualTo(SAVE_COUNT);
   }
 
   @Test
@@ -236,17 +238,9 @@ class EventServiceTest {
   @DisplayName("Validate updating Event in database")
   void update() {
 
-    final Match originalEvent = testDataCreator.createTestMatch("MinimumEvent");
-    final List<Event> events = eventService.fetchAll();
-    if (events.size() == 0) {
-      // make sure there is at least one event to test...
-      events.add(originalEvent);
-      eventService.saveAll(events);
-    }
-    assertThat(events.size()).isGreaterThanOrEqualTo(1);
-    logger.info("Original Event: {}", originalEvent);
+    logger.info("Original Event: {}", unUpdatedEvent);
 
-    final Match testEvent = getPristineEventCopy(originalEvent);
+    final Match testEvent = getPristineEventCopy(unUpdatedEvent);
     final Competition updatedCompetition = new Competition("Updated Competition");
     updatedCompetition.setCompetitionId(UUID.randomUUID());
     testEvent.setCompetition(updatedCompetition);
@@ -254,10 +248,11 @@ class EventServiceTest {
 
     final Match updatedEvent = (Match) eventService.update(testEvent);
     logger.info("Got updated Event: {}", updatedEvent);
-    assertThat(updatedEvent).isNotEqualTo(originalEvent);
+    assertThat(updatedEvent).isNotEqualTo(unUpdatedEvent);
   }
 
   private @NotNull Match getPristineEventCopy(@NotNull Match event) {
+
     final Match pristine = new Match();
     pristine.setEventId(event.getEventId());
     pristine.setCompetition(event.getCompetition());

@@ -68,7 +68,8 @@ class VideoStreamLocatorServiceTest {
     VideoStreamLocatorServiceTest.testDataCreator = testDataCreator;
     VideoStreamLocatorServiceTest.videoStreamLocatorService = videoStreamLocatorService;
     // Get managed copy of test file source
-    VideoStreamLocatorServiceTest.testVideoFileSource = testDataCreator.createTestVideoFileSource();
+    VideoStreamLocatorServiceTest.testVideoFileSource =
+        testDataCreator.createVideoFileSourceAndSave();
     VideoStreamLocatorServiceTest.testVideoFile =
         VideoStreamLocatorServiceTest.testVideoFileSource
             .getVideoFilePacks()
