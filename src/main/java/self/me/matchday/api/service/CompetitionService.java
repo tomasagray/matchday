@@ -31,10 +31,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
-public class CompetitionService {
+public class CompetitionService implements EntityService<Competition> {
 
   private final CompetitionRepository competitionRepository;
 
@@ -48,7 +50,8 @@ public class CompetitionService {
    *
    * @return A CollectionModel of Competition resources.
    */
-  public List<Competition> fetchAllCompetitions() {
+  @Override
+  public List<Competition> fetchAll() {
 
     final List<Competition> competitions = competitionRepository.findAll();
     if (competitions.size() > 0) {
@@ -63,7 +66,8 @@ public class CompetitionService {
    * @param competitionId The ID of the desired Competition.
    * @return The Competition as a resource.
    */
-  public Optional<Competition> fetchCompetitionById(@NotNull UUID competitionId) {
+  @Override
+  public Optional<Competition> fetchById(@NotNull UUID competitionId) {
     return competitionRepository.findById(competitionId);
   }
 
@@ -77,7 +81,8 @@ public class CompetitionService {
    * @param competition The Competition to persist
    * @return The (now Spring-managed) Competition, or null if it was not saved
    */
-  public Competition saveCompetition(@NotNull final Competition competition) {
+  @Override
+  public Competition save(@NotNull final Competition competition) {
 
     validateCompetition(competition);
     final Optional<Competition> competitionOptional =
@@ -85,13 +90,43 @@ public class CompetitionService {
     return competitionOptional.orElseGet(() -> competitionRepository.saveAndFlush(competition));
   }
 
+  @Override
+  public List<Competition> saveAll(@NotNull Iterable<? extends Competition> competitions) {
+    return StreamSupport.stream(competitions.spliterator(), false)
+        .map(this::save)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public Competition update(@NotNull Competition competition) {
+    if (competition.getCompetitionId() == null) {
+      throw new IllegalArgumentException("Trying to update unknown Competition: " + competition);
+    }
+    return save(competition);
+  }
+
+  @Override
+  public List<Competition> updateAll(@NotNull Iterable<? extends Competition> competitions) {
+    return StreamSupport.stream(competitions.spliterator(), false)
+        .map(this::update)
+        .collect(Collectors.toList());
+  }
+
   /**
    * Delete the Competition specified by the given ID from the database
    *
    * @param competitionId The ID of the Competition to delete
    */
-  public void deleteCompetitionById(@NotNull final UUID competitionId) {
+  @Override
+  public void delete(@NotNull final UUID competitionId) {
     competitionRepository.deleteById(competitionId);
+  }
+
+  @Override
+  public void deleteAll(@NotNull Iterable<? extends Competition> competitions) {
+    StreamSupport.stream(competitions.spliterator(), false)
+        .map(Competition::getCompetitionId)
+        .forEach(this::delete);
   }
 
   /**

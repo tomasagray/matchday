@@ -28,10 +28,12 @@ import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Team;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
-public class TeamService {
+public class TeamService implements EntityService<Team> {
 
   private final TeamRepository teamRepository;
 
@@ -45,7 +47,8 @@ public class TeamService {
    *
    * @return A collection of Teams.
    */
-  public List<Team> fetchAllTeams() {
+  @Override
+  public List<Team> fetchAll() {
     final List<Team> teams = teamRepository.findAll();
     if (teams.size() > 0) {
       teams.sort(Comparator.comparing(Team::getName));
@@ -59,7 +62,8 @@ public class TeamService {
    * @param teamId The Team ID.
    * @return The requested Team, wrapped in an Optional.
    */
-  public Optional<Team> fetchTeamById(@NotNull final UUID teamId) {
+  @Override
+  public Optional<Team> fetchById(@NotNull final UUID teamId) {
     return teamRepository.findById(teamId);
   }
 
@@ -92,10 +96,43 @@ public class TeamService {
    * @param team The Team to persist
    * @return The (now Spring-managed) Team, or null if invalid data was passed
    */
-  public Team saveTeam(@NotNull final Team team) {
+  @Override
+  public Team save(@NotNull final Team team) {
     validateTeam(team);
     final Optional<Team> teamOptional = teamRepository.findTeamByNameName(team.getName().getName());
     return teamOptional.orElseGet(() -> teamRepository.saveAndFlush(team));
+  }
+
+  @Override
+  public List<Team> saveAll(@NotNull Iterable<? extends Team> teams) {
+    return StreamSupport.stream(teams.spliterator(), false)
+        .map(this::save)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public Team update(@NotNull Team team) {
+    if (team.getTeamId() == null) {
+      throw new IllegalArgumentException("Trying to update unknown Team: " + team);
+    }
+    return save(team);
+  }
+
+  @Override
+  public List<Team> updateAll(@NotNull Iterable<? extends Team> teams) {
+    return StreamSupport.stream(teams.spliterator(), false)
+        .map(this::update)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public void delete(@NotNull UUID teamId) {
+    teamRepository.deleteById(teamId);
+  }
+
+  @Override
+  public void deleteAll(@NotNull Iterable<? extends Team> teams) {
+    StreamSupport.stream(teams.spliterator(), false).map(Team::getTeamId).forEach(this::delete);
   }
 
   /**

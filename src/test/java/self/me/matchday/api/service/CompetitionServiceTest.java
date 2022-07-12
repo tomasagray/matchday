@@ -76,7 +76,7 @@ class CompetitionServiceTest {
 
     final int MIN_REQUIRED_COMPETITIONS = 1;
 
-    final List<Competition> competitions = competitionService.fetchAllCompetitions();
+    final List<Competition> competitions = competitionService.fetchAll();
     logger.info("Retrieved {} competitions from database", competitions.size());
     assertThat(competitions.size()).isGreaterThanOrEqualTo(MIN_REQUIRED_COMPETITIONS);
   }
@@ -88,7 +88,7 @@ class CompetitionServiceTest {
     final UUID testCompetitionId = testCompetition.getCompetitionId();
 
     final Optional<Competition> competitionOptional =
-        competitionService.fetchCompetitionById(testCompetitionId);
+        competitionService.fetchById(testCompetitionId);
     assertThat(competitionOptional.isPresent()).isTrue();
 
     final Competition actualCompetition = competitionOptional.get();

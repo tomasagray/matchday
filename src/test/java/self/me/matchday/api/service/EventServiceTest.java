@@ -22,7 +22,6 @@ package self.me.matchday.api.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -91,12 +90,6 @@ class EventServiceTest {
     // create Event for updating test
     EventServiceTest.unUpdatedEvent = testDataCreator.createTestMatch("Non-Updated Event");
     logger.info("Created Event for update() test: {}", unUpdatedEvent);
-  }
-
-  @AfterAll
-  static void tearDown() {
-    // delete test data
-    //    testDataCreator.deleteTestEvent(testMatch);
   }
 
   private @NotNull Match createUnsavedMatch(String name) {

@@ -80,7 +80,7 @@ class TeamServiceTest {
 
     final int expectedTeamCount = 1;
 
-    final List<Team> teams = teamService.fetchAllTeams();
+    final List<Team> teams = teamService.fetchAll();
     logger.info("Got teams:\n" + teams);
     assertThat(teams.size()).isGreaterThanOrEqualTo(expectedTeamCount);
     assertThat(teams).contains(testTeam);
@@ -90,7 +90,7 @@ class TeamServiceTest {
   @DisplayName("Verify retrieval of specific team from database")
   void fetchTeamById() {
 
-    final Optional<Team> teamOptional = teamService.fetchTeamById(testTeam.getTeamId());
+    final Optional<Team> teamOptional = teamService.fetchById(testTeam.getTeamId());
     assertThat(teamOptional).isPresent();
 
     teamOptional.ifPresent(
@@ -116,15 +116,15 @@ class TeamServiceTest {
 
     final Team savingTestTeam = new Team("Saving Test Team");
 
-    final List<Team> teams = teamService.fetchAllTeams();
+    final List<Team> teams = teamService.fetchAll();
     final int initialTeamCount = teams.size();
 
     // Save team to database
-    final Team savedTeam = teamService.saveTeam(savingTestTeam);
+    final Team savedTeam = teamService.save(savingTestTeam);
     logger.info("Successfully saved Team: " + savedTeam);
 
     // Get new team list
-    final List<Team> teamsPostUpdate = teamService.fetchAllTeams();
+    final List<Team> teamsPostUpdate = teamService.fetchAll();
     final int postUpdateTeamCount = teamsPostUpdate.size();
     assertThat(postUpdateTeamCount).isGreaterThan(initialTeamCount);
     assertThat(postUpdateTeamCount - initialTeamCount).isEqualTo(1);
@@ -139,16 +139,16 @@ class TeamServiceTest {
 
     final Team deleteTestTeam = new Team("Delete Test Team");
     // Save to database
-    teamService.saveTeam(deleteTestTeam);
+    teamService.save(deleteTestTeam);
 
     // Get team count
-    final List<Team> updatedTeams = teamService.fetchAllTeams();
+    final List<Team> updatedTeams = teamService.fetchAll();
     final int updatedTeamCount = updatedTeams.size();
 
     // Delete test team
     teamService.deleteTeamByName(deleteTestTeam.getName().getName());
     // Get new team count
-    final List<Team> deletedTeamsList = teamService.fetchAllTeams();
+    final List<Team> deletedTeamsList = teamService.fetchAll();
     final int deletedTeamsCount = deletedTeamsList.size();
     assertThat(updatedTeamCount).isGreaterThan(deletedTeamsCount);
     assertThat(updatedTeamCount - deletedTeamsCount).isEqualTo(1);

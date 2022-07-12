@@ -75,7 +75,7 @@ public class TeamController {
       value = {"", "/"},
       method = RequestMethod.GET)
   public CollectionModel<TeamResource> fetchAllTeams() {
-    return teamResourceAssembler.toCollectionModel(teamService.fetchAllTeams());
+    return teamResourceAssembler.toCollectionModel(teamService.fetchAll());
   }
 
   /**
@@ -88,7 +88,7 @@ public class TeamController {
   public ResponseEntity<TeamResource> fetchTeamByName(@PathVariable final UUID teamId) {
 
     return teamService
-        .fetchTeamById(teamId)
+        .fetchById(teamId)
         .map(teamResourceAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());

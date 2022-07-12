@@ -36,7 +36,7 @@ public class TeamServiceLog {
 
   private static final Logger logger = LogManager.getLogger(TeamService.class);
 
-  @Around("execution(* self.me.matchday.api.service.TeamService.fetchAllTeams())")
+  @Around("execution(* self.me.matchday.api.service.TeamService.fetchAll())")
   public Object logFetchAllTeams(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Fetching all Teams from database...");
     List<?> teams = (List<?>) jp.proceed();
@@ -44,7 +44,7 @@ public class TeamServiceLog {
     return teams;
   }
 
-  @Around("execution(* self.me.matchday.api.service.TeamService.fetchTeamById(..))")
+  @Around("execution(* self.me.matchday.api.service.TeamService.fetchById(..))")
   public Object logFetchTeamById(@NotNull ProceedingJoinPoint jp) throws Throwable {
     Object teamId = jp.getArgs()[0];
     logger.info("Fetching Team with ID: {} from database...", teamId);
@@ -71,7 +71,7 @@ public class TeamServiceLog {
     return result;
   }
 
-  @Around("execution(* self.me.matchday.api.service.TeamService.saveTeam(..))")
+  @Around("execution(* self.me.matchday.api.service.TeamService.save(..))")
   public Object logSaveTeam(@NotNull ProceedingJoinPoint jp) throws Throwable {
     Object team = jp.getArgs()[0];
     logger.info("Attempting to save Team: {} to database...", team);

@@ -1149,6 +1149,7 @@
     <pattern value="self.me.matchday.api.service.MatchService" method="updateAll" />
     <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DownloadLanding" method="isLoggedIn" />
     <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DirectDownload" method="isLoggedIn" />
+    <pattern value="self.me.matchday.api.service.EntityCorrectionService" method="addAllSynonyms" />
   </component>
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$" />

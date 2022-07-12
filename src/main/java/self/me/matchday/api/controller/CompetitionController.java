@@ -75,8 +75,7 @@ public class CompetitionController {
       value = {"", "/"},
       method = RequestMethod.GET)
   public CollectionModel<CompetitionResource> fetchAllCompetitions() {
-    return competitionResourceAssembler.toCollectionModel(
-        competitionService.fetchAllCompetitions());
+    return competitionResourceAssembler.toCollectionModel(competitionService.fetchAll());
   }
 
   /**
@@ -90,7 +89,7 @@ public class CompetitionController {
       @PathVariable final UUID competitionId) {
 
     return competitionService
-        .fetchCompetitionById(competitionId)
+        .fetchById(competitionId)
         .map(competitionResourceAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());

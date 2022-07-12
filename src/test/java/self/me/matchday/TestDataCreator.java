@@ -237,13 +237,13 @@ public class TestDataCreator {
   public Competition createTestCompetition(@NotNull String name) {
     final Competition competition = new Competition(name);
     logger.info("Created test competition: {}", competition);
-    return competitionService.saveCompetition(competition);
+    return competitionService.save(competition);
   }
 
   @Transactional
   public void deleteTestCompetition(Competition competition) {
     logger.info("Deleting test Competition: {}", competition);
-    competitionService.deleteCompetitionById(competition.getCompetitionId());
+    competitionService.delete(competition.getCompetitionId());
   }
 
   @Transactional
@@ -256,7 +256,7 @@ public class TestDataCreator {
   @NotNull
   public Team createTestTeam(@NotNull String name) {
     final Team team = new Team(name);
-    return teamService.saveTeam(team);
+    return teamService.save(team);
   }
 
   @Transactional

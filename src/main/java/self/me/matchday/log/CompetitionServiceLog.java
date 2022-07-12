@@ -38,7 +38,7 @@ public class CompetitionServiceLog {
   private static final Logger logger = LogManager.getLogger(CompetitionService.class);
 
   @SuppressWarnings("unchecked cast")
-  @Around("execution(* self.me.matchday.api.service.CompetitionService.fetchAllCompetitions(..))")
+  @Around("execution(* self.me.matchday.api.service.CompetitionService.fetchAll(..))")
   public Object logFetchAllCompetitions(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Retrieving all Competitions from database...");
     List<Competition> competitions = (List<Competition>) jp.proceed();
@@ -55,7 +55,7 @@ public class CompetitionServiceLog {
     return result;
   }
 
-  @Around("execution(* self.me.matchday.api.service.CompetitionService.saveCompetition(..))")
+  @Around("execution(* self.me.matchday.api.service.CompetitionService.save(..))")
   public Object logSaveCompetition(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Attempting to save Competition: {}", jp.getArgs()[0]);
     Object result = jp.proceed();
@@ -63,7 +63,7 @@ public class CompetitionServiceLog {
     return result;
   }
 
-  @Before("execution(* self.me.matchday.api.service.CompetitionService.deleteCompetitionById(..))")
+  @Before("execution(* self.me.matchday.api.service.CompetitionService.delete(..))")
   public void logDeleteCompetitionById(@NotNull JoinPoint jp) {
     logger.info("Deleting Competition with ID: [{}] from database", jp.getArgs()[0]);
   }
