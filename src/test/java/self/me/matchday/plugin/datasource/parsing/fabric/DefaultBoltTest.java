@@ -19,13 +19,14 @@
 
 package self.me.matchday.plugin.datasource.parsing.fabric;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import self.me.matchday.plugin.datasource.parsing.fabric.model.Bar;
 import self.me.matchday.plugin.datasource.parsing.fabric.model.Bubble;
 import self.me.matchday.plugin.datasource.parsing.fabric.model.Foo;
 import self.me.matchday.plugin.datasource.parsing.fabric.model.Marklar;
-import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ import static self.me.matchday.plugin.datasource.parsing.fabric.FabricTestDataCr
     "Testing for the DefaultBolt (default concretion of) fluent interface for Stream zipping & folding")
 class DefaultBoltTest {
 
-  private static final String LOG_TAG = "DefaultBoltTest";
+  private static final Logger logger = LogManager.getLogger(DefaultBoltTest.class);
 
   @Test
   @DisplayName("Test fluent interface for folding & zipping streams")
@@ -59,7 +60,7 @@ class DefaultBoltTest {
 
     fizzyMarklars.forEach(
         marklar -> {
-          Log.i(LOG_TAG, "Got Fizzy Marklar:\n" + marklar);
+          logger.info("Got Fizzy Marklar:\n" + marklar);
           assertThat(marklar).isNotNull();
           assertThat(marklar.getBubbles().size()).isEqualTo(MAX_BUBBLES);
         });
@@ -83,10 +84,10 @@ class DefaultBoltTest {
 
     fizzyMarklars.forEach(
         marklar -> {
-          Log.i(LOG_TAG, "Got Fizzy Marklar:\n" + marklar);
+          logger.info("Got Fizzy Marklar:\n" + marklar);
           assertThat(marklar).isNotNull();
           assertThat(marklar.getBubbles().size()).isEqualTo(MAX_BUBBLES);
-          Log.i(LOG_TAG, "Reverse zipping & folding works! Eureka!");
+          logger.info("Reverse zipping & folding works! Eureka!");
         });
   }
 
@@ -124,7 +125,7 @@ class DefaultBoltTest {
 
     genericFizzyMarklars.forEach(
         marklar -> {
-          Log.i(LOG_TAG, "Got generic Fizzy Marklar:\n" + marklar);
+          logger.info("Got generic Fizzy Marklar:\n" + marklar);
           assertThat(marklar).isNotNull();
           assertThat(marklar.getBubbles().size()).isEqualTo(FabricTestDataCreator.MAX_BUBBLES);
         });

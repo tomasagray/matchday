@@ -19,12 +19,13 @@
 
 package self.me.matchday.plugin.datasource.parsing.fabric;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import self.me.matchday.plugin.datasource.parsing.fabric.model.Bubble;
 import self.me.matchday.plugin.datasource.parsing.fabric.model.Foo;
 import self.me.matchday.plugin.datasource.parsing.fabric.model.Marklar;
-import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for the Fabric Stream manipulation library")
 class FabricTest {
 
-  private static final String LOG_TAG = "FabricTest";
+  private static final Logger logger = LogManager.getLogger(FabricTest.class);
   private static final Folder<Bubble, List<Bubble>> bubbleFolder = new BubbleFolder<>();
 
   @Test
@@ -46,13 +47,13 @@ class FabricTest {
     final Stream<Foo> zippedFoos = FabricTestDataCreator.getZippedFoos();
     zippedFoos.forEach(
         foo -> {
-          Log.i(LOG_TAG, "Got zipped Foo: " + foo);
+          logger.info("Got zipped Foo: " + foo);
           assertThat(foo).isNotNull();
           zippedFooCount.getAndIncrement();
         });
 
     final int count = zippedFooCount.get();
-    Log.i(LOG_TAG, "Total Zipped Foo count: " + count);
+    logger.info("Total Zipped Foo count: " + count);
     assertThat(count).isEqualTo(FabricTestDataCreator.END_IDX);
   }
 
@@ -64,13 +65,13 @@ class FabricTest {
     final Stream<Marklar> zippedMarklars = FabricTestDataCreator.getZippedMarklars();
     zippedMarklars.forEach(
         marklar -> {
-          Log.i(LOG_TAG, "Got zipped Marklar:\n" + marklar);
+          logger.info("Got zipped Marklar:\n" + marklar);
           assertThat(marklar).isNotNull();
           zippedMarklarCount.getAndIncrement();
         });
 
     final int count = zippedMarklarCount.get();
-    Log.i(LOG_TAG, "Zipped Marklar count: " + count);
+    logger.info("Zipped Marklar count: " + count);
     assertThat(count).isEqualTo(FabricTestDataCreator.END_IDX);
   }
 
@@ -84,14 +85,14 @@ class FabricTest {
     final Stream<List<Bubble>> foldedBubbles = Fabric.fold(bubbleStream, bubbleFolder);
     foldedBubbles.forEach(
         bubbles -> {
-          Log.i(LOG_TAG, "Got folded Bubbles:\n" + bubbles);
+          logger.info("Got folded Bubbles:\n" + bubbles);
           assertThat(bubbles).isNotNull().isNotEmpty();
           assertThat(bubbles.size()).isEqualTo(FabricTestDataCreator.MAX_BUBBLES);
           foldedBubbleCount.getAndIncrement();
         });
 
     final int count = foldedBubbleCount.get();
-    Log.i(LOG_TAG, "Folded Bubble count: " + count);
+    logger.info("Folded Bubble count: " + count);
     assertThat(count).isEqualTo(FabricTestDataCreator.END_IDX);
   }
 
@@ -108,14 +109,14 @@ class FabricTest {
     final AtomicInteger count = new AtomicInteger(0);
     zippedAndFolded.forEach(
         marklar -> {
-          Log.i(LOG_TAG, "Zipped & Folded Marklar:\n" + marklar);
+          logger.info("Zipped & Folded Marklar:\n" + marklar);
           assertThat(marklar).isNotNull();
           assertThat(marklar.getBubbles().size()).isEqualTo(FabricTestDataCreator.MAX_BUBBLES);
           count.incrementAndGet();
         });
 
     final int actualMarklarCount = count.get();
-    Log.i(LOG_TAG, "Final Zipped  Folded item count: " + actualMarklarCount);
+    logger.info("Final Zipped  Folded item count: " + actualMarklarCount);
     assertThat(actualMarklarCount).isEqualTo(FabricTestDataCreator.END_IDX);
   }
 }

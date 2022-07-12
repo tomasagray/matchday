@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.util.Log;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,7 +42,7 @@ import static self.me.matchday.plugin.datasource.blogger.BloggerPlugin.SourceTyp
 @DisplayName("Validate creation of proper Blogger query URIs")
 class BloggerQueryBuilderTest {
 
-  private static final String LOG_TAG = "BloggerQueryBuilderTest";
+  private static final Logger logger = LogManager.getLogger(BloggerQueryBuilderTest.class);
 
   private static QueryBuilderService queryBuilderService;
 
@@ -55,13 +56,13 @@ class BloggerQueryBuilderTest {
   void buildHtmlQueryFrom() {
 
     final SnapshotRequest testSnapshotRequest = getTestSnapshotRequest();
-    Log.i(LOG_TAG, "Building HTML Blogger query with SnapshotRequest:\n" + testSnapshotRequest);
+    logger.info("Building HTML Blogger query with SnapshotRequest:\n" + testSnapshotRequest);
 
     final String expectedQuery =
         "/search/label/Something/Something%20Else?"
             + "max-results=25&updated-min=2020-10-11T00:00:00&orderBy=updated";
     final String actualQuery = queryBuilderService.buildQueryFrom(testSnapshotRequest, HTML);
-    Log.i(LOG_TAG, "Got query:\n\t" + actualQuery);
+    logger.info("Got query:\n\t" + actualQuery);
     assertThat(actualQuery).isEqualTo(expectedQuery);
   }
 
@@ -70,13 +71,13 @@ class BloggerQueryBuilderTest {
   void buildJsonQueryFrom() {
 
     final SnapshotRequest testSnapshotRequest = getTestSnapshotRequest();
-    Log.i(LOG_TAG, "Building JSON Blogger query with SnapshotRequest:\n" + testSnapshotRequest);
+    logger.info("Building JSON Blogger query with SnapshotRequest:\n" + testSnapshotRequest);
 
     final String expectedQuery =
         "/-/Something/Something%20Else?"
             + "alt=json&max-results=25&updated-min=2020-10-11T00:00:00&orderBy=updated";
     final String actualQuery = queryBuilderService.buildQueryFrom(testSnapshotRequest, JSON);
-    Log.i(LOG_TAG, "Got query:\n\t" + actualQuery);
+    logger.info("Got query:\n\t" + actualQuery);
     assertThat(actualQuery).isEqualTo(expectedQuery);
   }
 

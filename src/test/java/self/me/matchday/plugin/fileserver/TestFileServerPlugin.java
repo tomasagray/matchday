@@ -25,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.model.FileServerUser;
-import self.me.matchday.util.Log;
 
 import java.io.IOException;
 import java.net.URL;
@@ -88,7 +87,7 @@ public class TestFileServerPlugin implements FileServerPlugin {
       // simulate http delay
       Thread.sleep(500);
     } catch (InterruptedException e) {
-      Log.e("TestFileServerPlugin", "Artificial refresh delay was interrupted!");
+      throw new RuntimeException(e);
     }
     return Optional.of(url);
   }

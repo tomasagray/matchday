@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,7 +39,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
-import self.me.matchday.util.Log;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -56,7 +57,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Disabled
 class FileFoxPluginTest {
 
-  private static final String LOG_TAG = "FileFoxPluginTest";
+  private static final Logger logger = LogManager.getLogger(FileFoxPluginTest.class);
 
   private static final String LOGIN_DATA = "src/test/secure_resources/filefox_login.csv";
 
@@ -89,7 +90,7 @@ class FileFoxPluginTest {
 
     final BufferedReader reader = new BufferedReader(new FileReader(LOGIN_DATA));
     final String loginData = reader.lines().collect(Collectors.joining(" "));
-    Log.i(LOG_TAG, "Read login data: " + loginData);
+    logger.info("Read login data: " + loginData);
     final List<String> strings =
         Arrays.stream(loginData.split("\""))
             .filter(s -> !s.equals(",") && !"".equals(s))
@@ -104,7 +105,7 @@ class FileFoxPluginTest {
 
     final UUID expectedPluginId = UUID.fromString("4e3389aa-3c86-4541-aaa1-9a6603753921");
     final UUID actualPluginId = plugin.getPluginId();
-    Log.i(LOG_TAG, "Got plugin ID: " + actualPluginId);
+    logger.info("Got plugin ID: " + actualPluginId);
     assertThat(actualPluginId).isEqualTo(expectedPluginId);
   }
 
@@ -114,7 +115,7 @@ class FileFoxPluginTest {
 
     final String expectedTitle = "FileFox";
     final String actualTitle = plugin.getTitle();
-    Log.i(LOG_TAG, "Got plugin title: " + actualTitle);
+    logger.info("Got plugin title: " + actualTitle);
     assertThat(actualTitle).isEqualTo(expectedTitle);
   }
 
@@ -126,7 +127,7 @@ class FileFoxPluginTest {
         "Manager for the FileFox online file service. Translates external "
             + "links into internal, downloadable links.";
     final String actualDescription = plugin.getDescription();
-    Log.i(LOG_TAG, "Got plugin description:\n" + actualDescription);
+    logger.info("Got plugin description:\n" + actualDescription);
     assertThat(actualDescription).isEqualTo(expectedDescription);
   }
 
@@ -134,7 +135,7 @@ class FileFoxPluginTest {
   @DisplayName("Validate URL acceptance")
   void acceptsUrl() {
 
-    Log.i(LOG_TAG, "Testing acceptance of URL: " + testDownloadLink);
+    logger.info("Testing acceptance of URL: " + testDownloadLink);
     final boolean acceptsUrl = plugin.acceptsUrl(testDownloadLink);
     assertThat(acceptsUrl).isTrue();
   }
@@ -146,7 +147,7 @@ class FileFoxPluginTest {
     final Duration minRefreshRate = Duration.ofHours(1);
     final Duration maxRefreshRate = Duration.ofHours(24);
     final Duration actualRefreshRate = plugin.getRefreshRate();
-    Log.i(LOG_TAG, "Testing plugin refresh rate: " + actualRefreshRate);
+    logger.info("Testing plugin refresh rate: " + actualRefreshRate);
     assertThat(actualRefreshRate)
         .isGreaterThanOrEqualTo(minRefreshRate)
         .isLessThanOrEqualTo(maxRefreshRate);
@@ -159,17 +160,15 @@ class FileFoxPluginTest {
     // Read test data
     final FileServerUser fileServerUser = createTestUser();
     // Perform login
-    Log.i(LOG_TAG, "Attempting login to FileFox file server with user: " + fileServerUser);
+    logger.info("Attempting login to FileFox file server with user: " + fileServerUser);
     final ClientResponse response = plugin.login(fileServerUser);
 
     // Check response
     final String responseText = response.bodyToMono(String.class).block();
     final MultiValueMap<String, ResponseCookie> cookies = response.cookies();
     final HttpStatus statusCode = response.statusCode();
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Got response: %s\nbody:\n%s\nwith cookies:\n%s", statusCode, responseText, cookies));
+    logger.info(
+        "Got response: {}\nbody:\n{}\nwith cookies:\n{}", statusCode, responseText, cookies);
 
     final boolean loginSuccessful = statusCode.is2xxSuccessful();
     assertThat(loginSuccessful).isTrue();
@@ -186,17 +185,17 @@ class FileFoxPluginTest {
             .map(SecureCookie::toSpringCookie)
             .collect(Collectors.toSet());
 
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Attempting link extraction from URL: %s with user: %s\nCookies:\n%s",
-            testDownloadLink, testFileServerUser.getUsername(), cookies));
+    logger.info(
+        "Attempting link extraction from URL: {} with user: {}\nCookies:\n{}",
+        testDownloadLink,
+        testFileServerUser.getUsername(),
+        cookies);
 
     final Optional<URL> urlOptional = plugin.getDownloadURL(testDownloadLink, cookies);
     assertThat(urlOptional).isPresent();
     urlOptional.ifPresent(
         url -> {
-          Log.i(LOG_TAG, "Got download link: " + url);
+          logger.info("Got download link: " + url);
           final boolean urlMatches = directDownloadLinkPattern.matcher(url.toString()).find();
           assertThat(urlMatches).isTrue();
         });

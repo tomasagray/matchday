@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service.video;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +35,6 @@ import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
-import self.me.matchday.util.Log;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -47,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for playlist locator service")
 class VideoStreamLocatorServiceTest {
 
-  private static final String LOG_TAG = "PlaylistLocatorServiceTest";
+  private static final Logger logger = LogManager.getLogger(VideoStreamLocatorServiceTest.class);
 
   private static TestDataCreator testDataCreator;
   private static VideoStreamLocatorService videoStreamLocatorService;
@@ -92,7 +93,7 @@ class VideoStreamLocatorServiceTest {
 
     // Ensure test data is cleaned up
     if (testStreamLocator != null) {
-      Log.i(LOG_TAG, "Deleting test locator from DB...: " + testStreamLocator.getStreamLocatorId());
+      logger.info("Deleting test locator from DB...: " + testStreamLocator.getStreamLocatorId());
       videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
     }
   }
@@ -104,7 +105,7 @@ class VideoStreamLocatorServiceTest {
     assertThat(testVideoFile).isNotNull();
     testStreamLocator = videoStreamLocatorService.createStreamLocator(testStorage, testVideoFile);
 
-    Log.i(LOG_TAG, "Created playlist locator: " + testStreamLocator);
+    logger.info("Created playlist locator: " + testStreamLocator);
     assertThat(testStreamLocator).isNotNull();
     assertThat(testStreamLocator.getStreamLocatorId()).isNotNull();
   }
@@ -114,15 +115,13 @@ class VideoStreamLocatorServiceTest {
   void getAllPlaylistLocators() {
 
     final int expectedPlaylistLocatorCount = 1;
-    Log.i(LOG_TAG, "Adding test stream locator to database...");
+    logger.info("Adding test stream locator to database...");
     testStreamLocator = videoStreamLocatorService.createStreamLocator(testStorage, testVideoFile);
 
     final List<VideoStreamLocator> playlistLocators =
         videoStreamLocatorService.getAllStreamLocators();
     final int actualPlaylistLocatorCount = playlistLocators.size();
-    Log.i(
-        LOG_TAG,
-        String.format("Fetched %s playlist locators from database", actualPlaylistLocatorCount));
+    logger.info("Fetched {} playlist locators from database", actualPlaylistLocatorCount);
 
     assertThat(actualPlaylistLocatorCount).isGreaterThanOrEqualTo(expectedPlaylistLocatorCount);
     // Remove test resource
@@ -143,7 +142,7 @@ class VideoStreamLocatorServiceTest {
     assertThat(streamLocatorOptional).isPresent();
 
     final VideoStreamLocator actualStreamLocator = streamLocatorOptional.get();
-    Log.i(LOG_TAG, "Retrieved playlist locator: " + actualStreamLocator);
+    logger.info("Retrieved playlist locator: " + actualStreamLocator);
 
     // Test playlist locator fields; timestamp will be different
     assertThat(actualStreamLocator).isEqualTo(testStreamLocator);

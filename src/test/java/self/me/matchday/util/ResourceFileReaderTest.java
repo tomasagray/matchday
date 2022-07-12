@@ -19,6 +19,8 @@
 
 package self.me.matchday.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ResourceFileReaderTest {
 
-  private static final String LOG_TAG = "ResourceFileReaderTest";
+  private static final Logger logger = LogManager.getLogger(ResourceFileReaderTest.class);
   private static final String PROPERTIES_FILE = "plugins\\disk-manager\\disk-manager.properties";
 
   @Test
@@ -42,7 +44,7 @@ class ResourceFileReaderTest {
 
     resourceFile.forEach(
         (key, value) -> {
-          Log.i(LOG_TAG, String.format("Read key: [%s], value: %s", key, value));
+          logger.info(String.format("Read key: [%s], value: %s", key, value));
           assertThat(key).isNotNull().isNotEmpty();
           // not comments
           if (!key.startsWith("#")) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,6 +19,8 @@
 
 package self.me.matchday.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class URLQueryDecoderTest {
 
-  private static final String LOG_TAG = "URLQueryDecoderTest";
+  private static final Logger logger = LogManager.getLogger(URLQueryDecoderTest.class);
 
   private static final String TEST_URL =
       "https://www.google.com/search?q=TEST+STRING&xsrf=ALeKk03oTkf6HW11sfIblis7ggLLdAr7Q:1602377267332&source="
@@ -51,7 +53,7 @@ class URLQueryDecoderTest {
     expectedParams.put("sa", List.of("X"));
     expectedParams.put("ved", List.of("2ahUKEwing8K-qKvsAhX9IDKVjWAVoQ_AUoAXoECCEAw"));
 
-    Log.i(LOG_TAG, "Testing parsed params: " + actualParams);
+    logger.info("Testing parsed params: " + actualParams);
     assertThat(actualParams).isEqualTo(expectedParams);
   }
 }

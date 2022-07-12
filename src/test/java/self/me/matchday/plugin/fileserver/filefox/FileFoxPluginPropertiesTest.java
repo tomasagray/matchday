@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.util.Log;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,7 +42,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DisplayName("Testing for FileFox file server manager plugin properties")
 class FileFoxPluginPropertiesTest {
 
-  private static final String LOG_TAG = "FileFoxPluginPropertiesTest";
+  private static final Logger logger = LogManager.getLogger(FileFoxPluginPropertiesTest.class);
 
   private static FileFoxPluginProperties pluginProperties;
 
@@ -56,7 +57,7 @@ class FileFoxPluginPropertiesTest {
 
     final UUID expectedPluginId = UUID.fromString("4e3389aa-3c86-4541-aaa1-9a6603753921");
     final UUID actualPluginId = UUID.fromString(pluginProperties.getId());
-    Log.i(LOG_TAG, "Got plugin ID: " + actualPluginId);
+    logger.info("Got plugin ID: " + actualPluginId);
     assertThat(actualPluginId).isEqualTo(expectedPluginId);
   }
 
@@ -66,7 +67,7 @@ class FileFoxPluginPropertiesTest {
 
     final String expectedPluginTitle = "FileFox";
     final String actualPluginTitle = pluginProperties.getTitle();
-    Log.i(LOG_TAG, "Got plugin title: " + actualPluginTitle);
+    logger.info("Got plugin title: " + actualPluginTitle);
     assertThat(actualPluginTitle).isEqualTo(expectedPluginTitle);
   }
 
@@ -78,7 +79,7 @@ class FileFoxPluginPropertiesTest {
         "Manager for the FileFox online file service. Translates external "
             + "links into internal, downloadable links.";
     final String actualPluginDescription = pluginProperties.getDescription();
-    Log.i(LOG_TAG, "Got plugin description: " + actualPluginDescription);
+    logger.info("Got plugin description: " + actualPluginDescription);
     assertThat(actualPluginDescription).isEqualTo(expectedDescription);
   }
 
@@ -89,7 +90,7 @@ class FileFoxPluginPropertiesTest {
     final String expectedUserAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0";
     final String actualUserAgent = pluginProperties.getUserAgent();
-    Log.i(LOG_TAG, "Got user agent: " + actualUserAgent);
+    logger.info("Got user agent: " + actualUserAgent);
     assertThat(actualUserAgent).isEqualTo(expectedUserAgent);
   }
 
@@ -100,9 +101,7 @@ class FileFoxPluginPropertiesTest {
     final URL testUrl = new URL("https://filefox.cc/79muv293uj1r/20210121-EIB-ATM-LL_1.ts");
     final Pattern actualLinkUrlPattern = pluginProperties.getLinkUrlPattern();
 
-    Log.i(
-        LOG_TAG,
-        String.format("Using URL matcher: %s for test URL:\n%s", actualLinkUrlPattern, testUrl));
+    logger.info("Using URL matcher: {} for test URL:\n{}", actualLinkUrlPattern, testUrl);
     final Matcher matcher = actualLinkUrlPattern.matcher(testUrl.toString());
     assertThat(matcher.find()).isTrue();
   }
@@ -116,9 +115,7 @@ class FileFoxPluginPropertiesTest {
             "https://s02.filefox.cc/wojxtujqwup7elabbssq26q4xhnjwzzgnrxcnsikekhsnu2h6db7ggkemibmq5l2px3e5rca/20210121-EIB-ATM-LL_1.ts");
     final Pattern actualUrlPattern = pluginProperties.getDirectDownloadUrlPattern();
 
-    Log.i(
-        LOG_TAG,
-        String.format("Using URL pattern matcher: %s for URL:\n%s", actualUrlPattern, testUrl));
+    logger.info("Using URL pattern matcher: {} for URL:\n{}", actualUrlPattern, testUrl);
     final Matcher matcher = actualUrlPattern.matcher(testUrl.toString());
     assertThat(matcher.find()).isTrue();
   }
@@ -129,7 +126,7 @@ class FileFoxPluginPropertiesTest {
 
     final int expectedRefreshRate = 4;
     final int actualRefreshRate = pluginProperties.getRefreshHours();
-    Log.i(LOG_TAG, "Got refresh rate: " + actualRefreshRate);
+    logger.info("Got refresh rate: " + actualRefreshRate);
     assertThat(actualRefreshRate).isEqualTo(expectedRefreshRate);
   }
 }

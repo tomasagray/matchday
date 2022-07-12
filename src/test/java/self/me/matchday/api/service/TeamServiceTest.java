@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,7 +35,6 @@ import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
-import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for Team service")
 class TeamServiceTest {
 
-  private static final String LOG_TAG = "TeamServiceTest";
+  private static final Logger logger = LogManager.getLogger(TeamServiceTest.class);
 
   private static TestDataCreator testDataCreator;
   private static TeamService teamService;
@@ -80,7 +81,7 @@ class TeamServiceTest {
     final int expectedTeamCount = 1;
 
     final List<Team> teams = teamService.fetchAllTeams();
-    Log.i(LOG_TAG, "Got teams:\n" + teams);
+    logger.info("Got teams:\n" + teams);
     assertThat(teams.size()).isGreaterThanOrEqualTo(expectedTeamCount);
     assertThat(teams).contains(testTeam);
   }
@@ -94,7 +95,7 @@ class TeamServiceTest {
 
     teamOptional.ifPresent(
         team -> {
-          Log.i(LOG_TAG, "Got team: " + team);
+          logger.info("Got team: " + team);
           assertThat(team).isEqualTo(testTeam);
         });
   }
@@ -105,9 +106,7 @@ class TeamServiceTest {
 
     final List<Team> teams =
         teamService.fetchTeamsByCompetitionId(testCompetition.getCompetitionId());
-    Log.i(
-        LOG_TAG,
-        String.format("Found %s teams for Competition: %s", teams.size(), testCompetition));
+    logger.info("Found {} teams for Competition: {}", teams.size(), testCompetition);
     assertThat(teams).contains(testTeam);
   }
 
@@ -122,7 +121,7 @@ class TeamServiceTest {
 
     // Save team to database
     final Team savedTeam = teamService.saveTeam(savingTestTeam);
-    Log.i(LOG_TAG, "Successfully saved Team: " + savedTeam);
+    logger.info("Successfully saved Team: " + savedTeam);
 
     // Get new team list
     final List<Team> teamsPostUpdate = teamService.fetchAllTeams();

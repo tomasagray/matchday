@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +36,6 @@ import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.util.Log;
 
 import java.net.URL;
 import java.util.List;
@@ -47,7 +48,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DisplayName("Testing for VideoFile 'best version' selector microservice")
 class VideoFileSelectorServiceTest {
 
-  private static final String LOG_TAG = "VideoFileSelectorServiceTest";
+  private static final Logger logger = LogManager.getLogger(VideoFileSelectorServiceTest.class);
 
   private static VideoFileSource testVideoFileSource;
   private static VideoFileSelectorService fileSelectorService;
@@ -79,7 +80,7 @@ class VideoFileSelectorServiceTest {
     // Test parameters
     final int expectedVideoFileCount = 4;
 
-    Log.i(LOG_TAG, "Testing VideoFileSource: " + testVideoFileSource);
+    logger.info("Testing VideoFileSource: " + testVideoFileSource);
     final VideoFilePack testPlaylistFiles =
         fileSelectorService.getPlaylistFiles(testVideoFileSource);
 
@@ -87,9 +88,9 @@ class VideoFileSelectorServiceTest {
     assertThat(actualVideoFileCount).isEqualTo(expectedVideoFileCount);
     testPlaylistFiles.forEach(
         (title, videoFile) -> {
-          Log.i(LOG_TAG, "Got VideoFile: " + videoFile);
+          logger.info("Got VideoFile: " + videoFile);
           final URL internalUrl = videoFile.getInternalUrl();
-          Log.i(LOG_TAG, "Internal URL: " + internalUrl);
+          logger.info("Internal URL: " + internalUrl);
           assertThat(videoFile).isNotNull();
           assertThat(internalUrl).isNotNull();
         });
@@ -100,7 +101,7 @@ class VideoFileSelectorServiceTest {
   void testVideoFileOrder() {
 
     final VideoFilePack testFileList = fileSelectorService.getPlaylistFiles(testVideoFileSource);
-    Log.i(LOG_TAG, "Testing event file order for: " + testFileList);
+    logger.info("Testing event file order for: " + testFileList);
 
     final VideoFile preMatch = testFileList.get(PartIdentifier.PRE_MATCH);
     final VideoFile firstHalf = testFileList.get(PartIdentifier.FIRST_HALF);

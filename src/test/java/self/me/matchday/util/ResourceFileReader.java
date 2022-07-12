@@ -19,6 +19,8 @@
 
 package self.me.matchday.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
 
 public class ResourceFileReader {
 
-  private static final String LOG_TAG = "ResourceFileReader";
+  private static final Logger logger = LogManager.getLogger(ResourceFileReader.class);
 
   public static <T> @Nullable T getObjectFromProperties(
       @NotNull final Class<T> t_class, @NotNull final String filename, final String prefix) {
@@ -69,7 +71,7 @@ public class ResourceFileReader {
                   String.format(
                       "Property [%s] does not match a field in class %s; skipping...",
                       prop, t_class);
-              Log.i(LOG_TAG, msg, e);
+              logger.error(msg, e);
             }
           });
       return instance;

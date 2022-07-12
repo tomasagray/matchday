@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -28,7 +30,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.util.JsonParser;
-import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
 import java.io.IOException;
@@ -45,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestMethodOrder(OrderAnnotation.class)
 class FFprobeTest {
 
-  private static final String LOG_TAG = "FFprobeTest";
+  private static final Logger logger = LogManager.getLogger(FFprobeTest.class);
 
   private static final String FFPROBE_PATH = "plugin.ffmpeg.ffprobe-location";
   private static final String FFMPEG_PROPERTIES = "plugins\\ffmpeg\\ffmpeg.properties";
@@ -66,7 +67,7 @@ class FFprobeTest {
     expectedMetadata = JsonParser.fromJson(sampleMetadata, FFmpegMetadata.class);
 
     // Create FFprobe instance
-    Log.i(LOG_TAG, "Instantiating FFprobe with executable: " + FFPROBE_PATH);
+    logger.info("Instantiating FFprobe with executable: " + FFPROBE_PATH);
     ffProbe = new FFprobe(resources.get(FFPROBE_PATH));
     FFprobeTest.testUrl = testDataCreator.getFirstHalfUrl();
   }
@@ -76,7 +77,7 @@ class FFprobeTest {
   @DisplayName("Check creation of FFprobe instance")
   void checkFFprobeCreation() {
 
-    Log.i(LOG_TAG, "Verifying FFprobe instance is NOT NULL...");
+    logger.info("Verifying FFprobe instance is NOT NULL...");
     assertThat(ffProbe).isNotNull();
   }
 
@@ -86,10 +87,10 @@ class FFprobeTest {
   void testGetFileMetadata() throws URISyntaxException, IOException {
 
     final String baseUrl = testUrl.toString().replaceAll("\\?\\w*=[\\w-]*", "");
-    Log.i(LOG_TAG, "Reading file data from: " + baseUrl);
+    logger.info("Reading file data from: " + baseUrl);
     FFmpegMetadata actualMetadata = ffProbe.getFileMetadata(new URI(baseUrl));
 
-    Log.i(LOG_TAG, "Testing metadata for correctness...");
+    logger.info("Testing metadata for correctness...");
     assertThat(actualMetadata).isNotNull();
     assertThat(JsonParser.toJson(actualMetadata)).isEqualTo(JsonParser.toJson(expectedMetadata));
   }

@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,7 +32,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
-import self.me.matchday.util.Log;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Testing for competition service")
 class CompetitionServiceTest {
 
-  private static final String LOG_TAG = "CompetitionServiceTest";
+  private static final Logger logger = LogManager.getLogger(CompetitionServiceTest.class);
 
   // Test resources
   private static CompetitionService competitionService;
@@ -76,7 +77,7 @@ class CompetitionServiceTest {
     final int MIN_REQUIRED_COMPETITIONS = 1;
 
     final List<Competition> competitions = competitionService.fetchAllCompetitions();
-    Log.i(LOG_TAG, String.format("Retrieved %s competitions from database", competitions.size()));
+    logger.info("Retrieved {} competitions from database", competitions.size());
     assertThat(competitions.size()).isGreaterThanOrEqualTo(MIN_REQUIRED_COMPETITIONS);
   }
 
@@ -91,11 +92,10 @@ class CompetitionServiceTest {
     assertThat(competitionOptional.isPresent()).isTrue();
 
     final Competition actualCompetition = competitionOptional.get();
-    Log.i(
-        LOG_TAG,
-        String.format(
-            "Using ID: %s, retrieved competition from database:\n%s",
-            testCompetitionId, actualCompetition));
+    logger.info(
+        "Using ID: {}, retrieved competition from database:\n{}",
+        testCompetitionId,
+        actualCompetition);
 
     assertThat(actualCompetition).isEqualTo(testCompetition);
   }

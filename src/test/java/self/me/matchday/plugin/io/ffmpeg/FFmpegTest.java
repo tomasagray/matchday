@@ -19,6 +19,8 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.util.Log;
 import self.me.matchday.util.ResourceFileReader;
 
 import java.net.URI;
@@ -45,8 +46,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("FFmpegTest - Test the creation of FFmpegSingleStreamTask HLS streaming task")
 class FFmpegTest {
 
-  // Test constants
-  private static final String LOG_TAG = "FFmpegTest";
+  private static final Logger logger = LogManager.getLogger(FFmpegTest.class);
+
   private static final String FFMPEG_EXE = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe";
   private static final String DEFAULT_ARGS =
       " -v info -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
@@ -59,7 +60,7 @@ class FFmpegTest {
   static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator)
       throws URISyntaxException {
 
-    Log.i(LOG_TAG, "Instantiating FFmpeg Plugin with executable: " + FFMPEG_EXE);
+    logger.info("Instantiating FFmpeg Plugin with executable: " + FFMPEG_EXE);
     FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);
 
     // Read configuration resources
@@ -88,7 +89,7 @@ class FFmpegTest {
     final List<String> args = hlsStreamTask.getTranscodeArgs();
 
     // Test
-    Log.i(LOG_TAG, "Testing args: " + args);
+    logger.info("Testing args: " + args);
     assertThat(args.size()).isGreaterThanOrEqualTo(minArgLength);
   }
 
@@ -99,7 +100,7 @@ class FFmpegTest {
     final String expectedCommand = String.format("\"%s\"%s", FFMPEG_EXE, DEFAULT_ARGS);
     final String actualCommand = hlsStreamTask.getCommand();
 
-    Log.i(LOG_TAG, "Testing command: " + actualCommand);
+    logger.info("Testing command: " + actualCommand);
     assertThat(actualCommand).isEqualTo(expectedCommand);
   }
 
@@ -110,7 +111,7 @@ class FFmpegTest {
     final Path expectedOutputPath = Path.of(FFmpegTest.storageLocation);
     final Path actualOutputPath = hlsStreamTask.getPlaylistPath();
 
-    Log.i(LOG_TAG, "Testing output path: " + actualOutputPath);
+    logger.info("Testing output path: " + actualOutputPath);
     assertThat(actualOutputPath).isEqualByComparingTo(expectedOutputPath);
   }
 }
