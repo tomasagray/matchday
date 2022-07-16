@@ -21,16 +21,19 @@ package self.me.matchday.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import self.me.matchday.api.resource.CompetitionResource;
 import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
 import self.me.matchday.api.resource.MatchResource;
 import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
+import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.MatchService;
 import self.me.matchday.api.service.TeamService;
@@ -48,6 +51,8 @@ public class TeamController {
 
   private final TeamService teamService;
   private final TeamResourceAssembler teamResourceAssembler;
+  private final CompetitionService competitionService;
+  private final CompetitionResource.CompetitionResourceAssembler competitionResourceAssembler;
   private final MatchService matchService;
   private final MatchResourceAssembler matchAssembler;
 
@@ -56,13 +61,17 @@ public class TeamController {
       TeamService teamService,
       TeamResourceAssembler teamResourceAssembler,
       EventService eventService,
+      CompetitionService competitionService,
       MatchService matchService,
       EventResourceAssembler eventResourceAssembler,
+      CompetitionResource.CompetitionResourceAssembler competitionResourceAssembler,
       MatchResourceAssembler matchAssembler) {
 
     this.teamService = teamService;
     this.teamResourceAssembler = teamResourceAssembler;
+    this.competitionService = competitionService;
     this.matchService = matchService;
+    this.competitionResourceAssembler = competitionResourceAssembler;
     this.matchAssembler = matchAssembler;
   }
 
@@ -73,7 +82,8 @@ public class TeamController {
    */
   @RequestMapping(
       value = {"", "/"},
-      method = RequestMethod.GET)
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public CollectionModel<TeamResource> fetchAllTeams() {
     return teamResourceAssembler.toCollectionModel(teamService.fetchAll());
   }
@@ -84,7 +94,10 @@ public class TeamController {
    * @param teamId The Team name (MD5 String)
    * @return The Team as an HttpEntity.
    */
-  @RequestMapping(value = "/team/{teamId}", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/team/{teamId}",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<TeamResource> fetchTeamByName(@PathVariable final UUID teamId) {
 
     return teamService
@@ -100,7 +113,10 @@ public class TeamController {
    * @param teamId The name of the Team.
    * @return A CollectionModel of Events.
    */
-  @RequestMapping(value = "/team/{teamId}/matches", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/team/{teamId}/matches",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CollectionModel<MatchResource>> fetchEventsForTeam(
       @PathVariable final UUID teamId) {
 
@@ -110,5 +126,15 @@ public class TeamController {
             .toCollectionModel(events)
             .add(linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId)).withSelfRel());
     return ResponseEntity.ok(eventResources);
+  }
+
+  @RequestMapping(
+      value = "/team/{teamId}/competitions",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public CollectionModel<CompetitionResource> fetchCompetitionsForTema(
+      @PathVariable final UUID teamId) {
+    return competitionResourceAssembler.toCollectionModel(
+        competitionService.fetchCompetitionsForTeam(teamId));
   }
 }

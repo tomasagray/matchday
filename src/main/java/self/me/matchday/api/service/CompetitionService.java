@@ -20,7 +20,6 @@
 package self.me.matchday.api.service;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.CompetitionRepository;
@@ -40,7 +39,6 @@ public class CompetitionService implements EntityService<Competition> {
 
   private final CompetitionRepository competitionRepository;
 
-  @Autowired
   public CompetitionService(final CompetitionRepository competitionRepository) {
     this.competitionRepository = competitionRepository;
   }
@@ -73,6 +71,16 @@ public class CompetitionService implements EntityService<Competition> {
 
   public Optional<Competition> fetchCompetitionByName(@NotNull String name) {
     return competitionRepository.findCompetitionByNameName(name);
+  }
+
+  /**
+   * Fetch all Competitions from the database in which the given Team
+   *
+   * @param teamId The ID of the Team
+   * @return A list of Competitions
+   */
+  public List<Competition> fetchCompetitionsForTeam(@NotNull UUID teamId) {
+    return competitionRepository.findCompetitionsForTeam(teamId);
   }
 
   /**

@@ -21,9 +21,12 @@ package self.me.matchday.db;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Competition;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,4 +34,9 @@ import java.util.UUID;
 public interface CompetitionRepository extends JpaRepository<Competition, UUID> {
 
   Optional<Competition> findCompetitionByNameName(@NotNull String name);
+
+  @Query(
+      "SELECT c FROM MatchGame mg JOIN mg.competition c "
+          + "WHERE mg.homeTeam.teamId = :teamId OR mg.awayTeam.teamId = :teamId")
+  List<Competition> findCompetitionsForTeam(@Param("teamId") UUID teamId);
 }

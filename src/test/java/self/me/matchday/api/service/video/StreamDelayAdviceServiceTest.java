@@ -21,6 +21,7 @@ package self.me.matchday.api.service.video;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -46,8 +47,8 @@ class StreamDelayAdviceServiceTest {
 
   @BeforeAll
   public static void setup(
-      @Autowired final StreamDelayAdviceService delayAdviceService,
-      @Autowired final TestDataCreator testDataCreator) {
+      @Autowired @NotNull StreamDelayAdviceService delayAdviceService,
+      @Autowired @NotNull TestDataCreator testDataCreator) {
 
     StreamDelayAdviceServiceTest.delayAdviceService = delayAdviceService;
     StreamDelayAdviceServiceTest.testLocatorPlaylist =

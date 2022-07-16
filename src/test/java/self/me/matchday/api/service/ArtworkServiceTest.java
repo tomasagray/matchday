@@ -49,8 +49,8 @@ class ArtworkServiceTest {
   private static final Logger logger = LogManager.getLogger(ArtworkServiceTest.class);
 
   // Test constants
-  private static final int defaultTeamEmblemBytes = 15_182;
-  private static final int expectedCompetitionEmblemBytes = 13_989;
+  private static final int defaultTeamEmblemBytes = 18_976;
+  private static final int expectedCompetitionEmblemBytes = 8_104;
   private static final int expectedFanartBytes = 866_211;
   private static final int expectedLandscapeBytes = 189_337;
 

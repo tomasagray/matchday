@@ -19,7 +19,6 @@
 
 package self.me.matchday.api.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,7 +48,6 @@ public class CompetitionController {
   private final EventService eventService;
   private final EventResourceAssembler eventResourceAssembler;
 
-  @Autowired
   public CompetitionController(
       CompetitionService competitionService,
       CompetitionResourceAssembler competitionResourceAssembler,
@@ -96,20 +94,6 @@ public class CompetitionController {
   }
 
   /**
-   * Retrieve Teams for a given Competition from the database.
-   *
-   * @param competitionId The name of the competition
-   * @return A CollectionModel containing the Teams.
-   */
-  @RequestMapping(value = "/competition/{competitionId}/teams", method = RequestMethod.GET)
-  public CollectionModel<TeamResource> fetchCompetitionTeams(
-      @PathVariable final UUID competitionId) {
-
-    return teamResourceAssembler.toCollectionModel(
-        teamService.fetchTeamsByCompetitionId(competitionId));
-  }
-
-  /**
    * Gets all Events associated with the given Competition from the local database.
    *
    * @param competitionId The name of the Competition.
@@ -121,5 +105,19 @@ public class CompetitionController {
 
     return ResponseEntity.ok(
         eventResourceAssembler.toModel(eventService.fetchEventsForCompetition(competitionId)));
+  }
+
+  /**
+   * Retrieve Teams for a given Competition from the database.
+   *
+   * @param competitionId The name of the competition
+   * @return A CollectionModel containing the Teams.
+   */
+  @RequestMapping(value = "/competition/{competitionId}/teams", method = RequestMethod.GET)
+  public CollectionModel<TeamResource> fetchCompetitionTeams(
+      @PathVariable final UUID competitionId) {
+
+    return teamResourceAssembler.toCollectionModel(
+        teamService.fetchTeamsByCompetitionId(competitionId));
   }
 }

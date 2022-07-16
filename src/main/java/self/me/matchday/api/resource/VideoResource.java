@@ -31,7 +31,6 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
-import self.me.matchday.model.video.Resolution;
 import self.me.matchday.model.video.VideoFileSource;
 
 import java.util.UUID;
@@ -44,8 +43,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
-@JsonRootName(value = "video-resource")
-@Relation(collectionRelation = "video-resources", itemRelation = "video-resource")
+@JsonRootName(value = "video-source")
+@Relation(collectionRelation = "video-sources", itemRelation = "video-source")
 @JsonInclude(value = Include.NON_NULL)
 public class VideoResource extends RepresentationModel<VideoResource> {
 
@@ -54,15 +53,17 @@ public class VideoResource extends RepresentationModel<VideoResource> {
   private static final LinkRelation TRANSCODE_STREAM = LinkRelation.of("transcode_stream");
   private static final LinkRelation TRANSCODE_PLS_STREAM = LinkRelation.of("transcode_pls_stream");
 
+  private UUID id;
   private String channel;
   private String source;
   private String languages;
   private String resolution;
   private String mediaContainer;
-  private Long bitrate;
-  private int frameRate;
+  private String bitrate;
+  private Integer frameRate;
   private String videoCodec;
   private String audioCodec;
+  private String duration;
 
   @Component
   public static class VideoResourceAssembler
@@ -80,18 +81,21 @@ public class VideoResource extends RepresentationModel<VideoResource> {
       final VideoResource videoResource = instantiateModel(entity);
 
       final UUID fileSrcId = entity.getFileSrcId();
-      final Resolution resolution = entity.getResolution();
-
+      final int framerate = entity.getFramerate();
       // Add metadata
-      videoResource.channel = entity.getChannel();
-      videoResource.source = entity.getSource();
-      videoResource.languages = entity.getLanguages();
-      videoResource.resolution = (resolution != null) ? resolution.toString() : null;
-      videoResource.mediaContainer = entity.getMediaContainer();
-      videoResource.bitrate = entity.getVideoBitrate();
-      videoResource.frameRate = entity.getFramerate();
-      videoResource.videoCodec = entity.getVideoCodec();
-      videoResource.audioCodec = entity.getAudioCodec();
+      videoResource.setId(fileSrcId);
+      videoResource.setChannel(entity.getChannel());
+      videoResource.setSource(entity.getSource());
+      videoResource.setLanguages(entity.getLanguages());
+      videoResource.setResolution(entity.getVideoCodec());
+      videoResource.setMediaContainer(entity.getMediaContainer());
+      videoResource.setBitrate(entity.getVideoBitrate() + "Mbps");
+      if (framerate > 0) {
+        videoResource.setFrameRate(framerate);
+      }
+      videoResource.setVideoCodec(entity.getVideoCodec());
+      videoResource.setAudioCodec(entity.getAudioCodec());
+      videoResource.setDuration(entity.getApproximateDuration());
 
       // remote stream (no transcoding)
       videoResource.add(
