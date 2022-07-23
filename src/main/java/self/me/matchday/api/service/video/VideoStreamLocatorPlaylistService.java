@@ -86,7 +86,7 @@ public class VideoStreamLocatorPlaylistService {
     final VideoStreamLocatorPlaylist streamPlaylist =
         new VideoStreamLocatorPlaylist(fileSource, storageLocation);
 
-    playlistFiles.forEach(
+    playlistFiles.forEachVideoFile(
         (title, videoFile) -> {
           final VideoStreamLocator playlistLocator =
               videoStreamLocatorService.createStreamLocator(storageLocation, videoFile);

@@ -69,7 +69,7 @@ class VideoFileSelectorServiceTest {
   private static void setInternalUrls(@NotNull final List<VideoFilePack> videoFiles) {
     videoFiles.forEach(
         pack ->
-            pack.forEach(
+            pack.forEachVideoFile(
                 (title, videoFile) -> videoFile.setInternalUrl(videoFile.getExternalUrl())));
   }
 
@@ -86,7 +86,7 @@ class VideoFileSelectorServiceTest {
 
     final int actualVideoFileCount = testPlaylistFiles.size();
     assertThat(actualVideoFileCount).isEqualTo(expectedVideoFileCount);
-    testPlaylistFiles.forEach(
+    testPlaylistFiles.forEachVideoFile(
         (title, videoFile) -> {
           logger.info("Got VideoFile: " + videoFile);
           final URL internalUrl = videoFile.getInternalUrl();

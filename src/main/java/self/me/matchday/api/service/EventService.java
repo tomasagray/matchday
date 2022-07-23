@@ -31,7 +31,10 @@ import self.me.matchday.model.video.VideoFileSource;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -164,7 +167,7 @@ public class EventService implements EntityService<Event> {
     if (!isValidDate(date)) {
       throw new IllegalArgumentException("invalid date: " + date);
     }
-    final Set<VideoFileSource> fileSources = event.getFileSources();
+    final Collection<VideoFileSource> fileSources = event.getFileSources();
     if (!isValidVideoFiles(fileSources)) {
       throw new IllegalArgumentException("no video files!");
     }

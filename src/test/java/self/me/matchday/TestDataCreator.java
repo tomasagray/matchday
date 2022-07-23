@@ -330,7 +330,7 @@ public class TestDataCreator {
     final VideoStreamLocatorPlaylist playlist =
         new VideoStreamLocatorPlaylist(fileSource, locatorPath);
     final VideoFilePack videoFiles = fileSource.getVideoFilePacks().get(0);
-    videoFiles.forEach(
+    videoFiles.forEachVideoFile(
         (title, file) -> {
           final VideoStreamLocator streamLocator = createStreamLocator(file);
           playlist.addStreamLocator(streamLocator);

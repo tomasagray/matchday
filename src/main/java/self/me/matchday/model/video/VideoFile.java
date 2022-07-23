@@ -85,15 +85,10 @@ public class VideoFile implements Comparable<VideoFile> {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof VideoFile)) {
-      return false;
-    }
-    // Cast
+    if (obj == this) return true;
+    if (!(obj instanceof VideoFile)) return false;
     final VideoFile videoFile = (VideoFile) obj;
-    if (this.getExternalUrl() == null) {
-      return videoFile.getExternalUrl() == null;
-    }
-    return this.getExternalUrl().equals(videoFile.getExternalUrl());
+    return Objects.equals(videoFile.getExternalUrl(), this.getExternalUrl());
   }
 
   @Override

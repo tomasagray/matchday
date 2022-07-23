@@ -70,7 +70,7 @@ public class VideoFileSelectorService {
         new LinkedMultiValueMap<>();
     fileSource
         .getVideoFiles()
-        .forEach(videoFile -> eventParts.add(videoFile.getTitle(), videoFile));
+        .forEachVideoFile(videoFile -> eventParts.add(videoFile.getTitle(), videoFile));
 
     // Get best version of each part
     return eventParts.values().stream()

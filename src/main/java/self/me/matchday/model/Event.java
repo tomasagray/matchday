@@ -64,8 +64,14 @@ public abstract class Event {
 
   public void addFileSource(@NotNull final VideoFileSource fileSource) {
     // replace existing with updated
-    fileSources.remove(fileSource);
-    fileSources.add(fileSource);
+    for (VideoFileSource source : this.fileSources) {
+      if (source.equals(fileSource)) {
+        source.addAllVideoFilePacks(fileSource.getVideoFilePacks());
+        return;
+      }
+    }
+    // else...
+    this.fileSources.add(fileSource);
   }
 
   /**

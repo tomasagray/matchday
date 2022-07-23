@@ -24,6 +24,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.UUID;
@@ -50,8 +51,18 @@ public class VideoFilePack {
     videoFiles.putIfAbsent(videoFile.getTitle(), videoFile);
   }
 
+  public void putAll(@NotNull Map<PartIdentifier, VideoFile> files) {
+    for (VideoFile videoFile : files.values()) {
+      put(videoFile);
+    }
+  }
+
   public VideoFile get(@NotNull PartIdentifier title) {
     return videoFiles.get(title);
+  }
+
+  public Map<PartIdentifier, VideoFile> allFiles() {
+    return videoFiles;
   }
 
   public VideoFile firstPart() {
@@ -70,8 +81,12 @@ public class VideoFilePack {
     return videoFiles.size();
   }
 
-  public void forEach(BiConsumer<PartIdentifier, VideoFile> fn) {
+  public void forEachVideoFile(BiConsumer<PartIdentifier, VideoFile> fn) {
     videoFiles.forEach(fn);
+  }
+
+  public boolean containsAny(@NotNull Collection<VideoFile> videoFiles) {
+    return videoFiles.stream().anyMatch(this.videoFiles::containsValue);
   }
 
   public Stream<VideoFile> stream() {

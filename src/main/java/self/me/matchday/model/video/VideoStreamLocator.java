@@ -23,7 +23,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.PathConverter;
 
@@ -66,15 +65,18 @@ public abstract class VideoStreamLocator {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-    VideoStreamLocator that = (VideoStreamLocator) o;
-    return streamLocatorId != null && Objects.equals(streamLocatorId, that.streamLocatorId);
+  public int hashCode() {
+    return Objects.hash(playlistPath, timestamp, videoFile, state);
   }
 
   @Override
-  public int hashCode() {
-    return 0;
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof VideoStreamLocator)) return false;
+    final VideoStreamLocator that = (VideoStreamLocator) o;
+    return Objects.equals(getPlaylistPath(), that.getPlaylistPath())
+        && Objects.equals(getTimestamp(), that.getTimestamp())
+        && Objects.equals(getVideoFile(), that.getVideoFile())
+        && Objects.equals(getState(), that.getState());
   }
 }

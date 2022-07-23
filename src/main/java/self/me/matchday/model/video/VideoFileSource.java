@@ -63,8 +63,26 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   private int framerate;
   private String audioChannels;
 
+  public void addAllVideoFilePacks(@NotNull Collection<VideoFilePack> filePacks) {
+    for (final VideoFilePack pack : filePacks) {
+      addVideoFilePack(pack);
+    }
+  }
+
   public void addVideoFilePack(@NotNull VideoFilePack filePack) {
-    this.videoFilePacks.add(filePack);
+    VideoFilePack existing = null;
+    for (final VideoFilePack pack : this.videoFilePacks) {
+      if (pack.containsAny(filePack.allFiles().values())) {
+        // avoid ConcurrentModificationException
+        existing = pack;
+        break;
+      }
+    }
+    if (existing != null) {
+      existing.putAll(filePack.allFiles());
+    } else {
+      this.videoFilePacks.add(filePack);
+    }
   }
 
   public boolean removeVideoFilePack(VideoFilePack filePack) {
