@@ -35,7 +35,6 @@
         <include within="self.me.matchday.api.service.MatchService"/>
         <include within="self.me.matchday.api.service.TeamService"/>
         <include within="self.me.matchday.api.service.UserValidationService"/>
-        <include within="self.me.matchday.api.service.video.StreamDelayAdviceService"/>
         <include within="self.me.matchday.api.service.video.VideoFileService"/>
         <include within="self.me.matchday.api.service.video.VideoStreamingService"/>
         <include within="self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService"/>
@@ -66,7 +65,6 @@
         <aspect name="self.me.matchday.log.MatchServiceLog"/>
         <aspect name="self.me.matchday.log.MatchDataParserLog"/>
         <aspect name="self.me.matchday.log.ScheduledTaskLog"/>
-        <aspect name="self.me.matchday.log.StreamDelayAdviceServiceLog"/>
         <aspect name="self.me.matchday.log.TeamServiceLog"/>
         <aspect name="self.me.matchday.log.UserValidationServiceLog"/>
         <aspect name="self.me.matchday.log.VideoFileSelectorServiceLog"/>
