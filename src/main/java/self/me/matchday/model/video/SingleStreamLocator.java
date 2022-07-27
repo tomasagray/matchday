@@ -19,18 +19,15 @@
 
 package self.me.matchday.model.video;
 
+import java.nio.file.Path;
+import javax.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.Entity;
-import java.nio.file.Path;
 
 @Entity
 @Getter
 @Setter
-@ToString
 public class SingleStreamLocator extends VideoStreamLocator {
 
   public SingleStreamLocator() {

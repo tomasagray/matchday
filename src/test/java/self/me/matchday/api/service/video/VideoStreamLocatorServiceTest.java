@@ -19,10 +19,19 @@
 
 package self.me.matchday.api.service.video;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,12 +44,6 @@ import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -145,7 +148,10 @@ class VideoStreamLocatorServiceTest {
     logger.info("Retrieved playlist locator: " + actualStreamLocator);
 
     // Test playlist locator fields; timestamp will be different
-    assertThat(actualStreamLocator).isEqualTo(testStreamLocator);
+    assertThat(actualStreamLocator.getStreamLocatorId()).isEqualTo(testStreamLocator.getStreamLocatorId());
+    assertThat(actualStreamLocator.getPlaylistPath()).isEqualTo(testStreamLocator.getPlaylistPath());
+    assertThat(actualStreamLocator.getVideoFile()).isEqualTo(testStreamLocator.getVideoFile());
+    assertThat(actualStreamLocator.getState()).isEqualTo(testStreamLocator.getState());
   }
 
   @Test

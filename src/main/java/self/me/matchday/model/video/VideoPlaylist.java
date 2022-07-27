@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,13 +19,26 @@
 
 package self.me.matchday.model.video;
 
-import lombok.Builder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 
 @Data
-@Builder
 public class VideoPlaylist {
 
-  private final String playlist;
-  private final long waitMillis;
+  private final Map<Long, PartIdentifier> locatorIds = new HashMap<>();
+  private UUID eventId;
+  private UUID fileSrcId;
+  private String title;
+
+  public VideoPlaylist(@NotNull UUID eventId, @NotNull UUID fileSrcId) {
+    this.eventId = eventId;
+    this.fileSrcId = fileSrcId;
+  }
+
+  public void addLocator(@NotNull Long locatorId, @NotNull PartIdentifier partId) {
+    locatorIds.put(locatorId, partId);
+  }
 }

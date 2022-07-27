@@ -19,10 +19,19 @@
 
 package self.me.matchday.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import lombok.*;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.LinkRelation;
@@ -33,20 +42,14 @@ import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.model.video.VideoFileSource;
 
-import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "video-source")
 @Relation(collectionRelation = "video-sources", itemRelation = "video-source")
 @JsonInclude(value = Include.NON_NULL)
-public class VideoResource extends RepresentationModel<VideoResource> {
+public class VideoFileSourceResource extends RepresentationModel<VideoFileSourceResource> {
 
   private static final LinkRelation MASTER_PLAYLIST = LinkRelation.of("direct_master");
   private static final LinkRelation VARIANT_PLAYLIST = LinkRelation.of("direct_variant");
@@ -66,65 +69,58 @@ public class VideoResource extends RepresentationModel<VideoResource> {
   private String duration;
 
   @Component
-  public static class VideoResourceAssembler
-      extends RepresentationModelAssemblerSupport<VideoFileSource, VideoResource> {
+  public static class VideoFileSourceResourceAssembler
+      extends RepresentationModelAssemblerSupport<VideoFileSource, VideoFileSourceResource> {
 
     @Getter @Setter private UUID eventId;
 
-    public VideoResourceAssembler() {
-      super(VideoStreamingController.class, VideoResource.class);
+    public VideoFileSourceResourceAssembler() {
+      super(VideoStreamingController.class, VideoFileSourceResource.class);
     }
 
     @Override
-    public @NotNull VideoResource toModel(@NotNull VideoFileSource entity) {
+    public @NotNull VideoFileSourceResource toModel(@NotNull VideoFileSource entity) {
 
-      final VideoResource videoResource = instantiateModel(entity);
+      final VideoFileSourceResource videoFileSourceResource = instantiateModel(entity);
 
       final UUID fileSrcId = entity.getFileSrcId();
       final int framerate = entity.getFramerate();
       // Add metadata
-      videoResource.setId(fileSrcId);
-      videoResource.setChannel(entity.getChannel());
-      videoResource.setSource(entity.getSource());
-      videoResource.setLanguages(entity.getLanguages());
-      videoResource.setResolution(entity.getVideoCodec());
-      videoResource.setMediaContainer(entity.getMediaContainer());
-      videoResource.setBitrate(entity.getVideoBitrate() + "Mbps");
+      videoFileSourceResource.setId(fileSrcId);
+      videoFileSourceResource.setChannel(entity.getChannel());
+      videoFileSourceResource.setSource(entity.getSource());
+      videoFileSourceResource.setLanguages(entity.getLanguages());
+      videoFileSourceResource.setResolution(entity.getVideoCodec());
+      videoFileSourceResource.setMediaContainer(entity.getMediaContainer());
+      videoFileSourceResource.setBitrate(entity.getVideoBitrate() + "Mbps");
       if (framerate > 0) {
-        videoResource.setFrameRate(framerate);
+        videoFileSourceResource.setFrameRate(framerate);
       }
-      videoResource.setVideoCodec(entity.getVideoCodec());
-      videoResource.setAudioCodec(entity.getAudioCodec());
-      videoResource.setDuration(entity.getApproximateDuration());
+      videoFileSourceResource.setVideoCodec(entity.getVideoCodec());
+      videoFileSourceResource.setAudioCodec(entity.getAudioCodec());
+      videoFileSourceResource.setDuration(entity.getApproximateDuration());
 
       // remote stream (no transcoding)
-      videoResource.add(
+      videoFileSourceResource.add(
           linkTo(
                   methodOn(VideoStreamingController.class)
                       .getVideoStreamPlaylist(eventId, fileSrcId))
               .withRel(VARIANT_PLAYLIST));
 
       // local stream (transcoded to local disk)
-      videoResource.add(
+      videoFileSourceResource.add(
           linkTo(
                   methodOn(VideoStreamingController.class)
                       .getVideoStreamPlaylist(eventId, fileSrcId))
               .withRel(TRANSCODE_STREAM));
-
-      // locally transcoded stream (.pls format)
-      videoResource.add(
-          linkTo(
-                  methodOn(VideoStreamingController.class)
-                      .getVideoStreamPlsPlaylist(eventId, fileSrcId))
-              .withRel(TRANSCODE_PLS_STREAM));
-      return videoResource;
+      return videoFileSourceResource;
     }
 
     @Override
-    public @NotNull CollectionModel<VideoResource> toCollectionModel(
+    public @NotNull CollectionModel<VideoFileSourceResource> toCollectionModel(
         @NotNull Iterable<? extends VideoFileSource> entities) {
 
-      final CollectionModel<VideoResource> videoResources = super.toCollectionModel(entities);
+      final CollectionModel<VideoFileSourceResource> videoResources = super.toCollectionModel(entities);
 
       // Add link to master playlist
       videoResources.add(

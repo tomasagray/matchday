@@ -19,8 +19,28 @@
 
 package self.me.matchday;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static self.me.matchday.model.video.PartIdentifier.FIRST_HALF;
+import static self.me.matchday.model.video.PartIdentifier.POST_MATCH;
+import static self.me.matchday.model.video.PartIdentifier.PRE_MATCH;
+import static self.me.matchday.model.video.PartIdentifier.SECOND_HALF;
+import static self.me.matchday.model.video.Resolution.R_1080p;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -30,27 +50,35 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.api.service.*;
+import self.me.matchday.api.service.CompetitionService;
+import self.me.matchday.api.service.EventService;
+import self.me.matchday.api.service.FileServerUserService;
+import self.me.matchday.api.service.HighlightService;
+import self.me.matchday.api.service.TeamService;
 import self.me.matchday.db.VideoFileSrcRepository;
 import self.me.matchday.db.VideoStreamLocatorPlaylistRepo;
 import self.me.matchday.db.VideoStreamLocatorRepo;
-import self.me.matchday.model.*;
-import self.me.matchday.model.video.*;
+import self.me.matchday.model.Competition;
+import self.me.matchday.model.DataSource;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.FileServerUser;
+import self.me.matchday.model.FileSize;
+import self.me.matchday.model.Fixture;
+import self.me.matchday.model.Highlight;
+import self.me.matchday.model.Match;
+import self.me.matchday.model.PatternKit;
+import self.me.matchday.model.PlaintextDataSource;
+import self.me.matchday.model.Season;
+import self.me.matchday.model.Team;
+import self.me.matchday.model.video.SingleStreamLocator;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFilePack;
+import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.ResourceFileReader;
-
-import java.lang.reflect.Type;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.regex.Pattern;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static self.me.matchday.model.video.PartIdentifier.*;
-import static self.me.matchday.model.video.Resolution.R_1080p;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -102,10 +130,15 @@ public class TestDataCreator {
     return readTestDataSource(filename);
   }
 
-  private DataSource<Match> readTestDataSource(@NotNull String filename) {
+  private @NotNull DataSource<Match> readTestDataSource(@NotNull String filename) {
     final String dataSourceJson = ResourceFileReader.readTextResource(filename);
     final Type type = new TypeReference<PlaintextDataSource<Match>>() {}.getType();
-    final DataSource<Match> testDataSource = JsonParser.fromJson(dataSourceJson, type);
+    final PlaintextDataSource<Match> testDataSource = JsonParser.fromJson(dataSourceJson, type);
+    assertThat(testDataSource).isNotNull();
+
+    // randomize IDs to avoid collisions
+    testDataSource.getPatternKits()
+      .forEach(patternKit -> patternKit.setId(ThreadLocalRandom.current().nextLong()));
     logger.info("Read test datasource:\n{}", testDataSource);
     return testDataSource;
   }

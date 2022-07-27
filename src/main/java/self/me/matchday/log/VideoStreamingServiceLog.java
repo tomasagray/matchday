@@ -19,6 +19,11 @@
 
 package self.me.matchday.log;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -30,9 +35,6 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
-
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 @Aspect
 public class VideoStreamingServiceLog {
@@ -53,9 +55,8 @@ public class VideoStreamingServiceLog {
       "execution(* self.me.matchday.api.service.video.VideoStreamingService.getVideoStreamPlaylist(..))")
   public Object logGetBestVideoStreamPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info(
-        "Getting optimal VideoStreamPlaylist for Event: {} using Renderer: {}",
-        jp.getArgs()[0],
-        jp.getArgs()[1]);
+        "Getting optimal VideoStreamPlaylist for Event: {}",
+        jp.getArgs()[0]);
     final Object result = jp.proceed();
     logger.debug("Returned playlist: {}", result);
     return result;
@@ -66,22 +67,23 @@ public class VideoStreamingServiceLog {
   public Object logGetVideoStreamPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
 
     logger.info(
-        "Getting VideoStreamPlaylist for Event: {}, File Source: {}, using renderer {}",
+        "Getting VideoStreamPlaylist for Event: {}, File Source: {}",
         jp.getArgs()[0],
-        jp.getArgs()[1],
-        jp.getArgs()[2].getClass().getSimpleName());
+        jp.getArgs()[1]);
     final Object result = jp.proceed();
     logger.info("Found: {}", result);
     return result;
   }
 
+  @SuppressWarnings("unchecked cast")
   @Around(
       "execution(* self.me.matchday.api.service.video.VideoStreamingService.readPlaylistFile(..))")
   public Object logReadPlaylistFile(@NotNull ProceedingJoinPoint jp) throws Throwable {
 
     logger.info("Attempting to read playlist file for Locator ID: {}", jp.getArgs()[0]);
-    final Object result = jp.proceed();
-    logger.info("Read playlist file: {}", result);
+    final Optional<String> result = (Optional<String>) jp.proceed();
+    final int byteCount = result.map(s -> s.getBytes(StandardCharsets.UTF_8).length).orElse(0);
+    logger.info("Read {} bytes of playlist file", byteCount);
     return result;
   }
 
@@ -138,18 +140,17 @@ public class VideoStreamingServiceLog {
   public Object logRenderPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
     final Object[] args = jp.getArgs();
     logger.info(
-        "Rendering playlist for Event: {}, File Source: {}, using renderer: {}, locator playlist: {}",
+        "Rendering playlist for Event: {}, File Source: {}, locator playlist: {}",
         args[0],
         args[1],
-        args[2],
-        args[3]);
+        args[2]);
     final Object result = jp.proceed();
     logger.info("Rendered playlist: {} for File Source: {}", result, args[1]);
     return result;
   }
 
   @Around(
-      "execution(* self.me.matchday.api.service.video.VideoStreamingService.createPlaylist(..))")
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.createVideoStream(..))")
   public Object logCreatePlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
     final VideoFileSource fileSource = (VideoFileSource) jp.getArgs()[0];
     final UUID fileSrcId = fileSource.getFileSrcId();
@@ -157,5 +158,15 @@ public class VideoStreamingServiceLog {
     final Object result = jp.proceed();
     logger.info("Created playlist: {} for VideoFileSource: {}", result, fileSrcId);
     return result;
+  }
+
+  @Before("execution(* self.me.matchday.api.controller.VideoStreamingController.handle*(..))")
+  public void logStreamingError(@NotNull JoinPoint jp) {
+    final Throwable e = (Throwable) jp.getArgs()[0];
+    final String error =
+        Arrays.stream(e.getStackTrace())
+          .map(StackTraceElement::toString)
+          .collect(Collectors.joining("\n"));
+    logger.debug(error);
   }
 }

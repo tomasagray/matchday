@@ -1,5 +1,5 @@
 {
-  "dataSourceId": "f493b151-0d0d-4e3d-8624-68aebd120c0e",
+  "dataSourceId": "718d9c24-8b26-44fa-9fa9-f5c7bfb4ca42",
   "clazz": "self.me.matchday.model.Match",
   "title": "GaLaTaMaN HD Football",
   "baseUri": "https://galatamanhdfb.blogspot.com/",
@@ -7,19 +7,21 @@
   "enabled": true,
   "patternKits": [
     {
+      "id": 1,
       "clazz": "self.me.matchday.model.video.VideoFile",
       "pattern": {
         "pattern": "[1st2ndFirSeco-]+ Half|[Postre]+-Match",
-        "flags": 0
+        "flags": 64
       },
       "fields": {
         "0": "title"
       }
     },
     {
+      "id": 2,
       "clazz": "self.me.matchday.model.video.VideoFileSource",
       "pattern": {
-        "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\d\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\s\\d-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\d+\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+) (\\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
+        "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\d\\s\\.+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\s\\d-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\d+\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+) (\\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
         "flags": 64
       },
       "fields": {
@@ -39,9 +41,10 @@
       }
     },
     {
+      "id": 3,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
-        "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]* (\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]* ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
+        "pattern": "([\\p{L}\\d\\s\\.]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]* (\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]* ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
         "flags": 64
       },
       "fields": {
@@ -54,6 +57,7 @@
       }
     },
     {
+      "id": 4,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
         "pattern": "([\\p{L}\\d\\s]+) (\\d{2}\\/\\d{2}) -([SemiFinalLegstndrdth\\d\\s-]*) (\\d{1,2}[\\p{L}\\s]+) - ([\\p{L}\\d\\s-]+) vs.? ([\\p{L}\\d\\s-]+) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})",
@@ -69,6 +73,7 @@
       }
     },
     {
+      "id": 5,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
         "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]*(\\d+) - ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
@@ -84,6 +89,7 @@
       }
     },
     {
+      "id": 6,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
         "pattern": "([\\s\\p{L}]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
@@ -99,6 +105,7 @@
       }
     },
     {
+      "id": 7,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
         "pattern": "([\\s\\p{L}]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
@@ -114,6 +121,7 @@
       }
     },
     {
+      "id": 8,
       "clazz": "java.net.URL",
       "pattern": {
         "pattern": "^http[s]?://[\\p{L}.]*filefox.cc/[\\w]+/[\\w-]*.(mkv|ts)",
@@ -124,6 +132,7 @@
       }
     },
     {
+      "id": 9,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
         "pattern": "([\\p{L}\\d\\s]+) (\\d{2}\\/\\d{2}) - ([PlayofLeg\\d\\s-]*) (\\d{1,2}) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}) ([\\p{L}\\d\\s-]+) vs.? ([\\p{L}\\d\\s-]+)",

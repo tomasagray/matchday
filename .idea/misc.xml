@@ -1150,6 +1150,12 @@
     <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DownloadLanding" method="isLoggedIn" />
     <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DirectDownload" method="isLoggedIn" />
     <pattern value="self.me.matchday.api.service.EntityCorrectionService" method="addAllSynonyms" />
+    <pattern value="self.me.matchday.api.service.CompetitionService" method="deleteAll" />
+    <pattern value="self.me.matchday.api.service.TeamService" method="deleteAll" />
+    <pattern value="self.me.matchday.api.service.CompetitionService" method="saveAll" />
+    <pattern value="self.me.matchday.api.service.TeamService" method="saveAll" />
+    <pattern value="self.me.matchday.api.service.CompetitionService" method="updateAll" />
+    <pattern value="self.me.matchday.api.service.TeamService" method="updateAll" />
   </component>
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$" />

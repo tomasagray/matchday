@@ -19,38 +19,48 @@
 
 package self.me.matchday.api.service.video;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.FileServerUser;
-import self.me.matchday.model.video.*;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.video.VideoPlaylist;
+import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for video streaming service")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Transactional
 class VideoStreamingServiceTest {
 
   private static final Logger logger = LogManager.getLogger(VideoStreamingServiceTest.class);
@@ -66,7 +76,6 @@ class VideoStreamingServiceTest {
   private static Event testMatch;
   private static VideoFile testVideoFile;
   private static VideoFileSource testFileSource;
-  private static VideoStreamLocatorPlaylist deletablePlaylist;
 
   @BeforeAll
   static void setUp(
@@ -132,9 +141,8 @@ class VideoStreamingServiceTest {
   @Test
   @Order(2)
   @DisplayName("Test that a playlist is created & returned")
-  void getVideoStreamPlaylist() throws Exception {
+  void getVideoStreamPlaylist() {
 
-    final M3uRenderer renderer = new M3uRenderer();
     // test variables
     final UUID testEventId = testMatch.getEventId();
     final UUID testFileSrcId = testFileSource.getFileSrcId();
@@ -145,40 +153,19 @@ class VideoStreamingServiceTest {
         testFileSrcId);
 
     final Optional<VideoPlaylist> playlistOptional =
-        streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId, renderer);
+        streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId);
     assertThat(playlistOptional).isPresent();
     final VideoPlaylist videoPlaylist = playlistOptional.get();
     logger.info("Retrieved VideoPlaylist: " + videoPlaylist);
 
     assertThat(videoPlaylist).isNotNull();
-    assertThat(videoPlaylist.getPlaylist()).isNull();
-    long recheckDelay = videoPlaylist.getWaitMillis();
-    assertThat(recheckDelay).isGreaterThan(0);
-    logger.info("VideoStreamingService returned a \"wait\" playlist, as expected...");
+    assertThat(videoPlaylist.getLocatorIds().size()).isNotZero();
 
-    VideoPlaylist testPlaylistOutput = null;
-    while (recheckDelay > 0) {
-      logger.info("Waiting {} milliseconds from playlist recommendation...", recheckDelay);
-      Thread.sleep(recheckDelay);
-
-      final Optional<VideoPlaylist> afterDelayStreamPlaylist =
-          streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId, renderer);
-      assertThat(afterDelayStreamPlaylist).isNotNull().isPresent();
-      testPlaylistOutput = afterDelayStreamPlaylist.get();
-      assertThat(testPlaylistOutput).isNotNull();
-      recheckDelay = testPlaylistOutput.getWaitMillis();
-    }
-    logger.info("Done waiting, performing recheck...");
-    assertThat(testPlaylistOutput).isNotNull();
-    final String renderedPlaylist = testPlaylistOutput.getPlaylist();
-    logger.info("Test rendered M3U playlist:\n" + renderedPlaylist);
-    assertThat(renderedPlaylist).isNotNull().isNotEmpty().isNotBlank();
-    assertThat(testPlaylistOutput.getWaitMillis()).isEqualTo(0);
-
-    final Optional<VideoStreamLocatorPlaylist> deleteOptional =
-        locatorPlaylistService.getVideoStreamPlaylistFor(testFileSrcId);
-    assertThat(deleteOptional).isPresent();
-    VideoStreamingServiceTest.deletablePlaylist = deleteOptional.get();
+    final Optional<VideoPlaylist> afterCreatingStreamPlaylist =
+        streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId);
+    assertThat(afterCreatingStreamPlaylist).isNotNull().isPresent();
+    final VideoPlaylist playlist = afterCreatingStreamPlaylist.get();
+    assertThat(playlist).isNotNull();
   }
 
   @Test
@@ -275,6 +262,11 @@ class VideoStreamingServiceTest {
   @DisplayName("Validate ability to delete previously downloaded video data")
   void deleteVideoData() throws IOException, InterruptedException {
 
+    logger.info("Getting VideoStreamLocatorPlaylist for VideoFileSource: {}", testFileSource);
+    final Optional<VideoStreamLocatorPlaylist> playlistOptional =
+            locatorPlaylistService.getVideoStreamPlaylistFor(testFileSource.getFileSrcId());
+    assertThat(playlistOptional).isPresent();
+    VideoStreamLocatorPlaylist deletablePlaylist = playlistOptional.get();
     assertThat(deletablePlaylist).isNotNull();
     final List<VideoStreamLocator> streamLocators = deletablePlaylist.getStreamLocators();
 
@@ -309,7 +301,7 @@ class VideoStreamingServiceTest {
 
     final Optional<VideoPlaylist> playlistOptional =
         streamingService.getVideoStreamPlaylist(
-            testMatch.getEventId(), fileSrcId, new M3uRenderer());
+            testMatch.getEventId(), fileSrcId);
     assertThat(playlistOptional).isPresent();
     final VideoPlaylist videoPlaylist = playlistOptional.get();
     logger.info("Using playlist: " + videoPlaylist);

@@ -19,6 +19,19 @@
 
 package self.me.matchday.api.service.video;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,31 +44,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
-import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.Event;
-import self.me.matchday.model.video.*;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.net.URI;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import self.me.matchday.model.video.PartIdentifier;
+import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.video.VideoPlaylist;
+import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
 @Service
 @Transactional
 public class VideoStreamingService {
 
+  private static final int BUFFER_SIZE = 4096;
+  private static final int FILE_CHECK_DELAY = 100;
+  private static final Duration MAX_TIMEOUT = Duration.of(15, ChronoUnit.SECONDS);
+
   private final EventService eventService;
   private final VideoFileSelectorService selectorService;
   private final VideoStreamManager videoStreamManager;
-  private final StreamDelayAdviceService delayAdviceService;
   private final VideoStreamLocatorPlaylistService playlistService;
   private final VideoStreamLocatorService videoStreamLocatorService;
 
@@ -64,14 +71,12 @@ public class VideoStreamingService {
       final EventService eventService,
       final VideoFileSelectorService selectorService,
       final VideoStreamManager videoStreamManager,
-      final StreamDelayAdviceService delayAdviceService,
       final VideoStreamLocatorPlaylistService playlistService,
       final VideoStreamLocatorService videoStreamLocatorService) {
 
     this.eventService = eventService;
     this.selectorService = selectorService;
     this.videoStreamManager = videoStreamManager;
-    this.delayAdviceService = delayAdviceService;
     this.playlistService = playlistService;
     this.videoStreamLocatorService = videoStreamLocatorService;
   }
@@ -87,8 +92,26 @@ public class VideoStreamingService {
     return Optional.empty();
   }
 
+  private static void waitForFile(@NotNull Path playlistPath) {
+
+    // todo - if this works, find a better way
+    final File playlistFile = playlistPath.toFile();
+    final Instant start = Instant.now();
+    try {
+      while(!playlistFile.exists()) {
+        TimeUnit.MILLISECONDS.sleep(FILE_CHECK_DELAY);
+        final Instant elapsed = Instant.now();
+        if (Duration.between(start, elapsed).compareTo(MAX_TIMEOUT) > 0) {
+          throw new InterruptedException("Timeout exceeded reading playlist file: " + playlistFile);
+        }
+      }
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public Optional<VideoPlaylist> getBestVideoStreamPlaylist(
-      @NotNull final UUID eventId, @NotNull final VideoPlaylistRenderer renderer) {
+      @NotNull final UUID eventId) {
 
     final Optional<Event> eventOptional = eventService.fetchById(eventId);
     return eventOptional
@@ -96,32 +119,9 @@ public class VideoStreamingService {
             event -> {
               final VideoFileSource fileSource = selectorService.getBestFileSource(event);
               final UUID fileSrcId = fileSource.getFileSrcId();
-              return this.getVideoStreamPlaylist(eventId, fileSrcId, renderer);
+              return this.getVideoStreamPlaylist(eventId, fileSrcId);
             })
         .orElse(Optional.empty());
-  }
-
-  /**
-   * Get the most recent video stream playlist for the given file source
-   *
-   * @param fileSrcId The ID of the VideoFileSource
-   * @return An Optional containing the playlist, if one was found; empty indicates one is being
-   *     created
-   */
-  public Optional<VideoPlaylist> getVideoStreamPlaylist(
-      @NotNull final UUID eventId,
-      @NotNull final UUID fileSrcId,
-      @NotNull final VideoPlaylistRenderer renderer) {
-
-    final VideoFileSource videoFileSource = getRequestedFileSource(eventId, fileSrcId);
-    if (videoFileSource != null) {
-      return videoStreamManager
-          .getLocalStreamFor(fileSrcId)
-          .map(playlist -> renderPlaylist(eventId, fileSrcId, renderer, playlist))
-          .or(() -> Optional.of(createPlaylist(videoFileSource)));
-    }
-    // "not found"
-    return Optional.empty();
   }
 
   /**
@@ -144,58 +144,46 @@ public class VideoStreamingService {
     return null;
   }
 
+  /**
+   * Get the most recent video stream playlist for the given file source
+   *
+   * @param fileSrcId The ID of the VideoFileSource
+   * @return An Optional containing the playlist, if one was found; empty indicates one is being
+   *     created
+   */
+  public Optional<VideoPlaylist> getVideoStreamPlaylist(
+      @NotNull final UUID eventId,
+      @NotNull final UUID fileSrcId) {
+
+    final VideoFileSource videoFileSource = getRequestedFileSource(eventId, fileSrcId);
+    if (videoFileSource != null) {
+      return videoStreamManager
+          .getLocalStreamFor(fileSrcId)
+          .map(playlist -> renderPlaylist(eventId, fileSrcId, playlist))
+          .or(
+              () -> {
+                final VideoStreamLocatorPlaylist playlist = createVideoStream(videoFileSource);
+                return Optional.of(renderPlaylist(eventId, fileSrcId, playlist));
+              });
+    }
+    // "not found"
+    return Optional.empty();
+  }
+
   public @NotNull VideoPlaylist renderPlaylist(
       @NotNull UUID eventId,
       @NotNull UUID fileSrcId,
-      @NotNull VideoPlaylistRenderer renderer,
       @NotNull VideoStreamLocatorPlaylist playlist) {
 
-    long waitMillis = 0;
-    String renderedPlaylist = null;
-
-    if (delayAdviceService.isStreamReady(playlist)) {
-      playlist
-          .getStreamLocators()
-          .forEach(locator -> addLocator(eventId, fileSrcId, renderer, locator));
-      renderedPlaylist = renderer.renderPlaylist();
-    } else {
-      waitMillis = delayAdviceService.getDelayAdvice(playlist);
-    }
-    return VideoPlaylist.builder().waitMillis(waitMillis).playlist(renderedPlaylist).build();
-  }
-
-  private void addLocator(
-      @NotNull UUID eventId,
-      @NotNull UUID fileSrcId,
-      @NotNull VideoPlaylistRenderer renderer,
-      @NotNull VideoStreamLocator locator) {
-
-    final VideoFile videoFile = locator.getVideoFile();
-    final Long streamLocatorId = locator.getStreamLocatorId();
-    final URI playlistUri =
-        linkTo(
-                methodOn(VideoStreamingController.class)
-                    .getVideoPartPlaylist(eventId, fileSrcId, streamLocatorId))
-            .toUri();
-    final PartIdentifier identifier = videoFile.getTitle();
-    final String title = identifier != null ? identifier.toString() : "";
-    final double duration = videoFile.getDuration();
-    renderer.addMediaSegment(playlistUri, title, duration);
-  }
-
-  /**
-   * Create playlist & asynchronously begin playlist stream
-   *
-   * @param videoFileSource Video source from which to create playlist
-   * @return The video playlist
-   */
-  public @NotNull VideoPlaylist createPlaylist(@NotNull final VideoFileSource videoFileSource) {
-
-    final VideoStreamLocatorPlaylist playlist =
-        videoStreamManager.createVideoStreamFrom(videoFileSource);
-    playlist.getStreamLocators().forEach(videoStreamManager::beginStreaming);
-    final long delayAdvice = delayAdviceService.getDelayAdvice(playlist);
-    return VideoPlaylist.builder().waitMillis(delayAdvice).build();
+    final VideoPlaylist videoPlaylist = new VideoPlaylist(eventId, fileSrcId);
+    playlist
+        .getStreamLocators()
+        .forEach(locator -> {
+          final Long streamLocatorId = locator.getStreamLocatorId();
+          final PartIdentifier partId = locator.getVideoFile().getTitle();
+          videoPlaylist.addLocator(streamLocatorId, partId);
+        });
+    return videoPlaylist;
   }
 
   /**
@@ -209,6 +197,20 @@ public class VideoStreamingService {
   }
 
   /**
+   * Create playlist & asynchronously begin playlist stream
+   *
+   * @param videoFileSource Video source from which to create playlist
+   * @return The video playlist
+   */
+  public @NotNull VideoStreamLocatorPlaylist createVideoStream(@NotNull final VideoFileSource videoFileSource) {
+
+    final VideoStreamLocatorPlaylist playlist =
+        videoStreamManager.createVideoStreamFrom(videoFileSource);
+    playlist.getStreamLocators().forEach(videoStreamManager::beginStreaming);
+    return playlist;
+  }
+
+  /**
    * Read playlist file; it may be concurrently being written to, so we read it reactively
    *
    * @param streamLocator The locator pointing to the required playlist file
@@ -218,10 +220,15 @@ public class VideoStreamingService {
 
     final StringBuilder sb = new StringBuilder();
     final Path playlistPath = streamLocator.getPlaylistPath();
+    // wait until playlist file actually exists
+    waitForFile(playlistPath);
+
     final Flux<DataBuffer> fluxBuffer =
-        DataBufferUtils.read(playlistPath, new DefaultDataBufferFactory(), 4096);
+        DataBufferUtils.read(playlistPath, new DefaultDataBufferFactory(), BUFFER_SIZE);
     fluxBuffer
         .publishOn(Schedulers.boundedElastic())
+        .buffer(450)
+        .flatMapIterable(Function.identity())
         .doOnNext(buffer -> readBufferFromDisk(buffer, sb))
         .blockLast();
     final String result = sb.toString();
