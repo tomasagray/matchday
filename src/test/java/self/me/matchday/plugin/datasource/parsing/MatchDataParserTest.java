@@ -19,6 +19,13 @@
 
 package self.me.matchday.plugin.datasource.parsing;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import java.net.URL;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -43,14 +50,6 @@ import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.plugin.datasource.blogger.HtmlBloggerParser;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerEntry;
 import self.me.matchday.util.ResourceFileReader;
-
-import java.net.URL;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -84,7 +83,9 @@ public class MatchDataParserTest {
   private static Stream<Arguments> getBloggerEntryArgs() {
     //    final JsonBloggerParser bloggerParser = new JsonBloggerParser();
     final HtmlBloggerParser bloggerParser = new HtmlBloggerParser();
-    return bloggerParser.getBlogger(testHtml).getFeed().getEntry().stream().map(Arguments::of);
+    final List<BloggerEntry> entries = bloggerParser.getBlogger(testHtml).getFeed().getEntry();
+    logger.info("Found: {} Blogger entries for testing...", entries.size());
+    return entries.stream().map(Arguments::of);
   }
 
   @Test
