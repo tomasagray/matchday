@@ -171,7 +171,6 @@ public class VideoStreamingController {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
   public String handleIoError(@NotNull IOException e) {
-    e.printStackTrace();
     return e.getMessage();
   }
 

@@ -19,6 +19,21 @@
 
 package self.me.matchday.api.service.video;
 
+import static self.me.matchday.model.video.StreamJobState.JobStatus;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -31,18 +46,6 @@ import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegLogger;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask;
-
-import java.io.*;
-import java.net.URI;
-import java.nio.channels.AsynchronousFileChannel;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static self.me.matchday.model.video.StreamJobState.JobStatus;
 
 @Service
 @Transactional

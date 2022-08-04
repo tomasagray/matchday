@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -56,9 +56,12 @@ import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 @Transactional
 public class VideoStreamingService {
 
-  private static final int BUFFER_SIZE = 4096;
-  private static final int FILE_CHECK_DELAY = 100;
-  private static final Duration MAX_TIMEOUT = Duration.of(15, ChronoUnit.SECONDS);
+  @Value("${video-resources.file-read-buffer-size}")
+  private int BUFFER_SIZE;
+  @Value("${video-resources.file-recheck-delay-ms}")
+  private int FILE_CHECK_DELAY;
+  @Value("${video-resources.max-recheck-seconds}")
+  private int MAX_RECHECK_TIMEOUT;
 
   private final EventService eventService;
   private final VideoFileSelectorService selectorService;
@@ -66,7 +69,6 @@ public class VideoStreamingService {
   private final VideoStreamLocatorPlaylistService playlistService;
   private final VideoStreamLocatorService videoStreamLocatorService;
 
-  @Autowired
   public VideoStreamingService(
       final EventService eventService,
       final VideoFileSelectorService selectorService,
@@ -92,16 +94,16 @@ public class VideoStreamingService {
     return Optional.empty();
   }
 
-  private static void waitForFile(@NotNull Path playlistPath) {
+  private void waitForFile(@NotNull Path playlistPath) {
 
-    // todo - if this works, find a better way
     final File playlistFile = playlistPath.toFile();
+    final Duration timeout = Duration.of(MAX_RECHECK_TIMEOUT, ChronoUnit.SECONDS);
     final Instant start = Instant.now();
     try {
       while(!playlistFile.exists()) {
         TimeUnit.MILLISECONDS.sleep(FILE_CHECK_DELAY);
-        final Instant elapsed = Instant.now();
-        if (Duration.between(start, elapsed).compareTo(MAX_TIMEOUT) > 0) {
+        final Duration elapsed = Duration.between(start, Instant.now());
+        if (elapsed.compareTo(timeout) > 0) {
           throw new InterruptedException("Timeout exceeded reading playlist file: " + playlistFile);
         }
       }

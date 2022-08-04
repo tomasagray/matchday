@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Data;
@@ -39,6 +40,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.service.video.VideoStreamingService;
+import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoPlaylist;
 
 @Data
@@ -89,11 +91,17 @@ public class VideoPlaylistResource extends RepresentationModel<VideoPlaylistReso
 
         @Override
         public @NotNull VideoPlaylistResource toModel(@NotNull VideoPlaylist playlist) {
+
             final VideoPlaylistResource resource = instantiateModel(playlist);
-            playlist.getLocatorIds()
-                .forEach((locatorId, partId) -> {
-                    final UUID eventId = playlist.getEventId();
-                    final UUID fileSrcId = playlist.getFileSrcId();
+            final UUID eventId = playlist.getEventId();
+            final UUID fileSrcId = playlist.getFileSrcId();
+            final List<Entry<Long, PartIdentifier>> locatorIds =
+                new ArrayList<>(playlist.getLocatorIds().entrySet());
+            locatorIds.sort(Entry.comparingByValue());
+            locatorIds
+                .forEach(entry -> {
+                    final Long locatorId = entry.getKey();
+                    final PartIdentifier partId = entry.getValue();
                     final URI playlistUri =
                         linkTo(
                             methodOn(VideoStreamingController.class)
