@@ -90,7 +90,7 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
       videoFileSourceResource.setChannel(entity.getChannel());
       videoFileSourceResource.setSource(entity.getSource());
       videoFileSourceResource.setLanguages(entity.getLanguages());
-      videoFileSourceResource.setResolution(entity.getVideoCodec());
+      videoFileSourceResource.setResolution(entity.getResolution().toString());
       videoFileSourceResource.setMediaContainer(entity.getMediaContainer());
       videoFileSourceResource.setBitrate(entity.getVideoBitrate() + "Mbps");
       if (framerate > 0) {

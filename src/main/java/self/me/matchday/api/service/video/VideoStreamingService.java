@@ -28,6 +28,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -208,7 +210,12 @@ public class VideoStreamingService {
 
     final VideoStreamLocatorPlaylist playlist =
         videoStreamManager.createVideoStreamFrom(videoFileSource);
-    playlist.getStreamLocators().forEach(videoStreamManager::beginStreaming);
+
+    // ensure streams are started in correct order
+    final List<VideoStreamLocator> locators = playlist.getStreamLocators();
+    locators.sort(Comparator.comparing(VideoStreamLocator::getVideoFile));
+
+    locators.forEach(videoStreamManager::beginStreaming);
     return playlist;
   }
 

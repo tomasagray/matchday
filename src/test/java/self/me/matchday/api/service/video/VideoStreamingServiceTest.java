@@ -22,9 +22,11 @@ package self.me.matchday.api.service.video;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -50,6 +52,8 @@ import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.FileServerUser;
+import self.me.matchday.model.video.PartIdentifier;
+import self.me.matchday.model.video.SingleStreamLocator;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoPlaylist;
@@ -315,5 +319,35 @@ class VideoStreamingServiceTest {
     logger.info("Done waiting. Deleting test data...");
     streamingService.deleteVideoData(testFileSource.getFileSrcId());
     logger.info("Test data successfully deleted.");
+  }
+
+  @Test
+  @DisplayName("Validate that sorting VideoStreamLocatorPlaylist locators works as expected")
+  public void testPlaylistLocatorSorting() throws IOException {
+
+    final VideoStreamLocatorPlaylist playlist = new VideoStreamLocatorPlaylist();
+    final SingleStreamLocator firstHalfLocator = new SingleStreamLocator();
+    final SingleStreamLocator secondHalfLocator = new SingleStreamLocator();
+    final URL url = new URL("https://www.com.com");
+    final VideoFile firstHalf = new VideoFile(PartIdentifier.FIRST_HALF,
+        url);
+    final VideoFile secondHalf = new VideoFile(PartIdentifier.SECOND_HALF, url);
+    firstHalfLocator.setVideoFile(firstHalf);
+    secondHalfLocator.setVideoFile(secondHalf);
+
+    // add second half first
+    playlist.addStreamLocator(secondHalfLocator);
+    playlist.addStreamLocator(firstHalfLocator);
+
+    final List<VideoStreamLocator> locators = playlist.getStreamLocators();
+    logger.info("Locators before sorting: {}", locators);
+    logger.info("Sorting...");
+
+    locators.sort(Comparator.comparing(VideoStreamLocator::getVideoFile));
+    logger.info("Locators AFTER sorting: {}", locators);
+
+    final VideoStreamLocator firstLocator = locators.get(0);
+    logger.info("First locator after sorting is: {}", firstLocator);
+    assertThat(firstLocator).isEqualTo(firstHalfLocator);
   }
 }
