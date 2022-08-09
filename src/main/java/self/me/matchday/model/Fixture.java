@@ -19,15 +19,14 @@
 
 package self.me.matchday.model;
 
+import java.io.Serializable;
+import java.util.Objects;
+import javax.persistence.Embeddable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.Embeddable;
-import java.io.Serializable;
-import java.util.Objects;
 
 /** Represents a specific Fixture within a Season. This object is immutable. */
 @Getter
@@ -36,12 +35,9 @@ import java.util.Objects;
 @Embeddable
 public final class Fixture implements Serializable {
 
-  private static final long serialVersionUID = 123456L;
-
-  // Default parameters
   private static final String DEFAULT_TITLE = "Matchday";
 
-  private String title;
+  private String title = DEFAULT_TITLE;
   private Integer fixtureNumber = 0;
 
   public Fixture(@NotNull String title) {

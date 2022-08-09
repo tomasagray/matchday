@@ -19,15 +19,33 @@
 
 package self.me.matchday.model;
 
-import lombok.*;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.Corrected;
 import self.me.matchday.model.video.VideoFileSource;
-
-import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.*;
 
 /** A sporting Event */
 @Getter
@@ -48,9 +66,9 @@ public abstract class Event {
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
   protected Competition competition;
 
-  @Embedded protected Season season;
+  @Embedded protected Season season = new Season();
 
-  @Embedded protected Fixture fixture;
+  @Embedded protected Fixture fixture = new Fixture();
 
   @Setter(AccessLevel.NONE)
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
