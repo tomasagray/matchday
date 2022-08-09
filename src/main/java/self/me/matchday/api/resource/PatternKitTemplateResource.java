@@ -19,8 +19,13 @@
 
 package self.me.matchday.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
@@ -30,12 +35,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.PatternKitTemplateController;
 import self.me.matchday.model.PatternKitTemplate;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import self.me.matchday.model.PatternKitTemplate.Field;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -44,7 +44,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class PatternKitTemplateResource extends RepresentationModel<PatternKitTemplateResource> {
 
-  private final List<String> fields = new ArrayList<>();
+  private final List<Field> fields = new ArrayList<>();
   private final List<PatternKitTemplate> relatedTemplates = new ArrayList<>();
   private Long id;
   private Class<?> type;

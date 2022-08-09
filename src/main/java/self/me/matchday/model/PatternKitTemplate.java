@@ -19,18 +19,26 @@
 
 package self.me.matchday.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 @Getter
 @Setter
@@ -43,7 +51,7 @@ public class PatternKitTemplate {
   private final String name;
 
   @ElementCollection(fetch = FetchType.EAGER)
-  private final List<String> fields = new ArrayList<>();
+  private final List<Field> fields = new ArrayList<>();
 
   @OneToMany(cascade = CascadeType.ALL)
   @LazyCollection(LazyCollectionOption.FALSE)
@@ -61,8 +69,20 @@ public class PatternKitTemplate {
     this.name = type.getSimpleName();
   }
 
+  public void addField(@NotNull String fieldName, boolean required) {
+    final boolean present =
+        this.fields.stream()
+            .map(Field::getFieldName)
+            .anyMatch(name -> name.equals(fieldName));
+    if (!present) {
+      this.fields.add(new Field(fieldName, required));
+    }
+  }
+
   public void addFields(@NotNull String... fields) {
-    this.fields.addAll(Arrays.asList(fields));
+        Arrays.stream(fields)
+            .map(field -> new Field(field, false))
+            .forEach(this.fields::add);
   }
 
   public void addRelatedTemplate(@NotNull PatternKitTemplate template) {
@@ -76,5 +96,18 @@ public class PatternKitTemplate {
   @Override
   public String toString() {
     return String.format("PatternKitTemplate{id=%s, type=%s}", getId(), getType().getName());
+  }
+
+  @Data
+  @AllArgsConstructor
+  @Embeddable
+  public static class Field {
+    private final String fieldName;
+    private final Boolean required;
+
+    public Field() {
+      this.fieldName = null;
+      this.required = null;
+    }
   }
 }

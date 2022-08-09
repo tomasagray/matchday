@@ -19,6 +19,8 @@
 
 package self.me.matchday.startup;
 
+import java.net.URL;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
@@ -28,9 +30,6 @@ import self.me.matchday.model.Match;
 import self.me.matchday.model.PatternKitTemplate;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
-
-import java.net.URL;
-import java.util.Optional;
 
 @Component
 public class LoadPatternKitTemplates implements CommandLineRunner {
@@ -64,7 +63,14 @@ public class LoadPatternKitTemplates implements CommandLineRunner {
     logger.info("Reading PatternKitTemplate(s) for: Match");
 
     final PatternKitTemplate template = new PatternKitTemplate(Match.class);
-    template.addFields("competition", "homeTeam", "awayTeam", "season", "fixture", "date");
+    // add required fields
+    template.addField("competition", true);
+    template.addField("homeTeam", true);
+    template.addField("awayTeam", true);
+    template.addField("date", true);
+    // optional fields
+    template.addFields("season", "fixture");
+    // related
     template.addRelatedTemplate(readVideoFileSourceTemplate());
     template.addRelatedTemplate(readVideoFileTemplate());
     template.addRelatedTemplate(readUrlTemplate());
@@ -73,10 +79,14 @@ public class LoadPatternKitTemplates implements CommandLineRunner {
 
   PatternKitTemplate readVideoFileSourceTemplate() {
     logger.info("Reading PatternKitTemplate for: VideoFileSource");
+
     final PatternKitTemplate template = new PatternKitTemplate(VideoFileSource.class);
+    // required fields
+    template.addField("channel", true);
+    template.addField("source", true);
+    template.addField("resolution", true);
+    // optional fields
     template.addFields(
-        "channel",
-        "source",
         "languages",
         "videoBitrate",
         "videoCodec",
@@ -86,23 +96,23 @@ public class LoadPatternKitTemplates implements CommandLineRunner {
         "audioCodec",
         "audioChannels",
         "approximateDuration",
-        "filesize",
-        "resolution");
+        "filesize");
     return template;
   }
 
   PatternKitTemplate readVideoFileTemplate() {
     logger.info("Reading PatternKitTemplate for: VideoFile");
+
     final PatternKitTemplate template = new PatternKitTemplate(VideoFile.class);
-    template.addFields("title");
+    template.addField("title", true);
     return template;
   }
 
   PatternKitTemplate readUrlTemplate() {
-
     logger.info("Reading PatternKitTemplate for: URI");
+
     final PatternKitTemplate template = new PatternKitTemplate(URL.class);
-    template.addFields("url");
+    template.addField("url", true);
     return template;
   }
 }
