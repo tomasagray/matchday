@@ -40,6 +40,7 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
+import self.me.matchday.model.video.Resolution;
 import self.me.matchday.model.video.VideoFileSource;
 
 @Data
@@ -85,20 +86,24 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
 
       final UUID fileSrcId = entity.getFileSrcId();
       final int framerate = entity.getFramerate();
+      final Resolution resolution = entity.getResolution();
+
       // Add metadata
       videoFileSourceResource.setId(fileSrcId);
       videoFileSourceResource.setChannel(entity.getChannel());
       videoFileSourceResource.setSource(entity.getSource());
       videoFileSourceResource.setLanguages(entity.getLanguages());
-      videoFileSourceResource.setResolution(entity.getResolution().toString());
       videoFileSourceResource.setMediaContainer(entity.getMediaContainer());
       videoFileSourceResource.setBitrate(entity.getVideoBitrate() + "Mbps");
-      if (framerate > 0) {
-        videoFileSourceResource.setFrameRate(framerate);
-      }
       videoFileSourceResource.setVideoCodec(entity.getVideoCodec());
       videoFileSourceResource.setAudioCodec(entity.getAudioCodec());
       videoFileSourceResource.setDuration(entity.getApproximateDuration());
+      if (resolution != null) {
+        videoFileSourceResource.setResolution(resolution.toString());
+      }
+      if (framerate > 0) {
+        videoFileSourceResource.setFrameRate(framerate);
+      }
 
       // remote stream (no transcoding)
       videoFileSourceResource.add(
