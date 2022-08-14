@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.controller;
 
+import java.io.IOException;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -26,11 +28,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.service.ArtworkService;
-
-import java.io.IOException;
-import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/artwork")
@@ -54,8 +58,7 @@ public class ArtworkController {
       value = "/competition/{competitionId}/emblem",
       produces = MediaType.IMAGE_PNG_VALUE,
       method = RequestMethod.GET)
-  public ResponseEntity<byte[]> fetchCompetitionEmblem(@PathVariable final UUID competitionId)
-      throws IOException {
+  public ResponseEntity<byte[]> fetchCompetitionEmblem(@PathVariable final UUID competitionId) {
 
     return artworkService
         .fetchCompetitionEmblem(competitionId)
@@ -73,8 +76,7 @@ public class ArtworkController {
       value = "/competition/{competitionId}/fanart",
       produces = MediaType.IMAGE_JPEG_VALUE,
       method = RequestMethod.GET)
-  public ResponseEntity<byte[]> fetchCompetitionFanart(@PathVariable final UUID competitionId)
-      throws IOException {
+  public ResponseEntity<byte[]> fetchCompetitionFanart(@PathVariable final UUID competitionId) {
 
     return artworkService
         .fetchCompetitionFanart(competitionId)
@@ -93,7 +95,7 @@ public class ArtworkController {
       produces = MediaType.IMAGE_PNG_VALUE,
       method = RequestMethod.GET)
   public ResponseEntity<byte[]> fetchCompetitionMonochromeEmblem(
-      @PathVariable final UUID competitionId) throws IOException {
+      @PathVariable final UUID competitionId) {
 
     return artworkService
         .fetchCompetitionMonochromeEmblem(competitionId)
@@ -111,8 +113,7 @@ public class ArtworkController {
       value = "/competition/{competitionId}/landscape",
       produces = MediaType.IMAGE_JPEG_VALUE,
       method = RequestMethod.GET)
-  public ResponseEntity<byte[]> fetchCompetitionLandscape(@PathVariable final UUID competitionId)
-      throws IOException {
+  public ResponseEntity<byte[]> fetchCompetitionLandscape(@PathVariable final UUID competitionId) {
 
     return artworkService
         .fetchCompetitionLandscape(competitionId)
@@ -130,8 +131,7 @@ public class ArtworkController {
       value = "/team/{teamId}/emblem",
       produces = MediaType.IMAGE_PNG_VALUE,
       method = RequestMethod.GET)
-  public ResponseEntity<byte[]> fetchTeamEmblem(@PathVariable final UUID teamId)
-      throws IOException {
+  public ResponseEntity<byte[]> fetchTeamEmblem(@PathVariable final UUID teamId) {
 
     return artworkService
         .fetchTeamEmblem(teamId)
@@ -149,8 +149,7 @@ public class ArtworkController {
       value = "/team/{teamId}/fanart",
       produces = MediaType.IMAGE_JPEG_VALUE,
       method = RequestMethod.GET)
-  public ResponseEntity<byte[]> fetchTeamFanart(@PathVariable final UUID teamId)
-      throws IOException {
+  public ResponseEntity<byte[]> fetchTeamFanart(@PathVariable final UUID teamId) {
 
     return artworkService
         .fetchTeamFanart(teamId)

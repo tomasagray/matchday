@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,17 +19,17 @@
 
 package self.me.matchday.model;
 
+import java.io.File;
+import java.time.LocalDateTime;
+import java.util.Objects;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @Getter
@@ -39,8 +39,7 @@ import java.util.Objects;
 public class Artwork {
 
   @Id @GeneratedValue private Long id;
-  private String filePath;
-  private String fileName;
+  private File file;
   private Long fileSize;
   private String mediaType;
   private int width;

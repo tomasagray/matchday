@@ -44,7 +44,7 @@
       "id": 3,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
-        "pattern": "([\\p{L}\\d\\s\\.]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]* (\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]* ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
+        "pattern": "([\\p{L}\\d\\s\\.]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]* (\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]* ([\\p{L}\\s-]+) v[s\\.] ([\\p{L}\\s-]+)",
         "flags": 64
       },
       "fields": {
@@ -60,7 +60,7 @@
       "id": 4,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
-        "pattern": "([\\p{L}\\d\\s]+) (\\d{2}\\/\\d{2}) -([SemiFinalLegstndrdth\\d\\s-]*) (\\d{1,2}[\\p{L}\\s]+) - ([\\p{L}\\d\\s-]+) vs.? ([\\p{L}\\d\\s-]+) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})",
+        "pattern": "([\\p{L}\\d\\s]+) (\\d{2}\\/\\d{2}) -([SemiFinalLegstndrdth\\d\\s-]*) (\\d{1,2}[\\p{L}\\s]+) - ([\\p{L}\\d\\s-]+) v[s\\.] ([\\p{L}\\d\\s-]+) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})",
         "flags": 64
       },
       "fields": {
@@ -76,7 +76,7 @@
       "id": 5,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
-        "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]*(\\d+) - ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
+        "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]*(\\d+) - ([\\p{L}\\s-]+) v[s\\.] ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
         "flags": 64
       },
       "fields": {
@@ -92,7 +92,7 @@
       "id": 6,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
-        "pattern": "([\\s\\p{L}]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
+        "pattern": "([\\s\\p{L}]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - ([\\p{L}\\s-]+) v[s\\.] ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
         "flags": 64
       },
       "fields": {
@@ -108,7 +108,7 @@
       "id": 7,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
-        "pattern": "([\\s\\p{L}]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
+        "pattern": "([\\s\\p{L}]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s-]+) v[s\\.] ([\\p{L}\\s-]+)",
         "flags": 64
       },
       "fields": {
@@ -135,7 +135,7 @@
       "id": 9,
       "clazz": "self.me.matchday.model.Match",
       "pattern": {
-        "pattern": "([\\p{L}\\d\\s]+) (\\d{2}\\/\\d{2}) - ([PlayofLeg\\d\\s-]*) (\\d{1,2}) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}) ([\\p{L}\\d\\s-]+) vs.? ([\\p{L}\\d\\s-]+)",
+        "pattern": "([\\p{L}\\d\\s]+) (\\d{2}\\/\\d{2}) - ([PlayofLeg\\d\\s-]*) (\\d{1,2}) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}) ([\\p{L}\\d\\s-]+) v[s\\.] ([\\p{L}\\d\\s-]+)",
         "flags": 64
       },
       "fields": {
@@ -145,6 +145,20 @@
         "5": "date",
         "6": "homeTeam",
         "7": "awayTeam"
+      }
+    },
+    {
+      "id": 25,
+      "clazz": "self.me.matchday.model.Match",
+      "pattern": {
+        "pattern": "([\\p{L}\\d\\s\\.-]+) ?- (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\d\\s\\.-]+) v[s\\.]? ([\\p{L}\\d\\s\\.-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "date",
+        "3": "homeTeam",
+        "4": "awayTeam"
       }
     }
   ]
