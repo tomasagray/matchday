@@ -19,18 +19,27 @@
 
 package self.me.matchday.model.video;
 
-import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
-import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.MapKeyEnumerated;
+import javax.persistence.OneToMany;
+import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
 
 @ToString
 @Entity
@@ -65,16 +74,39 @@ public class VideoFilePack {
     return videoFiles;
   }
 
+  /**
+   * Gets the first VideoFile in the pack, by PartIdentifier
+   *
+   * @return The first VideoFile in the pack, or null if pack is empty
+   */
   public VideoFile firstPart() {
-    final Map.Entry<PartIdentifier, VideoFile> firstEntry =
-        ((NavigableMap<PartIdentifier, VideoFile>) videoFiles).firstEntry();
-    return firstEntry != null ? firstEntry.getValue() : null;
+    if (videoFiles.size() > 0) {
+      final List<VideoFile> sorted = getSortedVideoFiles();
+      return sorted.get(0);
+    }
+    return null;
   }
 
+  @NotNull
+  private List<VideoFile> getSortedVideoFiles() {
+    return videoFiles.entrySet().stream()
+        .sorted(Entry.comparingByKey(Enum::compareTo))
+        .map(Entry::getValue)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Gets the last VideoFile in the pack, by PartIdentifier
+   *
+   * @return The last VideoFile, or null if the pack is empty
+   */
   public VideoFile lastPart() {
-    final Map.Entry<PartIdentifier, VideoFile> lastEntry =
-        ((NavigableMap<PartIdentifier, VideoFile>) videoFiles).lastEntry();
-    return lastEntry != null ? lastEntry.getValue() : null;
+    if (videoFiles.size() > 0) {
+      final List<VideoFile> sorted = getSortedVideoFiles();
+      final int lastIndex = sorted.size() - 1;
+      return sorted.get(lastIndex);
+    }
+    return null;
   }
 
   public int size() {

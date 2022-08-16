@@ -19,20 +19,36 @@
 
 package self.me.matchday.api.service.video;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import self.me.matchday.api.service.FileServerPluginService;
+import self.me.matchday.model.Country;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class VideoFileSelectorService {
+
+  private final FileServerPluginService pluginService;
+
+  public VideoFileSelectorService(FileServerPluginService pluginService) {
+    this.pluginService = pluginService;
+  }
+
+  private static String getSourcePrimaryLanguage(@NotNull VideoFileSource source) {
+    final String languages = source.getLanguages();
+    if (languages.contains(" ")) {
+      return languages.split("\\s")[0];
+    }
+    return languages.trim();
+  }
 
   /**
    * Get the "best" file source, sorted by: language -> bitrate -> resolution
@@ -42,15 +58,47 @@ public class VideoFileSelectorService {
    */
   public VideoFileSource getBestFileSource(@NotNull final Event event) {
 
-    // sort file sources
-    final List<VideoFileSource> fileSources = new ArrayList<>(event.getFileSources());
-    fileSources.sort(
+    // get a mutable copy
+    final List<VideoFileSource> sortedFileSources = new ArrayList<>(event.getFileSources());
+    // sort file sources by:
+    //  - resolution, competition language, home team language, away team language
+    sortedFileSources.sort(
         Comparator.comparing(VideoFileSource::getResolution)
-            .thenComparing(VideoFileSource::getVideoBitrate)
-            .thenComparing(VideoFileSource::getLanguages));
-    // todo - get "preferred" language instead of alphabetical sort ^
+            .thenComparing(
+                VideoFileSelectorService::getSourcePrimaryLanguage,
+                (first, second) ->
+                    compareLanguages(event.getCompetition().getCountry(), first, second))
+            .thenComparing(
+                VideoFileSelectorService::getSourcePrimaryLanguage,
+                (first, second) -> {
+                  if (event instanceof Match) {
+                    final Match match = (Match) event;
+                    return compareLanguages(match.getHomeTeam().getCountry(), first, second);
+                  }
+                  return 0;
+                })
+            .thenComparing(
+                VideoFileSelectorService::getSourcePrimaryLanguage,
+                (first, second) -> {
+                  if (event instanceof Match) {
+                    final Match match = (Match) event;
+                    return compareLanguages(match.getAwayTeam().getCountry(), first, second);
+                  }
+                  return 0;
+                }));
     // get top result
-    return fileSources.get(0);
+    return sortedFileSources.get(0);
+  }
+
+  private int compareLanguages(@NotNull Country country, String first, String second) {
+
+    final Boolean firstMatches =
+        country.getLocales().stream()
+            .anyMatch(locale -> locale.getDisplayLanguage().contains(first));
+    final Boolean secondMatches =
+        country.getLocales().stream()
+            .anyMatch(locale -> locale.getDisplayLanguage().contains(second));
+    return firstMatches.compareTo(secondMatches);
   }
 
   /**
@@ -62,51 +110,23 @@ public class VideoFileSelectorService {
    */
   public VideoFilePack getPlaylistFiles(@NotNull final VideoFileSource fileSource) {
 
-    // todo - reimplement this
-    return fileSource.getVideoFilePacks().get(0);
-    /*
-    // Sort VideoFiles by part
-    final LinkedMultiValueMap<EventPartIdentifier, VideoFile> eventParts =
-        new LinkedMultiValueMap<>();
-    fileSource
-        .getVideoFiles()
-        .forEachVideoFile(videoFile -> eventParts.add(videoFile.getTitle(), videoFile));
-
-    // Get best version of each part
-    return eventParts.values().stream()
-        .map(this::getBestVideoFile)
-        .sorted()
-        .collect(Collectors.toList());*/
-  }
-
-  /**
-   * Given a List of VideoFiles which all represent the same portion of the same event, get the
-   * "best" version. Best is determined by: Does the VideoFile have an internal URL? ... more to
-   * come
-   *
-   * @param videoFiles A List of VideoFile versions
-   * @return The "best" version
-   */
-  private @NotNull VideoFile getBestVideoFile(@NotNull final List<VideoFile> videoFiles) {
-
-    final Optional<VideoFile> videoFileOptional =
-        videoFiles.stream()
-            .min(
-                (ev1, ev2) -> {
-                  // todo - include file server differentiation
-                  if (ev2.getInternalUrl() != null && ev1.getInternalUrl() == null) {
-                    return 1;
-                  } else if (ev1.getInternalUrl() != null && ev2.getInternalUrl() == null) {
-                    return -1;
-                  } else if (ev1.getInternalUrl() != null && ev2.getInternalUrl() != null) {
-                    return -1;
-                  } else {
-                    return 0;
-                  }
-                });
-    // Validation should have occurred upstream
-    assert videoFileOptional.isPresent();
-    // Return "best" event file option
-    return videoFileOptional.get();
+    // get mutable copy
+    final List<VideoFilePack> sortedPacks = new ArrayList<>(fileSource.getVideoFilePacks());
+    sortedPacks.sort(
+        Comparator.comparing(
+            pack -> {
+              final VideoFile firstPart = pack.firstPart();
+              if (firstPart != null) {
+                final URL url = firstPart.getExternalUrl();
+                return pluginService.getEnabledPluginForUrl(url);
+              }
+              return null;
+            },
+            (o1, o2) -> {
+              final Boolean hasPlugin1 = o1 != null;
+              final Boolean hasPlugin2 = o2 != null;
+              return hasPlugin1.compareTo(hasPlugin2);
+            }));
+    return sortedPacks.get(0);
   }
 }
