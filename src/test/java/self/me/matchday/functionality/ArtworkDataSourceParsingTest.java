@@ -17,8 +17,20 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.model;
+package self.me.matchday.functionality;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -31,25 +43,17 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import self.me.matchday.model.Artwork;
+import self.me.matchday.model.PatternKit;
+import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.plugin.datasource.parsing.TextParser;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Validation for DataSource entity")
-class DataSourceTest {
+class ArtworkDataSourceParsingTest {
 
-  private static final Logger logger = LogManager.getLogger(DataSourceTest.class);
+  private static final Logger logger = LogManager.getLogger(ArtworkDataSourceParsingTest.class);
 
   private static PlaintextDataSource<Artwork> dataSource;
   private static TextParser textParser;
@@ -57,15 +61,15 @@ class DataSourceTest {
   @BeforeAll
   static void setup(@Autowired TextParser textParser) throws URISyntaxException {
 
-    DataSourceTest.textParser = textParser;
+    ArtworkDataSourceParsingTest.textParser = textParser;
 
     // create test data source
     final URI uri = new URI("https://galatamanhdfb.blogspot.com/");
     final PatternKit<Artwork> patternKit = new PatternKit<>(Artwork.class);
     patternKit.setPattern(
         Pattern.compile("<img[\\w=\":;%\\s-]*src=\"([\\w.:/]*)\" [\\w\\s=\":;%_-]*/?>"));
-    patternKit.setFields(Map.of(1, "filePath"));
-    DataSourceTest.dataSource =
+    patternKit.setFields(Map.of(1, "file"));
+    ArtworkDataSourceParsingTest.dataSource =
         new PlaintextDataSource<>(
             "Test Plaintext DataSource", uri, Artwork.class, List.of(patternKit));
     logger.info("Created PlaintextDataSource:\n{}", dataSource);
@@ -73,7 +77,7 @@ class DataSourceTest {
 
   private static Stream<Arguments> createArtworkStream() {
 
-    final URI baseUri = DataSourceTest.dataSource.getBaseUri();
+    final URI baseUri = dataSource.getBaseUri();
     logger.info("Getting data from: {}", baseUri);
     final String data = getDataFromUri(baseUri);
     logger.info("Got data:\n{}", data);
@@ -91,12 +95,8 @@ class DataSourceTest {
     try (BufferedReader reader =
         new BufferedReader(new InputStreamReader(baseUri.toURL().openStream()))) {
 
-      final StringBuilder builder = new StringBuilder();
-      String line;
-      while ((line = reader.readLine()) != null) {
-        builder.append(line);
-      }
-      return builder.toString();
+      return reader.lines().collect(Collectors.joining("\n"));
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -110,6 +110,9 @@ class DataSourceTest {
 
     logger.info("Got Artwork: {}", artwork);
     assertThat(artwork).isNotNull();
-    assertThat(artwork.getFilePath()).isNotNull().isNotEmpty();
+
+    // todo - make this actually read artwork, test
+    final File artworkFile = artwork.getFile();
+    assertThat(artworkFile).isNotNull();
   }
 }

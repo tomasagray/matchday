@@ -23,16 +23,21 @@
  */
 package self.me.matchday.model;
 
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Represents a competition, e.g., a domestic league (EPL) or cup (FA Cup), a tournament (UCL, World
@@ -54,11 +59,11 @@ public class Competition implements Serializable {
   @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   private final ProperName name;
 
-  private Locale locale;
   @OneToOne private Artwork emblem;
   @OneToOne private Artwork fanart;
   @OneToOne private Artwork monochromeEmblem;
   @OneToOne private Artwork landscape;
+  @ManyToOne private Country country;
 
   public Competition(@NotNull final String name) {
     this.name = new ProperName(name);
@@ -82,11 +87,11 @@ public class Competition implements Serializable {
     Competition that = (Competition) o;
     return Objects.equals(getCompetitionId(), that.getCompetitionId())
         && Objects.equals(getName(), that.getName())
-        && Objects.equals(getLocale(), that.getLocale());
+        && Objects.equals(getCountry(), that.getCountry());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getCompetitionId(), getName(), getLocale());
+    return Objects.hash(getCompetitionId(), getName(), getCountry());
   }
 }

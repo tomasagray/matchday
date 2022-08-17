@@ -137,8 +137,9 @@ public class TestDataCreator {
     assertThat(testDataSource).isNotNull();
 
     // randomize IDs to avoid collisions
-    testDataSource.getPatternKits()
-      .forEach(patternKit -> patternKit.setId(ThreadLocalRandom.current().nextLong()));
+    testDataSource
+        .getPatternKits()
+        .forEach(patternKit -> patternKit.setId(ThreadLocalRandom.current().nextLong()));
     logger.info("Read test datasource:\n{}", testDataSource);
     return testDataSource;
   }

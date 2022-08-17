@@ -107,8 +107,7 @@ public class ArtworkService {
    * @return A byte array of the image data.
    */
   public Optional<byte[]> fetchCompetitionFanart(@NotNull final UUID competitionId) {
-    return readCompetitionArtworkOrDefault(
-        competitionId, Competition::getFanart, DEFAULT_FANART);
+    return readCompetitionArtworkOrDefault(competitionId, Competition::getFanart, DEFAULT_FANART);
   }
 
   /**
@@ -152,10 +151,7 @@ public class ArtworkService {
     final Optional<Team> teamOptional = teamRepository.findById(teamId);
     if (teamOptional.isPresent()) {
       File artwork =
-          teamOptional
-              .map(getter)
-              .map(Artwork::getFile)
-              .orElse(getDefaultFile(defaultFilename));
+          teamOptional.map(getter).map(Artwork::getFile).orElse(getDefaultFile(defaultFilename));
       return Optional.of(readArtworkFromDisk(artwork));
     }
     return Optional.empty();

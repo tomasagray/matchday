@@ -19,8 +19,11 @@
 
 package self.me.matchday.util;
 
-import com.google.gson.*;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
@@ -82,5 +85,9 @@ public class JsonParser {
 
   public static <T> T fromJson(String json, Type type) {
     return gson.fromJson(json, type);
+  }
+
+  public static <T> T fromJson(Reader reader, Type type) {
+    return gson.fromJson(reader, type);
   }
 }

@@ -1,0 +1,32 @@
+<!--
+  - Copyright (c) 2022.
+  -
+  - This file is part of Matchday.
+  -
+  - Matchday is free software: you can redistribute it and/or modify
+  - it under the terms of the GNU General Public License as published by
+  - the Free Software Foundation, either version 3 of the License, or
+  - (at your option) any later version.
+  -
+  - Matchday is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  - GNU General Public License for more details.
+  -
+  - You should have received a copy of the GNU General Public License
+  - along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<svg id="flag-icons-cefta" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="320" cy="249.8" fill="none" r="30.4" stroke="#fc0" stroke-width="27.5"/>
+  <circle cx="320" cy="249.8" fill="none" r="88.3" stroke="#fc0" stroke-width="27.5"/>
+  <circle cx="225.1" cy="159.6" fill="#fc0" r="13.7"/>
+  <circle cx="144.3" cy="249.8" fill="#fc0" r="13.7"/>
+  <circle cx="320" cy="381.4" fill="#fc0" r="13.7"/>
+  <circle cx="320" cy="425.5" fill="#fc0" r="13.7"/>
+  <circle cx="408.3" cy="249.8" fill="#fc0" r="13.7"/>
+  <path d="M0 0h640v480H0z" fill="#039"/>
+  <path d="m404.7 165.1 84.7 84.7-84.7 84.7-84.7-84.7z" fill="#039"/>
+  <path d="M175.7 236.1h59.2v27.5h-59.2zM434.8 236.1h88.3v27.5h-88.3zM363 187.4l38.8-38.8 19.4 19.5-38.7 38.7zM306.3 48.6h27.5v107.1h-27.5z" fill="#fc0"/>
+  <path d="m208.3 341.5 19.5-19.4 19.4 19.4-19.4 19.5zM413 362.5l19.5-19.5 19.5 19.5-19.5 19.4z" fill="#fc0"/>
+</svg>

@@ -19,10 +19,17 @@
 
 package self.me.matchday.api.resource;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.fasterxml.jackson.annotation.JsonRootName;
-import lombok.*;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.LinkRelation;
@@ -33,12 +40,7 @@ import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.ArtworkController;
 import self.me.matchday.api.controller.CompetitionController;
 import self.me.matchday.model.Competition;
-
-import java.util.Locale;
-import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import self.me.matchday.model.Country;
 
 @Data
 @Builder
@@ -47,12 +49,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "competition")
 @Relation(collectionRelation = "competitions")
-@JsonInclude(value = Include.NON_NULL)
 public class CompetitionResource extends RepresentationModel<CompetitionResource> {
 
   private UUID id;
   private String name;
-  private Locale locale;
+  private Country country;
 
   @Component
   public static class CompetitionResourceAssembler
@@ -80,7 +81,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       final UUID competitionId = competition.getCompetitionId();
       competitionResource.setId(competitionId);
       competitionResource.setName(competition.getName().getName());
-      competitionResource.setLocale(competition.getLocale());
+      competitionResource.setCountry(competition.getCountry());
 
       // Attach links:
       competitionResource.add(

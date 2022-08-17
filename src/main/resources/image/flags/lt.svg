@@ -1,0 +1,26 @@
+<!--
+  - Copyright (c) 2022.
+  -
+  - This file is part of Matchday.
+  -
+  - Matchday is free software: you can redistribute it and/or modify
+  - it under the terms of the GNU General Public License as published by
+  - the Free Software Foundation, either version 3 of the License, or
+  - (at your option) any later version.
+  -
+  - Matchday is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  - GNU General Public License for more details.
+  -
+  - You should have received a copy of the GNU General Public License
+  - along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<svg id="flag-icons-lt" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg">
+  <g fill-rule="evenodd" stroke-width="1pt" transform="scale(.64143 .96773)">
+    <path d="M0 0h997.8v164.6H0z" fill="#fdb913"/>
+    <rect fill="#c1272d" height="236.2" rx="0" ry="0" transform="scale(.93865 .69686)" width="1063" y="475.6"/>
+    <rect fill="#006a44" height="708.7" rx="0" ry="0" transform="scale(.93865 .69686)" width="1063"/>
+  </g>
+</svg>

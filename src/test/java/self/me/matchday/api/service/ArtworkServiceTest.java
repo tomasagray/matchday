@@ -19,6 +19,11 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -33,13 +38,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Team;
-
-import java.io.IOException;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -82,7 +80,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validate default team emblem retrieval")
-  void fetchDefaultTeamEmblem() throws IOException {
+  void fetchDefaultTeamEmblem() {
 
     final UUID teamId = testTeam.getTeamId();
     logger.info("Getting emblem artwork for team ID: " + teamId);
@@ -97,7 +95,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validate default team fanart retrieval")
-  void fetchDefaultTeamFanart() throws IOException {
+  void fetchDefaultTeamFanart() {
 
     final Optional<byte[]> optionalBytes = artworkService.fetchTeamFanart(testTeam.getTeamId());
     assertThat(optionalBytes).isPresent();
@@ -111,7 +109,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validate retrieval of default competition emblem")
-  void fetchCompetitionEmblem() throws IOException {
+  void fetchCompetitionEmblem() {
 
     final Optional<byte[]> optionalBytes =
         artworkService.fetchCompetitionEmblem(testCompetition.getCompetitionId());
@@ -124,7 +122,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validation for default competition fanart retrieval")
-  void fetchCompetitionFanart() throws IOException {
+  void fetchCompetitionFanart() {
 
     final Optional<byte[]> optionalBytes =
         artworkService.fetchCompetitionFanart(testCompetition.getCompetitionId());
@@ -137,7 +135,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validate default competition monochrome emblem lookup")
-  void fetchCompetitionMonochromeEmblem() throws IOException {
+  void fetchCompetitionMonochromeEmblem() {
 
     final Optional<byte[]> optionalBytes =
         artworkService.fetchCompetitionMonochromeEmblem(testCompetition.getCompetitionId());
@@ -150,7 +148,7 @@ class ArtworkServiceTest {
 
   @Test
   @DisplayName("Validate default competition landscape art retrieval")
-  void fetchCompetitionLandscape() throws IOException {
+  void fetchCompetitionLandscape() {
 
     final Optional<byte[]> optionalBytes =
         artworkService.fetchCompetitionLandscape(testCompetition.getCompetitionId());

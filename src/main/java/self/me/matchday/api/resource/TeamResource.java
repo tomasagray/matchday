@@ -19,10 +19,17 @@
 
 package self.me.matchday.api.resource;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.fasterxml.jackson.annotation.JsonRootName;
-import lombok.*;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.LinkRelation;
@@ -32,13 +39,8 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.ArtworkController;
 import self.me.matchday.api.controller.TeamController;
+import self.me.matchday.model.Country;
 import self.me.matchday.model.Team;
-
-import java.util.Locale;
-import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @Builder
@@ -47,12 +49,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "team")
 @Relation(collectionRelation = "teams")
-@JsonInclude(value = Include.NON_NULL)
 public class TeamResource extends RepresentationModel<TeamResource> {
 
   private UUID id;
   private String name;
-  private Locale locale;
+  private Country country;
 
   @Component
   public static class TeamResourceAssembler
@@ -76,7 +77,7 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       final UUID teamId = team.getTeamId();
       teamResource.setId(teamId);
       teamResource.setName(team.getName().getName());
-      teamResource.setLocale(team.getLocale());
+      teamResource.setCountry(team.getCountry());
       // attach links
       teamResource.add(
           linkTo(methodOn(TeamController.class).fetchTeamByName(teamId)).withSelfRel());

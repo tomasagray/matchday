@@ -60,8 +60,10 @@ public class VideoStreamingService {
 
   @Value("${video-resources.file-read-buffer-size}")
   private int BUFFER_SIZE;
+
   @Value("${video-resources.file-recheck-delay-ms}")
   private int FILE_CHECK_DELAY;
+
   @Value("${video-resources.max-recheck-seconds}")
   private int MAX_RECHECK_TIMEOUT;
 
@@ -102,7 +104,7 @@ public class VideoStreamingService {
     final Duration timeout = Duration.of(MAX_RECHECK_TIMEOUT, ChronoUnit.SECONDS);
     final Instant start = Instant.now();
     try {
-      while(!playlistFile.exists()) {
+      while (!playlistFile.exists()) {
         TimeUnit.MILLISECONDS.sleep(FILE_CHECK_DELAY);
         final Duration elapsed = Duration.between(start, Instant.now());
         if (elapsed.compareTo(timeout) > 0) {
@@ -114,18 +116,42 @@ public class VideoStreamingService {
     }
   }
 
-  public Optional<VideoPlaylist> getBestVideoStreamPlaylist(
-      @NotNull final UUID eventId) {
+  public Optional<VideoPlaylist> getBestVideoStreamPlaylist(@NotNull final UUID eventId) {
 
     final Optional<Event> eventOptional = eventService.fetchById(eventId);
     return eventOptional
         .map(
             event -> {
+              // check if a stream already exists for this Event
+              final Optional<VideoStreamLocatorPlaylist> playlistOptional =
+                  findExistingStream(event);
+              if (playlistOptional.isPresent()) {
+                final VideoStreamLocatorPlaylist existingPlaylist = playlistOptional.get();
+                return getVideoStreamPlaylist(
+                    eventId, existingPlaylist.getFileSource().getFileSrcId());
+              }
+              // else...
               final VideoFileSource fileSource = selectorService.getBestFileSource(event);
               final UUID fileSrcId = fileSource.getFileSrcId();
-              return this.getVideoStreamPlaylist(eventId, fileSrcId);
+              return getVideoStreamPlaylist(eventId, fileSrcId);
             })
         .orElse(Optional.empty());
+  }
+
+  /**
+   * Determine if this Event has already been streamed, as indicated by the presence of a matching
+   * VideoStreamLocatorPlaylist in the database.
+   *
+   * @param event The Event to query for
+   * @return An Optional which will contain the playlist, or not
+   */
+  private @NotNull Optional<VideoStreamLocatorPlaylist> findExistingStream(@NotNull Event event) {
+    return event.getFileSources().stream()
+        .map(VideoFileSource::getFileSrcId)
+        .map(playlistService::getVideoStreamPlaylistFor)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .findAny();
   }
 
   /**
@@ -156,8 +182,7 @@ public class VideoStreamingService {
    *     created
    */
   public Optional<VideoPlaylist> getVideoStreamPlaylist(
-      @NotNull final UUID eventId,
-      @NotNull final UUID fileSrcId) {
+      @NotNull final UUID eventId, @NotNull final UUID fileSrcId) {
 
     final VideoFileSource videoFileSource = getRequestedFileSource(eventId, fileSrcId);
     if (videoFileSource != null) {
@@ -182,11 +207,12 @@ public class VideoStreamingService {
     final VideoPlaylist videoPlaylist = new VideoPlaylist(eventId, fileSrcId);
     playlist
         .getStreamLocators()
-        .forEach(locator -> {
-          final Long streamLocatorId = locator.getStreamLocatorId();
-          final PartIdentifier partId = locator.getVideoFile().getTitle();
-          videoPlaylist.addLocator(streamLocatorId, partId);
-        });
+        .forEach(
+            locator -> {
+              final Long streamLocatorId = locator.getStreamLocatorId();
+              final PartIdentifier partId = locator.getVideoFile().getTitle();
+              videoPlaylist.addLocator(streamLocatorId, partId);
+            });
     return videoPlaylist;
   }
 
@@ -206,7 +232,8 @@ public class VideoStreamingService {
    * @param videoFileSource Video source from which to create playlist
    * @return The video playlist
    */
-  public @NotNull VideoStreamLocatorPlaylist createVideoStream(@NotNull final VideoFileSource videoFileSource) {
+  public @NotNull VideoStreamLocatorPlaylist createVideoStream(
+      @NotNull final VideoFileSource videoFileSource) {
 
     final VideoStreamLocatorPlaylist playlist =
         videoStreamManager.createVideoStreamFrom(videoFileSource);

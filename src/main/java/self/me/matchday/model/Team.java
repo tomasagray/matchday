@@ -23,16 +23,21 @@
  */
 package self.me.matchday.model;
 
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Represents a football team.
@@ -55,8 +60,7 @@ public class Team implements Serializable {
 
   @OneToOne private Artwork emblem;
   @OneToOne private Artwork fanart;
-
-  private Locale locale;
+  @ManyToOne private Country country;
 
   public Team(@NotNull String name) {
     this.name = new ProperName(name);
@@ -96,6 +100,6 @@ public class Team implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, locale, emblem, fanart);
+    return Objects.hash(name, country, emblem, fanart);
   }
 }
