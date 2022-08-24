@@ -19,10 +19,12 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import java.io.IOException;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,12 +32,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.model.*;
-
-import java.io.IOException;
-import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import self.me.matchday.model.DataSource;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.PatternKit;
+import self.me.matchday.model.PlaintextDataSource;
+import self.me.matchday.model.SnapshotRequest;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -44,19 +45,19 @@ class DataSourceServiceTest {
 
   private static final Logger logger = LogManager.getLogger(DataSourceServiceTest.class);
 
-  private static DataSourceService dataSourceService;
-  private static TestDataCreator testDataCreator;
-  private static EventService eventService;
+  private final DataSourceService dataSourceService;
+  private final TestDataCreator testDataCreator;
+  private final EventService eventService;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull DataSourceService dataSourceService,
-      @Autowired @NotNull TestDataCreator testDataCreator,
+  //  @BeforeAll
+  public DataSourceServiceTest(
+      @Autowired DataSourceService dataSourceService,
+      @Autowired TestDataCreator testDataCreator,
       @Autowired EventService eventService) {
 
-    DataSourceServiceTest.dataSourceService = dataSourceService;
-    DataSourceServiceTest.testDataCreator = testDataCreator;
-    DataSourceServiceTest.eventService = eventService;
+    this.dataSourceService = dataSourceService;
+    this.testDataCreator = testDataCreator;
+    this.eventService = eventService;
   }
 
   @Test
@@ -80,7 +81,7 @@ class DataSourceServiceTest {
   @Test
   @DisplayName("Validate that a DataSource can be added to the database")
   @SuppressWarnings("unchecked cast")
-  void addDataSource() {
+  void addDataSource() throws IOException {
 
     final List<DataSource<?>> preliminaryDataSources = dataSourceService.fetchAll();
     logger.info("Before adding, there are: {} DataSources", preliminaryDataSources.size());

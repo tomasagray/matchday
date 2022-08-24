@@ -21,6 +21,7 @@ package self.me.matchday.plugin.datasource.parsing;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -68,14 +69,15 @@ public class MatchDataParserTest {
   @BeforeAll
   static void setup(
       @Autowired @NotNull TestDataCreator testDataCreator,
-      @Autowired MatchDataParser matchDataParser) {
+      @Autowired MatchDataParser matchDataParser)
+      throws IOException {
     MatchDataParserTest.matchDataParser = matchDataParser;
     MatchDataParserTest.testDataSource =
         testDataCreator.readTestJsonDataSource(); // .readTestHtmlDataSource();
     MatchDataParserTest.readTestResources();
   }
 
-  private static void readTestResources() {
+  private static void readTestResources() throws IOException {
     MatchDataParserTest.testHtml = ResourceFileReader.readTextResource(TEST_DATA_FILE);
     assertThat(testHtml).isNotNull().isNotEmpty();
   }

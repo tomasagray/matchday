@@ -19,6 +19,10 @@
 
 package self.me.matchday.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -32,10 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -51,7 +51,7 @@ class PatternKitTest {
     PatternKitTest.testDataCreator = testDataCreator;
   }
 
-  private static @NotNull Stream<Arguments> getPatternKitArgs() {
+  private static @NotNull Stream<Arguments> getPatternKitArgs() throws IOException {
 
     final String regex =
         "([\\p{L}\\d\\s]+) (\\d{2,4}/\\d{2,4})[-Matchdy\\s]*(\\d+)[\\s-]*([\\p{L}\\s-]+) "

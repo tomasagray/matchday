@@ -19,6 +19,15 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -30,18 +39,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.model.*;
+import self.me.matchday.model.DataSource;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.Match;
+import self.me.matchday.model.PatternKit;
+import self.me.matchday.model.PlaintextDataSource;
+import self.me.matchday.model.Snapshot;
+import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.model.video.VideoFileSource;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -55,7 +60,8 @@ class BloggerPluginTest {
 
   @BeforeAll
   static void setUp(
-      @Autowired @NotNull TestDataCreator testDataCreator, @Autowired BloggerPlugin bloggerPlugin) {
+      @Autowired @NotNull TestDataCreator testDataCreator, @Autowired BloggerPlugin bloggerPlugin)
+      throws IOException {
 
     BloggerPluginTest.plugin = bloggerPlugin;
     testDataSource = testDataCreator.readTestJsonDataSource();

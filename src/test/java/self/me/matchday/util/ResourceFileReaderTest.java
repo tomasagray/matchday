@@ -19,14 +19,14 @@
 
 package self.me.matchday.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class ResourceFileReaderTest {
 
@@ -35,7 +35,7 @@ class ResourceFileReaderTest {
 
   @Test
   @DisplayName("Ensure reads and splits resource file key/value pairs correctly")
-  void testReadPropertiesResourceFile() {
+  void testReadPropertiesResourceFile() throws IOException {
 
     Map<String, String> resourceFile = ResourceFileReader.readPropertiesResource(PROPERTIES_FILE);
 

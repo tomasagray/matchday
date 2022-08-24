@@ -19,11 +19,22 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,14 +42,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.ResourceFileReader;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -57,7 +60,7 @@ class FFprobeTest {
   private static FFmpegMetadata expectedMetadata;
 
   @BeforeAll
-  static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator) {
+  static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator) throws IOException {
 
     // Read plugin resources file
     Map<String, String> resources = ResourceFileReader.readPropertiesResource(FFMPEG_PROPERTIES);

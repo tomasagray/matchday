@@ -28,6 +28,7 @@ import static self.me.matchday.model.video.Resolution.R_1080p;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.reflect.TypeToken;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -120,17 +121,18 @@ public class TestDataCreator {
   }
 
   // ======================== DATA SOURCE ========================
-  public DataSource<Match> readTestHtmlDataSource() {
+  public DataSource<Match> readTestHtmlDataSource() throws IOException {
     final String filename = "data/datasource/test_html_blogger_datasource.json";
     return readTestDataSource(filename);
   }
 
-  public DataSource<Match> readTestJsonDataSource() {
+  public DataSource<Match> readTestJsonDataSource() throws IOException {
     final String filename = "data/datasource/test_json_blogger_datasource.json";
     return readTestDataSource(filename);
   }
 
-  private @NotNull DataSource<Match> readTestDataSource(@NotNull String filename) {
+  private @NotNull DataSource<Match> readTestDataSource(@NotNull String filename)
+      throws IOException {
     final String dataSourceJson = ResourceFileReader.readTextResource(filename);
     final Type type = new TypeReference<PlaintextDataSource<Match>>() {}.getType();
     final PlaintextDataSource<Match> testDataSource = JsonParser.fromJson(dataSourceJson, type);
@@ -160,7 +162,7 @@ public class TestDataCreator {
     return patternKit;
   }
 
-  public PatternKit<Event> createEventPatternKitFromFile() {
+  public PatternKit<Event> createEventPatternKitFromFile() throws IOException {
 
     final String patternKitData =
         ResourceFileReader.readTextResource("data/test_event_pattern_kit.json");
@@ -210,7 +212,7 @@ public class TestDataCreator {
     return patternKit;
   }
 
-  public PatternKit<VideoFileSource> createFileSourcePatternFromFile() {
+  public PatternKit<VideoFileSource> createFileSourcePatternFromFile() throws IOException {
 
     final String patternKitData =
         ResourceFileReader.readTextResource("data/datasource/test_filesource_pattern_kit.json");

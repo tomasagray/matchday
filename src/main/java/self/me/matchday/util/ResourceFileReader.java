@@ -19,87 +19,88 @@
 
 package self.me.matchday.util;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.stream.Collectors;
-
 public class ResourceFileReader {
 
   private static final Logger logger = LogManager.getLogger(ResourceFileReader.class);
 
-  public static <T> @Nullable T getObjectFromProperties(
-      @NotNull final Class<T> t_class, @NotNull final String filename, final String prefix) {
+  public static <T> @NotNull T getObjectFromProperties(
+      @NotNull final Class<T> t_class, @NotNull final String filename, final String prefix)
+      throws IOException, ReflectiveOperationException {
 
-    try {
-      // Instantiate object
-      final T instance = t_class.getConstructor().newInstance();
-      // Read properties file from disk
-      final Map<String, String> properties = readPropertiesResource(filename);
-      properties.forEach(
-          (prop, val) -> {
-            try {
-              // Skip comments
-              if (prop.startsWith("#")) {
-                return;
-              }
-              // Parse property key
-              if (prefix != null && prop.startsWith(prefix)) {
-                // remove prefix from key
-                prop = prop.replace(prefix + ".", "");
-              }
-              final String fieldName = dashToCamelCase(prop);
-              // Get field
-              final Field field = t_class.getDeclaredField(fieldName);
-              // Save accessible
-              final boolean accessible = field.canAccess(instance);
-              // Set field
-              field.setAccessible(true);
-              final Long aLong = isLong(val);
-              field.set(instance, Objects.requireNonNullElse(aLong, val));
-              // Restore access state
-              field.setAccessible(accessible);
-            } catch (ReflectiveOperationException e) {
-              final String msg =
-                  String.format(
-                      "Property [%s] does not match a field in class %s; skipping...",
-                      prop, t_class);
-              logger.error(msg, e);
+    // Instantiate object
+    final T instance = t_class.getConstructor().newInstance();
+    // Read properties file from disk
+    final Map<String, String> properties = readPropertiesResource(filename);
+    properties.forEach(
+        (prop, val) -> {
+          try {
+            // Skip comments
+            if (prop.startsWith("#")) {
+              return;
             }
-          });
-      return instance;
-    } catch (ReflectiveOperationException e) {
-      e.printStackTrace();
-    }
-    return null;
+            // Parse property key
+            if (prefix != null && prop.startsWith(prefix)) {
+              // remove prefix from key
+              prop = prop.replace(prefix + ".", "");
+            }
+            final String fieldName = dashToCamelCase(prop);
+            // Get field
+            final Field field = t_class.getDeclaredField(fieldName);
+            // Save accessible
+            final boolean accessible = field.canAccess(instance);
+            // Set field
+            field.setAccessible(true);
+            final Long aLong = isLong(val);
+            field.set(instance, Objects.requireNonNullElse(aLong, val));
+            // Restore access state
+            field.setAccessible(accessible);
+          } catch (ReflectiveOperationException e) {
+            final String msg =
+                String.format(
+                    "Property [%s] does not match a field in class %s; skipping...", prop, t_class);
+            logger.error(msg, e);
+          }
+        });
+    return instance;
   }
 
-  public static @NotNull Map<String, String> readPropertiesResource(
-      @NotNull final String filename) {
+  public static @NotNull Map<String, String> readPropertiesResource(@NotNull final String filename)
+      throws IOException {
 
     final String data = readTextResource(filename);
-    assert data != null;
     return parsePropertiesData(data);
   }
 
-  public static @Nullable String readTextResource(@NotNull final String filename) {
+  public static @NotNull String readTextResource(@NotNull final String filename)
+      throws IOException {
 
-    InputStream resourceAsStream =
-        ResourceFileReader.class.getClassLoader().getResourceAsStream(filename);
-    assert resourceAsStream != null;
+    logger.info("Attempting to read data at: {}", filename);
+
+    final ClassLoader classLoader = ResourceFileReader.class.getClassLoader();
+    InputStream resourceAsStream = classLoader.getResourceAsStream(filename);
+    if (resourceAsStream == null) {
+      throw new FileNotFoundException("No resources found at: " + filename);
+    }
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
       return reader.lines().collect(Collectors.joining("\n"));
-    } catch (Exception e) {
-      e.printStackTrace();
     }
-    return null;
   }
 
   @NotNull

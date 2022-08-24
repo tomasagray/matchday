@@ -23,6 +23,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,6 +42,8 @@ import self.me.matchday.api.controller.ArtworkController;
 import self.me.matchday.api.controller.CompetitionController;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Country;
+import self.me.matchday.model.ProperName;
+import self.me.matchday.model.Synonym;
 
 @Data
 @Builder
@@ -53,6 +56,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
 
   private UUID id;
   private String name;
+  private List<Synonym> synonyms;
   private Country country;
 
   @Component
@@ -77,25 +81,22 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
 
       final CompetitionResource competitionResource = instantiateModel(competition);
 
-      // populate DTO
       final UUID competitionId = competition.getCompetitionId();
+      final ProperName properName = competition.getName();
       competitionResource.setId(competitionId);
-      competitionResource.setName(competition.getName().getName());
+      competitionResource.setName(properName.getName());
+      competitionResource.setSynonyms(properName.getSynonyms());
       competitionResource.setCountry(competition.getCountry());
 
-      // Attach links:
       competitionResource.add(
           linkTo(methodOn(CompetitionController.class).fetchCompetitionById(competitionId))
               .withSelfRel());
-      // events
       competitionResource.add(
           linkTo(methodOn(CompetitionController.class).fetchCompetitionEvents(competitionId))
               .withRel(EVENTS));
-      // teams
       competitionResource.add(
           linkTo(methodOn(CompetitionController.class).fetchCompetitionTeams(competitionId))
               .withRel(TEAMS));
-      // artwork
       competitionResource.add(
           linkTo(methodOn(ArtworkController.class).fetchCompetitionEmblem(competitionId))
               .withRel(EMBLEM));

@@ -19,6 +19,10 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,10 +34,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpCookie;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.util.ResourceFileReader;
-
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -47,7 +47,7 @@ class CookiesServiceTest {
   private static String cookieFile;
 
   @BeforeAll
-  static void setUp(@Autowired final CookiesService cookiesService) {
+  static void setUp(@Autowired final CookiesService cookiesService) throws IOException {
 
     CookiesServiceTest.cookiesService = cookiesService;
 

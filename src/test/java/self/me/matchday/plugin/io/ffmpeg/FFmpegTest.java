@@ -19,6 +19,15 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -31,15 +40,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.util.ResourceFileReader;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -58,7 +58,7 @@ class FFmpegTest {
 
   @BeforeAll
   static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator)
-      throws URISyntaxException {
+      throws URISyntaxException, IOException {
 
     logger.info("Instantiating FFmpeg Plugin with executable: " + FFMPEG_EXE);
     FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);

@@ -19,13 +19,21 @@
 
 package self.me.matchday.api.service;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import org.hibernate.Hibernate;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.CountryRepository;
 import self.me.matchday.model.Country;
+import self.me.matchday.util.ResourceFileReader;
 
 @Service
+@Transactional
 public class CountryService {
 
   private final CountryRepository countryRepository;
@@ -35,10 +43,40 @@ public class CountryService {
   }
 
   public List<Country> getAllCountries() {
-    return countryRepository.findAll();
+    final List<Country> all = countryRepository.findAll();
+    all.forEach(country -> Hibernate.initialize(country.getLocales()));
+    return all;
+  }
+
+  public Optional<Country> getCountry(@NotNull String name) {
+    final Optional<Country> optional = countryRepository.findById(name);
+    optional.ifPresent(country -> Hibernate.initialize(country.getLocales()));
+    return optional;
   }
 
   public List<Country> saveAll(Collection<Country> countries) {
     return countryRepository.saveAll(countries);
+  }
+
+  /**
+   * Get the flag image for the specified country. Empty if no data is read.
+   *
+   * @param countryName The (primary) name of the Country
+   * @return a byte array of the image, or empty()
+   * @throws IllegalArgumentException if a Country cannot be found for the specified name
+   */
+  public byte[] getFlag(@NotNull String countryName) throws IOException {
+    final Optional<Country> optional = countryRepository.findById(countryName);
+    if (optional.isPresent()) {
+      final Country country = optional.get();
+      return readFlagData(country);
+    }
+    throw new IllegalArgumentException("No such country: " + countryName);
+  }
+
+  private byte @NotNull [] readFlagData(@NotNull Country country) throws IOException {
+    final String path = country.getFlagFileName();
+    final String data = ResourceFileReader.readTextResource(path);
+    return data.getBytes(StandardCharsets.UTF_8);
   }
 }
