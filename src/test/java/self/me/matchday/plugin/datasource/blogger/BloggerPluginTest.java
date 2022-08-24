@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,16 +54,14 @@ class BloggerPluginTest {
 
   private static final Logger logger = LogManager.getLogger(BloggerPluginTest.class);
 
-  private static BloggerPlugin plugin;
-  private static DataSource<Match> testDataSource;
+  private final BloggerPlugin plugin;
+  private final DataSource<Match> testDataSource;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull TestDataCreator testDataCreator, @Autowired BloggerPlugin bloggerPlugin)
+  @Autowired
+  public BloggerPluginTest(@NotNull TestDataCreator testDataCreator, BloggerPlugin bloggerPlugin)
       throws IOException {
-
-    BloggerPluginTest.plugin = bloggerPlugin;
-    testDataSource = testDataCreator.readTestJsonDataSource();
+    this.plugin = bloggerPlugin;
+    this.testDataSource = testDataCreator.readTestJsonDataSource();
   }
 
   @Test

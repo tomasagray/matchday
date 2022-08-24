@@ -19,11 +19,15 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,13 +37,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for competition service")
@@ -48,26 +45,17 @@ class CompetitionServiceTest {
   private static final Logger logger = LogManager.getLogger(CompetitionServiceTest.class);
 
   // Test resources
-  private static CompetitionService competitionService;
-  private static TestDataCreator testDataCreator;
-  private static Competition testCompetition;
+  private final CompetitionService competitionService;
+  private final Competition testCompetition;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull CompetitionService service,
-      @Autowired @NotNull TestDataCreator testDataCreator) {
+  @Autowired
+  public CompetitionServiceTest(
+      CompetitionService service, @NotNull TestDataCreator testDataCreator) {
 
     final Random random = new Random();
-    CompetitionServiceTest.competitionService = service;
-    CompetitionServiceTest.testDataCreator = testDataCreator;
-    CompetitionServiceTest.testCompetition =
+    this.competitionService = service;
+    this.testCompetition =
         testDataCreator.createTestCompetition("CST_Competition_" + random.nextInt());
-  }
-
-  @AfterAll
-  static void tearDown() {
-    // delete test data from DB
-    testDataCreator.deleteTestCompetition(testCompetition);
   }
 
   @Test

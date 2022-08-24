@@ -19,9 +19,13 @@
 
 package self.me.matchday.db;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,13 +33,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Example;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.model.*;
-
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.Fixture;
+import self.me.matchday.model.Match;
+import self.me.matchday.model.Season;
+import self.me.matchday.model.Team;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -44,11 +47,11 @@ class EventRepositoryTest {
 
   private static final Logger logger = LogManager.getLogger(EventRepositoryTest.class);
 
-  private static EventRepository eventRepository;
+  private final EventRepository eventRepository;
 
-  @BeforeAll
-  static void setup(@Autowired EventRepository eventRepository) {
-    EventRepositoryTest.eventRepository = eventRepository;
+  @Autowired
+  EventRepositoryTest(EventRepository eventRepository) {
+    this.eventRepository = eventRepository;
   }
 
   @Test

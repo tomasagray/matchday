@@ -19,11 +19,13 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,11 +38,6 @@ import self.me.matchday.model.Competition;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
@@ -49,29 +46,16 @@ class TeamServiceTest {
 
   private static final Logger logger = LogManager.getLogger(TeamServiceTest.class);
 
-  private static TestDataCreator testDataCreator;
-  private static TeamService teamService;
-  private static Competition testCompetition;
-  private static Team testTeam;
-  private static Match testMatch;
+  private final TeamService teamService;
+  private final Competition testCompetition;
+  private final Team testTeam;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull final TestDataCreator testDataCreator,
-      @Autowired @NotNull final TeamService teamService) {
-
-    TeamServiceTest.testDataCreator = testDataCreator;
-    TeamServiceTest.teamService = teamService;
-
-    TeamServiceTest.testMatch = testDataCreator.createTestMatch();
-    TeamServiceTest.testCompetition = testMatch.getCompetition();
-    TeamServiceTest.testTeam = testMatch.getHomeTeam();
-  }
-
-  @AfterAll
-  static void tearDown() {
-    // delete test data
-    testDataCreator.deleteTestEvent(testMatch);
+  @Autowired
+  public TeamServiceTest(@NotNull TestDataCreator testDataCreator, TeamService teamService) {
+    this.teamService = teamService;
+    Match testMatch = testDataCreator.createTestMatch();
+    this.testCompetition = testMatch.getCompetition();
+    this.testTeam = testMatch.getHomeTeam();
   }
 
   @Test

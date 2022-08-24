@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,14 +47,14 @@ class DataSourceRepositoryTest {
 
   private static final Logger logger = LogManager.getLogger(DataSourceRepositoryTest.class);
 
-  private static TestDataCreator testDataCreator;
-  private static DataSourceRepository repository;
+  private final TestDataCreator testDataCreator;
+  private final DataSourceRepository repository;
 
-  @BeforeAll
-  static void setup(
-      @Autowired TestDataCreator testDataCreator, @Autowired DataSourceRepository repository) {
-    DataSourceRepositoryTest.testDataCreator = testDataCreator;
-    DataSourceRepositoryTest.repository = repository;
+  @Autowired
+  public DataSourceRepositoryTest(
+      TestDataCreator testDataCreator, DataSourceRepository repository) {
+    this.testDataCreator = testDataCreator;
+    this.repository = repository;
   }
 
   @Test

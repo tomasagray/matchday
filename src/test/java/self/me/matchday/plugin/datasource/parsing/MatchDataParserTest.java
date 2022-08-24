@@ -33,7 +33,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,30 +59,32 @@ public class MatchDataParserTest {
   private static final Logger logger = LogManager.getLogger(MatchDataParserTest.class);
   private static final String TEST_DATA_FILE = "data/blogger/blogger_html_single_team.html";
 
-  private static MatchDataParser matchDataParser;
+  private final MatchDataParser matchDataParser;
 
   // test resources
-  private static DataSource<Match> testDataSource;
+  private final DataSource<Match> testDataSource;
   private static String testHtml;
 
-  @BeforeAll
-  static void setup(
-      @Autowired @NotNull TestDataCreator testDataCreator,
-      @Autowired MatchDataParser matchDataParser)
+  @Autowired
+  public MatchDataParserTest(
+      @NotNull TestDataCreator testDataCreator, MatchDataParser matchDataParser)
       throws IOException {
-    MatchDataParserTest.matchDataParser = matchDataParser;
-    MatchDataParserTest.testDataSource =
-        testDataCreator.readTestJsonDataSource(); // .readTestHtmlDataSource();
-    MatchDataParserTest.readTestResources();
+    this.matchDataParser = matchDataParser;
+    this.testDataSource = testDataCreator.readTestJsonDataSource(); // .readTestHtmlDataSource();
+    testHtml = readTestResources();
   }
 
-  private static void readTestResources() throws IOException {
-    MatchDataParserTest.testHtml = ResourceFileReader.readTextResource(TEST_DATA_FILE);
-    assertThat(testHtml).isNotNull().isNotEmpty();
+  private static @NotNull String readTestResources() throws IOException {
+    final String html = ResourceFileReader.readTextResource(TEST_DATA_FILE);
+    assertThat(html).isNotNull().isNotEmpty();
+    return html;
   }
 
-  private static Stream<Arguments> getBloggerEntryArgs() {
-    //    final JsonBloggerParser bloggerParser = new JsonBloggerParser();
+  private static Stream<Arguments> getBloggerEntryArgs() throws IOException {
+
+    if (testHtml == null) {
+      testHtml = readTestResources();
+    }
     final HtmlBloggerParser bloggerParser = new HtmlBloggerParser();
     final List<BloggerEntry> entries = bloggerParser.getBlogger(testHtml).getFeed().getEntry();
     logger.info("Found: {} Blogger entries for testing...", entries.size());

@@ -19,25 +19,8 @@
 
 package self.me.matchday.api.service.video;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.TestDataCreator;
-import self.me.matchday.api.service.FileServerPluginService;
-import self.me.matchday.api.service.FileServerUserService;
-import self.me.matchday.model.FileServerUser;
-import self.me.matchday.model.video.StreamJobState.JobStatus;
-import self.me.matchday.model.video.TaskListState;
-import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.model.video.VideoStreamLocator;
-import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -45,32 +28,49 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.TestDataCreator;
+import self.me.matchday.api.service.FileServerUserService;
+import self.me.matchday.model.FileServerUser;
+import self.me.matchday.model.video.StreamJobState.JobStatus;
+import self.me.matchday.model.video.TaskListState;
+import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for video stream manager")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(PER_CLASS)
 class VideoStreamManagerTest {
 
   private static final Logger logger = LogManager.getLogger(VideoStreamManagerTest.class);
-  private static VideoStreamManager streamManager;
+  private final VideoStreamManager streamManager;
+  private final VideoFileSource testFileSource;
+  private VideoStreamLocator testStreamLocator;
 
-  // test resources
-  private static VideoFileSource testFileSource;
-  private static VideoStreamLocator testStreamLocator;
+  @Autowired
+  public VideoStreamManagerTest(
+      @NotNull TestDataCreator testDataCreator,
+      @NotNull FileServerUserService userService,
+      VideoStreamManager streamManager) {
 
-  @BeforeAll
-  public static void setup(
-      @Autowired @NotNull TestDataCreator testDataCreator,
-      @Autowired @NotNull FileServerUserService userService,
-      @Autowired FileServerPluginService fileServerPluginService,
-      @Autowired TestFileServerPlugin testFileServerPlugin,
-      @Autowired VideoStreamManager streamManager) {
-
-    VideoStreamManagerTest.streamManager = streamManager;
-    VideoStreamManagerTest.testFileSource = testDataCreator.createVideoFileSourceAndSave();
+    this.streamManager = streamManager;
+    this.testFileSource = testDataCreator.createVideoFileSourceAndSave();
 
     final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
     final FileServerUser loggedInUser = userService.login(testFileServerUser);
@@ -92,7 +92,7 @@ class VideoStreamManagerTest {
 
     // get test data
     final VideoStreamLocatorPlaylist actualLocatorPlaylist =
-        streamManager.createVideoStreamFrom(VideoStreamManagerTest.testFileSource);
+        streamManager.createVideoStreamFrom(this.testFileSource);
     assertThat(actualLocatorPlaylist).isNotNull();
     final TaskListState actualState = actualLocatorPlaylist.getState();
     final JobStatus actualStateStatus = actualState.getStatus();
@@ -112,7 +112,7 @@ class VideoStreamManagerTest {
   @DisplayName("Validate retrieval of previously created playlist")
   void getLocalStreamFor() {
 
-    final UUID testFileSrcId = VideoStreamManagerTest.testFileSource.getFileSrcId();
+    final UUID testFileSrcId = testFileSource.getFileSrcId();
     logger.info(
         "Attempting VideoStreamLocatorPlaylist lookup for file source ID: {}", testFileSrcId);
 
@@ -130,7 +130,7 @@ class VideoStreamManagerTest {
     final int streamHeadStartSeconds = 10;
 
     final VideoStreamLocatorPlaylist testPlaylist = getStreamLocatorPlaylist();
-    VideoStreamManagerTest.testStreamLocator = testPlaylist.getStreamLocators().get(0);
+    testStreamLocator = testPlaylist.getStreamLocators().get(0);
     assertThat(testStreamLocator).isNotNull();
 
     logger.info("Beginning streaming of locator: {}", testStreamLocator);

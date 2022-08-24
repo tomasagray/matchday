@@ -19,9 +19,11 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.BeforeAll;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,10 +36,7 @@ import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -46,22 +45,18 @@ class VideoFileServiceTest {
 
   private static final Logger logger = LogManager.getLogger(VideoFileServiceTest.class);
 
-  private static VideoFileService videoFileService;
-  private static VideoFileSource testVideoFileSrc;
-  private static FileServerUser testFileServerUser;
+  private final VideoFileService videoFileService;
+  private final VideoFileSource testVideoFileSrc;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired TestDataCreator testDataCreator,
-      @Autowired VideoFileService videoFileService,
-      @Autowired FileServerPluginService fileServerPluginService,
-      @Autowired FileServerUserService userService,
-      @Autowired TestFileServerPlugin testFileServerPlugin) {
+  @Autowired
+  public VideoFileServiceTest(
+      @NotNull TestDataCreator testDataCreator,
+      @NotNull FileServerUserService userService,
+      VideoFileService videoFileService) {
 
-    VideoFileServiceTest.videoFileService = videoFileService;
-
+    this.videoFileService = videoFileService;
     // Create test user & login
-    VideoFileServiceTest.testFileServerUser = testDataCreator.createTestFileServerUser();
+    final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
     userService.login(testFileServerUser);
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 

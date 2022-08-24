@@ -19,10 +19,16 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,20 +36,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.TestDataCreator;
-import self.me.matchday.model.*;
+import self.me.matchday.model.Competition;
+import self.me.matchday.model.Fixture;
+import self.me.matchday.model.Match;
+import self.me.matchday.model.ProperName;
+import self.me.matchday.model.Season;
+import self.me.matchday.model.Synonym;
+import self.me.matchday.model.Team;
 import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -56,23 +59,20 @@ class EntityCorrectionServiceTest {
   private static final String ATLETICO_DE_MADRID = "Atletico de Madrid ";
 
   private static final Logger logger = LogManager.getLogger(EntityCorrectionServiceTest.class);
-  private static EntityCorrectionService entityCorrectionService;
-  private static EventService eventService;
+  private final EntityCorrectionService entityCorrectionService;
+  private final EventService eventService;
 
-  @BeforeAll
-  static void setup(
-      @Autowired EntityCorrectionService correctionService,
-      @Autowired TestDataCreator testDataCreator,
-      @Autowired @NotNull EventService eventService)
+  @Autowired
+  public EntityCorrectionServiceTest(
+      EntityCorrectionService correctionService, @NotNull EventService eventService)
       throws MalformedURLException {
-
-    EntityCorrectionServiceTest.entityCorrectionService = correctionService;
-    EntityCorrectionServiceTest.eventService = eventService;
+    this.entityCorrectionService = correctionService;
+    this.eventService = eventService;
     createProperEvent();
     createSynonyms();
   }
 
-  private static void createProperEvent() throws MalformedURLException {
+  private void createProperEvent() throws MalformedURLException {
     final Match properEvent =
         Match.builder()
             .competition(new Competition(UEFA_CHAMPIONS_LEAGUE))
@@ -88,7 +88,7 @@ class EntityCorrectionServiceTest {
     logger.info("Saved proper event: " + eventService.save(properEvent));
   }
 
-  private static void createSynonyms() {
+  private void createSynonyms() {
     final ProperName fcBarcelona = new ProperName(FC_BARCELONA);
     createSynonym("Barca", fcBarcelona);
     final ProperName atletico = new ProperName(ATLETICO_DE_MADRID);
@@ -97,7 +97,7 @@ class EntityCorrectionServiceTest {
     createSynonym("UCL", championsLeague);
   }
 
-  private static void createSynonym(@NotNull String name, ProperName properName) {
+  private void createSynonym(@NotNull String name, ProperName properName) {
     final List<Synonym> synonyms = entityCorrectionService.getSynonymsFor(name);
     if (synonyms.size() == 0) {
       final Synonym synonym = entityCorrectionService.addSynonym(new Synonym(name, properName));

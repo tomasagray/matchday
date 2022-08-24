@@ -19,9 +19,12 @@
 
 package self.me.matchday.db;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,11 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Synonym;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @DisplayName("Test adding & retrieving words to/from Synonym database")
@@ -45,11 +43,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SynonymRepositoryTest {
 
   private static final Logger logger = LogManager.getLogger(SynonymRepositoryTest.class);
-  private static SynonymRepository repository;
+  private final SynonymRepository repository;
 
-  @BeforeAll
-  static void setup(@Autowired SynonymRepository repository) {
-    SynonymRepositoryTest.repository = repository;
+  @Autowired
+  SynonymRepositoryTest(SynonymRepository repository) {
+    this.repository = repository;
   }
 
   @Test

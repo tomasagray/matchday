@@ -19,24 +19,13 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.Environment;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import reactor.core.publisher.Flux;
-import self.me.matchday.TestDataCreator;
-import self.me.matchday.util.JsonParser;
-import self.me.matchday.util.RecursiveDirectoryDeleter;
-import self.me.matchday.util.ResourceFileReader;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -45,12 +34,30 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.core.publisher.Flux;
+import self.me.matchday.TestDataCreator;
+import self.me.matchday.util.JsonParser;
+import self.me.matchday.util.RecursiveDirectoryDeleter;
+import self.me.matchday.util.ResourceFileReader;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -60,67 +67,79 @@ class FFmpegPluginTest {
 
   private static final Logger logger = LogManager.getLogger(FFmpegPluginTest.class);
 
-  private static final int MIN_EXPECTED_FILE_COUNT = 25;
-  private static final int SLEEP_SECONDS = 5;
-
   // Test constants
-  @Value("${video-resources.file-storage-location}")
-  private static String STORAGE_LOCATION;
-
+  private static final int SLEEP_SECONDS = 5;
+  private static final int MIN_EXPECTED_FILE_COUNT = 25;
   private static final String SAMPLE_METADATA_JSON = "data/ffprobe_sample_metadata.json";
 
   // Test resources
-  private static File storageLocation;
-  private static Path testPlaylist;
-  private static FFmpegPlugin ffmpegPlugin;
-  private static FFmpegMetadata expectedMetadata;
-  private static List<URL> testUrls;
+  private final File storageLocation;
+  private final FFmpegPlugin ffmpegPlugin;
+  private final FFmpegMetadata expectedMetadata;
+  private final List<URL> testUrls;
+  private Path testPlaylist;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull Environment env,
-      @Autowired @NotNull TestDataCreator testDataCreator,
-      @Autowired @NotNull FFmpegPlugin plugin)
-      throws IOException {
-
-    // Get FFMPEG instance
-    FFmpegPluginTest.ffmpegPlugin = plugin;
-    FFmpegPluginTest.STORAGE_LOCATION =
-        Objects.requireNonNull(env.getProperty("video-resources.file-storage-location"))
-            + "\\ffmpeg-plugin-test\\";
-    logger.info("Test data storage location: {}", storageLocation);
-
-    try {
-      // Get video storage location
-      storageLocation = new File(STORAGE_LOCATION);
-      testPlaylist = storageLocation.toPath().resolve("playlist.m3u8");
-      logger.info("Got storage path: " + storageLocation.getAbsolutePath());
-
-      // Create directory if not exists
-      if (!storageLocation.exists()) {
-        final boolean mkdir = storageLocation.mkdir();
-        logger.info("Created directory: [{}] ? : {}", storageLocation, mkdir);
-      }
-
-      // initialize test URI
-      final URL preMatchUrl = testDataCreator.getPreMatchUrl();
-      final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
-      final URL secondHalfUrl = testDataCreator.getSecondHalfUrl();
-      final URL postMatchUrl = testDataCreator.getPostMatchUrl();
-
-      assertThat(preMatchUrl).isNotNull();
-      assertThat(firstHalfUrl).isNotNull();
-      assertThat(secondHalfUrl).isNotNull();
-      assertThat(postMatchUrl).isNotNull();
-
-      testUrls = List.of(preMatchUrl, firstHalfUrl, secondHalfUrl, postMatchUrl);
-    } catch (NullPointerException e) {
-      throw new IOException("Error reading test video storage location!", e);
-    }
+  @Autowired
+  public FFmpegPluginTest(TestDataCreator testDataCreator, FFmpegPlugin plugin) throws IOException {
+    this.ffmpegPlugin = plugin;
+    storageLocation = readStorageLocation();
+    testUrls = getTestUrls(testDataCreator);
+    ensureStorageLocationExists();
     // Read test metadata & deserialize
     String sampleMetadata = ResourceFileReader.readTextResource(SAMPLE_METADATA_JSON);
     // Parse JSON to object
     expectedMetadata = JsonParser.fromJson(sampleMetadata, FFmpegMetadata.class);
+  }
+
+  @Contract(" -> new")
+  private @NotNull File readStorageLocation() throws IOException {
+
+    final String testingDirectory = "testing-" + Instant.now().toEpochMilli();
+    // read properties
+    final Map<String, String> properties =
+        ResourceFileReader.readPropertiesResource("video.properties");
+    final String location = properties.get("video-resources.file-storage-location");
+    assertThat(location).isNotNull();
+
+    final File file = new File(location);
+    final Path testingPath = file.toPath().resolve(testingDirectory);
+    logger.info("Storage location is: {}", testingPath);
+    return testingPath.toFile();
+  }
+
+  private void ensureStorageLocationExists() throws IOException {
+    try {
+      // Get video storage location
+      logger.info("Test data storage location: {}", storageLocation);
+      this.testPlaylist = storageLocation.toPath().resolve("playlist.m3u8");
+      logger.info("Got storage path: " + storageLocation.getAbsolutePath());
+      // Create directory if not exists
+      if (!storageLocation.exists()) {
+        final boolean mkdir = storageLocation.mkdir();
+        logger.info("Created directory: [{}] ? : {}", storageLocation, mkdir);
+        assertThat(storageLocation).exists();
+      }
+    } catch (NullPointerException e) {
+      throw new IOException("Error reading test video storage location: " + storageLocation, e);
+    }
+  }
+
+  @NotNull
+  private @Unmodifiable List<URL> getTestUrls(@NotNull TestDataCreator testDataCreator) {
+    final List<URL> testUrls;
+    // initialize test URI
+    final URL preMatchUrl = testDataCreator.getPreMatchUrl();
+    final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
+    final URL secondHalfUrl = testDataCreator.getSecondHalfUrl();
+    final URL postMatchUrl = testDataCreator.getPostMatchUrl();
+
+    assertThat(preMatchUrl).isNotNull();
+    assertThat(firstHalfUrl).isNotNull();
+    assertThat(secondHalfUrl).isNotNull();
+    assertThat(postMatchUrl).isNotNull();
+
+    testUrls = List.of(preMatchUrl, firstHalfUrl, secondHalfUrl, postMatchUrl);
+    return testUrls;
   }
 
   @AfterEach

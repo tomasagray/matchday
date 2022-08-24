@@ -19,10 +19,14 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,12 +38,6 @@ import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for remote file server USER management service")
@@ -48,21 +46,21 @@ public class FileServerUserServiceTest {
 
   private static final Logger logger = LogManager.getLogger(FileServerUserServiceTest.class);
 
-  private static FileServerUserService userService;
-  private static TestDataCreator testDataCreator;
-  private static FileServerPlugin testFileServerPlugin;
+  private final FileServerUserService userService;
+  private final TestDataCreator testDataCreator;
+  private final FileServerPlugin testFileServerPlugin;
 
-  private static FileServerUser testFileServerUser;
+  private final FileServerUser testFileServerUser;
 
-  @BeforeAll
-  static void setup(
-      @Autowired FileServerUserService userService,
-      @Autowired TestDataCreator testDataCreator,
-      @Autowired FileServerPlugin testFileServerPlugin) {
-    FileServerUserServiceTest.userService = userService;
-    FileServerUserServiceTest.testDataCreator = testDataCreator;
-    FileServerUserServiceTest.testFileServerPlugin = testFileServerPlugin;
-    FileServerUserServiceTest.testFileServerUser = testDataCreator.createTestFileServerUser();
+  @Autowired
+  public FileServerUserServiceTest(
+      @NotNull TestDataCreator testDataCreator,
+      FileServerUserService userService,
+      FileServerPlugin testFileServerPlugin) {
+    this.userService = userService;
+    this.testDataCreator = testDataCreator;
+    this.testFileServerPlugin = testFileServerPlugin;
+    this.testFileServerUser = testDataCreator.createTestFileServerUser();
   }
 
   @NotNull

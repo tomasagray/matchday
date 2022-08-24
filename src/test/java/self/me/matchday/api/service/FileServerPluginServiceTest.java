@@ -19,10 +19,16 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.net.URL;
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,15 +41,6 @@ import self.me.matchday.model.FileServerUser;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
 
-import java.io.IOException;
-import java.net.URL;
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for remote file server PLUGIN management service")
@@ -52,25 +49,24 @@ class FileServerPluginServiceTest {
 
   private static final Logger logger = LogManager.getLogger(FileServerPluginServiceTest.class);
 
-  private static TestDataCreator testDataCreator;
-  private static FileServerPluginService fileServerPluginService;
-  private static FileServerUserService userService;
-  private static FileServerPlugin testFileServerPlugin;
-  private static FileServerUser testFileServerUser;
+  private final TestDataCreator testDataCreator;
+  private final FileServerPluginService fileServerPluginService;
+  private final FileServerUserService userService;
+  private final FileServerPlugin testFileServerPlugin;
+  private final FileServerUser testFileServerUser;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull final TestDataCreator testDataCreator,
-      @Autowired final FileServerPluginService fileServerPluginService,
-      @Autowired FileServerUserService userService,
-      @Autowired final TestFileServerPlugin testFileServerPlugin) {
+  @Autowired
+  public FileServerPluginServiceTest(
+      TestDataCreator testDataCreator,
+      FileServerPluginService fileServerPluginService,
+      FileServerUserService userService,
+      TestFileServerPlugin testFileServerPlugin) {
 
-    FileServerPluginServiceTest.testDataCreator = testDataCreator;
-    FileServerPluginServiceTest.fileServerPluginService = fileServerPluginService;
-    FileServerPluginServiceTest.userService = userService;
-    FileServerPluginServiceTest.testFileServerPlugin = testFileServerPlugin;
-
-    testFileServerUser = testDataCreator.createTestFileServerUser();
+    this.testDataCreator = testDataCreator;
+    this.fileServerPluginService = fileServerPluginService;
+    this.userService = userService;
+    this.testFileServerPlugin = testFileServerPlugin;
+    this.testFileServerUser = testDataCreator.createTestFileServerUser();
   }
 
   @Test

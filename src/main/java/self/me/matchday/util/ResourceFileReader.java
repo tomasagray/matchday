@@ -112,7 +112,7 @@ public class ResourceFileReader {
     String lastKey = null;
     // Examine file line by line
     for (String line : lines) {
-      if (!(line.equals(""))) {
+      if (!(line.equals("")) && !line.startsWith("#")) {
         // Split line
         String[] split = line.split("=", 2);
         if (split.length > 0) {

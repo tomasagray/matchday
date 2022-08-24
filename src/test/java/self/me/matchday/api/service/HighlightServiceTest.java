@@ -19,11 +19,13 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,11 +35,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Highlight;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for Highlight Show service")
@@ -45,26 +42,15 @@ class HighlightServiceTest {
 
   private static final Logger logger = LogManager.getLogger(HighlightServiceTest.class);
 
-  private static TestDataCreator testDataCreator;
-  private static HighlightService highlightService;
-  private static Highlight testHighlight;
+  private final HighlightService highlightService;
+  private final Highlight testHighlight;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull final TestDataCreator testDataCreator,
-      @Autowired @NotNull final HighlightService highlightService) {
-
-    HighlightServiceTest.testDataCreator = testDataCreator;
-    HighlightServiceTest.highlightService = highlightService;
-
+  @Autowired
+  public HighlightServiceTest(
+      @NotNull TestDataCreator testDataCreator, HighlightService highlightService) {
+    this.highlightService = highlightService;
     // Create test data
-    HighlightServiceTest.testHighlight = testDataCreator.createHighlightShow();
-  }
-
-  @AfterAll
-  static void tearDown() {
-    // delete test data from database
-    testDataCreator.deleteTestEvent(testHighlight);
+    this.testHighlight = testDataCreator.createHighlightShow();
   }
 
   @Test

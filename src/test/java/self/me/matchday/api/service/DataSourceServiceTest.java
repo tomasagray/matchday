@@ -49,11 +49,11 @@ class DataSourceServiceTest {
   private final TestDataCreator testDataCreator;
   private final EventService eventService;
 
-  //  @BeforeAll
+  @Autowired
   public DataSourceServiceTest(
-      @Autowired DataSourceService dataSourceService,
-      @Autowired TestDataCreator testDataCreator,
-      @Autowired EventService eventService) {
+      DataSourceService dataSourceService,
+      TestDataCreator testDataCreator,
+      EventService eventService) {
 
     this.dataSourceService = dataSourceService;
     this.testDataCreator = testDataCreator;

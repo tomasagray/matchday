@@ -19,10 +19,13 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import java.net.URL;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,11 +40,6 @@ import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 
-import java.net.URL;
-import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
@@ -50,23 +48,21 @@ class VideoFileSelectorServiceTest {
 
   private static final Logger logger = LogManager.getLogger(VideoFileSelectorServiceTest.class);
 
-  private static VideoFileSource testVideoFileSource;
-  private static VideoFileSelectorService fileSelectorService;
+  private final VideoFileSource testVideoFileSource;
+  private final VideoFileSelectorService fileSelectorService;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull final TestDataCreator testDataCreator,
-      @Autowired @NotNull final VideoFileSelectorService fileSelectorService) {
+  @Autowired
+  public VideoFileSelectorServiceTest(
+      @NotNull TestDataCreator testDataCreator, VideoFileSelectorService fileSelectorService) {
 
-    VideoFileSelectorServiceTest.fileSelectorService = fileSelectorService;
-
+    this.fileSelectorService = fileSelectorService;
     // Create test data
     testVideoFileSource = testDataCreator.createVideoFileSourceAndSave();
     // Set internal urls for testing
     setInternalUrls(testVideoFileSource.getVideoFilePacks());
   }
 
-  private static void setInternalUrls(@NotNull final List<VideoFilePack> videoFiles) {
+  private void setInternalUrls(@NotNull final List<VideoFilePack> videoFiles) {
     videoFiles.forEach(
         pack ->
             pack.forEachVideoFile(

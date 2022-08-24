@@ -19,10 +19,14 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,12 +38,6 @@ import self.me.matchday.model.Competition;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for Match service")
@@ -47,32 +45,19 @@ class MatchServiceTest {
 
   private static final Logger logger = LogManager.getLogger(MatchServiceTest.class);
 
-  private static TestDataCreator testDataCreator;
-  private static MatchService matchService;
+  private final MatchService matchService;
 
   // Test data
-  private static Competition testCompetition;
-  private static Team testTeam;
-  private static Match testMatch;
+  private final Competition testCompetition;
+  private final Team testTeam;
+  private final Match testMatch;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired final TestDataCreator testDataCreator,
-      @Autowired final MatchService matchService) {
-
-    MatchServiceTest.testDataCreator = testDataCreator;
-    MatchServiceTest.matchService = matchService;
-
-    // setup resources
-    MatchServiceTest.testMatch = testDataCreator.createTestMatch();
-    MatchServiceTest.testCompetition = testMatch.getCompetition();
-    MatchServiceTest.testTeam = testMatch.getHomeTeam();
-  }
-
-  @AfterAll
-  static void tearDown() {
-    // delete test event
-    testDataCreator.deleteTestEvent(testMatch);
+  @Autowired
+  public MatchServiceTest(@NotNull TestDataCreator testDataCreator, MatchService matchService) {
+    this.matchService = matchService;
+    this.testMatch = testDataCreator.createTestMatch();
+    this.testCompetition = testMatch.getCompetition();
+    this.testTeam = testMatch.getHomeTeam();
   }
 
   @Test

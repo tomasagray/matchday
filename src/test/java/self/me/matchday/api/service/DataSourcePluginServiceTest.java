@@ -19,10 +19,13 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,34 +35,20 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 import self.me.matchday.plugin.datasource.TestDataSourcePlugin;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("DataSourcePlugin testing & validation")
 public class DataSourcePluginServiceTest {
 
   private static final Logger logger = LogManager.getLogger(DataSourcePluginServiceTest.class);
-  private static DataSourcePluginService pluginService;
-  private static DataSourcePlugin testDataSourcePlugin;
+  private final DataSourcePluginService pluginService;
+  private final DataSourcePlugin testDataSourcePlugin;
 
-  @BeforeAll
-  static void setup(
-      @Autowired DataSourcePluginService pluginService,
-      @Autowired TestDataSourcePlugin testDataSourcePlugin) {
-    DataSourcePluginServiceTest.pluginService = pluginService;
-    DataSourcePluginServiceTest.testDataSourcePlugin = testDataSourcePlugin;
-  }
-
-  @AfterAll
-  static void tearDown() {
-    logger.info("Deleting test data...");
-    final boolean removed = pluginService.getDataSourcePlugins().remove(testDataSourcePlugin);
-    assertThat(removed).isTrue();
+  @Autowired
+  public DataSourcePluginServiceTest(
+      DataSourcePluginService pluginService, TestDataSourcePlugin testDataSourcePlugin) {
+    this.pluginService = pluginService;
+    this.testDataSourcePlugin = testDataSourcePlugin;
   }
 
   @Test

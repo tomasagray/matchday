@@ -19,11 +19,24 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,17 +53,6 @@ import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
-import java.time.Duration;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for FileFox file server manager")
@@ -61,32 +63,31 @@ class FileFoxPluginTest {
 
   private static final String LOGIN_DATA = "src/test/secure_resources/filefox_login.csv";
 
-  private static FileFoxPlugin plugin;
-  private static FileServerUserService userService;
-  private static URL testDownloadLink;
-  private static Pattern directDownloadLinkPattern;
+  private final FileFoxPlugin plugin;
+  private final FileServerUserService userService;
+  private final URL testDownloadLink;
+  private final Pattern directDownloadLinkPattern;
 
-  @BeforeAll
-  static void setUp(@Autowired FileFoxPlugin plugin, @Autowired FileServerUserService userService)
+  @Autowired
+  public FileFoxPluginTest(FileFoxPlugin plugin, FileServerUserService userService)
       throws IOException {
 
-    FileFoxPluginTest.plugin = plugin;
-    FileFoxPluginTest.userService = userService;
+    this.plugin = plugin;
+    this.userService = userService;
 
-    FileFoxPluginTest.testDownloadLink =
+    this.testDownloadLink =
         new URL("https://filefox.cc/k5impa7zfhdc/20210210-EVE-TOT-FAC_1-1080.mkv");
-    FileFoxPluginTest.directDownloadLinkPattern =
-        Pattern.compile("^https://s\\d{2}.filefox.cc/\\w*/[\\w.-]*");
+    this.directDownloadLinkPattern = Pattern.compile("^https://s\\d{2}.filefox.cc/\\w*/[\\w.-]*");
   }
 
-  private static FileServerUser getLoggedInUser() {
+  private FileServerUser getLoggedInUser() {
     final List<FileServerUser> users = userService.getAllServerUsers(plugin.getPluginId());
     assertThat(users.size()).isGreaterThan(0);
     return users.get(0);
   }
 
   @Contract(" -> new")
-  private static @NotNull FileServerUser createTestUser() throws IOException {
+  private @NotNull FileServerUser createTestUser() throws IOException {
 
     final BufferedReader reader = new BufferedReader(new FileReader(LOGIN_DATA));
     final String loginData = reader.lines().collect(Collectors.joining(" "));

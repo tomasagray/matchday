@@ -27,9 +27,7 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,47 +51,29 @@ class VideoStreamLocatorServiceTest {
 
   private static final Logger logger = LogManager.getLogger(VideoStreamLocatorServiceTest.class);
 
-  private static TestDataCreator testDataCreator;
-  private static VideoStreamLocatorService videoStreamLocatorService;
-
-  // test resources
-  private static VideoStreamLocator testStreamLocator;
-  private static VideoFileSource testVideoFileSource;
-  private static VideoFile testVideoFile;
-
   private static final Path storageLocation = Path.of("C:\\Users\\Public\\Matchday\\videos\\_test");
-  private static Path testStorage;
+  private final VideoStreamLocatorService videoStreamLocatorService;
+  private final VideoFile testVideoFile;
+  private final Path testStorage;
+  // test resources
+  private VideoStreamLocator testStreamLocator;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull final TestDataCreator testDataCreator,
-      @Autowired @NotNull final VideoStreamLocatorService videoStreamLocatorService) {
+  @Autowired
+  public VideoStreamLocatorServiceTest(
+      @NotNull TestDataCreator testDataCreator,
+      VideoStreamLocatorService videoStreamLocatorService) {
 
-    VideoStreamLocatorServiceTest.testDataCreator = testDataCreator;
-    VideoStreamLocatorServiceTest.videoStreamLocatorService = videoStreamLocatorService;
+    this.videoStreamLocatorService = videoStreamLocatorService;
     // Get managed copy of test file source
-    VideoStreamLocatorServiceTest.testVideoFileSource =
-        testDataCreator.createVideoFileSourceAndSave();
-    VideoStreamLocatorServiceTest.testVideoFile =
-        VideoStreamLocatorServiceTest.testVideoFileSource
-            .getVideoFilePacks()
-            .get(0)
-            .get(PartIdentifier.FIRST_HALF);
+    VideoFileSource testVideoFileSource = testDataCreator.createVideoFileSourceAndSave();
+    this.testVideoFile =
+        testVideoFileSource.getVideoFilePacks().get(0).get(PartIdentifier.FIRST_HALF);
     // resolve test data storage path
-    VideoStreamLocatorServiceTest.testStorage =
-        storageLocation.resolve(testVideoFileSource.getFileSrcId().toString());
-  }
-
-  @AfterAll
-  static void tearDownDependencies() {
-    // Cleanup test resources
-    testDataCreator.deleteVideoFileSource(testVideoFileSource);
-    videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
+    this.testStorage = storageLocation.resolve(testVideoFileSource.getFileSrcId().toString());
   }
 
   @AfterEach
   void tearDown() {
-
     // Ensure test data is cleaned up
     if (testStreamLocator != null) {
       logger.info("Deleting test locator from DB...: " + testStreamLocator.getStreamLocatorId());
@@ -148,8 +128,10 @@ class VideoStreamLocatorServiceTest {
     logger.info("Retrieved playlist locator: " + actualStreamLocator);
 
     // Test playlist locator fields; timestamp will be different
-    assertThat(actualStreamLocator.getStreamLocatorId()).isEqualTo(testStreamLocator.getStreamLocatorId());
-    assertThat(actualStreamLocator.getPlaylistPath()).isEqualTo(testStreamLocator.getPlaylistPath());
+    assertThat(actualStreamLocator.getStreamLocatorId())
+        .isEqualTo(testStreamLocator.getStreamLocatorId());
+    assertThat(actualStreamLocator.getPlaylistPath())
+        .isEqualTo(testStreamLocator.getPlaylistPath());
     assertThat(actualStreamLocator.getVideoFile()).isEqualTo(testStreamLocator.getVideoFile());
     assertThat(actualStreamLocator.getState()).isEqualTo(testStreamLocator.getState());
   }

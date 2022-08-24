@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -48,7 +47,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.FileServerUser;
@@ -59,7 +57,6 @@ import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoPlaylist;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-import self.me.matchday.plugin.fileserver.TestFileServerPlugin;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -72,28 +69,26 @@ class VideoStreamingServiceTest {
   private static final long waitSeconds = 10;
 
   // Service dependencies
-  private static VideoStreamingService streamingService;
-  private static VideoStreamLocatorPlaylistService locatorPlaylistService;
-  private static VideoStreamLocatorService streamLocatorService;
+  private final VideoStreamingService streamingService;
+  private final VideoStreamLocatorPlaylistService locatorPlaylistService;
+  private final VideoStreamLocatorService streamLocatorService;
 
   // Test data
-  private static Event testMatch;
-  private static VideoFile testVideoFile;
-  private static VideoFileSource testFileSource;
+  private final Event testMatch;
+  private final VideoFile testVideoFile;
+  private final VideoFileSource testFileSource;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull TestDataCreator testDataCreator,
-      @Autowired @NotNull VideoStreamingService streamingService,
-      @Autowired @NotNull VideoStreamLocatorPlaylistService locatorPlaylistService,
-      @Autowired @NotNull VideoStreamLocatorService streamLocatorService,
-      @Autowired @NotNull FileServerPluginService fileServerPluginService,
-      @Autowired @NotNull FileServerUserService userService,
-      @Autowired @NotNull TestFileServerPlugin testFileServerPlugin) {
+  @Autowired
+  public VideoStreamingServiceTest(
+      @NotNull TestDataCreator testDataCreator,
+      @NotNull FileServerUserService userService,
+      VideoStreamingService streamingService,
+      VideoStreamLocatorPlaylistService locatorPlaylistService,
+      VideoStreamLocatorService streamLocatorService) {
 
-    VideoStreamingServiceTest.streamingService = streamingService;
-    VideoStreamingServiceTest.streamLocatorService = streamLocatorService;
-    VideoStreamingServiceTest.locatorPlaylistService = locatorPlaylistService;
+    this.streamingService = streamingService;
+    this.streamLocatorService = streamLocatorService;
+    this.locatorPlaylistService = locatorPlaylistService;
 
     // Create test user & login
     FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
@@ -101,9 +96,9 @@ class VideoStreamingServiceTest {
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Create test data
-    VideoStreamingServiceTest.testMatch = testDataCreator.createTestMatch();
-    VideoStreamingServiceTest.testFileSource = getTestFileSource();
-    VideoStreamingServiceTest.testVideoFile =
+    this.testMatch = testDataCreator.createTestMatch();
+    this.testFileSource = getTestFileSource();
+    this.testVideoFile =
         testFileSource.getVideoFilePacks().stream()
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("No VideoFilePacks for test data"))
@@ -113,7 +108,7 @@ class VideoStreamingServiceTest {
   }
 
   @NotNull
-  private static VideoFileSource getTestFileSource() {
+  private VideoFileSource getTestFileSource() {
 
     AtomicReference<VideoFileSource> atomicFileSource = new AtomicReference<>();
     final Set<VideoFileSource> fileSources = testMatch.getFileSources();
@@ -186,7 +181,7 @@ class VideoStreamingServiceTest {
     final VideoStreamLocator testStreamLocator = getTestStreamLocator();
     logger.info(
         "Testing playlist file reading with File Source ID: {}, Stream Locator ID: {}",
-        VideoStreamingServiceTest.testFileSource.getFileSrcId(),
+        testFileSource.getFileSrcId(),
         testStreamLocator.getStreamLocatorId());
 
     // Read test playlist file
@@ -214,7 +209,7 @@ class VideoStreamingServiceTest {
 
     // Test params
     final Long testStreamLocatorId = testStreamLocator.getStreamLocatorId();
-    final UUID testVideoFileSrcId = VideoStreamingServiceTest.testFileSource.getFileSrcId();
+    final UUID testVideoFileSrcId = testFileSource.getFileSrcId();
     final UUID testEventId = testMatch.getEventId();
     final String segmentId = "segment_00001";
 
@@ -268,7 +263,7 @@ class VideoStreamingServiceTest {
 
     logger.info("Getting VideoStreamLocatorPlaylist for VideoFileSource: {}", testFileSource);
     final Optional<VideoStreamLocatorPlaylist> playlistOptional =
-            locatorPlaylistService.getVideoStreamPlaylistFor(testFileSource.getFileSrcId());
+        locatorPlaylistService.getVideoStreamPlaylistFor(testFileSource.getFileSrcId());
     assertThat(playlistOptional).isPresent();
     VideoStreamLocatorPlaylist deletablePlaylist = playlistOptional.get();
     assertThat(deletablePlaylist).isNotNull();
@@ -304,8 +299,7 @@ class VideoStreamingServiceTest {
         "Beginning test stream for file source stream killing with file source ID: " + fileSrcId);
 
     final Optional<VideoPlaylist> playlistOptional =
-        streamingService.getVideoStreamPlaylist(
-            testMatch.getEventId(), fileSrcId);
+        streamingService.getVideoStreamPlaylist(testMatch.getEventId(), fileSrcId);
     assertThat(playlistOptional).isPresent();
     final VideoPlaylist videoPlaylist = playlistOptional.get();
     logger.info("Using playlist: " + videoPlaylist);
@@ -329,8 +323,7 @@ class VideoStreamingServiceTest {
     final SingleStreamLocator firstHalfLocator = new SingleStreamLocator();
     final SingleStreamLocator secondHalfLocator = new SingleStreamLocator();
     final URL url = new URL("https://www.com.com");
-    final VideoFile firstHalf = new VideoFile(PartIdentifier.FIRST_HALF,
-        url);
+    final VideoFile firstHalf = new VideoFile(PartIdentifier.FIRST_HALF, url);
     final VideoFile secondHalf = new VideoFile(PartIdentifier.SECOND_HALF, url);
     firstHalfLocator.setVideoFile(firstHalf);
     secondHalfLocator.setVideoFile(secondHalf);

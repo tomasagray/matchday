@@ -19,10 +19,18 @@
 
 package self.me.matchday.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static self.me.matchday.model.video.Resolution.R_1080p;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,19 +39,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.model.*;
+import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.FileSize;
+import self.me.matchday.model.Fixture;
+import self.me.matchday.model.Match;
+import self.me.matchday.model.Season;
+import self.me.matchday.model.Team;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static self.me.matchday.model.video.Resolution.R_1080p;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -54,22 +58,20 @@ class EventServiceTest {
   private static final Logger logger = LogManager.getLogger(EventServiceTest.class);
 
   // Test resources
-  private static TestDataCreator testDataCreator;
-  private static EventService eventService;
+  private final TestDataCreator testDataCreator;
+  private final EventService eventService;
 
   // Test data
-  private static Match testMatch;
-  private static Match unUpdatedEvent;
-  private static VideoFileSource testFileSource;
-  private static Competition testCompetition;
+  private final Match testMatch;
+  private final Match unUpdatedEvent;
+  private final VideoFileSource testFileSource;
+  private final Competition testCompetition;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull final TestDataCreator testDataCreator,
-      @Autowired @NotNull final EventService eventService) {
+  @Autowired
+  public EventServiceTest(TestDataCreator testDataCreator, EventService eventService) {
 
-    EventServiceTest.testDataCreator = testDataCreator;
-    EventServiceTest.eventService = eventService;
+    this.testDataCreator = testDataCreator;
+    this.eventService = eventService;
 
     testMatch = testDataCreator.createTestMatch("EventServiceTest");
     testCompetition = testMatch.getCompetition();
@@ -88,7 +90,7 @@ class EventServiceTest {
         testFileSource.getFileSrcId());
 
     // create Event for updating test
-    EventServiceTest.unUpdatedEvent = testDataCreator.createTestMatch("Non-Updated Event");
+    this.unUpdatedEvent = testDataCreator.createTestMatch("Non-Updated Event");
     logger.info("Created Event for update() test: {}", unUpdatedEvent);
   }
 
@@ -213,7 +215,7 @@ class EventServiceTest {
     fileSourceOptional.ifPresent(
         videoFileSource -> {
           logger.info("Retrieved file source from database: {}", videoFileSource);
-          assertThat(videoFileSource).isEqualTo(EventServiceTest.testFileSource);
+          assertThat(videoFileSource).isEqualTo(this.testFileSource);
         });
   }
 

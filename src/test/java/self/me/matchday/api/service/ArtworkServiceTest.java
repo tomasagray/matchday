@@ -27,8 +27,6 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,29 +51,19 @@ class ArtworkServiceTest {
   private static final int expectedLandscapeBytes = 189_337;
 
   // Test resources
-  private static ArtworkService artworkService;
-  private static TestDataCreator testDataCreator;
+  private final ArtworkService artworkService;
 
   // Test data
-  private static Competition testCompetition;
-  private static Team testTeam;
+  private final Competition testCompetition;
+  private final Team testTeam;
 
-  @BeforeAll
-  static void setUp(
-      @Autowired @NotNull TestDataCreator testDataCreator,
-      @Autowired @NotNull ArtworkService service) {
+  @Autowired
+  public ArtworkServiceTest(@NotNull TestDataCreator testDataCreator, ArtworkService service) {
 
-    ArtworkServiceTest.artworkService = service;
-    ArtworkServiceTest.testDataCreator = testDataCreator;
-    ArtworkServiceTest.testCompetition =
+    this.artworkService = service;
+    this.testCompetition =
         testDataCreator.createTestCompetition("Artwork_Competition_" + new Random().nextInt());
-    ArtworkServiceTest.testTeam = testDataCreator.createTestTeam();
-  }
-
-  @AfterAll
-  static void tearDown() {
-    testDataCreator.deleteTestCompetition(testCompetition);
-    testDataCreator.deleteTestTeam(testTeam);
+    this.testTeam = testDataCreator.createTestTeam();
   }
 
   @Test
