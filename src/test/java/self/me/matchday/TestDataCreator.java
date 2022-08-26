@@ -120,6 +120,10 @@ public class TestDataCreator {
     this.streamLocatorRepo = locatorRepo;
   }
 
+  private static int getRandomNumber(int min, int max) {
+    return (int) ((Math.random() * (min - max)) + min);
+  }
+
   // ======================== DATA SOURCE ========================
   public DataSource<Match> readTestHtmlDataSource() throws IOException {
     final String filename = "data/datasource/test_html_blogger_datasource.json";
@@ -221,7 +225,6 @@ public class TestDataCreator {
   }
 
   // ================ EVENTS ======================
-
   @Transactional
   @NotNull
   public Match createTestMatch() {
@@ -231,8 +234,11 @@ public class TestDataCreator {
   @Transactional
   @NotNull
   public Match createTestMatch(@NotNull String name) {
-    // Create & save test match & VideoFileSource
-    final Competition testCompetition = createTestCompetition("Competition " + name);
+
+    final int seed = getRandomNumber(1_000, 10_000);
+    final String randomizedName = String.format("Test Competition %s [%d]", name, seed);
+
+    final Competition testCompetition = createTestCompetition(randomizedName);
     final Team homeTeam = createTestTeam("Home Team " + name);
     final Team awayTeam = createTestTeam("Away Team " + name);
     final Event testEvent =
@@ -279,7 +285,7 @@ public class TestDataCreator {
   @Transactional
   public void deleteTestCompetition(Competition competition) {
     logger.info("Deleting test Competition: {}", competition);
-    competitionService.delete(competition.getCompetitionId());
+    competitionService.delete(competition.getId());
   }
 
   @Transactional

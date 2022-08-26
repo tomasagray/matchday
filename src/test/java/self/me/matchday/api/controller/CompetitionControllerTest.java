@@ -19,6 +19,15 @@
 
 package self.me.matchday.api.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -46,17 +55,8 @@ import self.me.matchday.api.resource.MatchResource;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.ProperName;
 import self.me.matchday.plugin.datasource.parsing.fabric.Bolt;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -107,7 +107,8 @@ class CompetitionControllerTest {
     final CollectionModel<CompetitionResource> body = response.getBody();
     assertThat(body).isNotNull();
 
-    final Stream<String> names = body.getContent().stream().map(CompetitionResource::getName);
+    final Stream<String> names =
+        body.getContent().stream().map(CompetitionResource::getName).map(ProperName::getName);
     return Bolt.of(names)
         .zipWithBecoming(
             testCompetitions.stream(),
@@ -139,7 +140,7 @@ class CompetitionControllerTest {
   @DisplayName("Validate retrieving a Competition from the database by name")
   void fetchCompetitionByName(@NotNull Competition competition) {
 
-    final UUID competitionId = competition.getCompetitionId();
+    final UUID competitionId = competition.getId();
     logger.info("Testing with Competition Name: {}", competitionId);
     final ResponseEntity<CompetitionResource> response = getCompetition(competitionId);
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
@@ -157,8 +158,7 @@ class CompetitionControllerTest {
 
     final String url =
         String.format(
-            "http://localhost:%d/competitions/competition/%s/teams",
-            port, competition.getCompetitionId());
+            "http://localhost:%d/competitions/competition/%s/teams", port, competition.getId());
     logger.info("Getting teams from database for Competition: {}", competition);
     logger.info("Using URL: {}", url);
 
@@ -185,8 +185,7 @@ class CompetitionControllerTest {
 
     final String url =
         String.format(
-            "http://localhost:%d/competitions/competition/%s/events",
-            port, competition.getCompetitionId());
+            "http://localhost:%d/competitions/competition/%s/events", port, competition.getId());
     final ResponseEntity<EventsResource> response =
         restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();

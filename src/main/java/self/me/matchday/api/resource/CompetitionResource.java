@@ -23,7 +23,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,12 +37,12 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.controller.ArtworkController;
 import self.me.matchday.api.controller.CompetitionController;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Country;
 import self.me.matchday.model.ProperName;
-import self.me.matchday.model.Synonym;
 
 @Data
 @Builder
@@ -55,8 +54,7 @@ import self.me.matchday.model.Synonym;
 public class CompetitionResource extends RepresentationModel<CompetitionResource> {
 
   private UUID id;
-  private String name;
-  private List<Synonym> synonyms;
+  private ProperName name;
   private Country country;
 
   @Component
@@ -77,17 +75,16 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
     @SneakyThrows
     @NotNull
     @Override
+    @Transactional
     public CompetitionResource toModel(@NotNull Competition competition) {
 
       final CompetitionResource competitionResource = instantiateModel(competition);
 
-      final UUID competitionId = competition.getCompetitionId();
-      final ProperName properName = competition.getName();
+      final UUID competitionId = competition.getId();
       competitionResource.setId(competitionId);
-      competitionResource.setName(properName.getName());
-      competitionResource.setSynonyms(properName.getSynonyms());
       competitionResource.setCountry(competition.getCountry());
-
+      competitionResource.setName(competition.getName());
+      // links
       competitionResource.add(
           linkTo(methodOn(CompetitionController.class).fetchCompetitionById(competitionId))
               .withSelfRel());

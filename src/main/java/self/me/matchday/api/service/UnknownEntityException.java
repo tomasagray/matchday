@@ -17,12 +17,13 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db;
+package self.me.matchday.api.service;
 
-import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import self.me.matchday.model.video.VideoFileSource;
+import org.jetbrains.annotations.NotNull;
 
-@Repository
-public interface VideoFileSrcRepository extends JpaRepository<VideoFileSource, UUID> {}
+public class UnknownEntityException extends RuntimeException {
+
+  public UnknownEntityException(@NotNull String message) {
+    super(message);
+  }
+}

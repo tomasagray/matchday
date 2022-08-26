@@ -19,13 +19,10 @@
 
 package self.me.matchday.db;
 
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Highlight;
 
-import java.util.UUID;
-
 @Repository
-public interface HighlightRepository extends JpaRepository<Highlight, UUID> {
-
-}
+public interface HighlightRepository extends JpaRepository<Highlight, UUID> {}

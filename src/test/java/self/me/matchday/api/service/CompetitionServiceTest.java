@@ -73,7 +73,7 @@ class CompetitionServiceTest {
   @DisplayName("Validate retrieval of a single competition from database")
   void fetchCompetitionById() {
 
-    final UUID testCompetitionId = testCompetition.getCompetitionId();
+    final UUID testCompetitionId = testCompetition.getId();
 
     final Optional<Competition> competitionOptional =
         competitionService.fetchById(testCompetitionId);

@@ -19,6 +19,12 @@
 
 package self.me.matchday.api.service;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,21 +32,17 @@ import self.me.matchday.db.CompetitionRepository;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.ProperName;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 @Service
 @Transactional
 public class CompetitionService implements EntityService<Competition> {
 
   private final CompetitionRepository competitionRepository;
+  private final SynonymService synonymService;
 
-  public CompetitionService(final CompetitionRepository competitionRepository) {
+  public CompetitionService(
+      CompetitionRepository competitionRepository, SynonymService synonymService) {
     this.competitionRepository = competitionRepository;
+    this.synonymService = synonymService;
   }
 
   /**
@@ -91,11 +93,8 @@ public class CompetitionService implements EntityService<Competition> {
    */
   @Override
   public Competition save(@NotNull final Competition competition) {
-
     validateCompetition(competition);
-    final Optional<Competition> competitionOptional =
-        competitionRepository.findCompetitionByNameName(competition.getName().getName());
-    return competitionOptional.orElseGet(() -> competitionRepository.saveAndFlush(competition));
+    return competitionRepository.saveAndFlush(competition);
   }
 
   @Override
@@ -107,10 +106,56 @@ public class CompetitionService implements EntityService<Competition> {
 
   @Override
   public Competition update(@NotNull Competition competition) {
-    if (competition.getCompetitionId() == null) {
-      throw new IllegalArgumentException("Trying to update unknown Competition: " + competition);
-    }
+    validateForUpdate(competition);
     return save(competition);
+  }
+
+  private void validateForUpdate(@NotNull Competition updated) {
+    validateUpdateId(updated);
+    validateUpdateName(updated);
+    synonymService.validateProperName(updated.getName());
+  }
+
+  private void validateUpdateId(@NotNull Competition updated) {
+
+    final UUID updatedId = updated.getId();
+    final String unknownMsg = "Trying to update unknown Competition: " + updated;
+    if (updatedId == null) {
+      throw new UnknownEntityException(unknownMsg);
+    }
+    final Optional<Competition> optionalIdExists = fetchById(updatedId);
+    if (optionalIdExists.isEmpty()) {
+      throw new UnknownEntityException(unknownMsg);
+    }
+  }
+
+  private void validateUpdateName(@NotNull Competition updated) {
+
+    final String nameError = "Competition has no name";
+    final ProperName updatedProperName = updated.getName();
+    final UUID updatedId = updated.getId();
+    // check for name collision
+    if (updatedProperName == null) {
+      throw new IllegalArgumentException(nameError);
+    }
+
+    final String updatedName = updatedProperName.getName();
+    if (updatedName == null || "".equals(updatedName)) {
+      throw new IllegalArgumentException(nameError);
+    }
+
+    final Optional<Competition> optional = fetchCompetitionByName(updatedName);
+    if (optional.isPresent()) {
+      final Competition existing = optional.get();
+      final UUID existingId = existing.getId();
+      if (!existingId.equals(updatedId)) {
+        final String msg =
+            String.format(
+                "A Competition with name: %s already exists; please use the merge function instead",
+                updatedName);
+        throw new IllegalArgumentException(msg);
+      }
+    }
   }
 
   @Override
@@ -133,7 +178,7 @@ public class CompetitionService implements EntityService<Competition> {
   @Override
   public void deleteAll(@NotNull Iterable<? extends Competition> competitions) {
     StreamSupport.stream(competitions.spliterator(), false)
-        .map(Competition::getCompetitionId)
+        .map(Competition::getId)
         .forEach(this::delete);
   }
 

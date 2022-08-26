@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.CountryService;
@@ -43,7 +44,9 @@ import self.me.matchday.util.JsonParser;
 @Component
 public class LoadCountries implements CommandLineRunner {
 
-  private static final String FLAG_URI = "/img/flags/%s.svg";
+  @Value("${artwork.flag-uri-format}")
+  private static String FLAG_URI;
+
   private static final String COUNTRIES_JSON = "countries.json";
   private static final int EXPECTED_COUNTRIES = 246;
 

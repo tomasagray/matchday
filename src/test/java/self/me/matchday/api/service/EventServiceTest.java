@@ -68,7 +68,7 @@ class EventServiceTest {
   private final Competition testCompetition;
 
   @Autowired
-  public EventServiceTest(TestDataCreator testDataCreator, EventService eventService) {
+  public EventServiceTest(@NotNull TestDataCreator testDataCreator, EventService eventService) {
 
     this.testDataCreator = testDataCreator;
     this.eventService = eventService;
@@ -85,7 +85,7 @@ class EventServiceTest {
     logger.info(
         "Saved Event w/ID: {}, Competition ID: {}, Team ID: {}; FileSrcID: {}",
         testMatch.getEventId(),
-        testCompetition.getCompetitionId(),
+        testCompetition.getId(),
         testTeam.getTeamId(),
         testFileSource.getFileSrcId());
 
@@ -224,8 +224,7 @@ class EventServiceTest {
   void fetchEventsForCompetition() {
 
     final int minExpectedEventCount = 1;
-    final List<Event> events =
-        eventService.fetchEventsForCompetition(testCompetition.getCompetitionId());
+    final List<Event> events = eventService.fetchEventsForCompetition(testCompetition.getId());
     assertThat(events.size()).isGreaterThanOrEqualTo(minExpectedEventCount);
   }
 
@@ -237,7 +236,7 @@ class EventServiceTest {
 
     final Match testEvent = getPristineEventCopy(unUpdatedEvent);
     final Competition updatedCompetition = new Competition("Updated Competition");
-    updatedCompetition.setCompetitionId(UUID.randomUUID());
+    updatedCompetition.setId(UUID.randomUUID());
     testEvent.setCompetition(updatedCompetition);
     logger.info("Attempting to update Event with: {}", testEvent);
 

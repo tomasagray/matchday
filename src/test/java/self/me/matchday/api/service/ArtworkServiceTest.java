@@ -100,7 +100,7 @@ class ArtworkServiceTest {
   void fetchCompetitionEmblem() {
 
     final Optional<byte[]> optionalBytes =
-        artworkService.fetchCompetitionEmblem(testCompetition.getCompetitionId());
+        artworkService.fetchCompetitionEmblem(testCompetition.getId());
     assertThat(optionalBytes).isPresent();
 
     final int actualCompetitionEmblemBytes = optionalBytes.get().length;
@@ -113,7 +113,7 @@ class ArtworkServiceTest {
   void fetchCompetitionFanart() {
 
     final Optional<byte[]> optionalBytes =
-        artworkService.fetchCompetitionFanart(testCompetition.getCompetitionId());
+        artworkService.fetchCompetitionFanart(testCompetition.getId());
     assertThat(optionalBytes).isPresent();
 
     final byte[] actualFanartBytes = optionalBytes.get();
@@ -126,7 +126,7 @@ class ArtworkServiceTest {
   void fetchCompetitionMonochromeEmblem() {
 
     final Optional<byte[]> optionalBytes =
-        artworkService.fetchCompetitionMonochromeEmblem(testCompetition.getCompetitionId());
+        artworkService.fetchCompetitionMonochromeEmblem(testCompetition.getId());
     assertThat(optionalBytes).isPresent();
 
     final int actualMonoEmblemBytes = optionalBytes.get().length;
@@ -139,7 +139,7 @@ class ArtworkServiceTest {
   void fetchCompetitionLandscape() {
 
     final Optional<byte[]> optionalBytes =
-        artworkService.fetchCompetitionLandscape(testCompetition.getCompetitionId());
+        artworkService.fetchCompetitionLandscape(testCompetition.getId());
     assertThat(optionalBytes).isPresent();
 
     final int actualLandscapeBytes = optionalBytes.get().length;

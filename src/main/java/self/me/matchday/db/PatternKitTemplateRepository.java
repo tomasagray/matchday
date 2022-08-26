@@ -19,12 +19,11 @@
 
 package self.me.matchday.db;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.PatternKitTemplate;
-
-import java.util.Optional;
 
 @Repository
 public interface PatternKitTemplateRepository extends JpaRepository<PatternKitTemplate, Long> {

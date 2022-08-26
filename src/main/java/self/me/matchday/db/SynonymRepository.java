@@ -19,14 +19,13 @@
 
 package self.me.matchday.db;
 
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Synonym;
-
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface SynonymRepository extends JpaRepository<Synonym, Long> {

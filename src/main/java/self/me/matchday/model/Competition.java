@@ -23,6 +23,7 @@
  */
 package self.me.matchday.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
@@ -38,6 +39,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.api.converter.StringToCountryConverter;
 
 /**
  * Represents a competition, e.g., a domestic league (EPL) or cup (FA Cup), a tournament (UCL, World
@@ -54,16 +56,20 @@ public class Competition implements Serializable {
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
   @Column(columnDefinition = "BINARY(16)")
-  private UUID competitionId;
+  private UUID id;
 
   @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   private final ProperName name;
 
+  @JsonDeserialize(converter = StringToCountryConverter.class)
+  @ManyToOne
+  private Country country;
+
+  // artwork
   @OneToOne private Artwork emblem;
   @OneToOne private Artwork fanart;
   @OneToOne private Artwork monochromeEmblem;
   @OneToOne private Artwork landscape;
-  @ManyToOne private Country country;
 
   public Competition(@NotNull final String name) {
     this.name = new ProperName(name);
@@ -77,7 +83,7 @@ public class Competition implements Serializable {
   public String toString() {
     final ProperName properName = getName();
     final String name = properName == null ? "UNKNOWN" : properName.getName();
-    return String.format("%s [%s]", name, getCompetitionId());
+    return String.format("%s [%s]", name, getId());
   }
 
   @Override
@@ -85,13 +91,13 @@ public class Competition implements Serializable {
     if (this == o) return true;
     if (!(o instanceof Competition)) return false;
     Competition that = (Competition) o;
-    return Objects.equals(getCompetitionId(), that.getCompetitionId())
+    return Objects.equals(getId(), that.getId())
         && Objects.equals(getName(), that.getName())
         && Objects.equals(getCountry(), that.getCountry());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getCompetitionId(), getName(), getCountry());
+    return Objects.hash(getId(), getName(), getCountry());
   }
 }

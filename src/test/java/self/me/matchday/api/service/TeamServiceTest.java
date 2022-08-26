@@ -59,7 +59,7 @@ class TeamServiceTest {
   }
 
   @Test
-  @DisplayName("Validate retrieval of all teams fromm database")
+  @DisplayName("Validate retrieval of all teams from database")
   void fetchAllTeams() {
 
     final int expectedTeamCount = 1;
@@ -88,8 +88,7 @@ class TeamServiceTest {
   @DisplayName("Validate retrieval of teams for a given Competition")
   void fetchTeamsByCompetitionId() {
 
-    final List<Team> teams =
-        teamService.fetchTeamsByCompetitionId(testCompetition.getCompetitionId());
+    final List<Team> teams = teamService.fetchTeamsByCompetitionId(testCompetition.getId());
     logger.info("Found {} teams for Competition: {}", teams.size(), testCompetition);
     assertThat(teams).contains(testTeam);
   }

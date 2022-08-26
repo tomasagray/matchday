@@ -20,22 +20,13 @@
 package self.me.matchday.db;
 
 import java.util.List;
-import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import self.me.matchday.model.Event;
+import self.me.matchday.model.ProperName;
 
 @Repository
-public interface EventRepository extends JpaRepository<Event, UUID> {
+public interface ProperNameRepository extends JpaRepository<ProperName, Long> {
 
-  /**
-   * Retrieve all Events associated with the specified competition.
-   *
-   * @param competitionId The name of the Competition.
-   * @return A List of Competitions.
-   */
-  @Query("SELECT ev FROM Event ev JOIN ev.competition cm WHERE cm.id = :competitionId")
-  List<Event> fetchEventsByCompetition(@Param("competitionId") UUID competitionId);
+  List<ProperName> findProperNameByName(@Param("name") String name);
 }
