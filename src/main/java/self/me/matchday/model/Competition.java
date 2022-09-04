@@ -30,7 +30,6 @@ import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -58,7 +57,7 @@ public class Competition implements Serializable {
   @Column(columnDefinition = "BINARY(16)")
   private UUID id;
 
-  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @OneToOne(cascade = CascadeType.ALL)
   private final ProperName name;
 
   @JsonDeserialize(converter = StringToCountryConverter.class)

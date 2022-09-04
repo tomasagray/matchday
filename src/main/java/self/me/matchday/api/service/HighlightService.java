@@ -19,6 +19,12 @@
 
 package self.me.matchday.api.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -26,14 +32,8 @@ import self.me.matchday.db.HighlightRepository;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Highlight;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 @Service
-public class HighlightService implements EntityService<Highlight> {
+public class HighlightService implements EntityService<Highlight, UUID> {
 
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
@@ -47,6 +47,12 @@ public class HighlightService implements EntityService<Highlight> {
     this.entityCorrectionService = entityCorrectionService;
   }
 
+  @Override
+  public Highlight initialize(@NotNull Highlight highlight) {
+    Hibernate.initialize(highlight);
+    return highlight;
+  }
+
   /**
    * Retrieve all Highlight Shows from the database.
    *
@@ -58,6 +64,7 @@ public class HighlightService implements EntityService<Highlight> {
     final List<Highlight> highlights = highlightRepository.findAll();
     if (highlights.size() > 0) {
       highlights.sort(EVENT_SORTER);
+      highlights.forEach(this::initialize);
     }
     return highlights;
   }
@@ -70,7 +77,7 @@ public class HighlightService implements EntityService<Highlight> {
    */
   @Override
   public Optional<Highlight> fetchById(@NotNull UUID highlightShowId) {
-    return highlightRepository.findById(highlightShowId);
+    return highlightRepository.findById(highlightShowId).map(this::initialize);
   }
 
   @Override
@@ -85,7 +92,8 @@ public class HighlightService implements EntityService<Highlight> {
         existingEvent.addAllFileSources(highlight.getFileSources());
         return existingEvent;
       }
-      return highlightRepository.save(highlight);
+      final Highlight saved = highlightRepository.save(highlight);
+      return initialize(saved);
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }

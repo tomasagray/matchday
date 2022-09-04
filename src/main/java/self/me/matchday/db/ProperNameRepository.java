@@ -20,7 +20,9 @@
 package self.me.matchday.db;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.ProperName;
@@ -29,4 +31,8 @@ import self.me.matchday.model.ProperName;
 public interface ProperNameRepository extends JpaRepository<ProperName, Long> {
 
   List<ProperName> findProperNameByName(@Param("name") String name);
+
+  @Query(
+      "SELECT pn FROM ProperName pn WHERE :synonym = pn.name OR :synonym IN (SELECT sy.name FROM Synonym sy WHERE sy IN elements(pn.synonyms))")
+  Optional<ProperName> findProperNameForSynonym(@Param("synonym") String synonym);
 }

@@ -32,6 +32,6 @@ public interface SynonymRepository extends JpaRepository<Synonym, Long> {
 
   Optional<Synonym> findSynonymByName(@Param("name") String name);
 
-  @Query("SELECT sy FROM Synonym sy WHERE sy.name = :name OR sy.properName.name = :name")
+  @Query("SELECT sy FROM Synonym sy  WHERE sy.name = :name")
   List<Synonym> findSynonymsFor(@Param("name") String name);
 }

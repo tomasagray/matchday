@@ -145,7 +145,7 @@ public class DataSourcePluginServiceTest {
   @DisplayName("Validate ALL data source plugins are returned by service")
   void getDataSourcePlugins() {
 
-    final int expectedPluginCount = 3;
+    final int expectedPluginCount = 2;
 
     // Retrieve all data source plugins
     final Collection<DataSourcePlugin> dataSourcePlugins = pluginService.getDataSourcePlugins();

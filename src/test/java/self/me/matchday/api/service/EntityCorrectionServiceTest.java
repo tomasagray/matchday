@@ -54,20 +54,25 @@ import self.me.matchday.model.video.VideoFileSource;
 @Transactional
 class EntityCorrectionServiceTest {
 
+  private static final Logger logger = LogManager.getLogger(EntityCorrectionServiceTest.class);
   static final String UEFA_CHAMPIONS_LEAGUE = "UEFA Champions League ";
   private static final String FC_BARCELONA = "FC Barcelona ";
   private static final String ATLETICO_DE_MADRID = "Atletico de Madrid ";
 
-  private static final Logger logger = LogManager.getLogger(EntityCorrectionServiceTest.class);
   private final EntityCorrectionService entityCorrectionService;
   private final EventService eventService;
+  private final SynonymService synonymService;
 
   @Autowired
   public EntityCorrectionServiceTest(
-      EntityCorrectionService correctionService, @NotNull EventService eventService)
+      EntityCorrectionService correctionService,
+      @NotNull EventService eventService,
+      SynonymService synonymService)
       throws MalformedURLException {
     this.entityCorrectionService = correctionService;
     this.eventService = eventService;
+    this.synonymService = synonymService;
+
     createProperEvent();
     createSynonyms();
   }
@@ -98,44 +103,14 @@ class EntityCorrectionServiceTest {
   }
 
   private void createSynonym(@NotNull String name, ProperName properName) {
-    final List<Synonym> synonyms = entityCorrectionService.getSynonymsFor(name);
+
+    final List<String> synonyms = synonymService.fetchSynonymsFor(name);
     if (synonyms.size() == 0) {
-      final Synonym synonym = entityCorrectionService.addSynonym(new Synonym(name, properName));
-      logger.info("Added Synonym: {}", synonym);
+      properName.addSynonym(new Synonym(name));
+      logger.info("Added ProperName with Synonym: {}", synonymService.addProperName(properName));
     } else {
       logger.info("Synonym already exists for name: {}", name);
     }
-  }
-
-  @Test
-  @DisplayName("Validate a Synonym can be added to & retrieved from database")
-  void testAddSynonym() {
-
-    final String synonymName = "Beth";
-    final ProperName elizabeth = new ProperName("Elizabeth");
-    final Synonym beth = new Synonym(synonymName, elizabeth);
-    final Synonym addedSynonym = entityCorrectionService.addSynonym(beth);
-    logger.info("Added Synonym: " + addedSynonym);
-
-    assertThat(addedSynonym.getProperName()).isEqualTo(elizabeth);
-    assertThat(addedSynonym.getName()).isEqualTo(synonymName);
-  }
-
-  @Test
-  @DisplayName("Validate Synonyms for a ProperName can be retrieved")
-  void testSynonymProperNameRetrieval() {
-
-    final String synonymName = "Sammy";
-    final String properName = "Samuel";
-    final ProperName samuel = new ProperName(properName);
-    final Synonym sam = new Synonym(synonymName, samuel);
-    final Synonym synonym = entityCorrectionService.addSynonym(sam);
-    logger.info("Added Synonym: " + synonym);
-
-    final List<Synonym> synonyms = entityCorrectionService.getSynonymsFor(properName);
-    logger.info("Got Synonyms: " + synonyms);
-    assertThat(synonyms.size()).isNotZero();
-    synonyms.forEach(s -> assertThat(s.getProperName()).isEqualTo(samuel));
   }
 
   @Test

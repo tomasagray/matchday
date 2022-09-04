@@ -29,7 +29,6 @@ import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -55,7 +54,7 @@ public class Team implements Serializable {
   @Column(columnDefinition = "BINARY(16)")
   private UUID teamId;
 
-  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @OneToOne(cascade = CascadeType.ALL)
   private final ProperName name;
 
   @OneToOne private Artwork emblem;

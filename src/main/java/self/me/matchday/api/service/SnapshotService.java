@@ -19,16 +19,15 @@
 
 package self.me.matchday.api.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.model.Snapshot;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.stream.Stream;
 
 @Service
 public class SnapshotService {
@@ -44,7 +43,7 @@ public class SnapshotService {
   @Transactional
   public <T> void saveSnapshot(@NotNull Snapshot<T> snapshot, @NotNull Class<T> clazz) {
 
-    final EntityService<T> service = registry.getServiceFor(clazz);
+    final EntityService<T, ?> service = registry.getServiceFor(clazz);
     final Stream<T> data = snapshot.getData();
     data.forEach(
         datum -> {

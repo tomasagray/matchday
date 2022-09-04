@@ -19,12 +19,13 @@
 
 package self.me.matchday.model;
 
+import java.util.Objects;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -35,20 +36,12 @@ public class Synonym {
 
   private final String name;
 
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-  private final ProperName properName;
-
   public Synonym() {
     this.name = null;
-    this.properName = null;
   }
 
-  public Synonym(@NotNull String name, ProperName properName) {
+  public Synonym(@NotNull String name) {
     this.name = name;
-    this.properName = properName;
-    if (this.properName != null) {
-      this.properName.addSynonym(this);
-    }
   }
 
   @Override
@@ -56,18 +49,16 @@ public class Synonym {
     if (this == o) return true;
     if (!(o instanceof Synonym)) return false;
     Synonym synonym = (Synonym) o;
-    return Objects.equals(getId(), synonym.getId())
-        && Objects.equals(getName(), synonym.getName())
-        && Objects.equals(getProperName(), synonym.getProperName());
+    return Objects.equals(getId(), synonym.getId()) && Objects.equals(getName(), synonym.getName());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getName(), getProperName());
+    return Objects.hash(getId(), getName());
   }
 
   @Override
   public String toString() {
-    return String.format("Synonym{id=%s, name='%s', properName=%s}", id, name, getProperName());
+    return String.format("Synonym{id=%s, name='%s'}", id, name);
   }
 }

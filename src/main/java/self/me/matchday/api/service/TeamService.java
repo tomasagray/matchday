@@ -19,27 +19,47 @@
 
 package self.me.matchday.api.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.TeamRepository;
+import self.me.matchday.model.Country;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Team;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 @Service
 @Transactional
-public class TeamService implements EntityService<Team> {
+public class TeamService implements EntityService<Team, UUID> {
 
   private final TeamRepository teamRepository;
 
   @Autowired
   public TeamService(@NotNull final TeamRepository teamRepository) {
     this.teamRepository = teamRepository;
+  }
+
+  @Override
+  public Team initialize(@NotNull Team team) {
+    final Country country = team.getCountry();
+    if (country != null) {
+      Hibernate.initialize(country.getLocales());
+    }
+    final ProperName name = team.getName();
+    if (name != null) {
+      Hibernate.initialize(name.getSynonyms());
+    }
+    return team;
   }
 
   /**
@@ -52,6 +72,7 @@ public class TeamService implements EntityService<Team> {
     final List<Team> teams = teamRepository.findAll();
     if (teams.size() > 0) {
       teams.sort(Comparator.comparing(Team::getName));
+      teams.forEach(this::initialize);
     }
     return teams;
   }
@@ -64,7 +85,7 @@ public class TeamService implements EntityService<Team> {
    */
   @Override
   public Optional<Team> fetchById(@NotNull final UUID teamId) {
-    return teamRepository.findById(teamId);
+    return teamRepository.findById(teamId).map(this::initialize);
   }
 
   /**
@@ -81,13 +102,14 @@ public class TeamService implements EntityService<Team> {
     // Combine results in a Set<> to ensure no duplicates
     Set<Team> teamSet = new LinkedHashSet<>(homeTeams);
     teamSet.addAll(awayTeams);
-    List<Team> teamList = new ArrayList<>(teamSet);
-    teamList.sort(Comparator.comparing(Team::getName));
-    return teamList;
+    List<Team> teams = new ArrayList<>(teamSet);
+    teams.sort(Comparator.comparing(Team::getName));
+    teams.forEach(this::initialize);
+    return teams;
   }
 
   public Optional<Team> getTeamByName(@NotNull String name) {
-    return teamRepository.findTeamByNameName(name);
+    return teamRepository.findTeamByNameName(name).map(this::initialize);
   }
 
   /**
@@ -100,7 +122,9 @@ public class TeamService implements EntityService<Team> {
   public Team save(@NotNull final Team team) {
     validateTeam(team);
     final Optional<Team> teamOptional = teamRepository.findTeamByNameName(team.getName().getName());
-    return teamOptional.orElseGet(() -> teamRepository.saveAndFlush(team));
+    final Team saved = teamOptional.orElseGet(() -> teamRepository.saveAndFlush(team));
+    initialize(saved);
+    return saved;
   }
 
   @Override

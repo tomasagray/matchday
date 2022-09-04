@@ -19,39 +19,58 @@
 
 package self.me.matchday.api.service;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.stereotype.Service;
-import self.me.matchday.db.MatchRepository;
-import self.me.matchday.model.Event.EventSorter;
-import self.me.matchday.model.Match;
-
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.transaction.Transactional;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Example;
+import org.springframework.stereotype.Service;
+import self.me.matchday.db.MatchRepository;
+import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event.EventSorter;
+import self.me.matchday.model.Match;
+import self.me.matchday.model.Team;
 
 @Service
 @Transactional
-public class MatchService implements EntityService<Match> {
+public class MatchService implements EntityService<Match, UUID> {
 
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
   private final MatchRepository matchRepository;
   private final EntityCorrectionService entityCorrectionService;
   private final TeamService teamService;
+  private final CompetitionService competitionService;
 
-  @Autowired
   public MatchService(
       MatchRepository matchRepository,
       EntityCorrectionService entityCorrectionService,
-      TeamService teamService) {
+      TeamService teamService,
+      CompetitionService competitionService) {
     this.matchRepository = matchRepository;
     this.entityCorrectionService = entityCorrectionService;
     this.teamService = teamService;
+    this.competitionService = competitionService;
+  }
+
+  @Override
+  public Match initialize(@NotNull Match match) {
+    final Competition competition = match.getCompetition();
+    if (competition != null) {
+      competitionService.initialize(competition);
+    }
+    final Team homeTeam = match.getHomeTeam();
+    if (homeTeam != null) {
+      teamService.initialize(homeTeam);
+    }
+    final Team awayTeam = match.getAwayTeam();
+    if (awayTeam != null) {
+      teamService.initialize(awayTeam);
+    }
+    return match;
   }
 
   /**
@@ -65,6 +84,7 @@ public class MatchService implements EntityService<Match> {
     final List<Match> matches = matchRepository.findAll();
     if (matches.size() > 0) {
       matches.sort(EVENT_SORTER);
+      matches.forEach(this::initialize);
     }
     return matches;
   }
@@ -77,7 +97,7 @@ public class MatchService implements EntityService<Match> {
    */
   @Override
   public Optional<Match> fetchById(@NotNull UUID matchId) {
-    return matchRepository.findById(matchId);
+    return matchRepository.findById(matchId).map(this::initialize);
   }
 
   /**
@@ -87,7 +107,9 @@ public class MatchService implements EntityService<Match> {
    * @return A CollectionModel containing the Events.
    */
   public List<Match> fetchMatchesForTeam(@NotNull final UUID teamId) {
-    return matchRepository.fetchMatchesByTeam(teamId);
+    return matchRepository.fetchMatchesByTeam(teamId).stream()
+        .map(this::initialize)
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -103,7 +125,8 @@ public class MatchService implements EntityService<Match> {
         existingEvent.addAllFileSources(match.getFileSources());
         return existingEvent;
       }
-      return matchRepository.save(match);
+      final Match saved = matchRepository.save(match);
+      return initialize(saved);
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }

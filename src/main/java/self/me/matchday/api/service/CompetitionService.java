@@ -25,16 +25,19 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.hibernate.Hibernate;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.CompetitionRepository;
 import self.me.matchday.model.Competition;
+import self.me.matchday.model.Country;
 import self.me.matchday.model.ProperName;
 
 @Service
 @Transactional
-public class CompetitionService implements EntityService<Competition> {
+public class CompetitionService implements EntityService<Competition, UUID> {
 
   private final CompetitionRepository competitionRepository;
   private final SynonymService synonymService;
@@ -43,6 +46,20 @@ public class CompetitionService implements EntityService<Competition> {
       CompetitionRepository competitionRepository, SynonymService synonymService) {
     this.competitionRepository = competitionRepository;
     this.synonymService = synonymService;
+  }
+
+  @Override
+  @Contract("_ -> param1")
+  public @NotNull Competition initialize(@NotNull Competition competition) {
+    final ProperName name = competition.getName();
+    if (name != null) {
+      Hibernate.initialize(name.getSynonyms());
+    }
+    final Country country = competition.getCountry();
+    if (country != null) {
+      Hibernate.initialize(country.getLocales());
+    }
+    return competition;
   }
 
   /**
@@ -56,6 +73,7 @@ public class CompetitionService implements EntityService<Competition> {
     final List<Competition> competitions = competitionRepository.findAll();
     if (competitions.size() > 0) {
       competitions.sort(Comparator.comparing(Competition::getName));
+      competitions.forEach(this::initialize);
     }
     return competitions;
   }
@@ -68,11 +86,11 @@ public class CompetitionService implements EntityService<Competition> {
    */
   @Override
   public Optional<Competition> fetchById(@NotNull UUID competitionId) {
-    return competitionRepository.findById(competitionId);
+    return competitionRepository.findById(competitionId).map(this::initialize);
   }
 
   public Optional<Competition> fetchCompetitionByName(@NotNull String name) {
-    return competitionRepository.findCompetitionByNameName(name);
+    return competitionRepository.findCompetitionByNameName(name).map(this::initialize);
   }
 
   /**
@@ -82,7 +100,9 @@ public class CompetitionService implements EntityService<Competition> {
    * @return A list of Competitions
    */
   public List<Competition> fetchCompetitionsForTeam(@NotNull UUID teamId) {
-    return competitionRepository.findCompetitionsForTeam(teamId);
+    return competitionRepository.findCompetitionsForTeam(teamId).stream()
+        .map(this::initialize)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -94,7 +114,8 @@ public class CompetitionService implements EntityService<Competition> {
   @Override
   public Competition save(@NotNull final Competition competition) {
     validateCompetition(competition);
-    return competitionRepository.saveAndFlush(competition);
+    final Competition saved = competitionRepository.saveAndFlush(competition);
+    return initialize(saved);
   }
 
   @Override

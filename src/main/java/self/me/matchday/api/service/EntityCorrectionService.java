@@ -19,39 +19,34 @@
 
 package self.me.matchday.api.service;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.Corrected;
 import self.me.matchday.CorrectedOrNull;
-import self.me.matchday.db.SynonymRepository;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.ProperName;
-import self.me.matchday.model.Synonym;
 import self.me.matchday.model.Team;
 import self.me.matchday.util.ReflectionUtils;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
 public class EntityCorrectionService {
 
-  private final SynonymRepository synonymRepository;
+  private final SynonymService synonymService;
   private final CompetitionService competitionService;
   private final TeamService teamService;
 
   public EntityCorrectionService(
-      SynonymRepository synonymRepository,
+      SynonymService synonymService,
       CompetitionService competitionService,
       TeamService teamService) {
 
-    this.synonymRepository = synonymRepository;
+    this.synonymService = synonymService;
     this.competitionService = competitionService;
     this.teamService = teamService;
   }
@@ -64,7 +59,6 @@ public class EntityCorrectionService {
       if (!Modifier.isStatic(field.getModifiers())) {
         final Method getter = getGetterMethod(clazz, field);
         final Object currentValue = getter.invoke(entity);
-
         validateCorrectedIsNotNull(field, currentValue);
         if (isCorrectable(field, currentValue)) {
           final Method setter = getSetterMethod(clazz, field);
@@ -112,27 +106,19 @@ public class EntityCorrectionService {
     return fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
   }
 
-  public Collection<Synonym> addAllSynonyms(@NotNull Collection<Synonym> synonyms) {
-    return synonymRepository.saveAll(synonyms);
-  }
-
-  public Synonym addSynonym(@NotNull Synonym synonym) {
-    return synonymRepository.save(synonym);
-  }
-
-  public List<Synonym> getSynonymsFor(@NotNull String word) {
-    return synonymRepository.findSynonymsFor(word);
-  }
-
   public <T> T getCorrectedEntity(@NotNull T entity) {
 
     final String name = getName(entity);
     return getEntityByName(entity, name)
         .or(
             () ->
-                synonymRepository
-                    .findSynonymByName(name)
-                    .flatMap(synonym -> getEntityByName(entity, synonym.getProperName().getName())))
+                synonymService
+                    .fetchByName(name)
+                    .flatMap(
+                        synonym ->
+                            getEntityByName(
+                                entity,
+                                synonymService.fetchProperNameFor(synonym.getName()).getName())))
         .orElse(entity);
   }
 

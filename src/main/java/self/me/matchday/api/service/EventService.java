@@ -19,15 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.db.EventRepository;
-import self.me.matchday.db.VideoFileSrcRepository;
-import self.me.matchday.model.*;
-import self.me.matchday.model.Event.EventSorter;
-import self.me.matchday.model.video.VideoFileSource;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -37,10 +28,23 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.hibernate.Hibernate;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.db.EventRepository;
+import self.me.matchday.db.VideoFileSrcRepository;
+import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.Event.EventSorter;
+import self.me.matchday.model.Highlight;
+import self.me.matchday.model.Match;
+import self.me.matchday.model.ProperName;
+import self.me.matchday.model.video.VideoFileSource;
 
 @Service
 @Transactional
-public class EventService implements EntityService<Event> {
+public class EventService implements EntityService<Event, UUID> {
 
   private static final EventSorter EVENT_SORTER = new EventSorter();
 
@@ -48,6 +52,7 @@ public class EventService implements EntityService<Event> {
   private final VideoFileSrcRepository fileSrcRepository;
   private final MatchService matchService;
   private final HighlightService highlightService;
+  private final CompetitionService competitionService;
 
   EventService(
       EventRepository eventRepository,
@@ -55,12 +60,27 @@ public class EventService implements EntityService<Event> {
       MatchService matchService,
       HighlightService highlightService,
       CompetitionService competitionService,
-      TeamService teamService,
       VideoFileSrcRepository fileSrcRepository) {
     this.eventRepository = eventRepository;
     this.fileSrcRepository = fileSrcRepository;
     this.matchService = matchService;
     this.highlightService = highlightService;
+    this.competitionService = competitionService;
+  }
+
+  @Override
+  public Event initialize(@NotNull Event event) {
+    final Competition competition = event.getCompetition();
+    if (competition != null) {
+      competitionService.initialize(competition);
+    }
+    if (event instanceof Match) {
+      matchService.initialize((Match) event);
+    } else if (event instanceof Highlight) {
+      highlightService.initialize((Highlight) event);
+    }
+    Hibernate.initialize(event.getFileSources());
+    return event;
   }
 
   /**
@@ -72,14 +92,17 @@ public class EventService implements EntityService<Event> {
   public Event save(@NotNull final Event event) {
 
     validateEvent(event);
+    Event saved;
     if (event instanceof Match) {
-      return matchService.save((Match) event);
+      saved = matchService.save((Match) event);
     } else if (event instanceof Highlight) {
-      return highlightService.save((Highlight) event);
+      saved = highlightService.save((Highlight) event);
+    } else {
+      throw new IllegalArgumentException(
+          "Trying to save unknown type: " + event.getClass().getName());
     }
-    // else...
-    throw new IllegalArgumentException(
-        "Trying to save unknown type: " + event.getClass().getName());
+    initialize(saved);
+    return saved;
   }
 
   @Override
@@ -93,6 +116,7 @@ public class EventService implements EntityService<Event> {
   public List<Event> fetchAll() {
     final List<Event> events = eventRepository.findAll();
     if (events.size() > 0) {
+      events.forEach(this::initialize);
       events.sort(EVENT_SORTER);
     }
     return events;
@@ -117,7 +141,7 @@ public class EventService implements EntityService<Event> {
 
   @Override
   public Optional<Event> fetchById(@NotNull final UUID eventId) {
-    return eventRepository.findById(eventId);
+    return eventRepository.findById(eventId).map(this::initialize);
   }
 
   public Optional<VideoFileSource> fetchVideoFileSrc(final UUID fileSrcId) {
@@ -131,7 +155,9 @@ public class EventService implements EntityService<Event> {
    * @return A CollectionModel containing all Events for the specified Competition.
    */
   public List<Event> fetchEventsForCompetition(@NotNull final UUID competitionId) {
-    return eventRepository.fetchEventsByCompetition(competitionId);
+    return eventRepository.fetchEventsByCompetition(competitionId).stream()
+        .map(this::initialize)
+        .collect(Collectors.toList());
   }
 
   /**

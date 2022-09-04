@@ -19,19 +19,20 @@
 
 package self.me.matchday.api.service;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
 
-public interface EntityService<T> {
+public interface EntityService<T, I> {
+
+  // TODO: Is this the right way to do this? (Avoids LazyInitializationException)
+  T initialize(@NotNull T t);
 
   T save(@NotNull T entity);
 
   List<T> saveAll(@NotNull Iterable<? extends T> entities);
 
-  Optional<T> fetchById(@NotNull UUID id);
+  Optional<T> fetchById(@NotNull I id);
 
   List<T> fetchAll();
 
@@ -39,7 +40,7 @@ public interface EntityService<T> {
 
   List<T> updateAll(@NotNull Iterable<? extends T> entities);
 
-  void delete(@NotNull UUID id);
+  void delete(@NotNull I id);
 
   void deleteAll(@NotNull Iterable<? extends T> entities);
 }
