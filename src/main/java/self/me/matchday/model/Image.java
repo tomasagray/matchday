@@ -17,22 +17,19 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db.converter;
+package self.me.matchday.model;
 
-import java.nio.file.Path;
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import lombok.Data;
+import org.springframework.http.MediaType;
 
-@Converter
-public class PathConverter implements AttributeConverter<Path, String> {
+@Data
+public class Image {
 
-  @Override
-  public String convertToDatabaseColumn(Path attribute) {
-    return attribute == null ? null : attribute.toString();
-  }
+  private final byte[] data;
+  private final MediaType contentType;
 
   @Override
-  public Path convertToEntityAttribute(String dbData) {
-    return dbData == null ? null : Path.of(dbData);
+  public String toString() {
+    return String.format("Image [%s] - %d bytes", contentType, data.length);
   }
 }

@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -35,6 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,7 +52,8 @@ import self.me.matchday.plugin.datasource.parsing.TextParser;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@DisplayName("Validation for DataSource entity")
+@DisplayName("Artwork DataSource parsing test")
+@Disabled
 class ArtworkDataSourceParsingTest {
 
   private static final Logger logger = LogManager.getLogger(ArtworkDataSourceParsingTest.class);
@@ -64,7 +67,7 @@ class ArtworkDataSourceParsingTest {
     ArtworkDataSourceParsingTest.textParser = textParser;
 
     // create test data source
-    final URI uri = new URI("https://galatamanhdfb.blogspot.com/");
+    final URI uri = new URI("https://www.bing.com/images/feed/");
     final PatternKit<Artwork> patternKit = new PatternKit<>(Artwork.class);
     patternKit.setPattern(
         Pattern.compile("<img[\\w=\":;%\\s-]*src=\"([\\w.:/]*)\" [\\w\\s=\":;%_-]*/?>"));
@@ -80,11 +83,15 @@ class ArtworkDataSourceParsingTest {
     final URI baseUri = dataSource.getBaseUri();
     logger.info("Getting data from: {}", baseUri);
     final String data = getDataFromUri(baseUri);
-    logger.info("Got data:\n{}", data);
     assertThat(data).isNotNull().isNotEmpty();
+    logger.info("Read: {} bytes of data", data.getBytes(StandardCharsets.UTF_8).length);
 
     final List<PatternKit<? extends Artwork>> patternKits =
         dataSource.getPatternKitsFor(Artwork.class);
+    final int patternKitCount = patternKits.size();
+
+    logger.info("Found: {} pattern kits", patternKitCount);
+    assertThat(patternKitCount).isGreaterThan(0);
     final Stream<? extends Artwork> artworkStream =
         textParser.createEntityStreams(patternKits, data);
     assertThat(artworkStream).isNotNull();
@@ -112,7 +119,7 @@ class ArtworkDataSourceParsingTest {
     assertThat(artwork).isNotNull();
 
     // todo - make this actually read artwork, test
-    final File artworkFile = artwork.getFile();
+    final File artworkFile = artwork.getFile().toFile();
     assertThat(artworkFile).isNotNull();
   }
 }

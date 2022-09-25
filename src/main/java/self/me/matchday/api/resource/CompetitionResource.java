@@ -23,9 +23,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -38,14 +39,14 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.api.controller.ArtworkController;
 import self.me.matchday.api.controller.CompetitionController;
+import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionResourceAssembler;
+import self.me.matchday.model.ArtworkRole;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Country;
 import self.me.matchday.model.ProperName;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
@@ -56,6 +57,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
   private UUID id;
   private ProperName name;
   private Country country;
+  private ArtworkCollectionResource emblem;
 
   @Component
   public static class CompetitionResourceAssembler
@@ -63,13 +65,37 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
 
     private static final LinkRelation TEAMS = LinkRelation.of("teams");
     private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
-    private static final LinkRelation FANART = LinkRelation.of("fanart");
-    private static final LinkRelation MONOCHROME = LinkRelation.of("monochrome_emblem");
-    private static final LinkRelation LANDSCAPE = LinkRelation.of("landscape");
+    //    private static final LinkRelation FANART = LinkRelation.of("fanart");
+    //    private static final LinkRelation MONOCHROME = LinkRelation.of("monochrome_emblem");
+    //    private static final LinkRelation LANDSCAPE = LinkRelation.of("landscape");
     private static final LinkRelation EVENTS = LinkRelation.of("events");
 
-    public CompetitionResourceAssembler() {
+    private final ArtworkCollectionResourceAssembler artworkModeller;
+
+    public CompetitionResourceAssembler(ArtworkCollectionResourceAssembler artworkModeller) {
       super(CompetitionController.class, CompetitionResource.class);
+      this.artworkModeller = artworkModeller;
+    }
+
+    public static void addArtworkLinks(
+        @NotNull UUID competitionId,
+        @NotNull ArtworkRole role,
+        @NotNull ArtworkResource artworkResource) {
+      try {
+        final Long artworkId = artworkResource.getId();
+        artworkResource.add(
+            linkTo(
+                    methodOn(CompetitionController.class)
+                        .fetchArtworkMetadata(competitionId, role, artworkId))
+                .withRel("metadata"));
+        artworkResource.add(
+            linkTo(
+                    methodOn(CompetitionController.class)
+                        .fetchArtworkImageData(competitionId, role, artworkId))
+                .withRel("image"));
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
     }
 
     @SneakyThrows
@@ -84,6 +110,12 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       competitionResource.setId(competitionId);
       competitionResource.setCountry(competition.getCountry());
       competitionResource.setName(competition.getName());
+      competitionResource.setEmblem(artworkModeller.toModel(competition.getEmblem()));
+      competitionResource
+          .getEmblem()
+          .getArtwork()
+          .forEach(artwork -> addArtworkLinks(competitionId, ArtworkRole.EMBLEM, artwork));
+
       // links
       competitionResource.add(
           linkTo(methodOn(CompetitionController.class).fetchCompetitionById(competitionId))
@@ -95,9 +127,11 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
           linkTo(methodOn(CompetitionController.class).fetchCompetitionTeams(competitionId))
               .withRel(TEAMS));
       competitionResource.add(
-          linkTo(methodOn(ArtworkController.class).fetchCompetitionEmblem(competitionId))
+          linkTo(
+                  methodOn(CompetitionController.class)
+                      .fetchSelectedArtwork(competitionId, ArtworkRole.EMBLEM))
               .withRel(EMBLEM));
-      competitionResource.add(
+      /* competitionResource.add(
           linkTo(methodOn(ArtworkController.class).fetchCompetitionFanart(competitionId))
               .withRel(FANART));
       competitionResource.add(
@@ -105,7 +139,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
               .withRel(MONOCHROME));
       competitionResource.add(
           linkTo(methodOn(ArtworkController.class).fetchCompetitionLandscape(competitionId))
-              .withRel(LANDSCAPE));
+              .withRel(LANDSCAPE));*/
 
       return competitionResource;
     }

@@ -17,22 +17,9 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db.converter;
+package self.me.matchday.db;
 
-import java.nio.file.Path;
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import org.springframework.data.jpa.repository.JpaRepository;
+import self.me.matchday.model.ArtworkCollection;
 
-@Converter
-public class PathConverter implements AttributeConverter<Path, String> {
-
-  @Override
-  public String convertToDatabaseColumn(Path attribute) {
-    return attribute == null ? null : attribute.toString();
-  }
-
-  @Override
-  public Path convertToEntityAttribute(String dbData) {
-    return dbData == null ? null : Path.of(dbData);
-  }
-}
+public interface ArtworkCollectionRepository extends JpaRepository<ArtworkCollection, Long> {}

@@ -19,10 +19,14 @@
 
 package self.me.matchday.api.service;
 
+import java.io.IOException;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
@@ -30,9 +34,14 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.db.CompetitionRepository;
+import self.me.matchday.model.Artwork;
+import self.me.matchday.model.ArtworkCollection;
+import self.me.matchday.model.ArtworkRole;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Country;
+import self.me.matchday.model.Image;
 import self.me.matchday.model.ProperName;
 
 @Service
@@ -41,11 +50,24 @@ public class CompetitionService implements EntityService<Competition, UUID> {
 
   private final CompetitionRepository competitionRepository;
   private final SynonymService synonymService;
+  private final ArtworkService artworkService;
+  private final Map<ArtworkRole, Function<Competition, ArtworkCollection>> methodRegistry;
 
   public CompetitionService(
-      CompetitionRepository competitionRepository, SynonymService synonymService) {
+      CompetitionRepository competitionRepository,
+      SynonymService synonymService,
+      ArtworkService artworkService) {
     this.competitionRepository = competitionRepository;
     this.synonymService = synonymService;
+    this.artworkService = artworkService;
+    methodRegistry = createMethodRegistry();
+  }
+
+  private static @NotNull Map<ArtworkRole, Function<Competition, ArtworkCollection>>
+      createMethodRegistry() {
+    final Map<ArtworkRole, Function<Competition, ArtworkCollection>> registry = new HashMap<>();
+    registry.put(ArtworkRole.EMBLEM, Competition::getEmblem);
+    return registry;
   }
 
   @Override
@@ -59,6 +81,7 @@ public class CompetitionService implements EntityService<Competition, UUID> {
     if (country != null) {
       Hibernate.initialize(country.getLocales());
     }
+    Hibernate.initialize(competition.getEmblem().getCollection());
     return competition;
   }
 
@@ -105,6 +128,62 @@ public class CompetitionService implements EntityService<Competition, UUID> {
         .collect(Collectors.toList());
   }
 
+  public ArtworkCollection fetchArtworkCollection(
+      @NotNull UUID competitionId, @NotNull ArtworkRole role) {
+    return fetchById(competitionId)
+        .map(competition -> getArtworkCollection(competition, role))
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    String.format(
+                        "Could not find %s artwork for Competition: %s", role, competitionId)));
+  }
+
+  private ArtworkCollection getArtworkCollection(
+      @NotNull Competition competition, @NotNull ArtworkRole role) {
+    return methodRegistry.get(role).apply(competition);
+  }
+
+  public Artwork fetchSelectedArtworkMetadata(
+      @NotNull UUID competitionId, @NotNull ArtworkRole role) {
+    return fetchArtworkCollection(competitionId, role).getSelected();
+  }
+
+  public Image fetchSelectedArtworkImage(@NotNull UUID competitionId, @NotNull ArtworkRole role)
+      throws IOException {
+    final Artwork artwork = fetchSelectedArtworkMetadata(competitionId, role);
+    if (artwork != null) {
+      return artworkService.fetchArtworkData(artwork);
+    }
+    return null;
+  }
+
+  public Artwork fetchArtworkMetadata(
+      @NotNull UUID competitionId, @NotNull ArtworkRole role, @NotNull Long artworkId) {
+    return fetchArtworkCollection(competitionId, role).getCollection().stream()
+        .filter(artwork -> artworkId.equals(artwork.getId()))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    String.format(
+                        "No artwork with ID: %s in %s collection for Competition ID: %s",
+                        artworkId, role, competitionId)));
+  }
+
+  public Image fetchArtworkData(
+      @NotNull UUID competitionId, @NotNull ArtworkRole role, @NotNull Long artworkId)
+      throws IOException {
+    final Artwork artwork = fetchArtworkMetadata(competitionId, role, artworkId);
+    return artworkService.fetchArtworkData(artwork);
+  }
+
+  public ArtworkCollection addArtworkToCollection(
+      @NotNull UUID competitionId, ArtworkRole role, MultipartFile image) throws IOException {
+    final ArtworkCollection collection = fetchArtworkCollection(competitionId, role);
+    return artworkService.addArtworkToCollection(collection, image);
+  }
+
   /**
    * Saves the given Competition to the database, if it is valid
    *
@@ -128,6 +207,8 @@ public class CompetitionService implements EntityService<Competition, UUID> {
   @Override
   public Competition update(@NotNull Competition competition) {
     validateForUpdate(competition);
+    // correct missing artwork file paths
+    artworkService.repairArtworkFilePaths(competition.getEmblem());
     return save(competition);
   }
 

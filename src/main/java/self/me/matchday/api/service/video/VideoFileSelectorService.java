@@ -61,13 +61,15 @@ public class VideoFileSelectorService {
     // get a mutable copy
     final List<VideoFileSource> sortedFileSources = new ArrayList<>(event.getFileSources());
     // sort file sources by:
-    //  - resolution, competition language, home team language, away team language
     sortedFileSources.sort(
+        // - resolution
         Comparator.comparing(VideoFileSource::getResolution)
+            // - competition language
             .thenComparing(
                 VideoFileSelectorService::getSourcePrimaryLanguage,
                 (first, second) ->
                     compareLanguages(event.getCompetition().getCountry(), first, second))
+            // - home team language
             .thenComparing(
                 VideoFileSelectorService::getSourcePrimaryLanguage,
                 (first, second) -> {
@@ -77,6 +79,7 @@ public class VideoFileSelectorService {
                   }
                   return 0;
                 })
+            // - away team language
             .thenComparing(
                 VideoFileSelectorService::getSourcePrimaryLanguage,
                 (first, second) -> {

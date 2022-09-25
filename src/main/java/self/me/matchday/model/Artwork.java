@@ -19,18 +19,21 @@
 
 package self.me.matchday.model;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
+import self.me.matchday.db.converter.PathConverter;
 
 @Entity
 @Getter
@@ -38,10 +41,14 @@ import org.hibernate.Hibernate;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Artwork {
 
   @Id @GeneratedValue private Long id;
-  private File file;
+
+  @Convert(converter = PathConverter.class)
+  private Path file;
+
   private Long fileSize;
   private String mediaType;
   private int width;

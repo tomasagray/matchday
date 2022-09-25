@@ -23,9 +23,8 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 
 public class ClassTypeAdapter extends TypeAdapter<Class<?>> {
 
@@ -46,12 +45,10 @@ public class ClassTypeAdapter extends TypeAdapter<Class<?>> {
       jsonReader.nextNull();
       return null;
     }
-    Class<?> clazz;
     try {
-      clazz = Class.forName(jsonReader.nextString());
+      return Class.forName(jsonReader.nextString());
     } catch (ClassNotFoundException exception) {
       throw new IOException(exception);
     }
-    return clazz;
   }
 }

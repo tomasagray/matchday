@@ -128,9 +128,9 @@ class CompetitionControllerTest {
     return testCompetitions.stream().map(Arguments::of);
   }
 
-  private ResponseEntity<CompetitionResource> getCompetition(@NotNull UUID teamId) {
+  private ResponseEntity<CompetitionResource> getCompetition(@NotNull UUID competitionId) {
     final String url =
-        String.format("http://localhost:%d/competitions/competition/%s", port, teamId);
+        String.format("http://localhost:%d/competitions/competition/%s", port, competitionId);
     logger.info("Getting data from URL: {}", url);
     return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
   }

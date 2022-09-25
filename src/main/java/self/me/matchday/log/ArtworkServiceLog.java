@@ -25,47 +25,39 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.api.service.ArtworkService;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Aspect
 public class ArtworkServiceLog {
 
-  private static final List<Integer> defaultSizes = List.of(15_182, 13_989);
-
   private static final Logger logger = LogManager.getLogger(ArtworkService.class);
 
-  @SuppressWarnings("unchecked cast")
-  @Around("execution(* self.me.matchday.api.service.ArtworkService.fetch*(..))")
-  public Object logFetchArtwork(@NotNull ProceedingJoinPoint jp) throws Throwable {
-
-    final Object arg = jp.getArgs()[0];
-    final List<String> action = getAction(jp);
-    final String actionType = action.get(0);
-    final String actionName = String.join(" ", action);
-    logger.info("Fetching {} for {}: {}...", actionName, actionType, arg);
-
-    final Optional<byte[]> result = (Optional<byte[]>) jp.proceed();
-    result.ifPresentOrElse(
-        img -> {
-          if (defaultSizes.contains(img.length)) {
-            logger.info("Emblem not found for {}: {}; using default", actionType, arg);
-          } else {
-            logger.info("Emblem found for {}: {}, size: {}", actionType, arg, img.length);
-          }
-        },
-        () -> logger.warn("{}: {} not found in database", actionType, arg));
-    return result;
+  @Around("execution(* self.me.matchday.api.service.ArtworkService.fetchArtworkData(..))")
+  public Object logFetchArtworkData(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.info("Getting artwork data using extractor: {}", jp.getArgs()[0]);
+    final Object image = jp.proceed();
+    logger.info("Read image: {}", image);
+    return image;
   }
 
-  @NotNull
-  private List<String> getAction(@NotNull ProceedingJoinPoint jp) {
-    return Arrays.stream(jp.getSignature().getName().split("(?<!^)(?=[A-Z])"))
-        .skip(1)
-        .collect(Collectors.toList());
+  @Around("execution(* self.me.matchday.api.service.ArtworkService.addArtworkToCollection(..))")
+  public Object logAddCompetitionEmblem(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    final Object[] args = jp.getArgs();
+    final Object collection = args[0];
+    final MultipartFile image = (MultipartFile) args[1];
+    logger.info(
+        "Adding image with {} bytes to collection: {}", image.getBytes().length, collection);
+
+    final Object modifiedCollection = jp.proceed();
+    logger.info("ArtworkCollection is now: {}", modifiedCollection);
+    return modifiedCollection;
+  }
+
+  @Around("execution(* self.me.matchday.api.controller.ArtworkController.handle*(..))")
+  public Object logArtworkError(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    final Object error = jp.proceed();
+    logger.error("Artwork Error: " + error);
+    return error;
   }
 }

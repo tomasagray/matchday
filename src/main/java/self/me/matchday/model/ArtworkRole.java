@@ -17,22 +17,21 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db.converter;
+package self.me.matchday.model;
 
-import java.nio.file.Path;
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+public enum ArtworkRole {
+  EMBLEM("emblem"),
+  FANART("fanart"),
+  POSTER("poster");
 
-@Converter
-public class PathConverter implements AttributeConverter<Path, String> {
+  private final String name;
 
-  @Override
-  public String convertToDatabaseColumn(Path attribute) {
-    return attribute == null ? null : attribute.toString();
+  ArtworkRole(final String name) {
+    this.name = name;
   }
 
   @Override
-  public Path convertToEntityAttribute(String dbData) {
-    return dbData == null ? null : Path.of(dbData);
+  public String toString() {
+    return this.name;
   }
 }

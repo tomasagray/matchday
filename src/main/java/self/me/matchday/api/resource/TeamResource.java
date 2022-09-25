@@ -37,7 +37,6 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
-import self.me.matchday.api.controller.ArtworkController;
 import self.me.matchday.api.controller.TeamController;
 import self.me.matchday.model.Country;
 import self.me.matchday.model.Team;
@@ -82,10 +81,10 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       teamResource.add(
           linkTo(methodOn(TeamController.class).fetchTeamByName(teamId)).withSelfRel());
       // artwork
-      teamResource.add(
+      /*      teamResource.add(
           linkTo(methodOn(ArtworkController.class).fetchTeamEmblem(teamId)).withRel(EMBLEM));
       teamResource.add(
-          linkTo(methodOn(ArtworkController.class).fetchTeamFanart(teamId)).withRel(FANART));
+          linkTo(methodOn(ArtworkController.class).fetchTeamFanart(teamId)).withRel(FANART));*/
       // events
       teamResource.add(
           linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId)).withRel(EVENTS));

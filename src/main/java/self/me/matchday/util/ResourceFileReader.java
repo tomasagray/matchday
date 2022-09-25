@@ -19,7 +19,9 @@
 
 package self.me.matchday.util;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -157,6 +159,16 @@ public class ResourceFileReader {
       return Long.parseLong(str);
     } catch (NumberFormatException e) {
       return null;
+    }
+  }
+
+  public static byte[] readBinaryData(@NotNull String path) throws IOException {
+    final InputStream stream = ResourceFileReader.class.getClassLoader().getResourceAsStream(path);
+    if (stream == null) {
+      throw new IOException("Could not find resource at: " + path);
+    }
+    try (final DataInputStream is = new DataInputStream(new BufferedInputStream(stream))) {
+      return is.readAllBytes();
     }
   }
 }

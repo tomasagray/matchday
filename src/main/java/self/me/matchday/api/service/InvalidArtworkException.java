@@ -17,22 +17,11 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.db.converter;
+package self.me.matchday.api.service;
 
-import java.nio.file.Path;
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+public class InvalidArtworkException extends RuntimeException {
 
-@Converter
-public class PathConverter implements AttributeConverter<Path, String> {
-
-  @Override
-  public String convertToDatabaseColumn(Path attribute) {
-    return attribute == null ? null : attribute.toString();
-  }
-
-  @Override
-  public Path convertToEntityAttribute(String dbData) {
-    return dbData == null ? null : Path.of(dbData);
+  public InvalidArtworkException(final String msg) {
+    super(msg);
   }
 }

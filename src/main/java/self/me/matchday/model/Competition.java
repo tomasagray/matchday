@@ -65,10 +65,12 @@ public class Competition implements Serializable {
   private Country country;
 
   // artwork
-  @OneToOne private Artwork emblem;
-  @OneToOne private Artwork fanart;
-  @OneToOne private Artwork monochromeEmblem;
-  @OneToOne private Artwork landscape;
+  @OneToOne(cascade = CascadeType.ALL)
+  private ArtworkCollection emblem = new ArtworkCollection(ArtworkRole.EMBLEM);
+
+  @OneToOne private ArtworkCollection fanart;
+  @OneToOne private ArtworkCollection monochromeEmblem;
+  @OneToOne private ArtworkCollection landscape;
 
   public Competition(@NotNull final String name) {
     this.name = new ProperName(name);

@@ -52,6 +52,7 @@
     <weaver>
         <!-- only weave classes in our application-specific packages -->
         <include within="self.me.matchday.config.ScheduledTasks"/>
+        <include within="self.me.matchday.api.controller.ArtworkController"/>
         <include within="self.me.matchday.api.service.ArtworkService"/>
         <include within="self.me.matchday.api.service.CompetitionService"/>
         <include within="self.me.matchday.api.service.DataSourcePluginService"/>

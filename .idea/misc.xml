@@ -435,6 +435,133 @@
       <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed xmlns$georss" />
       <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed xmlns$openSearch" />
       <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.datasource.blogger.model.BloggerFeed xmlns$thr" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkCollectionResource artwork" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource audioCodec" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Match awayTeam" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.MatchResource awayTeam" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.ArtworkService BASE_STORAGE_LOCATION" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourceResource baseUri" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource bitrate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.video.VideoStreamingService BUFFER_SIZE" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource channel" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourceResource clazz" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.EntityServiceRegistry.Entry clazz" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkCollection collection" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.MatchResource competition" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Image contentType" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Competition country" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.CompetitionResource country" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Team country" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.TeamResource country" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkResource created" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Image data" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourceResource dataSourceId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.HighlightResource date" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.MatchResource date" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource.NetscapeCookie domain" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource duration" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.CompetitionResource emblem" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.TeamResource.TeamResourceAssembler EMBLEM" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourceResource enabled" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.HighlightResource eventId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.MatchResource eventId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource.VideoFileSourceResourceAssembler eventId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoPlaylist eventId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkRole FANART" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.TeamResource.TeamResourceAssembler FANART" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitTemplate.Field fieldName" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitTemplate fields" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.PatternKitTemplateResource fields" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Artwork file" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.video.VideoStreamingService FILE_CHECK_DELAY" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkResource fileSize" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoPlaylist fileSrcId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.HighlightResource fixture" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.MatchResource fixture" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.CountryResource FLAG" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.startup.LoadCountries FLAG_URI" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.converter.StringToCountryConverter FLAG_URI_FORMATTER" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Country flagFileName" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource frameRate" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource hasPassword" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkResource height" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventsResource highlights" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Match homeTeam" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.MatchResource homeTeam" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource.NetscapeCookie httpOnly" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkCollection id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkCollectionResource id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkResource id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Competition id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource.NetscapeCookie id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitTemplate id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.PatternKitTemplateResource id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource languages" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Country locales" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.CountryResource locales" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoPlaylist locatorIds" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage loggedIn" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource MASTER_PLAYLIST" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventsResource matches" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.ArtworkService MAX_IMAGE_DIMENSION" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.video.VideoStreamingService MAX_RECHECK_TIMEOUT" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.config.VideoStreamingConfig MAX_REFRESH" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource.NetscapeCookie maxAge" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource mediaContainer" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkResource mediaType" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.ArtworkService MIN_IMAGE_DIMENSION" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkResource modified" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Competition name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Country name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.CountryResource name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource.NetscapeCookie name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitTemplate name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.PatternKitTemplateResource name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Team name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource.NetscapeCookie path" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourceResource.PlaintextDataSourceResource patternKits" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PlaintextDataSource patternKits" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourceResource pluginId" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.controller.ArtworkControllerTest port" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkRole POSTER" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage premium" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.config.VideoStreamingConfig REFRESH_THREAD_PREFIX" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitTemplate relatedTemplates" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.PatternKitTemplateResource relatedTemplates" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitTemplate.Field required" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource resolution" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkCollection role" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkCollectionResource role" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource.NetscapeCookie sameSite" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.HighlightResource season" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.MatchResource season" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource.NetscapeCookie secure" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkResource selected" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkCollection selectedIndex" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkCollectionResource selectedIndex" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.service.EntityServiceRegistry.Entry service" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource source" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.config.VideoStreamingConfig STREAM_THREAD_PREFIX" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.TaskListState taskStates" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.fileserver.filefox.FileFoxPage text" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.DataSource title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.DataSourceResource title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.HighlightResource title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.MatchResource title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.video.VideoPlaylist title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoPlaylistResource.Pair title" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource TRANSCODE_PLS_STREAM" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource TRANSCODE_STREAM" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.PatternKitTemplate type" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.PatternKitTemplateResource type" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoPlaylistResource.Pair uri" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoPlaylistResource uris" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.FileServerUserResource.NetscapeCookie value" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource VARIANT_PLAYLIST" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventsResource VIDEO_LINK" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource videoCodec" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkResource width" />
     </entry_points>
     <pattern value="self.me.matchday.config.AdminDashboardConfig" />
     <pattern value="self.me.matchday.api.controller.ArtworkController" method="ArtworkController" />
@@ -1156,6 +1283,402 @@
     <pattern value="self.me.matchday.api.service.TeamService" method="saveAll" />
     <pattern value="self.me.matchday.api.service.CompetitionService" method="updateAll" />
     <pattern value="self.me.matchday.api.service.TeamService" method="updateAll" />
+    <pattern value="self.me.matchday.api.controller.ArtworkControllerTest" method="addCompetitionEmblem" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="addCompetitionEmblem" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="addPlaintextDataSource" />
+    <pattern value="self.me.matchday.model.ArtworkCollection" />
+    <pattern value="self.me.matchday.model.ArtworkCollection" method="ArtworkCollection" />
+    <pattern value="self.me.matchday.api.resource.ArtworkCollectionResource" />
+    <pattern value="self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionResourceAssembler" method="ArtworkCollectionResourceAssembler" />
+    <pattern value="self.me.matchday.model.ArtworkCollectionTest" />
+    <pattern value="self.me.matchday.api.controller.ArtworkControllerTest" />
+    <pattern value="self.me.matchday.api.controller.ArtworkControllerTest" method="ArtworkControllerTest" />
+    <pattern value="self.me.matchday.functionality.ArtworkDataSourceParsingTest" />
+    <pattern value="self.me.matchday.api.resource.ArtworkResource" />
+    <pattern value="self.me.matchday.api.resource.ArtworkResource.ArtworkResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.ArtworkResource.ArtworkResourceAssembler" method="ArtworkResourceAssembler" />
+    <pattern value="self.me.matchday.model.ArtworkRole" />
+    <pattern value="self.me.matchday.log.ArtworkServiceLog" />
+    <pattern value="self.me.matchday.log.plugin.blogger.BloggerPluginLog" />
+    <pattern value="self.me.matchday.plugin.datasource.blogger.BloggerPluginTest" method="BloggerPluginTest" />
+    <pattern value="self.me.matchday.api.controller.ArtworkControllerTest" method="cleanup" />
+    <pattern value="self.me.matchday.log.CompetitionServiceLog" />
+    <pattern value="self.me.matchday.api.service.CompetitionServiceTest" method="CompetitionServiceTest" />
+    <pattern value="self.me.matchday.api.service.CookiesServiceTest" />
+    <pattern value="self.me.matchday._DEVFIXTURES.DevelopmentSecurityConfig" method="corsConfigurationSource" />
+    <pattern value="self.me.matchday.model.Country" />
+    <pattern value="self.me.matchday.api.controller.CountryController" />
+    <pattern value="self.me.matchday.api.controller.CountryController" method="CountryController" />
+    <pattern value="self.me.matchday.api.resource.CountryResource" />
+    <pattern value="self.me.matchday.api.resource.CountryResource.CountryResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.CountryResource.CountryResourceAssembler" method="CountryResourceAssembler" />
+    <pattern value="self.me.matchday.api.service.CountryService" />
+    <pattern value="self.me.matchday.api.service.CountryService" method="CountryService" />
+    <pattern value="self.me.matchday.api.service.CountryServiceTest" />
+    <pattern value="self.me.matchday.functionality.ArtworkDataSourceParsingTest" method="createNewDataSource" />
+    <pattern value="self.me.matchday.TestDataCreator" method="createStreamLocatorPlaylist" />
+    <pattern value="self.me.matchday.TestDataCreator" method="createTestTeam" />
+    <pattern value="self.me.matchday.api.controller.DataSourcePluginController" />
+    <pattern value="self.me.matchday.api.controller.DataSourcePluginController" method="DataSourcePluginController" />
+    <pattern value="self.me.matchday.api.service.DataSourcePluginService" />
+    <pattern value="self.me.matchday.api.service.DataSourcePluginService" method="DataSourcePluginService" />
+    <pattern value="self.me.matchday.log.DataSourcePluginServiceLog" />
+    <pattern value="self.me.matchday.api.service.DataSourcePluginServiceTest" />
+    <pattern value="self.me.matchday.api.service.DataSourcePluginServiceTest" method="DataSourcePluginServiceTest" />
+    <pattern value="self.me.matchday.db.DataSourceRepositoryTest" method="DataSourceRepositoryTest" />
+    <pattern value="self.me.matchday.api.resource.DataSourceResource" />
+    <pattern value="self.me.matchday.api.resource.DataSourceResource.DataSourceResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.DataSourceResource.DataSourceResourceAssembler" method="DataSourceResourceAssembler" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" />
+    <pattern value="self.me.matchday.api.service.DataSourceServiceTest" method="DataSourceServiceTest" />
+    <pattern value="self.me.matchday._DEVFIXTURES.env.TestingDelayInterceptor.DelayConfig" />
+    <pattern value="self.me.matchday.api.service.SynonymService" method="delete" />
+    <pattern value="self.me.matchday.api.service.SynonymService" method="deleteAll" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="deleteDataSource" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" method="deleteFileServerUser" />
+    <pattern value="self.me.matchday.TestDataCreator" method="deleteTestCompetition" />
+    <pattern value="self.me.matchday.TestDataCreator" method="deleteTestTeam" />
+    <pattern value="self.me.matchday.api.service.FileServerUserServiceTest" method="deleteUser" />
+    <pattern value="self.me.matchday.TestDataCreator" method="deleteVideoFileSource" />
+    <pattern value="self.me.matchday._DEVFIXTURES.DevelopmentSecurityConfig" />
+    <pattern value="self.me.matchday._DEVFIXTURES.env.DevFixtureDataSourcePlugin" />
+    <pattern value="self.me.matchday.api.controller.FileServerPluginController" method="disableFileServerPlugin" />
+    <pattern value="self.me.matchday.api.service.DataSourcePluginServiceTest" method="disablePlugin" />
+    <pattern value="self.me.matchday.api.controller.DataSourcePluginController" method="disablePlugin" />
+    <pattern value="self.me.matchday.api.controller.FileServerPluginController" method="enableFileServerPlugin" />
+    <pattern value="self.me.matchday.api.service.DataSourcePluginServiceTest" method="enablePlugin" />
+    <pattern value="self.me.matchday.api.controller.DataSourcePluginController" method="enablePlugin" />
+    <pattern value="self.me.matchday.log.EntityCorrectionServiceLog" />
+    <pattern value="self.me.matchday.api.service.EntityCorrectionServiceTest" method="EntityCorrectionServiceTest" />
+    <pattern value="self.me.matchday.api.service.EntityServiceRegistry" />
+    <pattern value="self.me.matchday.api.service.EntityServiceRegistry" method="EntityServiceRegistry" />
+    <pattern value="self.me.matchday.log.EntityServiceRegistryLog" />
+    <pattern value="self.me.matchday.api.service.EntityServiceRegistry.Entry" />
+    <pattern value="self.me.matchday.db.EventRepositoryTest" method="EventRepositoryTest" />
+    <pattern value="self.me.matchday.api.resource.EventsResource.EventResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.EventsResource.EventResourceAssembler" method="EventResourceAssembler" />
+    <pattern value="self.me.matchday.log.EventServiceLog" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="EventServiceTest" />
+    <pattern value="self.me.matchday.api.resource.EventsResource" />
+    <pattern value="self.me.matchday.api.service.SynonymService" method="fetchAll" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="fetchAllDataSources" />
+    <pattern value="self.me.matchday.api.controller.PatternKitTemplateController" method="fetchAllTemplates" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="fetchArtworkImageData" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="fetchArtworkMetadata" />
+    <pattern value="self.me.matchday.api.service.SynonymService" method="fetchById" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="fetchCompetitionArtworkCollection" />
+    <pattern value="self.me.matchday.api.controller.ArtworkControllerTest" method="fetchCompetitionEmblem" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="fetchCompetitionsForTema" />
+    <pattern value="self.me.matchday.api.service.MatchServiceTest" method="fetchMatchesForTeam" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="fetchSelectedArtwork" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="fetchSelectedArtworkMetadata" />
+    <pattern value="self.me.matchday.api.controller.PatternKitTemplateController" method="fetchTemplateByClassName" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" />
+    <pattern value="self.me.matchday.plugin.io.ffmpeg.FFmpegPluginTest" method="FFmpegPluginTest" />
+    <pattern value="self.me.matchday.model.PatternKitTemplate.Field" />
+    <pattern value="self.me.matchday.model.PatternKitTemplate.Field" method="Field" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPluginTest" method="FileFoxPluginTest" />
+    <pattern value="self.me.matchday.plugin.fileserver.FileServerPlugin" />
+    <pattern value="self.me.matchday.api.controller.FileServerPluginController" />
+    <pattern value="self.me.matchday.api.controller.FileServerPluginController" method="FileServerPluginController" />
+    <pattern value="self.me.matchday.api.service.FileServerPluginService" />
+    <pattern value="self.me.matchday.api.service.FileServerPluginService" method="FileServerPluginService" />
+    <pattern value="self.me.matchday.log.FileServerPluginServiceLog" />
+    <pattern value="self.me.matchday.api.service.FileServerPluginServiceTest" />
+    <pattern value="self.me.matchday.api.service.FileServerPluginServiceTest" method="FileServerPluginServiceTest" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" method="FileServerUserController" />
+    <pattern value="self.me.matchday.api.service.FileServerUserService" />
+    <pattern value="self.me.matchday.api.service.FileServerUserService" method="FileServerUserService" />
+    <pattern value="self.me.matchday.log.FileServerUserServiceLog" />
+    <pattern value="self.me.matchday.api.service.FileServerUserServiceTest" />
+    <pattern value="self.me.matchday.api.service.FileServerUserServiceTest" method="FileServerUserServiceTest" />
+    <pattern value="self.me.matchday.api.controller.CountryController" method="getAllCountries" />
+    <pattern value="self.me.matchday.api.service.CountryServiceTest" method="getAllCountries" />
+    <pattern value="self.me.matchday.api.controller.FileServerPluginController" method="getAllFileServerPlugins" />
+    <pattern value="self.me.matchday.api.controller.DataSourcePluginController" method="getAllPlugins" />
+    <pattern value="self.me.matchday.api.service.FileServerUserServiceTest" method="getAllServerUsers" />
+    <pattern value="self.me.matchday.api.service.CountryServiceTest" method="getCountry" />
+    <pattern value="self.me.matchday.api.controller.CountryController" method="getCountry" />
+    <pattern value="self.me.matchday.api.service.DataSourcePluginServiceTest" method="getDataSourcePlugin" />
+    <pattern value="self.me.matchday.api.controller.DataSourcePluginController" method="getDataSourcePlugin" />
+    <pattern value="self.me.matchday.api.service.DataSourcePluginServiceTest" method="getDataSourcePlugins" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="getDataSourcesForPlugin" />
+    <pattern value="self.me.matchday._DEVFIXTURES.env.DevFixtureDataSourcePlugin" method="getDescription" />
+    <pattern value="self.me.matchday.api.service.FileServerPluginServiceTest" method="getDownloadUrl" />
+    <pattern value="self.me.matchday.model.video.VideoFile" method="getDuration" />
+    <pattern value="self.me.matchday.api.controller.FileServerPluginController" method="getEnabledFileServers" />
+    <pattern value="self.me.matchday.api.service.DataSourcePluginServiceTest" method="getEnabledPlugins" />
+    <pattern value="self.me.matchday.api.controller.FileServerPluginController" method="getFileServerById" />
+    <pattern value="self.me.matchday.api.service.FileServerPluginServiceTest" method="getFileServerPlugins" />
+    <pattern value="self.me.matchday.api.service.FileServerPluginServiceTest" method="getFileServerRefreshRate" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" method="getFileServerUsers" />
+    <pattern value="self.me.matchday.api.service.CountryServiceTest" method="getFlag" />
+    <pattern value="self.me.matchday.api.controller.CountryController" method="getFlagForCountry" />
+    <pattern value="self.me.matchday.plugin.fileserver.FileServerPlugin" method="getHostname" />
+    <pattern value="self.me.matchday.api.service.FileServerPluginServiceTest" method="getPluginById" />
+    <pattern value="self.me.matchday._DEVFIXTURES.env.DevFixtureDataSourcePlugin" method="getPluginId" />
+    <pattern value="self.me.matchday._DEVFIXTURES.env.DevFixtureDataSourcePlugin" method="getSnapshot" />
+    <pattern value="self.me.matchday._DEVFIXTURES.env.DevFixtureDataSourcePlugin" method="getTitle" />
+    <pattern value="self.me.matchday.api.service.FileServerUserServiceTest" method="getUserById" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" method="getUserData" />
+    <pattern value="self.me.matchday.config.VideoStreamingConfig" method="getVideoFileRefresher" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="handleBadArgument" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="handleIllegalArg" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" method="handleIllegalArgument" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="handleIllegalArgumentException" />
+    <pattern value="self.me.matchday.api.controller.DataSourcePluginController" method="handleIllegalArgumentException" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" method="handleInternalError" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="handleInvalidArt" />
+    <pattern value="self.me.matchday.api.controller.ArtworkController" method="handleInvalidArtwork" />
+    <pattern value="self.me.matchday.api.controller.CountryController" method="handleIoError" />
+    <pattern value="self.me.matchday.api.controller.VideoStreamingController" method="handleIoError" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" method="handleIoException" />
+    <pattern value="self.me.matchday.api.controller.FileServerPluginController" method="handleIoException" />
+    <pattern value="self.me.matchday.api.controller.CountryController" method="handleNoCountry" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="handleUnknownEntity" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" method="handleUserNotFound" />
+    <pattern value="self.me.matchday.api.resource.HighlightResource" />
+    <pattern value="self.me.matchday.api.resource.HighlightResource.HighlightResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.HighlightResource.HighlightResourceAssembler" method="HighlightResourceAssembler" />
+    <pattern value="self.me.matchday.api.service.HighlightServiceTest" method="HighlightServiceTest" />
+    <pattern value="self.me.matchday._DEVFIXTURES.DevelopmentSecurityConfig" method="httpFirewall" />
+    <pattern value="self.me.matchday.model.Image" />
+    <pattern value="self.me.matchday.log.plugin.filefox.LoginParserLog" />
+    <pattern value="self.me.matchday.log.MatchDataParserLog" />
+    <pattern value="self.me.matchday.log.MatchServiceLog" />
+    <pattern value="self.me.matchday.api.controller.PluginNotFoundAdvice" />
+    <pattern value="self.me.matchday.log.ScheduledTaskLog" />
+    <pattern value="self.me.matchday.api.converter.StringToArtworkRoleConverter" />
+    <pattern value="self.me.matchday.api.converter.StringToCountryConverter" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" />
+    <pattern value="self.me.matchday.plugin.fileserver.TestFileServerPlugin" />
+    <pattern value="self.me.matchday._DEVFIXTURES.env.TestingDelayInterceptor" />
+    <pattern value="self.me.matchday.log.UserValidationServiceLog" />
+    <pattern value="self.me.matchday.log.VideoFileSelectorServiceLog" />
+    <pattern value="self.me.matchday.log.VideoFileServiceLog" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorServiceLog" />
+    <pattern value="self.me.matchday.log.VideoStreamManagerLog" />
+    <pattern value="self.me.matchday.api.service.EntityService" method="initialize" />
+    <pattern value="self.me.matchday._DEVFIXTURES.env.DevFixtureDataSourcePlugin" method="isEnabled" />
+    <pattern value="self.me.matchday.api.service.DataSourcePluginServiceTest" method="isPluginEnabled" />
+    <pattern value="self.me.matchday.startup.LoadCountries" />
+    <pattern value="self.me.matchday.startup.LoadCountries" method="LoadCountries" />
+    <pattern value="self.me.matchday.startup.LoadInitialDataSources" />
+    <pattern value="self.me.matchday.startup.LoadInitialDataSources" method="LoadInitialDataSources" />
+    <pattern value="self.me.matchday.startup.LoadPatternKitTemplates" />
+    <pattern value="self.me.matchday.startup.LoadPatternKitTemplates" method="LoadPatternKitTemplates" />
+    <pattern value="self.me.matchday.log.ArtworkServiceLog" method="logAddCompetitionEmblem" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logAddProperName" />
+    <pattern value="self.me.matchday.log.EntityCorrectionServiceLog" method="logAroundEntityCorrection" />
+    <pattern value="self.me.matchday.log.MatchDataParserLog" method="logAroundEventParsing" />
+    <pattern value="self.me.matchday.log.ArtworkServiceLog" method="logArtworkError" />
+    <pattern value="self.me.matchday.log.EntityCorrectionServiceLog" method="logBeforeCorrectedEntityRetrieval" />
+    <pattern value="self.me.matchday.log.VideoStreamManagerLog" method="logBeginStreaming" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" method="logCreateConcatFile" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logCreatePlaylist" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorServiceLog" method="logCreateStreamLocator" />
+    <pattern value="self.me.matchday.log.MatchDataParserLog" method="logCreateUrlStream" />
+    <pattern value="self.me.matchday.log.VideoStreamManagerLog" method="logCreateVideoStreamFrom" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog" method="logCreateVideoStreamPlaylist" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" method="logDataSourceRefresh" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logDeleteAllSynonyms" />
+    <pattern value="self.me.matchday.log.CompetitionServiceLog" method="logDeleteCompetitionById" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" method="logDeleteDataSource" />
+    <pattern value="self.me.matchday.log.EventServiceLog" method="logDeleteEvent" />
+    <pattern value="self.me.matchday.log.VideoStreamManagerLog" method="logDeleteLocalStream" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" method="logDeleteManyDataSources" />
+    <pattern value="self.me.matchday.log.EventServiceLog" method="logDeleteManyEvents" />
+    <pattern value="self.me.matchday.log.MatchServiceLog" method="logDeleteMatch" />
+    <pattern value="self.me.matchday.log.MatchServiceLog" method="logDeleteSeveralMatches" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorServiceLog" method="logDeleteStreamLocator" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorServiceLog" method="logDeleteStreamLocatorWithData" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logDeleteSynonym" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logDeleteTeamByName" />
+    <pattern value="self.me.matchday.log.FileServerUserServiceLog" method="logDeleteUser" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logDeleteVideoData" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog" method="logDeleteVideoStreamPlaylist" />
+    <pattern value="self.me.matchday.log.DataSourcePluginServiceLog" method="logDisableDataSourcePlugin" />
+    <pattern value="self.me.matchday.log.FileServerPluginServiceLog" method="logDisablePlugin" />
+    <pattern value="self.me.matchday.log.VideoFileServiceLog" method="logDoRefreshTask" />
+    <pattern value="self.me.matchday.log.DataSourcePluginServiceLog" method="logEnableDataSourcePlugin" />
+    <pattern value="self.me.matchday.log.FileServerPluginServiceLog" method="logEnablePlugin" />
+    <pattern value="self.me.matchday.log.plugin.filefox.LoginParserLog" method="logEvaluateLoginResponse" />
+    <pattern value="self.me.matchday.log.CompetitionServiceLog" method="logFetchAllCompetitions" />
+    <pattern value="self.me.matchday.log.EventServiceLog" method="logFetchAllEvents" />
+    <pattern value="self.me.matchday.log.MatchServiceLog" method="logFetchAllMatches" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logFetchAllSynonyms" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logFetchAllTeams" />
+    <pattern value="self.me.matchday.log.ArtworkServiceLog" method="logFetchArtworkData" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logFetchById" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logFetchByName" />
+    <pattern value="self.me.matchday.log.CompetitionServiceLog" method="logFetchCompetitionById" />
+    <pattern value="self.me.matchday.log.EventServiceLog" method="logFetchEventsForCompetition" />
+    <pattern value="self.me.matchday.log.MatchServiceLog" method="logFetchEventsForTeam" />
+    <pattern value="self.me.matchday.log.MatchServiceLog" method="logFetchMatchById" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logFetchProperName" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logFetchSynonyms" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logFetchTeamById" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logFetchTeamByName" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logFetchTeamsByCompetitionId" />
+    <pattern value="self.me.matchday.log.EventServiceLog" method="logFetchVideoFileSource" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logFetchVideoFileSources" />
+    <pattern value="self.me.matchday.log.DataSourcePluginServiceLog" method="logGetAllDataSourcePlugins" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" method="logGetAllDataSources" />
+    <pattern value="self.me.matchday.log.FileServerPluginServiceLog" method="logGetAllFileServerPlugins" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorServiceLog" method="logGetAllStreamLocators" />
+    <pattern value="self.me.matchday.log.FileServerUserServiceLog" method="logGetAllUsersForPlugin" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog" method="logGetAllVideoStreamPlaylists" />
+    <pattern value="self.me.matchday.log.VideoFileSelectorServiceLog" method="logGetBestFileSource" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logGetBestVideoStreamPlaylist" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" method="logGetDataSourceById" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" method="logGetDataSourcesForPlugin" />
+    <pattern value="self.me.matchday.log.DataSourcePluginServiceLog" method="logGetEnabledDataSourcePlugins" />
+    <pattern value="self.me.matchday.log.FileServerPluginServiceLog" method="logGetEnabledFileServerPlugins" />
+    <pattern value="self.me.matchday.log.FileServerPluginServiceLog" method="logGetEnabledPluginForUrl" />
+    <pattern value="self.me.matchday.log.EventServiceLog" method="logGetEventById" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" method="logGetFfmpegInputString" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" method="logGetFFmpegStreamTaskCommand" />
+    <pattern value="self.me.matchday.log.FileServerPluginServiceLog" method="logGetFileServerRefreshRate" />
+    <pattern value="self.me.matchday.log.FileServerUserServiceLog" method="logGetFileServerUser" />
+    <pattern value="self.me.matchday.log.FileServerPluginServiceLog" method="logGetInternalUrl" />
+    <pattern value="self.me.matchday.log.VideoStreamManagerLog" method="logGetLocalStreamFor" />
+    <pattern value="self.me.matchday.log.plugin.filefox.LoginParserLog" method="logGetLoginData" />
+    <pattern value="self.me.matchday.log.EntityCorrectionServiceLog" method="logGetNameForObject" />
+    <pattern value="self.me.matchday.log.VideoFileSelectorServiceLog" method="logGetPlaylistFiles" />
+    <pattern value="self.me.matchday.log.FileServerPluginServiceLog" method="logGetPluginById" />
+    <pattern value="self.me.matchday.log.EntityServiceRegistryLog" method="logGetServiceForClass" />
+    <pattern value="self.me.matchday.log.plugin.blogger.BloggerPluginLog" method="logGetSnapshot" />
+    <pattern value="self.me.matchday.log.MatchDataParserLog" method="logGetStreamForType" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" method="logGetStreamingTaskCount" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorServiceLog" method="logGetStreamLocator" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorServiceLog" method="logGetStreamLocatorFor" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logGetVideoSegmentResource" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logGetVideoStreamPlaylist" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog" method="logGetVideoStreamPlaylistFor" />
+    <pattern value="self.me.matchday.api.service.FileServerUserServiceTest" method="loginAndLogout" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logInitializeSynonym" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" method="logInterruptAllStreamingTasks" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" method="logInterruptStreamingTask" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" method="loginToFileServer" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" method="loginWithCookies" />
+    <pattern value="self.me.matchday.log.plugin.blogger.BloggerPluginLog" method="logIsBloggerPluginEnabled" />
+    <pattern value="self.me.matchday.log.DataSourcePluginServiceLog" method="logIsPluginEnabled" />
+    <pattern value="self.me.matchday.log.FileServerPluginServiceLog" method="logIsPluginEnabled" />
+    <pattern value="self.me.matchday.log.UserValidationServiceLog" method="logIsValidEmailAddress" />
+    <pattern value="self.me.matchday.log.UserValidationServiceLog" method="logIsValidPassword" />
+    <pattern value="self.me.matchday.log.UserValidationServiceLog" method="logIsValidUserData" />
+    <pattern value="self.me.matchday.log.ScheduledTaskLog" method="logIsVideoDataStale" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logKillAllStreamingTasks" />
+    <pattern value="self.me.matchday.log.VideoStreamManagerLog" method="logKillAllStreams" />
+    <pattern value="self.me.matchday.log.VideoStreamManagerLog" method="logKillAllStreamsFor" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" method="logKillFfmpegTask" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logKillStreamingFor" />
+    <pattern value="self.me.matchday.log.VideoStreamManagerLog" method="logKillStreamingTask" />
+    <pattern value="self.me.matchday.log.FileServerUserServiceLog" method="logLoginUser" />
+    <pattern value="self.me.matchday.log.FileServerUserServiceLog" method="logLoginUserWithCookies" />
+    <pattern value="self.me.matchday.log.FileServerUserServiceLog" method="logLogoutUser" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" method="logoutOfFileServer" />
+    <pattern value="self.me.matchday.log.plugin.filefox.LoginParserLog" method="logPerformLogin" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" method="logPrepareFfmpegStream" />
+    <pattern value="self.me.matchday.log.ScheduledTaskLog" method="logPruneVideoData" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" method="logReadFileMetadata" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logReadPlaylistDataForLocator" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logReadPlaylistFile" />
+    <pattern value="self.me.matchday.log.ScheduledTaskLog" method="logRefreshAllDataSources" />
+    <pattern value="self.me.matchday.log.VideoFileServiceLog" method="logRefreshVideoFile" />
+    <pattern value="self.me.matchday.log.FileServerUserServiceLog" method="logReloginUser" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logRenderPlaylist" />
+    <pattern value="self.me.matchday.log.plugin.ffmpeg.FFmpegLog" method="logRunFfmpegStreamTask" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" method="logSaveAllDataSources" />
+    <pattern value="self.me.matchday.log.MatchServiceLog" method="logSaveAllMatches" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logSaveAllSynonyms" />
+    <pattern value="self.me.matchday.log.CompetitionServiceLog" method="logSaveCompetition" />
+    <pattern value="self.me.matchday.log.EventServiceLog" method="logSaveEvent" />
+    <pattern value="self.me.matchday.log.EventServiceLog" method="logSaveManyEvents" />
+    <pattern value="self.me.matchday.log.MatchServiceLog" method="logSaveMatch" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" method="logSaveNewDataSource" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logSaveSynonym" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logSaveTeam" />
+    <pattern value="self.me.matchday.log.plugin.blogger.BloggerPluginLog" method="logSetBloggerPluginEnabled" />
+    <pattern value="self.me.matchday.log.FileServerUserServiceLog" method="logSetUserLoggedInToServer" />
+    <pattern value="self.me.matchday.log.VideoStreamingServiceLog" method="logStreamingError" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorServiceLog" method="logSuccessDeleteStreamLocatorWithData" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logUpdateAllSynonyms" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" method="logUpdateDataSource" />
+    <pattern value="self.me.matchday.log.EventServiceLog" method="logUpdateEvent" />
+    <pattern value="self.me.matchday.log.DataSourceServiceLog" method="logUpdateManyDataSources" />
+    <pattern value="self.me.matchday.log.EventServiceLog" method="logUpdateManyEvents" />
+    <pattern value="self.me.matchday.log.MatchServiceLog" method="logUpdateMatch" />
+    <pattern value="self.me.matchday.log.MatchServiceLog" method="logUpdateSeveralMatches" />
+    <pattern value="self.me.matchday.log.VideoStreamLocatorServiceLog" method="logUpdateStreamLocator" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logUpdateSynonym" />
+    <pattern value="self.me.matchday.log.DataSourcePluginServiceLog" method="logValidateDataSource" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logValidateProperName" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logValidateSynonym" />
+    <pattern value="self.me.matchday.log.SynonymServiceLog" method="logValidateSynonymIsNotProperName" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.MatchDataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.MatchDataParser" method="MatchDataParser" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.MatchDataParserTest" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.MatchDataParserTest" method="MatchDataParserTest" />
+    <pattern value="self.me.matchday.api.resource.MatchResource" />
+    <pattern value="self.me.matchday.api.resource.MatchResource.MatchResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.MatchResource.MatchResourceAssembler" method="MatchResourceAssembler" />
+    <pattern value="self.me.matchday.api.service.MatchServiceTest" method="MatchServiceTest" />
+    <pattern value="self.me.matchday.api.resource.FileServerUserResource.NetscapeCookie" />
+    <pattern value="self.me.matchday.api.resource.VideoPlaylistResource.Pair" />
+    <pattern value="self.me.matchday.api.service.CookiesServiceTest" method="parseNetscapeCookies" />
+    <pattern value="self.me.matchday.model.PatternKitTemplate" method="PatternKitTemplate" />
+    <pattern value="self.me.matchday.api.controller.PatternKitTemplateController" />
+    <pattern value="self.me.matchday.api.controller.PatternKitTemplateController" method="PatternKitTemplateController" />
+    <pattern value="self.me.matchday.api.resource.PatternKitTemplateResource" />
+    <pattern value="self.me.matchday.api.service.PatternKitTemplateService" method="PatternKitTemplateService" />
+    <pattern value="self.me.matchday.api.resource.DataSourceResource.PlaintextDataSourceResource" />
+    <pattern value="self.me.matchday.api.controller.PluginNotFoundAdvice" method="pluginNotFoundHandler" />
+    <pattern value="self.me.matchday.api.controller.FileServerUserController" method="reloginToFileServer" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="save" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="saveAll" />
+    <pattern value="self.me.matchday.api.service.SynonymService" method="saveAll" />
+    <pattern value="self.me.matchday._DEVFIXTURES.env.DevFixtureDataSourcePlugin" method="setEnabled" />
+    <pattern value="self.me.matchday.api.service.CookiesServiceTest" method="setUp" />
+    <pattern value="self.me.matchday.api.service.CountryServiceTest" method="setup" />
+    <pattern value="self.me.matchday.functionality.ArtworkDataSourceParsingTest" method="setup" />
+    <pattern value="self.me.matchday.api.service.SynonymService" />
+    <pattern value="self.me.matchday.api.service.SynonymService" method="SynonymService" />
+    <pattern value="self.me.matchday.api.service.SynonymServiceTest" />
+    <pattern value="self.me.matchday.api.service.SynonymServiceTest" method="SynonymServiceTest" />
+    <pattern value="self.me.matchday.model.video.TaskListState" />
+    <pattern value="self.me.matchday.api.service.TeamServiceTest" method="TeamServiceTest" />
+    <pattern value="self.me.matchday.api.resource.PatternKitTemplateResource.TemplateResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.PatternKitTemplateResource.TemplateResourceAssembler" method="TemplateResourceAssembler" />
+    <pattern value="self.me.matchday.api.service.SynonymServiceTest" method="testAddSynonym" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.MatchDataParserTest" method="testBloggerEntryParsing" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="testPlaylistLocatorSorting" />
+    <pattern value="self.me.matchday.api.service.FileServerPluginServiceTest" method="testPluginEnableAndDisable" />
+    <pattern value="self.me.matchday.model.ArtworkCollectionTest" method="testSetAlreadySelected" />
+    <pattern value="self.me.matchday.model.ArtworkCollectionTest" method="testSetSelectedArtwork" />
+    <pattern value="self.me.matchday.api.service.SynonymServiceTest" method="testSynonymProperNameRetrieval" />
+    <pattern value="self.me.matchday.api.service.EventServiceTest" method="update" />
+    <pattern value="self.me.matchday.api.service.SynonymService" method="updateAll" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="updateCompetition" />
+    <pattern value="self.me.matchday.api.controller.DataSourceController" method="updatePlaintextDataSource" />
+    <pattern value="self.me.matchday._DEVFIXTURES.env.DevFixtureDataSourcePlugin" method="validateDataSource" />
+    <pattern value="self.me.matchday.plugin.datasource.parsing.MatchDataParserTest" method="validateTestHtml" />
+    <pattern value="self.me.matchday.api.service.video.VideoFileSelectorService" method="VideoFileSelectorService" />
+    <pattern value="self.me.matchday.api.service.VideoFileSelectorServiceTest" method="VideoFileSelectorServiceTest" />
+    <pattern value="self.me.matchday.api.service.video.VideoFileService" />
+    <pattern value="self.me.matchday.api.service.video.VideoFileService" method="VideoFileService" />
+    <pattern value="self.me.matchday.api.service.VideoFileServiceTest" method="VideoFileServiceTest" />
+    <pattern value="self.me.matchday.api.resource.VideoFileSourceResource" />
+    <pattern value="self.me.matchday.api.resource.VideoFileSourceResource.VideoFileSourceResourceAssembler" />
+    <pattern value="self.me.matchday.api.resource.VideoFileSourceResource.VideoFileSourceResourceAssembler" method="VideoFileSourceResourceAssembler" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="VideoStreamingServiceTest" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorServiceTest" method="VideoStreamLocatorServiceTest" />
+    <pattern value="self.me.matchday.api.service.video.VideoStreamManagerTest" method="VideoStreamManagerTest" />
   </component>
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$" />

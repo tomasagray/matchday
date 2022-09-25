@@ -26,12 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,38 +43,13 @@ public class LoadCountries implements CommandLineRunner {
   private static String FLAG_URI;
 
   private static final String COUNTRIES_JSON = "countries.json";
-  private static final int EXPECTED_COUNTRIES = 246;
+  private static final int EXPECTED_COUNTRIES = 245;
 
   private final Logger logger = LogManager.getLogger(LoadCountries.class);
   private final CountryService countryService;
 
   public LoadCountries(CountryService countryService) {
     this.countryService = countryService;
-  }
-
-  /**
-   * Logic for generating countries.json
-   *
-   * @return A list of Countries
-   */
-  private List<Country> generateCountries() {
-
-    final Map<String, List<Locale>> locales =
-        Arrays.stream(Locale.getAvailableLocales())
-            .filter(locale -> locale.toString().matches("[a-z]{2}_[A-Z]{2}"))
-            .collect(Collectors.groupingBy(Locale::getDisplayCountry));
-
-    return locales.entrySet().stream()
-        .map(
-            entry -> {
-              final String countryName = entry.getKey();
-              final List<Locale> countryLocales = entry.getValue();
-              final String countryCode = countryLocales.get(0).getCountry();
-              final String flagFileName = String.format(FLAG_URI, countryCode.toLowerCase());
-              return new Country(countryName, countryLocales, flagFileName);
-            })
-        .sorted(Comparator.comparing(Country::getName))
-        .collect(Collectors.toList());
   }
 
   private List<Country> readCountriesJson() throws IOException {
@@ -99,8 +69,10 @@ public class LoadCountries implements CommandLineRunner {
     final int countryCount = allCountries.size();
     if (countryCount > 0 && countryCount != EXPECTED_COUNTRIES) {
       final String msg =
-          "Found partial Country data; database has possibly been corrupted. "
-              + "Perform a manual repair, then reload application.";
+          String.format(
+              "Found partial Country (%d countries) data; database has possibly been corrupted. "
+                  + "Perform a manual repair, then reload application.",
+              countryCount);
       throw new IllegalArgumentException(msg);
     }
 
