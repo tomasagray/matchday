@@ -35,7 +35,7 @@ public class ArtworkServiceLog {
 
   @Around("execution(* self.me.matchday.api.service.ArtworkService.fetchArtworkData(..))")
   public Object logFetchArtworkData(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    logger.info("Getting artwork data using extractor: {}", jp.getArgs()[0]);
+    logger.info("Reading data from disk for Artwork: {}", jp.getArgs()[0]);
     final Object image = jp.proceed();
     logger.info("Read image: {}", image);
     return image;
@@ -52,12 +52,5 @@ public class ArtworkServiceLog {
     final Object modifiedCollection = jp.proceed();
     logger.info("ArtworkCollection is now: {}", modifiedCollection);
     return modifiedCollection;
-  }
-
-  @Around("execution(* self.me.matchday.api.controller.ArtworkController.handle*(..))")
-  public Object logArtworkError(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    final Object error = jp.proceed();
-    logger.error("Artwork Error: " + error);
-    return error;
   }
 }

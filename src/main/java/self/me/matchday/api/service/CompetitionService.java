@@ -67,6 +67,7 @@ public class CompetitionService implements EntityService<Competition, UUID> {
       createMethodRegistry() {
     final Map<ArtworkRole, Function<Competition, ArtworkCollection>> registry = new HashMap<>();
     registry.put(ArtworkRole.EMBLEM, Competition::getEmblem);
+    registry.put(ArtworkRole.FANART, Competition::getFanart);
     return registry;
   }
 
@@ -81,7 +82,10 @@ public class CompetitionService implements EntityService<Competition, UUID> {
     if (country != null) {
       Hibernate.initialize(country.getLocales());
     }
+
+    // initialize Artwork
     Hibernate.initialize(competition.getEmblem().getCollection());
+    Hibernate.initialize(competition.getFanart().getCollection());
     return competition;
   }
 
@@ -209,6 +213,7 @@ public class CompetitionService implements EntityService<Competition, UUID> {
     validateForUpdate(competition);
     // correct missing artwork file paths
     artworkService.repairArtworkFilePaths(competition.getEmblem());
+    artworkService.repairArtworkFilePaths(competition.getFanart());
     return save(competition);
   }
 

@@ -149,14 +149,16 @@ public class ArtworkService {
 
   public void repairArtworkFilePaths(@NotNull ArtworkCollection collection) {
     final Set<Artwork> artworks = collection.getCollection();
-    artworks.forEach(
-        artwork ->
-            artworkRepository
-                .findOne(Example.of(artwork))
-                .map(
-                    art -> {
-                      artwork.setFile(art.getFile());
-                      return artwork;
-                    }));
+    if (artworks != null) {
+      artworks.forEach(
+          artwork ->
+              artworkRepository
+                  .findOne(Example.of(artwork))
+                  .map(
+                      art -> {
+                        artwork.setFile(art.getFile());
+                        return artwork;
+                      }));
+    }
   }
 }

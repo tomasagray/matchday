@@ -40,8 +40,6 @@ public class ArtworkCollection {
   @OneToMany(cascade = CascadeType.ALL)
   private final Set<Artwork> collection = new LinkedHashSet<>();
 
-  private final ArtworkRole role;
-  @Id @GeneratedValue private Long id;
   private int selectedIndex;
 
   public ArtworkCollection() {

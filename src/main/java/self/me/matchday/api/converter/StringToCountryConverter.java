@@ -46,15 +46,11 @@ public class StringToCountryConverter implements Converter<String, Country> {
             .filter(locale -> locale.toString().matches("[a-z]{2}_[A-Z]{2}"))
             .collect(Collectors.toList());
     if (locales.size() > 0) {
-      System.out.println("NAME: " + name);
-      System.out.println("FORMATTER: " + FLAG_URI_FORMATTER);
       try {
         final Locale primaryLocale = locales.get(0);
         final String countryCode = primaryLocale.getCountry();
         final String flagPath = String.format(FLAG_URI_FORMATTER, countryCode);
-        final Country country = new Country(name, locales, flagPath);
-        System.out.println("COUNTRY: " + country);
-        return country;
+        return new Country(name, locales, flagPath);
       } catch (RuntimeException e) {
         e.printStackTrace();
         throw e;

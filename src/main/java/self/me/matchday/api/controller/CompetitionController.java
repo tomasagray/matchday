@@ -22,6 +22,7 @@ package self.me.matchday.api.controller;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
@@ -324,5 +325,12 @@ public class CompetitionController {
   @ResponseBody
   public String handleUnknownEntity(@NotNull UnknownEntityException e) {
     return e.getMessage();
+  }
+
+  @ExceptionHandler(FileNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public String handleFileNotFound(@NotNull FileNotFoundException e) {
+    return "File not found: " + e.getMessage();
   }
 }

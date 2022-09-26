@@ -93,7 +93,7 @@ public class ResourceFileReader {
   public static @NotNull String readTextResource(@NotNull final String filename)
       throws IOException {
 
-    logger.debug("Attempting to read data at: {}", filename);
+    logger.trace("Attempting to read data at: {}", filename);
 
     final ClassLoader classLoader = ResourceFileReader.class.getClassLoader();
     InputStream resourceAsStream = classLoader.getResourceAsStream(filename);

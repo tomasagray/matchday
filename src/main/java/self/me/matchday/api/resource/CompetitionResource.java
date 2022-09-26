@@ -58,6 +58,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
   private ProperName name;
   private Country country;
   private ArtworkCollectionResource emblem;
+  private ArtworkCollectionResource fanart;
 
   @Component
   public static class CompetitionResourceAssembler
@@ -65,7 +66,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
 
     private static final LinkRelation TEAMS = LinkRelation.of("teams");
     private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
-    //    private static final LinkRelation FANART = LinkRelation.of("fanart");
+    private static final LinkRelation FANART = LinkRelation.of("fanart");
     //    private static final LinkRelation MONOCHROME = LinkRelation.of("monochrome_emblem");
     //    private static final LinkRelation LANDSCAPE = LinkRelation.of("landscape");
     private static final LinkRelation EVENTS = LinkRelation.of("events");
@@ -110,11 +111,19 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       competitionResource.setId(competitionId);
       competitionResource.setCountry(competition.getCountry());
       competitionResource.setName(competition.getName());
+      // setup artwork
       competitionResource.setEmblem(artworkModeller.toModel(competition.getEmblem()));
+      competitionResource.setFanart(artworkModeller.toModel(competition.getFanart()));
+
+      // add artwork links
       competitionResource
           .getEmblem()
           .getArtwork()
           .forEach(artwork -> addArtworkLinks(competitionId, ArtworkRole.EMBLEM, artwork));
+      competitionResource
+          .getFanart()
+          .getArtwork()
+          .forEach(artwork -> addArtworkLinks(competitionId, ArtworkRole.FANART, artwork));
 
       // links
       competitionResource.add(
@@ -126,15 +135,18 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       competitionResource.add(
           linkTo(methodOn(CompetitionController.class).fetchCompetitionTeams(competitionId))
               .withRel(TEAMS));
+      // artwork collection links
       competitionResource.add(
           linkTo(
                   methodOn(CompetitionController.class)
                       .fetchSelectedArtwork(competitionId, ArtworkRole.EMBLEM))
               .withRel(EMBLEM));
-      /* competitionResource.add(
-          linkTo(methodOn(ArtworkController.class).fetchCompetitionFanart(competitionId))
-              .withRel(FANART));
       competitionResource.add(
+          linkTo(
+                  methodOn(CompetitionController.class)
+                      .fetchSelectedArtwork(competitionId, ArtworkRole.FANART))
+              .withRel(FANART));
+      /* competitionResource.add(
           linkTo(methodOn(ArtworkController.class).fetchCompetitionMonochromeEmblem(competitionId))
               .withRel(MONOCHROME));
       competitionResource.add(
