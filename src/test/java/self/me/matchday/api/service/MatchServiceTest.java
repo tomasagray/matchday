@@ -98,7 +98,7 @@ class MatchServiceTest {
     logger.info("All Matches in database:\n{}", matchService.fetchAll());
 
     logger.info("Fetching Matches for Team: {}", testTeam);
-    final List<Match> events = matchService.fetchMatchesForTeam(testTeam.getTeamId());
+    final List<Match> events = matchService.fetchMatchesForTeam(testTeam.getId());
     logger.info("Got Matches:\n{}", events);
     assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount);
   }

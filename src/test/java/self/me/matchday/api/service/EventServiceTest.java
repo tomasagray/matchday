@@ -86,7 +86,7 @@ class EventServiceTest {
         "Saved Event w/ID: {}, Competition ID: {}, Team ID: {}; FileSrcID: {}",
         testMatch.getEventId(),
         testCompetition.getId(),
-        testTeam.getTeamId(),
+        testTeam.getId(),
         testFileSource.getFileSrcId());
 
     // create Event for updating test

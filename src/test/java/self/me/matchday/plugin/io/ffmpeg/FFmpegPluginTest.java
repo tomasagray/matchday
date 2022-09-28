@@ -94,7 +94,9 @@ class FFmpegPluginTest {
   @Contract(" -> new")
   private @NotNull File readStorageLocation() throws IOException {
 
-    final String testingDirectory = "testing-" + Instant.now().toEpochMilli();
+    final Map<String, String> propertiesResource =
+        ResourceFileReader.readPropertiesResource("application.properties");
+    final String testingDirectory = propertiesResource.get("video-resources.file-storage-location");
     // read properties
     final Map<String, String> properties =
         ResourceFileReader.readPropertiesResource("video.properties");
@@ -102,9 +104,14 @@ class FFmpegPluginTest {
     assertThat(location).isNotNull();
 
     final File file = new File(location);
-    final Path testingPath = file.toPath().resolve(testingDirectory);
+    final Path testingPath = file.toPath().resolve(testingDirectory).resolve("FFmpegPluginTest");
     logger.info("Storage location is: {}", testingPath);
-    return testingPath.toFile();
+    final File testingDir = testingPath.toFile();
+    if (!testingDir.exists()) {
+      final Path directories = Files.createDirectories(testingPath);
+      logger.info("Created testing directory: {}", directories);
+    }
+    return testingDir;
   }
 
   private void ensureStorageLocationExists() throws IOException {

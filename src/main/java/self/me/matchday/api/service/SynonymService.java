@@ -56,8 +56,11 @@ public class SynonymService implements EntityService<Synonym, Long> {
         });
   }
 
-  public void validateSynonym(@NotNull Synonym synonym, List<Long> synonymIds) {
+  public void validateSynonym(Synonym synonym, List<Long> synonymIds) {
 
+    if (synonym == null) {
+      throw new IllegalArgumentException("Synonym was null");
+    }
     final String name = synonym.getName();
     if (name == null || "".equals(name)) {
       throw new IllegalArgumentException("Found empty Synonym");

@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,11 +50,8 @@ class CompetitionServiceTest {
   @Autowired
   public CompetitionServiceTest(
       CompetitionService service, @NotNull TestDataCreator testDataCreator) {
-
-    final Random random = new Random();
     this.competitionService = service;
-    this.testCompetition =
-        testDataCreator.createTestCompetition("CST_Competition_" + random.nextInt());
+    this.testCompetition = testDataCreator.createTestCompetition("CompetitionServiceTest");
   }
 
   @Test

@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -37,8 +38,12 @@ import org.jetbrains.annotations.NotNull;
 @Setter
 public class ArtworkCollection {
 
-  @OneToMany(cascade = CascadeType.ALL)
+  private final ArtworkRole role;
+
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private final Set<Artwork> collection = new LinkedHashSet<>();
+
+  @Id @GeneratedValue private Long id;
 
   private int selectedIndex;
 

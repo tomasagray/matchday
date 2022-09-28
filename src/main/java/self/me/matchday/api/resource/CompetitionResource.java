@@ -67,8 +67,6 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
     private static final LinkRelation TEAMS = LinkRelation.of("teams");
     private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
     private static final LinkRelation FANART = LinkRelation.of("fanart");
-    //    private static final LinkRelation MONOCHROME = LinkRelation.of("monochrome_emblem");
-    //    private static final LinkRelation LANDSCAPE = LinkRelation.of("landscape");
     private static final LinkRelation EVENTS = LinkRelation.of("events");
 
     private final ArtworkCollectionResourceAssembler artworkModeller;
@@ -146,13 +144,6 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
                   methodOn(CompetitionController.class)
                       .fetchSelectedArtwork(competitionId, ArtworkRole.FANART))
               .withRel(FANART));
-      /* competitionResource.add(
-          linkTo(methodOn(ArtworkController.class).fetchCompetitionMonochromeEmblem(competitionId))
-              .withRel(MONOCHROME));
-      competitionResource.add(
-          linkTo(methodOn(ArtworkController.class).fetchCompetitionLandscape(competitionId))
-              .withRel(LANDSCAPE));*/
-
       return competitionResource;
     }
 

@@ -23,6 +23,7 @@
  */
 package self.me.matchday.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
@@ -37,6 +38,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.api.converter.StringToCountryConverter;
 
 /**
  * Represents a football team.
@@ -52,14 +54,20 @@ public class Team implements Serializable {
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
   @Column(columnDefinition = "BINARY(16)")
-  private UUID teamId;
+  private UUID id;
 
   @OneToOne(cascade = CascadeType.ALL)
   private final ProperName name;
 
-  @OneToOne private Artwork emblem;
-  @OneToOne private Artwork fanart;
-  @ManyToOne private Country country;
+  @JsonDeserialize(converter = StringToCountryConverter.class)
+  @ManyToOne
+  private Country country;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  private ArtworkCollection emblem = new ArtworkCollection(ArtworkRole.EMBLEM);
+
+  @OneToOne(cascade = CascadeType.ALL)
+  private ArtworkCollection fanart = new ArtworkCollection(ArtworkRole.FANART);
 
   public Team(@NotNull String name) {
     this.name = new ProperName(name);
@@ -73,7 +81,7 @@ public class Team implements Serializable {
   public String toString() {
     final ProperName properName = getName();
     final String name = properName == null ? "UNKNOWN" : properName.getName();
-    return String.format("%s [%s]", name, getTeamId());
+    return String.format("%s [%s]", name, getId());
   }
 
   /**

@@ -38,6 +38,6 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
    */
   @Query(
       "SELECT mt FROM MatchGame mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
-          + "WHERE ht.teamId = :teamId OR at.teamId = :teamId")
+          + "WHERE ht.id = :teamId OR at.id = :teamId")
   List<Match> fetchMatchesByTeam(@Param("teamId") UUID teamId);
 }

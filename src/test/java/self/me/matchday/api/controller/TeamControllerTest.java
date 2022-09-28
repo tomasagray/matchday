@@ -19,6 +19,15 @@
 
 package self.me.matchday.api.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -42,17 +51,8 @@ import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.Match;
+import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Team;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -111,7 +111,9 @@ class TeamControllerTest {
   void fetchAllTeams(@NotNull TeamResource resource) {
     logger.info("Testing TeamResource: {}", resource);
     assertThat(resource.getId()).isNotNull();
-    assertThat(resource.getName()).isNotNull().isNotEmpty();
+    final ProperName properName = resource.getName();
+    assertThat(properName).isNotNull();
+    assertThat(properName.getName()).isNotNull().isNotEmpty();
   }
 
   private Stream<Arguments> getTeamByNameArgs() {
@@ -128,7 +130,7 @@ class TeamControllerTest {
   @DisplayName("Validate retrieval of Team from database via REST controller by name")
   void fetchTeamByName(@NotNull Team team) {
 
-    final UUID teamName = team.getTeamId();
+    final UUID teamName = team.getId();
     final ResponseEntity<TeamResource> response = getTeam(teamName);
     logger.info("Got response: {}", response);
     assertThat(response).isNotNull();
@@ -145,7 +147,7 @@ class TeamControllerTest {
   @DisplayName("Validate retrieval of Events related to Team specified by {0} via REST controller")
   void fetchEventsForTeam(@NotNull Team team) {
 
-    final UUID teamId = team.getTeamId();
+    final UUID teamId = team.getId();
     final String url = String.format("http://localhost:%d/teams/team/%s", port, teamId);
     logger.info(String.format("Getting Events for Team: %s @ URL: %s", teamId, url));
 

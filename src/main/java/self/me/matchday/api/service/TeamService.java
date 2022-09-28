@@ -19,22 +19,30 @@
 
 package self.me.matchday.api.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.db.TeamRepository;
+import self.me.matchday.model.Artwork;
+import self.me.matchday.model.ArtworkCollection;
+import self.me.matchday.model.ArtworkRole;
 import self.me.matchday.model.Country;
+import self.me.matchday.model.Image;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Team;
 
@@ -43,10 +51,24 @@ import self.me.matchday.model.Team;
 public class TeamService implements EntityService<Team, UUID> {
 
   private final TeamRepository teamRepository;
+  private final ArtworkService artworkService;
+  private final SynonymService synonymService;
+  private final Map<ArtworkRole, Function<Team, ArtworkCollection>> methodRegistry;
 
-  @Autowired
-  public TeamService(@NotNull final TeamRepository teamRepository) {
+  public TeamService(
+      TeamRepository teamRepository, ArtworkService artworkService, SynonymService synonymService) {
     this.teamRepository = teamRepository;
+    this.artworkService = artworkService;
+    this.synonymService = synonymService;
+    this.methodRegistry = createMethodRegistry();
+  }
+
+  private static @NotNull Map<ArtworkRole, Function<Team, ArtworkCollection>>
+      createMethodRegistry() {
+    final Map<ArtworkRole, Function<Team, ArtworkCollection>> registry = new HashMap<>();
+    registry.put(ArtworkRole.EMBLEM, Team::getEmblem);
+    registry.put(ArtworkRole.FANART, Team::getFanart);
+    return registry;
   }
 
   @Override
@@ -59,6 +81,8 @@ public class TeamService implements EntityService<Team, UUID> {
     if (name != null) {
       Hibernate.initialize(name.getSynonyms());
     }
+    Hibernate.initialize(team.getEmblem().getCollection());
+    Hibernate.initialize(team.getFanart().getCollection());
     return team;
   }
 
@@ -121,10 +145,8 @@ public class TeamService implements EntityService<Team, UUID> {
   @Override
   public Team save(@NotNull final Team team) {
     validateTeam(team);
-    final Optional<Team> teamOptional = teamRepository.findTeamByNameName(team.getName().getName());
-    final Team saved = teamOptional.orElseGet(() -> teamRepository.saveAndFlush(team));
-    initialize(saved);
-    return saved;
+    final Team saved = teamRepository.saveAndFlush(team);
+    return initialize(saved);
   }
 
   @Override
@@ -136,10 +158,41 @@ public class TeamService implements EntityService<Team, UUID> {
 
   @Override
   public Team update(@NotNull Team team) {
-    if (team.getTeamId() == null) {
-      throw new IllegalArgumentException("Trying to update unknown Team: " + team);
-    }
+    validateForUpdate(team);
+    artworkService.repairArtworkFilePaths(team.getEmblem());
+    artworkService.repairArtworkFilePaths(team.getFanart());
     return save(team);
+  }
+
+  private void validateForUpdate(@NotNull Team updated) {
+    validateUpdateId(updated);
+    validateUpdatedName(updated);
+  }
+
+  private void validateUpdateId(@NotNull Team updated) {
+    if (updated.getId() == null) {
+      throw new IllegalArgumentException("Trying to update unknown Team: " + updated);
+    }
+  }
+
+  private void validateUpdatedName(@NotNull Team updated) {
+
+    final ProperName name = updated.getName();
+    synonymService.validateProperName(name);
+
+    final String updatedName = name.getName();
+    final Optional<Team> optional = getTeamByName(updatedName);
+    if (optional.isPresent()) {
+      final Team existing = optional.get();
+      final UUID existingId = existing.getId();
+      if (!existingId.equals(updated.getId())) {
+        final String msg =
+            String.format(
+                "A Team with name: %s already exists; please use the merge function instead",
+                updatedName);
+        throw new IllegalArgumentException(msg);
+      }
+    }
   }
 
   @Override
@@ -156,7 +209,7 @@ public class TeamService implements EntityService<Team, UUID> {
 
   @Override
   public void deleteAll(@NotNull Iterable<? extends Team> teams) {
-    StreamSupport.stream(teams.spliterator(), false).map(Team::getTeamId).forEach(this::delete);
+    StreamSupport.stream(teams.spliterator(), false).map(Team::getId).forEach(this::delete);
   }
 
   /**
@@ -181,5 +234,61 @@ public class TeamService implements EntityService<Team, UUID> {
     if (properName == null || properName.getName() == null || properName.getName().equals("")) {
       throw new IllegalArgumentException("Team has invalid name");
     }
+  }
+
+  public ArtworkCollection fetchArtworkCollection(@NotNull UUID teamId, @NotNull ArtworkRole role) {
+    return teamRepository
+        .findById(teamId)
+        .map(team -> getArtworkCollection(team, role))
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    String.format("Could not find %s artwork for Team: %s", role, teamId)));
+  }
+
+  private ArtworkCollection getArtworkCollection(@NotNull Team team, @NotNull ArtworkRole role) {
+    return methodRegistry.get(role).apply(team);
+  }
+
+  public Artwork fetchSelectedArtworkMetadata(@NotNull UUID teamId, @NotNull ArtworkRole role) {
+    return fetchArtworkCollection(teamId, role).getSelected();
+  }
+
+  public Image fetchSelectedArtwork(@NotNull UUID teamId, @NotNull ArtworkRole role)
+      throws IOException {
+    final Artwork artwork = fetchSelectedArtworkMetadata(teamId, role);
+    if (artwork != null) {
+      return artworkService.fetchArtworkData(artwork);
+    }
+    return null;
+  }
+
+  public Artwork fetchArtworkMetadata(
+      @NotNull UUID teamId, @NotNull ArtworkRole role, @NotNull Long artworkId) {
+    return fetchArtworkCollection(teamId, role).getCollection().stream()
+        .filter(artwork -> artworkId.equals(artwork.getId()))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    String.format(
+                        "No artwork with ID %s in %s collection for Team: %s",
+                        artworkId, role, teamId)));
+  }
+
+  public Image fetchArtworkImageData(
+      @NotNull UUID teamId, @NotNull ArtworkRole role, @NotNull Long artworkId) throws IOException {
+    final Artwork artwork = fetchArtworkMetadata(teamId, role, artworkId);
+    if (artwork != null) {
+      return artworkService.fetchArtworkData(artwork);
+    }
+    return null;
+  }
+
+  public ArtworkCollection addTeamArtwork(
+      @NotNull UUID teamId, @NotNull ArtworkRole role, @NotNull MultipartFile image)
+      throws IOException {
+    final ArtworkCollection collection = fetchArtworkCollection(teamId, role);
+    return artworkService.addArtworkToCollection(collection, image);
   }
 }

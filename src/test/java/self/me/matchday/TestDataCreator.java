@@ -121,7 +121,8 @@ public class TestDataCreator {
   }
 
   private static int getRandomNumber(int min, int max) {
-    return (int) ((Math.random() * (min - max)) + min);
+    final int number = (int) ((Math.random() * (min - max)) + min);
+    return Math.abs(number);
   }
 
   // ======================== DATA SOURCE ========================
@@ -231,16 +232,19 @@ public class TestDataCreator {
     return this.createTestMatch("Test ");
   }
 
+  private static String getRandomizedName(@NotNull String name, int start, int end) {
+    final int seed = getRandomNumber(start, end);
+    return String.format("Test Competition %s [%d]", name, seed);
+  }
+
   @Transactional
   @NotNull
   public Match createTestMatch(@NotNull String name) {
 
-    final int seed = getRandomNumber(1_000, 10_000);
-    final String randomizedName = String.format("Test Competition %s [%d]", name, seed);
-
-    final Competition testCompetition = createTestCompetition(randomizedName);
-    final Team homeTeam = createTestTeam("Home Team " + name);
-    final Team awayTeam = createTestTeam("Away Team " + name);
+    final Competition testCompetition =
+        createTestCompetition("Competition " + getRandomizedName(name, 100, 1000));
+    final Team homeTeam = createTestTeam("Home Team " + getRandomizedName(name, 10_000, 100_000));
+    final Team awayTeam = createTestTeam("Away Team " + getRandomizedName(name, 10_000, 100_000));
     final Event testEvent =
         Match.builder()
             .date(LocalDateTime.now())

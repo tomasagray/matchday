@@ -19,6 +19,7 @@
 
 package self.me.matchday.log;
 
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -28,8 +29,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.TeamService;
-
-import java.util.List;
 
 @Aspect
 public class TeamServiceLog {
@@ -84,8 +83,50 @@ public class TeamServiceLog {
     return result;
   }
 
+  @Before("execution(* self.me.matchday.api.service.TeamService.delete(..))")
+  public void logDeleteTeam(@NotNull JoinPoint jp) {
+    logger.info("Deleting Team: {}", jp.getArgs()[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.TeamService.deleteAll(..))")
+  public void logDeleteManyTeam(@NotNull JoinPoint jp) {
+    final Iterable<?> teams = (Iterable<?>) jp.getArgs()[0];
+    final long teamCount = teams.spliterator().estimateSize();
+    logger.info("Deleting: {} teams...", teamCount);
+  }
+
   @Before("execution(* self.me.matchday.api.service.TeamService.deleteTeamByName(..))")
   public void logDeleteTeamByName(@NotNull JoinPoint jp) {
     logger.info("Attempting to DELETE Team: {} from database...", jp.getArgs()[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.TeamService.fetchArtworkCollection(..))")
+  public void logFetchTeamArtworkCollection(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    logger.info("Getting {} artwork collection for Team: {} ...", args[1], args[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.TeamService.fetchSelectedArtwork(..))")
+  public void logFetchSelectedArtwork(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    logger.info("Getting selected {} artwork for Team: {}", args[1], args[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.TeamService.fetchSelectedArtworkMetadata(..))")
+  public void logFetchSelectedArtworkMetadata(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    logger.info("Getting selected {} artwork metadata for Team: {}", args[1], args[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.TeamService.fetchArtworkImageData(..))")
+  public void logFetchTeamArtwork(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    logger.info("Getting {} artwork with ID: {} for Team: {}", args[1], args[2], args[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.TeamService.fetchArtworkMetadata(..))")
+  public void logFetchTeamArtworkMetadata(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    logger.info("Getting {} artwork metadata with ID: {} for Team: {}", args[1], args[2], args[0]);
   }
 }

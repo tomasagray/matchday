@@ -71,9 +71,6 @@ public class Competition implements Serializable {
   @OneToOne(cascade = CascadeType.ALL)
   private ArtworkCollection fanart = new ArtworkCollection(ArtworkRole.FANART);
 
-  //  @OneToOne private ArtworkCollection monochromeEmblem;
-  //  @OneToOne private ArtworkCollection landscape;
-
   public Competition(@NotNull final String name) {
     this.name = new ProperName(name);
   }

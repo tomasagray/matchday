@@ -19,31 +19,50 @@
 
 package self.me.matchday.api.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static self.me.matchday.api.controller.CompetitionController.IMAGE_SVG_VALUE;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import self.me.matchday.api.resource.ArtworkCollectionResource;
+import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionResourceAssembler;
+import self.me.matchday.api.resource.ArtworkResource;
+import self.me.matchday.api.resource.ArtworkResource.ArtworkResourceAssembler;
 import self.me.matchday.api.resource.CompetitionResource;
-import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
+import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.MatchResource;
 import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.api.service.EventService;
+import self.me.matchday.api.service.InvalidArtworkException;
 import self.me.matchday.api.service.MatchService;
 import self.me.matchday.api.service.TeamService;
+import self.me.matchday.api.service.UnknownEntityException;
+import self.me.matchday.model.Artwork;
+import self.me.matchday.model.ArtworkCollection;
+import self.me.matchday.model.ArtworkRole;
+import self.me.matchday.model.Image;
 import self.me.matchday.model.Match;
-
-import java.util.List;
-import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import self.me.matchday.model.Team;
 
 @RestController
 @RequestMapping(value = "/teams")
@@ -52,20 +71,22 @@ public class TeamController {
   private final TeamService teamService;
   private final TeamResourceAssembler teamResourceAssembler;
   private final CompetitionService competitionService;
-  private final CompetitionResource.CompetitionResourceAssembler competitionResourceAssembler;
+  private final CompetitionResourceAssembler competitionResourceAssembler;
   private final MatchService matchService;
   private final MatchResourceAssembler matchAssembler;
+  private final ArtworkResourceAssembler artworkModeller;
+  private final ArtworkCollectionResourceAssembler collectionModeller;
 
-  @Autowired
   public TeamController(
       TeamService teamService,
-      TeamResourceAssembler teamResourceAssembler,
-      EventService eventService,
       CompetitionService competitionService,
+      EventService eventService,
       MatchService matchService,
-      EventResourceAssembler eventResourceAssembler,
-      CompetitionResource.CompetitionResourceAssembler competitionResourceAssembler,
-      MatchResourceAssembler matchAssembler) {
+      TeamResourceAssembler teamResourceAssembler,
+      CompetitionResourceAssembler competitionResourceAssembler,
+      MatchResourceAssembler matchAssembler,
+      ArtworkResourceAssembler artworkModeller,
+      ArtworkCollectionResourceAssembler collectionModeller) {
 
     this.teamService = teamService;
     this.teamResourceAssembler = teamResourceAssembler;
@@ -73,6 +94,8 @@ public class TeamController {
     this.matchService = matchService;
     this.competitionResourceAssembler = competitionResourceAssembler;
     this.matchAssembler = matchAssembler;
+    this.artworkModeller = artworkModeller;
+    this.collectionModeller = collectionModeller;
   }
 
   /**
@@ -136,5 +159,138 @@ public class TeamController {
       @PathVariable final UUID teamId) {
     return competitionResourceAssembler.toCollectionModel(
         competitionService.fetchCompetitionsForTeam(teamId));
+  }
+
+  @RequestMapping(
+      value = "/team/{teamId}/{role}",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<CollectionModel<ArtworkResource>> fetchTeamArtworkCollection(
+      @PathVariable UUID teamId, @PathVariable ArtworkRole role) {
+
+    final ArtworkCollection collection = teamService.fetchArtworkCollection(teamId, role);
+    final CollectionModel<ArtworkResource> resources = artworkModeller.fromCollection(collection);
+    resources.add(
+        linkTo(methodOn(TeamController.class).fetchTeamArtworkCollection(teamId, role))
+            .withSelfRel());
+    resources.forEach(artwork -> TeamResourceAssembler.addArtworkLinks(teamId, role, artwork));
+    return ResponseEntity.ok(resources);
+  }
+
+  @RequestMapping(
+      value = "/team/{teamId}/{role}/selected",
+      method = RequestMethod.GET,
+      produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, IMAGE_SVG_VALUE})
+  public ResponseEntity<byte[]> fetchSelectedArtwork(
+      @PathVariable UUID teamId, @PathVariable ArtworkRole role) throws IOException {
+    final Image image = teamService.fetchSelectedArtwork(teamId, role);
+    return image != null
+        ? ResponseEntity.ok().contentType(image.getContentType()).body(image.getData())
+        : ResponseEntity.notFound().build();
+  }
+
+  @RequestMapping(
+      value = "/team/{teamId}/{role}/selected/metadata",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<ArtworkResource> fetchSelectedArtworkMetadata(
+      @PathVariable UUID teamId, @PathVariable ArtworkRole role) {
+    final Artwork artwork = teamService.fetchSelectedArtworkMetadata(teamId, role);
+    if (artwork != null) {
+      final ArtworkResource resource = artworkModeller.toModel(artwork);
+      resource.add(
+          linkTo(methodOn(TeamController.class).fetchSelectedArtworkMetadata(teamId, role))
+              .withSelfRel());
+      return ResponseEntity.ok(resource);
+    }
+    return ResponseEntity.notFound().build();
+  }
+
+  @RequestMapping(
+      value = "/team/{teamId}/{role}/{artworkId}",
+      method = RequestMethod.GET,
+      produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, IMAGE_SVG_VALUE})
+  public ResponseEntity<byte[]> fetchTeamArtworkImageData(
+      @PathVariable UUID teamId, @PathVariable ArtworkRole role, @PathVariable Long artworkId)
+      throws IOException {
+    final Image image = teamService.fetchArtworkImageData(teamId, role, artworkId);
+    return image != null
+        ? ResponseEntity.ok().contentType(image.getContentType()).body(image.getData())
+        : ResponseEntity.notFound().build();
+  }
+
+  @RequestMapping(
+      value = "/team/{teamId}/{role}/{artworkId}",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<ArtworkResource> fetchTeamArtworkMetadata(
+      @PathVariable UUID teamId, @PathVariable ArtworkRole role, @PathVariable Long artworkId)
+      throws IOException {
+    final Artwork artwork = teamService.fetchArtworkMetadata(teamId, role, artworkId);
+    final ArtworkResource resource = artworkModeller.toModel(artwork);
+    resource.add(
+        linkTo(methodOn(TeamController.class).fetchTeamArtworkMetadata(teamId, role, artworkId))
+            .withRel("metadata"));
+    resource.add(
+        linkTo(methodOn(TeamController.class).fetchTeamArtworkImageData(teamId, role, artworkId))
+            .withRel("image"));
+    return ResponseEntity.ok(resource);
+  }
+
+  @RequestMapping(
+      value = "/team/{teamId}/{role}/add",
+      method = RequestMethod.POST,
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<ArtworkCollectionResource> addTeamArtwork(
+      @PathVariable UUID teamId, @PathVariable ArtworkRole role, @RequestBody MultipartFile image)
+      throws IOException {
+    final ArtworkCollection collection = teamService.addTeamArtwork(teamId, role, image);
+    final ArtworkCollectionResource resource = collectionModeller.toModel(collection);
+    resource
+        .getArtwork()
+        .forEach(artwork -> TeamResourceAssembler.addArtworkLinks(teamId, role, artwork));
+    resource.add(
+        linkTo(methodOn(TeamController.class).addTeamArtwork(teamId, role, image)).withSelfRel());
+    return ResponseEntity.ok(resource);
+  }
+
+  @RequestMapping(
+      value = "/team/{teamId}/update",
+      method = RequestMethod.PATCH,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<TeamResource> updateTeam(@RequestBody Team team) {
+    final Team update = teamService.update(team);
+    final TeamResource resource = teamResourceAssembler.toModel(update);
+    return ResponseEntity.ok(resource);
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public String handleIllegalArg(@NotNull IllegalArgumentException e) {
+    return e.getMessage();
+  }
+
+  @ExceptionHandler(InvalidArtworkException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public String handleInvalidArt(@NotNull InvalidArtworkException e) {
+    return e.getMessage();
+  }
+
+  @ExceptionHandler(UnknownEntityException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public String handleUnknownEntity(@NotNull UnknownEntityException e) {
+    return e.getMessage();
+  }
+
+  @ExceptionHandler(FileNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public String handleFileNotFound(@NotNull FileNotFoundException e) {
+    return "File not found: " + e.getMessage();
   }
 }

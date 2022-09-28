@@ -69,7 +69,7 @@ class CompetitionControllerTest {
   @LocalServerPort private int port;
   @Autowired private TestRestTemplate restTemplate;
 
-  private static final String NAME = "Competition Controller Test ";
+  private static final String NAME = "CompetitionControllerTest ";
   private static List<Competition> testCompetitions;
   private static final List<Event> testMatches = new ArrayList<>();
   private static TestDataCreator testDataCreator;
@@ -108,7 +108,10 @@ class CompetitionControllerTest {
     assertThat(body).isNotNull();
 
     final Stream<String> names =
-        body.getContent().stream().map(CompetitionResource::getName).map(ProperName::getName);
+        body.getContent().stream()
+            .map(CompetitionResource::getName)
+            .map(ProperName::getName)
+            .filter(name -> name.contains(NAME));
     return Bolt.of(names)
         .zipWithBecoming(
             testCompetitions.stream(),

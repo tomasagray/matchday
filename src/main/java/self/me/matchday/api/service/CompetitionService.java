@@ -49,8 +49,8 @@ import self.me.matchday.model.ProperName;
 public class CompetitionService implements EntityService<Competition, UUID> {
 
   private final CompetitionRepository competitionRepository;
-  private final SynonymService synonymService;
   private final ArtworkService artworkService;
+  private final SynonymService synonymService;
   private final Map<ArtworkRole, Function<Competition, ArtworkCollection>> methodRegistry;
 
   public CompetitionService(
@@ -220,7 +220,6 @@ public class CompetitionService implements EntityService<Competition, UUID> {
   private void validateForUpdate(@NotNull Competition updated) {
     validateUpdateId(updated);
     validateUpdateName(updated);
-    synonymService.validateProperName(updated.getName());
   }
 
   private void validateUpdateId(@NotNull Competition updated) {
@@ -238,24 +237,15 @@ public class CompetitionService implements EntityService<Competition, UUID> {
 
   private void validateUpdateName(@NotNull Competition updated) {
 
-    final String nameError = "Competition has no name";
     final ProperName updatedProperName = updated.getName();
-    final UUID updatedId = updated.getId();
-    // check for name collision
-    if (updatedProperName == null) {
-      throw new IllegalArgumentException(nameError);
-    }
+    synonymService.validateProperName(updatedProperName);
 
     final String updatedName = updatedProperName.getName();
-    if (updatedName == null || "".equals(updatedName)) {
-      throw new IllegalArgumentException(nameError);
-    }
-
     final Optional<Competition> optional = fetchCompetitionByName(updatedName);
     if (optional.isPresent()) {
       final Competition existing = optional.get();
       final UUID existingId = existing.getId();
-      if (!existingId.equals(updatedId)) {
+      if (!existingId.equals(updated.getId())) {
         final String msg =
             String.format(
                 "A Competition with name: %s already exists; please use the merge function instead",

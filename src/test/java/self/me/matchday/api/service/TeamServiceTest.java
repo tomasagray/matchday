@@ -74,7 +74,7 @@ class TeamServiceTest {
   @DisplayName("Verify retrieval of specific team from database")
   void fetchTeamById() {
 
-    final Optional<Team> teamOptional = teamService.fetchById(testTeam.getTeamId());
+    final Optional<Team> teamOptional = teamService.fetchById(testTeam.getId());
     assertThat(teamOptional).isPresent();
 
     teamOptional.ifPresent(
