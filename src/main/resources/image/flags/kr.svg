@@ -1,43 +1,24 @@
-<!--
-  - Copyright (c) 2022.
-  -
-  - This file is part of Matchday.
-  -
-  - Matchday is free software: you can redistribute it and/or modify
-  - it under the terms of the GNU General Public License as published by
-  - the Free Software Foundation, either version 3 of the License, or
-  - (at your option) any later version.
-  -
-  - Matchday is distributed in the hope that it will be useful,
-  - but WITHOUT ANY WARRANTY; without even the implied warranty of
-  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  - GNU General Public License for more details.
-  -
-  - You should have received a copy of the GNU General Public License
-  - along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
-  -->
-
-<svg xmlns:xlink="http://www.w3.org/1999/xlink" id="flag-icons-kr" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="flag-icons-kr" viewBox="0 0 640 480">
   <defs>
     <clipPath id="a">
-      <path d="M-95.8-.4h682.7v512H-95.8z" fill-opacity=".7"/>
+      <path fill-opacity=".7" d="M-95.8-.4h682.7v512H-95.8z"/>
     </clipPath>
   </defs>
-  <g clip-path="url(#a)" fill-rule="evenodd" transform="translate(89.8 .4) scale(.9375)">
+  <g fill-rule="evenodd" clip-path="url(#a)" transform="translate(89.8 .4) scale(.9375)">
+    <path fill="#fff" d="M-95.8-.4H587v512H-95.8Z"/>
     <g transform="rotate(-56.3 361.6 -101.3) scale(10.66667)">
-      <circle cy="-6" fill="#cd2e3a" r="6"/>
       <g id="c">
-        <path d="M-6-26H6v2H-6Zm0 3H6v2H-6Zm0 3H6v2H-6Z" id="b"/>
-        <use height="100%" width="100%" y="44" xlink:href="#b"/>
+        <path id="b" d="M-6-26H6v2H-6Zm0 3H6v2H-6Zm0 3H6v2H-6Z"/>
+        <use xlink:href="#b" width="100%" height="100%" y="44"/>
       </g>
-      <path d="M0-12a12 12 0 0 1 0 24Z" fill="#cd2e3a"/>
-      <path d="M0-12a12 12 0 0 0 0 24A6 6 0 0 0 0 0Z" fill="#0047a0"/>
-      <path d="M0 17v10" stroke="#fff"/>
+      <path stroke="#fff" d="M0 17v10"/>
+      <path fill="#cd2e3a" d="M0-12a12 12 0 0 1 0 24Z"/>
+      <path fill="#0047a0" d="M0-12a12 12 0 0 0 0 24A6 6 0 0 0 0 0Z"/>
+      <circle cy="-6" r="6" fill="#cd2e3a"/>
     </g>
     <g transform="rotate(-123.7 191.2 62.2) scale(10.66667)">
-      <path d="M0-23.5v3M0 17v3.5m0 3v3" stroke="#fff"/>
-      <use height="100%" width="100%" xlink:href="#c"/>
+      <use xlink:href="#c" width="100%" height="100%"/>
+      <path stroke="#fff" d="M0-23.5v3M0 17v3.5m0 3v3"/>
     </g>
-    <path d="M-95.8-.4H587v512H-95.8Z" fill="#fff"/>
   </g>
 </svg>

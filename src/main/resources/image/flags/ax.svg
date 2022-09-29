@@ -1,29 +1,11 @@
-<!--
-  - Copyright (c) 2022.
-  -
-  - This file is part of Matchday.
-  -
-  - Matchday is free software: you can redistribute it and/or modify
-  - it under the terms of the GNU General Public License as published by
-  - the Free Software Foundation, either version 3 of the License, or
-  - (at your option) any later version.
-  -
-  - Matchday is distributed in the hope that it will be useful,
-  - but WITHOUT ANY WARRANTY; without even the implied warranty of
-  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  - GNU General Public License for more details.
-  -
-  - You should have received a copy of the GNU General Public License
-  - along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
-  -->
-
-<svg id="flag-icons-ax" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-ax" viewBox="0 0 640 480">
   <defs>
     <clipPath id="a">
-      <path d="M106.3 0h1133.3v850H106.3z" fill-opacity=".7"/>
+      <path fill-opacity=".7" d="M106.3 0h1133.3v850H106.3z"/>
     </clipPath>
   </defs>
   <g clip-path="url(#a)" transform="matrix(.56472 0 0 .56482 -60 -.1)">
+    <path fill="#0053a5" d="M0 0h1300v850H0z"/>
     <g fill="#ffce00">
       <path d="M400 0h250v850H400z"/>
       <path d="M0 300h1300v250H0z"/>
@@ -32,6 +14,5 @@
       <path d="M475 0h100v850H475z"/>
       <path d="M0 375h1300v100H0z"/>
     </g>
-    <path d="M0 0h1300v850H0z" fill="#0053a5"/>
   </g>
 </svg>

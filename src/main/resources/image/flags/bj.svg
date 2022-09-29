@@ -1,33 +1,14 @@
-<!--
-  - Copyright (c) 2022.
-  -
-  - This file is part of Matchday.
-  -
-  - Matchday is free software: you can redistribute it and/or modify
-  - it under the terms of the GNU General Public License as published by
-  - the Free Software Foundation, either version 3 of the License, or
-  - (at your option) any later version.
-  -
-  - Matchday is distributed in the hope that it will be useful,
-  - but WITHOUT ANY WARRANTY; without even the implied warranty of
-  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  - GNU General Public License for more details.
-  -
-  - You should have received a copy of the GNU General Public License
-  - along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
-  -->
-
-<svg id="flag-icons-bj" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-bj" viewBox="0 0 640 480">
   <defs>
     <clipPath id="a">
-      <path d="M67.6-154h666v666h-666z" fill="gray"/>
+      <path fill="gray" d="M67.6-154h666v666h-666z"/>
     </clipPath>
   </defs>
   <g clip-path="url(#a)" transform="matrix(.961 0 0 .7207 -65 111)">
     <g fill-rule="evenodd" stroke-width="1pt">
-      <path d="M0-154h333v666H0z" fill="#319400"/>
-      <path d="M333-154h666v333H333z" fill="#ffd600"/>
-      <path d="M333 179h666v333H333z" fill="#de2110"/>
+      <path fill="#319400" d="M0-154h333v666H0z"/>
+      <path fill="#ffd600" d="M333-154h666v333H333z"/>
+      <path fill="#de2110" d="M333 179h666v333H333z"/>
     </g>
   </g>
 </svg>
