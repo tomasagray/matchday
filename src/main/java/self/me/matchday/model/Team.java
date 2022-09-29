@@ -24,11 +24,14 @@
 package self.me.matchday.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.awt.Color;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -62,6 +65,8 @@ public class Team implements Serializable {
   @JsonDeserialize(converter = StringToCountryConverter.class)
   @ManyToOne
   private Country country;
+
+  @ElementCollection private List<Color> colors;
 
   @OneToOne(cascade = CascadeType.ALL)
   private ArtworkCollection emblem = new ArtworkCollection(ArtworkRole.EMBLEM);

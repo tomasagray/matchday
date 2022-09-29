@@ -21,35 +21,35 @@ package self.me.matchday.api.resource;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static self.me.matchday.util.Constants.EMBLEM_REL;
+import static self.me.matchday.util.Constants.EVENTS_REL;
+import static self.me.matchday.util.Constants.FANART_REL;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.awt.Color;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.TeamController;
 import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionResourceAssembler;
+import self.me.matchday.api.resource.ColorResource.ColorResourceModeller;
 import self.me.matchday.model.ArtworkRole;
 import self.me.matchday.model.Country;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Team;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "team")
 @Relation(collectionRelation = "teams")
@@ -58,6 +58,7 @@ public class TeamResource extends RepresentationModel<TeamResource> {
   private UUID id;
   private ProperName name;
   private Country country;
+  private List<ColorResource> colors;
   private ArtworkCollectionResource emblem;
   private ArtworkCollectionResource fanart;
 
@@ -65,15 +66,15 @@ public class TeamResource extends RepresentationModel<TeamResource> {
   public static class TeamResourceAssembler
       extends RepresentationModelAssemblerSupport<Team, TeamResource> {
 
-    private static final LinkRelation EVENTS = LinkRelation.of("events");
-    private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
-    private static final LinkRelation FANART = LinkRelation.of("fanart");
-
     private final ArtworkCollectionResourceAssembler collectionModeller;
+    private final ColorResourceModeller colorModeller;
 
-    public TeamResourceAssembler(ArtworkCollectionResourceAssembler collectionModeller) {
+    public TeamResourceAssembler(
+        ArtworkCollectionResourceAssembler collectionModeller,
+        ColorResourceModeller colorModeller) {
       super(TeamController.class, TeamResource.class);
       this.collectionModeller = collectionModeller;
+      this.colorModeller = colorModeller;
     }
 
     public static void addArtworkLinks(
@@ -98,15 +99,17 @@ public class TeamResource extends RepresentationModel<TeamResource> {
     @Override
     public TeamResource toModel(@NotNull Team team) {
 
-      final TeamResource teamResource = instantiateModel(team);
       // initialize resource
+      final TeamResource teamResource = instantiateModel(team);
       final UUID teamId = team.getId();
       teamResource.setId(teamId);
       teamResource.setName(team.getName());
       teamResource.setCountry(team.getCountry());
+      teamResource.setColors(getColorResources(team.getColors()));
+
+      // artwork
       teamResource.setEmblem(collectionModeller.toModel(team.getEmblem()));
       teamResource.setFanart(collectionModeller.toModel(team.getFanart()));
-
       teamResource
           .getEmblem()
           .getArtwork()
@@ -122,15 +125,19 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       // artwork
       teamResource.add(
           linkTo(methodOn(TeamController.class).fetchSelectedArtwork(teamId, ArtworkRole.EMBLEM))
-              .withRel(EMBLEM));
+              .withRel(EMBLEM_REL));
       teamResource.add(
           linkTo(methodOn(TeamController.class).fetchSelectedArtwork(teamId, ArtworkRole.FANART))
-              .withRel(FANART));
+              .withRel(FANART_REL));
       // events
       teamResource.add(
-          linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId)).withRel(EVENTS));
+          linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId)).withRel(EVENTS_REL));
 
       return teamResource;
+    }
+
+    private List<ColorResource> getColorResources(@NotNull List<Color> colors) {
+      return colors.stream().map(colorModeller::toModel).collect(Collectors.toList());
     }
 
     @NotNull

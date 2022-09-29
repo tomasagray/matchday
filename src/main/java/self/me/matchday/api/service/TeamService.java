@@ -81,6 +81,7 @@ public class TeamService implements EntityService<Team, UUID> {
     if (name != null) {
       Hibernate.initialize(name.getSynonyms());
     }
+    Hibernate.initialize(team.getColors());
     Hibernate.initialize(team.getEmblem().getCollection());
     Hibernate.initialize(team.getFanart().getCollection());
     return team;
