@@ -21,9 +21,11 @@ package self.me.matchday.log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.api.service.ArtworkService;
@@ -52,5 +54,17 @@ public class ArtworkServiceLog {
     final Object modifiedCollection = jp.proceed();
     logger.info("ArtworkCollection is now: {}", modifiedCollection);
     return modifiedCollection;
+  }
+
+  @Before("execution(* self.me.matchday.api.service.ArtworkService.repairArtworkFilePaths(..))")
+  public void logRepairArtworkPath(@NotNull JoinPoint jp) {
+    logger.info("Repairing Artwork file paths for collection: {}", jp.getArgs());
+  }
+
+  @Before(
+      "execution(* self.me.matchday.api.service.ArtworkService.deleteArtworkFromCollection(..))")
+  public void logDeleteArtwork(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    logger.info("Deleting Artwork: {} from collection: {}", args[1], args[0]);
   }
 }

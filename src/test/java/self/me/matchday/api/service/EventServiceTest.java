@@ -97,9 +97,9 @@ class EventServiceTest {
   private @NotNull Match createUnsavedMatch(String name) {
     final Match match =
         Match.builder()
-            .competition(new Competition(name))
-            .homeTeam(new Team(name + " Home"))
-            .awayTeam(new Team(name + " Away"))
+            .competition(new Competition(TestDataCreator.getRandomizedName(name, 10, 100)))
+            .homeTeam(new Team(TestDataCreator.getRandomizedName(name + " Home", 100, 1000)))
+            .awayTeam(new Team(TestDataCreator.getRandomizedName(name + " Away", 100, 1000)))
             .fixture(new Fixture(5))
             .season(new Season())
             .date(LocalDateTime.now())

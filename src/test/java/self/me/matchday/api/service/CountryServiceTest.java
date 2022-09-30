@@ -86,7 +86,7 @@ class CountryServiceTest {
   void getFlag() throws IOException {
 
     // given
-    final long expectedBytes = 92_539;
+    final long expectedBytes = 91_814;
     final String countryName = "Spain";
     logger.info("Reading flag for Country: {}; expecting {} bytes", countryName, expectedBytes);
 

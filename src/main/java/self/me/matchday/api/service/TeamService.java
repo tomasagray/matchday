@@ -292,4 +292,10 @@ public class TeamService implements EntityService<Team, UUID> {
     final ArtworkCollection collection = fetchArtworkCollection(teamId, role);
     return artworkService.addArtworkToCollection(collection, image);
   }
+
+  public ArtworkCollection removeTeamArtwork(
+      @NotNull UUID teamId, @NotNull ArtworkRole role, @NotNull Long artworkId) throws IOException {
+    final ArtworkCollection collection = fetchArtworkCollection(teamId, role);
+    return artworkService.deleteArtworkFromCollection(collection, artworkId);
+  }
 }

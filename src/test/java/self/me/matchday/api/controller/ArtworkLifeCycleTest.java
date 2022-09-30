@@ -21,22 +21,22 @@ package self.me.matchday.api.controller;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,44 +55,54 @@ import self.me.matchday.util.ResourceFileReader;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
-@DisplayName("Validation for the ArtworkController REST API endpoints")
-class ArtworkControllerTest {
+@DisplayName("Ensure Artwork can be added, retrieved and deleted via API")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class ArtworkLifeCycleTest {
 
-  private static final Logger logger = LogManager.getLogger(ArtworkControllerTest.class);
-  private static final List<String> deleteList = new ArrayList<>();
+  private static final Logger logger = LogManager.getLogger(ArtworkLifeCycleTest.class);
+
+  private static final List<Long> deleteList = new ArrayList<>();
   private final Competition testCompetition;
   private final MockMvc mvc;
   @LocalServerPort private int port;
 
   @Autowired
-  ArtworkControllerTest(
+  ArtworkLifeCycleTest(
       @NotNull TestDataCreator testDataCreator, CompetitionController competitionController) {
     // create test data
-    testCompetition = testDataCreator.createTestCompetition("ArtworkControllerTest");
+    testCompetition = testDataCreator.createTestCompetition("ArtworkLifeCycleTest");
     mvc = MockMvcBuilders.standaloneSetup(competitionController).build();
   }
 
-  @AfterAll
-  static void cleanup() throws IOException {
-    logger.info("Deleting images created by test...");
-    for (String file : deleteList) {
-      logger.info("Deleting: {}", file);
-      Files.delete(Path.of(file));
-    }
-  }
-
-  private static void addFileToDeleteList(String json) throws JSONException {
+  private static void updateFilesToDeleteList(String json) throws JSONException {
 
     logger.info("Parsing JSON: {}", json);
     final JSONObject jsonObject = new JSONObject(json);
-    final JSONArray content = jsonObject.getJSONArray("content");
+    final JSONObject artworks = jsonObject.getJSONObject("artwork");
+    final JSONArray content = artworks.getJSONArray("content");
     logger.info("Found: {} objects in 'content'", content.length());
 
     for (int i = 0; i < content.length(); i++) {
       final JSONObject o = content.getJSONObject(i);
-      final String file = o.getString("file");
-      deleteList.add(file);
+      final Long id = o.getLong("id");
+      logger.info("Adding ID: {} to delete list", id);
+      deleteList.add(id);
     }
+  }
+
+  private String getEmblemCollectionUri(UUID id) {
+    return String.format("http://localhost:%d/competitions/competition/%s/EMBLEM", port, id);
+  }
+
+  @Contract(pure = true)
+  private @NotNull String getAddEmblemUri(UUID id) {
+    return getEmblemCollectionUri(id) + "/add";
+  }
+
+  private String getRemoveEmblemUri(UUID id, Long artworkId) {
+    return String.format(
+        "http://localhost:%d/competitions/competition/%s/EMBLEM/%d/remove", port, id, artworkId);
   }
 
   @Test
@@ -102,28 +112,24 @@ class ArtworkControllerTest {
     // given
     final byte[] uploadImage = ResourceFileReader.readBinaryData("data/TestUploadImage.png");
     logger.info("Read: {} bytes for test upload image", uploadImage.length);
-    final String uri = getEmblemUri(testCompetition.getId());
+    final String addUri = getAddEmblemUri(testCompetition.getId());
     final MockMultipartFile multipartFile =
         new MockMultipartFile("image", "", "image/png", uploadImage);
 
     // when
+    logger.info("Uploading Artwork to: {}", addUri);
     final MvcResult result =
-        mvc.perform(MockMvcRequestBuilders.multipart(uri).file(multipartFile)).andReturn();
+        mvc.perform(MockMvcRequestBuilders.multipart(addUri).file(multipartFile)).andReturn();
 
     final MockHttpServletResponse response = result.getResponse();
     final int actualStatus = response.getStatus();
     final String content = response.getContentAsString();
     logger.info("Got status: {}", actualStatus);
     logger.info("Got response: {}", content);
-    // todo - cleanup images created during test
-    //    addFileToDeleteList(content);
+    updateFilesToDeleteList(content);
 
     // then
     assertThat(actualStatus).isEqualTo(200);
-  }
-
-  private String getEmblemUri(UUID id) {
-    return String.format("http://localhost:%d/competitions/competition/%s/EMBLEM", port, id);
   }
 
   @Test
@@ -132,11 +138,12 @@ class ArtworkControllerTest {
   void fetchCompetitionEmblem() throws Exception {
 
     // given
-    final String uri = getEmblemUri(testCompetition.getId());
+    final String getUri = getEmblemCollectionUri(testCompetition.getId());
     logger.info("Getting Emblem collection for Competition: {}", testCompetition);
+    logger.info("Getting emblem collection from URL: {}", getUri);
 
     // when
-    final MvcResult result = mvc.perform(MockMvcRequestBuilders.get(uri)).andReturn();
+    final MvcResult result = mvc.perform(MockMvcRequestBuilders.get(getUri)).andReturn();
     final MockHttpServletResponse response = result.getResponse();
     final int actualStatus = response.getStatus();
     final String content = response.getContentAsString();
@@ -145,5 +152,29 @@ class ArtworkControllerTest {
     // then
     assertThat(actualStatus).isEqualTo(200);
     assertThat(content).isNotNull().isNotEmpty();
+  }
+
+  @Test
+  @Order(3)
+  @DisplayName("Validate deleting Artwork with file data via API")
+  void deleteArtwork() throws Exception {
+
+    assertThat(deleteList).isNotEmpty();
+    for (final Long artworkId : deleteList) {
+      // given
+      final String removeUri = getRemoveEmblemUri(testCompetition.getId(), artworkId);
+      logger.info("Removing artwork using URL: {}", removeUri);
+
+      // when
+      final MvcResult result = mvc.perform(MockMvcRequestBuilders.delete(removeUri)).andReturn();
+      final MockHttpServletResponse response = result.getResponse();
+      final int actualStatus = response.getStatus();
+      final String content = response.getContentAsString();
+      logger.info("Got response: [{}] {}", actualStatus, content);
+
+      // then
+      assertThat(actualStatus).isEqualTo(200);
+      assertThat(content).isNotNull().isNotEmpty();
+    }
   }
 }

@@ -161,4 +161,26 @@ public class ArtworkService {
                       }));
     }
   }
+
+  public ArtworkCollection deleteArtworkFromCollection(
+      @NotNull ArtworkCollection collection, @NotNull Long artworkId) throws IOException {
+
+    final Artwork artwork = collection.getById(artworkId);
+    deleteArtworkFromDisk(artwork);
+    final Artwork selected = collection.getSelected();
+    if (selected != null) {
+      if (selected.getId().equals(artworkId)) {
+        collection.setSelectedIndex(0);
+      }
+    }
+    collection.remove(artwork);
+    return collection;
+  }
+
+  private void deleteArtworkFromDisk(@NotNull Artwork artwork) throws IOException {
+    final boolean deleted = artwork.getFile().toFile().delete();
+    if (!deleted) {
+      throw new IOException("Could not delete Artwork from disk: " + artwork);
+    }
+  }
 }

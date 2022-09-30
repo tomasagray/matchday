@@ -256,6 +256,18 @@ public class TeamController {
   }
 
   @RequestMapping(
+      value = "/team/{teamId}/{role}/{artworkId}/remove",
+      method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<ArtworkCollectionResource> removeTeamArtwork(
+      @PathVariable UUID teamId, @PathVariable ArtworkRole role, @PathVariable Long artworkId)
+      throws IOException {
+    final ArtworkCollection collection = teamService.removeTeamArtwork(teamId, role, artworkId);
+    final ArtworkCollectionResource resource = collectionModeller.toModel(collection);
+    return ResponseEntity.ok(resource);
+  }
+
+  @RequestMapping(
       value = "/team/{teamId}/update",
       method = RequestMethod.PATCH,
       consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -292,5 +304,12 @@ public class TeamController {
   @ResponseBody
   public String handleFileNotFound(@NotNull FileNotFoundException e) {
     return "File not found: " + e.getMessage();
+  }
+
+  @ExceptionHandler(IOException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  public String handleIoError(@NotNull IOException e) {
+    return e.getMessage();
   }
 }

@@ -232,7 +232,7 @@ public class TestDataCreator {
     return this.createTestMatch("Test ");
   }
 
-  private static String getRandomizedName(@NotNull String name, int start, int end) {
+  public static String getRandomizedName(@NotNull String name, int start, int end) {
     final int seed = getRandomNumber(start, end);
     return String.format("Test Competition %s [%d]", name, seed);
   }

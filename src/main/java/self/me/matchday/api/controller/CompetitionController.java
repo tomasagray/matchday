@@ -203,33 +203,6 @@ public class CompetitionController {
   }
 
   @RequestMapping(
-      value = "/competition/{competitionId}/{role}",
-      method = RequestMethod.POST,
-      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<ArtworkCollectionResource> addCompetitionArtwork(
-      @PathVariable UUID competitionId,
-      @PathVariable ArtworkRole role,
-      @RequestParam("image") MultipartFile image)
-      throws IOException {
-
-    final ArtworkCollection collection =
-        competitionService.addArtworkToCollection(competitionId, role, image);
-    final ArtworkCollectionResource resources = collectionModeller.toModel(collection);
-    resources
-        .getArtwork()
-        .forEach(
-            artworkResource ->
-                CompetitionResourceAssembler.addArtworkLinks(competitionId, role, artworkResource));
-    resources.add(
-        linkTo(
-                methodOn(CompetitionController.class)
-                    .addCompetitionArtwork(competitionId, role, image))
-            .withSelfRel());
-    return ResponseEntity.ok(resources);
-  }
-
-  @RequestMapping(
       value = "/competition/{competitionId}/{role}/selected",
       method = RequestMethod.GET,
       produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, IMAGE_SVG_VALUE})
@@ -306,6 +279,48 @@ public class CompetitionController {
     return ResponseEntity.ok(model);
   }
 
+  @RequestMapping(
+      value = "/competition/{competitionId}/{role}/add",
+      method = RequestMethod.POST,
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<ArtworkCollectionResource> addCompetitionArtwork(
+      @PathVariable UUID competitionId,
+      @PathVariable ArtworkRole role,
+      @RequestParam("image") MultipartFile image)
+      throws IOException {
+
+    final ArtworkCollection collection =
+        competitionService.addArtworkToCollection(competitionId, role, image);
+    final ArtworkCollectionResource resources = collectionModeller.toModel(collection);
+    resources
+        .getArtwork()
+        .forEach(
+            artworkResource ->
+                CompetitionResourceAssembler.addArtworkLinks(competitionId, role, artworkResource));
+    resources.add(
+        linkTo(
+                methodOn(CompetitionController.class)
+                    .addCompetitionArtwork(competitionId, role, image))
+            .withSelfRel());
+    return ResponseEntity.ok(resources);
+  }
+
+  @RequestMapping(
+      value = "/competition/{competitionId}/{role}/{artworkId}/remove",
+      method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<ArtworkCollectionResource> removeCompetitionArtwork(
+      @PathVariable UUID competitionId,
+      @PathVariable ArtworkRole role,
+      @PathVariable Long artworkId)
+      throws IOException {
+    final ArtworkCollection collection =
+        competitionService.removeCompetitionArtwork(competitionId, role, artworkId);
+    final ArtworkCollectionResource resource = collectionModeller.toModel(collection);
+    return ResponseEntity.ok(resource);
+  }
+
   @ExceptionHandler(IllegalArgumentException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
@@ -332,5 +347,12 @@ public class CompetitionController {
   @ResponseBody
   public String handleFileNotFound(@NotNull FileNotFoundException e) {
     return "File not found: " + e.getMessage();
+  }
+
+  @ExceptionHandler(IOException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  public String handleIoError(@NotNull IOException e) {
+    return e.getMessage();
   }
 }

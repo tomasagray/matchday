@@ -188,6 +188,13 @@ public class CompetitionService implements EntityService<Competition, UUID> {
     return artworkService.addArtworkToCollection(collection, image);
   }
 
+  public ArtworkCollection removeCompetitionArtwork(
+      @NotNull UUID competitionId, @NotNull ArtworkRole role, @NotNull Long artworkId)
+      throws IOException {
+    final ArtworkCollection collection = fetchArtworkCollection(competitionId, role);
+    return artworkService.deleteArtworkFromCollection(collection, artworkId);
+  }
+
   /**
    * Saves the given Competition to the database, if it is valid
    *

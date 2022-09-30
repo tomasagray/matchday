@@ -89,6 +89,16 @@ public class ArtworkCollection {
     return get(selectedIndex);
   }
 
+  public Artwork getById(@NotNull Long artworkId) {
+    return collection.stream()
+        .filter(artwork -> artworkId.equals(artwork.getId()))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    "No artwork in this collection with ID: " + artworkId));
+  }
+
   public int indexOf(Artwork t) {
     for (int i = 0; i < collection.size(); i++) {
       final Artwork ti = get(i);
@@ -109,6 +119,10 @@ public class ArtworkCollection {
 
   public void addAll(Collection<Artwork> collection) {
     this.collection.addAll(collection);
+  }
+
+  public boolean remove(Artwork artwork) {
+    return collection.remove(artwork);
   }
 
   public int size() {
