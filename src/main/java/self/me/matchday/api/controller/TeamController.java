@@ -244,15 +244,16 @@ public class TeamController {
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<ArtworkCollectionResource> addTeamArtwork(
-      @PathVariable UUID teamId, @PathVariable ArtworkRole role, @RequestBody MultipartFile image)
+      @PathVariable UUID teamId, @PathVariable ArtworkRole role, @RequestBody MultipartFile data)
       throws IOException {
-    final ArtworkCollection collection = teamService.addTeamArtwork(teamId, role, image);
+    final ArtworkCollection collection =
+        teamService.addTeamArtwork(teamId, role, Image.fromMultipartFile(data));
     final ArtworkCollectionResource resource = collectionModeller.toModel(collection);
     resource
         .getArtwork()
         .forEach(artwork -> TeamResourceAssembler.addArtworkLinks(teamId, role, artwork));
     resource.add(
-        linkTo(methodOn(TeamController.class).addTeamArtwork(teamId, role, image)).withSelfRel());
+        linkTo(methodOn(TeamController.class).addTeamArtwork(teamId, role, data)).withSelfRel());
     return ResponseEntity.ok(resource);
   }
 

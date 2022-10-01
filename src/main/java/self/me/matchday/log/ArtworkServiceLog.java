@@ -27,8 +27,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.api.service.ArtworkService;
+import self.me.matchday.model.Image;
 
 @Aspect
 public class ArtworkServiceLog {
@@ -47,9 +47,9 @@ public class ArtworkServiceLog {
   public Object logAddCompetitionEmblem(@NotNull ProceedingJoinPoint jp) throws Throwable {
     final Object[] args = jp.getArgs();
     final Object collection = args[0];
-    final MultipartFile image = (MultipartFile) args[1];
-    logger.info(
-        "Adding image with {} bytes to collection: {}", image.getBytes().length, collection);
+    final Image image = (Image) args[1];
+    final int imageSize = image.getData().length;
+    logger.info("Adding image with {} bytes to collection: {}", imageSize, collection);
 
     final Object modifiedCollection = jp.proceed();
     logger.info("ArtworkCollection is now: {}", modifiedCollection);

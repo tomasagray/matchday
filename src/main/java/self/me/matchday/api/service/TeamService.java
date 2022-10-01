@@ -36,7 +36,6 @@ import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.db.TeamRepository;
 import self.me.matchday.model.Artwork;
 import self.me.matchday.model.ArtworkCollection;
@@ -287,8 +286,7 @@ public class TeamService implements EntityService<Team, UUID> {
   }
 
   public ArtworkCollection addTeamArtwork(
-      @NotNull UUID teamId, @NotNull ArtworkRole role, @NotNull MultipartFile image)
-      throws IOException {
+      @NotNull UUID teamId, @NotNull ArtworkRole role, @NotNull Image image) throws IOException {
     final ArtworkCollection collection = fetchArtworkCollection(teamId, role);
     return artworkService.addArtworkToCollection(collection, image);
   }

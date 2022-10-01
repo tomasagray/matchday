@@ -19,11 +19,24 @@
 
 package self.me.matchday.model;
 
+import java.io.IOException;
 import lombok.Data;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class Image {
+
+  @Contract("_ -> new")
+  public static @NotNull Image fromMultipartFile(@NotNull MultipartFile data) throws IOException {
+    final String contentType = data.getContentType();
+    if (contentType == null) {
+      throw new IllegalArgumentException("Content-type was null");
+    }
+    return new Image(data.getBytes(), MediaType.valueOf(contentType));
+  }
 
   private final byte[] data;
   private final MediaType contentType;

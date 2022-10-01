@@ -34,7 +34,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.db.CompetitionRepository;
 import self.me.matchday.model.Artwork;
 import self.me.matchday.model.ArtworkCollection;
@@ -183,7 +182,7 @@ public class CompetitionService implements EntityService<Competition, UUID> {
   }
 
   public ArtworkCollection addArtworkToCollection(
-      @NotNull UUID competitionId, ArtworkRole role, MultipartFile image) throws IOException {
+      @NotNull UUID competitionId, ArtworkRole role, @NotNull Image image) throws IOException {
     final ArtworkCollection collection = fetchArtworkCollection(competitionId, role);
     return artworkService.addArtworkToCollection(collection, image);
   }

@@ -38,7 +38,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.db.ArtworkCollectionRepository;
 import self.me.matchday.db.ArtworkRepository;
 import self.me.matchday.model.Artwork;
@@ -85,49 +84,51 @@ public class ArtworkService {
   }
 
   public ArtworkCollection addArtworkToCollection(
-      @NotNull ArtworkCollection collection, @NotNull MultipartFile image) throws IOException {
+      @NotNull ArtworkCollection collection, @NotNull Image image) throws IOException {
 
     final Artwork artwork = createArtwork(image);
-    collection.add(artworkRepository.save(artwork));
+    collection.add(artwork);
     return collectionRepository.saveAndFlush(collection);
   }
 
-  private Artwork createArtwork(@NotNull MultipartFile image) throws IOException {
+  public Artwork createArtwork(@NotNull Image image) throws IOException {
 
+    final byte[] data = image.getData();
+    final MediaType type = image.getContentType();
     // parse image
-    final byte[] imageBytes = image.getBytes();
-    final ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
+    final ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
     final BufferedImage bufferedImage = ImageIO.read(inputStream);
-
     // validate image
     validateImage(bufferedImage);
-    // create image file path
-    final Path storageLocation = Path.of(BASE_STORAGE_LOCATION);
-    final String extension = getArtworkExtension(image);
-    final String fileName = String.format("%s.%s", UUID.randomUUID(), extension);
-    final Path imageLocation = storageLocation.toAbsolutePath().resolve(fileName);
-
+    final Path imageLocation = getImageLocation(type);
+    final String extension = getArtworkExtension(type);
     // write data to disk
     ImageIO.write(bufferedImage, extension, imageLocation.toFile());
-    // create new artwork
-    return Artwork.builder()
-        .created(LocalDateTime.now())
-        .mediaType(image.getContentType())
-        .height(bufferedImage.getHeight())
-        .width(bufferedImage.getWidth())
-        .fileSize(image.getSize())
-        .file(imageLocation)
-        .build();
+    final Artwork artwork =
+        Artwork.builder()
+            .created(LocalDateTime.now())
+            .mediaType(type.toString())
+            .height(bufferedImage.getHeight())
+            .width(bufferedImage.getWidth())
+            .fileSize((long) data.length)
+            .file(imageLocation)
+            .build();
+    return artworkRepository.save(artwork);
   }
 
-  private String getArtworkExtension(@NotNull MultipartFile image) {
-    // get extension
-    final String contentType = image.getContentType();
+  private @NotNull Path getImageLocation(@NotNull MediaType type) {
+    final Path storageLocation = Path.of(BASE_STORAGE_LOCATION);
+    final String extension = getArtworkExtension(type);
+    final String fileName = String.format("%s.%s", UUID.randomUUID(), extension);
+    return storageLocation.toAbsolutePath().resolve(fileName);
+  }
+
+  private String getArtworkExtension(MediaType contentType) {
     if (contentType == null) {
       throw new InvalidArtworkException("Content type was null");
     }
     final Pattern pattern = Pattern.compile(IMAGE_CONTENT_TYPE_PATTERN);
-    final Matcher matcher = pattern.matcher(contentType);
+    final Matcher matcher = pattern.matcher(contentType.toString());
     if (!matcher.find()) {
       throw new InvalidArtworkException("Unknown image type: " + contentType);
     }

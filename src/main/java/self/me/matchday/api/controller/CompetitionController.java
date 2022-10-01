@@ -24,7 +24,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
@@ -177,11 +176,11 @@ public class CompetitionController {
   }
 
   /**
-   * Publishes the Competition emblem image to the API.
+   * Publishes the Competition emblem data to the API.
    *
    * @param competitionId The ID of the Competition.
    * @param role The type of artwork is required
-   * @return A byte array of the image.
+   * @return A byte array of the data.
    */
   @RequestMapping(
       value = "/competition/{competitionId}/{role}",
@@ -288,9 +287,10 @@ public class CompetitionController {
   public ResponseEntity<ArtworkCollectionResource> addCompetitionArtwork(
       @PathVariable UUID competitionId,
       @PathVariable ArtworkRole role,
-      @RequestParam("image") MultipartFile image)
+      @RequestParam("image") MultipartFile data)
       throws IOException {
 
+    final Image image = Image.fromMultipartFile(data);
     final ArtworkCollection collection =
         competitionService.addArtworkToCollection(competitionId, role, image);
     final ArtworkCollectionResource resources = collectionModeller.toModel(collection);
@@ -302,29 +302,9 @@ public class CompetitionController {
     resources.add(
         linkTo(
                 methodOn(CompetitionController.class)
-                    .addCompetitionArtwork(competitionId, role, image))
+                    .addCompetitionArtwork(competitionId, role, data))
             .withSelfRel());
     return ResponseEntity.ok(resources);
-  }
-
-  private static void addArtworkLinks(
-      @NotNull ArtworkResource artwork, @NotNull UUID competitionId, @NotNull ArtworkRole role) {
-
-    try {
-      final Long artworkId = artwork.getId();
-      artwork.add(
-          linkTo(
-                  methodOn(CompetitionController.class)
-                      .fetchArtworkImageData(competitionId, role, artworkId))
-              .withRel("image"));
-      artwork.add(
-          linkTo(
-                  methodOn(CompetitionController.class)
-                      .fetchArtworkMetadata(competitionId, role, artworkId))
-              .withRel("metadata"));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
   }
 
   @RequestMapping(
@@ -340,7 +320,10 @@ public class CompetitionController {
         competitionService.removeCompetitionArtwork(competitionId, role, artworkId);
     final ArtworkCollectionResource resource = collectionModeller.toModel(collection);
     // add links
-    resource.getArtwork().forEach(artwork -> addArtworkLinks(artwork, competitionId, role));
+    resource
+        .getArtwork()
+        .forEach(
+            artwork -> CompetitionResourceAssembler.addArtworkLinks(competitionId, role, artwork));
     return ResponseEntity.ok(resource);
   }
 
