@@ -25,6 +25,7 @@ import static self.me.matchday.api.controller.CompetitionController.IMAGE_SVG_VA
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
@@ -255,6 +256,22 @@ public class TeamController {
     return ResponseEntity.ok(resource);
   }
 
+  private static void addArtworkLinks(
+      @NotNull ArtworkResource artwork, @NotNull UUID teamId, @NotNull ArtworkRole role) {
+
+    try {
+      final Long artworkId = artwork.getId();
+      artwork.add(
+          linkTo(methodOn(TeamController.class).fetchTeamArtworkImageData(teamId, role, artworkId))
+              .withRel("image"));
+      artwork.add(
+          linkTo(methodOn(TeamController.class).fetchTeamArtworkMetadata(teamId, role, artworkId))
+              .withRel("metadata"));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
   @RequestMapping(
       value = "/team/{teamId}/{role}/{artworkId}/remove",
       method = RequestMethod.DELETE,
@@ -264,6 +281,8 @@ public class TeamController {
       throws IOException {
     final ArtworkCollection collection = teamService.removeTeamArtwork(teamId, role, artworkId);
     final ArtworkCollectionResource resource = collectionModeller.toModel(collection);
+    // add links
+    resource.getArtwork().forEach(artwork -> addArtworkLinks(artwork, teamId, role));
     return ResponseEntity.ok(resource);
   }
 

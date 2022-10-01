@@ -52,7 +52,7 @@ public class ArtworkService {
 
   private static final String IMAGE_CONTENT_TYPE_PATTERN = "image/(\\w+)[+\\w]*";
   private final ArtworkRepository artworkRepository;
-  private final ArtworkCollectionRepository artworkCollectionRepository;
+  private final ArtworkCollectionRepository collectionRepository;
 
   @Value("${artwork.storage-location}")
   private String BASE_STORAGE_LOCATION;
@@ -64,10 +64,9 @@ public class ArtworkService {
   private int MAX_IMAGE_DIMENSION;
 
   public ArtworkService(
-      ArtworkRepository artworkRepository,
-      ArtworkCollectionRepository artworkCollectionRepository) {
+      ArtworkRepository artworkRepository, ArtworkCollectionRepository collectionRepository) {
     this.artworkRepository = artworkRepository;
-    this.artworkCollectionRepository = artworkCollectionRepository;
+    this.collectionRepository = collectionRepository;
   }
 
   public Image fetchArtworkData(@NotNull Artwork artwork) throws IOException {
@@ -90,7 +89,7 @@ public class ArtworkService {
 
     final Artwork artwork = createArtwork(image);
     collection.add(artworkRepository.save(artwork));
-    return artworkCollectionRepository.saveAndFlush(collection);
+    return collectionRepository.saveAndFlush(collection);
   }
 
   private Artwork createArtwork(@NotNull MultipartFile image) throws IOException {
@@ -168,13 +167,18 @@ public class ArtworkService {
     final Artwork artwork = collection.getById(artworkId);
     deleteArtworkFromDisk(artwork);
     final Artwork selected = collection.getSelected();
+    collection.remove(artwork);
     if (selected != null) {
+      // if we are deleting selected art
       if (selected.getId().equals(artworkId)) {
         collection.setSelectedIndex(0);
+      } else {
+        // get index of mutated collection
+        final int newSelectedIndex = collection.indexOf(selected);
+        collection.setSelectedIndex(newSelectedIndex);
       }
     }
-    collection.remove(artwork);
-    return collection;
+    return collectionRepository.saveAndFlush(collection);
   }
 
   private void deleteArtworkFromDisk(@NotNull Artwork artwork) throws IOException {

@@ -41,7 +41,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.api.converter.StringToCountryConverter;
+import self.me.matchday.api.controller.converter.StringToCountryConverter;
 
 /**
  * Represents a football team.

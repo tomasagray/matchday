@@ -21,8 +21,6 @@ package self.me.matchday.api.resource;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -76,17 +74,14 @@ public class ArtworkResource extends RepresentationModel<ArtworkResource> {
     }
 
     public CollectionModel<ArtworkResource> fromCollection(@NotNull ArtworkCollection collection) {
-
       if (collection.size() > 0) {
+        final CollectionModel<ArtworkResource> model =
+            toCollectionModel(collection.getCollection());
         final Long selectedId = collection.getSelected().getId();
-        final List<ArtworkResource> resources =
-            collection.getCollection().stream()
-                .map(this::toModel)
-                .peek(resource -> resource.setSelected(resource.getId().equals(selectedId)))
-                .collect(Collectors.toList());
-        return CollectionModel.of(resources);
+        model.forEach(resource -> resource.setSelected(resource.getId().equals(selectedId)));
+        return model;
       }
-      // else
+      // else...
       return CollectionModel.empty();
     }
   }

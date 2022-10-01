@@ -65,7 +65,7 @@ public class ArtworkCollectionResource extends RepresentationModel<ArtworkCollec
       model.setId(collection.getId());
       model.setRole(collection.getRole());
       model.setSelectedIndex(collection.getSelectedIndex());
-      model.setArtwork(artworkModeller.toCollectionModel(collection.getCollection()));
+      model.setArtwork(artworkModeller.fromCollection(collection));
       return model;
     }
   }

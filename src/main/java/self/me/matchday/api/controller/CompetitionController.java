@@ -24,6 +24,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
@@ -306,6 +307,26 @@ public class CompetitionController {
     return ResponseEntity.ok(resources);
   }
 
+  private static void addArtworkLinks(
+      @NotNull ArtworkResource artwork, @NotNull UUID competitionId, @NotNull ArtworkRole role) {
+
+    try {
+      final Long artworkId = artwork.getId();
+      artwork.add(
+          linkTo(
+                  methodOn(CompetitionController.class)
+                      .fetchArtworkImageData(competitionId, role, artworkId))
+              .withRel("image"));
+      artwork.add(
+          linkTo(
+                  methodOn(CompetitionController.class)
+                      .fetchArtworkMetadata(competitionId, role, artworkId))
+              .withRel("metadata"));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
   @RequestMapping(
       value = "/competition/{competitionId}/{role}/{artworkId}/remove",
       method = RequestMethod.DELETE,
@@ -318,6 +339,8 @@ public class CompetitionController {
     final ArtworkCollection collection =
         competitionService.removeCompetitionArtwork(competitionId, role, artworkId);
     final ArtworkCollectionResource resource = collectionModeller.toModel(collection);
+    // add links
+    resource.getArtwork().forEach(artwork -> addArtworkLinks(artwork, competitionId, role));
     return ResponseEntity.ok(resource);
   }
 

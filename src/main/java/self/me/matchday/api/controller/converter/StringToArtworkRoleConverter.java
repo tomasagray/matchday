@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.api.converter;
+package self.me.matchday.api.controller.converter;
 
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
