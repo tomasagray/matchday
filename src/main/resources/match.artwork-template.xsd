@@ -1,72 +1,52 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ Copyright (c) 2022.
-  ~
-  ~ This file is part of Matchday.
-  ~
-  ~ Matchday is free software: you can redistribute it and/or modify
-  ~ it under the terms of the GNU General Public License as published by
-  ~ the Free Software Foundation, either version 3 of the License, or
-  ~ (at your option) any later version.
-  ~
-  ~ Matchday is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~ GNU General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU General Public License
-  ~ along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
-  -->
-
-<xs:schema xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
-  xmlns:xs="http://www.w3.org/2001/XMLSchema" id="NewDataSet"
-  xmlns="">
+<xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
   <xs:element name="template">
     <xs:complexType>
-      <xs:attribute name="height" type="xs:string"/>
-      <xs:attribute name="width" type="xs:string"/>
       <xs:sequence>
-        <xs:element maxOccurs="unbounded" minOccurs="0" name="layer">
+        <xs:element name="layer" minOccurs="0" maxOccurs="unbounded">
           <xs:complexType>
-            <xs:attribute name="name" type="xs:string"/>
             <xs:sequence>
-              <xs:element maxOccurs="unbounded" minOccurs="0" name="shape">
+              <xs:element name="shape" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
-                  <xs:attribute name="color" type="xs:string"/>
                   <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="coords">
+                    <xs:element name="coords" minOccurs="0" maxOccurs="unbounded">
                       <xs:complexType>
                         <xs:attribute name="x" type="xs:string"/>
                         <xs:attribute name="y" type="xs:string"/>
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
+                  <xs:attribute name="color" type="xs:string"/>
                 </xs:complexType>
               </xs:element>
-              <xs:element maxOccurs="unbounded" minOccurs="0" name="image">
+              <xs:element name="image" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="origin" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:attribute name="x" type="xs:string"/>
+                        <xs:attribute name="y" type="xs:string"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
                   <xs:attribute name="height" type="xs:string"/>
                   <xs:attribute name="src" type="xs:string"/>
                   <xs:attribute name="width" type="xs:string"/>
-                  <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="origin">
-                      <xs:complexType>
-                        <xs:attribute name="x" type="xs:string"/>
-                        <xs:attribute name="y" type="xs:string"/>
-                      </xs:complexType>
-                    </xs:element>
-                  </xs:sequence>
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
+            <xs:attribute name="name" type="xs:string"/>
           </xs:complexType>
         </xs:element>
       </xs:sequence>
+      <xs:attribute name="height" type="xs:string"/>
+      <xs:attribute name="width" type="xs:string"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
     <xs:complexType>
-      <xs:choice maxOccurs="unbounded" minOccurs="0">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="template"/>
       </xs:choice>
     </xs:complexType>

@@ -22,21 +22,14 @@ package self.me.matchday.plugin.artwork.creator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.awt.Color;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import javax.imageio.ImageIO;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,10 +38,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.model.ArtworkTemplate;
-import self.me.matchday.model.ArtworkTemplate.Coordinate;
-import self.me.matchday.model.ArtworkTemplate.Image;
-import self.me.matchday.model.ArtworkTemplate.Layer;
-import self.me.matchday.model.ArtworkTemplate.Shape;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Param;
 import self.me.matchday.util.ResourceFileReader;
@@ -122,69 +111,22 @@ class ArtworkCreatorPluginTest {
   }
 
   @Test
-  @Disabled
-  void createXmlFromObj() throws JAXBException {
-    final ArtworkTemplate template =
-        new ArtworkTemplate(
-            List.of(
-                new Layer(
-                    "team-emblems",
-                    List.of(
-                        new Image(400, 400, "#home-team-emblem", new Coordinate(200, 250)),
-                        new Image(400, 400, "#away-team-emblem", new Coordinate(1000, 250))),
-                    null),
-                new Layer(
-                    "home-team-color",
-                    null,
-                    List.of(
-                        new Shape(
-                            "#home-team-color",
-                            List.of(
-                                new Coordinate(0, 0),
-                                new Coordinate(1160, 0),
-                                new Coordinate(440, 900),
-                                new Coordinate(0, 900))))),
-                new Layer(
-                    "away-team-color",
-                    null,
-                    List.of(
-                        new Shape(
-                            "#away-team-color",
-                            List.of(
-                                new Coordinate(0, 0),
-                                new Coordinate(0, 900),
-                                new Coordinate(1600, 900),
-                                new Coordinate(1600, 0)))))),
-            1600,
-            900);
-
-    JAXBContext context = JAXBContext.newInstance(ArtworkTemplate.class);
-    Marshaller marshaller = context.createMarshaller();
-    final String pathname = dataLocation + "match.artwork-template.xml";
-    logger.info("Writing template data to: {}", pathname);
-    marshaller.marshal(template, new File(pathname));
-  }
-
-  @Test
   @DisplayName("Validate creation of Artwork image from template, params")
   void createArtwork() throws IOException {
 
+    // given
+    final int expectedImageSize = 33_639;
     logger.info("Creating params...");
     final Collection<Param<?>> params = createTemplateParams();
     logger.info("Created params: {}", params);
+
+    // when
     final self.me.matchday.model.Image artwork = plugin.createArtwork(Match.class, params);
     logger.info("Created artwork: {}", artwork);
+
+    // then
     assertThat(artwork).isNotNull();
-
-    writeImageToDisk(artwork);
-  }
-
-  private void writeImageToDisk(self.me.matchday.model.@NotNull Image image) throws IOException {
-
-    final String pathname = dataLocation + "image.png";
-    final byte[] data = image.getData();
-    logger.info("Writing {} bytes created image data to: {}", data.length, pathname);
-    ImageIO.write(ImageIO.read(new ByteArrayInputStream(data)), "png", new File(pathname));
+    assertThat(artwork.getData().length).isEqualTo(expectedImageSize);
   }
 
   private @NotNull @Unmodifiable Collection<Param<?>> createTemplateParams() throws IOException {

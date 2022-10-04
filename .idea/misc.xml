@@ -562,6 +562,48 @@
       <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.EventsResource VIDEO_LINK" />
       <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.VideoFileSourceResource videoCodec" />
       <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ArtworkResource width" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Rgb a" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Hsl a" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Hsv a" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Rgb b" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Shape color" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Team colors" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.TeamResource colors" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Shape coords" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Param data" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginTest dataLocation" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.TeamResource emblem" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.CompetitionResource fanart" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.TeamResource fanart" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.controller.converter.StringToCountryConverter FLAG_URI_FORMATTER" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Rgb g" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Hsl h" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Hsv h" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate height" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Image height" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource hex" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource hsl" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource hsv" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Team id" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Layer image" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Hsl l" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate layer" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Layer name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.Param name" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Image origin" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.controller.ArtworkLifeCycleTest port" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Rgb r" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource rgb" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Hsl s" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Hsv s" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Layer shape" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Image src" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginProperties templateNamePattern" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.api.resource.ColorResource.Hsv v" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate width" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Image width" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Coordinate x" />
+      <entry_point TYPE="field" FQNAME="self.me.matchday.model.ArtworkTemplate.Coordinate y" />
     </entry_points>
     <pattern value="self.me.matchday.config.AdminDashboardConfig" />
     <pattern value="self.me.matchday.api.controller.ArtworkController" method="ArtworkController" />
@@ -1679,6 +1721,83 @@
     <pattern value="self.me.matchday.api.service.video.VideoStreamingServiceTest" method="VideoStreamingServiceTest" />
     <pattern value="self.me.matchday.api.service.video.VideoStreamLocatorServiceTest" method="VideoStreamLocatorServiceTest" />
     <pattern value="self.me.matchday.api.service.video.VideoStreamManagerTest" method="VideoStreamManagerTest" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="addCompetitionArtwork" />
+    <pattern value="self.me.matchday.api.controller.ArtworkLifeCycleTest" method="addCompetitionEmblem" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="addTeamArtwork" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPlugin" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPlugin" method="ArtworkCreatorPlugin" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginProperties" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginTest" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginTest" method="ArtworkCreatorPluginTest" />
+    <pattern value="self.me.matchday.api.controller.ArtworkLifeCycleTest" />
+    <pattern value="self.me.matchday.api.controller.ArtworkLifeCycleTest" method="ArtworkLifeCycleTest" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate" />
+    <pattern value="self.me.matchday.api.resource.ColorResource" />
+    <pattern value="self.me.matchday.api.resource.ColorResource.ColorResourceModeller" />
+    <pattern value="self.me.matchday.api.resource.ColorResource.ColorResourceModeller" method="ColorResourceModeller" />
+    <pattern value="self.me.matchday.log.CompetitionControllerLog" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Coordinate" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginTest" method="createArtwork" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginTest" method="createXmlFromObj" />
+    <pattern value="self.me.matchday.api.controller.ArtworkLifeCycleTest" method="deleteArtwork" />
+    <pattern value="self.me.matchday.api.controller.ArtworkLifeCycleTest" method="fetchCompetitionEmblem" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="fetchSelectedArtwork" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="fetchSelectedArtworkMetadata" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="fetchTeamArtworkCollection" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="fetchTeamArtworkImageData" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="fetchTeamArtworkMetadata" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginTest" method="getDescription" />
+    <pattern value="self.me.matchday.plugin.fileserver.filefox.FileFoxPlugin" method="getHostname" />
+    <pattern value="self.me.matchday.plugin.fileserver.TestFileServerPlugin" method="getHostname" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Layer" method="getName" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginTest" method="getPluginId" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginTest" method="getTitle" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="handleFileNotFound" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="handleFileNotFound" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="handleIllegalArg" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="handleInvalidArt" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="handleIoError" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="handleIoError" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="handleUnknownEntity" />
+    <pattern value="self.me.matchday.api.resource.ColorResource.Hsl" />
+    <pattern value="self.me.matchday.api.resource.ColorResource.Hsv" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Image" />
+    <pattern value="self.me.matchday.api.controller.converter.StringToArtworkRoleConverter" />
+    <pattern value="self.me.matchday.api.controller.converter.StringToCountryConverter" />
+    <pattern value="self.me.matchday.api.service.DataSourceService" method="initialize" />
+    <pattern value="self.me.matchday.api.service.SynonymService" method="initialize" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Layer" />
+    <pattern value="self.me.matchday.log.ArtworkServiceLog" method="logDeleteArtwork" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logDeleteManyTeam" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logDeleteTeam" />
+    <pattern value="self.me.matchday.log.CompetitionControllerLog" method="logErrorHandling" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logFetchSelectedArtwork" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logFetchSelectedArtworkMetadata" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logFetchTeamArtwork" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logFetchTeamArtworkCollection" />
+    <pattern value="self.me.matchday.log.TeamServiceLog" method="logFetchTeamArtworkMetadata" />
+    <pattern value="self.me.matchday.log.ArtworkServiceLog" method="logRepairArtworkPath" />
+    <pattern value="self.me.matchday.model.Param" />
+    <pattern value="self.me.matchday.plugin.artwork.creator.ArtworkCreatorPluginTest" method="readTemplate" />
+    <pattern value="self.me.matchday.api.controller.CompetitionController" method="removeCompetitionArtwork" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="removeTeamArtwork" />
+    <pattern value="self.me.matchday.api.resource.ColorResource.Rgb" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Shape" method="setColor" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Shape" method="setCoords" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate" method="setHeight" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Image" method="setHeight" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Layer" method="setImage" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate" method="setLayer" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Layer" method="setName" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Image" method="setOrigin" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Layer" method="setShape" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Image" method="setSrc" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate" method="setWidth" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Image" method="setWidth" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Coordinate" method="setX" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Coordinate" method="setY" />
+    <pattern value="self.me.matchday.model.ArtworkTemplate.Shape" />
+    <pattern value="self.me.matchday.api.controller.TeamController" method="updateTeam" />
   </component>
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$" />
