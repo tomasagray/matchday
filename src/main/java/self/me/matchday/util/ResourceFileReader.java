@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.jetbrains.annotations.Nullable;
 public class ResourceFileReader {
 
   private static final Logger logger = LogManager.getLogger(ResourceFileReader.class);
+  private static final ClassLoader classLoader = ResourceFileReader.class.getClassLoader();
 
   public static <T> @NotNull T getObjectFromProperties(
       @NotNull final Class<T> t_class, @NotNull final String filename, final String prefix)
@@ -95,7 +97,6 @@ public class ResourceFileReader {
 
     logger.trace("Attempting to read data at: {}", filename);
 
-    final ClassLoader classLoader = ResourceFileReader.class.getClassLoader();
     InputStream resourceAsStream = classLoader.getResourceAsStream(filename);
     if (resourceAsStream == null) {
       throw new FileNotFoundException("No resources found at: " + filename);
@@ -163,12 +164,16 @@ public class ResourceFileReader {
   }
 
   public static byte[] readBinaryData(@NotNull String path) throws IOException {
-    final InputStream stream = ResourceFileReader.class.getClassLoader().getResourceAsStream(path);
+    final InputStream stream = classLoader.getResourceAsStream(path);
     if (stream == null) {
       throw new IOException("Could not find resource at: " + path);
     }
     try (final DataInputStream is = new DataInputStream(new BufferedInputStream(stream))) {
       return is.readAllBytes();
     }
+  }
+
+  public static URL getResourceUrl(@NotNull String name) {
+    return classLoader.getResource(name);
   }
 }

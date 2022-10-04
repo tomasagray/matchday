@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ Copyright (c) 2022.
+  ~
+  ~ This file is part of Matchday.
+  ~
+  ~ Matchday is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ Matchday is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<template height="900" width="1600">
+  <layer name="team-emblems">
+    <image height="400" src="#home-team-emblem" width="400">
+      <origin x="200" y="250"/>
+    </image>
+    <image height="400" src="#away-team-emblem" width="400">
+      <origin x="1000" y="250"/>
+    </image>
+  </layer>
+  <layer name="home-team-color">
+    <shape color="#home-team-color">
+      <coords x="0" y="0"/>
+      <coords x="1160" y="0"/>
+      <coords x="440" y="900"/>
+      <coords x="0" y="900"/>
+    </shape>
+  </layer>
+  <layer name="away-team-color">
+    <shape color="#away-team-color">
+      <coords x="0" y="0"/>
+      <coords x="0" y="900"/>
+      <coords x="1600" y="900"/>
+      <coords x="1600" y="0"/>
+    </shape>
+  </layer>
+</template>
