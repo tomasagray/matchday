@@ -37,6 +37,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -75,6 +76,9 @@ public abstract class Event {
   protected final Set<VideoFileSource> fileSources = new HashSet<>();
 
   protected LocalDateTime date;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  protected Artwork artwork;
 
   public void addAllFileSources(@NotNull final Collection<? extends VideoFileSource> fileSources) {
     fileSources.forEach(this::addFileSource);

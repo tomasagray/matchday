@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -42,6 +43,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.MediaType;
@@ -64,9 +66,11 @@ public class ArtworkCreatorPlugin implements Plugin {
 
   private final ArtworkCreatorPluginProperties properties;
   private final Map<Class<?>, ArtworkTemplate> templateRegistry = new HashMap<>();
+  private final JAXBContext jaxbContext;
 
-  public ArtworkCreatorPlugin(ArtworkCreatorPluginProperties properties) {
+  public ArtworkCreatorPlugin(ArtworkCreatorPluginProperties properties) throws JAXBException {
     this.properties = properties;
+    this.jaxbContext = JAXBContext.newInstance(ArtworkTemplate.class);
   }
 
   private static <T> Stream<T> reverseStream(@NotNull Stream<T> stream) {
@@ -101,11 +105,16 @@ public class ArtworkCreatorPlugin implements Plugin {
     try (final ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 
       final ArtworkTemplate template = getTemplateFor(type);
+      // get a mutable copy
+      final ArrayList<Param<?>> _params = new ArrayList<>(params);
+      // add default params
+      _params.add(new Param<>("#width", template.getWidth()));
+      _params.add(new Param<>("#height", template.getHeight()));
+
       final BufferedImage baseTile = getBaseTile(template);
       final Graphics2D graphics = baseTile.createGraphics();
-
       reverseStream(template.getLayer().stream())
-          .map(layer -> renderLayer(layer, template, params))
+          .map(layer -> renderLayer(layer, template, _params))
           .forEach(image -> graphics.drawImage(image, 0, 0, null));
       graphics.dispose();
 
@@ -146,10 +155,21 @@ public class ArtworkCreatorPlugin implements Plugin {
 
     final Param<?> color = getMatchingParam(params, shape.getColor());
     final GeneralPath path = createPathFrom(shape);
-    final Color colorData = (Color) color.getData();
+    final Color colorData = getValidColor((Color) color.getData());
     graphics.setColor(colorData);
     graphics.setPaint(colorData);
     graphics.fill(path);
+  }
+
+  /**
+   * Correct data corruption which may have been introduced during serialization/deserialization
+   *
+   * @param color The reconstituted color
+   * @return A corrected version of the input color
+   */
+  @Contract("_ -> new")
+  private @NotNull Color getValidColor(@NotNull Color color) {
+    return new Color(color.getRed(), color.getGreen(), color.getBlue());
   }
 
   private void renderImage(
@@ -193,8 +213,7 @@ public class ArtworkCreatorPlugin implements Plugin {
     return null;
   }
 
-  // todo - make private
-  public @NotNull ArtworkTemplate getTemplateFor(@NotNull Class<?> type) {
+  private @NotNull ArtworkTemplate getTemplateFor(@NotNull Class<?> type) {
 
     final ArtworkTemplate template = templateRegistry.get(type);
     if (template != null) {
@@ -220,22 +239,22 @@ public class ArtworkCreatorPlugin implements Plugin {
       final String templateName = String.format(properties.getTemplateNamePattern(), typeName);
 
       final String templateData = ResourceFileReader.readTextResource(templateName);
-      final JAXBContext context = JAXBContext.newInstance(ArtworkTemplate.class);
-      final Unmarshaller unmarshaller = context.createUnmarshaller();
+      final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
       unmarshaller.setSchema(getSchema(templateName));
       return (ArtworkTemplate) unmarshaller.unmarshal(new StringReader(templateData));
 
-    } catch (IOException | JAXBException e) {
+    } catch (IOException | JAXBException | SAXException e) {
       final String msg = String.format("No Artwork creation template found for type: %s", type);
       throw new IllegalArgumentException(msg, e);
-    } catch (SAXException e) {
-      throw new RuntimeException(e);
     }
   }
 
-  private Schema getSchema(@NotNull String templateName) throws SAXException {
+  private @Nullable Schema getSchema(@NotNull String templateName) throws SAXException {
     final String schemaFilename = templateName.replace(".xml", ".xsd");
     final URL schemaUrl = ResourceFileReader.getResourceUrl(schemaFilename);
-    return schemaFactory.newSchema(schemaUrl);
+    if (schemaUrl != null) {
+      return schemaFactory.newSchema(schemaUrl);
+    }
+    return null;
   }
 }

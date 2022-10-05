@@ -23,6 +23,14 @@
  */
 package self.me.matchday.model;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,15 +38,6 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.CorrectedOrNull;
 import self.me.matchday.model.video.VideoFileSource;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Class representing a match (game) between two teams (home & away) in a given Competition on a
@@ -71,7 +70,7 @@ public class Match extends Event {
       Season season,
       Fixture fixture,
       LocalDateTime date) {
-    super(eventId, competition, season, fixture, date);
+    super(eventId, competition, season, fixture, date, null);
     this.homeTeam = homeTeam;
     this.awayTeam = awayTeam;
   }
@@ -87,7 +86,8 @@ public class Match extends Event {
         + ((fixture != null) ? ", " + fixture : "");
   }
 
-  // Next 7 methods included for reflection
+  // --------------------------------------
+  // Next 8 methods included for reflection
   @Override
   public UUID getEventId() {
     return super.getEventId();
@@ -127,7 +127,13 @@ public class Match extends Event {
   public LocalDateTime getDate() {
     return super.getDate();
   }
+
+  @Override
+  public Artwork getArtwork() {
+    return super.getArtwork();
+  }
   // End redundant reflection overrides
+  // ----------------------------------
 
   @Override
   public boolean equals(Object o) {

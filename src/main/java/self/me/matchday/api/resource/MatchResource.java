@@ -19,8 +19,16 @@
 
 package self.me.matchday.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static self.me.matchday.api.resource.EventsResource.VIDEO_LINK;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -38,13 +46,6 @@ import self.me.matchday.model.Fixture;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Season;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import static self.me.matchday.api.resource.EventsResource.VIDEO_LINK;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -53,6 +54,8 @@ import static self.me.matchday.api.resource.EventsResource.VIDEO_LINK;
 @Relation(collectionRelation = "matches")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class MatchResource extends RepresentationModel<MatchResource> {
+
+  private static final String ARTWORK_REL = "artwork";
 
   private UUID eventId;
   private String title;
@@ -80,25 +83,33 @@ public class MatchResource extends RepresentationModel<MatchResource> {
     @Override
     public @NotNull MatchResource toModel(@NotNull Match entity) {
 
-      final CompetitionResource competition = competitionAssembler.toModel(entity.getCompetition());
-      final TeamResource homeTeam = teamAssembler.toModel(entity.getHomeTeam());
-      final TeamResource awayTeam = teamAssembler.toModel(entity.getAwayTeam());
+      try {
+        final MatchResource resource = instantiateModel(entity);
+        final CompetitionResource competition =
+            competitionAssembler.toModel(entity.getCompetition());
+        final TeamResource homeTeam = teamAssembler.toModel(entity.getHomeTeam());
+        final TeamResource awayTeam = teamAssembler.toModel(entity.getAwayTeam());
 
-      final UUID eventId = entity.getEventId();
-      final MatchResource resource = instantiateModel(entity);
-      resource.setEventId(eventId);
-      resource.setTitle(entity.getTitle());
-      resource.setSeason(entity.getSeason());
-      resource.setFixture(entity.getFixture());
-      resource.setDate(entity.getDate());
-      resource.setCompetition(competition);
-      resource.setHomeTeam(homeTeam);
-      resource.setAwayTeam(awayTeam);
-      resource.add(
-          linkTo(methodOn(VideoStreamingController.class).getVideoResources(eventId))
-              .withRel(VIDEO_LINK));
-      resource.add(linkTo(methodOn(MatchController.class).fetchMatchById(eventId)).withSelfRel());
-      return resource;
+        final UUID eventId = entity.getEventId();
+        resource.setEventId(eventId);
+        resource.setTitle(entity.getTitle());
+        resource.setSeason(entity.getSeason());
+        resource.setFixture(entity.getFixture());
+        resource.setDate(entity.getDate());
+        resource.setCompetition(competition);
+        resource.setHomeTeam(homeTeam);
+        resource.setAwayTeam(awayTeam);
+        resource.add(
+            linkTo(methodOn(MatchController.class).fetchMatchArtworkImage(eventId))
+                .withRel(ARTWORK_REL));
+        resource.add(
+            linkTo(methodOn(VideoStreamingController.class).getVideoResources(eventId))
+                .withRel(VIDEO_LINK));
+        resource.add(linkTo(methodOn(MatchController.class).fetchMatchById(eventId)).withSelfRel());
+        return resource;
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
     }
   }
 }

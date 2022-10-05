@@ -80,6 +80,7 @@ public class EventService implements EntityService<Event, UUID> {
       highlightService.initialize((Highlight) event);
     }
     Hibernate.initialize(event.getFileSources());
+    Hibernate.initialize(event.getArtwork());
     return event;
   }
 

@@ -19,41 +19,59 @@
 
 package self.me.matchday.api.service;
 
+import java.awt.Color;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.MatchRepository;
+import self.me.matchday.model.Artwork;
 import self.me.matchday.model.Competition;
 import self.me.matchday.model.Event.EventSorter;
+import self.me.matchday.model.Image;
 import self.me.matchday.model.Match;
+import self.me.matchday.model.Param;
 import self.me.matchday.model.Team;
+import self.me.matchday.util.ResourceFileReader;
 
 @Service
 @Transactional
 public class MatchService implements EntityService<Match, UUID> {
 
   private static final EventSorter EVENT_SORTER = new EventSorter();
+  private static final Color DEFAULT_HOME_COLOR = new Color(35, 38, 45);
+  private static final Color DEFAULT_AWAY_COLOR = new Color(46, 50, 57);
 
   private final MatchRepository matchRepository;
   private final EntityCorrectionService entityCorrectionService;
   private final TeamService teamService;
   private final CompetitionService competitionService;
+  private final ArtworkService artworkService;
+  private final byte[] defaultEmblem;
 
   public MatchService(
       MatchRepository matchRepository,
       EntityCorrectionService entityCorrectionService,
       TeamService teamService,
-      CompetitionService competitionService) {
+      CompetitionService competitionService,
+      ArtworkService artworkService)
+      throws IOException {
     this.matchRepository = matchRepository;
     this.entityCorrectionService = entityCorrectionService;
     this.teamService = teamService;
     this.competitionService = competitionService;
+    this.artworkService = artworkService;
+    this.defaultEmblem = ResourceFileReader.readBinaryData("image/default_team_emblem.png");
   }
 
   @Override
@@ -70,6 +88,7 @@ public class MatchService implements EntityService<Match, UUID> {
     if (awayTeam != null) {
       teamService.initialize(awayTeam);
     }
+    Hibernate.initialize(match.getArtwork());
     return match;
   }
 
@@ -112,6 +131,93 @@ public class MatchService implements EntityService<Match, UUID> {
         .collect(Collectors.toList());
   }
 
+  public Artwork makeMatchArtwork(@NotNull Match match) throws IOException {
+    final Artwork existingArtwork = match.getArtwork();
+    if (existingArtwork != null) {
+      final boolean deleted = artworkService.deleteArtwork(existingArtwork);
+      if (!deleted) {
+        final String msg =
+            "Could not create new Match artwork because old artwork could not be deleted";
+        throw new IOException(msg);
+      }
+    }
+    final Collection<Param<?>> params = createMatchArtworkParams(match);
+    return artworkService.createArtwork(Match.class, params);
+  }
+
+  private @NotNull @Unmodifiable Collection<Param<?>> createMatchArtworkParams(@NotNull Match match)
+      throws IOException {
+
+    final Team homeTeam = match.getHomeTeam();
+    final Team awayTeam = match.getAwayTeam();
+    // emblems
+    final Param<?> homeTeamEmblem = createTeamEmblemParam(homeTeam, "#home-team-emblem");
+    final Param<?> awayTeamEmblem = createTeamEmblemParam(awayTeam, "#away-team-emblem");
+    // colors
+    final Color[] teamColors = getContrastingTeamColors(homeTeam, awayTeam);
+    final Param<Color> homeTeamColor = new Param<>("#home-team-color", teamColors[0]);
+    final Param<Color> awayTeamColor = new Param<>("#away-team-color", teamColors[1]);
+
+    return List.of(homeTeamEmblem, awayTeamEmblem, homeTeamColor, awayTeamColor);
+  }
+
+  private @NotNull Param<?> createTeamEmblemParam(@NotNull Team team, @NotNull String tag)
+      throws IOException {
+
+    final Artwork emblem = team.getEmblem().getSelected();
+    byte[] data;
+    if (emblem != null) {
+      final Image image = artworkService.fetchArtworkData(emblem);
+      data = image.getData();
+    } else {
+      data = Arrays.copyOf(defaultEmblem, defaultEmblem.length);
+    }
+    return new Param<>(tag, data);
+  }
+
+  private Color @NotNull [] getContrastingTeamColors(@NotNull Team home, @NotNull Team away) {
+
+    final List<Color> homeColors = home.getColors();
+    final List<Color> awayColors = away.getColors();
+    final Color[] colorPair = artworkService.getContrastingColorPair(homeColors, awayColors);
+    return colorPair != null ? colorPair : new Color[] {DEFAULT_HOME_COLOR, DEFAULT_AWAY_COLOR};
+  }
+
+  public Artwork refreshMatchArtwork(@NotNull UUID matchId) throws IOException {
+    final Optional<Match> matchOptional = fetchById(matchId);
+    if (matchOptional.isPresent()) {
+      final Match match = matchOptional.get();
+      final Artwork artwork = makeMatchArtwork(match);
+      match.setArtwork(artwork);
+      return artwork;
+    }
+    // else...
+    throw new IllegalArgumentException("No Match with ID: " + matchId);
+  }
+
+  public Image fetchMatchArtwork(@NotNull UUID matchId) throws IOException {
+    final Optional<Match> optional = fetchById(matchId);
+    if (optional.isPresent()) {
+      final Match match = optional.get();
+      final Artwork artwork = match.getArtwork();
+      if (artwork != null) {
+        return artworkService.fetchArtworkData(artwork);
+      }
+      // else...
+      throw new IllegalArgumentException("No artwork for match: " + matchId);
+    }
+    // else...
+    throw new IllegalArgumentException("No Match with ID: " + matchId);
+  }
+
+  public Artwork fetchMatchArtworkMetadata(@NotNull UUID matchId) {
+    return matchRepository
+        .findById(matchId)
+        .map(Match::getArtwork)
+        .orElseThrow(
+            () -> new IllegalArgumentException("No Artwork found for Match ID: " + matchId));
+  }
+
   @Override
   public Match save(@NotNull Match match) {
 
@@ -123,11 +229,16 @@ public class MatchService implements EntityService<Match, UUID> {
       if (eventOptional.isPresent()) {
         final Match existingEvent = eventOptional.get();
         existingEvent.addAllFileSources(match.getFileSources());
-        return existingEvent;
+        return initialize(existingEvent);
       }
-      final Match saved = matchRepository.save(match);
+      // ensure Artwork is attached
+      if (match.getArtwork() == null) {
+        final Artwork artwork = makeMatchArtwork(match);
+        match.setArtwork(artwork);
+      }
+      final Match saved = matchRepository.saveAndFlush(match);
       return initialize(saved);
-    } catch (ReflectiveOperationException e) {
+    } catch (ReflectiveOperationException | IOException e) {
       throw new RuntimeException(e);
     }
   }

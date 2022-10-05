@@ -37,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.model.ArtworkTemplate;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Param;
 import self.me.matchday.util.ResourceFileReader;
@@ -98,19 +97,6 @@ class ArtworkCreatorPluginTest {
   }
 
   @Test
-  @DisplayName("Validate reading of template from disk")
-  void readTemplate() {
-    // given
-    final Class<Match> type = Match.class;
-    logger.info("Getting Artwork creation template for: {}", type);
-    // when
-    final ArtworkTemplate template = plugin.getTemplateFor(type);
-    logger.info("Found template: {}", template);
-    // then
-    assertThat(template).isNotNull();
-  }
-
-  @Test
   @DisplayName("Validate creation of Artwork image from template, params")
   void createArtwork() throws IOException {
 
@@ -131,21 +117,11 @@ class ArtworkCreatorPluginTest {
 
   private @NotNull @Unmodifiable Collection<Param<?>> createTemplateParams() throws IOException {
 
-    // needed params:
-    // - home-team-emblem + dimensions
     final byte[] logoImage = ResourceFileReader.readBinaryData("data/TestUploadImage.png");
     final Param<byte[]> homeTeamEmblem = new Param<>("#home-team-emblem", logoImage);
-    // - away-team-emblem + dimensions
     final Param<byte[]> awayTeamEmblem = new Param<>("#away-team-emblem", logoImage);
-    // - home-team-color
     final Param<Color> homeTeamColor = new Param<>("#home-team-color", Color.BLUE);
-    // - away-team-color
     final Param<Color> awayTeamColor = new Param<>("#away-team-color", Color.YELLOW);
-    // - height
-    final Param<Integer> height = new Param<>("#height", 900);
-    // - width
-    final Param<Integer> width = new Param<>("#width", 1600);
-    // - image type; todo
-    return List.of(homeTeamEmblem, homeTeamColor, awayTeamEmblem, awayTeamColor, height, width);
+    return List.of(homeTeamEmblem, homeTeamColor, awayTeamEmblem, awayTeamColor);
   }
 }

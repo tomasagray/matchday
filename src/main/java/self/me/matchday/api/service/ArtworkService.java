@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,6 +27,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -43,6 +46,8 @@ import self.me.matchday.db.ArtworkRepository;
 import self.me.matchday.model.Artwork;
 import self.me.matchday.model.ArtworkCollection;
 import self.me.matchday.model.Image;
+import self.me.matchday.model.Param;
+import self.me.matchday.plugin.artwork.creator.ArtworkCreatorPlugin;
 
 @Service
 @Transactional
@@ -50,8 +55,10 @@ import self.me.matchday.model.Image;
 public class ArtworkService {
 
   private static final String IMAGE_CONTENT_TYPE_PATTERN = "image/(\\w+)[+\\w]*";
+
   private final ArtworkRepository artworkRepository;
   private final ArtworkCollectionRepository collectionRepository;
+  private final ArtworkCreatorPlugin creatorPlugin;
 
   @Value("${artwork.storage-location}")
   private String BASE_STORAGE_LOCATION;
@@ -63,9 +70,12 @@ public class ArtworkService {
   private int MAX_IMAGE_DIMENSION;
 
   public ArtworkService(
-      ArtworkRepository artworkRepository, ArtworkCollectionRepository collectionRepository) {
+      ArtworkRepository artworkRepository,
+      ArtworkCollectionRepository collectionRepository,
+      ArtworkCreatorPlugin creatorPlugin) {
     this.artworkRepository = artworkRepository;
     this.collectionRepository = collectionRepository;
+    this.creatorPlugin = creatorPlugin;
   }
 
   public Image fetchArtworkData(@NotNull Artwork artwork) throws IOException {
@@ -114,6 +124,60 @@ public class ArtworkService {
             .file(imageLocation)
             .build();
     return artworkRepository.save(artwork);
+  }
+
+  public Artwork createArtwork(@NotNull Class<?> type, @NotNull Collection<Param<?>> params)
+      throws IOException {
+    final Image artwork = creatorPlugin.createArtwork(type, params);
+    return createArtwork(artwork);
+  }
+
+  /**
+   * Given two Collections of colors, find 2 that are sufficiently visually contrasting. Defaults to
+   * the 'primary color' in each list. Primary color is assumed to be the first one in the
+   * collection (index 0).
+   *
+   * @param colors1 Primary list of colors
+   * @param colors2 Secondary list of colors
+   * @return A 2x1 array containing the contrasting colors, or null if no suitable pair was found
+   */
+  public Color[] getContrastingColorPair(List<Color> colors1, List<Color> colors2) {
+
+    if (colors1 == null || colors1.size() == 0 || colors2 == null || colors2.size() == 0) {
+      return null;
+    }
+
+    // compare colors in list 1...
+    for (final Color c1 : colors1) {
+      final float l1 = getRelativeLuminance(c1);
+      // ... to colors in list 2
+      for (final Color c2 : colors2) {
+        final float l2 = getRelativeLuminance(c2);
+        final float contrast = Math.abs(l2 - l1);
+        // if "contrast ratio" is sufficient
+        if (contrast > 0.1f) {
+          return new Color[] {c1, c2};
+        }
+      }
+    }
+    // default - return primary colors
+    return new Color[] {colors1.get(0), colors2.get(0)};
+  }
+
+  private float getRelativeLuminance(@NotNull Color color) {
+    final float red = getColorFactor(color.getRed());
+    final float green = getColorFactor(color.getGreen());
+    final float blue = getColorFactor(color.getBlue());
+    return (0.2126f * red) + (0.7152f * green) + (0.0722f * blue);
+  }
+
+  private float getColorFactor(int color) {
+    final float converted = color / 255f;
+    if (converted <= 0.03928) {
+      return converted / 12.92f;
+    } else {
+      return (float) Math.pow((converted + 0.055) / 1.055, 2.4f);
+    }
   }
 
   private @NotNull Path getImageLocation(@NotNull MediaType type) {
@@ -180,6 +244,16 @@ public class ArtworkService {
       }
     }
     return collectionRepository.saveAndFlush(collection);
+  }
+
+  public boolean deleteArtwork(@NotNull Artwork artwork) {
+    final Path artworkFile = artwork.getFile();
+    final boolean deleted = artworkFile.toFile().delete();
+    if (deleted) {
+      artworkRepository.delete(artwork);
+      return true;
+    }
+    return false;
   }
 
   private void deleteArtworkFromDisk(@NotNull Artwork artwork) throws IOException {

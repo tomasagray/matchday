@@ -19,19 +19,18 @@
 
 package self.me.matchday.model;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Set;
+import java.util.UUID;
+import javax.persistence.Entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.video.VideoFileSource;
-
-import javax.persistence.Entity;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Set;
-import java.util.UUID;
 
 /** A highlight show, week in review or other non-Match televised Event. */
 @Getter
@@ -43,7 +42,7 @@ public class Highlight extends Event implements Serializable {
   @Builder(builderMethodName = "highlightBuilder")
   public Highlight(
       UUID eventId, Competition competition, Season season, Fixture fixture, LocalDateTime date) {
-    super(eventId, competition, season, fixture, date);
+    super(eventId, competition, season, fixture, date, null);
   }
 
   @Override
@@ -53,7 +52,8 @@ public class Highlight extends Event implements Serializable {
         getCompetition().getName().getName(), getDate().format(DateTimeFormatter.ISO_DATE));
   }
 
-  // Next 7 methods included for reflection
+  // --------------------------------------
+  // Next 8 methods included for reflection
   @Override
   public UUID getEventId() {
     return super.getEventId();
@@ -88,7 +88,13 @@ public class Highlight extends Event implements Serializable {
   public LocalDateTime getDate() {
     return super.getDate();
   }
+
+  @Override
+  public Artwork getArtwork() {
+    return super.getArtwork();
+  }
   // End redundant reflection overrides
+  // ----------------------------------
 
   @Override
   public @NotNull String toString() {
