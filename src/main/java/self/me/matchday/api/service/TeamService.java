@@ -203,13 +203,26 @@ public class TeamService implements EntityService<Team, UUID> {
   }
 
   @Override
-  public void delete(@NotNull UUID teamId) {
-    teamRepository.deleteById(teamId);
+  public void delete(@NotNull UUID teamId) throws IOException {
+
+    // TODO : check matches
+    final Optional<Team> teamOptional = fetchById(teamId);
+    if (teamOptional.isPresent()) {
+      final Team team = teamOptional.get();
+      // delete artwork
+      artworkService.deleteArtworkCollection(team.getEmblem());
+      artworkService.deleteArtworkCollection(team.getFanart());
+      teamRepository.deleteById(teamId);
+    } else {
+      throw new IllegalArgumentException("Trying to delete non-existent Team with ID: " + teamId);
+    }
   }
 
   @Override
-  public void deleteAll(@NotNull Iterable<? extends Team> teams) {
-    StreamSupport.stream(teams.spliterator(), false).map(Team::getId).forEach(this::delete);
+  public void deleteAll(@NotNull Iterable<? extends Team> teams) throws IOException {
+    for (Team team : teams) {
+      delete(team.getId());
+    }
   }
 
   /**

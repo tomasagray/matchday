@@ -26,19 +26,31 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
@@ -50,6 +62,15 @@ import self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask;
 @Service
 @Transactional
 public class VideoStreamManager {
+
+  @Value("${video-resources.file-read-buffer-size}")
+  private int BUFFER_SIZE;
+
+  @Value("${video-resources.file-recheck-delay-ms}")
+  private int FILE_CHECK_DELAY;
+
+  @Value("${video-resources.max-recheck-seconds}")
+  private int MAX_RECHECK_TIMEOUT;
 
   private final VideoStreamLocatorPlaylistService playlistService;
   private final VideoStreamLocatorService locatorService;
@@ -152,6 +173,68 @@ public class VideoStreamManager {
     // wait for process to finish
     process.waitFor();
     process.destroy();
+  }
+
+  /**
+   * Read playlist file from disk and return as a String
+   *
+   * @param partId Playlist locator ID
+   * @return The playlist as a String
+   */
+  public Optional<String> readPlaylistFile(@NotNull final Long partId) {
+    return locatorService.getStreamLocator(partId).map(this::readLocatorPlaylist);
+  }
+
+  /**
+   * Read playlist file; it may be concurrently being written to, so we read it reactively
+   *
+   * @param streamLocator The locator pointing to the required playlist file
+   * @return The playlist file as a String or empty
+   */
+  private @Nullable String readLocatorPlaylist(@NotNull final VideoStreamLocator streamLocator) {
+
+    final StringBuilder sb = new StringBuilder();
+    final Path playlistPath = streamLocator.getPlaylistPath();
+    // wait until playlist file actually exists
+    waitForFile(playlistPath);
+
+    final Flux<DataBuffer> fluxBuffer =
+        DataBufferUtils.read(playlistPath, new DefaultDataBufferFactory(), BUFFER_SIZE);
+    fluxBuffer
+        .publishOn(Schedulers.boundedElastic())
+        .buffer(450)
+        .flatMapIterable(Function.identity())
+        .doOnNext(buffer -> readBufferFromDisk(buffer, sb))
+        .blockLast();
+    final String result = sb.toString();
+    return result.isEmpty() ? null : result;
+  }
+
+  private void waitForFile(@NotNull Path playlistPath) {
+
+    final File playlistFile = playlistPath.toFile();
+    final Duration timeout = Duration.of(MAX_RECHECK_TIMEOUT, ChronoUnit.SECONDS);
+    final Instant start = Instant.now();
+    try {
+      while (!playlistFile.exists()) {
+        TimeUnit.MILLISECONDS.sleep(FILE_CHECK_DELAY);
+        final Duration elapsed = Duration.between(start, Instant.now());
+        if (elapsed.compareTo(timeout) > 0) {
+          throw new InterruptedException("Timeout exceeded reading playlist file: " + playlistFile);
+        }
+      }
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void readBufferFromDisk(@NotNull DataBuffer buffer, @NotNull StringBuilder sb) {
+    try (final InputStream inputStream = buffer.asInputStream()) {
+      final String data = new String(inputStream.readAllBytes());
+      sb.append(data);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   public int killAllStreams() {

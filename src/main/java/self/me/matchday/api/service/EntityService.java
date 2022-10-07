@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +41,7 @@ public interface EntityService<T, I> {
 
   List<T> updateAll(@NotNull Iterable<? extends T> entities);
 
-  void delete(@NotNull I id);
+  void delete(@NotNull I id) throws IOException;
 
-  void deleteAll(@NotNull Iterable<? extends T> entities);
+  void deleteAll(@NotNull Iterable<? extends T> entities) throws IOException;
 }

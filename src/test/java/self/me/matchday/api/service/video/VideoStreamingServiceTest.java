@@ -125,11 +125,7 @@ class VideoStreamingServiceTest {
   void fetchVideoFileSources() {
 
     logger.info("Fetching event with ID: " + testMatch.getEventId());
-    final Optional<Collection<VideoFileSource>> fileSrcOptional =
-        streamingService.fetchVideoFileSources(testMatch.getEventId());
-    assertThat(fileSrcOptional).isPresent();
-
-    final Collection<VideoFileSource> actualFileSources = fileSrcOptional.get();
+    final Collection<VideoFileSource> actualFileSources = testMatch.getFileSources();
     logger.info("Retrieved files sources: " + actualFileSources);
 
     final Set<VideoFileSource> expectedFileSources = testMatch.getFileSources();
@@ -152,7 +148,7 @@ class VideoStreamingServiceTest {
         testFileSrcId);
 
     final Optional<VideoPlaylist> playlistOptional =
-        streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId);
+        streamingService.getVideoStreamPlaylist(testMatch, testFileSrcId);
     assertThat(playlistOptional).isPresent();
     final VideoPlaylist videoPlaylist = playlistOptional.get();
     logger.info("Retrieved VideoPlaylist: " + videoPlaylist);
@@ -161,7 +157,7 @@ class VideoStreamingServiceTest {
     assertThat(videoPlaylist.getLocatorIds().size()).isNotZero();
 
     final Optional<VideoPlaylist> afterCreatingStreamPlaylist =
-        streamingService.getVideoStreamPlaylist(testEventId, testFileSrcId);
+        streamingService.getVideoStreamPlaylist(testMatch, testFileSrcId);
     assertThat(afterCreatingStreamPlaylist).isNotNull().isPresent();
     final VideoPlaylist playlist = afterCreatingStreamPlaylist.get();
     assertThat(playlist).isNotNull();
@@ -299,7 +295,7 @@ class VideoStreamingServiceTest {
         "Beginning test stream for file source stream killing with file source ID: " + fileSrcId);
 
     final Optional<VideoPlaylist> playlistOptional =
-        streamingService.getVideoStreamPlaylist(testMatch.getEventId(), fileSrcId);
+        streamingService.getVideoStreamPlaylist(testMatch, fileSrcId);
     assertThat(playlistOptional).isPresent();
     final VideoPlaylist videoPlaylist = playlistOptional.get();
     logger.info("Using playlist: " + videoPlaylist);

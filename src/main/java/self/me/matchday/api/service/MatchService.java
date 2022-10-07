@@ -21,6 +21,7 @@ package self.me.matchday.api.service;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
+import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.Artwork;
 import self.me.matchday.model.Competition;
@@ -57,6 +59,7 @@ public class MatchService implements EntityService<Match, UUID> {
   private final TeamService teamService;
   private final CompetitionService competitionService;
   private final ArtworkService artworkService;
+  private final VideoStreamingService streamingService;
   private final byte[] defaultEmblem;
 
   public MatchService(
@@ -64,13 +67,15 @@ public class MatchService implements EntityService<Match, UUID> {
       EntityCorrectionService entityCorrectionService,
       TeamService teamService,
       CompetitionService competitionService,
-      ArtworkService artworkService)
+      ArtworkService artworkService,
+      VideoStreamingService streamingService)
       throws IOException {
     this.matchRepository = matchRepository;
     this.entityCorrectionService = entityCorrectionService;
     this.teamService = teamService;
     this.competitionService = competitionService;
     this.artworkService = artworkService;
+    this.streamingService = streamingService;
     this.defaultEmblem = ResourceFileReader.readBinaryData("image/default_team_emblem.png");
   }
 
@@ -288,7 +293,25 @@ public class MatchService implements EntityService<Match, UUID> {
 
   @Override
   public void delete(@NotNull UUID matchId) {
-    matchRepository.deleteById(matchId);
+    // todo - delete related: videos, artwork, etc.
+    final Optional<Match> matchOptional = fetchById(matchId);
+    if (matchOptional.isPresent()) {
+      final Match match = matchOptional.get();
+      artworkService.deleteArtwork(match.getArtwork());
+      match
+          .getFileSources()
+          .forEach(
+              fileSrc -> {
+                try {
+                  streamingService.deleteVideoData(fileSrc.getFileSrcId());
+                } catch (IOException e) {
+                  throw new UncheckedIOException(e);
+                }
+              });
+      matchRepository.deleteById(matchId);
+    } else {
+      throw new IllegalArgumentException("No Match found with ID: " + matchId);
+    }
   }
 
   @Override

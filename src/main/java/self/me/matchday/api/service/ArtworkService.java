@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -247,13 +248,31 @@ public class ArtworkService {
   }
 
   public boolean deleteArtwork(@NotNull Artwork artwork) {
-    final Path artworkFile = artwork.getFile();
-    final boolean deleted = artworkFile.toFile().delete();
-    if (deleted) {
+    final File artworkFile = artwork.getFile().toFile();
+    final boolean deleted = artworkFile.delete();
+    if (deleted || !artworkFile.exists()) {
       artworkRepository.delete(artwork);
       return true;
     }
+    // else...
     return false;
+  }
+
+  public void deleteArtworkCollection(@NotNull ArtworkCollection collection) throws IOException {
+    deleteArtworkCollectionFromDisk(collection);
+    // only reachable if all Artwork in collection deleted successfully
+    collectionRepository.delete(collection);
+  }
+
+  private void deleteArtworkCollectionFromDisk(@NotNull ArtworkCollection collection)
+      throws IOException {
+    final Set<Artwork> artworks = collection.getCollection();
+    for (Artwork artwork : artworks) {
+      final boolean deleted = deleteArtwork(artwork);
+      if (!deleted) {
+        throw new IOException("Could not delete artwork from disk");
+      }
+    }
   }
 
   private void deleteArtworkFromDisk(@NotNull Artwork artwork) throws IOException {

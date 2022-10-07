@@ -22,6 +22,7 @@ package self.me.matchday.api.controller;
 import static self.me.matchday.api.controller.CompetitionController.IMAGE_SVG_VALUE;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +128,16 @@ public class MatchController {
     return ResponseEntity.ok().body(artworkModeller.toModel(artwork));
   }
 
-  @ExceptionHandler(IOException.class)
+  @RequestMapping(
+      value = "/match/{matchId}/delete",
+      method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<UUID> deleteMatch(@PathVariable UUID matchId) {
+    matchService.delete(matchId);
+    return ResponseEntity.ok(matchId);
+  }
+
+  @ExceptionHandler({IOException.class, UncheckedIOException.class})
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
   public String handleIoError(@NotNull IOException e) {

@@ -298,6 +298,15 @@ public class TeamController {
     return ResponseEntity.ok(resource);
   }
 
+  @RequestMapping(
+      value = "/team/{teamId}/delete",
+      method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<UUID> deleteTeam(@PathVariable UUID teamId) throws IOException {
+    teamService.delete(teamId);
+    return ResponseEntity.ok(teamId);
+  }
+
   @ExceptionHandler(IllegalArgumentException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody

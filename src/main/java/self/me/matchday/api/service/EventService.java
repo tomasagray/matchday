@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -30,8 +31,10 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.EventRepository;
 import self.me.matchday.db.VideoFileSrcRepository;
 import self.me.matchday.model.Competition;
@@ -41,6 +44,7 @@ import self.me.matchday.model.Highlight;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.video.VideoPlaylist;
 
 @Service
 @Transactional
@@ -53,6 +57,7 @@ public class EventService implements EntityService<Event, UUID> {
   private final MatchService matchService;
   private final HighlightService highlightService;
   private final CompetitionService competitionService;
+  private final VideoStreamingService videoStreamingService;
 
   EventService(
       EventRepository eventRepository,
@@ -60,12 +65,14 @@ public class EventService implements EntityService<Event, UUID> {
       MatchService matchService,
       HighlightService highlightService,
       CompetitionService competitionService,
-      VideoFileSrcRepository fileSrcRepository) {
+      VideoFileSrcRepository fileSrcRepository,
+      VideoStreamingService videoStreamingService) {
     this.eventRepository = eventRepository;
     this.fileSrcRepository = fileSrcRepository;
     this.matchService = matchService;
     this.highlightService = highlightService;
     this.competitionService = competitionService;
+    this.videoStreamingService = videoStreamingService;
   }
 
   @Override
@@ -159,6 +166,36 @@ public class EventService implements EntityService<Event, UUID> {
     return eventRepository.fetchEventsByCompetition(competitionId).stream()
         .map(this::initialize)
         .collect(Collectors.toList());
+  }
+
+  public Optional<VideoPlaylist> getBestVideoStreamPlaylist(@NotNull UUID eventId) {
+    return fetchById(eventId).flatMap(videoStreamingService::getBestVideoStreamPlaylist);
+  }
+
+  public Optional<VideoPlaylist> getVideoStreamPlaylist(
+      @NotNull UUID eventId, @NotNull UUID fileSrcId) {
+    return fetchById(eventId)
+        .flatMap(event -> videoStreamingService.getVideoStreamPlaylist(event, fileSrcId));
+  }
+
+  public Optional<Collection<VideoFileSource>> fetchVideoFileSources(@NotNull UUID eventId) {
+    return fetchById(eventId).map(Event::getFileSources);
+  }
+
+  public Resource getVideoSegmentResource(@NotNull Long partId, @NotNull String segmentId) {
+    return videoStreamingService.getVideoSegmentResource(partId, segmentId);
+  }
+
+  public void deleteVideoData(@NotNull UUID fileSrcId) throws IOException {
+    videoStreamingService.deleteVideoData(fileSrcId);
+  }
+
+  public int killAllStreamingTasks() {
+    return videoStreamingService.killAllStreamingTasks();
+  }
+
+  public Optional<String> readPlaylistFile(@NotNull Long partId) {
+    return videoStreamingService.readPlaylistFile(partId);
   }
 
   /**
