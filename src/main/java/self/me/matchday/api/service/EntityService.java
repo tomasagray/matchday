@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface EntityService<T, I> {
 
-  // TODO: Is this the right way to do this? (Avoids LazyInitializationException)
   T initialize(@NotNull T t);
 
   T save(@NotNull T entity);

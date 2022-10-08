@@ -118,12 +118,17 @@ public class ArtworkCreatorPlugin implements Plugin {
           .forEach(image -> graphics.drawImage(image, 0, 0, null));
       graphics.dispose();
 
-      final boolean written = ImageIO.write(baseTile, "png", output);
+      final MediaType imageType = (MediaType) getMatchingParam(_params, "#type").getData();
+      final boolean written = ImageIO.write(baseTile, imageType.getSubtype(), output);
       if (!written) {
         throw new IOException("Could not write image data: no appropriate writer found");
       }
-      return new Image(output.toByteArray(), MediaType.IMAGE_PNG); // todo - get type from params
+      return new Image(output.toByteArray(), imageType);
     }
+  }
+
+  private Param<?> getMatchingParam(@NotNull Collection<Param<?>> params, @NotNull String tag) {
+    return params.stream().filter(param -> param.nameMatches(tag)).findFirst().orElse(null);
   }
 
   private @NotNull BufferedImage renderLayer(
@@ -144,10 +149,6 @@ public class ArtworkCreatorPlugin implements Plugin {
     }
     graphics.dispose();
     return buffer;
-  }
-
-  private Param<?> getMatchingParam(@NotNull Collection<Param<?>> params, @NotNull String tag) {
-    return params.stream().filter(param -> param.nameMatches(tag)).findFirst().orElse(null);
   }
 
   private void renderShape(

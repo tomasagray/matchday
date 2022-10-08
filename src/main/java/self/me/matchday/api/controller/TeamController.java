@@ -26,6 +26,7 @@ import static self.me.matchday.api.controller.CompetitionController.IMAGE_SVG_VA
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
@@ -339,6 +340,13 @@ public class TeamController {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
   public String handleIoError(@NotNull IOException e) {
+    return e.getMessage();
+  }
+
+  @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public String handleSqlError(@NotNull SQLIntegrityConstraintViolationException e) {
     return e.getMessage();
   }
 }

@@ -34,6 +34,7 @@ import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.springframework.data.domain.Example;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.MatchRepository;
@@ -162,8 +163,10 @@ public class MatchService implements EntityService<Match, UUID> {
     final Color[] teamColors = getContrastingTeamColors(homeTeam, awayTeam);
     final Param<Color> homeTeamColor = new Param<>("#home-team-color", teamColors[0]);
     final Param<Color> awayTeamColor = new Param<>("#away-team-color", teamColors[1]);
+    // other
+    final Param<MediaType> type = new Param<>("#type", MediaType.IMAGE_PNG);
 
-    return List.of(homeTeamEmblem, awayTeamEmblem, homeTeamColor, awayTeamColor);
+    return List.of(homeTeamEmblem, awayTeamEmblem, homeTeamColor, awayTeamColor, type);
   }
 
   private @NotNull Param<?> createTeamEmblemParam(@NotNull Team team, @NotNull String tag)
@@ -293,7 +296,7 @@ public class MatchService implements EntityService<Match, UUID> {
 
   @Override
   public void delete(@NotNull UUID matchId) {
-    // todo - delete related: videos, artwork, etc.
+
     final Optional<Match> matchOptional = fetchById(matchId);
     if (matchOptional.isPresent()) {
       final Match match = matchOptional.get();

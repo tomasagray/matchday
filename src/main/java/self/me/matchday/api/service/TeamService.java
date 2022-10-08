@@ -205,7 +205,6 @@ public class TeamService implements EntityService<Team, UUID> {
   @Override
   public void delete(@NotNull UUID teamId) throws IOException {
 
-    // TODO : check matches
     final Optional<Team> teamOptional = fetchById(teamId);
     if (teamOptional.isPresent()) {
       final Team team = teamOptional.get();
