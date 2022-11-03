@@ -24,6 +24,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
@@ -173,6 +174,16 @@ public class CompetitionController {
     final Competition update = competitionService.update(competition);
     final CompetitionResource resource = resourceAssembler.toModel(update);
     return ResponseEntity.ok(resource);
+  }
+
+  @RequestMapping(
+      value = "/competition/{competitionId}/delete",
+      method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<UUID> deleteCompetition(@PathVariable UUID competitionId)
+      throws IOException {
+    competitionService.delete(competitionId);
+    return ResponseEntity.ok(competitionId);
   }
 
   /**
@@ -359,6 +370,13 @@ public class CompetitionController {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
   public String handleIoError(@NotNull IOException e) {
+    return e.getMessage();
+  }
+
+  @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public String handleSqlIntegrityError(@NotNull SQLIntegrityConstraintViolationException e) {
     return e.getMessage();
   }
 }

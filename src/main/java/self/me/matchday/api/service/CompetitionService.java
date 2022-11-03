@@ -274,15 +274,25 @@ public class CompetitionService implements EntityService<Competition, UUID> {
    * @param competitionId The ID of the Competition to delete
    */
   @Override
-  public void delete(@NotNull final UUID competitionId) {
-    competitionRepository.deleteById(competitionId);
+  public void delete(@NotNull final UUID competitionId) throws IOException {
+
+    final Optional<Competition> competitionOptional = fetchById(competitionId);
+    if (competitionOptional.isPresent()) {
+      final Competition competition = competitionOptional.get();
+      artworkService.deleteArtworkCollection(competition.getEmblem());
+      artworkService.deleteArtworkCollection(competition.getFanart());
+      competitionRepository.delete(competition);
+    } else {
+      throw new IllegalArgumentException(
+          "Trying to delete non-existent Competition: " + competitionId);
+    }
   }
 
   @Override
-  public void deleteAll(@NotNull Iterable<? extends Competition> competitions) {
-    StreamSupport.stream(competitions.spliterator(), false)
-        .map(Competition::getId)
-        .forEach(this::delete);
+  public void deleteAll(@NotNull Iterable<? extends Competition> competitions) throws IOException {
+    for (final Competition competition : competitions) {
+      delete(competition.getId());
+    }
   }
 
   /**

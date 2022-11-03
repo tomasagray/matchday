@@ -169,7 +169,10 @@ public class EventService implements EntityService<Event, UUID> {
   }
 
   public Optional<VideoPlaylist> getBestVideoStreamPlaylist(@NotNull UUID eventId) {
-    return fetchById(eventId).flatMap(videoStreamingService::getBestVideoStreamPlaylist);
+    return fetchById(eventId)
+        .flatMap(videoStreamingService::getBestVideoStreamPlaylist)
+        .flatMap(
+            playlist -> getVideoStreamPlaylist(playlist.getEventId(), playlist.getFileSrcId()));
   }
 
   public Optional<VideoPlaylist> getVideoStreamPlaylist(

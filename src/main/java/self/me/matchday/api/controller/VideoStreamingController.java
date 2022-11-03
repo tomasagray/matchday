@@ -40,7 +40,6 @@ import self.me.matchday.api.resource.VideoFileSourceResource.VideoFileSourceReso
 import self.me.matchday.api.resource.VideoPlaylistResource;
 import self.me.matchday.api.resource.VideoPlaylistResource.VideoPlaylistResourceAssembler;
 import self.me.matchday.api.service.EventService;
-import self.me.matchday.model.video.VideoPlaylist;
 
 @RestController
 @RequestMapping(value = "/events/event/{eventId}/video")
@@ -76,13 +75,15 @@ public class VideoStreamingController {
   }
 
   @RequestMapping(
-      value = "/playlist/master",
+      value = "/playlist/preferred",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<VideoPlaylist> getMasterPlaylist(@PathVariable final UUID eventId) {
+  public ResponseEntity<VideoPlaylistResource> getPreferredPlaylist(
+      @PathVariable final UUID eventId) {
 
     return eventService
         .getBestVideoStreamPlaylist(eventId)
+        .map(playlistResourceAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }

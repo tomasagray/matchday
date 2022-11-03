@@ -85,7 +85,7 @@ public class VideoStreamingService {
         .map(playlistService::getVideoStreamPlaylistFor)
         .filter(Optional::isPresent)
         .map(Optional::get)
-        .findAny();
+        .findFirst();
   }
 
   /**

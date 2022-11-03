@@ -34,8 +34,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Param;
@@ -48,9 +48,6 @@ class ArtworkCreatorPluginTest {
 
   private static final Logger logger = LogManager.getLogger(ArtworkCreatorPluginTest.class);
   private final ArtworkCreatorPlugin plugin;
-
-  @Value("${artwork.data-storage-location}")
-  private String dataLocation;
 
   @Autowired
   ArtworkCreatorPluginTest(ArtworkCreatorPlugin plugin) {
@@ -122,6 +119,7 @@ class ArtworkCreatorPluginTest {
     final Param<byte[]> awayTeamEmblem = new Param<>("#away-team-emblem", logoImage);
     final Param<Color> homeTeamColor = new Param<>("#home-team-color", Color.BLUE);
     final Param<Color> awayTeamColor = new Param<>("#away-team-color", Color.YELLOW);
-    return List.of(homeTeamEmblem, homeTeamColor, awayTeamEmblem, awayTeamColor);
+    final Param<MediaType> type = new Param<>("#type", MediaType.IMAGE_PNG);
+    return List.of(homeTeamEmblem, homeTeamColor, awayTeamEmblem, awayTeamColor, type);
   }
 }

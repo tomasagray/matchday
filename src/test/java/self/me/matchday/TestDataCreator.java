@@ -287,7 +287,7 @@ public class TestDataCreator {
   }
 
   @Transactional
-  public void deleteTestCompetition(Competition competition) {
+  public void deleteTestCompetition(Competition competition) throws IOException {
     logger.info("Deleting test Competition: {}", competition);
     competitionService.delete(competition.getId());
   }

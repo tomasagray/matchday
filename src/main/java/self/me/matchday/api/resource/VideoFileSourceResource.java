@@ -52,10 +52,8 @@ import self.me.matchday.model.video.VideoFileSource;
 @JsonInclude(value = Include.NON_NULL)
 public class VideoFileSourceResource extends RepresentationModel<VideoFileSourceResource> {
 
-  private static final LinkRelation MASTER_PLAYLIST = LinkRelation.of("direct_master");
-  private static final LinkRelation VARIANT_PLAYLIST = LinkRelation.of("direct_variant");
-  private static final LinkRelation TRANSCODE_STREAM = LinkRelation.of("transcode_stream");
-  private static final LinkRelation TRANSCODE_PLS_STREAM = LinkRelation.of("transcode_pls_stream");
+  private static final LinkRelation PREFERRED_PLAYLIST = LinkRelation.of("preferred");
+  private static final LinkRelation STREAM = LinkRelation.of("stream");
 
   private UUID id;
   private String channel;
@@ -104,20 +102,11 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
       if (framerate > 0) {
         videoFileSourceResource.setFrameRate(framerate);
       }
-
-      // remote stream (no transcoding)
       videoFileSourceResource.add(
           linkTo(
                   methodOn(VideoStreamingController.class)
                       .getVideoStreamPlaylist(eventId, fileSrcId))
-              .withRel(VARIANT_PLAYLIST));
-
-      // local stream (transcoded to local disk)
-      videoFileSourceResource.add(
-          linkTo(
-                  methodOn(VideoStreamingController.class)
-                      .getVideoStreamPlaylist(eventId, fileSrcId))
-              .withRel(TRANSCODE_STREAM));
+              .withRel(STREAM));
       return videoFileSourceResource;
     }
 
@@ -125,12 +114,13 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
     public @NotNull CollectionModel<VideoFileSourceResource> toCollectionModel(
         @NotNull Iterable<? extends VideoFileSource> entities) {
 
-      final CollectionModel<VideoFileSourceResource> videoResources = super.toCollectionModel(entities);
+      final CollectionModel<VideoFileSourceResource> videoResources =
+          super.toCollectionModel(entities);
 
       // Add link to master playlist
       videoResources.add(
-          linkTo(methodOn(VideoStreamingController.class).getMasterPlaylist(eventId))
-              .withRel(MASTER_PLAYLIST));
+          linkTo(methodOn(VideoStreamingController.class).getPreferredPlaylist(eventId))
+              .withRel(PREFERRED_PLAYLIST));
       return videoResources;
     }
   }

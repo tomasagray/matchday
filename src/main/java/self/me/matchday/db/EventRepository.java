@@ -36,6 +36,8 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
    * @param competitionId The name of the Competition.
    * @return A List of Competitions.
    */
-  @Query("SELECT ev FROM Event ev JOIN ev.competition cm WHERE cm.id = :competitionId")
+  @Query(
+      "SELECT ev FROM Event ev JOIN ev.competition cm WHERE cm.id = :competitionId "
+          + "ORDER BY ev.date DESC")
   List<Event> fetchEventsByCompetition(@Param("competitionId") UUID competitionId);
 }

@@ -143,7 +143,16 @@ public abstract class Event {
 
     @Override
     public int compare(@NotNull Event o1, @NotNull Event o2) {
-      return o1.getDate().compareTo(o2.getDate()) * -1;
+      final int reverse = -1;
+      final LocalDateTime date1 = o1.getDate();
+      final LocalDateTime date2 = o2.getDate();
+      if (date1 == null) {
+        if (date2 == null) {
+          return 0;
+        }
+        return -1;
+      }
+      return date1.compareTo(date2) * reverse;
     }
   }
 }
