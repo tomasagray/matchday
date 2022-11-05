@@ -25,7 +25,9 @@ import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -36,6 +38,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.springframework.data.domain.Example;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import self.me.matchday.api.service.video.InvalidVideoFilePackException;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.Artwork;
@@ -45,6 +48,10 @@ import self.me.matchday.model.Image;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Param;
 import self.me.matchday.model.Team;
+import self.me.matchday.model.video.PartIdentifier;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoFilePack;
+import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.util.ResourceFileReader;
 
 @Service
@@ -254,6 +261,36 @@ public class MatchService implements EntityService<Match, UUID> {
   private void validateMatch(@NotNull Match match) {
     teamService.validateTeam(match.getHomeTeam());
     teamService.validateTeam(match.getAwayTeam());
+    validateFileSources(match);
+  }
+
+  private void validateFileSources(@NotNull Match match) {
+    final Set<VideoFileSource> fileSources = match.getFileSources();
+    int validFileSources = 0;
+    for (VideoFileSource fileSource : fileSources) {
+      int validFilePacks = 0;
+      final List<VideoFilePack> filePacks = fileSource.getVideoFilePacks();
+      for (VideoFilePack filePack : filePacks) {
+        if (isValidVideoFilePack(filePack)) {
+          validFilePacks++;
+        } else {
+          throw new InvalidVideoFilePackException("VideoFilePack does not contain required parts");
+        }
+      }
+      if (validFilePacks == 0) {
+        throw new InvalidVideoFileSourceException("VideoFileSource is empty");
+      }
+      validFileSources++;
+    }
+    if (validFileSources == 0) {
+      throw new InvalidEventException("No video file sources");
+    }
+  }
+
+  private boolean isValidVideoFilePack(@NotNull VideoFilePack filePack) {
+    final Map<PartIdentifier, VideoFile> files = filePack.allFiles();
+    return files.containsKey(PartIdentifier.FIRST_HALF)
+        && files.containsKey(PartIdentifier.SECOND_HALF);
   }
 
   private @NotNull Example<Match> getExampleEvent(@NotNull Match match) {

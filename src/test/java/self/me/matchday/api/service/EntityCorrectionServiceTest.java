@@ -87,7 +87,8 @@ class EntityCorrectionServiceTest {
             .build();
     final VideoFileSource fileSource = new VideoFileSource();
     final VideoFilePack filePack = new VideoFilePack();
-    filePack.put(new VideoFile(PartIdentifier.FIRST_HALF, new URL("https://wwww.testing.com/")));
+    filePack.put(new VideoFile(PartIdentifier.FIRST_HALF, new URL("https://wwww.testing.com/1")));
+    filePack.put(new VideoFile(PartIdentifier.SECOND_HALF, new URL("https://wwww.testing.com/2")));
     fileSource.addVideoFilePack(filePack);
     properEvent.addFileSource(fileSource);
     logger.info("Saved proper event: " + eventService.save(properEvent));

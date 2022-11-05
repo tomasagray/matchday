@@ -228,15 +228,15 @@ public class EventService implements EntityService<Event, UUID> {
     }
     final Competition competition = event.getCompetition();
     if (!isValidCompetition(competition)) {
-      throw new IllegalArgumentException("invalid competition: " + competition);
+      throw new InvalidEventException("invalid competition: " + competition);
     }
     final LocalDateTime date = event.getDate();
     if (!isValidDate(date)) {
-      throw new IllegalArgumentException("invalid date: " + date);
+      throw new InvalidEventException("invalid date: " + date);
     }
     final Collection<VideoFileSource> fileSources = event.getFileSources();
     if (!isValidVideoFiles(fileSources)) {
-      throw new IllegalArgumentException("no video files!");
+      throw new InvalidEventException("Event has no video files");
     }
   }
 
