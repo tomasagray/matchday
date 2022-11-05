@@ -19,7 +19,19 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Snapshot;
@@ -29,14 +41,6 @@ import self.me.matchday.plugin.datasource.blogger.model.Blogger;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerEntry;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed;
 import self.me.matchday.plugin.datasource.parsing.HypertextEntityParser;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 @Component
 public class BloggerPlugin implements DataSourcePlugin {
@@ -123,15 +127,61 @@ public class BloggerPlugin implements DataSourcePlugin {
     final SourceType type = getSourceType(baseUri);
     final BloggerParser parser =
         type == SourceType.JSON ? new JsonBloggerParser() : new HtmlBloggerParser();
+
     // parse request into blogger query
     final String query = queryBuilder.buildQueryFrom(request, type);
-    final URL queryUrl = baseUri.resolve(query).toURL();
-    // use appropriate BloggerParser to get snapshot
-    final Blogger blogger = parser.getBlogger(queryUrl);
+    URL queryUrl = baseUri.resolve(query).toURL();
+    final LocalDateTime target = request.getEndDate();
+    final List<BloggerEntry> entries = getEntriesUntil(parser, queryUrl, target);
+    return entries.stream().map(BloggerEntry::getContent).map(BloggerFeed.Str::getData);
+  }
 
-    return blogger.getFeed().getEntry().stream()
-        .map(BloggerEntry::getContent)
-        .map(BloggerFeed.Str::getData);
+  /**
+   * Recursively scan Blogger entries until the specified date is reached
+   *
+   * @param parser The Blogger parser
+   * @param queryUrl Beginning query URL
+   * @param target The date a which to stop scanning
+   * @return All BloggerEntries found during the scan
+   * @throws IOException If the Blogger cannot be parsed
+   */
+  private @NotNull List<BloggerEntry> getEntriesUntil(
+      @NotNull BloggerParser parser, @NotNull URL queryUrl, LocalDateTime target)
+      throws IOException {
+
+    final int MAX_SCAN_STEPS = pluginProperties.getMaxScanSteps();
+
+    final List<BloggerEntry> allEntries = new ArrayList<>();
+    URL _url = queryUrl;
+    int steps = 0;
+    do {
+      steps++;
+      final Blogger blogger = parser.getBlogger(_url);
+      final BloggerFeed feed = blogger.getFeed();
+      final List<BloggerEntry> entries = feed.getEntry();
+      if (entries.size() > 0) {
+        allEntries.addAll(entries);
+        _url = getNextUrl(feed, entries, target);
+      } else {
+        _url = null;
+      }
+    } while (_url != null && steps < MAX_SCAN_STEPS);
+    return allEntries;
+  }
+
+  @Nullable
+  private URL getNextUrl(
+      @NotNull BloggerFeed feed, @NotNull List<BloggerEntry> entries, LocalDateTime target) {
+
+    if (target != null) {
+      entries.sort(Comparator.comparing(e -> e.getPublished().$t));
+      final BloggerEntry leastRecent = entries.get(entries.size() - 1);
+      final LocalDateTime current = leastRecent.getPublished().$t;
+      if (current != null && !current.isBefore(target)) {
+        return feed.getNext().getHref();
+      }
+    }
+    return null;
   }
 
   enum SourceType {

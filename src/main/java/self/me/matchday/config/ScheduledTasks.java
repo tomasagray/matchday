@@ -19,6 +19,11 @@
 
 package self.me.matchday.config;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,15 +31,12 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.DataSourceService;
+import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService;
 import self.me.matchday.api.service.video.VideoStreamingService;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
 
 /** Regularly run tasks. Configuration in external properties file. */
 @Component
@@ -44,24 +46,34 @@ public class ScheduledTasks {
   private final DataSourceService dataSourceService;
   private final VideoStreamLocatorPlaylistService streamPlaylistService;
   private final VideoStreamingService videoStreamingService;
+  private final EventService eventService;
 
   @Value("${scheduled-tasks.cron.video-data-expired-days}")
   private int videoDataExpiredDays;
 
   @Autowired
   public ScheduledTasks(
-      final DataSourceService dataSourceService,
-      final VideoStreamLocatorPlaylistService streamPlaylistService,
-      final VideoStreamingService videoStreamingService) {
+      DataSourceService dataSourceService,
+      VideoStreamLocatorPlaylistService streamPlaylistService,
+      VideoStreamingService videoStreamingService,
+      EventService eventService) {
 
     this.dataSourceService = dataSourceService;
     this.streamPlaylistService = streamPlaylistService;
     this.videoStreamingService = videoStreamingService;
+    this.eventService = eventService;
   }
 
   @Scheduled(cron = "${scheduled-tasks.cron.refresh-event-data}")
   public void refreshEventData() throws IOException {
-    final SnapshotRequest snapshotRequest = SnapshotRequest.builder().build();
+    // find latest Events (date sorted)
+    final List<Event> events = eventService.fetchAll();
+    LocalDateTime endDate = null;
+    if (events.size() > 0) {
+      final Event latest = events.get(0);
+      endDate = latest.getDate();
+    }
+    final SnapshotRequest snapshotRequest = SnapshotRequest.builder().endDate(endDate).build();
     dataSourceService.refreshAllDataSources(snapshotRequest);
   }
 

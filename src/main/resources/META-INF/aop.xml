@@ -47,6 +47,7 @@
     <include within="self.me.matchday.api.service.video.VideoStreamManager"/>
     <!-- plugin-->
     <include within="self.me.matchday.plugin.datasource.blogger.BloggerPlugin"/>
+    <include within="self.me.matchday.plugin.datasource.blogger.BloggerParser"/>
     <include within="self.me.matchday.plugin.datasource.parsing.MatchDataParser"/>
     <include within="self.me.matchday.plugin.io.ffmpeg.*"/>
     <include within="self.me.matchday.plugin.fileserver.filefox.*"/>

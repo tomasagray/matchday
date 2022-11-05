@@ -53,4 +53,9 @@ public class BloggerPluginLog {
   public void logSetBloggerPluginEnabled(@NotNull JoinPoint jp) {
     logger.info("Setting Blogger plugin enabled status to: {}", jp.getArgs()[0]);
   }
+
+  @Before("execution(* self.me.matchday.plugin.datasource.blogger.BloggerParser.getBlogger(..))")
+  public void logGetBloggerFromUrl(@NotNull JoinPoint jp) {
+    logger.info("Fetching Blogger instance from: {}", jp.getArgs()[0]);
+  }
 }

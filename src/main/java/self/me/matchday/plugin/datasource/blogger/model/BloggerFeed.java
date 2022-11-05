@@ -19,17 +19,22 @@
 
 package self.me.matchday.plugin.datasource.blogger.model;
 
-import lombok.*;
-import org.hibernate.Hibernate;
-import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import java.net.URI;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
@@ -59,6 +64,8 @@ public class BloggerFeed {
   private Generic<Integer> openSearch$startIndex;
   private Generic<Integer> openSearch$itemsPerPage;
   private List<BloggerEntry> entry;
+  private Link previous;
+  private Link next;
 
   @Override
   public boolean equals(Object o) {

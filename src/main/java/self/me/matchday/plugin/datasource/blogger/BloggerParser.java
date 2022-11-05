@@ -19,14 +19,13 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.plugin.datasource.blogger.model.Blogger;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
+import self.me.matchday.plugin.datasource.blogger.model.Blogger;
 
 public interface BloggerParser {
 

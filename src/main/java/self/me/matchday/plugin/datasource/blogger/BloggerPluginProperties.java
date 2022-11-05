@@ -39,6 +39,7 @@ public class BloggerPluginProperties extends PluginProperties {
   private String jsonUrlPattern;
   private String dateTimeFormatPattern;
   @Getter private String queryUrlPrefix;
+  @Getter private int maxScanSteps;
 
   public Pattern getBloggerUrlPattern() {
     return Pattern.compile(bloggerUrlPattern);

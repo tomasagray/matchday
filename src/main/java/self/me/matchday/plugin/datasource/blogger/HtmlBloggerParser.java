@@ -36,6 +36,7 @@ import org.jsoup.select.Evaluator;
 import self.me.matchday.plugin.datasource.blogger.model.Blogger;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerEntry;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed;
+import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Link;
 
 public class HtmlBloggerParser implements BloggerParser {
 
@@ -93,6 +94,8 @@ public class HtmlBloggerParser implements BloggerParser {
         .link(feedParser.getLinks())
         .generator(feedParser.getGenerator())
         .entry(feedParser.getEntries())
+        .previous(feedParser.getPreviousLink())
+        .next(feedParser.getNextLink())
         .build();
   }
 
@@ -195,19 +198,28 @@ public class HtmlBloggerParser implements BloggerParser {
     }
 
     @Nullable
-    private BloggerFeed.Link getNextLink() {
+    public BloggerFeed.Link getNextLink() {
+      return getLink("next", "a.blog-pager-older-link");
+    }
+
+    @Nullable
+    private BloggerFeed.Link getLink(String rel, String cssQuery) {
       try {
-        final Element nextLink = html.selectFirst("a.blog-pager-older-link");
+        final Element nextLink = html.selectFirst(cssQuery);
         if (nextLink != null) {
-          final BloggerFeed.Link link = new BloggerFeed.Link();
+          final Link link = new Link();
           link.setHref(new URL(nextLink.attr("href")));
-          link.setRel("next");
+          link.setRel(rel);
           link.setType("application/atom+xml");
           return link;
         }
       } catch (MalformedURLException ignored) {
       }
       return null;
+    }
+
+    public BloggerFeed.Link getPreviousLink() {
+      return getLink("previous", "a.blog-pager-newer-link");
     }
 
     BloggerFeed.Generator getGenerator() {
