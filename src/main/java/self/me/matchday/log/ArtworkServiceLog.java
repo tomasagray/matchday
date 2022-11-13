@@ -63,8 +63,22 @@ public class ArtworkServiceLog {
 
   @Before(
       "execution(* self.me.matchday.api.service.ArtworkService.deleteArtworkFromCollection(..))")
-  public void logDeleteArtwork(@NotNull JoinPoint jp) {
+  public void logDeleteArtworkFromCollection(@NotNull JoinPoint jp) {
     final Object[] args = jp.getArgs();
     logger.info("Deleting Artwork: {} from collection: {}", args[1], args[0]);
+  }
+
+  @Around("execution(* self.me.matchday.api.service.ArtworkService.deleteArtwork(..))")
+  public Object logDeleteArtwork(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    final Object artwork = jp.getArgs()[0];
+    logger.info("Attempting to delete Artwork: {}", artwork);
+    final Object success = jp.proceed();
+    logger.info("Successfully deleted artwork: {} ? {}", artwork, success);
+    return success;
+  }
+
+  @Before("execution(* self.me.matchday.api.service.ArtworkService.deleteArtworkCollection(..))")
+  public void logDeleteArtworkCollection(@NotNull JoinPoint jp) {
+    logger.info("Deleting ArtworkCollection: {}", jp.getArgs()[0]);
   }
 }

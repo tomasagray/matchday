@@ -20,6 +20,7 @@
 package self.me.matchday.model;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -141,18 +142,21 @@ public abstract class Event {
   /** Defines default Event sorting order - reverse chronological. */
   public static class EventSorter implements Comparator<Event> {
 
+    private static final ZoneOffset OFFSET = ZoneOffset.UTC;
+    private static final int REVERSE = -1;
+
     @Override
     public int compare(@NotNull Event o1, @NotNull Event o2) {
-      final int reverse = -1;
+      long r1 = Integer.MAX_VALUE, r2 = Integer.MAX_VALUE;
       final LocalDateTime date1 = o1.getDate();
       final LocalDateTime date2 = o2.getDate();
-      if (date1 == null) {
-        if (date2 == null) {
-          return 0;
-        }
-        return -1;
+      if (date1 != null) {
+        r1 = date1.toEpochSecond(OFFSET);
       }
-      return date1.compareTo(date2) * reverse;
+      if (date2 != null) {
+        r2 = date2.toEpochSecond(OFFSET);
+      }
+      return Long.compare(r1, r2) * REVERSE;
     }
   }
 }

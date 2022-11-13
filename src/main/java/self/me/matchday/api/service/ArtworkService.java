@@ -247,15 +247,9 @@ public class ArtworkService {
     return collectionRepository.saveAndFlush(collection);
   }
 
-  public boolean deleteArtwork(@NotNull Artwork artwork) {
-    final File artworkFile = artwork.getFile().toFile();
-    final boolean deleted = artworkFile.delete();
-    if (deleted || !artworkFile.exists()) {
-      artworkRepository.delete(artwork);
-      return true;
-    }
-    // else...
-    return false;
+  public void deleteArtwork(@NotNull Artwork artwork) throws IOException {
+    deleteArtworkFromDisk(artwork);
+    artworkRepository.delete(artwork);
   }
 
   public void deleteArtworkCollection(@NotNull ArtworkCollection collection) throws IOException {
@@ -268,16 +262,14 @@ public class ArtworkService {
       throws IOException {
     final Set<Artwork> artworks = collection.getCollection();
     for (Artwork artwork : artworks) {
-      final boolean deleted = deleteArtwork(artwork);
-      if (!deleted) {
-        throw new IOException("Could not delete artwork from disk");
-      }
+      deleteArtwork(artwork);
     }
   }
 
-  private void deleteArtworkFromDisk(@NotNull Artwork artwork) throws IOException {
-    final boolean deleted = artwork.getFile().toFile().delete();
-    if (!deleted) {
+  public void deleteArtworkFromDisk(@NotNull Artwork artwork) throws IOException {
+    final File artworkFile = artwork.getFile().toFile();
+    final boolean deleted = artworkFile.delete();
+    if (!deleted || artworkFile.exists()) {
       throw new IOException("Could not delete Artwork from disk: " + artwork);
     }
   }

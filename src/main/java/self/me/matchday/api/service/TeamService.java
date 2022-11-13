@@ -208,10 +208,14 @@ public class TeamService implements EntityService<Team, UUID> {
     final Optional<Team> teamOptional = fetchById(teamId);
     if (teamOptional.isPresent()) {
       final Team team = teamOptional.get();
-      // delete artwork
-      artworkService.deleteArtworkCollection(team.getEmblem());
-      artworkService.deleteArtworkCollection(team.getFanart());
       teamRepository.deleteById(teamId);
+      // delete artwork
+      final List<Artwork> artworks = new ArrayList<>();
+      artworks.addAll(team.getEmblem().getCollection());
+      artworks.addAll(team.getFanart().getCollection());
+      for (Artwork artwork : artworks) {
+        artworkService.deleteArtworkFromDisk(artwork);
+      }
     } else {
       throw new IllegalArgumentException("Trying to delete non-existent Team with ID: " + teamId);
     }

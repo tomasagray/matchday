@@ -142,7 +142,8 @@ public class Match extends Event {
     if (!super.equals(o)) return false;
     Match match = (Match) o;
     return Objects.equals(getHomeTeam(), match.getHomeTeam())
-        && Objects.equals(getAwayTeam(), match.getAwayTeam());
+        && Objects.equals(getAwayTeam(), match.getAwayTeam())
+        && Objects.equals(getDate(), match.getDate());
   }
 
   @Override

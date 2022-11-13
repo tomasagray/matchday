@@ -235,8 +235,8 @@ class EventServiceTest {
     logger.info("Original Event: {}", unUpdatedEvent);
 
     final Match testEvent = getPristineEventCopy(unUpdatedEvent);
-    final Competition updatedCompetition = new Competition("Updated Competition");
-    updatedCompetition.setId(UUID.randomUUID());
+    final Competition updatedCompetition =
+        testDataCreator.createTestCompetition("Updated Competition for EventServiceTest");
     testEvent.setCompetition(updatedCompetition);
     logger.info("Attempting to update Event with: {}", testEvent);
 

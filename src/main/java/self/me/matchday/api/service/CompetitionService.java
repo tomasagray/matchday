@@ -20,6 +20,7 @@
 package self.me.matchday.api.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -279,9 +280,15 @@ public class CompetitionService implements EntityService<Competition, UUID> {
     final Optional<Competition> competitionOptional = fetchById(competitionId);
     if (competitionOptional.isPresent()) {
       final Competition competition = competitionOptional.get();
-      artworkService.deleteArtworkCollection(competition.getEmblem());
-      artworkService.deleteArtworkCollection(competition.getFanart());
+      // save artwork for deletion
       competitionRepository.delete(competition);
+      competitionRepository.flush();
+      final List<Artwork> artworks = new ArrayList<>();
+      artworks.addAll(competition.getEmblem().getCollection());
+      artworks.addAll(competition.getFanart().getCollection());
+      for (Artwork artwork : artworks) {
+        artworkService.deleteArtworkFromDisk(artwork);
+      }
     } else {
       throw new IllegalArgumentException(
           "Trying to delete non-existent Competition: " + competitionId);

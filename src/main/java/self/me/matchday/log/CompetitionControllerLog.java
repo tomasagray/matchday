@@ -34,6 +34,7 @@ public class CompetitionControllerLog {
 
   @Around("execution(* self.me.matchday.api.controller.CompetitionController.handle*(..))")
   public Object logErrorHandling(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.debug(jp.getArgs()[0]);
     final Object msg = jp.proceed();
     logger.error(msg);
     return msg;

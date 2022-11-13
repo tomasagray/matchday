@@ -366,7 +366,8 @@ public class MatchService implements EntityService<Match, UUID> {
     final Optional<Match> matchOptional = fetchById(matchId);
     if (matchOptional.isPresent()) {
       final Match match = matchOptional.get();
-      artworkService.deleteArtwork(match.getArtwork());
+      matchRepository.deleteById(matchId);
+      artworkService.deleteArtworkFromDisk(match.getArtwork());
       match
           .getFileSources()
           .forEach(
@@ -377,7 +378,6 @@ public class MatchService implements EntityService<Match, UUID> {
                   throw new UncheckedIOException(e);
                 }
               });
-      matchRepository.deleteById(matchId);
     } else {
       throw new IllegalArgumentException("No Match found with ID: " + matchId);
     }
