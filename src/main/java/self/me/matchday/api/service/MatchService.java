@@ -147,13 +147,9 @@ public class MatchService implements EntityService<Match, UUID> {
   public Artwork makeMatchArtwork(@NotNull Match match) throws IOException {
     final Artwork existingArtwork = match.getArtwork();
     if (existingArtwork != null) {
-      final boolean deleted = artworkService.deleteArtwork(existingArtwork);
-      if (!deleted) {
-        final String msg =
-            "Could not create new Match artwork because old artwork could not be deleted";
-        throw new IOException(msg);
-      }
+      artworkService.deleteArtwork(existingArtwork);
     }
+
     final Collection<Param<?>> params = createMatchArtworkParams(match);
     return artworkService.createArtwork(Match.class, params);
   }
@@ -314,14 +310,47 @@ public class MatchService implements EntityService<Match, UUID> {
   }
 
   @Override
-  public Match update(@NotNull Match match) {
-    final UUID eventId = match.getEventId();
+  public Match update(@NotNull Match updated) {
+    final UUID eventId = updated.getEventId();
     final Optional<Match> optional = fetchById(eventId);
     if (optional.isPresent()) {
-      return save(match);
+      final Match existing = optional.get();
+      // perform update...
+      updateMatch(existing, updated);
+      return save(existing);
     }
     // else..
     throw new IllegalArgumentException("Trying to update non-existent Match with ID: " + eventId);
+  }
+
+  private void updateMatch(@NotNull Match existing, @NotNull Match updated) {
+    final UUID competitionId = updated.getCompetition().getId();
+    final UUID homeTeamId = updated.getHomeTeam().getId();
+    final UUID awayTeamId = updated.getAwayTeam().getId();
+    competitionService
+        .fetchById(competitionId)
+        .ifPresentOrElse(
+            existing::setCompetition,
+            () -> {
+              throw new IllegalArgumentException("No competition with ID: " + competitionId);
+            });
+    teamService
+        .fetchById(homeTeamId)
+        .ifPresentOrElse(
+            existing::setHomeTeam,
+            () -> {
+              throw new IllegalArgumentException("No Team with ID: " + homeTeamId);
+            });
+    teamService
+        .fetchById(awayTeamId)
+        .ifPresentOrElse(
+            existing::setAwayTeam,
+            () -> {
+              throw new IllegalArgumentException("No team with ID: " + awayTeamId);
+            });
+    existing.setDate(updated.getDate());
+    existing.setSeason(updated.getSeason());
+    existing.setFixture(updated.getFixture());
   }
 
   @Override
@@ -332,7 +361,7 @@ public class MatchService implements EntityService<Match, UUID> {
   }
 
   @Override
-  public void delete(@NotNull UUID matchId) {
+  public void delete(@NotNull UUID matchId) throws IOException {
 
     final Optional<Match> matchOptional = fetchById(matchId);
     if (matchOptional.isPresent()) {

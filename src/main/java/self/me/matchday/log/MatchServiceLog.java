@@ -19,6 +19,7 @@
 
 package self.me.matchday.log;
 
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -28,8 +29,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.MatchService;
-
-import java.util.List;
 
 @Aspect
 public class MatchServiceLog {
@@ -70,6 +69,12 @@ public class MatchServiceLog {
   @Before("execution(* self.me.matchday.api.service.MatchService.update(..))")
   public void logUpdateMatch(@NotNull JoinPoint jp) {
     logger.info("Updating Match: {}...", jp.getArgs()[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.MatchService.updateMatch(..))")
+  public void logUpdateMatchWith(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    logger.info("Updating Match: {} with: {}", args[0], args[1]);
   }
 
   @Before("execution(* self.me.matchday.api.service.MatchService.updateAll(..))")

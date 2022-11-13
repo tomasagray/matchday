@@ -31,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -42,9 +43,11 @@ import self.me.matchday.api.resource.EventsResource;
 import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
 import self.me.matchday.api.resource.MatchResource;
 import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
+import self.me.matchday.api.service.InvalidEventException;
 import self.me.matchday.api.service.MatchService;
 import self.me.matchday.model.Artwork;
 import self.me.matchday.model.Image;
+import self.me.matchday.model.Match;
 
 @RestController
 @RequestMapping(value = "/matches")
@@ -132,9 +135,18 @@ public class MatchController {
       value = "/match/{matchId}/delete",
       method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<UUID> deleteMatch(@PathVariable UUID matchId) {
+  public ResponseEntity<UUID> deleteMatch(@PathVariable UUID matchId) throws IOException {
     matchService.delete(matchId);
     return ResponseEntity.ok(matchId);
+  }
+
+  @RequestMapping(
+      value = "/match/update",
+      method = RequestMethod.PATCH,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<MatchResource> updateMatch(@RequestBody final Match match) {
+    final Match updated = matchService.update(match);
+    return ResponseEntity.ok(matchAssembler.toModel(updated));
   }
 
   @ExceptionHandler({IOException.class, UncheckedIOException.class})
@@ -148,6 +160,13 @@ public class MatchController {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
   public String handleIllegalArg(@NotNull IllegalArgumentException e) {
+    return e.getMessage();
+  }
+
+  @ExceptionHandler(InvalidEventException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public String handleInvalidEvent(@NotNull InvalidEventException e) {
     return e.getMessage();
   }
 }
