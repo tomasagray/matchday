@@ -21,14 +21,17 @@ package self.me.matchday.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +39,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.Fixture;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.ProperName;
@@ -62,6 +67,13 @@ class EntityCorrectionServiceTest {
   private final EntityCorrectionService entityCorrectionService;
   private final EventService eventService;
   private final SynonymService synonymService;
+  // Test data
+  private static final List<Event> cleanupData = new ArrayList<>();
+
+  @AfterAll
+  static void cleanup() throws IOException {
+    TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
+  }
 
   @Autowired
   public EntityCorrectionServiceTest(
@@ -91,7 +103,9 @@ class EntityCorrectionServiceTest {
     filePack.put(new VideoFile(PartIdentifier.SECOND_HALF, new URL("https://wwww.testing.com/2")));
     fileSource.addVideoFilePack(filePack);
     properEvent.addFileSource(fileSource);
-    logger.info("Saved proper event: " + eventService.save(properEvent));
+    final Event saved = eventService.save(properEvent);
+    cleanupData.add(saved);
+    logger.info("Saved proper event: " + saved);
   }
 
   private void createSynonyms() {

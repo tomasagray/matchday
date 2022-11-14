@@ -21,6 +21,7 @@ package self.me.matchday.api.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -90,12 +91,13 @@ class CompetitionControllerTest {
   }
 
   @AfterAll
-  static void teardown() {
+  static void teardown() throws IOException {
     testMatches.forEach(
         match -> {
           logger.info("Deleting test Match: {}", match);
           testDataCreator.deleteTestEvent(match);
         });
+    TestDataCreator.deleteGeneratedMatchArtwork(testMatches);
   }
 
   private Stream<Arguments> getAllTestCompetitionsArgs() {

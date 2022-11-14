@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -36,6 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -74,6 +76,7 @@ class VideoStreamingServiceTest {
   private final VideoStreamLocatorService streamLocatorService;
 
   // Test data
+  private static final List<Event> cleanupData = new ArrayList<>();
   private final Event testMatch;
   private final VideoFile testVideoFile;
   private final VideoFileSource testFileSource;
@@ -97,6 +100,7 @@ class VideoStreamingServiceTest {
 
     // Create test data
     this.testMatch = testDataCreator.createTestMatch();
+    cleanupData.add(testMatch);
     this.testFileSource = getTestFileSource();
     this.testVideoFile =
         testFileSource.getVideoFilePacks().stream()
@@ -105,6 +109,11 @@ class VideoStreamingServiceTest {
             .stream()
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("No VideoFiles for test data"));
+  }
+
+  @AfterAll
+  static void cleanup() throws IOException {
+    TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
   }
 
   @NotNull

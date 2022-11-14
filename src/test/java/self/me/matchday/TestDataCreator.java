@@ -28,6 +28,7 @@ import static self.me.matchday.model.video.Resolution.R_1080p;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.reflect.TypeToken;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -35,6 +36,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -226,6 +228,23 @@ public class TestDataCreator {
   }
 
   // ================ EVENTS ======================
+
+  public static void deleteGeneratedMatchArtwork(@NotNull Collection<Event> cleanupData)
+      throws IOException {
+
+    logger.info("Attempting to delete: {} test-generated files...", cleanupData.size());
+    for (Event event : cleanupData) {
+      final File file = event.getArtwork().getFile().toFile();
+      logger.info("Deleting test-generated Artwork file: " + file);
+      final boolean deleted = file.delete();
+      if (deleted || !file.exists()) {
+        logger.info("Successfully deleted file: " + file);
+      } else {
+        throw new IOException("Could not delete file: " + file);
+      }
+    }
+  }
+
   @Transactional
   @NotNull
   public Match createTestMatch() {

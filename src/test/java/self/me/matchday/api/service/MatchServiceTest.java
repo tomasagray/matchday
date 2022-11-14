@@ -21,12 +21,15 @@ package self.me.matchday.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +38,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Team;
 
@@ -51,13 +55,20 @@ class MatchServiceTest {
   private final Competition testCompetition;
   private final Team testTeam;
   private final Match testMatch;
+  private static final List<Event> cleanupData = new ArrayList<>();
 
   @Autowired
   public MatchServiceTest(@NotNull TestDataCreator testDataCreator, MatchService matchService) {
     this.matchService = matchService;
     this.testMatch = testDataCreator.createTestMatch();
+    cleanupData.add(testMatch);
     this.testCompetition = testMatch.getCompetition();
     this.testTeam = testMatch.getHomeTeam();
+  }
+
+  @AfterAll
+  static void cleanup() throws IOException {
+    TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
   }
 
   @Test

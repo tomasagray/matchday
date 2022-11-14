@@ -21,6 +21,7 @@ package self.me.matchday.api.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -86,12 +87,13 @@ class TeamControllerTest {
   }
 
   @AfterAll
-  static void tearDown() {
+  static void tearDown() throws IOException {
     testMatches.forEach(
         event -> {
           logger.info("Deleting test Match: {}", event);
           testDataCreator.deleteTestEvent(event);
         });
+    TestDataCreator.deleteGeneratedMatchArtwork(testMatches);
   }
 
   private Stream<Arguments> getAllTeamsArgs() {

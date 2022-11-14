@@ -22,7 +22,9 @@ package self.me.matchday.api.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static self.me.matchday.model.video.Resolution.R_1080p;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +33,7 @@ import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,6 +65,7 @@ class EventServiceTest {
   private final EventService eventService;
 
   // Test data
+  private static final List<Event> cleanupData = new ArrayList<>();
   private final Match testMatch;
   private final Match unUpdatedEvent;
   private final VideoFileSource testFileSource;
@@ -74,6 +78,7 @@ class EventServiceTest {
     this.eventService = eventService;
 
     testMatch = testDataCreator.createTestMatch("EventServiceTest");
+    cleanupData.add(testMatch);
     testCompetition = testMatch.getCompetition();
     Team testTeam = testMatch.getHomeTeam();
 
@@ -90,8 +95,14 @@ class EventServiceTest {
         testFileSource.getFileSrcId());
 
     // create Event for updating test
-    this.unUpdatedEvent = testDataCreator.createTestMatch("Non-Updated Event");
+    unUpdatedEvent = testDataCreator.createTestMatch("Non-Updated Event");
+    cleanupData.add(unUpdatedEvent);
     logger.info("Created Event for update() test: {}", unUpdatedEvent);
+  }
+
+  @AfterAll
+  public static void cleanup() throws IOException {
+    TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
   }
 
   private @NotNull Match createUnsavedMatch(String name) {
@@ -132,6 +143,7 @@ class EventServiceTest {
     logger.info("Created Test Event: {}", testMatch);
 
     final Event savedEvent = eventService.save(testMatch);
+    cleanupData.add(savedEvent);
     logger.info("Saved Event: {}", savedEvent);
     assertThat(savedEvent).isNotNull();
 
@@ -157,6 +169,7 @@ class EventServiceTest {
             .mapToObj(i -> createUnsavedMatch("SaveAllMatch " + i))
             .collect(Collectors.toList());
     final List<Event> savedEvents = eventService.saveAll(testEvents);
+    cleanupData.addAll(savedEvents);
     logger.info("Saved Event: {}", savedEvents);
     assertThat(savedEvents).isNotNull().isNotEmpty();
     assertThat(savedEvents.size()).isEqualTo(SAVE_COUNT);
@@ -265,6 +278,7 @@ class EventServiceTest {
 
     // Create test data
     final Event saveEvent = testDataCreator.createTestMatch();
+    cleanupData.add(saveEvent);
 
     final List<Event> initialEvents = eventService.fetchAll();
     final int initialEventCount = initialEvents.size();
