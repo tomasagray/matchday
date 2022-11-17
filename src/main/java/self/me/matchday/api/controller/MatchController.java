@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static self.me.matchday.api.controller.CompetitionController.IMAGE_SVG_VALUE;
 
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.io.UncheckedIOException;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,13 +37,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.ArtworkResource;
 import self.me.matchday.api.resource.ArtworkResource.ArtworkResourceAssembler;
 import self.me.matchday.api.resource.EventsResource;
-import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
+import self.me.matchday.api.resource.EventsResource.EventsResourceAssembler;
 import self.me.matchday.api.resource.MatchResource;
 import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
 import self.me.matchday.api.service.InvalidEventException;
@@ -54,19 +58,19 @@ import self.me.matchday.model.Match;
 public class MatchController {
 
   private final MatchService matchService;
-  private final EventResourceAssembler eventAssembler;
+  private final EventsResourceAssembler eventsAssembler;
   private final MatchResourceAssembler matchAssembler;
   private final ArtworkResourceAssembler artworkModeller;
 
   @Autowired
   public MatchController(
       MatchService matchService,
-      EventResourceAssembler eventAssembler,
+      EventsResourceAssembler eventsAssembler,
       MatchResourceAssembler matchAssembler,
       ArtworkResourceAssembler artworkModeller) {
 
     this.matchService = matchService;
-    this.eventAssembler = eventAssembler;
+    this.eventsAssembler = eventsAssembler;
     this.matchAssembler = matchAssembler;
     this.artworkModeller = artworkModeller;
   }
@@ -80,8 +84,17 @@ public class MatchController {
       value = {"", "/"},
       method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<EventsResource> fetchAllMatches() {
-    return ResponseEntity.ok(eventAssembler.toModel(matchService.fetchAll()));
+  public ResponseEntity<EventsResource> fetchAllMatches(
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "16") int size) {
+    final Page<Match> matchPage = matchService.fetchAllPaged(page, size);
+    final EventsResource resource = eventsAssembler.toModel(matchPage.getContent());
+    if (matchPage.hasNext()) {
+      resource.add(
+          linkTo(methodOn(MatchController.class).fetchAllMatches(matchPage.getNumber() + 1, size))
+              .withRel("next"));
+    }
+    return ResponseEntity.ok(resource);
   }
 
   /**

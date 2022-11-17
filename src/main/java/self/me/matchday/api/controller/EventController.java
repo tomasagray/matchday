@@ -19,31 +19,47 @@
 
 package self.me.matchday.api.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.EventsResource;
-import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
+import self.me.matchday.api.resource.EventsResource.EventsResourceAssembler;
 import self.me.matchday.api.service.EventService;
+import self.me.matchday.model.Event;
 
 @RestController
 public class EventController {
 
   private final EventService eventService;
-  private final EventResourceAssembler resourceAssembler;
+  private final EventsResourceAssembler resourceAssembler;
 
   @Autowired
-  EventController(final EventService eventService, final EventResourceAssembler resourceAssembler) {
+  EventController(
+      final EventService eventService, final EventsResourceAssembler resourceAssembler) {
     this.eventService = eventService;
     this.resourceAssembler = resourceAssembler;
   }
 
   @ResponseBody
   @RequestMapping(value = "/events", method = RequestMethod.GET)
-  public ResponseEntity<EventsResource> fetchAllEvents() {
-    return ResponseEntity.ok(resourceAssembler.toModel(eventService.fetchAll()));
+  public ResponseEntity<EventsResource> fetchAllEvents(
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "16") int size) {
+    final Page<Event> events = eventService.fetchAllPaged(page, size);
+    final EventsResource resource = resourceAssembler.toModel(events.getContent());
+    if (events.hasNext()) {
+      resource.add(
+          linkTo(methodOn(EventController.class).fetchAllEvents(events.getNumber() + 1, size))
+              .withRel("next"));
+    }
+    return ResponseEntity.ok(resource);
   }
 }

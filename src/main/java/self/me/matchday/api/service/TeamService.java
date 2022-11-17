@@ -34,6 +34,10 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.TeamRepository;
@@ -49,6 +53,7 @@ import self.me.matchday.model.Team;
 @Transactional
 public class TeamService implements EntityService<Team, UUID> {
 
+  public static final Sort DEFAULT_TEAM_SORT = Sort.by(Direction.ASC, "name.name");
   private final TeamRepository teamRepository;
   private final ArtworkService artworkService;
   private final SynonymService synonymService;
@@ -98,6 +103,13 @@ public class TeamService implements EntityService<Team, UUID> {
       teams.sort(Comparator.comparing(Team::getName));
       teams.forEach(this::initialize);
     }
+    return teams;
+  }
+
+  public Page<Team> fetchAllPaged(final int page, final int size) {
+    final PageRequest request = PageRequest.of(page, size, DEFAULT_TEAM_SORT);
+    final Page<Team> teams = teamRepository.findAll(request);
+    teams.forEach(this::initialize);
     return teams;
   }
 

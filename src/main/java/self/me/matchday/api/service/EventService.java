@@ -32,6 +32,10 @@ import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.service.video.VideoStreamingService;
@@ -51,6 +55,7 @@ import self.me.matchday.model.video.VideoPlaylist;
 public class EventService implements EntityService<Event, UUID> {
 
   private static final EventSorter EVENT_SORTER = new EventSorter();
+  public static final Sort DEFAULT_EVENT_SORT = Sort.by(Direction.DESC, "date");
 
   private final EventRepository eventRepository;
   private final VideoFileSrcRepository fileSrcRepository;
@@ -91,6 +96,67 @@ public class EventService implements EntityService<Event, UUID> {
     return event;
   }
 
+  @Override
+  public Optional<Event> fetchById(@NotNull final UUID eventId) {
+    return eventRepository.findById(eventId).map(this::initialize);
+  }
+
+  @Override
+  public List<Event> fetchAll() {
+    final List<Event> events = eventRepository.findAll();
+    if (events.size() > 0) {
+      events.forEach(this::initialize);
+      events.sort(EVENT_SORTER);
+    }
+    return events;
+  }
+
+  public Page<Event> fetchAllPaged(final int page, final int size) {
+    final PageRequest request = PageRequest.of(page, size, DEFAULT_EVENT_SORT);
+    final Page<Event> eventPage = eventRepository.findAll(request);
+    eventPage.forEach(this::initialize);
+    return eventPage;
+  }
+
+  /**
+   * Retrieve all Events for a given Competition.
+   *
+   * @param competitionId The ID of the Competition.
+   * @return A CollectionModel containing all Events for the specified Competition.
+   */
+  public Page<Event> fetchEventsForCompetition(
+      @NotNull final UUID competitionId, final int page, final int size) {
+    final PageRequest request = PageRequest.of(page, size, DEFAULT_EVENT_SORT);
+    final Page<Event> events = eventRepository.fetchEventsByCompetition(competitionId, request);
+    events.forEach(this::initialize);
+    return events;
+  }
+
+  public Optional<Collection<VideoFileSource>> fetchVideoFileSources(@NotNull UUID eventId) {
+    return fetchById(eventId).map(Event::getFileSources);
+  }
+
+  public Optional<VideoFileSource> fetchVideoFileSrc(final UUID fileSrcId) {
+    return fileSrcRepository.findById(fileSrcId);
+  }
+
+  public Optional<VideoPlaylist> getBestVideoStreamPlaylist(@NotNull UUID eventId) {
+    return fetchById(eventId)
+        .flatMap(videoStreamingService::getBestVideoStreamPlaylist)
+        .flatMap(
+            playlist -> getVideoStreamPlaylist(playlist.getEventId(), playlist.getFileSrcId()));
+  }
+
+  public Optional<VideoPlaylist> getVideoStreamPlaylist(
+      @NotNull UUID eventId, @NotNull UUID fileSrcId) {
+    return fetchById(eventId)
+        .flatMap(event -> videoStreamingService.getVideoStreamPlaylist(event, fileSrcId));
+  }
+
+  public Resource getVideoSegmentResource(@NotNull Long partId, @NotNull String segmentId) {
+    return videoStreamingService.getVideoSegmentResource(partId, segmentId);
+  }
+
   /**
    * Persist an Event; must pass validation, or will skip and make a note in logs.
    *
@@ -121,16 +187,6 @@ public class EventService implements EntityService<Event, UUID> {
   }
 
   @Override
-  public List<Event> fetchAll() {
-    final List<Event> events = eventRepository.findAll();
-    if (events.size() > 0) {
-      events.forEach(this::initialize);
-      events.sort(EVENT_SORTER);
-    }
-    return events;
-  }
-
-  @Override
   public Event update(@NotNull Event event) {
     if (event instanceof Match) {
       return matchService.update((Match) event);
@@ -147,60 +203,6 @@ public class EventService implements EntityService<Event, UUID> {
         .collect(Collectors.toList());
   }
 
-  @Override
-  public Optional<Event> fetchById(@NotNull final UUID eventId) {
-    return eventRepository.findById(eventId).map(this::initialize);
-  }
-
-  public Optional<VideoFileSource> fetchVideoFileSrc(final UUID fileSrcId) {
-    return fileSrcRepository.findById(fileSrcId);
-  }
-
-  /**
-   * Retrieve all Events for a given Competition.
-   *
-   * @param competitionId The ID of the Competition.
-   * @return A CollectionModel containing all Events for the specified Competition.
-   */
-  public List<Event> fetchEventsForCompetition(@NotNull final UUID competitionId) {
-    return eventRepository.fetchEventsByCompetition(competitionId).stream()
-        .map(this::initialize)
-        .collect(Collectors.toList());
-  }
-
-  public Optional<VideoPlaylist> getBestVideoStreamPlaylist(@NotNull UUID eventId) {
-    return fetchById(eventId)
-        .flatMap(videoStreamingService::getBestVideoStreamPlaylist)
-        .flatMap(
-            playlist -> getVideoStreamPlaylist(playlist.getEventId(), playlist.getFileSrcId()));
-  }
-
-  public Optional<VideoPlaylist> getVideoStreamPlaylist(
-      @NotNull UUID eventId, @NotNull UUID fileSrcId) {
-    return fetchById(eventId)
-        .flatMap(event -> videoStreamingService.getVideoStreamPlaylist(event, fileSrcId));
-  }
-
-  public Optional<Collection<VideoFileSource>> fetchVideoFileSources(@NotNull UUID eventId) {
-    return fetchById(eventId).map(Event::getFileSources);
-  }
-
-  public Resource getVideoSegmentResource(@NotNull Long partId, @NotNull String segmentId) {
-    return videoStreamingService.getVideoSegmentResource(partId, segmentId);
-  }
-
-  public void deleteVideoData(@NotNull UUID fileSrcId) throws IOException {
-    videoStreamingService.deleteVideoData(fileSrcId);
-  }
-
-  public int killAllStreamingTasks() {
-    return videoStreamingService.killAllStreamingTasks();
-  }
-
-  public Optional<String> readPlaylistFile(@NotNull Long partId) {
-    return videoStreamingService.readPlaylistFile(partId);
-  }
-
   /**
    * Delete the given Event from the database
    *
@@ -214,6 +216,18 @@ public class EventService implements EntityService<Event, UUID> {
   @Override
   public void deleteAll(@NotNull Iterable<? extends Event> events) {
     eventRepository.deleteAll(events);
+  }
+
+  public void deleteVideoData(@NotNull UUID fileSrcId) throws IOException {
+    videoStreamingService.deleteVideoData(fileSrcId);
+  }
+
+  public int killAllStreamingTasks() {
+    return videoStreamingService.killAllStreamingTasks();
+  }
+
+  public Optional<String> readPlaylistFile(@NotNull Long partId) {
+    return videoStreamingService.readPlaylistFile(partId);
   }
 
   /**

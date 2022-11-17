@@ -22,6 +22,9 @@ package self.me.matchday.api.resource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -40,9 +43,6 @@ import self.me.matchday.model.Event;
 import self.me.matchday.model.Highlight;
 import self.me.matchday.model.Match;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -58,14 +58,14 @@ public class EventsResource extends RepresentationModel<EventsResource> {
   private final List<HighlightResource> highlights = new ArrayList<>();
 
   @Component
-  public static class EventResourceAssembler
-      extends RepresentationModelAssemblerSupport<List<? extends Event>, EventsResource> {
+  public static class EventsResourceAssembler
+      extends RepresentationModelAssemblerSupport<Collection<? extends Event>, EventsResource> {
 
     private final MatchResourceAssembler matchAssembler;
     private final HighlightResourceAssembler highlightAssembler;
 
     @Autowired
-    public EventResourceAssembler(
+    public EventsResourceAssembler(
         MatchResourceAssembler matchAssembler, HighlightResourceAssembler highlightAssembler) {
 
       super(EventController.class, EventsResource.class);
@@ -74,7 +74,7 @@ public class EventsResource extends RepresentationModel<EventsResource> {
     }
 
     @Override
-    public @NotNull EventsResource toModel(@NotNull List<? extends Event> events) {
+    public @NotNull EventsResource toModel(@NotNull Collection<? extends Event> events) {
 
       final EventsResource eventsResource = instantiateModel(events);
       events.forEach(

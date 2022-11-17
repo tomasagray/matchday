@@ -28,6 +28,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
 import self.me.matchday.api.service.TeamService;
 
 @Aspect
@@ -35,11 +36,16 @@ public class TeamServiceLog {
 
   private static final Logger logger = LogManager.getLogger(TeamService.class);
 
-  @Around("execution(* self.me.matchday.api.service.TeamService.fetchAll())")
+  @Before("execution(* self.me.matchday.api.service.TeamService.fetchAll(..))")
+  public void logFetchAllTeams() {
+    logger.info("Fetching ALL Teams from database...");
+  }
+
+  @Around("execution(* self.me.matchday.api.service.TeamService.fetchAllPaged(..))")
   public Object logFetchAllTeams(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    logger.info("Fetching all Teams from database...");
-    List<?> teams = (List<?>) jp.proceed();
-    logger.info("Found: {} Teams", teams.size());
+    logger.info("Fetching Teams from database...");
+    Page<?> teams = (Page<?>) jp.proceed();
+    logger.info("Found: {} Teams", teams.getContent().size());
     return teams;
   }
 

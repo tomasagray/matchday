@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
@@ -176,7 +177,7 @@ class EventServiceTest {
   }
 
   @Test
-  @DisplayName("Ensure fetchAll() returns all Events; at least @MIN_EVENT_COUNT")
+  @DisplayName("Ensure fetchAllPaged() returns all Events; at least @MIN_EVENT_COUNT")
   void fetchAllEvents() {
 
     final int expectedEventCount = 1; // minimum
@@ -236,8 +237,12 @@ class EventServiceTest {
   @DisplayName("Ensure fetches Events for a given Competition")
   void fetchEventsForCompetition() {
 
+    final int page = 0;
+    final int pageSize = 16;
     final int minExpectedEventCount = 1;
-    final List<Event> events = eventService.fetchEventsForCompetition(testCompetition.getId());
+    final Page<Event> eventsPage =
+        eventService.fetchEventsForCompetition(testCompetition.getId(), page, pageSize);
+    final List<Event> events = eventsPage.getContent();
     assertThat(events.size()).isGreaterThanOrEqualTo(minExpectedEventCount);
   }
 

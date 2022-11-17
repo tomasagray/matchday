@@ -27,6 +27,8 @@ import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.HighlightRepository;
 import self.me.matchday.model.Event.EventSorter;
@@ -66,6 +68,13 @@ public class HighlightService implements EntityService<Highlight, UUID> {
       highlights.sort(EVENT_SORTER);
       highlights.forEach(this::initialize);
     }
+    return highlights;
+  }
+
+  public Page<Highlight> fetchAll(final int page, final int size) {
+    final PageRequest request = PageRequest.of(page, size, EventService.DEFAULT_EVENT_SORT);
+    final Page<Highlight> highlights = highlightRepository.findAll(request);
+    highlights.forEach(this::initialize);
     return highlights;
   }
 

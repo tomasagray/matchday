@@ -19,28 +19,37 @@
 
 package self.me.matchday.api.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import self.me.matchday.api.resource.EventsResource;
-import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
-import self.me.matchday.api.resource.HighlightResource;
-import self.me.matchday.api.service.HighlightService;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import self.me.matchday.api.resource.EventsResource;
+import self.me.matchday.api.resource.EventsResource.EventsResourceAssembler;
+import self.me.matchday.api.resource.HighlightResource;
+import self.me.matchday.api.service.HighlightService;
+import self.me.matchday.model.Highlight;
 
 @RestController
 @RequestMapping(value = "/highlights")
 public class HighlightController {
 
   private final HighlightService highlightService;
-  private final EventResourceAssembler eventAssembler;
+  private final EventsResourceAssembler eventAssembler;
   private final HighlightResource.HighlightResourceAssembler highlightAssembler;
 
   @Autowired
   public HighlightController(
       HighlightService highlightService,
-      EventResourceAssembler eventAssembler,
+      EventsResourceAssembler eventAssembler,
       HighlightResource.HighlightResourceAssembler highlightAssembler) {
 
     this.highlightService = highlightService;
@@ -55,8 +64,19 @@ public class HighlightController {
    */
   @RequestMapping(value = "/highlight-shows", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<EventsResource> fetchAllHighlights() {
-    return ResponseEntity.ok(eventAssembler.toModel(highlightService.fetchAll()));
+  public ResponseEntity<EventsResource> fetchAllHighlights(
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "16") int size) {
+    final Page<Highlight> highlightPage = highlightService.fetchAll(page, size);
+    final EventsResource model = eventAssembler.toModel(highlightPage.getContent());
+    if (highlightPage.hasNext()) {
+      model.add(
+          linkTo(
+                  methodOn(HighlightController.class)
+                      .fetchAllHighlights(highlightPage.getNumber() + 1, size))
+              .withRel("next"));
+    }
+    return ResponseEntity.ok(model);
   }
 
   /**

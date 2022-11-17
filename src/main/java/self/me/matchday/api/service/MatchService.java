@@ -36,6 +36,8 @@ import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.service.video.InvalidVideoFilePackException;
@@ -106,6 +108,17 @@ public class MatchService implements EntityService<Match, UUID> {
   }
 
   /**
+   * Retrieve a specific match from the local DB.
+   *
+   * @param matchId The ID of the match we want.
+   * @return An optional containing the match resource, if it was found.
+   */
+  @Override
+  public Optional<Match> fetchById(@NotNull UUID matchId) {
+    return matchRepository.findById(matchId).map(this::initialize);
+  }
+
+  /**
    * Retrieve all Matches from the repo (database) and assemble into a collection of resources.
    *
    * @return Collection of assembled resources.
@@ -121,15 +134,11 @@ public class MatchService implements EntityService<Match, UUID> {
     return matches;
   }
 
-  /**
-   * Retrieve a specific match from the local DB.
-   *
-   * @param matchId The ID of the match we want.
-   * @return An optional containing the match resource, if it was found.
-   */
-  @Override
-  public Optional<Match> fetchById(@NotNull UUID matchId) {
-    return matchRepository.findById(matchId).map(this::initialize);
+  public Page<Match> fetchAllPaged(final int page, final int size) {
+    final PageRequest request = PageRequest.of(page, size, EventService.DEFAULT_EVENT_SORT);
+    final Page<Match> matches = matchRepository.findAll(request);
+    matches.forEach(this::initialize);
+    return matches;
   }
 
   /**

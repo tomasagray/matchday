@@ -25,8 +25,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,7 +50,7 @@ import self.me.matchday.api.resource.ArtworkResource.ArtworkResourceAssembler;
 import self.me.matchday.api.resource.CompetitionResource;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.EventsResource;
-import self.me.matchday.api.resource.EventsResource.EventResourceAssembler;
+import self.me.matchday.api.resource.EventsResource.EventsResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.CompetitionService;
@@ -60,7 +62,9 @@ import self.me.matchday.model.Artwork;
 import self.me.matchday.model.ArtworkCollection;
 import self.me.matchday.model.ArtworkRole;
 import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.Image;
+import self.me.matchday.model.Team;
 
 @RestController
 @RequestMapping(value = "/competitions")
@@ -72,7 +76,7 @@ public class CompetitionController {
   private final TeamService teamService;
   private final TeamResourceAssembler teamResourceAssembler;
   private final EventService eventService;
-  private final EventResourceAssembler eventResourceAssembler;
+  private final EventsResourceAssembler eventsModeller;
 
   private final ArtworkResourceAssembler artworkModeller;
   private final ArtworkCollectionResourceAssembler collectionModeller;
@@ -83,7 +87,7 @@ public class CompetitionController {
       TeamService teamService,
       TeamResourceAssembler teamResourceAssembler,
       EventService eventService,
-      EventResourceAssembler eventResourceAssembler,
+      EventsResourceAssembler eventsModeller,
       ArtworkResourceAssembler artworkModeller,
       ArtworkCollectionResourceAssembler collectionModeller) {
 
@@ -92,7 +96,7 @@ public class CompetitionController {
     this.teamService = teamService;
     this.teamResourceAssembler = teamResourceAssembler;
     this.eventService = eventService;
-    this.eventResourceAssembler = eventResourceAssembler;
+    this.eventsModeller = eventsModeller;
     this.artworkModeller = artworkModeller;
     this.collectionModeller = collectionModeller;
   }
@@ -106,8 +110,12 @@ public class CompetitionController {
       value = {"", "/"},
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public CollectionModel<CompetitionResource> fetchAllCompetitions() {
-    return resourceAssembler.toCollectionModel(competitionService.fetchAll());
+  public ResponseEntity<CollectionModel<CompetitionResource>> fetchAllCompetitions() {
+    final List<Competition> competitions = competitionService.fetchAll();
+    final CollectionModel<CompetitionResource> model =
+        resourceAssembler.toCollectionModel(competitions);
+    model.add(linkTo(methodOn(CompetitionController.class).fetchAllCompetitions()).withSelfRel());
+    return ResponseEntity.ok(model);
   }
 
   /**
@@ -141,10 +149,20 @@ public class CompetitionController {
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<EventsResource> fetchCompetitionEvents(
-      @PathVariable final UUID competitionId) {
+      @PathVariable final UUID competitionId,
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "16") int size) {
 
-    return ResponseEntity.ok(
-        eventResourceAssembler.toModel(eventService.fetchEventsForCompetition(competitionId)));
+    final Page<Event> eventPage = eventService.fetchEventsForCompetition(competitionId, page, size);
+    final EventsResource model = eventsModeller.toModel(eventPage.getContent());
+    if (eventPage.hasNext()) {
+      model.add(
+          linkTo(
+                  methodOn(CompetitionController.class)
+                      .fetchCompetitionEvents(competitionId, eventPage.getNumber() + 1, size))
+              .withRel("next"));
+    }
+    return ResponseEntity.ok(model);
   }
 
   /**
@@ -157,11 +175,15 @@ public class CompetitionController {
       value = "/competition/{competitionId}/teams",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public CollectionModel<TeamResource> fetchCompetitionTeams(
+  public ResponseEntity<CollectionModel<TeamResource>> fetchCompetitionTeams(
       @PathVariable final UUID competitionId) {
 
-    return teamResourceAssembler.toCollectionModel(
-        teamService.fetchTeamsByCompetitionId(competitionId));
+    final List<Team> teams = teamService.fetchTeamsByCompetitionId(competitionId);
+    final CollectionModel<TeamResource> model = teamResourceAssembler.toCollectionModel(teams);
+    model.add(
+        linkTo(methodOn(CompetitionController.class).fetchCompetitionTeams(competitionId))
+            .withSelfRel());
+    return ResponseEntity.ok(model);
   }
 
   @RequestMapping(

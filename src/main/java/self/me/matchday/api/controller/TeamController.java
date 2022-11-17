@@ -30,6 +30,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -109,8 +111,19 @@ public class TeamController {
       value = {"", "/"},
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public CollectionModel<TeamResource> fetchAllTeams() {
-    return teamResourceAssembler.toCollectionModel(teamService.fetchAll());
+  public ResponseEntity<CollectionModel<TeamResource>> fetchAllTeams(
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "20") int size) {
+
+    final Page<Team> teamPage = teamService.fetchAllPaged(page, size);
+    final CollectionModel<TeamResource> model =
+        teamResourceAssembler.toCollectionModel(teamPage.getContent());
+    if (teamPage.hasNext()) {
+      model.add(
+          linkTo(methodOn(TeamController.class).fetchAllTeams(teamPage.getNumber() + 1, size))
+              .withRel("next"));
+    }
+    return ResponseEntity.ok(model);
   }
 
   /**

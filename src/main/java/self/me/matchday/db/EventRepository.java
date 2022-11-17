@@ -19,8 +19,9 @@
 
 package self.me.matchday.db;
 
-import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,5 +40,6 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
   @Query(
       "SELECT ev FROM Event ev JOIN ev.competition cm WHERE cm.id = :competitionId "
           + "ORDER BY ev.date DESC")
-  List<Event> fetchEventsByCompetition(@Param("competitionId") UUID competitionId);
+  Page<Event> fetchEventsByCompetition(
+      @Param("competitionId") UUID competitionId, Pageable request);
 }

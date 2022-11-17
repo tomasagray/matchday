@@ -19,6 +19,9 @@
 
 package self.me.matchday.log;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -27,12 +30,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.Event;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Aspect
 public class EventServiceLog {
@@ -59,9 +59,15 @@ public class EventServiceLog {
     logger.info("Saving: {} Events...", eventList.size());
   }
 
-  @Before("execution(* self.me.matchday.api.service.EventService.fetchAll())")
+  @Before("execution(* self.me.matchday.api.service.EventService.fetchAll(..))")
   public void logFetchAllEvents() {
-    logger.info("Fetching latest Events...");
+    logger.info("Fetching ALL Events...");
+  }
+
+  @Before("execution(* self.me.matchday.api.service.EventService.fetchAllPaged(..))")
+  public void logFetchLatestEvents(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    logger.info("Fetching Events page #: {} with up to: {} entries", args[0], args[1]);
   }
 
   @Around("execution(* self.me.matchday.api.service.EventService.fetchById(..))")
@@ -84,8 +90,9 @@ public class EventServiceLog {
   public Object logFetchEventsForCompetition(@NotNull ProceedingJoinPoint jp) throws Throwable {
     Object competitionId = jp.getArgs()[0];
     logger.info("Fetching Events for Competition: {}", competitionId);
-    List<?> events = (List<?>) jp.proceed();
-    logger.info("Retrieved: {} Events for Competition: {}", events.size(), competitionId);
+    Page<?> events = (Page<?>) jp.proceed();
+    logger.info(
+        "Retrieved: {} Events for Competition: {}", events.getContent().size(), competitionId);
     return events;
   }
 

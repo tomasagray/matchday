@@ -36,7 +36,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
@@ -138,17 +137,6 @@ public class TeamResource extends RepresentationModel<TeamResource> {
 
     private List<ColorResource> getColorResources(@NotNull List<Color> colors) {
       return colors.stream().map(colorModeller::toModel).collect(Collectors.toList());
-    }
-
-    @NotNull
-    @Override
-    public CollectionModel<TeamResource> toCollectionModel(
-        @NotNull Iterable<? extends Team> teams) {
-
-      final CollectionModel<TeamResource> teamResources = super.toCollectionModel(teams);
-      // add a self link
-      teamResources.add(linkTo(methodOn(TeamController.class).fetchAllTeams()).withSelfRel());
-      return teamResources;
     }
   }
 }

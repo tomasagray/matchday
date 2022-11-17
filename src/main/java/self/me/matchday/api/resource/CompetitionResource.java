@@ -40,6 +40,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.controller.CompetitionController;
+import self.me.matchday.api.controller.RootController;
 import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionResourceAssembler;
 import self.me.matchday.model.ArtworkRole;
 import self.me.matchday.model.Competition;
@@ -128,7 +129,12 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
           linkTo(methodOn(CompetitionController.class).fetchCompetitionById(competitionId))
               .withSelfRel());
       competitionResource.add(
-          linkTo(methodOn(CompetitionController.class).fetchCompetitionEvents(competitionId))
+          linkTo(
+                  methodOn(CompetitionController.class)
+                      .fetchCompetitionEvents(
+                          competitionId,
+                          RootController.DEFAULT_PAGE,
+                          RootController.DEFAULT_PAGE_SIZE))
               .withRel(EVENTS));
       competitionResource.add(
           linkTo(methodOn(CompetitionController.class).fetchCompetitionTeams(competitionId))

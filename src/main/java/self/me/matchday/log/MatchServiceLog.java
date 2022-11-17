@@ -35,9 +35,15 @@ public class MatchServiceLog {
 
   private static final Logger logger = LogManager.getLogger(MatchService.class);
 
-  @Before("execution(* self.me.matchday.api.service.MatchService.fetchAll())")
+  @Before("execution(* self.me.matchday.api.service.MatchService.fetchAll(..))")
   public void logFetchAllMatches() {
     logger.info("Fetching all Matches from database...");
+  }
+
+  @Before("execution(* self.me.matchday.api.service.MatchService.fetchAllPaged(..))")
+  public void logFetchPagedMatches(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    logger.info("Getting Teams page #: {} with up to: {} entries", args[0], args[1]);
   }
 
   @Before("execution(* self.me.matchday.api.service.MatchService.fetchById(..))")
