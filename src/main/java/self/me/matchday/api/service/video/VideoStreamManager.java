@@ -237,6 +237,10 @@ public class VideoStreamManager {
     }
   }
 
+  public int getActiveStreamCount() {
+    return ffmpegPlugin.getStreamingTaskCount();
+  }
+
   public int killAllStreams() {
     final int taskCount = ffmpegPlugin.getStreamingTaskCount();
     ffmpegPlugin.interruptAllStreamTasks();
@@ -249,8 +253,8 @@ public class VideoStreamManager {
 
   public void killStreamingTask(@NotNull final VideoStreamLocator streamLocator) {
     final Double completionRatio = streamLocator.getState().getCompletionRatio();
-    updateLocatorTaskState(streamLocator, JobStatus.STOPPED, completionRatio);
     ffmpegPlugin.interruptStreamingTask(streamLocator.getPlaylistPath());
+    updateLocatorTaskState(streamLocator, JobStatus.STOPPED, completionRatio);
   }
 
   private void updateLocatorTaskState(

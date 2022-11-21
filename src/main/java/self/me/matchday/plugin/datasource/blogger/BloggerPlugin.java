@@ -184,7 +184,7 @@ public class BloggerPlugin implements DataSourcePlugin {
     return null;
   }
 
-  enum SourceType {
+  public enum SourceType {
     HTML,
     JSON,
   }

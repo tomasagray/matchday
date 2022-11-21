@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,15 +19,14 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.logging.log4j.util.Strings;
-import org.jetbrains.annotations.NotNull;
-
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.logging.log4j.util.Strings;
+import org.jetbrains.annotations.NotNull;
 
 public class FFmpeg {
 
@@ -36,7 +35,7 @@ public class FFmpeg {
   private final List<String> baseArgs;
   @Getter @Setter boolean loggingEnabled = true;
 
-  FFmpeg(@NotNull final String execPath) {
+  public FFmpeg(@NotNull final String execPath) {
     this.baseArgs =
         List.of(
             String.format("\"%s\"", execPath),

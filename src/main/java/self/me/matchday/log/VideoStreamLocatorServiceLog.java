@@ -19,6 +19,9 @@
 
 package self.me.matchday.log;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -31,10 +34,6 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.video.VideoStreamLocatorService;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoStreamLocator;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.UUID;
 
 @Aspect
 public class VideoStreamLocatorServiceLog {
@@ -86,7 +85,7 @@ public class VideoStreamLocatorServiceLog {
   @Before(
       "execution(* self.me.matchday.api.service.video.VideoStreamLocatorService.updateStreamLocator(..))")
   public void logUpdateStreamLocator(@NotNull JoinPoint jp) {
-    logger.info("Updating VideoStreamLocator: {}", jp.getArgs()[0]);
+    logger.trace("Updating VideoStreamLocator: {}", jp.getArgs()[0]);
   }
 
   @Before(

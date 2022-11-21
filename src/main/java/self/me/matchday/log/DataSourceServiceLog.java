@@ -19,6 +19,9 @@
 
 package self.me.matchday.log;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -30,10 +33,6 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.model.DataSource;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 @Aspect
 public class DataSourceServiceLog {
 
@@ -42,6 +41,23 @@ public class DataSourceServiceLog {
   @Before("execution(* self.me.matchday.api.service.DataSourceService.refreshAllDataSources(..))")
   public void logDataSourceRefresh(@NotNull JoinPoint jp) {
     logger.info("Refreshing all DataSources with SnapshotRequest: {}", jp.getArgs()[0]);
+  }
+
+  @Before(
+      "execution(* self.me.matchday.api.service.DataSourceService.refreshDataSourcesForPlugin(..))")
+  public void logRefreshDataSourceForPlugin(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    if (args.length == 2) {
+      logger.info("Refreshing DataSources for plugin: {} with request: {}", args[1], args[0]);
+    }
+  }
+
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.refreshDataSource(..))")
+  public void logRefreshDataSource(@NotNull JoinPoint jp) {
+    final Object[] args = jp.getArgs();
+    if (args.length == 2) {
+      logger.info("Refreshing DataSource: {} with request: {}", args[1], args[0]);
+    }
   }
 
   @Before("execution(* self.me.matchday.api.service.DataSourceService.save(..))")

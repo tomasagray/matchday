@@ -34,7 +34,6 @@ import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.model.video.VideoStreamLocator;
 
 @Aspect
 public class VideoStreamingServiceLog {
@@ -42,28 +41,7 @@ public class VideoStreamingServiceLog {
   private static final Logger logger = LogManager.getLogger(VideoStreamingService.class);
 
   @Around(
-      "execution(* self.me.matchday.api.service.video.VideoStreamingService.fetchVideoFileSources(..))")
-  public Object logFetchVideoFileSources(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    final Object eventId = jp.getArgs()[0];
-    logger.info("Fetching VideoFileSources for Event: {}", eventId);
-    final Object result = jp.proceed();
-    logger.debug("Retrieved VideoFileSources: {} for Event: {}", result, eventId);
-    return result;
-  }
-
-  @Around(
-      "execution(* self.me.matchday.api.service.video.VideoStreamingService.getVideoStreamPlaylist(..))")
-  public Object logGetBestVideoStreamPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    logger.info(
-        "Getting optimal VideoStreamPlaylist for Event: {}",
-        jp.getArgs()[0]);
-    final Object result = jp.proceed();
-    logger.debug("Returned playlist: {}", result);
-    return result;
-  }
-
-  @Around(
-      "execution(* self.me.matchday.api.service.video.VideoStreamingService.getVideoStreamPlaylist(..))")
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.getOrCreateVideoStreamPlaylist(..))")
   public Object logGetVideoStreamPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
 
     logger.info(
@@ -84,19 +62,6 @@ public class VideoStreamingServiceLog {
     final Optional<String> result = (Optional<String>) jp.proceed();
     final int byteCount = result.map(s -> s.getBytes(StandardCharsets.UTF_8).length).orElse(0);
     logger.info("Read {} bytes of playlist file", byteCount);
-    return result;
-  }
-
-  @Around(
-      "execution(* self.me.matchday.api.service.video.VideoStreamingService.readLocatorPlaylist(..))")
-  public Object logReadPlaylistDataForLocator(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    VideoStreamLocator locator = (VideoStreamLocator) jp.getArgs()[0];
-    Long streamLocatorId = locator.getStreamLocatorId();
-    logger.info("Reading playlist data from disk for VideoStreamLocator: {}", streamLocatorId);
-    String result = (String) jp.proceed();
-    long byteCount = result != null ? result.getBytes(StandardCharsets.UTF_8).length : 0;
-    logger.info(
-        "Read: {} bytes for playlist of VideoStreamLocator: {}", byteCount, streamLocatorId);
     return result;
   }
 
@@ -165,8 +130,8 @@ public class VideoStreamingServiceLog {
     final Throwable e = (Throwable) jp.getArgs()[0];
     final String error =
         Arrays.stream(e.getStackTrace())
-          .map(StackTraceElement::toString)
-          .collect(Collectors.joining("\n"));
+            .map(StackTraceElement::toString)
+            .collect(Collectors.joining("\n"));
     logger.debug(error);
   }
 }

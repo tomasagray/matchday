@@ -40,7 +40,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import self.me.matchday.api.service.video.InvalidVideoFilePackException;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.Artwork;
@@ -278,17 +277,14 @@ public class MatchService implements EntityService<Match, UUID> {
       for (VideoFilePack filePack : filePacks) {
         if (isValidVideoFilePack(filePack)) {
           validFilePacks++;
-        } else {
-          throw new InvalidVideoFilePackException("VideoFilePack does not contain required parts");
         }
       }
-      if (validFilePacks == 0) {
-        throw new InvalidVideoFileSourceException("VideoFileSource is empty");
+      if (validFilePacks > 0) {
+        validFileSources++;
       }
-      validFileSources++;
     }
     if (validFileSources == 0) {
-      throw new InvalidEventException("No video file sources");
+      throw new InvalidEventException("No valid video file sources");
     }
   }
 

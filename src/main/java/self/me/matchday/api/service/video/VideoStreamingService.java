@@ -64,12 +64,12 @@ public class VideoStreamingService {
     final Optional<VideoStreamLocatorPlaylist> playlistOptional = findExistingStream(event);
     if (playlistOptional.isPresent()) {
       final VideoStreamLocatorPlaylist existingPlaylist = playlistOptional.get();
-      return getVideoStreamPlaylist(event, existingPlaylist.getFileSource().getFileSrcId());
+      return getOrCreateVideoStreamPlaylist(event, existingPlaylist.getFileSource().getFileSrcId());
     }
     // else...
     final VideoFileSource fileSource = selectorService.getBestFileSource(event);
     final UUID fileSrcId = fileSource.getFileSrcId();
-    return getVideoStreamPlaylist(event, fileSrcId);
+    return getOrCreateVideoStreamPlaylist(event, fileSrcId);
   }
 
   /**
@@ -95,7 +95,7 @@ public class VideoStreamingService {
    * @return An Optional containing the playlist, if one was found; empty indicates one is being
    *     created
    */
-  public Optional<VideoPlaylist> getVideoStreamPlaylist(
+  public Optional<VideoPlaylist> getOrCreateVideoStreamPlaylist(
       @NotNull Event event, @NotNull final UUID fileSrcId) {
 
     final VideoFileSource videoFileSource = event.getFileSource(fileSrcId);
@@ -175,6 +175,10 @@ public class VideoStreamingService {
     }
     // Resource not found
     return null;
+  }
+
+  public int getActiveStreamingTaskCount() {
+    return videoStreamManager.getActiveStreamCount();
   }
 
   /** Destroy all currently-running video streaming tasks */
