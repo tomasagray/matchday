@@ -87,7 +87,7 @@ public class MatchDataParserTest {
       testHtml = readTestResources();
     }
     final HtmlBloggerParser bloggerParser = new HtmlBloggerParser();
-    final List<BloggerEntry> entries = bloggerParser.getBlogger(testHtml).getFeed().getEntry();
+    final List<BloggerEntry> entries = bloggerParser.parseBlogger(testHtml).getFeed().getEntry();
     logger.info("Found: {} Blogger entries for testing...", entries.size());
     return entries.stream().map(Arguments::of);
   }

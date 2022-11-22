@@ -41,7 +41,7 @@ import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Link;
 public class HtmlBloggerParser implements BloggerParser {
 
   @Override
-  public Blogger getBlogger(@NotNull String data) {
+  public Blogger parseBlogger(@NotNull String data) {
     final Document html = Jsoup.parse(data);
     return parseBlogger(html);
   }

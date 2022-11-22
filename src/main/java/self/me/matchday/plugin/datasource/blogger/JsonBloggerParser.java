@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -26,7 +26,7 @@ import self.me.matchday.util.JsonParser;
 public class JsonBloggerParser implements BloggerParser {
 
   @Override
-  public Blogger getBlogger(@NotNull final String data) {
+  public Blogger parseBlogger(@NotNull final String data) {
     return JsonParser.fromJson(data, Blogger.class);
   }
 }

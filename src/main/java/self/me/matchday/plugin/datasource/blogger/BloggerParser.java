@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -43,7 +43,7 @@ public interface BloggerParser {
     try (final InputStreamReader in = new InputStreamReader(url.openStream());
         final BufferedReader reader = new BufferedReader(in)) {
       final String data = reader.lines().collect(Collectors.joining("\n"));
-      return getBlogger(data);
+      return parseBlogger(data);
     }
   }
 
@@ -53,5 +53,5 @@ public interface BloggerParser {
    * @param data The HTML data
    * @return A Blogger instance
    */
-  Blogger getBlogger(@NotNull final String data);
+  Blogger parseBlogger(@NotNull final String data);
 }
