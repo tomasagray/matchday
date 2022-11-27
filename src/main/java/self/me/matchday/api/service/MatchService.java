@@ -157,7 +157,6 @@ public class MatchService implements EntityService<Match, UUID> {
     if (existingArtwork != null) {
       artworkService.deleteArtwork(existingArtwork);
     }
-
     final Collection<Param<?>> params = createMatchArtworkParams(match);
     return artworkService.createArtwork(Match.class, params);
   }
@@ -250,12 +249,12 @@ public class MatchService implements EntityService<Match, UUID> {
         existingEvent.addAllFileSources(match.getFileSources());
         return initialize(existingEvent);
       }
-      // ensure Artwork is attached
-      if (match.getArtwork() == null) {
-        final Artwork artwork = makeMatchArtwork(match);
-        match.setArtwork(artwork);
-      }
       final Match saved = matchRepository.saveAndFlush(match);
+      // ensure Artwork is attached
+      if (saved.getArtwork() == null) {
+        final Artwork artwork = makeMatchArtwork(saved);
+        saved.setArtwork(artwork);
+      }
       return initialize(saved);
     } catch (ReflectiveOperationException | IOException e) {
       throw new RuntimeException(e);

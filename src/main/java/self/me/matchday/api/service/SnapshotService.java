@@ -19,8 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,14 +50,7 @@ public class SnapshotService {
             service.save(datum);
 
           } catch (Exception e) {
-            final LocalDateTime timestamp =
-                LocalDateTime.ofInstant(snapshot.getTimestamp(), ZoneOffset.systemDefault());
-            logger.error(
-                "Error saving an Entity of type: [{}] from Snapshot taken at: {}; problem was: {}",
-                clazz.getName(),
-                timestamp,
-                e.getMessage(),
-                e);
+            logger.debug("Did not save Entity of type: [{}]: {}", clazz.getName(), e.getMessage());
           }
         });
   }
