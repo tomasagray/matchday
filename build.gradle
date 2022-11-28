@@ -5,7 +5,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.springframework.boot' version '2.6.7'
+    id 'org.springframework.boot' version '2.7.6'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
     id "io.freefair.aspectj.post-compile-weaving" version "6.6-rc1"
@@ -22,55 +22,53 @@ configurations {
 }
 
 dependencies {
-    def spring_version = '2.6.7'
 
     // Spring Boot
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa:$spring_version"
-    implementation "org.springframework.boot:spring-boot-starter-security:$spring_version"
-    implementation "org.springframework.boot:spring-boot-starter-web:$spring_version"
-    implementation "org.springframework.boot:spring-boot-starter-json:$spring_version"
-    implementation "org.springframework.boot:spring-boot-starter-webflux:$spring_version"
-    implementation "org.springframework.boot:spring-boot-starter-hateoas:$spring_version"
-    implementation "org.springframework.boot:spring-boot-starter-aop:$spring_version"
-    implementation 'org.springframework:spring-instrument:5.3.19'
-    implementation 'org.springframework:spring-aspects:5.3.19'
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-json"
+    implementation "org.springframework.boot:spring-boot-starter-webflux"
+    implementation "org.springframework.boot:spring-boot-starter-hateoas"
+    implementation "org.springframework.boot:spring-boot-starter-aop"
+    implementation 'org.springframework:spring-instrument'
+    implementation 'org.springframework:spring-aspects'
     implementation 'org.aspectj:aspectjrt:1.9.9.1'
     implementation 'org.aspectj:aspectjweaver:1.9.9.1'
 
     // Database
-    implementation 'mysql:mysql-connector-java:8.0.28'
-    implementation 'org.flywaydb:flyway-mysql:8.5.9'
-    implementation 'org.flywaydb:flyway-core:8.5.9'
+    implementation 'mysql:mysql-connector-java'
+    implementation 'org.flywaydb:flyway-mysql:9.8.2'
+    implementation 'org.flywaydb:flyway-core:9.8.2'
     implementation 'com.h2database:h2'
 
     // Annotations
     implementation 'org.jetbrains:annotations:23.0.0'
-    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$spring_version"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     // Lombok
-    implementation 'org.projectlombok:lombok:1.18.24'
-    testImplementation 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    implementation 'org.projectlombok:lombok'
+    testImplementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
     // Parsing
-    implementation 'org.jsoup:jsoup:1.14.3'
-    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.google.code.gson:gson'
+    implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.brotli:dec:0.1.2'
     implementation 'javax.activation:activation:1.1.1'
 
     // Development
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     // Remove to eliminate reflective access warning, per: https://stackoverflow.com/a/61007739/4871490
-    developmentOnly "org.springframework.boot:spring-boot-devtools:$spring_version"
+    developmentOnly "org.springframework.boot:spring-boot-devtools"
 
     // Testing
-    def jupiter_version = '5.8.2'
-    testImplementation("org.springframework.boot:spring-boot-starter-test:$spring_version") {
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude group: 'org.junit.vintage', module: 'unit-vintage-engine'
     }
-    testImplementation 'org.springframework.security:spring-security-test:5.6.3'
-    testImplementation "org.junit.jupiter:junit-jupiter:$jupiter_version"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:$jupiter_version"
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "org.junit.jupiter:junit-jupiter-params"
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
 }
 
 bootRun {
