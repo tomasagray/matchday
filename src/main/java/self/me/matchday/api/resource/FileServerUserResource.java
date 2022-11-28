@@ -19,10 +19,21 @@
 
 package self.me.matchday.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import lombok.*;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
@@ -32,14 +43,6 @@ import self.me.matchday.api.controller.FileServerPluginController;
 import self.me.matchday.api.controller.FileServerUserController;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
-
-import java.time.Duration;
-import java.util.Collection;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -105,7 +108,7 @@ public class FileServerUserResource extends RepresentationModel<FileServerUserRe
     NetscapeCookie(@NotNull SecureCookie cookie) {
       this.id = cookie.getId();
       this.name = cookie.getName();
-      this.value = cookie.getValue();
+      this.value = cookie.getCookieValue();
       final Duration maxAge = cookie.getMaxAge();
       this.maxAge = maxAge != null ? maxAge.toSeconds() : 0;
       this.domain = cookie.getDomain();

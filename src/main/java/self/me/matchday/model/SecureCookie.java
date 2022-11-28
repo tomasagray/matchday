@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021.
+ * Copyright (c) 2022.
  *
  * This file is part of Matchday.
  *
@@ -19,6 +19,12 @@
 
 package self.me.matchday.model;
 
+import java.time.Duration;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -27,13 +33,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import java.time.Duration;
-import java.util.Objects;
 
 /** Wraps Spring's HttpCookie & ResponseCookie classes for JPA persistence */
 @Entity
@@ -47,7 +46,7 @@ public class SecureCookie {
   private final String name;
 
   @Column(columnDefinition = "LONGTEXT")
-  private final String value;
+  private final String cookieValue;
   // ResponseCookie
   @Nullable private Duration maxAge;
   @Nullable private String domain;
@@ -58,12 +57,12 @@ public class SecureCookie {
 
   public SecureCookie() {
     this.name = null;
-    this.value = null;
+    this.cookieValue = null;
   }
 
-  public SecureCookie(@NotNull final String name, @NotNull final String value) {
+  public SecureCookie(@NotNull final String name, @NotNull final String cookieValue) {
     this.name = name;
-    this.value = value;
+    this.cookieValue = cookieValue;
   }
 
   /**
@@ -105,7 +104,7 @@ public class SecureCookie {
         && (secureCookie.getPath() != null)) {
 
       // Create response cookie
-      return ResponseCookie.from(secureCookie.getName(), secureCookie.getValue())
+      return ResponseCookie.from(secureCookie.getName(), secureCookie.getCookieValue())
           .maxAge(secureCookie.getMaxAge())
           .domain(secureCookie.getDomain())
           .path(secureCookie.getPath())
@@ -115,7 +114,7 @@ public class SecureCookie {
           .build();
 
     } else {
-      return new HttpCookie(secureCookie.getName(), secureCookie.getValue());
+      return new HttpCookie(secureCookie.getName(), secureCookie.getCookieValue());
     }
   }
 
