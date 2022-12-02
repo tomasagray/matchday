@@ -35,6 +35,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -117,6 +118,14 @@ public class VideoStreamManager {
       }
     }
     playlistService.deleteVideoStreamPlaylist(playlist);
+  }
+
+  public void queueStreamJobs(@NotNull List<VideoStreamLocator> locators) {
+    locators.stream()
+        // ensure streams are started in correct order
+        .sorted(Comparator.comparing(VideoStreamLocator::getVideoFile))
+        .peek(locator -> updateLocatorTaskState(locator, JobStatus.QUEUED, 0d))
+        .forEach(this::beginStreaming);
   }
 
   @Async("VideoStreamExecutor")

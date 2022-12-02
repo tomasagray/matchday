@@ -21,8 +21,6 @@ package self.me.matchday.api.service.video;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
@@ -141,10 +139,7 @@ public class VideoStreamingService {
 
     final VideoStreamLocatorPlaylist playlist =
         videoStreamManager.createVideoStreamFrom(videoFileSource);
-    // ensure streams are started in correct order
-    final List<VideoStreamLocator> locators = playlist.getStreamLocators();
-    locators.sort(Comparator.comparing(VideoStreamLocator::getVideoFile));
-    locators.forEach(videoStreamManager::beginStreaming);
+    videoStreamManager.queueStreamJobs(playlist.getStreamLocators());
     return playlist;
   }
 

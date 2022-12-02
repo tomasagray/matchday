@@ -19,17 +19,6 @@
 
 package self.me.matchday.api.service.video;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.db.VideoStreamLocatorRepo;
-import self.me.matchday.model.video.SingleStreamLocator;
-import self.me.matchday.model.video.VideoFile;
-import self.me.matchday.model.video.VideoStreamLocator;
-import self.me.matchday.util.RecursiveDirectoryDeleter;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,6 +26,17 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.api.controller.VideoStreamStatusController;
+import self.me.matchday.db.VideoStreamLocatorRepo;
+import self.me.matchday.model.video.SingleStreamLocator;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.util.RecursiveDirectoryDeleter;
 
 @Service
 public class VideoStreamLocatorService {
@@ -45,10 +45,16 @@ public class VideoStreamLocatorService {
   private String PLAYLIST_NAME;
 
   private final VideoStreamLocatorRepo streamLocatorRepo;
+  private final VideoStreamStatusController streamStatusController;
+  private final SimpMessagingTemplate messagingTemplate;
 
-  @Autowired
-  public VideoStreamLocatorService(final VideoStreamLocatorRepo streamLocatorRepo) {
+  public VideoStreamLocatorService(
+      final VideoStreamLocatorRepo streamLocatorRepo,
+      VideoStreamStatusController streamStatusController,
+      SimpMessagingTemplate messagingTemplate) {
     this.streamLocatorRepo = streamLocatorRepo;
+    this.streamStatusController = streamStatusController;
+    this.messagingTemplate = messagingTemplate;
   }
 
   /**
@@ -79,7 +85,7 @@ public class VideoStreamLocatorService {
   public Optional<VideoStreamLocator> getStreamLocatorFor(@NotNull final VideoFile videoFile) {
 
     final List<VideoStreamLocator> streamLocators =
-        streamLocatorRepo.getStreamLocatorsFor(videoFile);
+        streamLocatorRepo.getStreamLocatorsFor(videoFile.getFileId());
     if (streamLocators.isEmpty()) {
       return Optional.empty();
     }
@@ -106,6 +112,10 @@ public class VideoStreamLocatorService {
   @Transactional
   public void updateStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
     streamLocatorRepo.saveAndFlush(streamLocator);
+    final VideoFile videoFile = streamLocator.getVideoFile();
+    messagingTemplate.convertAndSend(
+        VideoStreamStatusController.EMIT_ENDPOINT,
+        streamStatusController.publishVideoStreamStatus(videoFile.getFileId()));
   }
 
   /**

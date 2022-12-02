@@ -25,7 +25,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -33,6 +38,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
@@ -40,7 +46,10 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
+import self.me.matchday.api.resource.VideoFileResource.VideoFileResourceModeller;
+import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.Resolution;
+import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 
 @Data
@@ -66,15 +75,18 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
   private String videoCodec;
   private String audioCodec;
   private String duration;
+  private Map<PartIdentifier, VideoFileResource> videoFiles;
 
   @Component
   public static class VideoFileSourceResourceAssembler
       extends RepresentationModelAssemblerSupport<VideoFileSource, VideoFileSourceResource> {
 
+    private final VideoFileResourceModeller videoFileModeller;
     @Getter @Setter private UUID eventId;
 
-    public VideoFileSourceResourceAssembler() {
+    public VideoFileSourceResourceAssembler(VideoFileResourceModeller videoFileModeller) {
       super(VideoStreamingController.class, VideoFileSourceResource.class);
+      this.videoFileModeller = videoFileModeller;
     }
 
     @Override
@@ -96,6 +108,7 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
       videoFileSourceResource.setVideoCodec(entity.getVideoCodec());
       videoFileSourceResource.setAudioCodec(entity.getAudioCodec());
       videoFileSourceResource.setDuration(entity.getApproximateDuration());
+      videoFileSourceResource.setVideoFiles(getVideoFiles(entity));
       if (resolution != null) {
         videoFileSourceResource.setResolution(resolution.toString());
       }
@@ -108,6 +121,23 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
                       .getVideoStreamPlaylist(eventId, fileSrcId))
               .withRel(STREAM));
       return videoFileSourceResource;
+    }
+
+    private @Nullable Map<PartIdentifier, VideoFileResource> getVideoFiles(
+        @NotNull VideoFileSource fileSource) {
+
+      final List<VideoFilePack> filePacks = fileSource.getVideoFilePacks();
+      // todo - should this be better? how to pick VideoFilePack?
+      if (filePacks != null && filePacks.size() > 0) {
+        final VideoFilePack filePack = filePacks.get(0);
+        final Map<PartIdentifier, VideoFileResource> unsorted =
+            filePack.allFiles().entrySet().stream()
+                .collect(
+                    Collectors.toMap(
+                        Entry::getKey, entry -> videoFileModeller.toModel(entry.getValue())));
+        return new TreeMap<>(unsorted);
+      }
+      return null;
     }
 
     @Override

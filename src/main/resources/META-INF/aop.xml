@@ -20,13 +20,45 @@
 <!DOCTYPE aspectj PUBLIC
   "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
 <aspectj>
+  <aspects>
+    <!-- weave in just these aspects -->
+    <aspect name="self.me.matchday.log.ArtworkServiceLog"/>
+    <aspect name="self.me.matchday.log.CompetitionServiceLog"/>
+    <aspect name="self.me.matchday.log.CompetitionControllerLog"/>
+    <aspect name="self.me.matchday.log.DataSourcePluginServiceLog"/>
+    <aspect name="self.me.matchday.log.DataSourceServiceLog"/>
+    <aspect name="self.me.matchday.log.EntityCorrectionServiceLog"/>
+    <aspect name="self.me.matchday.log.EntityServiceRegistryLog"/>
+    <aspect name="self.me.matchday.log.EventServiceLog"/>
+    <aspect name="self.me.matchday.log.FileServerPluginServiceLog"/>
+    <aspect name="self.me.matchday.log.FileServerUserServiceLog"/>
+    <aspect name="self.me.matchday.log.MatchDataParserLog"/>
+    <aspect name="self.me.matchday.log.MatchServiceLog"/>
+    <aspect name="self.me.matchday.log.MatchDataParserLog"/>
+    <aspect name="self.me.matchday.log.ScheduledTaskLog"/>
+    <aspect name="self.me.matchday.log.SynonymServiceLog"/>
+    <aspect name="self.me.matchday.log.TeamServiceLog"/>
+    <aspect name="self.me.matchday.log.UserValidationServiceLog"/>
+    <aspect name="self.me.matchday.log.VideoFileSelectorServiceLog"/>
+    <aspect name="self.me.matchday.log.VideoFileServiceLog"/>
+    <aspect name="self.me.matchday.log.VideoStatusControllerLog"/>
+    <aspect name="self.me.matchday.log.VideoStreamingServiceLog"/>
+    <aspect name="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog"/>
+    <aspect name="self.me.matchday.log.VideoStreamLocatorServiceLog"/>
+    <aspect name="self.me.matchday.log.VideoStreamManagerLog"/>
+    <aspect name="self.me.matchday.log.plugin.blogger.BloggerPluginLog"/>
+    <aspect name="self.me.matchday.log.plugin.ffmpeg.FFmpegLog"/>
+    <aspect name="self.me.matchday.log.plugin.filefox.LoginParserLog"/>
+  </aspects>
   <weaver>
+    <!--  todo: streamline this file  -->
     <!-- only weave classes in our application-specific packages -->
     <!-- config -->
     <include within="self.me.matchday.config.ScheduledTasks"/>
     <!-- controller-->
     <include within="self.me.matchday.api.controller.ArtworkController"/>
     <include within="self.me.matchday.api.controller.CompetitionController"/>
+    <include within="self.me.matchday.api.controller.VideoStreamStatusController"/>
     <!-- service -->
     <include within="self.me.matchday.api.service.ArtworkService"/>
     <include within="self.me.matchday.api.service.CompetitionService"/>
@@ -57,33 +89,4 @@
     <include within="self.me.matchday.log.plugin.ffmpeg.*"/>
     <include within="self.me.matchday.log.plugin.filefox.*"/>
   </weaver>
-  <aspects>
-    <!-- weave in just these aspects -->
-    <aspect name="self.me.matchday.log.ArtworkServiceLog"/>
-    <aspect name="self.me.matchday.log.CompetitionServiceLog"/>
-    <aspect name="self.me.matchday.log.CompetitionControllerLog"/>
-    <aspect name="self.me.matchday.log.DataSourcePluginServiceLog"/>
-    <aspect name="self.me.matchday.log.DataSourceServiceLog"/>
-    <aspect name="self.me.matchday.log.EntityCorrectionServiceLog"/>
-    <aspect name="self.me.matchday.log.EntityServiceRegistryLog"/>
-    <aspect name="self.me.matchday.log.EventServiceLog"/>
-    <aspect name="self.me.matchday.log.FileServerPluginServiceLog"/>
-    <aspect name="self.me.matchday.log.FileServerUserServiceLog"/>
-    <aspect name="self.me.matchday.log.MatchDataParserLog"/>
-    <aspect name="self.me.matchday.log.MatchServiceLog"/>
-    <aspect name="self.me.matchday.log.MatchDataParserLog"/>
-    <aspect name="self.me.matchday.log.ScheduledTaskLog"/>
-    <aspect name="self.me.matchday.log.SynonymServiceLog"/>
-    <aspect name="self.me.matchday.log.TeamServiceLog"/>
-    <aspect name="self.me.matchday.log.UserValidationServiceLog"/>
-    <aspect name="self.me.matchday.log.VideoFileSelectorServiceLog"/>
-    <aspect name="self.me.matchday.log.VideoFileServiceLog"/>
-    <aspect name="self.me.matchday.log.VideoStreamingServiceLog"/>
-    <aspect name="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog"/>
-    <aspect name="self.me.matchday.log.VideoStreamLocatorServiceLog"/>
-    <aspect name="self.me.matchday.log.VideoStreamManagerLog"/>
-    <aspect name="self.me.matchday.log.plugin.blogger.BloggerPluginLog"/>
-    <aspect name="self.me.matchday.log.plugin.ffmpeg.FFmpegLog"/>
-    <aspect name="self.me.matchday.log.plugin.filefox.LoginParserLog"/>
-  </aspects>
 </aspectj>

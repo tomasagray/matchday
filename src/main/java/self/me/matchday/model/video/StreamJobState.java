@@ -19,13 +19,16 @@
 
 package self.me.matchday.model.video;
 
+import java.util.Objects;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import javax.persistence.*;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -58,6 +61,7 @@ public abstract class StreamJobState {
     ERROR,
     STOPPED,
     CREATED,
+    QUEUED,
     STARTED,
     BUFFERING,
     STREAMING,

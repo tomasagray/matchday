@@ -32,6 +32,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.video.VideoStreamLocatorService;
+import self.me.matchday.model.video.TaskState;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoStreamLocator;
 
@@ -85,7 +86,16 @@ public class VideoStreamLocatorServiceLog {
   @Before(
       "execution(* self.me.matchday.api.service.video.VideoStreamLocatorService.updateStreamLocator(..))")
   public void logUpdateStreamLocator(@NotNull JoinPoint jp) {
-    logger.trace("Updating VideoStreamLocator: {}", jp.getArgs()[0]);
+    final Object arg = jp.getArgs()[0];
+    if (arg instanceof VideoStreamLocator) {
+      final VideoStreamLocator streamLocator = (VideoStreamLocator) arg;
+      final Long id = streamLocator.getStreamLocatorId();
+      final TaskState state = streamLocator.getState();
+      final int completed = (int) (state.getCompletionRatio() * 100);
+      logger.info("[VideoStreamLocator - {}] status: {}, ({}%)", id, state.getStatus(), completed);
+    } else {
+      logger.trace("Updating VideoStreamLocator: {}", arg);
+    }
   }
 
   @Before(
