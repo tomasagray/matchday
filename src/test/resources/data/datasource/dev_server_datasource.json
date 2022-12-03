@@ -1,8 +1,0 @@
-{
-  "pluginId": "b7098ba3-862e-4cee-a62d-a8cdd0eeef3b",
-  "dataSourceId": "bbad175a-01bd-4ab6-93f8-c3cbc98da8c4",
-  "baseUri": "http://hal9000:7000/?format=json",
-  "title": "Development Test DataSource (HAL9000)",
-  "clazz": "self.me.matchday.model.Event",
-  "enabled": true
-}
