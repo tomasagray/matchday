@@ -19,6 +19,10 @@
 
 package self.me.matchday.api.service.video;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,11 +34,6 @@ import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @PropertySource("classpath:video.properties")

@@ -128,16 +128,15 @@ public class VideoStreamLocatorService {
     streamLocatorRepo.delete(streamLocator);
   }
 
-  @Transactional
-  public void deleteStreamLocatorWithData(@NotNull final VideoStreamLocator streamLocator)
-      throws IOException {
+  private static void deleteVideoDataFromDisk(
+      @NotNull VideoStreamLocator streamLocator, @NotNull Path playlistPath) throws IOException {
 
-    final Path playlistPath = streamLocator.getPlaylistPath();
     final File playlistFile = playlistPath.toFile();
     // if the file doesn't exist, just return
     if (!playlistFile.exists()) {
       return;
     }
+
     if (!playlistFile.isFile()) {
       final String msg =
           String.format(
@@ -149,5 +148,14 @@ public class VideoStreamLocatorService {
     // delete the data
     final Path streamDataDir = playlistPath.getParent();
     Files.walkFileTree(streamDataDir, new RecursiveDirectoryDeleter());
+  }
+
+  @Transactional
+  public void deleteStreamLocatorWithData(@NotNull final VideoStreamLocator streamLocator)
+      throws IOException {
+
+    final Path playlistPath = streamLocator.getPlaylistPath();
+    deleteStreamLocator(streamLocator);
+    deleteVideoDataFromDisk(streamLocator, playlistPath);
   }
 }
