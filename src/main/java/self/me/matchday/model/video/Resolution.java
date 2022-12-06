@@ -19,12 +19,11 @@
 
 package self.me.matchday.model.video;
 
+import java.util.Arrays;
+import java.util.regex.Pattern;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Arrays;
-import java.util.regex.Pattern;
 
 /** Video resolution classes */
 public enum Resolution {
@@ -60,7 +59,13 @@ public enum Resolution {
   @Contract(pure = true)
   public static Resolution fromString(@NotNull String str) {
     return Arrays.stream(Resolution.values())
-        .filter(resolution -> resolution.pattern.matcher(str).matches())
+        .filter(
+            resolution -> {
+              final boolean nameMatches = resolution.pattern.matcher(str).matches();
+              final boolean heightMatches =
+                  String.format("%sp", resolution.getHeight()).equals(str);
+              return nameMatches || heightMatches;
+            })
         .findFirst()
         .orElse(null);
   }

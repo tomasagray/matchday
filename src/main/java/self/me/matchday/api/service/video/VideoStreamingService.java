@@ -62,7 +62,8 @@ public class VideoStreamingService {
     final Optional<VideoStreamLocatorPlaylist> playlistOptional = findExistingStream(event);
     if (playlistOptional.isPresent()) {
       final VideoStreamLocatorPlaylist existingPlaylist = playlistOptional.get();
-      return getOrCreateVideoStreamPlaylist(event, existingPlaylist.getFileSource().getFileSrcId());
+      final UUID fileSrcId = existingPlaylist.getFileSource().getFileSrcId();
+      return getOrCreateVideoStreamPlaylist(event, fileSrcId);
     }
     // else...
     final VideoFileSource fileSource = selectorService.getBestFileSource(event);
