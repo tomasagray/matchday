@@ -40,6 +40,7 @@ import self.me.matchday.api.resource.VideoFileSourceResource.VideoFileSourceReso
 import self.me.matchday.api.resource.VideoPlaylistResource;
 import self.me.matchday.api.resource.VideoPlaylistResource.VideoPlaylistResourceAssembler;
 import self.me.matchday.api.service.EventService;
+import self.me.matchday.api.service.video.VideoStreamingService;
 
 @RestController
 @RequestMapping(value = "/events/event/{eventId}/video")
@@ -48,14 +49,17 @@ public class VideoStreamingController {
   public static final String MEDIA_TYPE_APPLE_MPEGURL = "application/vnd.apple.mpegurl";
 
   private final EventService eventService;
+  private final VideoStreamingService streamingService;
   private final VideoFileSourceResourceAssembler resourceAssembler;
   private final VideoPlaylistResourceAssembler playlistResourceAssembler;
 
   public VideoStreamingController(
       EventService eventService,
+      VideoStreamingService streamingService,
       final VideoFileSourceResourceAssembler resourceAssembler,
       final VideoPlaylistResourceAssembler playlistResourceAssembler) {
     this.eventService = eventService;
+    this.streamingService = streamingService;
     this.resourceAssembler = resourceAssembler;
     this.playlistResourceAssembler = playlistResourceAssembler;
   }
@@ -82,7 +86,8 @@ public class VideoStreamingController {
       @PathVariable final UUID eventId) {
 
     return eventService
-        .getBestVideoStreamPlaylist(eventId)
+        .fetchById(eventId)
+        .flatMap(streamingService::getBestVideoStreamPlaylist)
         .map(playlistResourceAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
@@ -96,7 +101,8 @@ public class VideoStreamingController {
       @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId) {
 
     return eventService
-        .getVideoStreamPlaylist(eventId, fileSrcId)
+        .fetchById(eventId)
+        .flatMap(event -> streamingService.getOrCreateVideoStreamPlaylist(event, fileSrcId))
         .map(playlistResourceAssembler::toModel)
         .map(ResponseEntity::ok)
         .orElseThrow(
@@ -117,7 +123,7 @@ public class VideoStreamingController {
       @PathVariable("fileSrcId") UUID fileSrcId,
       @PathVariable("partId") Long partId) {
 
-    final Optional<String> playlistFile = eventService.readPlaylistFile(partId);
+    final Optional<String> playlistFile = streamingService.readPlaylistFile(partId);
     return ResponseEntity.of(playlistFile);
   }
 
@@ -131,7 +137,8 @@ public class VideoStreamingController {
       @PathVariable("partId") Long partId,
       @PathVariable("segmentId") String segmentId) {
 
-    final Resource videoSegmentResource = eventService.getVideoSegmentResource(partId, segmentId);
+    final Resource videoSegmentResource =
+        streamingService.getVideoSegmentResource(partId, segmentId);
     return videoSegmentResource != null
         ? ResponseEntity.ok(videoSegmentResource)
         : ResponseEntity.notFound().build();
@@ -146,7 +153,7 @@ public class VideoStreamingController {
       @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId)
       throws IOException {
 
-    eventService.deleteVideoData(fileSrcId);
+    streamingService.deleteVideoData(fileSrcId);
     final String message =
         String.format("Deleted stream data for Event: %s, File Source: %s", eventId, fileSrcId);
     return ResponseEntity.ok(message);
@@ -160,7 +167,7 @@ public class VideoStreamingController {
   public ResponseEntity<String> killStreamTasks(
       @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId) {
 
-    final int killedTasks = eventService.killAllStreamingTasks();
+    final int killedTasks = streamingService.killAllStreamingTasks();
     final String message =
         String.format(
             "Killed %s streaming tasks for Event: %s, file source: %s",

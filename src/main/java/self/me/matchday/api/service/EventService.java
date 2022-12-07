@@ -19,7 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,14 +30,12 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.EventRepository;
 import self.me.matchday.db.VideoFileSrcRepository;
 import self.me.matchday.model.Competition;
@@ -48,7 +45,6 @@ import self.me.matchday.model.Highlight;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.model.video.VideoPlaylist;
 
 @Service
 @Transactional
@@ -62,7 +58,6 @@ public class EventService implements EntityService<Event, UUID> {
   private final MatchService matchService;
   private final HighlightService highlightService;
   private final CompetitionService competitionService;
-  private final VideoStreamingService videoStreamingService;
 
   EventService(
       EventRepository eventRepository,
@@ -70,14 +65,12 @@ public class EventService implements EntityService<Event, UUID> {
       MatchService matchService,
       HighlightService highlightService,
       CompetitionService competitionService,
-      VideoFileSrcRepository fileSrcRepository,
-      VideoStreamingService videoStreamingService) {
+      VideoFileSrcRepository fileSrcRepository) {
     this.eventRepository = eventRepository;
     this.fileSrcRepository = fileSrcRepository;
     this.matchService = matchService;
     this.highlightService = highlightService;
     this.competitionService = competitionService;
-    this.videoStreamingService = videoStreamingService;
   }
 
   @Override
@@ -140,23 +133,6 @@ public class EventService implements EntityService<Event, UUID> {
     return fileSrcRepository.findById(fileSrcId);
   }
 
-  public Optional<VideoPlaylist> getBestVideoStreamPlaylist(@NotNull UUID eventId) {
-    return fetchById(eventId)
-        .flatMap(videoStreamingService::getBestVideoStreamPlaylist)
-        .flatMap(
-            playlist -> getVideoStreamPlaylist(playlist.getEventId(), playlist.getFileSrcId()));
-  }
-
-  public Optional<VideoPlaylist> getVideoStreamPlaylist(
-      @NotNull UUID eventId, @NotNull UUID fileSrcId) {
-    return fetchById(eventId)
-        .flatMap(event -> videoStreamingService.getOrCreateVideoStreamPlaylist(event, fileSrcId));
-  }
-
-  public Resource getVideoSegmentResource(@NotNull Long partId, @NotNull String segmentId) {
-    return videoStreamingService.getVideoSegmentResource(partId, segmentId);
-  }
-
   /**
    * Persist an Event; must pass validation, or will skip and make a note in logs.
    *
@@ -216,18 +192,6 @@ public class EventService implements EntityService<Event, UUID> {
   @Override
   public void deleteAll(@NotNull Iterable<? extends Event> events) {
     eventRepository.deleteAll(events);
-  }
-
-  public void deleteVideoData(@NotNull UUID fileSrcId) throws IOException {
-    videoStreamingService.deleteVideoData(fileSrcId);
-  }
-
-  public int killAllStreamingTasks() {
-    return videoStreamingService.killAllStreamingTasks();
-  }
-
-  public Optional<String> readPlaylistFile(@NotNull Long partId) {
-    return videoStreamingService.readPlaylistFile(partId);
   }
 
   /**
