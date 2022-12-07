@@ -21,7 +21,6 @@ package self.me.matchday.api.service;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -370,18 +369,12 @@ public class MatchService implements EntityService<Match, UUID> {
     final Optional<Match> matchOptional = fetchById(matchId);
     if (matchOptional.isPresent()) {
       final Match match = matchOptional.get();
+      final Optional<?> existingStream = streamingService.findExistingStream(match);
+      if (existingStream.isPresent()) {
+        throw new IOException("Cannot delete Match: found existing video streams");
+      }
       matchRepository.deleteById(matchId);
       artworkService.deleteArtworkFromDisk(match.getArtwork());
-      match
-          .getFileSources()
-          .forEach(
-              fileSrc -> {
-                try {
-                  streamingService.deleteVideoData(fileSrc.getFileSrcId());
-                } catch (IOException e) {
-                  throw new UncheckedIOException(e);
-                }
-              });
     } else {
       throw new IllegalArgumentException("No Match found with ID: " + matchId);
     }

@@ -78,7 +78,7 @@ public class VideoStreamingService {
    * @param event The Event to query for
    * @return An Optional which will contain the playlist, or not
    */
-  private @NotNull Optional<VideoStreamLocatorPlaylist> findExistingStream(@NotNull Event event) {
+  public @NotNull Optional<VideoStreamLocatorPlaylist> findExistingStream(@NotNull Event event) {
     return event.getFileSources().stream()
         .map(VideoFileSource::getFileSrcId)
         .map(playlistService::getVideoStreamPlaylistFor)
