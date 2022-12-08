@@ -52,6 +52,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
+import self.me.matchday.model.video.TaskState;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
@@ -93,31 +94,6 @@ public class VideoStreamManager {
   public VideoStreamLocatorPlaylist createVideoStreamFrom(
       @NotNull final VideoFileSource fileSource) {
     return playlistService.createVideoStreamPlaylist(fileSource);
-  }
-
-  public Optional<VideoStreamLocatorPlaylist> getLocalStreamFor(@NotNull final UUID fileSrcId) {
-    return playlistService.getVideoStreamPlaylistFor(fileSrcId);
-  }
-
-  public void deleteLocalStream(@NotNull final VideoStreamLocatorPlaylist playlist)
-      throws IOException {
-
-    final List<VideoStreamLocator> streamLocators = playlist.getStreamLocators();
-    for (VideoStreamLocator streamLocator : streamLocators) {
-      locatorService.deleteStreamLocatorWithData(streamLocator);
-    }
-    // delete stream root dir
-    final File storageLocation = playlist.getStorageLocation().toFile();
-    if (storageLocation.exists()) {
-      final boolean storageDeleted = storageLocation.delete();
-      if (!storageDeleted) {
-        final String message =
-            "Could not delete storage directory for VideoStreamLocatorPlaylist: "
-                + playlist.getId();
-        throw new IOException(message);
-      }
-    }
-    playlistService.deleteVideoStreamPlaylist(playlist);
   }
 
   public void queueStreamJobs(@NotNull List<VideoStreamLocator> locators) {
@@ -182,6 +158,10 @@ public class VideoStreamManager {
     // wait for process to finish
     process.waitFor();
     process.destroy();
+  }
+
+  public Optional<VideoStreamLocatorPlaylist> getLocalStreamFor(@NotNull final UUID fileSrcId) {
+    return playlistService.getVideoStreamPlaylistFor(fileSrcId);
   }
 
   /**
@@ -256,14 +236,42 @@ public class VideoStreamManager {
     return taskCount;
   }
 
-  public void killAllStreamsFor(@NotNull final VideoStreamLocatorPlaylist playlist) {
-    playlist.getStreamLocators().forEach(this::killStreamingTask);
+  public int killAllStreamsFor(@NotNull final VideoStreamLocatorPlaylist playlist) {
+
+    int killCount = 0;
+    final List<VideoStreamLocator> locators = playlist.getStreamLocators();
+    for (final VideoStreamLocator locator : locators) {
+      killStreamingTask(locator);
+      killCount++;
+    }
+    return killCount;
   }
 
   public void killStreamingTask(@NotNull final VideoStreamLocator streamLocator) {
     final Double completionRatio = streamLocator.getState().getCompletionRatio();
     ffmpegPlugin.interruptStreamingTask(streamLocator.getPlaylistPath());
     updateLocatorTaskState(streamLocator, JobStatus.STOPPED, completionRatio);
+  }
+
+  public void deleteLocalStreams(@NotNull final VideoStreamLocatorPlaylist playlist)
+      throws IOException {
+
+    final List<VideoStreamLocator> streamLocators = playlist.getStreamLocators();
+    for (VideoStreamLocator streamLocator : streamLocators) {
+      locatorService.deleteStreamLocatorWithData(streamLocator);
+    }
+    // delete stream root dir
+    final File storageLocation = playlist.getStorageLocation().toFile();
+    if (storageLocation.exists()) {
+      final boolean storageDeleted = storageLocation.delete();
+      if (!storageDeleted) {
+        final String message =
+            "Could not delete storage directory for VideoStreamLocatorPlaylist: "
+                + playlist.getId();
+        throw new IOException(message);
+      }
+    }
+    playlistService.deleteVideoStreamPlaylist(playlist);
   }
 
   private void updateLocatorTaskState(

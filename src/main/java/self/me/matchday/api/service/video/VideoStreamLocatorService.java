@@ -79,13 +79,13 @@ public class VideoStreamLocatorService {
   /**
    * Find the latest video stream locator for a given video file
    *
-   * @param videoFile The video file representation
+   * @param videoFileId The ID of the video file representation
    * @return The most recent stream locator for this video file, or Optional.empty();
    */
-  public Optional<VideoStreamLocator> getStreamLocatorFor(@NotNull final VideoFile videoFile) {
+  public Optional<VideoStreamLocator> getStreamLocatorFor(@NotNull UUID videoFileId) {
 
     final List<VideoStreamLocator> streamLocators =
-        streamLocatorRepo.getStreamLocatorsFor(videoFile.getFileId());
+        streamLocatorRepo.getStreamLocatorsFor(videoFileId);
     if (streamLocators.isEmpty()) {
       return Optional.empty();
     }

@@ -14,5 +14,10 @@
     <inspection_tool class="TrailingSpacesInProperty" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="UnusedMessageFormatParameter" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="UnusedProperty" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="com.haulmont.jpb.CompositeIdClassSerializable" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="s">
+        <Project />
+      </option>
+    </inspection_tool>
   </profile>
 </component>

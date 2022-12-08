@@ -82,7 +82,7 @@ public class ScheduledTasks {
     List<VideoStreamLocatorPlaylist> playlists = streamPlaylistService.getAllVideoStreamPlaylists();
     for (VideoStreamLocatorPlaylist playlist : playlists) {
       if (videoDataIsStale(playlist)) {
-        videoStreamingService.deleteVideoData(playlist);
+        videoStreamingService.deleteAllVideoData(playlist);
       }
     }
   }

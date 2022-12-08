@@ -21,7 +21,6 @@ package self.me.matchday.log;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -64,10 +63,9 @@ public class VideoStreamLocatorServiceLog {
   @Around(
       "execution(* self.me.matchday.api.service.video.VideoStreamLocatorService.getStreamLocatorFor(..))")
   public Object logGetStreamLocatorFor(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    VideoFile videoFile = (VideoFile) jp.getArgs()[0];
-    UUID fileId = videoFile.getFileId();
+    final Object fileId = jp.getArgs()[0];
     logger.info("Getting VideoStreamLocator for VideoFile: {} from database", fileId);
-    Object result = jp.proceed();
+    final Object result = jp.proceed();
     logger.debug("Retrieved VideoStreamLocator for VideoFile: {}: {}", fileId, result);
     return result;
   }

@@ -75,7 +75,7 @@ class VideoStreamingServiceTest {
   private static final Logger logger = LogManager.getLogger(VideoStreamingServiceTest.class);
 
   // Service dependencies
-  private final VideoStreamingService streamingService;
+  private static VideoStreamingService streamingService;
   private final VideoStreamLocatorPlaylistService locatorPlaylistService;
   private final VideoStreamLocatorService streamLocatorService;
 
@@ -83,7 +83,7 @@ class VideoStreamingServiceTest {
   private static final List<Event> cleanupData = new ArrayList<>();
   private final Event testMatch;
   private final VideoFile testVideoFile;
-  private final VideoFileSource testFileSource;
+  private static VideoFileSource testFileSource;
   private int testStreamTaskCount;
 
   @Autowired
@@ -94,7 +94,8 @@ class VideoStreamingServiceTest {
       VideoStreamLocatorPlaylistService locatorPlaylistService,
       VideoStreamLocatorService streamLocatorService) {
 
-    this.streamingService = streamingService;
+    // static ref for cleanup
+    VideoStreamingServiceTest.streamingService = streamingService;
     this.streamLocatorService = streamLocatorService;
     this.locatorPlaylistService = locatorPlaylistService;
 
@@ -105,8 +106,8 @@ class VideoStreamingServiceTest {
 
     // Create test data
     this.testMatch = testDataCreator.createTestMatch();
+    VideoStreamingServiceTest.testFileSource = getTestFileSource(this.testMatch);
     cleanupData.add(testMatch);
-    this.testFileSource = getTestFileSource();
     this.testVideoFile =
         testFileSource.getVideoFilePacks().stream()
             .findFirst()
@@ -117,12 +118,20 @@ class VideoStreamingServiceTest {
   }
 
   @AfterAll
-  static void cleanup() throws IOException {
+  static void cleanup() throws IOException, InterruptedException {
     TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
+    final int waitSec = 30;
+    logger.info("Waiting {} seconds for dust to settle...", waitSec);
+    TimeUnit.SECONDS.sleep(waitSec);
+    logger.info("Dust must have settled. Proceeding with test...");
+
+    logger.info("Attempting to delete test data...");
+    streamingService.deleteAllVideoData(testFileSource.getFileSrcId());
+    logger.info("Test data successfully deleted.");
   }
 
   @NotNull
-  private VideoFileSource getTestFileSource() {
+  private static VideoFileSource getTestFileSource(@NotNull Event testMatch) {
 
     AtomicReference<VideoFileSource> atomicFileSource = new AtomicReference<>();
     final Set<VideoFileSource> fileSources = testMatch.getFileSources();
@@ -247,7 +256,7 @@ class VideoStreamingServiceTest {
   @NotNull
   private VideoStreamLocator getTestStreamLocator() {
     final Optional<VideoStreamLocator> locatorOptional =
-        streamLocatorService.getStreamLocatorFor(testVideoFile);
+        streamLocatorService.getStreamLocatorFor(testVideoFile.getFileId());
     assertThat(locatorOptional).isPresent();
     final VideoStreamLocator testStreamLocator = locatorOptional.get();
     assertThat(testStreamLocator).isNotNull();
@@ -292,7 +301,7 @@ class VideoStreamingServiceTest {
     final List<VideoStreamLocator> streamLocators = deletablePlaylist.getStreamLocators();
     streamingService.killAllStreamingTasks();
     logger.info("Deleting video data...");
-    streamingService.deleteVideoData(deletablePlaylist);
+    streamingService.deleteAllVideoData(deletablePlaylist);
 
     // Validate data has been removed
     streamLocators.forEach(
@@ -306,14 +315,14 @@ class VideoStreamingServiceTest {
 
   @Test
   @Order(7)
-  @DisplayName("Validate a specific streaming task can be killed")
-  public void killStreamingFor() throws IOException, InterruptedException {
+  @DisplayName("Validate ability to kill all streaming tasks")
+  public void killStreamingFor() throws InterruptedException {
 
     logger.info(
         "Before testing, there are: {} active streaming tasks...",
         streamingService.getActiveStreamingTaskCount());
 
-    final VideoFileSource testFileSource = getTestFileSource();
+    final VideoFileSource testFileSource = getTestFileSource(this.testMatch);
     final UUID fileSrcId = testFileSource.getFileSrcId();
     logger.info(
         "Beginning test stream for file source stream killing with file source ID: " + fileSrcId);
@@ -330,15 +339,14 @@ class VideoStreamingServiceTest {
     TimeUnit.SECONDS.sleep(timeout);
 
     logger.info(
-        "Executing killStreamingFor()... {} times, in case streaming is scheduled sequentially...",
+        "Executing killAllStreamsFor()... {} times, in case streaming is scheduled sequentially...",
         streamTaskCount);
+    int killCount = 0;
     for (int i = 0; i < streamTaskCount; i++) {
-      streamingService.killStreamingFor(fileSrcId);
+      killCount += streamingService.killAllStreamsFor(fileSrcId);
     }
-
-    logger.info("Attempting to delete test data...");
-    streamingService.deleteVideoData(testFileSource.getFileSrcId());
-    logger.info("Test data successfully deleted.");
+    logger.info("Killed {} tasks in total", killCount);
+    assertThat(killCount).isGreaterThanOrEqualTo(streamTaskCount);
   }
 
   @Test

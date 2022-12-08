@@ -145,34 +145,51 @@ public class VideoStreamingController {
   }
 
   @RequestMapping(
-      value = "/stream/{fileSrcId}/delete-stream",
+      value = "/stream/{fileSrcId}/kill-streams",
       method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<Integer> killStreamTasks(
+      @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId) {
+    return ResponseEntity.ok(streamingService.killAllStreamsFor(fileSrcId));
+  }
+
+  @RequestMapping(
+      value = "/stream/{fileSrcId}/delete-streams",
+      method = RequestMethod.DELETE,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> deleteVideoData(
       @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId)
       throws IOException {
 
-    streamingService.deleteVideoData(fileSrcId);
+    streamingService.deleteAllVideoData(fileSrcId);
     final String message =
         String.format("Deleted stream data for Event: %s, File Source: %s", eventId, fileSrcId);
     return ResponseEntity.ok(message);
   }
 
   @RequestMapping(
-      value = "/stream/{fileSrcId}/kill-stream",
+      value = "/stream/{videoFileId}/kill-stream",
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<String> killStreamTasks(
-      @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId) {
+  public ResponseEntity<UUID> killStream(
+      @PathVariable("eventId") UUID eventId, @PathVariable("videoFileId") UUID videoFileId) {
+    streamingService.killStreamFor(videoFileId);
+    return ResponseEntity.ok(videoFileId);
+  }
 
-    final int killedTasks = streamingService.killAllStreamingTasks();
-    final String message =
-        String.format(
-            "Killed %s streaming tasks for Event: %s, file source: %s",
-            killedTasks, eventId, fileSrcId);
-    return ResponseEntity.ok(message);
+  @RequestMapping(
+      value = "/stream/{videoFileId}/delete-stream",
+      method = RequestMethod.DELETE,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<UUID> deleteStream(
+      @PathVariable("eventId") UUID eventId, @PathVariable("videoFileId") UUID videoFileId)
+      throws IOException {
+    streamingService.deleteVideoData(videoFileId);
+    return ResponseEntity.ok(videoFileId);
   }
 
   @ExceptionHandler(IOException.class)

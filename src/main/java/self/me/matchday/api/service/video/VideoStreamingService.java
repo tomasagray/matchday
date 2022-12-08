@@ -42,18 +42,18 @@ public class VideoStreamingService {
   private final VideoFileSelectorService selectorService;
   private final VideoStreamManager videoStreamManager;
   private final VideoStreamLocatorPlaylistService playlistService;
-  private final VideoStreamLocatorService videoStreamLocatorService;
+  private final VideoStreamLocatorService locatorService;
 
   public VideoStreamingService(
       VideoFileSelectorService selectorService,
       VideoStreamManager videoStreamManager,
       VideoStreamLocatorPlaylistService playlistService,
-      VideoStreamLocatorService videoStreamLocatorService) {
+      VideoStreamLocatorService locatorService) {
 
     this.selectorService = selectorService;
     this.videoStreamManager = videoStreamManager;
     this.playlistService = playlistService;
-    this.videoStreamLocatorService = videoStreamLocatorService;
+    this.locatorService = locatorService;
   }
 
   public Optional<VideoPlaylist> getBestVideoStreamPlaylist(@NotNull Event event) {
@@ -158,8 +158,7 @@ public class VideoStreamingService {
   public Resource getVideoSegmentResource(
       @NotNull final Long partId, @NotNull final String segmentId) {
 
-    final Optional<VideoStreamLocator> locatorOptional =
-        videoStreamLocatorService.getStreamLocator(partId);
+    final Optional<VideoStreamLocator> locatorOptional = locatorService.getStreamLocator(partId);
     if (locatorOptional.isPresent()) {
 
       // Get path to video data
@@ -182,13 +181,45 @@ public class VideoStreamingService {
     return videoStreamManager.killAllStreams();
   }
 
-  public void killStreamingFor(@NotNull final UUID fileSrcId) {
+  public int killAllStreamsFor(@NotNull final UUID fileSrcId) {
+    return videoStreamManager
+        .getLocalStreamFor(fileSrcId)
+        .map(videoStreamManager::killAllStreamsFor)
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    "Cannot kill streams for non-existent VideoFileSource: " + fileSrcId));
+  }
+
+  public void killStreamFor(@NotNull UUID videoFileId) {
+    locatorService
+        .getStreamLocatorFor(videoFileId)
+        .ifPresentOrElse(
+            videoStreamManager::killStreamingTask,
+            () -> {
+              throw new IllegalArgumentException(
+                  "Cannot stop stream for non-existent VideoFile: " + videoFileId);
+            });
+  }
+
+  public void deleteVideoData(@NotNull UUID videoFileId) throws IOException {
+    final Optional<VideoStreamLocator> locatorOptional =
+        locatorService.getStreamLocatorFor(videoFileId);
+    if (locatorOptional.isPresent()) {
+      final VideoStreamLocator locator = locatorOptional.get();
+      locatorService.deleteStreamLocatorWithData(locator);
+    } else {
+      throw new IllegalArgumentException("No stream locator exists for VideoFile: " + videoFileId);
+    }
+  }
+
+  public void deleteAllVideoData(@NotNull final UUID fileSrcId) throws IOException {
 
     final Optional<VideoStreamLocatorPlaylist> playlistOptional =
-        videoStreamManager.getLocalStreamFor(fileSrcId);
+        playlistService.getVideoStreamPlaylistFor(fileSrcId);
     if (playlistOptional.isPresent()) {
       final VideoStreamLocatorPlaylist playlist = playlistOptional.get();
-      videoStreamManager.killAllStreamsFor(playlist);
+      deleteAllVideoData(playlist);
     }
   }
 
@@ -198,18 +229,8 @@ public class VideoStreamingService {
    * @param streamPlaylist The video stream playlist for the video data
    * @throws IOException If any problems with deleting data
    */
-  public void deleteVideoData(@NotNull final VideoStreamLocatorPlaylist streamPlaylist)
+  public void deleteAllVideoData(@NotNull final VideoStreamLocatorPlaylist streamPlaylist)
       throws IOException {
-    videoStreamManager.deleteLocalStream(streamPlaylist);
-  }
-
-  public void deleteVideoData(@NotNull final UUID fileSrcId) throws IOException {
-
-    final Optional<VideoStreamLocatorPlaylist> playlistOptional =
-        playlistService.getVideoStreamPlaylistFor(fileSrcId);
-    if (playlistOptional.isPresent()) {
-      final VideoStreamLocatorPlaylist playlist = playlistOptional.get();
-      deleteVideoData(playlist);
-    }
+    videoStreamManager.deleteLocalStreams(streamPlaylist);
   }
 }

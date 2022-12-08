@@ -19,6 +19,8 @@
 
 package self.me.matchday.log;
 
+import java.time.Duration;
+import java.time.Instant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -31,9 +33,6 @@ import self.me.matchday.api.service.video.VideoStreamManager;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-
-import java.time.Duration;
-import java.time.Instant;
 
 @Aspect
 public class VideoStreamManagerLog {
@@ -61,7 +60,7 @@ public class VideoStreamManagerLog {
   }
 
   @Before(
-      "execution(* self.me.matchday.api.service.video.VideoStreamManager.deleteLocalStream(..))")
+      "execution(* self.me.matchday.api.service.video.VideoStreamManager.deleteLocalStreams(..))")
   public void logDeleteLocalStream(@NotNull JoinPoint jp) {
     final VideoStreamLocatorPlaylist playlist = (VideoStreamLocatorPlaylist) jp.getArgs()[0];
     logger.info("Deleting local stream for VideoStreamLocatorPlaylist: {}", playlist.getId());
