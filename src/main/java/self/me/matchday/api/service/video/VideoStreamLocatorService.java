@@ -19,9 +19,6 @@
 
 package self.me.matchday.api.service.video;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +33,6 @@ import self.me.matchday.db.VideoStreamLocatorRepo;
 import self.me.matchday.model.video.SingleStreamLocator;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoStreamLocator;
-import self.me.matchday.util.RecursiveDirectoryDeleter;
 
 @Service
 public class VideoStreamLocatorService {
@@ -100,22 +96,19 @@ public class VideoStreamLocatorService {
    * @param videoFile Video data for the stream
    * @return The newly created VideoStreamLocator
    */
-  @Transactional
   public VideoStreamLocator createStreamLocator(
       @NotNull final Path storageLocation, @NotNull final VideoFile videoFile) {
 
     final UUID fileId = videoFile.getFileId();
     final Path playlistPath = storageLocation.resolve(fileId.toString()).resolve(PLAYLIST_NAME);
-    return streamLocatorRepo.saveAndFlush(new SingleStreamLocator(playlistPath, videoFile));
+    final SingleStreamLocator locator = new SingleStreamLocator(playlistPath, videoFile);
+    return streamLocatorRepo.save(locator);
   }
 
   @Transactional
   public void updateStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
     streamLocatorRepo.saveAndFlush(streamLocator);
-    final VideoFile videoFile = streamLocator.getVideoFile();
-    messagingTemplate.convertAndSend(
-        VideoStreamStatusController.EMIT_ENDPOINT,
-        streamStatusController.publishVideoStreamStatus(videoFile.getFileId()));
+    publishLocatorStatus(streamLocator);
   }
 
   /**
@@ -126,36 +119,13 @@ public class VideoStreamLocatorService {
   @Transactional
   public void deleteStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
     streamLocatorRepo.delete(streamLocator);
+    publishLocatorStatus(streamLocator);
   }
 
-  private static void deleteVideoDataFromDisk(
-      @NotNull VideoStreamLocator streamLocator, @NotNull Path playlistPath) throws IOException {
-
-    final File playlistFile = playlistPath.toFile();
-    // if the file doesn't exist, just return
-    if (!playlistFile.exists()) {
-      return;
-    }
-
-    if (!playlistFile.isFile()) {
-      final String msg =
-          String.format(
-              "VideoStreamLocator: %s does not refer to a file! Will not delete",
-              streamLocator.getStreamLocatorId());
-      throw new IllegalArgumentException(msg);
-    }
-
-    // delete the data
-    final Path streamDataDir = playlistPath.getParent();
-    Files.walkFileTree(streamDataDir, new RecursiveDirectoryDeleter());
-  }
-
-  @Transactional
-  public void deleteStreamLocatorWithData(@NotNull final VideoStreamLocator streamLocator)
-      throws IOException {
-
-    final Path playlistPath = streamLocator.getPlaylistPath();
-    deleteStreamLocator(streamLocator);
-    deleteVideoDataFromDisk(streamLocator, playlistPath);
+  public void publishLocatorStatus(@NotNull VideoStreamLocator streamLocator) {
+    final UUID videoFileId = streamLocator.getVideoFile().getFileId();
+    messagingTemplate.convertAndSend(
+        VideoStreamStatusController.EMIT_ENDPOINT,
+        streamStatusController.publishVideoStreamStatus(videoFileId));
   }
 }

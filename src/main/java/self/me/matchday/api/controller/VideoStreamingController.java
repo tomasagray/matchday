@@ -159,14 +159,11 @@ public class VideoStreamingController {
       method = RequestMethod.DELETE,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<String> deleteVideoData(
+  public ResponseEntity<UUID> deleteVideoData(
       @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId)
       throws IOException {
-
     streamingService.deleteAllVideoData(fileSrcId);
-    final String message =
-        String.format("Deleted stream data for Event: %s, File Source: %s", eventId, fileSrcId);
-    return ResponseEntity.ok(message);
+    return ResponseEntity.ok(fileSrcId);
   }
 
   @RequestMapping(

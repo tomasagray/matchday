@@ -140,7 +140,7 @@ public class VideoStreamingService {
 
     final VideoStreamLocatorPlaylist playlist =
         videoStreamManager.createVideoStreamFrom(videoFileSource);
-    videoStreamManager.queueStreamJobs(playlist.getStreamLocators());
+    videoStreamManager.queueStreamJobs(playlist);
     return playlist;
   }
 
@@ -202,17 +202,6 @@ public class VideoStreamingService {
             });
   }
 
-  public void deleteVideoData(@NotNull UUID videoFileId) throws IOException {
-    final Optional<VideoStreamLocator> locatorOptional =
-        locatorService.getStreamLocatorFor(videoFileId);
-    if (locatorOptional.isPresent()) {
-      final VideoStreamLocator locator = locatorOptional.get();
-      locatorService.deleteStreamLocatorWithData(locator);
-    } else {
-      throw new IllegalArgumentException("No stream locator exists for VideoFile: " + videoFileId);
-    }
-  }
-
   public void deleteAllVideoData(@NotNull final UUID fileSrcId) throws IOException {
 
     final Optional<VideoStreamLocatorPlaylist> playlistOptional =
@@ -232,5 +221,16 @@ public class VideoStreamingService {
   public void deleteAllVideoData(@NotNull final VideoStreamLocatorPlaylist streamPlaylist)
       throws IOException {
     videoStreamManager.deleteLocalStreams(streamPlaylist);
+  }
+
+  public void deleteVideoData(@NotNull UUID videoFileId) throws IOException {
+    final Optional<VideoStreamLocator> locatorOptional =
+        locatorService.getStreamLocatorFor(videoFileId);
+    if (locatorOptional.isPresent()) {
+      final VideoStreamLocator locator = locatorOptional.get();
+      videoStreamManager.deleteStreamLocatorWithData(locator);
+    } else {
+      throw new IllegalArgumentException("No stream locator exists for VideoFile: " + videoFileId);
+    }
   }
 }

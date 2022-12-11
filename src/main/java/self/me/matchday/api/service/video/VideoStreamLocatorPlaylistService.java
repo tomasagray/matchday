@@ -40,7 +40,7 @@ import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 @Transactional
 public class VideoStreamLocatorPlaylistService {
   private final VideoStreamLocatorPlaylistRepo playlistRepo;
-  private final VideoStreamLocatorService videoStreamLocatorService;
+  private final VideoStreamLocatorService locatorService;
   private final VideoFileSelectorService videoFileSelectorService;
 
   @Value("${video-resources.file-storage-location}")
@@ -49,11 +49,11 @@ public class VideoStreamLocatorPlaylistService {
   @Autowired
   public VideoStreamLocatorPlaylistService(
       final VideoStreamLocatorPlaylistRepo playlistRepo,
-      final VideoStreamLocatorService videoStreamLocatorService,
+      final VideoStreamLocatorService locatorService,
       final VideoFileSelectorService videoFileSelectorService) {
 
     this.playlistRepo = playlistRepo;
-    this.videoStreamLocatorService = videoStreamLocatorService;
+    this.locatorService = locatorService;
     this.videoFileSelectorService = videoFileSelectorService;
   }
 
@@ -88,7 +88,7 @@ public class VideoStreamLocatorPlaylistService {
     playlistFiles.forEachVideoFile(
         (title, videoFile) -> {
           final VideoStreamLocator playlistLocator =
-              videoStreamLocatorService.createStreamLocator(storageLocation, videoFile);
+              locatorService.createStreamLocator(storageLocation, videoFile);
           streamPlaylist.addStreamLocator(playlistLocator);
         });
     return playlistRepo.saveAndFlush(streamPlaylist);
@@ -113,12 +113,18 @@ public class VideoStreamLocatorPlaylistService {
     return Optional.empty();
   }
 
+  public Optional<VideoStreamLocatorPlaylist> getVideoStreamPlaylistContaining(
+      @NotNull Long locatorId) {
+    return playlistRepo.fetchPlaylistContaining(locatorId);
+  }
+
   /**
    * Delete a video stream playlist & it's associated stream locators from database
    *
-   * @param streamPlaylist The playlist to be deleted
+   * @param playlist The playlist to be deleted
    */
-  public void deleteVideoStreamPlaylist(@NotNull final VideoStreamLocatorPlaylist streamPlaylist) {
-    playlistRepo.delete(streamPlaylist);
+  public void deleteVideoStreamPlaylist(@NotNull final VideoStreamLocatorPlaylist playlist) {
+    playlistRepo.delete(playlist);
+    playlist.getStreamLocators().forEach(locatorService::publishLocatorStatus);
   }
 }

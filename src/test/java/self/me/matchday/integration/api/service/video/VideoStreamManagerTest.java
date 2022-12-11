@@ -214,6 +214,7 @@ class VideoStreamManagerTest {
     final Path storageLocation = playlist.getStorageLocation();
     logger.info("Deleting local data associated with VideoStreamLocatorPlaylist: {}", playlist);
 
+    //    playlist.getStreamLocators().clear();
     streamManager.deleteLocalStreams(playlist);
 
     logger.info("Ensuring local data is actually gone...");

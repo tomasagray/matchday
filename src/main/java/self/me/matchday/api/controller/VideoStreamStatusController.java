@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.VideoStreamLocatorRepo;
 import self.me.matchday.model.video.StreamJobState.JobStatus;
 import self.me.matchday.model.video.TaskState;
-import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoStreamLocator;
 
 @Controller
@@ -54,14 +53,12 @@ public class VideoStreamStatusController {
 
     final VideoStreamLocator streamLocator = getStreamLocatorFor(videoFileId);
     if (streamLocator != null) {
-      final VideoFile videoFile = streamLocator.getVideoFile();
       final TaskState state = streamLocator.getState();
-      final UUID fileId = videoFile.getFileId();
       final JobStatus status = state.getStatus();
       final Double completionRatio = state.getCompletionRatio();
-      return new VideoStreamStatusMessage(fileId, status, completionRatio);
+      return new VideoStreamStatusMessage(videoFileId, status, completionRatio);
     } else {
-      return null;
+      return new VideoStreamStatusMessage(videoFileId, null, 0d);
     }
   }
 

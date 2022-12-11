@@ -19,6 +19,20 @@
 
 package self.me.matchday.model.video;
 
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.CascadeType;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,13 +40,6 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.PathConverter;
-
-import javax.persistence.*;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -103,13 +110,14 @@ public class VideoStreamLocatorPlaylist {
 
   @Override
   public String toString() {
+    final UUID fileSrcId = fileSource != null ? fileSource.getFileSrcId() : null;
     return getClass().getSimpleName()
         + "("
         + "id = "
         + id
         + ", "
         + "fileSource = "
-        + fileSource
+        + fileSrcId
         + ", "
         + "storageLocation = "
         + storageLocation

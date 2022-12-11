@@ -19,17 +19,16 @@
 
 package self.me.matchday.model.video;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -43,6 +42,10 @@ public class TaskListState extends StreamJobState {
 
   public void addTaskState(@NotNull TaskState state) {
     taskStates.add(state);
+  }
+
+  public void removeTaskState(@NotNull TaskState state) {
+    taskStates.remove(state);
   }
 
   public void computeState() {

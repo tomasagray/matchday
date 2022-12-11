@@ -19,14 +19,14 @@
 
 package self.me.matchday.db;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-
-import java.util.List;
-import java.util.UUID;
 
 @Repository
 public interface VideoStreamLocatorPlaylistRepo
@@ -38,4 +38,9 @@ public interface VideoStreamLocatorPlaylistRepo
           + "ORDER BY vslp.timestamp")
   List<VideoStreamLocatorPlaylist> fetchPlaylistsForFileSrc(
       @Param("fileSrcId") final UUID fileSrcId);
+
+  @Query(
+      "SELECT vslp FROM VideoStreamLocatorPlaylist vslp JOIN vslp.streamLocators l WHERE l.streamLocatorId = :locatorId")
+  Optional<VideoStreamLocatorPlaylist> fetchPlaylistContaining(
+      @Param("locatorId") final Long locatorId);
 }

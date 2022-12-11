@@ -182,12 +182,14 @@ class VideoStreamingServiceTest {
     final Optional<VideoPlaylist> afterCreatingStreamPlaylist =
         streamingService.getOrCreateVideoStreamPlaylist(testMatch, testFileSrcId);
     assertThat(afterCreatingStreamPlaylist).isNotNull().isPresent();
-    final VideoPlaylist playlist = afterCreatingStreamPlaylist.get();
-    assertThat(playlist).isNotNull();
-    final int streamingTaskCount = playlist.getLocatorIds().size();
-    assertThat(streamingTaskCount).isNotZero();
-    logger.info("There will be: {} streaming tasks...", streamingTaskCount);
-    this.testStreamTaskCount = streamingTaskCount;
+    if (afterCreatingStreamPlaylist.isPresent()) {
+      final VideoPlaylist playlist = afterCreatingStreamPlaylist.get();
+      assertThat(playlist).isNotNull();
+      final int streamingTaskCount = playlist.getLocatorIds().size();
+      assertThat(streamingTaskCount).isNotZero();
+      logger.info("There will be: {} streaming tasks...", streamingTaskCount);
+      this.testStreamTaskCount = streamingTaskCount;
+    }
   }
 
   @Test
@@ -214,12 +216,14 @@ class VideoStreamingServiceTest {
 
     // Perform tests
     assertThat(actualPlaylistFile).isNotNull().isNotEmpty().isPresent();
-    final String actualPlaylistData = actualPlaylistFile.get();
-    final int actualPlaylistSize = actualPlaylistData.getBytes(StandardCharsets.UTF_8).length;
-    logger.info("Read playlist data:\n" + actualPlaylistData);
-    logger.info("Data length: " + actualPlaylistSize);
-    logger.info("Ensuring read playlist is longer than {} bytes", MIN_PLAYLIST_LEN);
-    assertThat(actualPlaylistSize).isGreaterThan(MIN_PLAYLIST_LEN);
+    if (actualPlaylistFile.isPresent()) {
+      final String actualPlaylistData = actualPlaylistFile.get();
+      final int actualPlaylistSize = actualPlaylistData.getBytes(StandardCharsets.UTF_8).length;
+      logger.info("Read playlist data:\n" + actualPlaylistData);
+      logger.info("Data length: " + actualPlaylistSize);
+      logger.info("Ensuring read playlist is longer than {} bytes", MIN_PLAYLIST_LEN);
+      assertThat(actualPlaylistSize).isGreaterThan(MIN_PLAYLIST_LEN);
+    }
   }
 
   @Test
@@ -301,7 +305,7 @@ class VideoStreamingServiceTest {
     final List<VideoStreamLocator> streamLocators = deletablePlaylist.getStreamLocators();
     streamingService.killAllStreamingTasks();
     logger.info("Deleting video data...");
-    streamingService.deleteAllVideoData(deletablePlaylist);
+    streamingService.deleteAllVideoData(testFileSource.getFileSrcId());
 
     // Validate data has been removed
     streamLocators.forEach(
