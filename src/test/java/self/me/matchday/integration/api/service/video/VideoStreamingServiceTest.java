@@ -21,9 +21,12 @@ package self.me.matchday.integration.api.service.video;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,6 +50,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -64,6 +68,7 @@ import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoPlaylist;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
+import self.me.matchday.util.RecursiveDirectoryDeleter;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -85,6 +90,11 @@ class VideoStreamingServiceTest {
   private final VideoFile testVideoFile;
   private static VideoFileSource testFileSource;
   private int testStreamTaskCount;
+
+  private static final List<String> videoStorageDirs = new ArrayList<>();
+
+  @Value("${video-resources.file-storage-location}")
+  private String baseVideoStorage;
 
   @Autowired
   public VideoStreamingServiceTest(
@@ -118,16 +128,25 @@ class VideoStreamingServiceTest {
   }
 
   @AfterAll
-  static void cleanup() throws IOException, InterruptedException {
-    TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
-    final int waitSec = 30;
-    logger.info("Waiting {} seconds for dust to settle...", waitSec);
-    TimeUnit.SECONDS.sleep(waitSec);
-    logger.info("Dust must have settled. Proceeding with test...");
+  static void cleanup() throws IOException {
 
+    TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
     logger.info("Attempting to delete test data...");
-    streamingService.deleteAllVideoData(testFileSource.getFileSrcId());
+    for (String location : videoStorageDirs) {
+      deleteDataIn(location);
+    }
     logger.info("Test data successfully deleted.");
+  }
+
+  private static void deleteDataIn(String location) throws IOException {
+    try {
+      logger.info("Deleting data in: " + location);
+      final Path path = Path.of(location);
+      Files.walkFileTree(path, new RecursiveDirectoryDeleter());
+      logger.info("Location: {} deleted? {}", location, !path.toFile().exists());
+    } catch (FileNotFoundException | NoSuchFileException e) {
+      logger.info("No directory found at: {}; skipping...", location);
+    }
   }
 
   @NotNull
@@ -173,6 +192,9 @@ class VideoStreamingServiceTest {
     final Optional<VideoPlaylist> playlistOptional =
         streamingService.getOrCreateVideoStreamPlaylist(testMatch, testFileSrcId);
     assertThat(playlistOptional).isPresent();
+    // for cleanup
+    videoStorageDirs.add(baseVideoStorage + "\\" + testFileSrcId);
+
     final VideoPlaylist videoPlaylist = playlistOptional.get();
     logger.info("Retrieved VideoPlaylist: " + videoPlaylist);
 
@@ -294,7 +316,7 @@ class VideoStreamingServiceTest {
   @Test
   @Order(6)
   @DisplayName("Validate ability to delete previously downloaded video data")
-  void deleteVideoData() throws IOException {
+  void deleteVideoData() throws IOException, InterruptedException {
 
     logger.info("Getting VideoStreamLocatorPlaylist for VideoFileSource: {}", testFileSource);
     final Optional<VideoStreamLocatorPlaylist> playlistOptional =
@@ -304,6 +326,10 @@ class VideoStreamingServiceTest {
     assertThat(deletablePlaylist).isNotNull();
     final List<VideoStreamLocator> streamLocators = deletablePlaylist.getStreamLocators();
     streamingService.killAllStreamingTasks();
+
+    final int killWait = 10;
+    logger.info("Waiting {} seconds for dust to settle...", killWait);
+    TimeUnit.SECONDS.sleep(killWait);
     logger.info("Deleting video data...");
     streamingService.deleteAllVideoData(testFileSource.getFileSrcId());
 

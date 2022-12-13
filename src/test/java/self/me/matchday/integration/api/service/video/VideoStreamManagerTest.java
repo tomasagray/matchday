@@ -207,6 +207,7 @@ class VideoStreamManagerTest {
   @Test
   @Order(6)
   @DisplayName("Ensure VideoStreamManager can delete local data")
+  @Transactional
   void deleteLocalStream() throws IOException {
 
     final UUID fileSrcId = testFileSource.getFileSrcId();
