@@ -7,7 +7,7 @@
 .gitignore
 .gradle/
 /lib/
-.idea/libraries
+.idea/
 
 # Development files
 *.cookie
