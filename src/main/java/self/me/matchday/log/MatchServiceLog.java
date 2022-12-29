@@ -60,9 +60,17 @@ public class MatchServiceLog {
     return events;
   }
 
-  @Before("execution(* self.me.matchday.api.service.MatchService.save(..))")
-  public void logSaveMatch(@NotNull JoinPoint jp) {
-    logger.info("Saving Match: {}", jp.getArgs()[0]);
+  @Around("execution(* self.me.matchday.api.service.MatchService.save(..))")
+  public Object logSaveMatch(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    try {
+      logger.info("Saving Match: {}", jp.getArgs()[0]);
+      final Object saved = jp.proceed();
+      logger.info("Match saved as: {}", saved);
+      return saved;
+    } catch (Throwable e) {
+      logger.error("Could not save Match: " + e.getMessage());
+      throw e;
+    }
   }
 
   @Before("execution(* self.me.matchday.api.service.MatchService.saveAll(..))")

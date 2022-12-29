@@ -19,6 +19,9 @@
 
 package self.me.matchday.log;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -28,13 +31,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import self.me.matchday.model.DataSource;
 import self.me.matchday.model.PatternKit;
 import self.me.matchday.plugin.datasource.parsing.MatchDataParser;
-import self.me.matchday.util.JsonParser;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Aspect
 @Component
@@ -48,10 +47,14 @@ public class MatchDataParserLog {
 
     final Object[] args = jp.getArgs();
     if (args.length == 2) {
-      logger.trace(
-          "Attempting to get Stream<Event> from data:\n{}\nUsing DataSource:\n{}",
-          args[1],
-          JsonParser.toJson(args[0]));
+      if (args[0] instanceof DataSource && args[1] instanceof String) {
+        final String data = (String) args[1];
+        final DataSource<?> dataSource = (DataSource<?>) args[0];
+        logger.trace(
+            "Attempting to get Stream<Event> from data:{} ... using DataSource: {}",
+            data.substring(0, Math.min(data.length(), 250)),
+            dataSource.getDataSourceId());
+      }
     }
   }
 

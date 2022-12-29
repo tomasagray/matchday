@@ -55,8 +55,11 @@ public class DataSourceServiceLog {
   @Before("execution(* self.me.matchday.api.service.DataSourceService.refreshDataSource(..))")
   public void logRefreshDataSource(@NotNull JoinPoint jp) {
     final Object[] args = jp.getArgs();
-    if (args.length == 2) {
-      logger.info("Refreshing DataSource: {} with request: {}", args[1], args[0]);
+    if (args.length == 2 && args[1] instanceof DataSource) {
+      final Object request = args[0];
+      final DataSource<?> dataSource = (DataSource<?>) args[1];
+      logger.info(
+          "Refreshing DataSource: {} with request: {}", dataSource.getDataSourceId(), request);
     }
   }
 
