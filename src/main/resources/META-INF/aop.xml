@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2022.
+  ~ Copyright (c) 2023.
   ~
   ~ This file is part of Matchday.
   ~
@@ -35,7 +35,8 @@
     <aspect name="self.me.matchday.log.MatchDataParserLog"/>
     <aspect name="self.me.matchday.log.MatchServiceLog"/>
     <aspect name="self.me.matchday.log.MatchDataParserLog"/>
-    <aspect name="self.me.matchday.log.ScheduledTaskLog"/>
+    <aspect name="self.me.matchday.log.ScheduledTaskServiceLog"/>
+    <aspect name="self.me.matchday.log.SettingsServiceLog"/>
     <aspect name="self.me.matchday.log.SynonymServiceLog"/>
     <aspect name="self.me.matchday.log.TeamServiceLog"/>
     <aspect name="self.me.matchday.log.UserValidationServiceLog"/>
@@ -54,7 +55,7 @@
     <!--  todo: streamline this file  -->
     <!-- only weave classes in our application-specific packages -->
     <!-- config -->
-    <include within="self.me.matchday.config.ScheduledTasks"/>
+    <include within="self.me.matchday.api.service.ScheduledTaskService"/>
     <!-- controller-->
     <include within="self.me.matchday.api.controller.ArtworkController"/>
     <include within="self.me.matchday.api.controller.CompetitionController"/>
@@ -70,6 +71,7 @@
     <include within="self.me.matchday.api.service.FileServerPluginService"/>
     <include within="self.me.matchday.api.service.FileServerUserService"/>
     <include within="self.me.matchday.api.service.MatchService"/>
+    <include within="self.me.matchday.api.service.SettingsService"/>
     <include within="self.me.matchday.api.service.SynonymService"/>
     <include within="self.me.matchday.api.service.TeamService"/>
     <include within="self.me.matchday.api.service.UserValidationService"/>

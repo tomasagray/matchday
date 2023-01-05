@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -19,34 +19,34 @@
 
 package self.me.matchday.log;
 
+import java.nio.file.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.config.ScheduledTasks;
+import self.me.matchday.api.service.ScheduledTaskService;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
-import java.nio.file.Path;
-
 @Aspect
-public class ScheduledTaskLog {
+public class ScheduledTaskServiceLog {
 
-  private static final Logger logger = LogManager.getLogger(ScheduledTasks.class);
+  private static final Logger logger = LogManager.getLogger(ScheduledTaskService.class);
 
-  @Before("execution(* self.me.matchday.config.ScheduledTasks.refreshEventData())")
+  @Before("execution(* self.me.matchday.api.service.ScheduledTaskService.refreshEventData())")
   public void logRefreshAllDataSources() {
     logger.info("Refreshing all Data Sources with default SnapshotRequest...");
   }
 
-  @Before("execution(* self.me.matchday.config.ScheduledTasks.pruneVideoData())")
+  @Before("execution(* self.me.matchday.api.service.ScheduledTaskService.pruneVideoData())")
   public void logPruneVideoData() {
     logger.info("Pruning video data more than 2 weeks old...");
   }
 
-  @Around("execution(* self.me.matchday.config.ScheduledTasks.videoDataIsStale(..))")
+  @Around("execution(* self.me.matchday.api.service.ScheduledTaskService.videoDataIsStale(..))")
   public Object logIsVideoDataStale(@NotNull ProceedingJoinPoint jp) throws Throwable {
     VideoStreamLocatorPlaylist playlist = (VideoStreamLocatorPlaylist) jp.getArgs()[0];
     Path storageLocation = playlist.getStorageLocation();
@@ -60,5 +60,15 @@ public class ScheduledTaskLog {
       logger.info("Data at: {} is stale; it will be PERMANENTLY DELETED!", storageLocation);
     }
     return stale;
+  }
+
+  @Before("execution(* self.me.matchday.api.service.ScheduledTaskService.rescheduleTask(..))")
+  public void logRescheduleTasks(@NotNull JoinPoint jp) {
+    logger.info("Rescheduling tasks using settings: {}", jp.getArgs()[0]);
+  }
+
+  @Before("execution(* self.me.matchday.api.service.ScheduledTaskService.scheduleTasks(..))")
+  public void logScheduleTasks(@NotNull JoinPoint jp) {
+    logger.info("Scheduling tasks using settings: {}", jp.getArgs()[0]);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -312,6 +312,7 @@ public class VideoStreamManager {
       throws IOException {
 
     final List<VideoStreamLocator> streamLocators = playlist.getStreamLocators();
+    playlistService.deleteVideoStreamPlaylist(playlist);
     for (VideoStreamLocator streamLocator : streamLocators) {
       locatorService.deleteStreamLocator(streamLocator);
       deleteVideoDataFromDisk(streamLocator);
@@ -326,7 +327,6 @@ public class VideoStreamManager {
         throw new IOException(message);
       }
     }
-    playlistService.deleteVideoStreamPlaylist(playlist);
   }
 
   public void deleteStreamLocatorWithData(@NotNull final VideoStreamLocator streamLocator)
