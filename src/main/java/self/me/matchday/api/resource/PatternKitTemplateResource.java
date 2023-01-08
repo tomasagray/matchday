@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -40,7 +40,7 @@ import self.me.matchday.model.PatternKitTemplate.Field;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @JsonRootName(value = "template")
-@Relation(collectionRelation = "templates")
+@Relation(collectionRelation = "public/templates")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class PatternKitTemplateResource extends RepresentationModel<PatternKitTemplateResource> {
 

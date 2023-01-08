@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -19,9 +19,16 @@
 
 package self.me.matchday.db;
 
+import java.nio.file.Path;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Artwork;
 
 @Repository
-public interface ArtworkRepository extends JpaRepository<Artwork, Long> {}
+public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
+
+  @Query("SELECT a FROM Artwork a WHERE a.file = :file")
+  Optional<Artwork> findByFile(Path file);
+}

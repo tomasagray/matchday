@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -84,6 +85,14 @@ public class ArtworkService {
     final byte[] data = readArtworkImageData(artwork);
     final MediaType mediaType = MediaType.valueOf(artwork.getMediaType());
     return new Image(data, mediaType);
+  }
+
+  public List<Artwork> fetchAllArtwork() {
+    return artworkRepository.findAll();
+  }
+
+  public Optional<Artwork> fetchArtworkAt(@NotNull Path path) {
+    return artworkRepository.findByFile(path);
   }
 
   private byte @NotNull [] readArtworkImageData(@NotNull Artwork artwork) throws IOException {

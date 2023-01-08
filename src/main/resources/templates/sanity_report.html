@@ -1,0 +1,180 @@
+<!--
+  ~ Copyright (c) 2023.
+  ~
+  ~ This file is part of Matchday.
+  ~
+  ~ Matchday is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ Matchday is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sanity Check Report</title>
+  <link href="/css/report.css" rel="stylesheet">
+  <script>
+    function onEnterImgPreviewUrl() {
+      let input = document.getElementById("Image-preview-url")
+      let images = document.getElementsByClassName("Dangling-image")
+      for (const image of images) {
+        let imgSrc = image.src.substring(image.src.lastIndexOf('/'), image.src.length)
+        image.src = input.value + imgSrc
+      }
+    }
+  </script>
+</head>
+<body>
+<h1>Sanity Check Report</h1>
+<p>Completed: <strong data-th-text="${report.timestamp}">timestamp</strong></p>
+<form action="javascript:void(0)">
+  <label for="Image-preview-url">Image preview URL prefix: </label>
+  <input autocomplete="on" id="Image-preview-url" name="image-preview-url"
+         placeholder="Enter URL for image preview prefix..." type="text"/>
+  <button onclick="onEnterImgPreviewUrl()" type="submit">Enter</button>
+</form>
+<div>
+  <h2>Artwork Checks</h2>
+  <p>
+    Total Artwork files:
+    <strong data-th-text="${report.artworkSanityReport.totalFiles}">file count</strong>
+  </p>
+  <p>
+    Total database entries:
+    <strong data-th-text="${report.artworkSanityReport.totalDbEntries}">db entries</strong>
+  </p>
+  <h3>Dangling Artwork files</h3>
+  <p style="margin-left: 1rem">
+    Dangling file count:
+    <strong data-th-text="${report.artworkSanityReport.dangingFiles.size()}">
+      file count
+    </strong>
+  </p>
+  <div class="Info-display-container">
+    <div class="Info-display" data-th-each="img : ${report.artworkSanityReport.dangingFiles}">
+      <img alt="image file" class="Dangling-image"
+           data-th-src="${img.getFileName()}" src="/img/placeholder.png"/>
+      <p data-th-text="${img}">path</p>
+    </div>
+  </div>
+  <div>
+    <h3>Dangling Artwork filenames</h3>
+    <p data-th-text="${report.artworkSanityReport.dangingFiles}">files</p>
+  </div>
+  <h3>Dangling database entries</h3>
+  <div class="Info-display-container">
+    <div class="Info-display"
+         data-th-each="artwork : ${report.artworkSanityReport.danglingDbEntries}">
+      <table class="Entity-data">
+        <tr>
+          <td>ID</td>
+          <td data-th-text="${artwork.id}">id</td>
+        </tr>
+        <tr>
+          <td>Filepath</td>
+          <td data-th-text="${artwork.file}">file</td>
+        </tr>
+        <tr>
+          <td>Filesize</td>
+          <td data-th-text="${artwork.fileSize}">filesize</td>
+        </tr>
+        <tr>
+          <td>Width</td>
+          <td data-th-text="${artwork.width}">width</td>
+        </tr>
+        <tr>
+          <td>Height</td>
+          <td data-th-text="${artwork.height}">height</td>
+        </tr>
+        <tr>
+          <td>Created</td>
+          <td data-th-text="${artwork.created}">created</td>
+        </tr>
+        <tr>
+          <td>Modified</td>
+          <td data-th-text="${artwork.modified}">modified</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div>
+  <h2>Video Checks</h2>
+  <h3>Dangling VideoStreamLocators</h3>
+  <div class="Info-display-container">
+    <div class="Info-display"
+         data-th-each="locator : ${report.videoSanityReport.danglingStreamLocators}">
+      <table class="Entity-data">
+        <tr>
+          <td>streamLocatorId</td>
+          <td data-th-text="${locator.streamLocatorId}">streamLocatorId</td>
+        </tr>
+        <tr>
+          <td>playlistPath</td>
+          <td data-th-text="${locator.playlistPath}">playlistPath</td>
+        </tr>
+        <tr>
+          <td>timestamp</td>
+          <td data-th-text="${locator.timestamp}">timestamp</td>
+        </tr>
+        <tr>
+          <td>VideoFile</td>
+          <td data-th-text="${locator.videoFile}">videoFile</td>
+        </tr>
+        <tr>
+          <td>Status</td>
+          <td data-th-text="${locator.state.status}">status</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <h3>Dangling VideoStreamLocator IDs</h3>
+  <div>
+    <p data-th-text="${danglingLocatorIds}">locator ids</p>
+  </div>
+  <h3>Dangling VideoStreamLocatorPlaylists</h3>
+  <div class="Info-display-container">
+    <div class="Info-display"
+         data-th-each="playlist: ${report.videoSanityReport.danglingPlaylists}">
+      <table class="Entity-data">
+        <tr>
+          <td>ID</td>
+          <td data-th-text="${playlist.id}">id</td>
+        </tr>
+        <tr>
+          <td>storageLocation</td>
+          <td data-th-text="${playlist.storageLocation}">storageLocation</td>
+        </tr>
+        <tr>
+          <td>timestamp</td>
+          <td data-th-text="${playlist.timestamp}">timestamp</td>
+        </tr>
+        <tr>
+          <td>locator count</td>
+          <td data-th-text="${playlist.streamLocators.size()}">count</td>
+        </tr>
+        <tr>
+          <td>state</td>
+          <td data-th-text="${playlist.state.status}">status</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <h3>Dangling VideoStreamLocatorPlaylist IDs</h3>
+  <div>
+    <p data-th-text="${danglingPlaylistIds}">playlist ids</p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -21,6 +21,7 @@ package self.me.matchday.api.service.video;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
@@ -54,6 +55,14 @@ public class VideoStreamingService {
     this.videoStreamManager = videoStreamManager;
     this.playlistService = playlistService;
     this.locatorService = locatorService;
+  }
+
+  public List<VideoStreamLocatorPlaylist> fetchAllPlaylists() {
+    return playlistService.getAllVideoStreamPlaylists();
+  }
+
+  public List<VideoStreamLocator> fetchAllVideoStreamLocators() {
+    return locatorService.getAllStreamLocators();
   }
 
   public Optional<VideoPlaylist> getBestVideoStreamPlaylist(@NotNull Event event) {
