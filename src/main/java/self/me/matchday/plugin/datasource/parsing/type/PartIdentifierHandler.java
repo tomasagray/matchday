@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -19,12 +19,11 @@
 
 package self.me.matchday.plugin.datasource.parsing.type;
 
+import java.util.Map;
+import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.plugin.datasource.parsing.TypeHandler;
-
-import java.util.Map;
-import java.util.regex.Pattern;
 
 @Component
 public class PartIdentifierHandler extends TypeHandler<PartIdentifier> {
@@ -37,10 +36,12 @@ public class PartIdentifierHandler extends TypeHandler<PartIdentifier> {
           PartIdentifier.FIRST_HALF,
           Pattern.compile("2nd|Second"),
           PartIdentifier.SECOND_HALF,
-          Pattern.compile("Post"),
-          PartIdentifier.POST_MATCH,
+          Pattern.compile("Extra"),
+          PartIdentifier.EXTRA_TIME,
           Pattern.compile("Trophy"),
-          PartIdentifier.TROPHY_CEREMONY);
+          PartIdentifier.TROPHY_CEREMONY,
+          Pattern.compile("Post"),
+          PartIdentifier.POST_MATCH);
 
   public PartIdentifierHandler() {
     super(
