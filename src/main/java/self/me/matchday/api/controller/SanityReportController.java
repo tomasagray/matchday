@@ -42,7 +42,7 @@ public class SanityReportController {
     this.sanityCheckService = sanityCheckService;
   }
 
-  @GetMapping("/generate/html")
+  @GetMapping(value = "/generate/html", produces = MediaType.TEXT_HTML_VALUE)
   public String generateSanityReport(@NotNull Model model) {
     final SanityReport report = sanityCheckService.createSanityReport();
     model.addAttribute("report", report);
