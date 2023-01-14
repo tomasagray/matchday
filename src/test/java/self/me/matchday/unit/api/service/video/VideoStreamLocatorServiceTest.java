@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -52,7 +52,6 @@ class VideoStreamLocatorServiceTest {
 
   private static final Logger logger = LogManager.getLogger(VideoStreamLocatorServiceTest.class);
 
-  private static final Path storageLocation = Path.of("C:\\Users\\Public\\Matchday\\videos\\_test");
   private final VideoStreamLocatorService videoStreamLocatorService;
   private final VideoFile testVideoFile;
   private final Path testStorage;
@@ -70,7 +69,10 @@ class VideoStreamLocatorServiceTest {
     this.testVideoFile =
         testVideoFileSource.getVideoFilePacks().get(0).get(PartIdentifier.FIRST_HALF);
     // resolve test data storage path
-    this.testStorage = storageLocation.resolve(testVideoFileSource.getFileSrcId().toString());
+    final String storageLocation =
+        testDataCreator.getVideoResources().get("video-resources.file-storage-location");
+    this.testStorage =
+        Path.of(storageLocation).resolve(testVideoFileSource.getFileSrcId().toString());
   }
 
   @AfterEach

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -101,6 +101,8 @@ public class TestDataCreator {
   private final VideoStreamLocatorPlaylistRepo locatorPlaylistRepo;
   private final VideoStreamLocatorRepo streamLocatorRepo;
 
+  private final Map<String, String> videoResources;
+
   @Autowired
   public TestDataCreator(
       EventService eventService,
@@ -110,7 +112,8 @@ public class TestDataCreator {
       TeamService teamService,
       FileServerUserService userService,
       VideoStreamLocatorPlaylistRepo locatorPlaylistRepo,
-      VideoStreamLocatorRepo locatorRepo) {
+      VideoStreamLocatorRepo locatorRepo)
+      throws IOException {
 
     this.eventService = eventService;
     this.fileSrcRepository = fileSrcRepository;
@@ -120,6 +123,11 @@ public class TestDataCreator {
     this.userService = userService;
     this.locatorPlaylistRepo = locatorPlaylistRepo;
     this.streamLocatorRepo = locatorRepo;
+    videoResources = ResourceFileReader.readPropertiesResource("settings.default.properties");
+  }
+
+  public Map<String, String> getVideoResources() {
+    return videoResources;
   }
 
   private static int getRandomNumber(int min, int max) {
@@ -391,7 +399,7 @@ public class TestDataCreator {
   public @NotNull VideoStreamLocatorPlaylist createStreamLocatorPlaylist() {
 
     final VideoFileSource fileSource = createVideoFileSourceAndSave();
-    final Path locatorPath = Path.of("C:\\Users\\Public\\Matchday\\testing");
+    final Path locatorPath = Path.of(videoResources.get("video-resources.file-storage-location"));
     final VideoStreamLocatorPlaylist playlist =
         new VideoStreamLocatorPlaylist(fileSource, locatorPath);
     final VideoFilePack videoFiles = fileSource.getVideoFilePacks().get(0);
@@ -415,22 +423,22 @@ public class TestDataCreator {
     return streamLocator;
   }
 
-  public @Nullable URL getPreMatchUrl() {
+  public URL getPreMatchUrl() {
     return getTestUrl(
         BASE_URL + "/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_ETPEN.ts");
   }
 
-  public @Nullable URL getFirstHalfUrl() {
+  public URL getFirstHalfUrl() {
     return getTestUrl(
         BASE_URL + "/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_1EN.ts");
   }
 
-  public @Nullable URL getSecondHalfUrl() {
+  public URL getSecondHalfUrl() {
     return getTestUrl(
         BASE_URL + "/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_2EN.ts");
   }
 
-  public @Nullable URL getPostMatchUrl() {
+  public URL getPostMatchUrl() {
     return getTestUrl(
         BASE_URL + "/data/Euro_2020_-_France_vs._Switzerland/20210628-FRA-SWI-EK20_ETPEN.ts");
   }

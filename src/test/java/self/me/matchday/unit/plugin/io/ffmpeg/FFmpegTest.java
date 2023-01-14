@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,24 +48,30 @@ class FFmpegTest {
 
   private static final Logger logger = LogManager.getLogger(FFmpegTest.class);
 
-  private static final String FFMPEG_EXE = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe";
+  private final TestDataCreator testDataCreator;
   private static final String DEFAULT_ARGS =
       " -v info -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
+  private String FFMPEG_EXE;
 
   // Test resources
   private static FFmpegStreamTask hlsStreamTask;
   private static String storageLocation;
 
-  @BeforeAll
-  static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator)
-      throws URISyntaxException, IOException {
+  @Autowired
+  public FFmpegTest(TestDataCreator testDataCreator) throws URISyntaxException, IOException {
+    this.testDataCreator = testDataCreator;
+    setup();
+  }
 
-    logger.info("Instantiating FFmpeg Plugin with executable: " + FFMPEG_EXE);
-    FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);
+  private void setup() throws IOException, URISyntaxException {
 
     // Read configuration resources
     final Map<String, String> resources =
-        ResourceFileReader.readPropertiesResource("video.properties");
+        ResourceFileReader.readPropertiesResource("settings.default.properties");
+
+    FFMPEG_EXE = resources.get("plugin.ffmpeg.ffmpeg-location");
+    logger.info("Instantiating FFmpeg Plugin with executable: " + FFMPEG_EXE);
+    FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);
 
     // Create URLs
     final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();

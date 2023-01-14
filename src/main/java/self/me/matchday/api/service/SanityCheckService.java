@@ -30,7 +30,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.service.SanityCheckService.SanityReport.ArtworkSanityReport;
 import self.me.matchday.api.service.SanityCheckService.SanityReport.ArtworkSanityReport.ArtworkSanityReportBuilder;
@@ -46,14 +45,15 @@ public class SanityCheckService {
 
   private final ArtworkService artworkService;
   private final VideoStreamingService videoStreamingService;
-
-  @Value("${artwork.storage-location}")
-  private String artworkStorageLocation;
+  private final SettingsService settingsService;
 
   public SanityCheckService(
-      ArtworkService artworkService, VideoStreamingService videoStreamingService) {
+      ArtworkService artworkService,
+      VideoStreamingService videoStreamingService,
+      SettingsService settingsService) {
     this.artworkService = artworkService;
     this.videoStreamingService = videoStreamingService;
+    this.settingsService = settingsService;
   }
 
   public SanityReport createSanityReport() {
@@ -86,7 +86,7 @@ public class SanityCheckService {
 
     final List<Path> danglingFiles = new ArrayList<>();
     // find all Artwork files
-    final File storage = new File(artworkStorageLocation);
+    final File storage = settingsService.getSettings().getArtworkStorageLocation().toFile();
     final File[] artworkFiles = storage.listFiles();
     if (artworkFiles != null) {
       // - save total files found

@@ -61,9 +61,7 @@ public class ArtworkService {
   private final ArtworkRepository artworkRepository;
   private final ArtworkCollectionRepository collectionRepository;
   private final ArtworkCreatorPlugin creatorPlugin;
-
-  @Value("${artwork.storage-location}")
-  private String BASE_STORAGE_LOCATION;
+  private final SettingsService settingsService;
 
   @Value("${artwork.min-image-dimension}")
   private int MIN_IMAGE_DIMENSION;
@@ -74,10 +72,12 @@ public class ArtworkService {
   public ArtworkService(
       ArtworkRepository artworkRepository,
       ArtworkCollectionRepository collectionRepository,
-      ArtworkCreatorPlugin creatorPlugin) {
+      ArtworkCreatorPlugin creatorPlugin,
+      SettingsService settingsService) {
     this.artworkRepository = artworkRepository;
     this.collectionRepository = collectionRepository;
     this.creatorPlugin = creatorPlugin;
+    this.settingsService = settingsService;
   }
 
   public Image fetchArtworkData(@NotNull Artwork artwork) throws IOException {
@@ -191,7 +191,7 @@ public class ArtworkService {
   }
 
   private @NotNull Path getImageLocation(@NotNull MediaType type) {
-    final Path storageLocation = Path.of(BASE_STORAGE_LOCATION);
+    final Path storageLocation = settingsService.getSettings().getArtworkStorageLocation();
     final String extension = getArtworkExtension(type);
     final String fileName = String.format("%s.%s", UUID.randomUUID(), extension);
     return storageLocation.toAbsolutePath().resolve(fileName);

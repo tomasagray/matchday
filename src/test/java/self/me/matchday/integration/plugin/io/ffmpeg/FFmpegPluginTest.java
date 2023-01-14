@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2023.
  *
  * This file is part of Matchday.
  *
@@ -99,7 +99,7 @@ class FFmpegPluginTest {
 
     // read properties
     final Map<String, String> properties =
-        ResourceFileReader.readPropertiesResource("video.properties");
+        ResourceFileReader.readPropertiesResource("settings.default.properties");
     final String location = properties.get("video-resources.file-storage-location");
     assertThat(location).isNotNull();
 
