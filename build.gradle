@@ -33,7 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     // AOP
-    implementation 'org.springframework.boot:spring-boot-starter-aop'
+//    implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework:spring-instrument'
     implementation 'org.springframework:spring-aspects'
     implementation 'org.aspectj:aspectjrt:1.9.9.1'
@@ -77,6 +77,9 @@ dependencies {
 bootRun {
     if (project.hasProperty('args')) {
         args = project.args.split(',' as Closure)
+    }
+    if (project.hasProperty('jvmArgs')) {
+        jvmArgs = (project.jvmArgs.split('\\s+')) as List
     }
 }
 
