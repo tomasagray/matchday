@@ -20,85 +20,77 @@
 package self.me.matchday.startup;
 
 import com.google.gson.reflect.TypeToken;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URL;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.CountryService;
 import self.me.matchday.model.Country;
 import self.me.matchday.util.JsonParser;
 
+import java.io.*;
+import java.lang.reflect.Type;
+import java.util.List;
+
 @Component
 public class LoadCountries implements CommandLineRunner {
 
-  @Value("${artwork.flag-uri-format}")
-  private static String FLAG_URI;
+    private static final String COUNTRIES_JSON = "countries.json";
+    private static final int EXPECTED_COUNTRIES = 245;
 
-  private static final String COUNTRIES_JSON = "countries.json";
-  private static final int EXPECTED_COUNTRIES = 245;
+    private final Logger logger = LogManager.getLogger(LoadCountries.class);
+    private final CountryService countryService;
 
-  private final Logger logger = LogManager.getLogger(LoadCountries.class);
-  private final CountryService countryService;
-
-  public LoadCountries(CountryService countryService) {
-    this.countryService = countryService;
-  }
-
-  private List<Country> readCountriesJson() throws IOException {
-    final URL resource = getClass().getClassLoader().getResource(COUNTRIES_JSON);
-    if (resource == null) {
-      throw new FileNotFoundException("Could not read resource file: countries.json");
+    public LoadCountries(CountryService countryService) {
+        this.countryService = countryService;
     }
 
-    try (BufferedReader reader = new BufferedReader(new FileReader(resource.getFile()))) {
-      final Type type = new TypeToken<List<Country>>() {}.getType();
-      return JsonParser.fromJson(reader, type);
-    }
-  }
-
-  private boolean isCountriesProperlyLoaded() {
-    final List<Country> allCountries = countryService.getAllCountries();
-    final int countryCount = allCountries.size();
-    if (countryCount > 0 && countryCount != EXPECTED_COUNTRIES) {
-      final String msg =
-          String.format(
-              "Found partial Country (%d countries) data; database has possibly been corrupted. "
-                  + "Perform a manual repair, then reload application.",
-              countryCount);
-      throw new IllegalArgumentException(msg);
+    private List<Country> readCountriesJson() throws IOException {
+        final InputStream is = getClass().getClassLoader().getResourceAsStream(COUNTRIES_JSON);
+        if (is == null) {
+            throw new FileNotFoundException("Could not read required resource file: " + COUNTRIES_JSON);
+        }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+            final Type type = new TypeToken<List<Country>>() {}.getType();
+            return JsonParser.fromJson(reader, type);
+        }
     }
 
-    return countryCount == EXPECTED_COUNTRIES
-        && allCountries.stream()
-            .map(
-                country ->
-                    country.getLocales().size() > 0
-                        && country.getFlagFileName() != null
-                        && !"".equals(country.getName()))
-            .reduce((b1, b2) -> b1 && b2)
-            .orElse(false);
-  }
+    private boolean isCountriesProperlyLoaded() {
+        final List<Country> allCountries = countryService.getAllCountries();
+        final int countryCount = allCountries.size();
+        if (countryCount > 0 && countryCount != EXPECTED_COUNTRIES) {
+            final String msg =
+                    String.format(
+                            "Found partial Country (%d countries) data; database has possibly been corrupted. "
+                                    + "Perform a manual repair, then reload application.",
+                            countryCount);
+            throw new IllegalArgumentException(msg);
+        }
 
-  @Override
-  public void run(String... args) throws Exception {
-
-    logger.info("Validating country data has been loaded...");
-    final boolean loaded = isCountriesProperlyLoaded();
-    if (!loaded) {
-      logger.info("No country data found; loading...");
-      final List<Country> countries = readCountriesJson();
-      final List<Country> saved = countryService.saveAll(countries);
-      logger.info("Saved: {} countries...", saved.size());
-    } else {
-      logger.info("Country data already loaded, nothing to do");
+        return countryCount == EXPECTED_COUNTRIES
+                && allCountries.stream()
+                .map(
+                        country ->
+                                country.getLocales().size() > 0
+                                        && country.getFlagFileName() != null
+                                        && !"".equals(country.getName()))
+                .reduce((b1, b2) -> b1 && b2)
+                .orElse(false);
     }
-  }
+
+    @Override
+    public void run(String... args) throws Exception {
+
+        logger.info("Validating country data has been loaded...");
+        final boolean loaded = isCountriesProperlyLoaded();
+        if (!loaded) {
+            logger.info("No country data found; loading...");
+            final List<Country> countries = readCountriesJson();
+            final List<Country> saved = countryService.saveAll(countries);
+            logger.info("Saved: {} countries...", saved.size());
+        } else {
+            logger.info("Country data already loaded, nothing to do");
+        }
+    }
 }
