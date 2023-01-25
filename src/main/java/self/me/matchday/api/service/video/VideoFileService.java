@@ -67,6 +67,7 @@ public class VideoFileService {
   public VideoFile refreshVideoFile(@NotNull final VideoFile videoFile, final boolean fetchMetadata)
       throws Exception {
 
+    // todo - remove on complete, error, etc.
     if (lockedVideoFiles.contains(videoFile)) {
       rejectRequest(videoFile);
     }
