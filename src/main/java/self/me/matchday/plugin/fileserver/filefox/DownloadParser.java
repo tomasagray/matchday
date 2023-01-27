@@ -19,16 +19,16 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-
-import java.net.URI;
-import java.net.URL;
-import java.util.Map;
-import java.util.Optional;
+import self.me.matchday.plugin.fileserver.filefox.FileFoxPage.DownloadLanding;
 
 @Component
 public class DownloadParser {
@@ -43,18 +43,11 @@ public class DownloadParser {
     this.pageEvaluator = pageEvaluator;
   }
 
-  public Optional<URL> parseDownloadRequest(
-      @NotNull final URI uri, @NotNull MultiValueMap<String, String> cookieJar) {
+  public URL parseDownloadRequest(
+      @NotNull final URI uri, @NotNull MultiValueMap<String, String> cookieJar) throws IOException {
 
     // Read remote page
-    final ClientResponse downloadLandingResponse = connectionManager.get(uri, cookieJar);
-    final String downloadLandingHtml = downloadLandingResponse.bodyToMono(String.class).block();
-    final FileFoxPage page = pageEvaluator.getFileFoxPage(downloadLandingHtml);
-    if (!(page instanceof FileFoxPage.DownloadLanding && page.isPremium())) {
-      throw new FileFoxParsingException("Response from FileFox was not a Premium download page");
-    }
-
-    final FileFoxPage.DownloadLanding downloadLanding = (FileFoxPage.DownloadLanding) page;
+    final FileFoxPage.DownloadLanding downloadLanding = readDownloadLandingPage(uri, cookieJar);
     // Get hidden input fields
     final Map<String, String> queryParams = downloadLanding.getHiddenQueryParams();
     final URI hiddenFormUri = downloadLanding.getDdlSubmitUri();
@@ -66,9 +59,21 @@ public class DownloadParser {
     final FileFoxPage ddlPage = pageEvaluator.getFileFoxPage(directDownloadHtml);
     if (ddlPage instanceof FileFoxPage.DirectDownload) {
       final FileFoxPage.DirectDownload directDownload = (FileFoxPage.DirectDownload) ddlPage;
-      return Optional.of(directDownload.getDdlUrl());
+      return directDownload.getDdlUrl();
     }
     throw new FileFoxParsingException(
         "Not a DirectDownload page, or could not parse page: " + ddlPage.getText());
+  }
+
+  @NotNull
+  private FileFoxPage.DownloadLanding readDownloadLandingPage(
+      @NotNull URI uri, @NotNull MultiValueMap<String, String> cookieJar) throws IOException {
+    final ClientResponse response = connectionManager.connectTo(uri, cookieJar);
+    final String downloadLandingHtml = response.bodyToMono(String.class).block();
+    final FileFoxPage page = pageEvaluator.getFileFoxPage(downloadLandingHtml);
+    if (!(page instanceof FileFoxPage.DownloadLanding && page.isPremium())) {
+      throw new FileFoxParsingException("Response from FileFox was not a Premium download page");
+    }
+    return (DownloadLanding) page;
   }
 }

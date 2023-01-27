@@ -19,16 +19,11 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
-import org.brotli.dec.BrotliInputStream;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.client.ClientResponse;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
@@ -38,6 +33,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
+import org.brotli.dec.BrotliInputStream;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.client.ClientResponse;
 
 @Component
 public class ConnectionManager {
@@ -50,22 +52,39 @@ public class ConnectionManager {
     this.pluginProperties = pluginProperties;
   }
 
-  @Transactional
-  public ClientResponse get(
-      @NotNull final URI uri, @NotNull final MultiValueMap<String, String> cookies) {
-
-    try {
-      // Map data
-      final URL url = uri.toURL();
-      final HttpURLConnection connection = setupUrlConnection(url, cookies);
-      return readHttpData(connection);
-
-    } catch (IOException e) {
-      return ClientResponse.create(HttpStatus.BAD_REQUEST).body(e.getMessage()).build();
-    }
+  public ClientResponse connectTo(
+      @NotNull URI uri, @NotNull MultiValueMap<String, String> cookieJar) throws IOException {
+    return connectTo(uri, cookieJar, 0);
   }
 
-  @Transactional
+  private @NotNull ClientResponse connectTo(
+      @NotNull URI uri, @NotNull MultiValueMap<String, String> cookieJar, int currentDepth)
+      throws IOException {
+
+    final ClientResponse response = get(uri, cookieJar);
+    final HttpStatus status = response.statusCode();
+    final boolean shouldContinue = currentDepth < pluginProperties.getMaxRedirectDepth();
+    if (status.is3xxRedirection() && shouldContinue) {
+      final List<String> locations = response.headers().asHttpHeaders().get("Location");
+      if (locations != null && locations.size() > 0) {
+        final URI redirectUrl = URI.create(locations.get(0));
+        return connectTo(redirectUrl, cookieJar, ++currentDepth);
+      } else {
+        throw new IOException("No redirect URL (Location header) provided in 3xx response");
+      }
+    }
+    return response;
+  }
+
+  public ClientResponse get(
+      @NotNull final URI uri, @NotNull final MultiValueMap<String, String> cookies)
+      throws IOException {
+
+    final URL url = uri.toURL();
+    final HttpURLConnection connection = setupUrlConnection(url, cookies);
+    return readHttpData(connection);
+  }
+
   public ClientResponse post(
       @NotNull URI uri,
       @NotNull final MultiValueMap<String, String> cookies,
@@ -82,7 +101,7 @@ public class ConnectionManager {
     }
   }
 
-  private HttpURLConnection setupUrlConnection(
+  private @NotNull HttpURLConnection setupUrlConnection(
       @NotNull URL url, @NotNull MultiValueMap<String, String> cookies) throws IOException {
 
     final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -94,7 +113,7 @@ public class ConnectionManager {
     return connection;
   }
 
-  private ClientResponse readHttpData(@NotNull final HttpURLConnection connection)
+  private @NotNull ClientResponse readHttpData(@NotNull final HttpURLConnection connection)
       throws IOException {
 
     // Read page with headers
@@ -115,8 +134,8 @@ public class ConnectionManager {
     }
   }
 
-  private ClientResponse performPost(@NotNull HttpURLConnection connection, @NotNull String query)
-      throws IOException {
+  private @NotNull ClientResponse performPost(
+      @NotNull HttpURLConnection connection, @NotNull String query) throws IOException {
 
     configurePostConnection(connection);
     final byte[] queryBytes = query.getBytes(StandardCharsets.UTF_8);
@@ -135,7 +154,7 @@ public class ConnectionManager {
   }
 
   @NotNull
-  private String getCookiesHeader(MultiValueMap<String, String> cookies) {
+  private String getCookiesHeader(@NotNull MultiValueMap<String, String> cookies) {
 
     return cookies.toSingleValueMap().entrySet().stream()
         .map(cookie -> String.format("%s=%s", cookie.getKey(), cookie.getValue()))
