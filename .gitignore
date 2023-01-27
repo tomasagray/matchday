@@ -31,7 +31,7 @@ Backup of *.doc*
 
 # Slush directories
 /research
-_DEVFIXTURES/
+_DEV*/
 
 # Test output
 **/test/data
