@@ -40,8 +40,8 @@ dependencies {
 
     // Database
     implementation 'mysql:mysql-connector-java'
-    implementation 'org.flywaydb:flyway-mysql:9.8.2'
-    implementation 'org.flywaydb:flyway-core:9.8.2'
+    implementation 'org.flywaydb:flyway-mysql:9.12.0'
+    implementation 'org.flywaydb:flyway-core:9.12.0'
     implementation 'com.h2database:h2'
 
     // Annotations
