@@ -99,9 +99,8 @@ public class SanityCheckService {
           danglingFiles.add(filepath);
         }
       }
-      // - add "dangling" files
-      reportBuilder.dangingFiles(danglingFiles);
     }
+    reportBuilder.dangingFiles(danglingFiles);
     return reportBuilder;
   }
 
