@@ -22,13 +22,14 @@ package self.me.matchday.plugin.io.ffmpeg;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.logging.log4j.util.Strings;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -42,14 +43,16 @@ public class FFmpegSingleStreamTask extends FFmpegStreamTask {
 
   @Builder
   public FFmpegSingleStreamTask(
-      String command,
+      String execPath,
+      List<String> ffmpegArgs,
       Path playlistPath,
       Path dataDir,
       boolean loggingEnabled,
       List<String> transcodeArgs,
       URI uri) {
 
-    this.command = command;
+    this.execPath = execPath;
+    this.ffmpegArgs = ffmpegArgs;
     this.playlistPath = playlistPath;
     this.dataDir = dataDir;
     this.loggingEnabled = loggingEnabled;
@@ -58,13 +61,12 @@ public class FFmpegSingleStreamTask extends FFmpegStreamTask {
   }
 
   @Override
-  protected String getExecCommand() {
-
-    // Collate program arguments, format & return
-    final String inputs = getInputString();
-    final String arguments = Strings.join(transcodeArgs, ' ');
-    return String.format(
-        "%s %s %s \"%s\"", this.getCommand(), inputs, arguments, this.getPlaylistPath());
+  protected @NotNull List<String> getArguments() {
+    final List<String> args = new ArrayList<>(getFfmpegArgs());
+    args.addAll(getInputArg());
+    args.addAll(transcodeArgs);
+    args.add(getPlaylistPath().toString());
+    return args;
   }
 
   /**
@@ -79,7 +81,7 @@ public class FFmpegSingleStreamTask extends FFmpegStreamTask {
   }
 
   @Override
-  protected String getInputString() {
-    return String.format("-i %s", uri);
+  protected @NotNull List<String> getInputArg() {
+    return List.of("-i", uri.toString());
   }
 }

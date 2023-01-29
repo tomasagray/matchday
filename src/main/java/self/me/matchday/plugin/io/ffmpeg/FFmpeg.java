@@ -19,29 +19,32 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
+
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.logging.log4j.util.Strings;
-import org.jetbrains.annotations.NotNull;
 
 public class FFmpeg {
 
   private static final String SEGMENT_PATTERN = "segment_%05d.ts";
 
+  private final String execPath;
   private final List<String> baseArgs;
   @Getter @Setter boolean loggingEnabled = true;
 
   public FFmpeg(@NotNull final String execPath) {
+    this.execPath = execPath;
     this.baseArgs =
         List.of(
-            String.format("\"%s\"", execPath),
-            "-v info",
+            "-v",
+            "info",
             "-y",
-            "-protocol_whitelist concat,file,http,https,tcp,tls,crypto");
+            "-protocol_whitelist",
+            "concat,file,http,https,tcp,tls,crypto");
   }
 
   /**
@@ -52,10 +55,9 @@ public class FFmpeg {
    * @return A thread task
    */
   public FFmpegStreamTask getHlsStreamTask(
-      @NotNull final Path playlistPath, @NotNull final URI... uris) {
+      @NotNull final Path playlistPath, @NotNull final URI @NotNull ... uris) {
 
     // Assemble arguments
-    final String command = Strings.join(baseArgs, ' ');
     final Path playlistAbsolutePath = playlistPath.toAbsolutePath();
     final Path dataDir = playlistAbsolutePath.getParent();
     final List<String> transcodeArgs = getDefaultTranscodeArgs(dataDir);
@@ -63,7 +65,8 @@ public class FFmpeg {
     if (uris.length > 1) {
       // Create FFMPEG CLI command & return
       return FFmpegConcatStreamTask.builder()
-          .command(command)
+          .execPath(execPath)
+          .ffmpegArgs(baseArgs)
           .uris(List.of(uris))
           .transcodeArgs(transcodeArgs)
           .playlistPath(playlistAbsolutePath)
@@ -74,7 +77,8 @@ public class FFmpeg {
       URI uri = uris[0];
       // Create streaming task & return
       return FFmpegSingleStreamTask.builder()
-          .command(command)
+          .execPath(execPath)
+          .ffmpegArgs(baseArgs)
           .uri(uri)
           .transcodeArgs(transcodeArgs)
           .playlistPath(playlistAbsolutePath)
@@ -84,21 +88,19 @@ public class FFmpeg {
     }
   }
 
-  private List<String> getDefaultTranscodeArgs(@NotNull final Path storageLocation) {
+  private @NotNull List<String> getDefaultTranscodeArgs(@NotNull final Path storageLocation) {
 
     final List<String> transcodeArgs = new ArrayList<>();
     final Path absoluteStorageLocation = storageLocation.toAbsolutePath();
     final Path segmentPattern = absoluteStorageLocation.resolve(SEGMENT_PATTERN);
     // Add arguments
-    transcodeArgs.add("-vcodec copy");
-    transcodeArgs.add("-acodec copy");
-    transcodeArgs.add("-muxdelay 0");
-    transcodeArgs.add("-f hls");
-    transcodeArgs.add("-hls_playlist_type event");
+    transcodeArgs.addAll(List.of("-vcodec","copy"));
+    transcodeArgs.addAll(List.of("-acodec", "copy"));
+    transcodeArgs.addAll(List.of("-muxdelay", "0"));
+    transcodeArgs.addAll(List.of("-f", "hls"));
+    transcodeArgs.addAll(List.of("-hls_playlist_type", "event"));
     transcodeArgs.add("-hls_segment_filename");
-    // Add segment output pattern
-    final String segments = String.format("\"%s\"", segmentPattern);
-    transcodeArgs.add(segments);
+    transcodeArgs.add(segmentPattern.toString());
     return transcodeArgs;
   }
 }

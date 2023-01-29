@@ -22,12 +22,14 @@ package self.me.matchday.plugin.io.ffmpeg;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.logging.log4j.util.Strings;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,14 +41,16 @@ public final class FFmpegConcatProtocolStreamTask extends FFmpegStreamTask {
 
   @Builder
   public FFmpegConcatProtocolStreamTask(
-      String command,
+      String execPath,
+      List<String> ffmpegArgs,
       Path outputPath,
       Path dataDir,
       boolean loggingEnabled,
       List<String> transcodeArgs,
       List<URI> uris) {
 
-    this.command = command;
+    this.execPath = execPath;
+    this.ffmpegArgs = ffmpegArgs;
     this.playlistPath = outputPath;
     this.dataDir = dataDir;
     this.loggingEnabled = loggingEnabled;
@@ -55,13 +59,12 @@ public final class FFmpegConcatProtocolStreamTask extends FFmpegStreamTask {
   }
 
   @Override
-  protected String getExecCommand() {
-
-    // Collate program arguments, format & return
-    final String inputs = getInputString();
-    final String arguments = Strings.join(transcodeArgs, ' ');
-    return String.format(
-        "%s %s %s \"%s\"", this.getCommand(), inputs, arguments, this.getPlaylistPath());
+  protected @NotNull List<String> getArguments() {
+    final List<String> args = new ArrayList<>(getFfmpegArgs());
+    args.addAll(getInputArg());
+    args.addAll(transcodeArgs);
+    args.add(getPlaylistPath().toString());
+    return args;
   }
 
   @Override
@@ -71,12 +74,12 @@ public final class FFmpegConcatProtocolStreamTask extends FFmpegStreamTask {
   }
 
   @Override
-  protected String getInputString() {
+  protected @NotNull @Unmodifiable List<String> getInputArg() {
 
-    // Concatenate URIs
     final List<String> uriStrings = uris.stream().map(URI::toString).collect(Collectors.toList());
     final String concatText = String.join("|", uriStrings);
     // Create input String & return
-    return String.format("-i \"concat:%s\"", concatText);
+    final String concat = String.format("\"concat:%s\"", concatText);
+    return List.of("-i", concat);
   }
 }

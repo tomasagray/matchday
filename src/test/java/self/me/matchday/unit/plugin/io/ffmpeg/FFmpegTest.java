@@ -19,15 +19,6 @@
 
 package self.me.matchday.unit.plugin.io.ffmpeg;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +31,16 @@ import self.me.matchday.TestDataCreator;
 import self.me.matchday.plugin.io.ffmpeg.FFmpeg;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask;
 import self.me.matchday.util.ResourceFileReader;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -104,7 +105,7 @@ class FFmpegTest {
   void testCommandFormat() {
 
     final String expectedCommand = String.format("\"%s\"%s", FFMPEG_EXE, DEFAULT_ARGS);
-    final String actualCommand = hlsStreamTask.getCommand();
+    final String actualCommand = String.join(" ", hlsStreamTask.getFfmpegArgs());
 
     logger.info("Testing command: " + actualCommand);
     assertThat(actualCommand).isEqualTo(expectedCommand);

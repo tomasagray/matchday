@@ -21,12 +21,14 @@ package self.me.matchday.plugin.io.ffmpeg;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -36,7 +38,8 @@ public abstract class FFmpegStreamTask extends Thread {
   private static final DateTimeFormatter LOGFILE_TIMESTAMP_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
 
-  protected String command;
+  protected String execPath;
+  protected List<String> ffmpegArgs;
   protected List<String> transcodeArgs;
   protected Path playlistPath;
   protected Path dataDir;
@@ -46,8 +49,10 @@ public abstract class FFmpegStreamTask extends Thread {
 
   public Process execute() throws IOException {
     prepareStream();
-    final String command = getExecCommand();
-    this.process = Runtime.getRuntime().exec(command);
+    final List<String> cmd = new ArrayList<>();
+    cmd.add(execPath);
+    cmd.addAll(getArguments());
+    this.process = new ProcessBuilder(cmd).start();
     return this.process;
   }
 
@@ -80,9 +85,9 @@ public abstract class FFmpegStreamTask extends Thread {
   /**
    * Get a formatted executable command (system CLI)
    *
-   * @return The execution command
+   * @return The execution command arguments
    */
-  abstract String getExecCommand();
+  abstract @NonNull List<String> getArguments();
 
   /**
    * Perform necessary preliminary setup tasks
@@ -96,5 +101,5 @@ public abstract class FFmpegStreamTask extends Thread {
    *
    * @return The input portion of the FFMPEG command
    */
-  abstract String getInputString();
+  abstract @NonNull List<String> getInputArg();
 }
