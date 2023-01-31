@@ -38,20 +38,20 @@ public class PatternKitTemplateService {
     this.templateRepository = templateRepository;
   }
 
-  public PatternKitTemplate save(@NotNull PatternKitTemplate entity) {
-    return templateRepository.save(entity);
+  public List<PatternKitTemplate> fetchAll() {
+    return templateRepository.findAll();
   }
 
   public Optional<PatternKitTemplate> fetchById(@NotNull Long id) {
     return templateRepository.findById(id);
   }
 
-  public List<PatternKitTemplate> fetchAll() {
-    return templateRepository.findAll();
-  }
-
   public Optional<PatternKitTemplate> fetchByClassName(@NotNull String className) {
     return templateRepository.findPatternKitTemplateByNameEquals(className);
+  }
+
+  public PatternKitTemplate save(@NotNull PatternKitTemplate entity) {
+    return templateRepository.save(entity);
   }
 
   public PatternKitTemplate update(@NotNull PatternKitTemplate entity) {

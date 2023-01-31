@@ -35,6 +35,7 @@
     <aspect name="self.me.matchday.log.MatchDataParserLog"/>
     <aspect name="self.me.matchday.log.MatchServiceLog"/>
     <aspect name="self.me.matchday.log.MatchDataParserLog"/>
+    <aspect name="self.me.matchday.log.PatternKitTemplateServiceLog"/>
     <aspect name="self.me.matchday.log.ScheduledTaskServiceLog"/>
     <aspect name="self.me.matchday.log.SettingsServiceLog"/>
     <aspect name="self.me.matchday.log.SynonymServiceLog"/>
@@ -71,6 +72,7 @@
     <include within="self.me.matchday.api.service.FileServerPluginService"/>
     <include within="self.me.matchday.api.service.FileServerUserService"/>
     <include within="self.me.matchday.api.service.MatchService"/>
+    <include within="self.me.matchday.api.service.PatternKitTemplateService"/>
     <include within="self.me.matchday.api.service.SettingsService"/>
     <include within="self.me.matchday.api.service.SynonymService"/>
     <include within="self.me.matchday.api.service.TeamService"/>

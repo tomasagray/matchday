@@ -19,27 +19,12 @@
 
 package self.me.matchday.api.controller;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.api.resource.FileServerUserResource;
 import self.me.matchday.api.resource.FileServerUserResource.UserResourceAssembler;
@@ -47,6 +32,14 @@ import self.me.matchday.api.service.FileServerLoginException;
 import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.api.service.InvalidCookieException;
 import self.me.matchday.model.FileServerUser;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/file-server-users")
@@ -151,13 +144,19 @@ public class FileServerUserController {
 
   @ExceptionHandler({
     IOException.class,
-    FileServerLoginException.class,
     InvalidCookieException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public String handleIoException(@NotNull Exception e) {
     return e.getMessage();
+  }
+
+  @ExceptionHandler(FileServerLoginException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  @ResponseBody
+  public String handleLoginDenied(@NotNull Exception e) {
+    return "Access denied: " + e.getMessage();
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
