@@ -25,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import self.me.matchday.api.resource.DataSourcePluginResource.DataSourcePluginResourceAssembler;
 import self.me.matchday.api.resource.DataSourceResource;
 import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.model.DataSource;
@@ -47,7 +46,6 @@ public class DataSourceController {
 
   DataSourceController(
       DataSourceService dataSourceService,
-      DataSourcePluginResourceAssembler pluginResourceAssembler,
       DataSourceResourceAssembler dataSourceResourceAssembler) {
 
     this.dataSourceService = dataSourceService;
@@ -70,7 +68,6 @@ public class DataSourceController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SnapshotRequest> refreshAllSources(
       @RequestBody SnapshotRequest snapshotRequest) throws IOException {
-
     final SnapshotRequest status = dataSourceService.refreshAllDataSources(snapshotRequest);
     return ResponseEntity.ok().body(status);
   }

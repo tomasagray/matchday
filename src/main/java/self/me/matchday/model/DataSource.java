@@ -29,6 +29,7 @@ import self.me.matchday.db.converter.UriConverter;
 
 import javax.persistence.*;
 import java.net.URI;
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -67,5 +68,26 @@ public abstract class DataSource<T> {
     this.title = title;
     this.baseUri = baseUri;
     this.clazz = clazz;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof DataSource<?> that)) return false;
+    return isEnabled() == that.isEnabled() &&
+            Objects.equals(getDataSourceId(), that.getDataSourceId()) &&
+            Objects.equals(getClazz(), that.getClazz()) &&
+            Objects.equals(getTitle(), that.getTitle()) &&
+            Objects.equals(getBaseUri(), that.getBaseUri()) &&
+            Objects.equals(getPluginId(), that.getPluginId());
+  }
+
+  @Override
+  public int hashCode() {
+    return
+            Objects.hash(
+                    getDataSourceId(), getClazz(), getTitle(), getBaseUri(),
+                    getPluginId(), isEnabled()
+            );
   }
 }

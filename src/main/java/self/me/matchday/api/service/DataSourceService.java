@@ -19,38 +19,43 @@
 
 package self.me.matchday.api.service;
 
+import org.hibernate.Hibernate;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.db.DataSourceRepository;
+import self.me.matchday.db.PatternKitRepository;
+import self.me.matchday.model.DataSource;
+import self.me.matchday.model.PlaintextDataSource;
+import self.me.matchday.model.Snapshot;
+import self.me.matchday.model.SnapshotRequest;
+import self.me.matchday.plugin.datasource.DataSourcePlugin;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.hibernate.Hibernate;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.db.DataSourceRepository;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Snapshot;
-import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.plugin.datasource.DataSourcePlugin;
 
 @Service
 @Transactional
 public class DataSourceService implements EntityService<DataSource<?>, UUID> {
 
   private final SnapshotService snapshotService;
-  private final DataSourceRepository dataSourceRepository;
   private final DataSourcePluginService pluginService;
+  private final DataSourceRepository dataSourceRepository;
+  private final PatternKitRepository patternKitRepository;
 
   DataSourceService(
-      SnapshotService snapshotService,
-      DataSourceRepository dataSourceRepository,
-      DataSourcePluginService pluginService) {
-
+          SnapshotService snapshotService,
+          DataSourceRepository dataSourceRepository,
+          DataSourcePluginService pluginService,
+          PatternKitRepository patternKitRepository) {
     this.snapshotService = snapshotService;
     this.dataSourceRepository = dataSourceRepository;
     this.pluginService = pluginService;
+    this.patternKitRepository = patternKitRepository;
   }
 
   /**
@@ -96,7 +101,10 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
   @Override
   public DataSource<?> save(@NotNull final DataSource<?> dataSource) {
     pluginService.validateDataSource(dataSource);
-    return dataSourceRepository.saveAndFlush(dataSource);
+    if (dataSource instanceof final PlaintextDataSource<?> plaintext){
+      patternKitRepository.saveAll(plaintext.getPatternKits());
+    }
+    return dataSourceRepository.save(dataSource);
   }
 
   @Override
