@@ -49,10 +49,10 @@ class FFmpegTest {
 
   private static final Logger logger = LogManager.getLogger(FFmpegTest.class);
 
-  private final TestDataCreator testDataCreator;
+  private static final String FFMPEG_PROPERTIES = "plugins/ffmpeg/ffmpeg.properties";
   private static final String DEFAULT_ARGS =
-      " -v info -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
-  private String FFMPEG_EXE;
+      "-v info -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
+  private final TestDataCreator testDataCreator;
 
   // Test resources
   private static FFmpegStreamTask hlsStreamTask;
@@ -64,13 +64,20 @@ class FFmpegTest {
     setup();
   }
 
+  private static String getStorageLocation() throws IOException {
+    final Map<String, String> resources =
+            ResourceFileReader.readPropertiesResource("settings.default.properties");
+    return resources.get("video-resources.file-storage-location");
+  }
+
   private void setup() throws IOException, URISyntaxException {
 
     // Read configuration resources
     final Map<String, String> resources =
-        ResourceFileReader.readPropertiesResource("settings.default.properties");
+        ResourceFileReader.readPropertiesResource(FFMPEG_PROPERTIES);
 
-    FFMPEG_EXE = resources.get("plugin.ffmpeg.ffmpeg-location");
+    String FFMPEG_EXE = resources.get("plugin.ffmpeg.ffmpeg-location");
+    assertThat(FFMPEG_EXE).isNotNull().isNotEmpty();
     logger.info("Instantiating FFmpeg Plugin with executable: " + FFMPEG_EXE);
     FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);
 
@@ -81,7 +88,7 @@ class FFmpegTest {
     assertThat(secondHalfUrl).isNotNull();
 
     final List<URI> urls = List.of(firstHalfUrl.toURI(), secondHalfUrl.toURI());
-    storageLocation = resources.get("video-resources.file-storage-location");
+    storageLocation = getStorageLocation();
     hlsStreamTask = ffmpeg.getHlsStreamTask(Path.of(storageLocation), urls.toArray(new URI[0]));
   }
 
@@ -104,11 +111,10 @@ class FFmpegTest {
   @DisplayName("Check command default format")
   void testCommandFormat() {
 
-    final String expectedCommand = String.format("\"%s\"%s", FFMPEG_EXE, DEFAULT_ARGS);
     final String actualCommand = String.join(" ", hlsStreamTask.getFfmpegArgs());
 
     logger.info("Testing command: " + actualCommand);
-    assertThat(actualCommand).isEqualTo(expectedCommand);
+    assertThat(actualCommand).isEqualTo(DEFAULT_ARGS);
   }
 
   @Test

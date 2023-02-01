@@ -19,20 +19,21 @@
 
 package self.me.matchday.unit.util;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import self.me.matchday.util.ResourceFileReader;
 
+import java.io.IOException;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 class ResourceFileReaderTest {
 
   private static final Logger logger = LogManager.getLogger(ResourceFileReaderTest.class);
-  private static final String PROPERTIES_FILE = "plugins\\disk-manager\\disk-manager.properties";
+  private static final String PROPERTIES_FILE = "plugins/disk-manager/disk-manager.properties";
 
   @Test
   @DisplayName("Ensure reads and splits resource file key/value pairs correctly")

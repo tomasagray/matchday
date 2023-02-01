@@ -19,10 +19,6 @@
 
 package self.me.matchday.unit.db;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
@@ -34,12 +30,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.db.DataSourceRepository;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.Match;
-import self.me.matchday.model.PatternKit;
-import self.me.matchday.model.PlaintextDataSource;
-import self.me.matchday.util.JsonParser;
+import self.me.matchday.model.*;
+
+import java.io.IOException;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -101,7 +97,7 @@ class DataSourceRepositoryTest {
     // use most recent data source
     final PlaintextDataSource<Event> testDataSource =
         (PlaintextDataSource<Event>) dataSourcesByPluginId.get(dataSourceCount - 1);
-    logger.info("Testing retrieved DataSource:\n{}", JsonParser.toJson(testDataSource));
+    logger.info("Testing retrieved DataSource:\n{}", testDataSource);
 
     assertThat(testDataSource.getPatternKitsFor(Event.class).size())
         .isEqualTo(eventDataSource.getPatternKitsFor(Event.class).size());

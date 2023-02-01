@@ -19,31 +19,8 @@
 
 package self.me.matchday;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static self.me.matchday.model.video.PartIdentifier.FIRST_HALF;
-import static self.me.matchday.model.video.PartIdentifier.POST_MATCH;
-import static self.me.matchday.model.video.PartIdentifier.PRE_MATCH;
-import static self.me.matchday.model.video.PartIdentifier.SECOND_HALF;
-import static self.me.matchday.model.video.Resolution.R_1080p;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.reflect.TypeToken;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -53,35 +30,29 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.api.service.CompetitionService;
-import self.me.matchday.api.service.EventService;
-import self.me.matchday.api.service.FileServerUserService;
-import self.me.matchday.api.service.HighlightService;
-import self.me.matchday.api.service.TeamService;
+import self.me.matchday.api.service.*;
 import self.me.matchday.db.VideoFileSrcRepository;
-import self.me.matchday.db.VideoStreamLocatorPlaylistRepo;
-import self.me.matchday.db.VideoStreamLocatorRepo;
-import self.me.matchday.model.Competition;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.FileServerUser;
-import self.me.matchday.model.FileSize;
-import self.me.matchday.model.Fixture;
-import self.me.matchday.model.Highlight;
-import self.me.matchday.model.Match;
-import self.me.matchday.model.PatternKit;
-import self.me.matchday.model.PlaintextDataSource;
-import self.me.matchday.model.Season;
-import self.me.matchday.model.Team;
-import self.me.matchday.model.video.SingleStreamLocator;
+import self.me.matchday.model.*;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.model.video.VideoStreamLocator;
-import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 import self.me.matchday.unit.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.ResourceFileReader;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static self.me.matchday.model.video.PartIdentifier.*;
+import static self.me.matchday.model.video.Resolution.R_1080p;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -98,8 +69,6 @@ public class TestDataCreator {
   private final CompetitionService competitionService;
   private final TeamService teamService;
   private final FileServerUserService userService;
-  private final VideoStreamLocatorPlaylistRepo locatorPlaylistRepo;
-  private final VideoStreamLocatorRepo streamLocatorRepo;
 
   private final Map<String, String> videoResources;
 
@@ -110,9 +79,7 @@ public class TestDataCreator {
       HighlightService highlightService,
       CompetitionService competitionService,
       TeamService teamService,
-      FileServerUserService userService,
-      VideoStreamLocatorPlaylistRepo locatorPlaylistRepo,
-      VideoStreamLocatorRepo locatorRepo)
+      FileServerUserService userService)
       throws IOException {
 
     this.eventService = eventService;
@@ -121,9 +88,8 @@ public class TestDataCreator {
     this.competitionService = competitionService;
     this.teamService = teamService;
     this.userService = userService;
-    this.locatorPlaylistRepo = locatorPlaylistRepo;
-    this.streamLocatorRepo = locatorRepo;
     videoResources = ResourceFileReader.readPropertiesResource("settings.default.properties");
+
   }
 
   public Map<String, String> getVideoResources() {
@@ -135,19 +101,14 @@ public class TestDataCreator {
     return Math.abs(number);
   }
 
-  // ======================== DATA SOURCE ========================
-  public DataSource<Match> readTestHtmlDataSource() throws IOException {
-    final String filename = "data/datasource/test_html_blogger_datasource.json";
-    return readTestDataSource(filename);
-  }
-
   public DataSource<Match> readTestJsonDataSource() throws IOException {
-    final String filename = "data/datasource/test_json_blogger_datasource.json";
-    return readTestDataSource(filename);
+    return readTestDataSource();
   }
 
-  private @NotNull DataSource<Match> readTestDataSource(@NotNull String filename)
+  private @NotNull DataSource<Match> readTestDataSource()
       throws IOException {
+
+    String filename = "data/datasource/test_json_blogger_datasource.json";
     final String dataSourceJson = ResourceFileReader.readTextResource(filename);
     final Type type = new TypeReference<PlaintextDataSource<Match>>() {}.getType();
     final PlaintextDataSource<Match> testDataSource = JsonParser.fromJson(dataSourceJson, type);
@@ -314,28 +275,10 @@ public class TestDataCreator {
   }
 
   @Transactional
-  public void deleteTestCompetition(Competition competition) throws IOException {
-    logger.info("Deleting test Competition: {}", competition);
-    competitionService.delete(competition.getId());
-  }
-
-  @Transactional
-  @NotNull
-  public Team createTestTeam() {
-    return this.createTestTeam("TEST TEAM " + numGen.nextInt());
-  }
-
-  @Transactional
   @NotNull
   public Team createTestTeam(@NotNull String name) {
     final Team team = new Team(name);
     return teamService.save(team);
-  }
-
-  @Transactional
-  public void deleteTestTeam(@NotNull Team team) {
-    logger.info("Deleting test Team: {}", team);
-    teamService.deleteTeamByName(team.getName().getName());
   }
 
   @Transactional
@@ -357,12 +300,6 @@ public class TestDataCreator {
         .videoFilePacks(videoFilePacks)
         .filesize(FileSize.ofGigabytes(8))
         .build();
-  }
-
-  @Transactional
-  public void deleteVideoFileSource(@NotNull final VideoFileSource fileSource) {
-    logger.info("Deleting VideoFileSource: {}", fileSource);
-    fileSrcRepository.delete(fileSource);
   }
 
   @Transactional
@@ -393,34 +330,6 @@ public class TestDataCreator {
       videoFiles.add(pack);
     }
     return videoFiles;
-  }
-
-  @Transactional
-  public @NotNull VideoStreamLocatorPlaylist createStreamLocatorPlaylist() {
-
-    final VideoFileSource fileSource = createVideoFileSourceAndSave();
-    final Path locatorPath = Path.of(videoResources.get("video-resources.file-storage-location"));
-    final VideoStreamLocatorPlaylist playlist =
-        new VideoStreamLocatorPlaylist(fileSource, locatorPath);
-    final VideoFilePack videoFiles = fileSource.getVideoFilePacks().get(0);
-    videoFiles.forEachVideoFile(
-        (title, file) -> {
-          final VideoStreamLocator streamLocator = createStreamLocator(file);
-          playlist.addStreamLocator(streamLocator);
-        });
-
-    final VideoStreamLocatorPlaylist locatorPlaylist = locatorPlaylistRepo.saveAndFlush(playlist);
-    logger.info("Created VideoStreamLocatorPlaylist:\n{}", locatorPlaylist);
-    return locatorPlaylist;
-  }
-
-  @Transactional
-  public @NotNull VideoStreamLocator createStreamLocator(final VideoFile videoFile) {
-    final VideoStreamLocator locator = new SingleStreamLocator();
-    locator.setVideoFile(videoFile);
-    final VideoStreamLocator streamLocator = streamLocatorRepo.saveAndFlush(locator);
-    logger.info("Created VideoStreamLocator: {}", streamLocator);
-    return streamLocator;
   }
 
   public URL getPreMatchUrl() {
