@@ -89,7 +89,6 @@ public class TestDataCreator {
     this.teamService = teamService;
     this.userService = userService;
     videoResources = ResourceFileReader.readPropertiesResource("settings.default.properties");
-
   }
 
   public Map<String, String> getVideoResources() {

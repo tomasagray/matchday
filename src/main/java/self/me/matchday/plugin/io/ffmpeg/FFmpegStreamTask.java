@@ -87,19 +87,19 @@ public abstract class FFmpegStreamTask extends Thread {
    *
    * @return The execution command arguments
    */
-  abstract @NonNull List<String> getArguments();
+  public abstract @NonNull List<String> getArguments();
 
   /**
    * Perform necessary preliminary setup tasks
    *
    * @throws IOException If there are any problems with stream preparation
    */
-  abstract void prepareStream() throws IOException;
+  public abstract void prepareStream() throws IOException;
 
   /**
    * Returns a formatted String containing the input portion of the FFMPEG command
    *
    * @return The input portion of the FFMPEG command
    */
-  abstract @NonNull List<String> getInputArg();
+  public abstract @NonNull List<String> getInputArg();
 }

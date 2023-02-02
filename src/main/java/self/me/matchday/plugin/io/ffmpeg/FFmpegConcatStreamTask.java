@@ -62,7 +62,7 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
   }
 
   @Override
-  protected @NotNull List<String> getArguments() {
+  public @NotNull List<String> getArguments() {
     final List<String> args = new ArrayList<>(getFfmpegArgs());
     args.addAll(getInputArg());
     args.addAll(transcodeArgs);
@@ -71,7 +71,7 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
   }
 
   @Override
-  protected void prepareStream() throws IOException {
+  public void prepareStream() throws IOException {
     // Create output directory
     Files.createDirectories(this.getDataDir());
     // Create URI list text file
@@ -79,7 +79,7 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
   }
 
   @Override
-  protected @NotNull @Unmodifiable List<String> getInputArg() {
+  public @NotNull @Unmodifiable List<String> getInputArg() {
     return List.of("-f", "concat", "-safe", "0", "-i", getConcatFile().toString());
   }
 

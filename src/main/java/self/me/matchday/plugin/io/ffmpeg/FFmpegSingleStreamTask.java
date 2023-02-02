@@ -61,7 +61,7 @@ public class FFmpegSingleStreamTask extends FFmpegStreamTask {
   }
 
   @Override
-  protected @NotNull List<String> getArguments() {
+  public @NotNull List<String> getArguments() {
     final List<String> args = new ArrayList<>(getFfmpegArgs());
     args.addAll(getInputArg());
     args.addAll(transcodeArgs);
@@ -75,13 +75,13 @@ public class FFmpegSingleStreamTask extends FFmpegStreamTask {
    * @throws IOException If there are any problems with stream preparation
    */
   @Override
-  protected void prepareStream() throws IOException {
+  public void prepareStream() throws IOException {
     // Create output directory
     Files.createDirectories(this.getDataDir());
   }
 
   @Override
-  protected @NotNull List<String> getInputArg() {
+  public @NotNull List<String> getInputArg() {
     return List.of("-i", uri.toString());
   }
 }
