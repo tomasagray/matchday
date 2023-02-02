@@ -59,7 +59,7 @@ public final class FFmpegConcatProtocolStreamTask extends FFmpegStreamTask {
   }
 
   @Override
-  protected @NotNull List<String> getArguments() {
+  public @NotNull List<String> getArguments() {
     final List<String> args = new ArrayList<>(getFfmpegArgs());
     args.addAll(getInputArg());
     args.addAll(transcodeArgs);
@@ -68,13 +68,13 @@ public final class FFmpegConcatProtocolStreamTask extends FFmpegStreamTask {
   }
 
   @Override
-  void prepareStream() throws IOException {
+  public void prepareStream() throws IOException {
     // Create output directory
     Files.createDirectories(this.getDataDir());
   }
 
   @Override
-  protected @NotNull @Unmodifiable List<String> getInputArg() {
+  public @NotNull @Unmodifiable List<String> getInputArg() {
 
     final List<String> uriStrings = uris.stream().map(URI::toString).collect(Collectors.toList());
     final String concatText = String.join("|", uriStrings);
