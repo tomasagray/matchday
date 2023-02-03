@@ -19,25 +19,20 @@
 
 package self.me.matchday.api.service.video;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import self.me.matchday.model.Event;
+import self.me.matchday.model.video.*;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.video.PartIdentifier;
-import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.model.video.VideoPlaylist;
-import self.me.matchday.model.video.VideoStreamLocator;
-import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
 @Service
-@Transactional
 public class VideoStreamingService {
 
   private final VideoFileSelectorService selectorService;
