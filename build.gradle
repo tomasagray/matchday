@@ -12,7 +12,7 @@ plugins {
 }
 
 group = 'self.me'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.1'
 
 configurations {
     developmentOnly
@@ -78,7 +78,7 @@ bootRun {
         args = project.args.split(',' as Closure)
     }
     if (project.hasProperty('jvmArgs')) {
-        jvmArgs = (project.jvmArgs.split('\\s+')) as List
+        jvmArgs = (project.jvmArgs.split('\\s+' as Closure)) as List
     }
 }
 

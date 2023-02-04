@@ -22,6 +22,7 @@ package self.me.matchday.plugin.io.diskmanager;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import self.me.matchday.api.service.SettingsService;
 import self.me.matchday.model.FileSize;
 
 import java.io.File;
@@ -39,8 +40,8 @@ public class DiskManager {
   @Getter private final Path storageLocation;
   @Getter private final Path fileSystemRoot;
 
-  public DiskManager(@NotNull final DiskManagerProperties properties) {
-    this.storageLocation = Path.of(properties.getStorageLocation());
+  public DiskManager(@NotNull SettingsService settingsService) {
+    this.storageLocation = settingsService.getSettings().getVideoStorageLocation();
     this.fileSystemRoot = determineFileSystemRoot();
   }
 
