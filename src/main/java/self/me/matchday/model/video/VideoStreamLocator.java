@@ -57,6 +57,14 @@ public abstract class VideoStreamLocator {
     this.state.setCompletionRatio(completionRatio);
   }
 
+  public void updateState(
+          @NotNull StreamJobState.JobStatus status,
+          Double completionRatio,
+          VideoStreamingError error) {
+    updateState(status, completionRatio);
+    this.state.setError(error);
+  }
+
   @Override
   public String toString() {
     return String.format(
@@ -72,8 +80,7 @@ public abstract class VideoStreamLocator {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof VideoStreamLocator)) return false;
-    final VideoStreamLocator that = (VideoStreamLocator) o;
+    if (!(o instanceof final VideoStreamLocator that)) return false;
     return Objects.equals(getPlaylistPath(), that.getPlaylistPath())
         && Objects.equals(getTimestamp(), that.getTimestamp())
         && Objects.equals(getVideoFile(), that.getVideoFile())

@@ -19,28 +19,22 @@
 
 package self.me.matchday.api.controller;
 
-import java.io.IOException;
-import java.util.Optional;
-import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.VideoFileSourceResource;
 import self.me.matchday.api.resource.VideoFileSourceResource.VideoFileSourceResourceAssembler;
 import self.me.matchday.api.resource.VideoPlaylistResource;
 import self.me.matchday.api.resource.VideoPlaylistResource.VideoPlaylistResourceAssembler;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.video.VideoStreamingService;
+
+import java.io.IOException;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/events/event/{eventId}/video")
@@ -123,8 +117,12 @@ public class VideoStreamingController {
       @PathVariable("fileSrcId") UUID fileSrcId,
       @PathVariable("partId") Long partId) {
 
-    final Optional<String> playlistFile = streamingService.readPlaylistFile(partId);
-    return ResponseEntity.of(playlistFile);
+    try {
+      final String playlistFile = streamingService.readPlaylistFile(partId);
+      return ResponseEntity.ok(playlistFile);
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError().body(e.getMessage());
+    }
   }
 
   @RequestMapping(

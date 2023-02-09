@@ -148,7 +148,7 @@ public class VideoStreamingService {
     return playlist;
   }
 
-  public Optional<String> readPlaylistFile(@NotNull Long fileId) {
+  public String readPlaylistFile(@NotNull Long fileId) throws Exception {
     return videoStreamManager.readPlaylistFile(fileId);
   }
 

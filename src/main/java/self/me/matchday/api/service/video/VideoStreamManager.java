@@ -131,10 +131,9 @@ public class VideoStreamManager {
         updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0);
       }
     } catch (Throwable e) {
-      updateLocatorTaskState(streamLocator, JobStatus.ERROR, -1.0);
+      setLocatorErrorState(streamLocator, e);
       throw new VideoStreamingException(e);
     }
-//    return new AsyncResult<>(streamLocator.getStreamLocatorId());
   }
 
   private void streamWithLogging(
@@ -187,8 +186,14 @@ public class VideoStreamManager {
    * @param partId Playlist locator ID
    * @return The playlist as a String
    */
-  public Optional<String> readPlaylistFile(@NotNull final Long partId) {
-    return locatorService.getStreamLocator(partId).map(this::readLocatorPlaylist);
+  public String readPlaylistFile(@NotNull final Long partId) throws Exception {
+    Optional<VideoStreamLocator> locatorOptional = locatorService.getStreamLocator(partId);
+    if (locatorOptional.isPresent()) {
+      VideoStreamLocator locator = locatorOptional.get();
+      return readLocatorPlaylist(locator);
+    } else {
+      throw new IllegalArgumentException("No VideoStreamLocator found for ID: " + partId);
+    }
   }
 
   /**
@@ -197,7 +202,8 @@ public class VideoStreamManager {
    * @param streamLocator The locator pointing to the required playlist file
    * @return The playlist file as a String or empty
    */
-  private @Nullable String readLocatorPlaylist(@NotNull final VideoStreamLocator streamLocator) {
+  private @Nullable String readLocatorPlaylist(@NotNull final VideoStreamLocator streamLocator)
+          throws Exception {
 
     final StringBuilder sb = new StringBuilder();
     final Path playlistPath = streamLocator.getPlaylistPath();
@@ -216,21 +222,18 @@ public class VideoStreamManager {
     return result.isEmpty() ? null : result;
   }
 
-  private void waitForFile(@NotNull Path playlistPath) {
+  private void waitForFile(@NotNull Path playlistPath) throws IOException, InterruptedException {
 
     final File playlistFile = playlistPath.toFile();
     final Duration timeout = Duration.of(MAX_RECHECK_TIMEOUT, ChronoUnit.SECONDS);
     final Instant start = Instant.now();
-    try {
-      while (!playlistFile.exists()) {
-        TimeUnit.MILLISECONDS.sleep(FILE_CHECK_DELAY);
-        final Duration elapsed = Duration.between(start, Instant.now());
-        if (elapsed.compareTo(timeout) > 0) {
-          throw new InterruptedException("Timeout exceeded reading playlist file: " + playlistFile);
-        }
+
+    while (!playlistFile.exists()) {
+      TimeUnit.MILLISECONDS.sleep(FILE_CHECK_DELAY);
+      final Duration elapsed = Duration.between(start, Instant.now());
+      if (elapsed.compareTo(timeout) > 0) {
+        throw new IOException("Timeout exceeded reading playlist file: " + playlistFile);
       }
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
     }
   }
 
@@ -352,6 +355,13 @@ public class VideoStreamManager {
       @NotNull final JobStatus status,
       final Double completionRatio) {
     streamLocator.updateState(status, completionRatio);
+    locatorService.updateStreamLocator(streamLocator);
+  }
+
+  private void setLocatorErrorState(
+          @NotNull VideoStreamLocator streamLocator,
+          @NotNull Throwable error) {
+    streamLocator.updateState(JobStatus.ERROR, -1.0, new VideoStreamingError(error));
     locatorService.updateStreamLocator(streamLocator);
   }
 }

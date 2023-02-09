@@ -19,11 +19,6 @@
 
 package self.me.matchday.unit.api.service.video;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +38,12 @@ import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest

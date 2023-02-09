@@ -19,11 +19,8 @@
 
 package self.me.matchday.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
+
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
@@ -44,14 +41,14 @@ public class JsonParser {
             .registerTypeAdapter(
                 LocalDateTime.class,
                 (JsonDeserializer<LocalDateTime>)
-                    (json, type, jsonDeserializationContext) -> {
+                    (json, type, context) -> {
                       final String text = json.getAsJsonPrimitive().getAsString();
                       return LocalDateTime.parse(text, FORMATTER);
                     })
             .registerTypeAdapter(
                 Pattern.class,
                 (JsonDeserializer<Pattern>)
-                    (json, type, jsonDeserializationContext) -> {
+                    (json, type, context) -> {
                       final JsonObject jsonObject = json.getAsJsonObject();
                       final String pattern =
                           jsonObject.get("pattern").getAsJsonPrimitive().getAsString();

@@ -19,10 +19,7 @@
 
 package self.me.matchday.api.controller;
 
-import static self.me.matchday.config.VideoStatusWebConfigurer.BROKER_ROOT;
-
-import java.util.List;
-import java.util.UUID;
+import lombok.Builder;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +31,12 @@ import self.me.matchday.db.VideoStreamLocatorRepo;
 import self.me.matchday.model.video.StreamJobState.JobStatus;
 import self.me.matchday.model.video.TaskState;
 import self.me.matchday.model.video.VideoStreamLocator;
+import self.me.matchday.model.video.VideoStreamingError;
+
+import java.util.List;
+import java.util.UUID;
+
+import static self.me.matchday.config.VideoStatusWebConfigurer.BROKER_ROOT;
 
 @Controller
 public class VideoStreamStatusController {
@@ -56,9 +59,19 @@ public class VideoStreamStatusController {
       final TaskState state = streamLocator.getState();
       final JobStatus status = state.getStatus();
       final Double completionRatio = state.getCompletionRatio();
-      return new VideoStreamStatusMessage(videoFileId, status, completionRatio);
+      final VideoStreamingError error = state.getError();
+      return VideoStreamStatusMessage.builder()
+              .videoFileId(videoFileId)
+              .status(status)
+              .completionRatio(completionRatio)
+              .error(error)
+              .build();
     } else {
-      return new VideoStreamStatusMessage(videoFileId, null, 0d);
+      return VideoStreamStatusMessage.builder()
+              .videoFileId(videoFileId)
+              .status(null)
+              .completionRatio(0d)
+              .build();
     }
   }
 
@@ -72,9 +85,11 @@ public class VideoStreamStatusController {
   }
 
   @Data
+  @Builder
   public static class VideoStreamStatusMessage {
     private final UUID videoFileId;
     private final JobStatus status;
     private final Double completionRatio;
+    private VideoStreamingError error;
   }
 }
