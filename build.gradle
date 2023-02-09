@@ -12,7 +12,7 @@ plugins {
 }
 
 group = 'self.me'
-version = '0.1.1'
+version = '0.1.2'
 
 configurations {
     developmentOnly

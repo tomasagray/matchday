@@ -50,7 +50,7 @@
     <aspect name="self.me.matchday.log.VideoStreamManagerLog"/>
     <aspect name="self.me.matchday.log.plugin.blogger.BloggerPluginLog"/>
     <aspect name="self.me.matchday.log.plugin.ffmpeg.FFmpegPluginLog"/>
-    <aspect name="self.me.matchday.log.plugin.ffmpeg.FFmpegStreamTaskLog"/>
+    <aspect name="self.me.matchday.log.plugin.ffmpeg.FFmpegSingleStreamTaskLog"/>
     <aspect name="self.me.matchday.log.plugin.filefox.LoginParserLog"/>
   </aspects>
   <weaver>
@@ -92,7 +92,8 @@
 
     <include within="self.me.matchday.log.*"/>
     <include within="self.me.matchday.log.plugin.blogger.*"/>
-    <include within="self.me.matchday.log.plugin.ffmpeg.*"/>
+    <include within="self.me.matchday.log.plugin.ffmpeg.FFmpegPluginLog"/>
+    <include within="self.me.matchday.log.plugin.ffmpeg.FFmpegSingleStreamTaskLog"/>
     <include within="self.me.matchday.log.plugin.filefox.*"/>
   </weaver>
 </aspectj>

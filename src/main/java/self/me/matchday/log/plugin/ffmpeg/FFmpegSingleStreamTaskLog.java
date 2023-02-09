@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegSingleStreamTask;
@@ -14,8 +13,9 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 
-@Aspect
-public class FFmpegStreamTaskLog {
+//@Aspect
+// todo - re-enable this class, figure out why it's throwing AjcClosure ClassNotFound exception
+public class FFmpegSingleStreamTaskLog {
 
     private static final Logger logger = LogManager.getLogger(FFmpegSingleStreamTask.class);
 
