@@ -19,9 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +30,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.SettingsRepository;
 import self.me.matchday.model.Settings;
+
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.util.List;
 
 @Service
 public class SettingsService {
@@ -90,6 +91,11 @@ public class SettingsService {
     @Value("${video-resources.file-storage-location}")
     public void setVideoStorageLocation(String videoStorageLocation) {
       super.setVideoStorageLocation(Path.of(videoStorageLocation));
+    }
+
+    @Value("${application.backup-location}")
+    public void setBackupLocation(String backupLocation) {
+      super.setBackupLocation(Path.of(backupLocation));
     }
 
     @Value("${scheduled-tasks.cron.refresh-event-data}")

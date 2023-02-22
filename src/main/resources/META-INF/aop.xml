@@ -25,6 +25,7 @@
     <aspect name="self.me.matchday.log.ArtworkServiceLog"/>
     <aspect name="self.me.matchday.log.CompetitionServiceLog"/>
     <aspect name="self.me.matchday.log.CompetitionControllerLog"/>
+    <aspect name="self.me.matchday.log.DatabaseManagementServiceLog"/>
     <aspect name="self.me.matchday.log.DataSourcePluginServiceLog"/>
     <aspect name="self.me.matchday.log.DataSourceServiceLog"/>
     <aspect name="self.me.matchday.log.EntityCorrectionServiceLog"/>
@@ -82,6 +83,8 @@
     <include within="self.me.matchday.api.service.video.VideoStreamingService"/>
     <include within="self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService"/>
     <include within="self.me.matchday.api.service.video.VideoStreamManager"/>
+    <!-- admin service -->
+    <include within="self.me.matchday.api.service.admin.DatabaseManagementService"/>
     <!-- plugin-->
     <include within="self.me.matchday.plugin.datasource.blogger.BloggerPlugin"/>
     <include within="self.me.matchday.plugin.datasource.blogger.BloggerParser"/>
