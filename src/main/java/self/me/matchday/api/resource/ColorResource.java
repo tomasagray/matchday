@@ -20,7 +20,6 @@
 package self.me.matchday.api.resource;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.awt.Color;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,6 +30,7 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.ArtworkController;
+import self.me.matchday.model.Color;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

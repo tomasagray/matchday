@@ -19,19 +19,7 @@
 
 package self.me.matchday.api.resource;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import static self.me.matchday.util.Constants.EMBLEM_REL;
-import static self.me.matchday.util.Constants.EVENTS_REL;
-import static self.me.matchday.util.Constants.FANART_REL;
-
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.awt.Color;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
@@ -47,6 +35,16 @@ import self.me.matchday.model.ArtworkRole;
 import self.me.matchday.model.Country;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Team;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static self.me.matchday.util.Constants.*;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -104,7 +102,7 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       teamResource.setId(teamId);
       teamResource.setName(team.getName());
       teamResource.setCountry(team.getCountry());
-      teamResource.setColors(getColorResources(team.getColors()));
+      teamResource.setColors(getColorResources(team));
 
       // artwork
       teamResource.setEmblem(collectionModeller.toModel(team.getEmblem()));
@@ -135,8 +133,11 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       return teamResource;
     }
 
-    private List<ColorResource> getColorResources(@NotNull List<Color> colors) {
-      return colors.stream().map(colorModeller::toModel).collect(Collectors.toList());
+    private List<ColorResource> getColorResources(@NotNull Team team) {
+      return team.getColors()
+              .stream()
+              .map(colorModeller::toModel)
+              .collect(Collectors.toList());
     }
   }
 }
