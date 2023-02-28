@@ -34,6 +34,7 @@ import self.me.matchday.model.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -87,9 +88,10 @@ class DataSourceRepositoryTest {
     final PlaintextDataSource<Match> savedDataSource = repository.save(eventDataSource);
     logger.info("Saved DataSource:\n{}", savedDataSource);
 
-    logger.info("Attempting to fetch test DataSource by Plugin ID...");
+    UUID pluginId = eventDataSource.getPluginId();
+    logger.info("Attempting to fetch test DataSource by Plugin ID: {}...", pluginId);
     final List<DataSource<?>> dataSourcesByPluginId =
-        repository.findDataSourcesByPluginId(eventDataSource.getPluginId());
+        repository.findDataSourcesByPluginId(pluginId);
     final int dataSourceCount = dataSourcesByPluginId.size();
     assertThat(dataSourceCount).isNotZero();
 
