@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 @Entity
 public class PatternKit<T> {
 
-  @Id @GeneratedValue private Long id;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
 
   @Type(type = "java.lang.Class")
   private final Class<T> clazz;

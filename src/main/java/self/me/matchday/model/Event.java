@@ -19,35 +19,17 @@
 
 package self.me.matchday.model;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.Corrected;
 import self.me.matchday.model.video.VideoFileSource;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
 /** A sporting Event */
 @Getter
@@ -61,7 +43,7 @@ public abstract class Event {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(columnDefinition = "BINARY(16)")
+  @Type(type="uuid-char")
   protected UUID eventId;
 
   @Corrected
@@ -119,8 +101,7 @@ public abstract class Event {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof Event)) return false;
-    Event event = (Event) o;
+    if (!(o instanceof Event event)) return false;
     return Objects.equals(getCompetition(), event.getCompetition())
         && Objects.equals(getSeason(), event.getSeason())
         && Objects.equals(getFixture(), event.getFixture())

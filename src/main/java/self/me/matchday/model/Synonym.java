@@ -19,20 +19,22 @@
 
 package self.me.matchday.model;
 
-import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.util.Objects;
 
 @Getter
 @Setter
 @Entity
 public class Synonym {
 
-  @Id @GeneratedValue private Long id;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
 
   private final String name;
 
@@ -47,8 +49,7 @@ public class Synonym {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof Synonym)) return false;
-    Synonym synonym = (Synonym) o;
+    if (!(o instanceof Synonym synonym)) return false;
     return Objects.equals(getId(), synonym.getId()) && Objects.equals(getName(), synonym.getName());
   }
 

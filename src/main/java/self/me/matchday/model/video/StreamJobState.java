@@ -36,7 +36,8 @@ import java.util.Objects;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class StreamJobState {
 
-  @Id @GeneratedValue private Long id;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+
   private JobStatus status = JobStatus.CREATED;
   private Double completionRatio = 0.0;
 

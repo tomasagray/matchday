@@ -19,27 +19,23 @@
 
 package self.me.matchday.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
 @Entity
 public class ProperName implements Comparable<ProperName> {
 
-  private final String name;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
 
-  @Id @GeneratedValue private Long id;
+  private final String name;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private List<Synonym> synonyms = new ArrayList<>();
@@ -59,8 +55,7 @@ public class ProperName implements Comparable<ProperName> {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof ProperName)) return false;
-    ProperName that = (ProperName) o;
+    if (!(o instanceof ProperName that)) return false;
     return Objects.equals(getId(), that.getId()) && Objects.equals(getName(), that.getName());
   }
 

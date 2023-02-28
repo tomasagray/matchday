@@ -19,18 +19,6 @@
 
 package self.me.matchday.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.ElementCollection;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -40,10 +28,18 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
 public class PatternKitTemplate {
+
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
 
   @Type(type = "java.lang.Class")
   private final Class<?> type;
@@ -57,7 +53,6 @@ public class PatternKitTemplate {
   @LazyCollection(LazyCollectionOption.FALSE)
   private final List<PatternKitTemplate> relatedTemplates = new ArrayList<>();
 
-  @Id @GeneratedValue private Long id;
 
   public PatternKitTemplate() {
     this.type = null;

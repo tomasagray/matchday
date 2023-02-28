@@ -21,6 +21,7 @@ package self.me.matchday.model.video;
 
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
@@ -42,7 +43,7 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(columnDefinition = "BINARY(16)")
+  @Type(type="uuid-char")
   private UUID fileSrcId;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -101,8 +102,7 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof VideoFileSource)) return false;
-    VideoFileSource that = (VideoFileSource) o;
+    if (!(o instanceof VideoFileSource that)) return false;
     return getFramerate() == that.getFramerate()
         && Objects.equals(getChannel(), that.getChannel())
         && Objects.equals(getSource(), that.getSource())

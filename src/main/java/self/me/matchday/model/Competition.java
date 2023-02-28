@@ -24,21 +24,17 @@
 package self.me.matchday.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.io.Serializable;
-import java.util.Objects;
-import java.util.UUID;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.controller.converter.StringToCountryConverter;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Represents a competition, e.g., a domestic league (EPL) or cup (FA Cup), a tournament (UCL, World
@@ -54,7 +50,7 @@ public class Competition implements Serializable {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(columnDefinition = "BINARY(16)")
+  @Type(type="uuid-char")
   private UUID id;
 
   @OneToOne(cascade = CascadeType.ALL)
@@ -89,8 +85,7 @@ public class Competition implements Serializable {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof Competition)) return false;
-    Competition that = (Competition) o;
+    if (!(o instanceof Competition that)) return false;
     return Objects.equals(getId(), that.getId())
         && Objects.equals(getName(), that.getName())
         && Objects.equals(getCountry(), that.getCountry());

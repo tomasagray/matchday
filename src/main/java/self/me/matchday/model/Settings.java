@@ -27,10 +27,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import self.me.matchday.db.converter.CronTriggerConverter;
 import self.me.matchday.db.converter.PathConverter;
 
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -42,8 +39,10 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class Settings {
 
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+
   private final Timestamp timestamp;
-  @Id @GeneratedValue private Long id;
+
   @Convert(converter = PathConverter.class)
   private Path logFilename;
 

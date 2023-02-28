@@ -19,12 +19,6 @@
 
 package self.me.matchday.model;
 
-import java.time.Duration;
-import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -34,6 +28,10 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 
+import javax.persistence.*;
+import java.time.Duration;
+import java.util.Objects;
+
 /** Wraps Spring's HttpCookie & ResponseCookie classes for JPA persistence */
 @Entity
 @Getter
@@ -41,7 +39,8 @@ import org.springframework.lang.Nullable;
 @ToString
 public class SecureCookie {
 
-  @Id @GeneratedValue private Long id;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+
   // HttpCookie
   private final String name;
 
@@ -76,9 +75,8 @@ public class SecureCookie {
     // Create base instance
     final SecureCookie secureCookie = new SecureCookie(cookie.getName(), cookie.getValue());
 
-    if (cookie instanceof ResponseCookie) {
+    if (cookie instanceof final ResponseCookie responseCookie) {
       // Copy response cookie values
-      final ResponseCookie responseCookie = (ResponseCookie) cookie;
       secureCookie.setMaxAge(responseCookie.getMaxAge());
       secureCookie.setDomain(responseCookie.getDomain());
       secureCookie.setPath(responseCookie.getPath());
@@ -120,14 +118,15 @@ public class SecureCookie {
 
   @Override
   public boolean equals(Object o) {
+    if (!(o instanceof SecureCookie that)) return false;
     if (this == o) return true;
-    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-    SecureCookie that = (SecureCookie) o;
+    if (Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
     return id != null && Objects.equals(id, that.id);
   }
 
   @Override
   public int hashCode() {
-    return 0;
+    return Objects.hash(getId(), getName(), getCookieValue(), getMaxAge(), getDomain(),
+            getPath(), isSecure(), isHttpOnly(), getSameSite());
   }
 }
