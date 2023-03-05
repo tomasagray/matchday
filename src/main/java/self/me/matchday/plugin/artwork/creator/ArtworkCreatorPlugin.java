@@ -19,30 +19,6 @@
 
 package self.me.matchday.plugin.artwork.creator;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.geom.GeneralPath;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.UncheckedIOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Stream;
-import javax.imageio.ImageIO;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +33,21 @@ import self.me.matchday.model.Image;
 import self.me.matchday.model.Param;
 import self.me.matchday.plugin.Plugin;
 import self.me.matchday.util.ResourceFileReader;
+
+import javax.imageio.ImageIO;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import java.awt.*;
+import java.awt.geom.GeneralPath;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URL;
+import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Component
 public class ArtworkCreatorPlugin implements Plugin {
@@ -154,9 +145,8 @@ public class ArtworkCreatorPlugin implements Plugin {
   private void renderShape(
       @NotNull Collection<Param<?>> params, @NotNull Graphics2D graphics, @NotNull Shape shape) {
 
-    final Param<?> color = getMatchingParam(params, shape.getColor());
     final GeneralPath path = createPathFrom(shape);
-    final Color colorData = getValidColor((Color) color.getData());
+    final Color colorData = getValidColor(getMatchingParam(params, shape.getColor()));
     graphics.setColor(colorData);
     graphics.setPaint(colorData);
     graphics.fill(path);
@@ -165,11 +155,13 @@ public class ArtworkCreatorPlugin implements Plugin {
   /**
    * Correct data corruption which may have been introduced during serialization/deserialization
    *
-   * @param color The reconstituted color
-   * @return A corrected version of the input color
+   * @param param The reconstituted param
+   * @return A corrected version of the input param
    */
   @Contract("_ -> new")
-  private @NotNull Color getValidColor(@NotNull Color color) {
+  private @NotNull Color getValidColor(@NotNull Param<?> param) {
+    // get storage version
+    self.me.matchday.model.Color color = (self.me.matchday.model.Color) param.getData();
     return new Color(color.getRed(), color.getGreen(), color.getBlue());
   }
 
@@ -187,8 +179,7 @@ public class ArtworkCreatorPlugin implements Plugin {
   private @Nullable BufferedImage createBufferedImage(Param<?> param) {
 
     try {
-      if (param != null && param.getData() instanceof byte[]) {
-        final byte[] imgData = (byte[]) param.getData();
+      if (param != null && param.getData() instanceof final byte[] imgData) {
         return ImageIO.read(new ByteArrayInputStream(imgData));
       }
     } catch (IOException e) {

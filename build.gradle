@@ -11,8 +11,16 @@ plugins {
     id "io.freefair.aspectj.post-compile-weaving" version "6.6-rc1"
 }
 
+
+def props = 'application.properties'
+processResources {
+    filesMatching(props) {
+        expand(project.properties)
+    }
+}
+
 group = 'self.me'
-version = '0.1.0'
+version = findProperty('appVersion')
 
 configurations {
     developmentOnly

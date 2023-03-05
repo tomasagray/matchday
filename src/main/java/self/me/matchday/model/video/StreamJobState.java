@@ -19,16 +19,14 @@
 
 package self.me.matchday.model.video;
 
-import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import self.me.matchday.db.converter.VideoStreamingErrorConverter;
+
+import javax.persistence.*;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -38,15 +36,19 @@ import lombok.ToString;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class StreamJobState {
 
-  @Id @GeneratedValue private Long id;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+
   private JobStatus status = JobStatus.CREATED;
   private Double completionRatio = 0.0;
+
+  @Column(columnDefinition = "LONGTEXT")
+  @Convert(converter = VideoStreamingErrorConverter.class)
+  private VideoStreamingError error;
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof StreamJobState)) return false;
-    StreamJobState that = (StreamJobState) o;
+    if (!(o instanceof StreamJobState that)) return false;
     return Objects.equals(getId(), that.getId())
         && getStatus() == that.getStatus()
         && Objects.equals(getCompletionRatio(), that.getCompletionRatio());

@@ -19,13 +19,6 @@
 
 package self.me.matchday.model;
 
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.time.Instant;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -34,6 +27,11 @@ import org.springframework.scheduling.support.CronTrigger;
 import self.me.matchday.db.converter.CronTriggerConverter;
 import self.me.matchday.db.converter.PathConverter;
 
+import javax.persistence.*;
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.time.Instant;
+
 @Entity
 @Getter
 @Setter
@@ -41,8 +39,10 @@ import self.me.matchday.db.converter.PathConverter;
 @RequiredArgsConstructor
 public class Settings {
 
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+
   private final Timestamp timestamp;
-  @Id @GeneratedValue private Long id;
+
   @Convert(converter = PathConverter.class)
   private Path logFilename;
 
@@ -51,6 +51,9 @@ public class Settings {
 
   @Convert(converter = PathConverter.class)
   private Path videoStorageLocation;
+
+  @Convert(converter = PathConverter.class)
+  private Path backupLocation;
 
   @Convert(converter = CronTriggerConverter.class)
   private CronTrigger refreshEvents;

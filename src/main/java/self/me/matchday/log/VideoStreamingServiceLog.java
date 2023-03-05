@@ -19,11 +19,6 @@
 
 package self.me.matchday.log;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -35,6 +30,11 @@ import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.video.VideoFileSource;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Aspect
 public class VideoStreamingServiceLog {
@@ -104,14 +104,13 @@ public class VideoStreamingServiceLog {
     return result;
   }
 
-  @SuppressWarnings("unchecked cast")
   @Around(
       "execution(* self.me.matchday.api.service.video.VideoStreamingService.readPlaylistFile(..))")
   public Object logReadPlaylistFile(@NotNull ProceedingJoinPoint jp) throws Throwable {
 
     logger.info("Attempting to read playlist file for Locator ID: {}", jp.getArgs()[0]);
-    final Optional<String> result = (Optional<String>) jp.proceed();
-    final int byteCount = result.map(s -> s.getBytes(StandardCharsets.UTF_8).length).orElse(0);
+    final String result = (String) jp.proceed();
+    final int byteCount = result.getBytes(StandardCharsets.UTF_8).length;
     logger.info("Read {} bytes of playlist file", byteCount);
     return result;
   }

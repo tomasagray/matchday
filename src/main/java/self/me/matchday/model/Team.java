@@ -24,24 +24,17 @@
 package self.me.matchday.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.awt.Color;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.controller.converter.StringToCountryConverter;
+
+import javax.persistence.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Represents a football team.
@@ -51,12 +44,12 @@ import self.me.matchday.api.controller.converter.StringToCountryConverter;
 @Getter
 @Setter
 @Entity
-public class Team implements Serializable {
+public class Team {
 
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(columnDefinition = "BINARY(16)")
+  @Type(type="uuid-char")
   private UUID id;
 
   @OneToOne(cascade = CascadeType.ALL)

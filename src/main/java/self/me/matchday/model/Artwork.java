@@ -19,21 +19,14 @@
 
 package self.me.matchday.model;
 
+import lombok.*;
+import org.hibernate.Hibernate;
+import self.me.matchday.db.converter.PathConverter;
+
+import javax.persistence.*;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.Hibernate;
-import self.me.matchday.db.converter.PathConverter;
 
 @Entity
 @Getter
@@ -44,7 +37,7 @@ import self.me.matchday.db.converter.PathConverter;
 @Builder
 public class Artwork {
 
-  @Id @GeneratedValue private Long id;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
 
   @Convert(converter = PathConverter.class)
   private Path file;
@@ -58,9 +51,9 @@ public class Artwork {
 
   @Override
   public boolean equals(Object o) {
+    if (!(o instanceof Artwork artwork)) return false;
     if (this == o) return true;
-    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-    Artwork artwork = (Artwork) o;
+    if (Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
     return id != null && Objects.equals(id, artwork.id);
   }
 

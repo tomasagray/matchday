@@ -19,6 +19,12 @@
 
 package self.me.matchday.model.video;
 
+import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
+import org.jetbrains.annotations.NotNull;
+
+import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,18 +34,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.MapKeyEnumerated;
-import javax.persistence.OneToMany;
-import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
-import org.jetbrains.annotations.NotNull;
 
 @ToString
 @Entity
@@ -48,7 +42,7 @@ public class VideoFilePack {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(columnDefinition = "BINARY(16)")
+  @Type(type="uuid-char")
   private UUID id;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)

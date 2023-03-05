@@ -19,12 +19,13 @@
 
 package self.me.matchday.model;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -65,6 +66,7 @@ public class ArtworkTemplate {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Layer {
+
     private String name;
     private List<Image> image;
     private List<Shape> shape;
@@ -100,6 +102,7 @@ public class ArtworkTemplate {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Image {
+
     private int width;
     private int height;
     private String src;
@@ -145,6 +148,7 @@ public class ArtworkTemplate {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Shape {
+
     private String color;
     private List<Coordinate> coords;
 
@@ -170,6 +174,7 @@ public class ArtworkTemplate {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Coordinate {
+
     private int x;
     private int y;
 

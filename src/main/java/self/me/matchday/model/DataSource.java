@@ -42,7 +42,7 @@ public abstract class DataSource<T> {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(columnDefinition = "BINARY(16)")
+  @Type(type="uuid-char")
   private UUID dataSourceId;
 
   @Type(type = "java.lang.Class")
@@ -53,7 +53,7 @@ public abstract class DataSource<T> {
   @Convert(converter = UriConverter.class)
   private final URI baseUri;
 
-  @Column(columnDefinition = "BINARY(16)")
+  @Type(type="uuid-char")
   private UUID pluginId;
 
   private boolean enabled = true;

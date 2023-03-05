@@ -23,6 +23,7 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.CountryService;
 import self.me.matchday.model.Country;
@@ -33,6 +34,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 @Component
+@Order(1)
 public class LoadCountries implements CommandLineRunner {
 
     private static final String COUNTRIES_JSON = "countries.json";

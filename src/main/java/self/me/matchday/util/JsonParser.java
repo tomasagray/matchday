@@ -19,13 +19,14 @@
 
 package self.me.matchday.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
+
+import java.awt.*;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
@@ -33,7 +34,9 @@ import java.util.regex.Pattern;
 public class JsonParser {
 
   private static final String DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss[.nnn][z]";
-  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
+  private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
+  private static final String DATE_PATTERN = "yyyy-MM-dd";
+  private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
 
   private static final Gson gson;
 
@@ -44,14 +47,70 @@ public class JsonParser {
             .registerTypeAdapter(
                 LocalDateTime.class,
                 (JsonDeserializer<LocalDateTime>)
-                    (json, type, jsonDeserializationContext) -> {
+                    (json, type, context) -> {
                       final String text = json.getAsJsonPrimitive().getAsString();
-                      return LocalDateTime.parse(text, FORMATTER);
+                      return LocalDateTime.parse(text, DATETIME_FORMATTER);
+                    })
+            .registerTypeAdapter(
+                LocalDateTime.class,
+                (JsonSerializer<LocalDateTime>)
+                    (date, type, context) -> {
+                        final String formatted = date.format(DATETIME_FORMATTER);
+                        return new JsonPrimitive(formatted);
+                })
+            .registerTypeAdapter(
+                LocalDate.class,
+                (JsonDeserializer<LocalDate>)
+                    (json, type, context) -> {
+                        JsonObject o = json.getAsJsonObject();
+                        int year = o.get("year").getAsInt();
+                        int month = o.get("month").getAsInt();
+                        int day = o.get("day").getAsInt();
+                        return LocalDate.of(year, month, day);
+                    })
+            .registerTypeAdapter(
+                LocalDate.class,
+                (JsonSerializer<LocalDate>)
+                    (date, type, context) -> {
+                        String data = date.format(DATE_FORMATTER);
+                        return new JsonPrimitive(data);
+                    })
+            .registerTypeAdapter(
+                Duration.class,
+                (JsonDeserializer<Duration>)
+                    (json, type, context) -> {
+                        JsonObject o = json.getAsJsonObject();
+                        long seconds = o.get("seconds").getAsLong();
+                        int nanos = o.get("nanos").getAsInt();
+                        return Duration.ofSeconds(seconds).withNanos(nanos);
+                    })
+            .registerTypeAdapter(
+                Color.class,
+                (JsonSerializer<Color>)
+                    (color, type, context) -> {
+                        int red = color.getRed();
+                        int green = color.getGreen();
+                        int blue = color.getBlue();
+                        JsonObject o = new JsonObject();
+                        o.addProperty("red", red);
+                        o.addProperty("green", green);
+                        o.addProperty("blue", blue);
+                        return o;
+                    })
+            .registerTypeAdapter(
+                Color.class,
+                (JsonDeserializer<Color>)
+                    (json, type, context) -> {
+                        JsonObject o = json.getAsJsonObject();
+                        int red = o.get("red").getAsJsonPrimitive().getAsInt();
+                        int green = o.get("green").getAsJsonPrimitive().getAsInt();
+                        int blue = o.get("blue").getAsJsonPrimitive().getAsInt();
+                        return new Color(red, green, blue);
                     })
             .registerTypeAdapter(
                 Pattern.class,
                 (JsonDeserializer<Pattern>)
-                    (json, type, jsonDeserializationContext) -> {
+                    (json, type, context) -> {
                       final JsonObject jsonObject = json.getAsJsonObject();
                       final String pattern =
                           jsonObject.get("pattern").getAsJsonPrimitive().getAsString();
@@ -63,6 +122,23 @@ public class JsonParser {
                       //noinspection MagicConstant
                       return Pattern.compile(pattern, flags);
                     })
+            .registerTypeHierarchyAdapter(
+                Path.class,
+                (JsonSerializer<Path>)
+                  (path, type, context) -> {
+                    if (path == null) {
+                      return null;
+                    }
+                    return new JsonPrimitive(path.toString());
+                  })
+            .registerTypeHierarchyAdapter(
+                Path.class,
+                (JsonDeserializer<Path>)
+                    (json, type, context) -> {
+                      final String data = json.getAsJsonPrimitive().getAsString();
+                      return Path.of(data);
+                    }
+            )
             .registerTypeAdapterFactory(new ClassTypeAdapterFactory(new ClassTypeAdapter()))
             .create();
   }

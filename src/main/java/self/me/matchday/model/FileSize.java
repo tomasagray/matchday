@@ -23,8 +23,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class FileSize {
 
-  // Factory methods
-  public static @NotNull Long ofGigabytes(final float gigs) {
+    // Factory methods
+    public static @NotNull Long ofGigabytes(final float gigs) {
     // Gigabyte-ify
     return DataSizeUnit.GB.denominate(gigs);
   }

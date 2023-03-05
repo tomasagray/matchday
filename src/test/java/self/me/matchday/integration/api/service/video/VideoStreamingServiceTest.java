@@ -19,35 +19,11 @@
 
 package self.me.matchday.integration.api.service.video;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,14 +37,21 @@ import self.me.matchday.api.service.video.VideoStreamLocatorService;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.FileServerUser;
-import self.me.matchday.model.video.PartIdentifier;
-import self.me.matchday.model.video.SingleStreamLocator;
-import self.me.matchday.model.video.VideoFile;
-import self.me.matchday.model.video.VideoFileSource;
-import self.me.matchday.model.video.VideoPlaylist;
-import self.me.matchday.model.video.VideoStreamLocator;
-import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
+import self.me.matchday.model.video.*;
 import self.me.matchday.util.RecursiveDirectoryDeleter;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -217,7 +200,7 @@ class VideoStreamingServiceTest {
   @Test
   @Order(3)
   @DisplayName("Validate reading playlist file from disk")
-  void readPlaylistFile() throws InterruptedException {
+  void readPlaylistFile() throws Exception {
 
     final int MIN_PLAYLIST_LEN = 100;
 
@@ -233,19 +216,13 @@ class VideoStreamingServiceTest {
         testStreamLocator.getStreamLocatorId());
 
     // Read test playlist file
-    final Optional<String> actualPlaylistFile =
+    final String actualPlaylistData =
         streamingService.readPlaylistFile(testStreamLocator.getStreamLocatorId());
-
-    // Perform tests
-    assertThat(actualPlaylistFile).isNotNull().isNotEmpty().isPresent();
-    if (actualPlaylistFile.isPresent()) {
-      final String actualPlaylistData = actualPlaylistFile.get();
-      final int actualPlaylistSize = actualPlaylistData.getBytes(StandardCharsets.UTF_8).length;
-      logger.info("Read playlist data:\n" + actualPlaylistData);
-      logger.info("Data length: " + actualPlaylistSize);
-      logger.info("Ensuring read playlist is longer than {} bytes", MIN_PLAYLIST_LEN);
-      assertThat(actualPlaylistSize).isGreaterThan(MIN_PLAYLIST_LEN);
-    }
+    final int actualPlaylistSize = actualPlaylistData.getBytes(StandardCharsets.UTF_8).length;
+    logger.info("Read playlist data:\n" + actualPlaylistData);
+    logger.info("Data length: " + actualPlaylistSize);
+    logger.info("Ensuring read playlist is longer than {} bytes", MIN_PLAYLIST_LEN);
+    assertThat(actualPlaylistSize).isGreaterThan(MIN_PLAYLIST_LEN);
   }
 
   @Test

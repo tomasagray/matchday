@@ -184,6 +184,10 @@ public class FileServerUserService {
 
   // === Users ===
 
+  public List<FileServerUser> getAllUsers() {
+    return userRepo.findAll();
+  }
+
   /**
    * Get all users associated with a particular file server plugin
    *

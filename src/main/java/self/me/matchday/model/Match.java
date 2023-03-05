@@ -23,14 +23,6 @@
  */
 package self.me.matchday.model;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +30,15 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.CorrectedOrNull;
 import self.me.matchday.model.video.VideoFileSource;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Class representing a match (game) between two teams (home & away) in a given Competition on a
@@ -138,9 +139,8 @@ public class Match extends Event {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof Match)) return false;
+    if (!(o instanceof Match match)) return false;
     if (!super.equals(o)) return false;
-    Match match = (Match) o;
     return Objects.equals(getHomeTeam(), match.getHomeTeam())
         && Objects.equals(getAwayTeam(), match.getAwayTeam())
         && Objects.equals(getDate(), match.getDate());
@@ -149,5 +149,12 @@ public class Match extends Event {
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), getHomeTeam(), getAwayTeam());
+  }
+
+  @Override
+  public String toString() {
+    return String.format(
+            "Match{eventId=%s, competition=%s, homeTeam=%s, awayTeam=%s, season=%s, fixture=%s, date=%s",
+            getEventId(), getCompetition(), getHomeTeam(), getAwayTeam(), getSeason(), getFixture(), getDate());
   }
 }

@@ -23,6 +23,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
@@ -41,7 +42,7 @@ public final class FileServerUser implements Serializable {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(columnDefinition = "BINARY(16)")
+  @Type(type="uuid-char")
   @Setter
   private UUID userId;
 
@@ -56,7 +57,7 @@ public final class FileServerUser implements Serializable {
 
   private boolean loggedIn;
 
-  @Column(columnDefinition = "BINARY(16)")
+  @Type(type="uuid-char")
   private UUID serverId;
 
   @OneToMany(
@@ -118,11 +119,10 @@ public final class FileServerUser implements Serializable {
   @Override
   public boolean equals(final Object object) {
 
-    if (!(object instanceof FileServerUser)) {
+    if (!(object instanceof final FileServerUser fileServerUser)) {
       return false;
     }
     // Cast for comparison
-    final FileServerUser fileServerUser = (FileServerUser) object;
     final String username = (this.getUsername() != null) ? this.getUsername() : "";
     final String password = (this.getPassword() != null) ? this.getPassword() : "";
     final String email = (this.getEmail() != null) ? this.getEmail() : "";

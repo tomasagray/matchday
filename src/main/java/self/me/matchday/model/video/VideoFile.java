@@ -23,6 +23,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.FFmpegMetadataConverter;
 import self.me.matchday.db.converter.TimestampConverter;
@@ -45,7 +46,7 @@ public class VideoFile implements Comparable<VideoFile> {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(columnDefinition = "BINARY(16)")
+  @Type(type="uuid-char")
   private UUID fileId;
 
   private URL externalUrl;
@@ -86,8 +87,7 @@ public class VideoFile implements Comparable<VideoFile> {
   @Override
   public boolean equals(Object obj) {
     if (obj == this) return true;
-    if (!(obj instanceof VideoFile)) return false;
-    final VideoFile videoFile = (VideoFile) obj;
+    if (!(obj instanceof final VideoFile videoFile)) return false;
     return Objects.equals(videoFile.getExternalUrl(), this.getExternalUrl());
   }
 
