@@ -66,7 +66,8 @@ public class MySqlDumpWrapper {
         try (FileOutputStream fos = new FileOutputStream(filepath.toFile())) {
             final String[] data = mysqlDump.data();
             for (final String datum : data) {
-                fos.write(datum.getBytes(StandardCharsets.UTF_8));
+                final String line = datum + "\n";
+                fos.write(line.getBytes(StandardCharsets.UTF_8));
             }
         }
     }
@@ -90,7 +91,8 @@ public class MySqlDumpWrapper {
             final String host = matcher.group(1);
             final int port = Integer.parseInt(matcher.group(2));
             final String database = matcher.group(3);
-            return String.format("mysqldump --defaults-file=%s -h %s -P %d -uroot %s",
+            return String.format(
+                    "mysqldump --defaults-file=%s -h %s -P %d -uroot --add-drop-database --databases %s",
                     this.defaultsFile, host, port, database);
         }
         throw new IllegalArgumentException("Could not parse database URL: " + this.dataSourceUrl);

@@ -88,7 +88,7 @@ class ZipServiceTest {
 
         // when
         logger.info("Zipping: {} to {}...", TEST_DATA, archiveName);
-        zipService.zipFiles(archiveName, new File(TEST_DATA));
+        zipService.zipFiles(new File(archiveName), null, new File(TEST_DATA));
 
         // then
         logger.info("Checking existence of archive at: {}", archiveName);
@@ -106,8 +106,8 @@ class ZipServiceTest {
 
         // given
         testZipFilesAndDirs();      // create test archive
-        final String archiveName = OUTPUT_DIR + "zip-test-output.zip";
-        final String unzipDir = OUTPUT_DIR + File.separator + "unzip";
+        final File archiveName = new File(OUTPUT_DIR + "zip-test-output.zip");
+        final File unzipDir = new File(OUTPUT_DIR + File.separator + "unzip");
         final int expectedFileCount = 8;
 
         // when
@@ -115,9 +115,8 @@ class ZipServiceTest {
         zipService.unzipArchive(archiveName, unzipDir);
 
         logger.info("Checking existence of unzipped files...");
-        final Path unzipped = Path.of(unzipDir);
         final AtomicInteger count = new AtomicInteger(0);
-        Files.walkFileTree(unzipped, new SimpleFileVisitor<>() {
+        Files.walkFileTree(unzipDir.toPath(), new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                 logger.info("Found file: {}", file);

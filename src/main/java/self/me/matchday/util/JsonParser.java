@@ -34,7 +34,9 @@ import java.util.regex.Pattern;
 public class JsonParser {
 
   private static final String DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss[.nnn][z]";
-  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
+  private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
+  private static final String DATE_PATTERN = "yyyy-MM-dd";
+  private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
 
   private static final Gson gson;
 
@@ -47,8 +49,15 @@ public class JsonParser {
                 (JsonDeserializer<LocalDateTime>)
                     (json, type, context) -> {
                       final String text = json.getAsJsonPrimitive().getAsString();
-                      return LocalDateTime.parse(text, FORMATTER);
+                      return LocalDateTime.parse(text, DATETIME_FORMATTER);
                     })
+            .registerTypeAdapter(
+                LocalDateTime.class,
+                (JsonSerializer<LocalDateTime>)
+                    (date, type, context) -> {
+                        final String formatted = date.format(DATETIME_FORMATTER);
+                        return new JsonPrimitive(formatted);
+                })
             .registerTypeAdapter(
                 LocalDate.class,
                 (JsonDeserializer<LocalDate>)
@@ -60,6 +69,13 @@ public class JsonParser {
                         return LocalDate.of(year, month, day);
                     })
             .registerTypeAdapter(
+                LocalDate.class,
+                (JsonSerializer<LocalDate>)
+                    (date, type, context) -> {
+                        String data = date.format(DATE_FORMATTER);
+                        return new JsonPrimitive(data);
+                    })
+            .registerTypeAdapter(
                 Duration.class,
                 (JsonDeserializer<Duration>)
                     (json, type, context) -> {
@@ -68,13 +84,6 @@ public class JsonParser {
                         int nanos = o.get("nanos").getAsInt();
                         return Duration.ofSeconds(seconds).withNanos(nanos);
                     })
-            .registerTypeAdapter(
-                LocalDateTime.class,
-                (JsonSerializer<LocalDateTime>)
-                    (date, type, context) -> {
-                        final String formatted = date.format(FORMATTER);
-                        return new JsonPrimitive(formatted);
-                })
             .registerTypeAdapter(
                 Color.class,
                 (JsonSerializer<Color>)
@@ -113,24 +122,24 @@ public class JsonParser {
                       //noinspection MagicConstant
                       return Pattern.compile(pattern, flags);
                     })
-                .registerTypeHierarchyAdapter(
-                        Path.class,
-                        (JsonSerializer<Path>)
-                          (path, type, context) -> {
-                            if (path == null) {
-                              return null;
-                            }
-                            return new JsonPrimitive(path.toString());
-                          })
-                .registerTypeHierarchyAdapter(
-                        Path.class,
-                        (JsonDeserializer<Path>)
-                            (json, type, context) -> {
-                              final String data = json.getAsJsonPrimitive().getAsString();
-                              return Path.of(data);
-                            }
-                )
-                .registerTypeAdapterFactory(new ClassTypeAdapterFactory(new ClassTypeAdapter()))
+            .registerTypeHierarchyAdapter(
+                Path.class,
+                (JsonSerializer<Path>)
+                  (path, type, context) -> {
+                    if (path == null) {
+                      return null;
+                    }
+                    return new JsonPrimitive(path.toString());
+                  })
+            .registerTypeHierarchyAdapter(
+                Path.class,
+                (JsonDeserializer<Path>)
+                    (json, type, context) -> {
+                      final String data = json.getAsJsonPrimitive().getAsString();
+                      return Path.of(data);
+                    }
+            )
+            .registerTypeAdapterFactory(new ClassTypeAdapterFactory(new ClassTypeAdapter()))
             .create();
   }
 
