@@ -19,11 +19,7 @@
 
 package self.me.matchday.api.resource;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.sql.Timestamp;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +29,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.SettingsController;
 import self.me.matchday.model.Settings;
+
+import java.sql.Timestamp;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -47,6 +48,7 @@ public class SettingsResource extends RepresentationModel<SettingsResource> {
   private String logFilename;
   private String artworkStorageLocation;
   private String videoStorageLocation;
+  private String backupLocation;
 
   @Component
   public static final class SettingsResourceModeller
@@ -66,6 +68,7 @@ public class SettingsResource extends RepresentationModel<SettingsResource> {
       model.setLogFilename(entity.getLogFilename().toString());
       model.setArtworkStorageLocation(entity.getArtworkStorageLocation().toString());
       model.setVideoStorageLocation(entity.getVideoStorageLocation().toString());
+      model.setBackupLocation(entity.getBackupLocation().toString());
       model.add(linkTo(methodOn(SettingsController.class).getSettings()).withSelfRel());
       return model;
     }
