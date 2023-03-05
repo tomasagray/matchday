@@ -19,13 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import lombok.Builder;
 import lombok.Data;
 import org.jetbrains.annotations.Contract;
@@ -39,6 +32,14 @@ import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.Artwork;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SanityCheckService {
@@ -81,7 +82,8 @@ public class SanityCheckService {
    * @param reportBuilder An instance of the ArtworkReportBuilder class
    * @return An updated report builder
    */
-  private ArtworkSanityReportBuilder findDanglingArtworkFiles(
+  @Contract("_ -> param1")
+  private @NotNull ArtworkSanityReportBuilder findDanglingArtworkFiles(
       @NotNull ArtworkSanityReportBuilder reportBuilder) {
 
     final List<Path> danglingFiles = new ArrayList<>();
@@ -136,6 +138,7 @@ public class SanityCheckService {
    * @param reportBuilder An instance of a VideoSanityReportBuilder
    * @return The updated report builder
    */
+  @Contract("_ -> param1")
   private @NotNull VideoSanityReportBuilder findDanglingVideoStreamLocators(
       @NotNull VideoSanityReportBuilder reportBuilder) {
 

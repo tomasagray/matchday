@@ -19,18 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.awt.Color;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import javax.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -39,20 +27,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.MatchRepository;
-import self.me.matchday.model.Artwork;
-import self.me.matchday.model.Competition;
+import self.me.matchday.model.*;
 import self.me.matchday.model.Event.EventSorter;
-import self.me.matchday.model.Image;
-import self.me.matchday.model.Match;
-import self.me.matchday.model.Param;
-import self.me.matchday.model.Team;
 import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.util.ResourceFileReader;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
@@ -282,7 +271,7 @@ public class MatchService implements EntityService<Match, UUID> {
       }
     }
     if (validFileSources == 0) {
-      throw new InvalidEventException("No valid video file sources");
+      throw new InvalidEventException("No valid video file sources in: " + match);
     }
   }
 

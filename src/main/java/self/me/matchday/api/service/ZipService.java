@@ -1,12 +1,14 @@
 package self.me.matchday.api.service;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -33,7 +35,8 @@ public class ZipService {
         }
     }
 
-    private static void zipAllFiles(@NotNull ZipOutputStream zos, File @NotNull ... files)
+    private static void zipAllFiles(
+            @NotNull ZipOutputStream zos, @Nullable Path root, File @NotNull ... files)
             throws IOException {
 
         for (final File file : files) {
@@ -41,18 +44,22 @@ public class ZipService {
                 // recursively zip directory contents
                 final File[] subFiles = file.listFiles();
                 if (subFiles != null && subFiles.length > 0) {
-                    zipAllFiles(zos, subFiles);
+                    zipAllFiles(zos, root, subFiles);
                 }
             } else {
-                addFileToZip(zos, file);
+                addFileToZip(zos, root, file);
             }
         }
     }
 
-    private static void addFileToZip(@NotNull ZipOutputStream zos, @NotNull File file)
+    private static void addFileToZip(
+            @NotNull ZipOutputStream zos, @Nullable Path root, @NotNull File file)
             throws IOException {
 
-        zos.putNextEntry(new ZipEntry(file.getPath()));
+        final String zipPath = root != null ?
+                root.relativize(file.toPath()).toString() :
+                file.getPath();
+        zos.putNextEntry(new ZipEntry(zipPath));
         try (final FileInputStream fis = new FileInputStream(file)) {
             final byte[] buffer = new byte[BUFFER_SIZE];
             int read;
@@ -62,20 +69,20 @@ public class ZipService {
         }
     }
 
-    public void zipFiles(@NotNull String archive, File... files) throws IOException {
+    public void zipFiles(@NotNull File archive, @Nullable Path relative, File... files)
+            throws IOException {
 
         try (final FileOutputStream fos = new FileOutputStream(archive);
              final ZipOutputStream zos = new ZipOutputStream(fos)
              ) {
-            zipAllFiles(zos, files);
+            zipAllFiles(zos, relative, files);
         }
     }
 
-    public void unzipArchive(@NotNull String archive, @NotNull String output) throws IOException {
+    public void unzipArchive(@NotNull File archive, @NotNull File outputDir) throws IOException {
 
         try (final ZipInputStream zis = new ZipInputStream(new FileInputStream(archive))) {
 
-            final File outputDir = new File(output);
             ZipEntry zipEntry = zis.getNextEntry();
             while (zipEntry != null) {
                 final File file = createFile(outputDir, zipEntry);

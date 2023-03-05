@@ -19,19 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -41,13 +28,13 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.TeamRepository;
-import self.me.matchday.model.Artwork;
-import self.me.matchday.model.ArtworkCollection;
-import self.me.matchday.model.ArtworkRole;
-import self.me.matchday.model.Country;
-import self.me.matchday.model.Image;
-import self.me.matchday.model.ProperName;
-import self.me.matchday.model.Team;
+import self.me.matchday.model.*;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
