@@ -12,18 +12,12 @@ plugins {
 }
 
 
-def s = 'application.properties'
+def props = 'application.properties'
 processResources {
-    filesMatching(s) {
+    filesMatching(props) {
         expand(project.properties)
     }
 }
-
-//processTestResources {
-//    filesMatching(s) {
-//        expand(project.properties)
-//    }
-//}
 
 group = 'self.me'
 version = findProperty('appVersion')

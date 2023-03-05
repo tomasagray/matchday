@@ -12,7 +12,12 @@ public class ApplicationInfoService {
     private String appVersion;
 
     public ApplicationInfo getApplicationInfo() {
-        return ApplicationInfo.builder().version(appVersion).system(getOsData()).build();
+        final Long pid = Long.parseLong(System.getProperty("PID"));
+        return ApplicationInfo.builder()
+                .version(appVersion)
+                .system(getOsData())
+                .pid(pid)
+                .build();
     }
 
     private String getOsData() {
@@ -27,5 +32,6 @@ public class ApplicationInfoService {
     public static class ApplicationInfo {
         private String version;
         private String system;
+        private Long pid;
     }
 }
