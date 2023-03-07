@@ -56,12 +56,12 @@
   <h3>Dangling Artwork files</h3>
   <p style="margin-left: 1rem">
     Dangling file count:
-    <strong data-th-text="${report.artworkSanityReport.dangingFiles.size()}">
+    <strong data-th-text="${report.artworkSanityReport.getDanglingFiles.size()}">
       file count
     </strong>
   </p>
   <div class="Info-display-container">
-    <div class="Info-display" data-th-each="img : ${report.artworkSanityReport.dangingFiles}">
+    <div class="Info-display" data-th-each="img : ${report.artworkSanityReport.getDanglingFiles}">
       <img alt="image file" class="Dangling-image"
            data-th-src="${img.getFileName()}" src="/img/placeholder.png"/>
       <p data-th-text="${img}">path</p>
@@ -69,7 +69,7 @@
   </div>
   <div>
     <h3>Dangling Artwork filenames</h3>
-    <p data-th-text="${report.artworkSanityReport.dangingFiles}">files</p>
+    <p data-th-text="${report.artworkSanityReport.getDanglingFiles}">files</p>
   </div>
   <h3>Dangling database entries</h3>
   <div class="Info-display-container">

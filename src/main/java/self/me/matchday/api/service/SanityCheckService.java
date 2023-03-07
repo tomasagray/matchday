@@ -102,7 +102,7 @@ public class SanityCheckService {
         }
       }
     }
-    reportBuilder.dangingFiles(danglingFiles);
+    reportBuilder.danglingFiles(danglingFiles);
     return reportBuilder;
   }
 
@@ -196,7 +196,7 @@ public class SanityCheckService {
     @Data
     @Builder
     public static final class ArtworkSanityReport {
-      private final List<Path> dangingFiles;
+      private final List<Path> danglingFiles;
       private final List<Artwork> danglingDbEntries;
       private long totalFiles;
       private long totalDbEntries;

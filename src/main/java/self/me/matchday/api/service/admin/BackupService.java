@@ -59,7 +59,7 @@ public class BackupService {
     private static void analyzeReport(@NotNull SanityReport report) {
 
         SanityReport.ArtworkSanityReport artworkReport = report.getArtworkSanityReport();
-        List<Path> danglingArtwork = artworkReport.getDangingFiles();
+        List<Path> danglingArtwork = artworkReport.getDanglingFiles();
         if (danglingArtwork.size() > 0) {
             fail( "Found dangling Artwork: " + danglingArtwork);
         }
