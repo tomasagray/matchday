@@ -2,11 +2,10 @@ package self.me.matchday.api.service.admin;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import self.me.matchday.api.service.SanityCheckService;
-import self.me.matchday.api.service.SanityCheckService.SanityReport;
 import self.me.matchday.api.service.SettingsService;
 import self.me.matchday.api.service.ZipService;
 import self.me.matchday.model.Artwork;
+import self.me.matchday.model.SanityReport;
 import self.me.matchday.model.Settings;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;

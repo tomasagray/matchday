@@ -3,8 +3,8 @@ package self.me.matchday.api.controller;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import self.me.matchday.api.service.ApplicationInfoService;
-import self.me.matchday.api.service.ApplicationInfoService.ApplicationInfo;
+import self.me.matchday.api.service.admin.ApplicationInfoService;
+import self.me.matchday.api.service.admin.ApplicationInfoService.ApplicationInfo;
 
 @RestController
 public class ApplicationInfoController {
