@@ -51,7 +51,7 @@ public class RestorePointResource extends RepresentationModel<RestorePointResour
             model.setCompetitionCount(entity.getCompetitionCount());
             model.setTeamCount(entity.getTeamCount());
             model.setDataSourceCount(entity.getDataSourceCount());
-            model.setUserCount(entity.getUserCount());
+            model.setUserCount(entity.getFileServerUserCount());
             return model;
         }
     }

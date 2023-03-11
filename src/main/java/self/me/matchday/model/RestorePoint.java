@@ -39,7 +39,7 @@ public class RestorePoint {
     private Integer competitionCount;
     private Integer teamCount;
     private Integer dataSourceCount;
-    private Integer userCount;
+    private Integer fileServerUserCount;
 
     public RestorePoint() {}
 }

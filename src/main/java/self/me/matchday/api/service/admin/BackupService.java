@@ -136,7 +136,7 @@ public class BackupService {
                 .competitionCount(systemImage.getCompetitions().size())
                 .teamCount(systemImage.getTeams().size())
                 .dataSourceCount(systemImage.getDataSources().size())
-                .userCount(systemImage.getUsers().size())
+                .fileServerUserCount(systemImage.getFileServerUsers().size())
                 .build();
         return restorePointRepository.save(restorePoint);
     }

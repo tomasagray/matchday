@@ -82,7 +82,7 @@ public class HydrationService {
                 .events(events)
                 .competitions(competitions)
                 .teams(teams)
-                .users(users)
+                .fileServerUsers(users)
                 .dataSources(dataSources)
                 .templates(templates)
                 .build();
@@ -95,10 +95,29 @@ public class HydrationService {
     }
 
     public void rehydrate(@NotNull SystemImage systemImage) {
+        // ensure system is empty before rehydrating
+        SystemImage currentImage = createSystemImage();
+        validateEmptySystemImage(currentImage);
+
         matchService.saveAll(systemImage.getEvents());
-        fileServerUserRepo.saveAll(systemImage.getUsers());
-        dataSourceService.saveAll(systemImage.dataSources);
+        fileServerUserRepo.saveAll(systemImage.getFileServerUsers());
+        dataSourceService.saveAll(systemImage.getDataSources());
         systemImage.getTemplates().forEach(templateService::save);
+    }
+
+    private void validateEmptySystemImage(@NotNull SystemImage image) {
+
+        int eventCount = image.getEvents().size();
+        int competitionCount = image.getCompetitions().size();
+        int teamCount = image.getTeams().size();
+        int dataSourceCount = image.getDataSources().size();
+        int fileServerUserCount = image.getFileServerUsers().size();
+        int templateCount = image.getTemplates().size();
+        int total = eventCount + competitionCount + teamCount + dataSourceCount
+                        + fileServerUserCount + templateCount;
+        if (total != 0) {
+            throw new IllegalStateException("Cannot rehydrate: system is not fresh!");
+        }
     }
 
     @Data
@@ -107,7 +126,7 @@ public class HydrationService {
         List<Match> events;
         List<Competition> competitions;
         List<Team> teams;
-        List<FileServerUser> users;
+        List<FileServerUser> fileServerUsers;
         List<PlaintextDataSource<?>> dataSources;
         List<PatternKitTemplate> templates;
     }
