@@ -85,7 +85,7 @@ public class SanityCheckService {
   private @NotNull ArtworkSanityReportBuilder findDanglingArtworkFiles(
       @NotNull ArtworkSanityReportBuilder reportBuilder) {
 
-    final List<Path> danglingFiles = new ArrayList<>();
+    final List<String> danglingFiles = new ArrayList<>();
     // find all Artwork files
     final File storage = settingsService.getSettings().getArtworkStorageLocation().toFile();
     final File[] artworkFiles = storage.listFiles();
@@ -97,7 +97,7 @@ public class SanityCheckService {
         final Optional<Artwork> artwork = artworkService.fetchArtworkAt(filepath);
         if (artwork.isEmpty()) {
           // artwork not in DB
-          danglingFiles.add(filepath);
+          danglingFiles.add(filepath.toString());
         }
       }
     }

@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.service.SettingsService;
 import self.me.matchday.api.service.ZipService;
+import self.me.matchday.db.RestorePointRepository;
 import self.me.matchday.model.Artwork;
+import self.me.matchday.model.RestorePoint;
 import self.me.matchday.model.SanityReport;
 import self.me.matchday.model.Settings;
 import self.me.matchday.model.video.VideoStreamLocator;
@@ -18,8 +20,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -35,17 +40,21 @@ public class BackupService {
     private final HydrationService hydrationService;
     private final ZipService zipService;
     private final SettingsService settingsService;
+    private final RestorePointRepository restorePointRepository;
 
     public BackupService(
             DatabaseManagementService databaseService,
             SanityCheckService sanityCheckService,
-            HydrationService hydrationService, ZipService zipService,
-            SettingsService settingsService) {
+            HydrationService hydrationService,
+            ZipService zipService,
+            SettingsService settingsService,
+            RestorePointRepository restorePointRepository) {
         this.databaseService = databaseService;
         this.sanityCheckService = sanityCheckService;
         this.hydrationService = hydrationService;
         this.zipService = zipService;
         this.settingsService = settingsService;
+        this.restorePointRepository = restorePointRepository;
     }
 
     @NotNull
@@ -58,7 +67,7 @@ public class BackupService {
     private static void analyzeReport(@NotNull SanityReport report) {
 
         SanityReport.ArtworkSanityReport artworkReport = report.getArtworkSanityReport();
-        List<Path> danglingArtwork = artworkReport.getDanglingFiles();
+        List<String> danglingArtwork = artworkReport.getDanglingFiles();
         if (danglingArtwork.size() > 0) {
             fail( "Found dangling Artwork: " + danglingArtwork);
         }
@@ -111,6 +120,30 @@ public class BackupService {
         return dumpFiles[0].toPath();
     }
 
+    public RestorePoint createRestorePoint() throws IOException {
+        checkSanity();
+        Path backupArchive = createBackup();
+        if (backupArchive == null || !(backupArchive.toFile().exists())) {
+            throw new IOException("Could not create backup");
+        }
+
+        HydrationService.SystemImage systemImage = hydrationService.createSystemImage();
+        RestorePoint restorePoint = RestorePoint.builder().backupArchive(backupArchive)
+                .timestamp(Timestamp.from(Instant.now()))
+                .filesize(backupArchive.toFile().length())
+                .eventCount(systemImage.getEvents().size())
+                .competitionCount(systemImage.getCompetitions().size())
+                .teamCount(systemImage.getTeams().size())
+                .dataSourceCount(systemImage.getDataSources().size())
+                .userCount(systemImage.getUsers().size())
+                .build();
+        return restorePointRepository.save(restorePoint);
+    }
+
+    public List<RestorePoint> fetchAllRestorePoints() {
+        return restorePointRepository.findAll();
+    }
+
     public Path createBackup() throws IOException {
 
         // get settings
@@ -119,7 +152,6 @@ public class BackupService {
         Path logPath = settings.getLogFilename().getParent();
         Path archive = getArchivePath(settings);
 
-        checkSanity();
         Path tmp = Files.createTempDirectory("matchday_");
         copy(artworkStorageLocation, tmp.resolve(ARTWORK_PATH));
         copy(logPath, tmp.resolve(LOG_PATH));
@@ -137,39 +169,61 @@ public class BackupService {
         analyzeReport(report);
     }
 
-    public Path restoreFromBackup(@NotNull Path archive) throws IOException, SQLException {
+    public RestorePoint restoreSystem(@NotNull UUID restorePointId)
+            throws IOException, SQLException {
+
+        Optional<RestorePoint> restoreOptional = restorePointRepository.findById(restorePointId);
+        if (restoreOptional.isPresent()) {
+            RestorePoint restorePoint = restoreOptional.get();
+            createRestorePoint();
+            loadBackupArchive(restorePoint.getBackupArchive());
+            checkSanity();
+            return restorePoint;
+        } else {
+            throw new IllegalArgumentException("No RestorePoint found with ID: " + restoreOptional);
+        }
+    }
+
+    public void loadBackupArchive(@NotNull Path archive) throws IOException, SQLException {
 
         Settings settings = settingsService.getSettings();
         Path artworkLocation = settings.getArtworkStorageLocation();
         Path logLocation = settings.getLogFilename().getParent();
 
-        Path backup = createBackup();
-        if (backup == null || !(backup.toFile().exists())) {
-            throw new IOException("Could not create backup");
-        }
+        Files.walkFileTree(artworkLocation, new RecursiveDirectoryDeleter());
+        Files.walkFileTree(logLocation, new RecursiveDirectoryDeleter());
 
         Path tmp = Files.createTempDirectory("matchday_");
         zipService.unzipArchive(archive.toFile(), tmp.toFile());
-        Files.walkFileTree(artworkLocation, new RecursiveDirectoryDeleter());
-        Files.walkFileTree(logLocation, new RecursiveDirectoryDeleter());
-        copy(tmp.resolve(LOG_PATH), logLocation);
-        copy(tmp.resolve(ARTWORK_PATH), artworkLocation);
+        Path tmpArtwork = tmp.resolve(ARTWORK_PATH);
+        Path tmpLog = tmp.resolve(LOG_PATH);
+        if (tmpArtwork.toFile().exists())
+            copy(tmpArtwork, artworkLocation);
+        if (tmpLog.toFile().exists())
+            copy(tmpLog, logLocation);
         Path dumpFile = findDumpFile(tmp);
         databaseService.installDatabase(dumpFile);
-        checkSanity();
 
         Files.walkFileTree(tmp, new RecursiveDirectoryDeleter());
-        return backup;
     }
 
-    public Path dehydrate() throws IOException {
+    public Path dehydrateToDisk() throws IOException {
         checkSanity();
         Path backupLocation = settingsService.getSettings().getBackupLocation();
         return hydrationService.dehydrate(backupLocation);
     }
 
-    public void rehydrate(Path json) throws IOException {
+    public HydrationService.SystemImage dehydrate() {
+        return hydrationService.dehydrate();
+    }
+
+    public void rehydrateFrom(Path json) throws IOException {
         hydrationService.rehydrate(json);
+        checkSanity();
+    }
+
+    public void rehydrateFrom(HydrationService.SystemImage systemImage) {
+        hydrationService.rehydrate(systemImage);
         checkSanity();
     }
 }

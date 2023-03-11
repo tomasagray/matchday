@@ -105,8 +105,7 @@ class BackupServiceTest {
 
         // then
         logger.info("Restoring backup from: {}", backup);
-        Path preRestore = backupService.restoreFromBackup(backup);
-        cleanupFiles.add(preRestore);
+        backupService.loadBackupArchive(backup);
         logger.info("Backup restore complete");
         int restoredMatchCount = matchService.fetchAll().size();
         logger.info("After restore, there are: {} Matches", restoredMatchCount);
@@ -122,7 +121,7 @@ class BackupServiceTest {
 
         // when
         logger.info("Dehydrating system...");
-        Path dehydrated = backupService.dehydrate();
+        Path dehydrated = backupService.dehydrateToDisk();
         assertThat(dehydrated).isNotNull();
         assertThat(dehydrated.toFile()).exists();
         cleanupFiles.add(dehydrated);

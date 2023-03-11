@@ -5,7 +5,6 @@ import lombok.Data;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
-import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -20,7 +19,7 @@ public final class SanityReport {
     @Data
     @Builder
     public static final class ArtworkSanityReport {
-        private final List<Path> danglingFiles;
+        private final List<String> danglingFiles;
         private final List<Artwork> danglingDbEntries;
         private long totalFiles;
         private long totalDbEntries;

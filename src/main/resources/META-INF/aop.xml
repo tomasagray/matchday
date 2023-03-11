@@ -23,6 +23,7 @@
   <aspects>
     <!-- weave in just these aspects -->
     <aspect name="self.me.matchday.log.ArtworkServiceLog"/>
+    <aspect name="self.me.matchday.log.BackupServiceLog"/>
     <aspect name="self.me.matchday.log.CompetitionServiceLog"/>
     <aspect name="self.me.matchday.log.CompetitionControllerLog"/>
     <aspect name="self.me.matchday.log.DatabaseManagementServiceLog"/>
@@ -85,6 +86,7 @@
     <include within="self.me.matchday.api.service.video.VideoStreamManager"/>
     <!-- admin service -->
     <include within="self.me.matchday.api.service.admin.DatabaseManagementService"/>
+    <include within="self.me.matchday.api.service.admin.BackupService"/>
     <!-- plugin-->
     <include within="self.me.matchday.plugin.datasource.blogger.BloggerPlugin"/>
     <include within="self.me.matchday.plugin.datasource.blogger.BloggerParser"/>

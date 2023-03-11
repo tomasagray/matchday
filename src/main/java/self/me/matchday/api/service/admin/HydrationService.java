@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class HydrationService {
 
-    private static final Type TYPE = new TypeReference<Backup>() {}.getType();
+    private static final Type TYPE = new TypeReference<SystemImage>() {}.getType();
     private static final String FILENAME = "matchday_dehydrated_%s.json";
 
     private final MatchService matchService;
@@ -55,7 +55,18 @@ public class HydrationService {
         if (!to.toFile().isDirectory()) {
             throw new IllegalArgumentException("Path is not a directory: " + to);
         }
+        String json = JsonParser.toJson(dehydrate(), TYPE);
+        String filename = String.format(FILENAME, Instant.now().toEpochMilli());
+        Path jsonFile = to.resolve(filename);
+        Files.writeString(jsonFile, json, StandardOpenOption.CREATE_NEW);
+        return jsonFile;
+    }
 
+    public SystemImage dehydrate() {
+        return createSystemImage();
+    }
+
+    public SystemImage createSystemImage() {
         List<Match> events = matchService.fetchAll();
         List<Competition> competitions = competitionService.fetchAll();
         List<Team> teams = teamService.fetchAll();
@@ -67,7 +78,7 @@ public class HydrationService {
                         .collect(Collectors.toList());
         List<PatternKitTemplate> templates = templateService.fetchAll();
 
-        Backup backup = Backup.of()
+        return SystemImage.of()
                 .events(events)
                 .competitions(competitions)
                 .teams(teams)
@@ -75,27 +86,24 @@ public class HydrationService {
                 .dataSources(dataSources)
                 .templates(templates)
                 .build();
-        String json = JsonParser.toJson(backup, TYPE);
-        String filename = String.format(FILENAME, Instant.now().toEpochMilli());
-        Path jsonFile = to.resolve(filename);
-        Files.writeString(jsonFile, json, StandardOpenOption.CREATE_NEW);
-        return jsonFile;
     }
 
     public void rehydrate(@NotNull Path from) throws IOException {
-
         String json = Files.readString(from);
-        Backup backup = JsonParser.fromJson(json, TYPE);
+        SystemImage systemImage = JsonParser.fromJson(json, TYPE);
+        rehydrate(systemImage);
+    }
 
-        matchService.saveAll(backup.getEvents());
-        fileServerUserRepo.saveAll(backup.getUsers());
-        dataSourceService.saveAll(backup.dataSources);
-        backup.getTemplates().forEach(templateService::save);
+    public void rehydrate(@NotNull SystemImage systemImage) {
+        matchService.saveAll(systemImage.getEvents());
+        fileServerUserRepo.saveAll(systemImage.getUsers());
+        dataSourceService.saveAll(systemImage.dataSources);
+        systemImage.getTemplates().forEach(templateService::save);
     }
 
     @Data
     @Builder(builderMethodName = "of")
-    public static class Backup {
+    public static class SystemImage {
         List<Match> events;
         List<Competition> competitions;
         List<Team> teams;
@@ -103,5 +111,4 @@ public class HydrationService {
         List<PlaintextDataSource<?>> dataSources;
         List<PatternKitTemplate> templates;
     }
-
 }
