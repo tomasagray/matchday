@@ -37,7 +37,12 @@ public class Fabric {
 
     Spliterator<L> leftSplit = leftStream.spliterator();
     Spliterator<R> rightSplit = rightStream.spliterator();
-    final long minSize = Long.min(leftSplit.estimateSize(), rightSplit.estimateSize());
+    long leftSize = leftSplit.estimateSize();
+    long rightSize = rightSplit.estimateSize();
+    if (leftSize == 0 || rightSize == 0) {
+      return Stream.empty();
+    }
+    final long minSize = Long.min(leftSize, rightSize);
     final int characteristics = leftSplit.characteristics() & rightSplit.characteristics();
 
     return StreamSupport.stream(
