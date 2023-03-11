@@ -2,6 +2,7 @@ package self.me.matchday.api.service.admin;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.service.SettingsService;
 import self.me.matchday.api.service.ZipService;
 import self.me.matchday.db.RestorePointRepository;
@@ -205,6 +206,35 @@ public class BackupService {
         databaseService.installDatabase(dumpFile);
 
         Files.walkFileTree(tmp, new RecursiveDirectoryDeleter());
+    }
+
+    public byte[] readBackupArchive(@NotNull UUID restorePointId) throws IOException {
+        Optional<RestorePoint> restorePointOptional = restorePointRepository.findById(restorePointId);
+        if (restorePointOptional.isPresent()) {
+            RestorePoint restorePoint = restorePointOptional.get();
+            Path archive = restorePoint.getBackupArchive();
+            return Files.readAllBytes(archive);
+        }
+        String msg = "Cannot download archive for non-existent RestorePoint: " + restorePointId;
+        throw new IllegalArgumentException(msg);
+    }
+
+    @Transactional
+    public Optional<RestorePoint> deleteRestorePoint(@NotNull UUID restorePointId )
+            throws IOException {
+
+        Optional<RestorePoint> rpOpt = restorePointRepository.findById(restorePointId);
+        if (rpOpt.isPresent()) {
+            RestorePoint restorePoint = rpOpt.get();
+            File archive = restorePoint.getBackupArchive().toFile();
+            restorePointRepository.delete(restorePoint);
+            boolean deleted = archive.delete();
+            if (!deleted || archive.exists()) {
+                String msg = "Could not delete System Restore Point archive at: " + archive;
+                throw new IOException(msg);
+            }
+        }
+        return rpOpt;
     }
 
     public Path dehydrateToDisk() throws IOException {

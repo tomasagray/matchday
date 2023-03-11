@@ -50,6 +50,22 @@ public class BackupServiceLog {
         logger.info("Loading system from Backup Archive: {}", jp.getArgs()[0]);
     }
 
+    @Before("execution(* self.me.matchday.api.service.admin.BackupService.readBackupArchive(..))")
+    public void logReadBackupArchiveFromDisk(@NotNull JoinPoint jp) {
+        logger.info(
+                "Reading System Restore backup archive for System Restore Point: {}",
+                jp.getArgs()[0]);
+    }
+
+    @Around("execution(* self.me.matchday.api.service.admin.BackupService.deleteRestorePoint(..))")
+    public Object logDeleteRestorePoint(@NotNull ProceedingJoinPoint jp) throws Throwable {
+        Object rpId = jp.getArgs()[0];
+        logger.info("Deleting System Restore Point: {}...", rpId);
+        Object result = jp.proceed();
+        logger.info("Successfully deleted System Restore Point: {}", rpId);
+        return result;
+    }
+
     @Around("execution(* self.me.matchday.api.service.admin.BackupService.dehydrateToDisk(..))")
     public Object logDehydrateToDisk(@NotNull ProceedingJoinPoint jp) throws Throwable {
         logger.info("Dehydrating system to disk...");

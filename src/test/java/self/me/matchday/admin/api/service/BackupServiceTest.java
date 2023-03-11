@@ -13,6 +13,7 @@ import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.MatchService;
 import self.me.matchday.api.service.admin.BackupService;
 import self.me.matchday.model.Match;
+import self.me.matchday.model.RestorePoint;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -79,6 +81,25 @@ class BackupServiceTest {
         long actualFilesize = backup.toFile().length();
         logger.info("Filesize: {}", actualFilesize);
         assertThat(actualFilesize).isGreaterThanOrEqualTo(expectedFilesize);
+    }
+
+    @Test
+    @DisplayName("Validate ability to delete previously created System Restore Point")
+    void testDeleteBackup() throws IOException {
+
+        // given
+        logger.info("Creating test restore point for deletion...");
+        RestorePoint restorePoint = backupService.createRestorePoint();
+        logger.info("Created System Restore Point: {}", restorePoint);
+
+        // when
+        logger.info("Deleting test System Restore Point...");
+        Optional<RestorePoint> optional = backupService.deleteRestorePoint(restorePoint.getId());
+        logger.info("Done.");
+
+        // then
+        assertThat(optional).isPresent();
+        assertThat(optional.get()).isEqualTo(restorePoint);
     }
 
     @Test

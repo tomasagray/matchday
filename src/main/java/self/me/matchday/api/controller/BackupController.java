@@ -2,6 +2,7 @@ package self.me.matchday.api.controller;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.RestorePointResource;
 import self.me.matchday.api.resource.RestorePointResource.RestorePointResourceModeller;
@@ -44,6 +45,22 @@ public class BackupController {
     public RestorePointResource restoreSystem(@RequestBody UUID restorePointId) throws SQLException, IOException {
         RestorePoint restorePoint = backupService.restoreSystem(restorePointId);
         return restorePointModeller.toModel(restorePoint);
+    }
+
+    @GetMapping(value = "/restore-points/{restorePointId}/download", produces = "application/zip")
+    public byte[] downloadRestorePoint(@PathVariable UUID restorePointId) throws IOException {
+        return backupService.readBackupArchive(restorePointId);
+    }
+
+    @DeleteMapping(
+            value = "/restore-points/{restorePointId}/delete",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<RestorePointResource> deleteRestorePoint(@PathVariable UUID restorePointId)
+            throws IOException {
+        return backupService.deleteRestorePoint(restorePointId)
+                .map(restorePointModeller::toModel)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/dehydrate", produces = MediaType.APPLICATION_JSON_VALUE)
