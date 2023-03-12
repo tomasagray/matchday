@@ -19,17 +19,14 @@
 
 package self.me.matchday.api.controller;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.UUID;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.DataSourcePluginResource;
 import self.me.matchday.api.resource.DataSourcePluginResource.DataSourcePluginResourceAssembler;
 import self.me.matchday.api.service.DataSourcePluginService;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/data-source-plugins")
@@ -86,12 +83,5 @@ public class DataSourcePluginController {
   public @ResponseBody UUID disablePlugin(@PathVariable("pluginId") final UUID pluginId) {
     dataSourcePluginService.disablePlugin(pluginId);
     return pluginId;
-  }
-
-  @ExceptionHandler(IllegalArgumentException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public String handleIllegalArgumentException(@NotNull IllegalArgumentException e) {
-    return e.getMessage();
   }
 }

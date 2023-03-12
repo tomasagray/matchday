@@ -19,6 +19,13 @@
 
 package self.me.matchday.api.controller;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
@@ -32,14 +39,6 @@ import self.me.matchday.api.service.FileServerLoginException;
 import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.api.service.InvalidCookieException;
 import self.me.matchday.model.FileServerUser;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/file-server-users")
@@ -142,13 +141,10 @@ public class FileServerUserController {
     return ResponseEntity.ok(userId);
   }
 
-  @ExceptionHandler({
-    IOException.class,
-    InvalidCookieException.class
-  })
+  @ExceptionHandler(InvalidCookieException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
-  public String handleIoException(@NotNull Exception e) {
+  public String handleCookieException(@NotNull Exception e) {
     return e.getMessage();
   }
 

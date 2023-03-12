@@ -19,9 +19,12 @@
 
 package self.me.matchday.api.controller;
 
-import org.jetbrains.annotations.NotNull;
+import static self.me.matchday.api.resource.DataSourceResource.DataSourceResourceAssembler;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +33,6 @@ import self.me.matchday.api.service.DataSourceService;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.model.SnapshotRequest;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
-import static self.me.matchday.api.resource.DataSourceResource.DataSourceResourceAssembler;
 
 @RestController
 @RequestMapping(value = "/data-sources")
@@ -124,12 +121,5 @@ public class DataSourceController {
   public ResponseEntity<UUID> deleteDataSource(@PathVariable("dataSourceId") UUID dataSourceID) {
     dataSourceService.delete(dataSourceID);
     return ResponseEntity.ok(dataSourceID);
-  }
-
-  @ExceptionHandler(IllegalArgumentException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public String handleIllegalArgumentException(@NotNull IllegalArgumentException e) {
-    return e.getMessage();
   }
 }

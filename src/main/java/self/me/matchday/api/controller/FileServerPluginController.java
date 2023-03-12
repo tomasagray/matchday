@@ -109,13 +109,14 @@ public class FileServerPluginController {
 
   @ExceptionHandler(IOException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ResponseEntity<String> handleIoException(@NotNull IOException e) {
+  @ResponseBody
+  public String handleIoException(@NotNull IOException e) {
     String message = e.getMessage();
     final Throwable cause = e.getCause();
     logger.error(
         "Could not read text from multi-part POST data: {} with root cause: {}",
         message,
         cause.getMessage());
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+    return message;
   }
 }

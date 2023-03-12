@@ -21,17 +21,12 @@ package self.me.matchday.api.controller;
 
 import java.io.IOException;
 import java.util.List;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.CountryResource;
 import self.me.matchday.api.resource.CountryResource.CountryResourceAssembler;
@@ -81,19 +76,5 @@ public class CountryController {
   public ResponseEntity<byte[]> getFlagForCountry(@PathVariable String name) throws IOException {
     final byte[] flag = service.getFlag(name);
     return ResponseEntity.ok(flag);
-  }
-
-  @ExceptionHandler(IOException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public String handleIoError(@NotNull IOException e) {
-    return e.getMessage();
-  }
-
-  @ExceptionHandler(IllegalArgumentException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public String handleNoCountry(@NotNull IllegalArgumentException e) {
-    return e.getMessage();
   }
 }
