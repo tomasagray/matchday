@@ -19,15 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -38,13 +29,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.EventRepository;
 import self.me.matchday.db.VideoFileSrcRepository;
-import self.me.matchday.model.Competition;
-import self.me.matchday.model.Event;
+import self.me.matchday.model.*;
 import self.me.matchday.model.Event.EventSorter;
-import self.me.matchday.model.Highlight;
-import self.me.matchday.model.Match;
-import self.me.matchday.model.ProperName;
 import self.me.matchday.model.video.VideoFileSource;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
@@ -61,7 +58,6 @@ public class EventService implements EntityService<Event, UUID> {
 
   EventService(
       EventRepository eventRepository,
-      EntityCorrectionService entityCorrectionService,
       MatchService matchService,
       HighlightService highlightService,
       CompetitionService competitionService,
@@ -164,6 +160,7 @@ public class EventService implements EntityService<Event, UUID> {
 
   @Override
   public Event update(@NotNull Event event) {
+    validateEvent(event);
     if (event instanceof Match) {
       return matchService.update((Match) event);
     } else if (event instanceof Highlight) {
@@ -208,6 +205,10 @@ public class EventService implements EntityService<Event, UUID> {
     if (!isValidCompetition(competition)) {
       throw new InvalidEventException("invalid competition: " + competition);
     }
+    // ensure Event has a date
+    if (event.getDate() == null) {
+      event.setDate(LocalDateTime.now());
+    }
     final LocalDateTime date = event.getDate();
     if (!isValidDate(date)) {
       throw new InvalidEventException("invalid date: " + date);
@@ -227,7 +228,8 @@ public class EventService implements EntityService<Event, UUID> {
   }
 
   private boolean isValidDate(final LocalDateTime date) {
-    final LocalDateTime MIN_DATE = LocalDateTime.of(LocalDate.ofYearDay(1970, 1), LocalTime.MIN);
+    final LocalDate wayBack = LocalDate.ofYearDay(1970, 1);
+    final LocalDateTime MIN_DATE = LocalDateTime.of(wayBack, LocalTime.MIN);
     return date != null && date.isAfter(MIN_DATE);
   }
 
