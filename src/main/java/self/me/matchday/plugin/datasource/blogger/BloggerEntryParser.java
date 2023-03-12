@@ -19,11 +19,12 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
-import static self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Author;
-import static self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Generic;
-import static self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Link;
-import static self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Str;
-import static self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Term;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.jsoup.select.Evaluator;
+import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,12 +32,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.jsoup.select.Evaluator;
-import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed;
+
+import static self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.*;
 
 class BloggerEntryParser {
 
@@ -76,8 +73,8 @@ class BloggerEntryParser {
         .orElse(null);
   }
 
-  Str getStr() {
-    return element.select("h3.entry-Str").stream()
+  Str getTitle() {
+    return element.select("h3.entry-title").stream()
         .findFirst()
         .map(Element::text)
         .map(Str::new)
