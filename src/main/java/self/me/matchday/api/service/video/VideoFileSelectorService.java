@@ -73,8 +73,7 @@ public class VideoFileSelectorService {
             .thenComparing(
                 VideoFileSelectorService::getSourcePrimaryLanguage,
                 (first, second) -> {
-                  if (event instanceof Match) {
-                    final Match match = (Match) event;
+                  if (event instanceof final Match match) {
                     return compareLanguages(match.getHomeTeam().getCountry(), first, second);
                   }
                   return 0;
@@ -83,8 +82,7 @@ public class VideoFileSelectorService {
             .thenComparing(
                 VideoFileSelectorService::getSourcePrimaryLanguage,
                 (first, second) -> {
-                  if (event instanceof Match) {
-                    final Match match = (Match) event;
+                  if (event instanceof final Match match) {
                     return compareLanguages(match.getAwayTeam().getCountry(), first, second);
                   }
                   return 0;

@@ -85,8 +85,7 @@ public class VideoStreamLocatorServiceLog {
       "execution(* self.me.matchday.api.service.video.VideoStreamLocatorService.updateStreamLocator(..))")
   public void logUpdateStreamLocator(@NotNull JoinPoint jp) {
     final Object arg = jp.getArgs()[0];
-    if (arg instanceof VideoStreamLocator) {
-      final VideoStreamLocator streamLocator = (VideoStreamLocator) arg;
+    if (arg instanceof final VideoStreamLocator streamLocator) {
       final Long id = streamLocator.getStreamLocatorId();
       final TaskState state = streamLocator.getState();
       final int completed = (int) (state.getCompletionRatio() * 100);

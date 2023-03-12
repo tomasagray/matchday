@@ -20,7 +20,6 @@
 package self.me.matchday.log;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,9 +54,8 @@ public class DataSourceServiceLog {
   @Before("execution(* self.me.matchday.api.service.DataSourceService.refreshDataSource(..))")
   public void logRefreshDataSource(@NotNull JoinPoint jp) {
     final Object[] args = jp.getArgs();
-    if (args.length == 2 && args[1] instanceof DataSource) {
+    if (args.length == 2 && args[1] instanceof final DataSource<?> dataSource) {
       final Object request = args[0];
-      final DataSource<?> dataSource = (DataSource<?>) args[1];
       logger.info(
           "Refreshing DataSource: {} with request: {}", dataSource.getDataSourceId(), request);
     }
@@ -71,8 +69,7 @@ public class DataSourceServiceLog {
   @Before("execution(* self.me.matchday.api.service.DataSourceService.saveAll(..))")
   public void logSaveAllDataSources(@NotNull JoinPoint jp) {
     final Iterable<?> sources = (Iterable<?>) jp.getArgs()[0];
-    final List<?> sourceList =
-        StreamSupport.stream(sources.spliterator(), false).collect(Collectors.toList());
+    final List<?> sourceList = StreamSupport.stream(sources.spliterator(), false).toList();
     logger.info("Saving: {} Data Sources...", sourceList.size());
   }
 
@@ -80,8 +77,7 @@ public class DataSourceServiceLog {
   public Object logGetDataSourcesForPlugin(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Fetching Data Sources for plugin ID: {}", jp.getArgs()[0]);
     Object result = jp.proceed();
-    if (result instanceof List) {
-      final List<?> sources = (List<?>) result;
+    if (result instanceof final List<?> sources) {
       logger.info("Retrieved {} sources from database", sources.size());
     } else {
       logger.error("Database returned invalid data: {}", result);
@@ -108,8 +104,7 @@ public class DataSourceServiceLog {
   @Before("execution(* self.me.matchday.api.service.DataSourceService.updateAll(..))")
   public void logUpdateManyDataSources(@NotNull JoinPoint jp) {
     final Iterable<?> sources = (Iterable<?>) jp.getArgs()[0];
-    final List<?> sourceList =
-        StreamSupport.stream(sources.spliterator(), false).collect(Collectors.toList());
+    final List<?> sourceList = StreamSupport.stream(sources.spliterator(), false).toList();
     logger.info("Updating: {} DataSources...", sourceList.size());
   }
 
@@ -121,8 +116,7 @@ public class DataSourceServiceLog {
   @Before("execution(* self.me.matchday.api.service.DataSourceService.deleteAll(..))")
   public void logDeleteManyDataSources(@NotNull JoinPoint jp) {
     final Iterable<?> sources = (Iterable<?>) jp.getArgs()[0];
-    final List<?> sourceList =
-        StreamSupport.stream(sources.spliterator(), false).collect(Collectors.toList());
+    final List<?> sourceList = StreamSupport.stream(sources.spliterator(), false).toList();
     logger.info("Deleting: {} DataSources...", sourceList.size());
   }
 }

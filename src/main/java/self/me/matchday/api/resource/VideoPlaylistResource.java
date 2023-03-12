@@ -58,10 +58,9 @@ public class VideoPlaylistResource extends RepresentationModel<VideoPlaylistReso
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof VideoPlaylistResource)) return false;
-        if (!super.equals(o)) return false;
-        VideoPlaylistResource that = (VideoPlaylistResource) o;
+    if (this == o) return true;
+    if (!(o instanceof VideoPlaylistResource that)) return false;
+    if (!super.equals(o)) return false;
         return Objects.equals(getUris(), that.getUris());
     }
 

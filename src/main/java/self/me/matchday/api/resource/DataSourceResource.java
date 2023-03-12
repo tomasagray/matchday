@@ -19,7 +19,14 @@
 
 package self.me.matchday.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.StreamSupport;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
@@ -31,14 +38,6 @@ import self.me.matchday.api.controller.DataSourceController;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.PatternKit;
 import self.me.matchday.model.PlaintextDataSource;
-
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.StreamSupport;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @NoArgsConstructor
@@ -95,8 +94,7 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
           linkTo(methodOn(DataSourceController.class).getDataSource(entity.getDataSourceId()))
               .withSelfRel());
 
-      if (entity instanceof PlaintextDataSource) {
-        final PlaintextDataSource<?> plaintextEntity = (PlaintextDataSource<?>) entity;
+      if (entity instanceof final PlaintextDataSource<?> plaintextEntity) {
         PlaintextDataSourceResource plaintextResource = new PlaintextDataSourceResource(resource);
         final List<PatternKit<?>> patternKits = plaintextEntity.getPatternKits();
         plaintextResource.setPatternKits(patternKits);
