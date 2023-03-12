@@ -105,11 +105,10 @@ public class Highlight extends Event implements Serializable {
 
   @Override
   public boolean equals(final Object o) {
-    if (!(o instanceof Highlight)) {
+    if (!(o instanceof final Highlight highlight)) {
       return false;
     }
     // Cast for comparison
-    final Highlight highlight = (Highlight) o;
     return this.getEventId().equals(highlight.getEventId())
         && this.getCompetition().equals(highlight.getCompetition())
         && this.getFixture().equals(highlight.getFixture())

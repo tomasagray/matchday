@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.unit.api.service;
+package self.me.matchday.integration.api.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 

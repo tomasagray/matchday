@@ -19,6 +19,8 @@
 
 package self.me.matchday.log;
 
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -30,11 +32,6 @@ import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.video.VideoFileSource;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Aspect
 public class VideoStreamingServiceLog {
@@ -154,15 +151,5 @@ public class VideoStreamingServiceLog {
       "execution(* self.me.matchday.api.service.video.VideoStreamingService.deleteVideoData(..))")
   public void logDeleteVideoStreamForVideoFile(@NotNull JoinPoint jp) {
     logger.info("Deleting video stream data for VideoFile: " + jp.getArgs()[0]);
-  }
-
-  @Before("execution(* self.me.matchday.api.controller.VideoStreamingController.handle*(..))")
-  public void logStreamingError(@NotNull JoinPoint jp) {
-    final Throwable e = (Throwable) jp.getArgs()[0];
-    final String error =
-        Arrays.stream(e.getStackTrace())
-            .map(StackTraceElement::toString)
-            .collect(Collectors.joining("\n"));
-    logger.debug(error);
   }
 }

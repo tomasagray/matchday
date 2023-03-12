@@ -23,15 +23,41 @@ import org.springframework.stereotype.Component;
 import self.me.matchday.model.Fixture;
 import self.me.matchday.plugin.datasource.parsing.TypeHandler;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Component
 public class FixtureHandler extends TypeHandler<Fixture> {
 
-  public FixtureHandler() {
-    super(
-        Fixture.class,
-        s -> {
-          final int fixtureNum = Integer.parseInt(s);
-          return new Fixture(fixtureNum);
-        });
-  }
+    private static final Pattern FIXTURE_NUM = Pattern.compile("^\\d{1,2}$");
+    private static final Pattern TOURNAMENT =
+            Pattern.compile(
+                    "^(Round[\\s-]*of[\\s-]*16)|(Quarter[\\s-]*Final)|" +
+                            "(Semi[\\s-]*Final)|(Final)|(Play[\\s-]*off)",
+                    Pattern.CASE_INSENSITIVE);
+    private static final Pattern TITLE_FIXTURE_NUM = Pattern.compile("^(\\w+) (\\d{1,2})$");
+
+    public FixtureHandler() {
+        super(
+            Fixture.class,
+            s -> {
+                // fixture number only (e.g., "16")
+                if (FIXTURE_NUM.matcher(s).find()) {
+                    return new Fixture(Integer.parseInt(s));
+                }
+                // tournament (e.g., Round of 16, Quarter final, etc.)
+                if (TOURNAMENT.matcher(s).find()) {
+                    return new Fixture(s);
+                }
+                // title & number (e.g., Matchday 26, jornada 3, etc.)
+                Matcher titleMatcher = TITLE_FIXTURE_NUM.matcher(s);
+                if (titleMatcher.find()) {
+                    String title = titleMatcher.group(1);
+                    int fixture = Integer.parseInt(titleMatcher.group(2));
+                    return new Fixture(title, fixture);
+                }
+                // default
+                throw new RuntimeException("Not a Fixture: " + s);
+            });
+    }
 }

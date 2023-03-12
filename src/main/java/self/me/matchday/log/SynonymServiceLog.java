@@ -103,7 +103,7 @@ public class SynonymServiceLog {
   }
 
   @SuppressWarnings("unchecked cast")
-  @Before("execution(* self.me.matchday.api.service.SynonymService.updateAll())")
+  @Before("execution(* self.me.matchday.api.service.SynonymService.updateAll(..))")
   public void logUpdateAllSynonyms(@NotNull JoinPoint jp) {
     final Iterable<Synonym> synonyms = (Iterable<Synonym>) jp.getArgs()[0];
     final long synonymCount = synonyms.spliterator().estimateSize();

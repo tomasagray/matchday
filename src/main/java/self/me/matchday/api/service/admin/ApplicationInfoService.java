@@ -1,4 +1,4 @@
-package self.me.matchday.api.service;
+package self.me.matchday.api.service.admin;
 
 import lombok.Builder;
 import lombok.Data;

@@ -23,26 +23,20 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static self.me.matchday.api.controller.CompetitionController.IMAGE_SVG_VALUE;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.api.resource.ArtworkCollectionResource;
@@ -56,11 +50,8 @@ import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.api.service.CompetitionService;
-import self.me.matchday.api.service.EventService;
-import self.me.matchday.api.service.InvalidArtworkException;
 import self.me.matchday.api.service.MatchService;
 import self.me.matchday.api.service.TeamService;
-import self.me.matchday.api.service.UnknownEntityException;
 import self.me.matchday.model.Artwork;
 import self.me.matchday.model.ArtworkCollection;
 import self.me.matchday.model.ArtworkRole;
@@ -84,7 +75,6 @@ public class TeamController {
   public TeamController(
       TeamService teamService,
       CompetitionService competitionService,
-      EventService eventService,
       MatchService matchService,
       TeamResourceAssembler teamResourceAssembler,
       CompetitionResourceAssembler competitionResourceAssembler,
@@ -170,7 +160,7 @@ public class TeamController {
       value = "/team/{teamId}/competitions",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public CollectionModel<CompetitionResource> fetchCompetitionsForTema(
+  public CollectionModel<CompetitionResource> fetchCompetitionsForTeam(
       @PathVariable final UUID teamId) {
     return competitionResourceAssembler.toCollectionModel(
         competitionService.fetchCompetitionsForTeam(teamId));
@@ -319,47 +309,5 @@ public class TeamController {
   public ResponseEntity<UUID> deleteTeam(@PathVariable UUID teamId) throws IOException {
     teamService.delete(teamId);
     return ResponseEntity.ok(teamId);
-  }
-
-  @ExceptionHandler(IllegalArgumentException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public String handleIllegalArg(@NotNull IllegalArgumentException e) {
-    return e.getMessage();
-  }
-
-  @ExceptionHandler(InvalidArtworkException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public String handleInvalidArt(@NotNull InvalidArtworkException e) {
-    return e.getMessage();
-  }
-
-  @ExceptionHandler(UnknownEntityException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public String handleUnknownEntity(@NotNull UnknownEntityException e) {
-    return e.getMessage();
-  }
-
-  @ExceptionHandler(FileNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public String handleFileNotFound(@NotNull FileNotFoundException e) {
-    return "File not found: " + e.getMessage();
-  }
-
-  @ExceptionHandler(IOException.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  @ResponseBody
-  public String handleIoError(@NotNull IOException e) {
-    return e.getMessage();
-  }
-
-  @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public String handleSqlError(@NotNull SQLIntegrityConstraintViolationException e) {
-    return e.getMessage();
   }
 }

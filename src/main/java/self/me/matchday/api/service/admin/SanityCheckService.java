@@ -17,19 +17,18 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.api.service;
+package self.me.matchday.api.service.admin;
 
-import lombok.Builder;
-import lombok.Data;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import self.me.matchday.api.service.SanityCheckService.SanityReport.ArtworkSanityReport;
-import self.me.matchday.api.service.SanityCheckService.SanityReport.ArtworkSanityReport.ArtworkSanityReportBuilder;
-import self.me.matchday.api.service.SanityCheckService.SanityReport.VideoSanityReport;
-import self.me.matchday.api.service.SanityCheckService.SanityReport.VideoSanityReport.VideoSanityReportBuilder;
+import self.me.matchday.api.service.ArtworkService;
+import self.me.matchday.api.service.SettingsService;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.Artwork;
+import self.me.matchday.model.SanityReport;
+import self.me.matchday.model.SanityReport.ArtworkSanityReport.ArtworkSanityReportBuilder;
+import self.me.matchday.model.SanityReport.VideoSanityReport.VideoSanityReportBuilder;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
@@ -65,13 +64,13 @@ public class SanityCheckService {
         .build();
   }
 
-  public ArtworkSanityReport createArtworkSanityReport() {
-    final ArtworkSanityReportBuilder reportBuilder = ArtworkSanityReport.builder();
+  public SanityReport.ArtworkSanityReport createArtworkSanityReport() {
+    final ArtworkSanityReportBuilder reportBuilder = SanityReport.ArtworkSanityReport.builder();
     return findDanglingArtworkFiles(findDanglingEntries(reportBuilder)).build();
   }
 
-  public VideoSanityReport createVideoSanityReport() {
-    final VideoSanityReportBuilder reportBuilder = VideoSanityReport.builder();
+  public SanityReport.VideoSanityReport createVideoSanityReport() {
+    final VideoSanityReportBuilder reportBuilder = SanityReport.VideoSanityReport.builder();
     return findDanglingLocatorPlaylists(findDanglingVideoStreamLocators(reportBuilder)).build();
   }
 
@@ -86,7 +85,7 @@ public class SanityCheckService {
   private @NotNull ArtworkSanityReportBuilder findDanglingArtworkFiles(
       @NotNull ArtworkSanityReportBuilder reportBuilder) {
 
-    final List<Path> danglingFiles = new ArrayList<>();
+    final List<String> danglingFiles = new ArrayList<>();
     // find all Artwork files
     final File storage = settingsService.getSettings().getArtworkStorageLocation().toFile();
     final File[] artworkFiles = storage.listFiles();
@@ -98,11 +97,11 @@ public class SanityCheckService {
         final Optional<Artwork> artwork = artworkService.fetchArtworkAt(filepath);
         if (artwork.isEmpty()) {
           // artwork not in DB
-          danglingFiles.add(filepath);
+          danglingFiles.add(filepath.toString());
         }
       }
     }
-    reportBuilder.dangingFiles(danglingFiles);
+    reportBuilder.danglingFiles(danglingFiles);
     return reportBuilder;
   }
 
@@ -185,30 +184,4 @@ public class SanityCheckService {
     return reportBuilder;
   }
 
-  @Data
-  @Builder
-  public static final class SanityReport {
-
-    private final ArtworkSanityReport artworkSanityReport;
-    private final VideoSanityReport videoSanityReport;
-    private final Timestamp timestamp;
-
-    @Data
-    @Builder
-    public static final class ArtworkSanityReport {
-      private final List<Path> dangingFiles;
-      private final List<Artwork> danglingDbEntries;
-      private long totalFiles;
-      private long totalDbEntries;
-    }
-
-    @Data
-    @Builder
-    public static final class VideoSanityReport {
-      private final List<VideoStreamLocator> danglingStreamLocators;
-      private final List<VideoStreamLocatorPlaylist> danglingPlaylists;
-      private long totalStreamLocators;
-      private long totalLocatorPlaylists;
-    }
-  }
 }

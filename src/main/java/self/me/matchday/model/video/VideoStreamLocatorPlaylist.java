@@ -87,8 +87,7 @@ public class VideoStreamLocatorPlaylist {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof VideoStreamLocatorPlaylist)) return false;
-    VideoStreamLocatorPlaylist playlist = (VideoStreamLocatorPlaylist) o;
+    if (!(o instanceof VideoStreamLocatorPlaylist playlist)) return false;
     return Objects.equals(getFileSource(), playlist.getFileSource())
         && Objects.equals(getStreamLocators(), playlist.getStreamLocators())
         && Objects.equals(getStorageLocation(), playlist.getStorageLocation())

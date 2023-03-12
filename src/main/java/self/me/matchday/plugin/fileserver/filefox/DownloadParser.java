@@ -57,8 +57,7 @@ public class DownloadParser {
     final String directDownloadHtml =
         connectionManager.post(formUri, cookieJar, queryParams).bodyToMono(String.class).block();
     final FileFoxPage ddlPage = pageEvaluator.getFileFoxPage(directDownloadHtml);
-    if (ddlPage instanceof FileFoxPage.DirectDownload) {
-      final FileFoxPage.DirectDownload directDownload = (FileFoxPage.DirectDownload) ddlPage;
+    if (ddlPage instanceof final FileFoxPage.DirectDownload directDownload) {
       return directDownload.getDdlUrl();
     }
     throw new FileFoxParsingException(

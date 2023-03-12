@@ -19,13 +19,6 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
@@ -37,6 +30,14 @@ import self.me.matchday.plugin.datasource.blogger.model.Blogger;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerEntry;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Link;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class HtmlBloggerParser implements BloggerParser {
 
@@ -182,17 +183,16 @@ public class HtmlBloggerParser implements BloggerParser {
     private static BloggerFeed.Link getSelfLink(@NotNull final Element elem) {
       final String rel = elem.attr("rel");
       switch (rel) {
-        case "canonical":
-        case "alternate":
-        case "service.post":
+        case "canonical", "alternate", "service.post" -> {
           try {
-            final BloggerFeed.Link link = new BloggerFeed.Link();
+            final Link link = new Link();
             link.setHref(new URL(elem.attr("href")));
             link.setRel(rel);
             link.setType(elem.attr("type"));
             return link;
           } catch (MalformedURLException ignored) {
           }
+        }
       }
       return null;
     }
@@ -247,7 +247,7 @@ public class HtmlBloggerParser implements BloggerParser {
                     .id(parser.getId())
                     .published(parser.getPublished())
                     .category(parser.getTerms())
-                    .title(parser.getStr())
+                    .title(parser.getTitle())
                     .content(parser.getContent())
                     .link(parser.getLinks())
                     .author(parser.getAuthors())

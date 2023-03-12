@@ -13,6 +13,7 @@ import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.MatchService;
 import self.me.matchday.api.service.admin.BackupService;
 import self.me.matchday.model.Match;
+import self.me.matchday.model.RestorePoint;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -82,6 +84,25 @@ class BackupServiceTest {
     }
 
     @Test
+    @DisplayName("Validate ability to delete previously created System Restore Point")
+    void testDeleteBackup() throws IOException {
+
+        // given
+        logger.info("Creating test restore point for deletion...");
+        RestorePoint restorePoint = backupService.createRestorePoint();
+        logger.info("Created System Restore Point: {}", restorePoint);
+
+        // when
+        logger.info("Deleting test System Restore Point...");
+        Optional<RestorePoint> optional = backupService.deleteRestorePoint(restorePoint.getId());
+        logger.info("Done.");
+
+        // then
+        assertThat(optional).isPresent();
+        assertThat(optional.get()).isEqualTo(restorePoint);
+    }
+
+    @Test
     @DisplayName("Validate restoration of backup functionality")
     void testRestore() throws IOException, SQLException {
 
@@ -105,8 +126,7 @@ class BackupServiceTest {
 
         // then
         logger.info("Restoring backup from: {}", backup);
-        Path preRestore = backupService.restoreFromBackup(backup);
-        cleanupFiles.add(preRestore);
+        backupService.loadBackupArchive(backup);
         logger.info("Backup restore complete");
         int restoredMatchCount = matchService.fetchAll().size();
         logger.info("After restore, there are: {} Matches", restoredMatchCount);
@@ -122,7 +142,7 @@ class BackupServiceTest {
 
         // when
         logger.info("Dehydrating system...");
-        Path dehydrated = backupService.dehydrate();
+        Path dehydrated = backupService.dehydrateToDisk();
         assertThat(dehydrated).isNotNull();
         assertThat(dehydrated.toFile()).exists();
         cleanupFiles.add(dehydrated);

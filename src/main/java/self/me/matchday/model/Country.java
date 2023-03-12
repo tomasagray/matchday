@@ -51,10 +51,9 @@ public class Country {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof Country)) {
+    if (!(o instanceof Country country)) {
       return false;
     }
-    Country country = (Country) o;
     return Objects.equals(getName(), country.getName())
         && Objects.equals(getLocales(), country.getLocales())
         && Objects.equals(getFlagFileName(), country.getFlagFileName());

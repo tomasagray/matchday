@@ -19,19 +19,19 @@
 
 package self.me.matchday.model;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.Embeddable;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
+import javax.persistence.Embeddable;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
@@ -39,7 +39,7 @@ import java.util.Objects;
 @Embeddable
 public final class Season implements Serializable {
 
-  private static final long serialVersionUID = 123456L; // for cross-platform serialization
+  @Serial private static final long serialVersionUID = 123456L;
 
   // Default parameters
   private static final int MILLENNIUM = 2_000;
@@ -95,8 +95,7 @@ public final class Season implements Serializable {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof Season)) return false;
-    Season season = (Season) o;
+    if (!(o instanceof Season season)) return false;
     return Objects.equals(getStartDate(), season.getStartDate())
         && Objects.equals(getEndDate(), season.getEndDate());
   }

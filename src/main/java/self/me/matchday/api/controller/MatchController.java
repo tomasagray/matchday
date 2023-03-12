@@ -24,7 +24,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static self.me.matchday.api.controller.CompetitionController.IMAGE_SVG_VALUE;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,20 +159,6 @@ public class MatchController {
   public ResponseEntity<MatchResource> updateMatch(@RequestBody final Match match) {
     final Match updated = matchService.update(match);
     return ResponseEntity.ok(matchAssembler.toModel(updated));
-  }
-
-  @ExceptionHandler({IOException.class, UncheckedIOException.class})
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  @ResponseBody
-  public String handleIoError(@NotNull IOException e) {
-    return e.getMessage();
-  }
-
-  @ExceptionHandler(IllegalArgumentException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public String handleIllegalArg(@NotNull IllegalArgumentException e) {
-    return e.getMessage();
   }
 
   @ExceptionHandler(InvalidEventException.class)

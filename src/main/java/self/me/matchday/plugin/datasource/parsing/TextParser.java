@@ -106,25 +106,11 @@ public class TextParser {
 
     final Field[] fields = ReflectionUtils.getAllFields(obj.getClass());
     for (Field field : fields) {
-      final Object value = getFieldValue(field, obj);
-      if (field.getName().equals(name) && value == null) {
+      if (field.getName().equals(name)) {
         return field;
       }
     }
     return null;
-  }
-
-  private @Nullable Object getFieldValue(@NotNull Field field, @NotNull Object obj) {
-
-    try {
-      final boolean canAccess = field.canAccess(obj);
-      field.setAccessible(true);
-      final Object value = field.get(obj);
-      field.setAccessible(canAccess);
-      return value;
-    } catch (ReflectiveOperationException | RuntimeException e) {
-      return null;
-    }
   }
 
   @Nullable
