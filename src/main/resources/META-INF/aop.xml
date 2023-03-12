@@ -25,7 +25,6 @@
     <aspect name="self.me.matchday.log.ArtworkServiceLog"/>
     <aspect name="self.me.matchday.log.BackupServiceLog"/>
     <aspect name="self.me.matchday.log.CompetitionServiceLog"/>
-    <aspect name="self.me.matchday.log.CompetitionControllerLog"/>
     <aspect name="self.me.matchday.log.DatabaseManagementServiceLog"/>
     <aspect name="self.me.matchday.log.DataSourcePluginServiceLog"/>
     <aspect name="self.me.matchday.log.DataSourceServiceLog"/>

@@ -25,7 +25,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -99,17 +98,5 @@ public class VideoStreamLocatorServiceLog {
       "execution(* self.me.matchday.api.service.video.VideoStreamLocatorService.deleteStreamLocator(..))")
   public void logDeleteStreamLocator(@NotNull JoinPoint jp) {
     logger.info("Deleting VideoStreamLocator: {}", jp.getArgs()[0]);
-  }
-
-  @Before(
-      "execution(* self.me.matchday.api.service.video.VideoStreamLocatorService.deleteStreamLocatorWithData(..))")
-  public void logDeleteStreamLocatorWithData(@NotNull JoinPoint jp) {
-    logger.info("Deleting VideoStreamLocator: {} WITH DATA!", jp.getArgs()[0]);
-  }
-
-  @After(
-      "execution(* self.me.matchday.api.service.video.VideoStreamLocatorService.deleteStreamLocatorWithData(..))")
-  public void logSuccessDeleteStreamLocatorWithData(@NotNull JoinPoint jp) {
-    logger.info("Successfully deleted VideoStreamLocator: {} WITH DATA!", jp.getArgs()[0]);
   }
 }
