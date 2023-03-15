@@ -19,6 +19,10 @@
 
 package self.me.matchday.api.service;
 
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -37,11 +41,6 @@ import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.util.ResourceFileReader;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
@@ -249,7 +248,8 @@ public class MatchService implements EntityService<Match, UUID> {
     }
   }
 
-  private void validateMatch(@NotNull Match match) {
+  public void validateMatch(@NotNull Match match) {
+    competitionService.validateCompetition(match.getCompetition());
     teamService.validateTeam(match.getHomeTeam());
     teamService.validateTeam(match.getAwayTeam());
     validateFileSources(match);

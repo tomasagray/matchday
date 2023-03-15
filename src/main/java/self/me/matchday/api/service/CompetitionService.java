@@ -224,44 +224,6 @@ public class CompetitionService implements EntityService<Competition, UUID> {
     return save(competition);
   }
 
-  private void validateForUpdate(@NotNull Competition updated) {
-    validateUpdateId(updated);
-    validateUpdateName(updated);
-  }
-
-  private void validateUpdateId(@NotNull Competition updated) {
-
-    final UUID updatedId = updated.getId();
-    final String unknownMsg = "Trying to update unknown Competition: " + updated;
-    if (updatedId == null) {
-      throw new UnknownEntityException(unknownMsg);
-    }
-    final Optional<Competition> optionalIdExists = fetchById(updatedId);
-    if (optionalIdExists.isEmpty()) {
-      throw new UnknownEntityException(unknownMsg);
-    }
-  }
-
-  private void validateUpdateName(@NotNull Competition updated) {
-
-    final ProperName updatedProperName = updated.getName();
-    synonymService.validateProperName(updatedProperName);
-
-    final String updatedName = updatedProperName.getName();
-    final Optional<Competition> optional = fetchCompetitionByName(updatedName);
-    if (optional.isPresent()) {
-      final Competition existing = optional.get();
-      final UUID existingId = existing.getId();
-      if (!existingId.equals(updated.getId())) {
-        final String msg =
-            String.format(
-                "A Competition with name: %s already exists; please use the merge function instead",
-                updatedName);
-        throw new IllegalArgumentException(msg);
-      }
-    }
-  }
-
   @Override
   public List<Competition> updateAll(@NotNull Iterable<? extends Competition> competitions) {
     return StreamSupport.stream(competitions.spliterator(), false)
@@ -302,12 +264,50 @@ public class CompetitionService implements EntityService<Competition, UUID> {
     }
   }
 
+  private void validateForUpdate(@NotNull Competition updated) {
+    validateUpdateId(updated);
+    validateUpdateName(updated);
+  }
+
+  private void validateUpdateId(@NotNull Competition updated) {
+
+    final UUID updatedId = updated.getId();
+    final String unknownMsg = "Trying to update unknown Competition: " + updated;
+    if (updatedId == null) {
+      throw new UnknownEntityException(unknownMsg);
+    }
+    final Optional<Competition> optionalIdExists = fetchById(updatedId);
+    if (optionalIdExists.isEmpty()) {
+      throw new UnknownEntityException(unknownMsg);
+    }
+  }
+
+  private void validateUpdateName(@NotNull Competition updated) {
+
+    final ProperName updatedProperName = updated.getName();
+    synonymService.validateProperName(updatedProperName);
+
+    final String updatedName = updatedProperName.getName();
+    final Optional<Competition> optional = fetchCompetitionByName(updatedName);
+    if (optional.isPresent()) {
+      final Competition existing = optional.get();
+      final UUID existingId = existing.getId();
+      if (!existingId.equals(updated.getId())) {
+        final String msg =
+            String.format(
+                "A Competition with name: %s already exists; please use the merge function instead",
+                updatedName);
+        throw new IllegalArgumentException(msg);
+      }
+    }
+  }
+
   /**
    * Data validation for Competition objects
    *
    * @param competition The Competition to scrutinize
    */
-  private void validateCompetition(@NotNull final Competition competition) {
+  public void validateCompetition(@NotNull final Competition competition) {
     final ProperName name = competition.getName();
     if (name == null || "".equals(name.getName())) {
       throw new IllegalArgumentException("Competition name was blank or null");
