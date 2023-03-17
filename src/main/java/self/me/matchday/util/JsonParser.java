@@ -90,16 +90,12 @@ public class JsonParser {
                       return Duration.ofSeconds(seconds).withNanos(nanos);
                     })
             .registerTypeAdapter(
-                Color.class,
-                (JsonSerializer<Color>)
-                    (color, type, context) -> {
-                      int red = color.getRed();
-                      int green = color.getGreen();
-                      int blue = color.getBlue();
+                Duration.class,
+                (JsonSerializer<Duration>)
+                    (duration, type, context) -> {
                       JsonObject o = new JsonObject();
-                      o.addProperty("red", red);
-                      o.addProperty("green", green);
-                      o.addProperty("blue", blue);
+                      o.addProperty("seconds", duration.getSeconds());
+                      o.addProperty("nanos", duration.getNano());
                       return o;
                     })
             .registerTypeAdapter(
@@ -111,6 +107,19 @@ public class JsonParser {
                       int green = o.get("green").getAsJsonPrimitive().getAsInt();
                       int blue = o.get("blue").getAsJsonPrimitive().getAsInt();
                       return new Color(red, green, blue);
+                    })
+            .registerTypeAdapter(
+                Color.class,
+                (JsonSerializer<Color>)
+                    (color, type, context) -> {
+                      int red = color.getRed();
+                      int green = color.getGreen();
+                      int blue = color.getBlue();
+                      JsonObject o = new JsonObject();
+                      o.addProperty("red", red);
+                      o.addProperty("green", green);
+                      o.addProperty("blue", blue);
+                      return o;
                     })
             .registerTypeAdapter(
                 Pattern.class,
@@ -129,19 +138,19 @@ public class JsonParser {
                     })
             .registerTypeHierarchyAdapter(
                 Path.class,
+                (JsonDeserializer<Path>)
+                    (json, type, context) -> {
+                      final String data = json.getAsJsonPrimitive().getAsString();
+                      return Path.of(data);
+                    })
+            .registerTypeHierarchyAdapter(
+                Path.class,
                 (JsonSerializer<Path>)
                     (path, type, context) -> {
                       if (path == null) {
                         return null;
                       }
                       return new JsonPrimitive(path.toString());
-                    })
-            .registerTypeHierarchyAdapter(
-                Path.class,
-                (JsonDeserializer<Path>)
-                    (json, type, context) -> {
-                      final String data = json.getAsJsonPrimitive().getAsString();
-                      return Path.of(data);
                     })
             .registerTypeAdapterFactory(new ClassTypeAdapterFactory(new ClassTypeAdapter()))
             .create();

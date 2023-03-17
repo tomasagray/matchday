@@ -20,7 +20,6 @@
 package self.me.matchday.db;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,7 +29,7 @@ import self.me.matchday.model.Synonym;
 @Repository
 public interface SynonymRepository extends JpaRepository<Synonym, Long> {
 
-  Optional<Synonym> findSynonymByName(@Param("name") String name);
+  List<Synonym> findSynonymByName(@Param("name") String name);
 
   @Query("SELECT sy FROM Synonym sy  WHERE sy.name = :name")
   List<Synonym> findSynonymsFor(@Param("name") String name);

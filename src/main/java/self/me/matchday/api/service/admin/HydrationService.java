@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import self.me.matchday.api.service.*;
 import self.me.matchday.db.FileServerUserRepo;
 import self.me.matchday.model.*;
+import self.me.matchday.model.validation.EventValidator;
 import self.me.matchday.util.JsonParser;
 
 @Service
@@ -24,6 +25,7 @@ public class HydrationService {
   private static final Type TYPE = new TypeReference<SystemImage>() {}.getType();
   private static final String FILENAME = "matchday_dehydrated_%s.json";
 
+  private final EventValidator eventValidator;
   private final MatchService matchService;
   private final CompetitionService competitionService;
   private final TeamService teamService;
@@ -32,12 +34,14 @@ public class HydrationService {
   private final FileServerUserRepo fileServerUserRepo;
 
   public HydrationService(
+      EventValidator eventValidator,
       MatchService matchService,
       CompetitionService competitionService,
       TeamService teamService,
       DataSourceService dataSourceService,
       FileServerUserService userService,
       FileServerUserRepo fileServerUserRepo) {
+    this.eventValidator = eventValidator;
     this.matchService = matchService;
     this.competitionService = competitionService;
     this.teamService = teamService;
@@ -93,7 +97,7 @@ public class HydrationService {
     validateEmptySystemImage(currentImage);
 
     List<Match> events = systemImage.getEvents();
-    events.forEach(matchService::validateMatch); // fail early
+    eventValidator.validateAll(events); // fail early
     matchService.saveAll(events);
     fileServerUserRepo.saveAll(systemImage.getFileServerUsers());
     dataSourceService.saveAll(systemImage.getDataSources());

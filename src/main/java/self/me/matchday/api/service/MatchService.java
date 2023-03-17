@@ -36,10 +36,7 @@ import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.*;
 import self.me.matchday.model.Event.EventSorter;
-import self.me.matchday.model.video.PartIdentifier;
-import self.me.matchday.model.video.VideoFile;
-import self.me.matchday.model.video.VideoFilePack;
-import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.validation.EventValidator;
 import self.me.matchday.util.ResourceFileReader;
 
 @Service
@@ -56,6 +53,7 @@ public class MatchService implements EntityService<Match, UUID> {
   private final CompetitionService competitionService;
   private final ArtworkService artworkService;
   private final VideoStreamingService streamingService;
+  private final EventValidator eventValidator;
   private final byte[] defaultEmblem;
 
   public MatchService(
@@ -64,7 +62,8 @@ public class MatchService implements EntityService<Match, UUID> {
       TeamService teamService,
       CompetitionService competitionService,
       ArtworkService artworkService,
-      VideoStreamingService streamingService)
+      VideoStreamingService streamingService,
+      EventValidator eventValidator)
       throws IOException {
     this.matchRepository = matchRepository;
     this.entityCorrectionService = entityCorrectionService;
@@ -72,6 +71,7 @@ public class MatchService implements EntityService<Match, UUID> {
     this.competitionService = competitionService;
     this.artworkService = artworkService;
     this.streamingService = streamingService;
+    this.eventValidator = eventValidator;
     this.defaultEmblem = ResourceFileReader.readBinaryData("image/default_team_emblem.png");
   }
 
@@ -226,7 +226,7 @@ public class MatchService implements EntityService<Match, UUID> {
   @Override
   public Match save(@NotNull Match match) {
 
-    validateMatch(match);
+    eventValidator.validate(match);
     try {
       entityCorrectionService.correctEntityFields(match);
       // See if Event already exists in DB
@@ -246,39 +246,6 @@ public class MatchService implements EntityService<Match, UUID> {
     } catch (ReflectiveOperationException | IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  public void validateMatch(@NotNull Match match) {
-    competitionService.validateCompetition(match.getCompetition());
-    teamService.validateTeam(match.getHomeTeam());
-    teamService.validateTeam(match.getAwayTeam());
-    validateFileSources(match);
-  }
-
-  private void validateFileSources(@NotNull Match match) {
-    final Set<VideoFileSource> fileSources = match.getFileSources();
-    int validFileSources = 0;
-    for (VideoFileSource fileSource : fileSources) {
-      int validFilePacks = 0;
-      final List<VideoFilePack> filePacks = fileSource.getVideoFilePacks();
-      for (VideoFilePack filePack : filePacks) {
-        if (isValidVideoFilePack(filePack)) {
-          validFilePacks++;
-        }
-      }
-      if (validFilePacks > 0) {
-        validFileSources++;
-      }
-    }
-    if (validFileSources == 0) {
-      throw new InvalidEventException("No valid video file sources in: " + match);
-    }
-  }
-
-  private boolean isValidVideoFilePack(@NotNull VideoFilePack filePack) {
-    final Map<PartIdentifier, VideoFile> files = filePack.allFiles();
-    return files.containsKey(PartIdentifier.FIRST_HALF)
-        && files.containsKey(PartIdentifier.SECOND_HALF);
   }
 
   private @NotNull Example<Match> getExampleEvent(@NotNull Match match) {
@@ -303,12 +270,14 @@ public class MatchService implements EntityService<Match, UUID> {
 
   @Override
   public Match update(@NotNull Match updated) {
+
     final UUID eventId = updated.getEventId();
     final Optional<Match> optional = fetchById(eventId);
     if (optional.isPresent()) {
       final Match existing = optional.get();
       // perform update...
       updateMatch(existing, updated);
+      eventValidator.validate(existing);
       return save(existing);
     }
     // else..

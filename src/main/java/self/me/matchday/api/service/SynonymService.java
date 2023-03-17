@@ -21,6 +21,7 @@ package self.me.matchday.api.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -46,7 +47,7 @@ public class SynonymService implements EntityService<Synonym, Long> {
 
   public void validateProperName(@NotNull ProperName properName) {
 
-    final List<Synonym> synonyms = properName.getSynonyms();
+    final Set<Synonym> synonyms = properName.getSynonyms();
     // get ids
     final List<Long> synonymIds = getSynonymIds(synonyms);
     synonyms.forEach(
@@ -66,15 +67,27 @@ public class SynonymService implements EntityService<Synonym, Long> {
       throw new IllegalArgumentException("Found empty Synonym");
     }
     // check if synonym already exists
-    final Optional<Synonym> synonymOpt = synonymRepository.findSynonymByName(name);
-    if (synonymOpt.isPresent()) {
-      final Synonym existingSynonym = synonymOpt.get();
+    final Optional<Synonym> synonymOptional = findSynonym(name);
+    if (synonymOptional.isPresent()) {
+      final Synonym existingSynonym = synonymOptional.get();
       // synonym exists, but associated with another entity?
       if (!synonymIds.contains(existingSynonym.getId())) {
         final String msg =
             String.format("Synonym: %s already exists and is associated with another entity", name);
         throw new IllegalArgumentException(msg);
       }
+    }
+  }
+
+  private Optional<Synonym> findSynonym(String name) {
+    List<Synonym> synonyms = synonymRepository.findSynonymByName(name);
+    if (synonyms.size() > 1) {
+      String msg = String.format("Duplicated Synonyms found for %s: %s", name, synonyms);
+      throw new IllegalArgumentException(msg);
+    } else if (synonyms.size() == 1) {
+      return Optional.of(synonyms.get(0));
+    } else {
+      return Optional.empty();
     }
   }
 
@@ -90,7 +103,7 @@ public class SynonymService implements EntityService<Synonym, Long> {
   }
 
   @NotNull
-  private List<Long> getSynonymIds(@NotNull List<Synonym> synonyms) {
+  private List<Long> getSynonymIds(@NotNull Set<Synonym> synonyms) {
     return synonyms.stream().map(Synonym::getId).collect(Collectors.toList());
   }
 
@@ -127,7 +140,7 @@ public class SynonymService implements EntityService<Synonym, Long> {
   }
 
   public Optional<Synonym> fetchByName(@NotNull String name) {
-    return synonymRepository.findSynonymByName(name);
+    return findSynonym(name);
   }
 
   public ProperName fetchProperNameFor(@NotNull String synonym) {
