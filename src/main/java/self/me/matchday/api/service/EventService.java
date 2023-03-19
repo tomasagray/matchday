@@ -19,6 +19,12 @@
 
 package self.me.matchday.api.service;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -32,16 +38,6 @@ import self.me.matchday.db.VideoFileSrcRepository;
 import self.me.matchday.model.*;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.video.VideoFileSource;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
@@ -137,7 +133,6 @@ public class EventService implements EntityService<Event, UUID> {
   @Override
   public Event save(@NotNull final Event event) {
 
-    validateEvent(event);
     Event saved;
     if (event instanceof Match) {
       saved = matchService.save((Match) event);
@@ -160,7 +155,6 @@ public class EventService implements EntityService<Event, UUID> {
 
   @Override
   public Event update(@NotNull Event event) {
-    validateEvent(event);
     if (event instanceof Match) {
       return matchService.update((Match) event);
     } else if (event instanceof Highlight) {
@@ -189,58 +183,5 @@ public class EventService implements EntityService<Event, UUID> {
   @Override
   public void deleteAll(@NotNull Iterable<? extends Event> events) {
     eventRepository.deleteAll(events);
-  }
-
-  /**
-   * Ensure Event meets certain criteria.
-   *
-   * @param event The Event to be validated
-   */
-  private void validateEvent(final Event event) {
-
-    if (event == null) {
-      throw new IllegalArgumentException("Event is null");
-    }
-    final Competition competition = event.getCompetition();
-    if (!isValidCompetition(competition)) {
-      throw new InvalidEventException("invalid competition: " + competition);
-    }
-    // ensure Event has a date
-    if (event.getDate() == null) {
-      event.setDate(LocalDateTime.now());
-    }
-    final LocalDateTime date = event.getDate();
-    if (!isValidDate(date)) {
-      throw new InvalidEventException("invalid date: " + date);
-    }
-    final Collection<VideoFileSource> fileSources = event.getFileSources();
-    if (!isValidVideoFiles(fileSources)) {
-      throw new InvalidEventException("Event has no video files");
-    }
-  }
-
-  private boolean isValidCompetition(final Competition competition) {
-    if (competition != null) {
-      final ProperName name = competition.getName();
-      return name != null && !("".equals(name.getName()));
-    }
-    return false;
-  }
-
-  private boolean isValidDate(final LocalDateTime date) {
-    final LocalDate wayBack = LocalDate.ofYearDay(1970, 1);
-    final LocalDateTime MIN_DATE = LocalDateTime.of(wayBack, LocalTime.MIN);
-    return date != null && date.isAfter(MIN_DATE);
-  }
-
-  private boolean isValidVideoFiles(final Collection<VideoFileSource> fileSources) {
-    if (fileSources == null) {
-      return false;
-    }
-    int totalVideoFiles = 0;
-    for (final VideoFileSource fileSource : fileSources) {
-      totalVideoFiles += fileSource.getVideoFilePacks().size();
-    }
-    return totalVideoFiles > 0;
   }
 }

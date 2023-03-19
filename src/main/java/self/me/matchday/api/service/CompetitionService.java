@@ -43,22 +43,23 @@ import self.me.matchday.model.Competition;
 import self.me.matchday.model.Country;
 import self.me.matchday.model.Image;
 import self.me.matchday.model.ProperName;
+import self.me.matchday.model.validation.CompetitionValidator;
 
 @Service
 @Transactional
 public class CompetitionService implements EntityService<Competition, UUID> {
 
   private final CompetitionRepository competitionRepository;
+  private final CompetitionValidator validator;
   private final ArtworkService artworkService;
-  private final SynonymService synonymService;
   private final Map<ArtworkRole, Function<Competition, ArtworkCollection>> methodRegistry;
 
   public CompetitionService(
       CompetitionRepository competitionRepository,
-      SynonymService synonymService,
+      CompetitionValidator validator,
       ArtworkService artworkService) {
     this.competitionRepository = competitionRepository;
-    this.synonymService = synonymService;
+    this.validator = validator;
     this.artworkService = artworkService;
     methodRegistry = createMethodRegistry();
   }
@@ -203,7 +204,7 @@ public class CompetitionService implements EntityService<Competition, UUID> {
    */
   @Override
   public Competition save(@NotNull final Competition competition) {
-    validateCompetition(competition);
+    validator.validate(competition);
     final Competition saved = competitionRepository.saveAndFlush(competition);
     return initialize(saved);
   }
@@ -217,49 +218,12 @@ public class CompetitionService implements EntityService<Competition, UUID> {
 
   @Override
   public Competition update(@NotNull Competition competition) {
-    validateForUpdate(competition);
+
+    validator.validate(competition);
     // correct missing artwork file paths
     artworkService.repairArtworkFilePaths(competition.getEmblem());
     artworkService.repairArtworkFilePaths(competition.getFanart());
     return save(competition);
-  }
-
-  private void validateForUpdate(@NotNull Competition updated) {
-    validateUpdateId(updated);
-    validateUpdateName(updated);
-  }
-
-  private void validateUpdateId(@NotNull Competition updated) {
-
-    final UUID updatedId = updated.getId();
-    final String unknownMsg = "Trying to update unknown Competition: " + updated;
-    if (updatedId == null) {
-      throw new UnknownEntityException(unknownMsg);
-    }
-    final Optional<Competition> optionalIdExists = fetchById(updatedId);
-    if (optionalIdExists.isEmpty()) {
-      throw new UnknownEntityException(unknownMsg);
-    }
-  }
-
-  private void validateUpdateName(@NotNull Competition updated) {
-
-    final ProperName updatedProperName = updated.getName();
-    synonymService.validateProperName(updatedProperName);
-
-    final String updatedName = updatedProperName.getName();
-    final Optional<Competition> optional = fetchCompetitionByName(updatedName);
-    if (optional.isPresent()) {
-      final Competition existing = optional.get();
-      final UUID existingId = existing.getId();
-      if (!existingId.equals(updated.getId())) {
-        final String msg =
-            String.format(
-                "A Competition with name: %s already exists; please use the merge function instead",
-                updatedName);
-        throw new IllegalArgumentException(msg);
-      }
-    }
   }
 
   @Override
@@ -299,18 +263,6 @@ public class CompetitionService implements EntityService<Competition, UUID> {
   public void deleteAll(@NotNull Iterable<? extends Competition> competitions) throws IOException {
     for (final Competition competition : competitions) {
       delete(competition.getId());
-    }
-  }
-
-  /**
-   * Data validation for Competition objects
-   *
-   * @param competition The Competition to scrutinize
-   */
-  private void validateCompetition(@NotNull final Competition competition) {
-    final ProperName name = competition.getName();
-    if (name == null || "".equals(name.getName())) {
-      throw new IllegalArgumentException("Competition name was blank or null");
     }
   }
 }

@@ -19,6 +19,11 @@
 
 package self.me.matchday.api.service;
 
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -29,28 +34,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.TeamRepository;
 import self.me.matchday.model.*;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import self.me.matchday.model.validation.TeamValidator;
 
 @Service
 @Transactional
 public class TeamService implements EntityService<Team, UUID> {
 
   public static final Sort DEFAULT_TEAM_SORT = Sort.by(Direction.ASC, "name.name");
+
   private final TeamRepository teamRepository;
+  private final TeamValidator validator;
   private final ArtworkService artworkService;
   private final SynonymService synonymService;
   private final Map<ArtworkRole, Function<Team, ArtworkCollection>> methodRegistry;
 
   public TeamService(
-      TeamRepository teamRepository, ArtworkService artworkService, SynonymService synonymService) {
+      TeamRepository teamRepository,
+      TeamValidator validator,
+      ArtworkService artworkService,
+      SynonymService synonymService) {
     this.teamRepository = teamRepository;
     this.artworkService = artworkService;
     this.synonymService = synonymService;
+    this.validator = validator;
     this.methodRegistry = createMethodRegistry();
   }
 
@@ -143,7 +149,7 @@ public class TeamService implements EntityService<Team, UUID> {
    */
   @Override
   public Team save(@NotNull final Team team) {
-    validateTeam(team);
+    validator.validate(team);
     final Team saved = teamRepository.saveAndFlush(team);
     return initialize(saved);
   }
@@ -234,21 +240,6 @@ public class TeamService implements EntityService<Team, UUID> {
    */
   public void deleteTeamByName(@NotNull final String teamName) {
     teamRepository.deleteByNameName(teamName);
-  }
-
-  /**
-   * Team data validation
-   *
-   * @param team The Team to validate
-   */
-  public void validateTeam(Team team) {
-    if (team == null) {
-      throw new IllegalArgumentException("Team was null");
-    }
-    final ProperName properName = team.getName();
-    if (properName == null || properName.getName() == null || properName.getName().equals("")) {
-      throw new IllegalArgumentException("Team has invalid name");
-    }
   }
 
   public ArtworkCollection fetchArtworkCollection(@NotNull UUID teamId, @NotNull ArtworkRole role) {

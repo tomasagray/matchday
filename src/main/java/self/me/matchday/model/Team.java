@@ -23,18 +23,15 @@
  */
 package self.me.matchday.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
-import self.me.matchday.api.controller.converter.StringToCountryConverter;
-
-import javax.persistence.*;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Represents a football team.
@@ -55,7 +52,6 @@ public class Team {
   @OneToOne(cascade = CascadeType.ALL)
   private final ProperName name;
 
-  @JsonDeserialize(converter = StringToCountryConverter.class)
   @ManyToOne
   private Country country;
 

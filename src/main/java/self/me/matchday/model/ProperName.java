@@ -19,14 +19,11 @@
 
 package self.me.matchday.model;
 
+import java.util.*;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -38,7 +35,7 @@ public class ProperName implements Comparable<ProperName> {
   private final String name;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private List<Synonym> synonyms = new ArrayList<>();
+  private Set<Synonym> synonyms = new HashSet<>();
 
   public ProperName() {
     this.name = null;
