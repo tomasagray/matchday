@@ -2,25 +2,30 @@ package self.me.matchday.api.service.admin;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApplicationInfoService {
 
-    @Value("${application.info.version}")
-    private String appVersion;
+    private static final String osData = getOsData();
+    private static final Long pid = Long.parseLong(System.getProperty("PID"));
+    private final BuildProperties buildProperties;
+
+    ApplicationInfoService(BuildProperties properties){
+        this.buildProperties = properties;
+    }
 
     public ApplicationInfo getApplicationInfo() {
-        final Long pid = Long.parseLong(System.getProperty("PID"));
+        final String appVersion = buildProperties.getVersion();
         return ApplicationInfo.builder()
                 .version(appVersion)
-                .system(getOsData())
+                .system(osData)
                 .pid(pid)
                 .build();
     }
 
-    private String getOsData() {
+    private static String getOsData() {
         final String name = System.getProperty("os.name");
         final String version = System.getProperty("os.version");
         final String arch = System.getProperty("os.arch");
