@@ -31,7 +31,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.RepresentationModel;
@@ -58,9 +57,9 @@ public class VideoPlaylistResource extends RepresentationModel<VideoPlaylistReso
 
     @Override
     public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof VideoPlaylistResource that)) return false;
-    if (!super.equals(o)) return false;
+        if (this == o) return true;
+        if (!(o instanceof VideoPlaylistResource that)) return false;
+        if (!super.equals(o)) return false;
         return Objects.equals(getUris(), that.getUris());
     }
 
@@ -69,16 +68,7 @@ public class VideoPlaylistResource extends RepresentationModel<VideoPlaylistReso
         return Objects.hash(super.hashCode(), getUris());
     }
 
-    @Getter
-    public static class Pair {
-        private final String title;
-        private final URI uri;
-
-        public Pair(String title, URI uri) {
-            this.title = title;
-            this.uri = uri;
-        }
-    }
+    public record Pair(String title, URI uri) {}
 
     @Component
     public static class VideoPlaylistResourceAssembler

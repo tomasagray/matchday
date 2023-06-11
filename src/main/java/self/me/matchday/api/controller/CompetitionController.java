@@ -236,7 +236,7 @@ public class CompetitionController {
 
     final Image image = competitionService.fetchSelectedArtworkImage(competitionId, role);
     return image != null
-        ? ResponseEntity.ok().contentType(image.getContentType()).body(image.getData())
+        ? ResponseEntity.ok().contentType(image.contentType()).body(image.data())
         : ResponseEntity.notFound().build();
   }
 
@@ -276,7 +276,7 @@ public class CompetitionController {
       throws IOException {
 
     final Image image = competitionService.fetchArtworkData(competitionId, role, artworkId);
-    return ResponseEntity.ok().contentType(image.getContentType()).body(image.getData());
+    return ResponseEntity.ok().contentType(image.contentType()).body(image.data());
   }
 
   @RequestMapping(

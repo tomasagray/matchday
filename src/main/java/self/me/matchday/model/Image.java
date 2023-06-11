@@ -20,14 +20,12 @@
 package self.me.matchday.model;
 
 import java.io.IOException;
-import lombok.Data;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
-@Data
-public class Image {
+public record Image(byte[] data, MediaType contentType) {
 
   @Contract("_ -> new")
   public static @NotNull Image fromMultipartFile(@NotNull MultipartFile data) throws IOException {
@@ -37,9 +35,6 @@ public class Image {
     }
     return new Image(data.getBytes(), MediaType.valueOf(contentType));
   }
-
-  private final byte[] data;
-  private final MediaType contentType;
 
   @Override
   public String toString() {

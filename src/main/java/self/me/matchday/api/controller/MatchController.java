@@ -121,7 +121,7 @@ public class MatchController {
       throws IOException {
 
     final Image artwork = matchService.fetchMatchArtwork(matchId);
-    return ResponseEntity.ok().contentType(artwork.getContentType()).body(artwork.getData());
+    return ResponseEntity.ok().contentType(artwork.contentType()).body(artwork.data());
   }
 
   @RequestMapping(

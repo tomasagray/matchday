@@ -19,17 +19,16 @@
 
 package self.me.matchday.api.service;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.ResponseCookie;
-import org.springframework.stereotype.Service;
-import self.me.matchday.model.SecureCookie;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Service;
+import self.me.matchday.model.SecureCookie;
 
 @Service
 public class CookiesService {
@@ -71,7 +70,7 @@ public class CookiesService {
             // ... clean
             .map(String::trim)
             .filter(substr -> !("".equals(substr)))
-            .collect(Collectors.toList());
+            .toList();
 
     // Extract fields
     final String name = fields.get(NAME_IDX);

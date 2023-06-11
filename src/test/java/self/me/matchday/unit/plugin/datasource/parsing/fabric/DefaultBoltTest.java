@@ -22,7 +22,6 @@ package self.me.matchday.unit.plugin.datasource.parsing.fabric;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
@@ -101,19 +100,19 @@ class DefaultBoltTest {
     final List<? extends Foo> genericFoos =
         IntStream.range(START, END)
             .mapToObj(i -> new Foo(String.format("f:[%s]", i)))
-            .collect(Collectors.toList());
+            .toList();
     final List<? extends Bar> genericBars =
         IntStream.range(START, END)
             .mapToObj(i -> new Bar(String.format("b:{%s}", i)))
-            .collect(Collectors.toList());
+            .toList();
     final List<? extends Marklar> genericMarklars =
         IntStream.range(START, END)
             .mapToObj(i -> new Marklar(String.format("M:((%s))", i)))
-            .collect(Collectors.toList());
+            .toList();
     final List<? extends Bubble> genericBubbles =
         IntStream.range(START, LOTTA_BUBBLES)
             .mapToObj(i -> new Bubble(String.format("b:%s", i)))
-            .collect(Collectors.toList());
+            .toList();
 
     final Stream<? extends Marklar> genericFizzyMarklars =
         Bolt.of(genericFoos.stream())

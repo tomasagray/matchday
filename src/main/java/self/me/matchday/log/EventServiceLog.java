@@ -20,7 +20,6 @@
 package self.me.matchday.log;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,7 +54,7 @@ public class EventServiceLog {
   public void logSaveManyEvents(@NotNull JoinPoint jp) {
     final Iterable<?> events = (Iterable<?>) jp.getArgs()[0];
     final List<?> eventList =
-        StreamSupport.stream(events.spliterator(), false).collect(Collectors.toList());
+        StreamSupport.stream(events.spliterator(), false).toList();
     logger.info("Saving: {} Events...", eventList.size());
   }
 
@@ -105,7 +104,7 @@ public class EventServiceLog {
   public void logUpdateManyEvents(@NotNull JoinPoint jp) {
     final Iterable<?> events = (Iterable<?>) jp.getArgs()[0];
     final List<?> eventsList =
-        StreamSupport.stream(events.spliterator(), false).collect(Collectors.toList());
+        StreamSupport.stream(events.spliterator(), false).toList();
     logger.info("Updating: {} Events...", eventsList.size());
   }
 
@@ -118,7 +117,7 @@ public class EventServiceLog {
   public void logDeleteManyEvents(@NotNull JoinPoint jp) {
     final Iterable<?> events = (Iterable<?>) jp.getArgs()[0];
     final List<?> eventList =
-        StreamSupport.stream(events.spliterator(), false).collect(Collectors.toList());
+        StreamSupport.stream(events.spliterator(), false).toList();
     logger.info("Deleting: {} Events...", eventList.size());
   }
 }

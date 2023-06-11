@@ -21,8 +21,6 @@ package self.me.matchday.api.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.Event;
@@ -41,17 +39,12 @@ public class EntityServiceRegistry {
   @SuppressWarnings("unchecked cast")
   public <T, I> EntityService<T, I> getServiceFor(@NotNull Class<T> clazz) {
     return registry.stream()
-        .filter(entry -> entry.getClazz().equals(clazz))
-        .map(entry -> (EntityService<T, I>) entry.getService())
+        .filter(entry -> entry.clazz().equals(clazz))
+        .map(entry -> (EntityService<T, I>) entry.service())
         .findAny()
         .orElseThrow(
             () -> new IllegalArgumentException("No Service found for class: " + clazz.getName()));
   }
 
-  @Data
-  @AllArgsConstructor
-  private static class Entry<T, S extends EntityService<T, ?>> {
-    private final Class<T> clazz;
-    private final S service;
-  }
+    private record Entry<T, S extends EntityService<T, ?>>(Class<T> clazz, S service) {}
 }

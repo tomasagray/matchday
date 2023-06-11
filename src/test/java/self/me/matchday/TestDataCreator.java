@@ -19,8 +19,21 @@
 
 package self.me.matchday;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static self.me.matchday.model.video.PartIdentifier.*;
+import static self.me.matchday.model.video.Resolution.R_1080p;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.reflect.TypeToken;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -39,20 +52,6 @@ import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.unit.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.ResourceFileReader;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.regex.Pattern;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static self.me.matchday.model.video.PartIdentifier.*;
-import static self.me.matchday.model.video.Resolution.R_1080p;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -301,7 +300,6 @@ public class TestDataCreator {
         .build();
   }
 
-  @Transactional
   public @NotNull List<VideoFilePack> createTestVideoFiles(final int count) {
 
     List<VideoFilePack> videoFiles = new ArrayList<>();

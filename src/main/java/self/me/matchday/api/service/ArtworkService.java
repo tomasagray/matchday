@@ -19,6 +19,14 @@
 
 package self.me.matchday.api.service;
 
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.imageio.ImageIO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -30,15 +38,6 @@ import self.me.matchday.db.ArtworkCollectionRepository;
 import self.me.matchday.db.ArtworkRepository;
 import self.me.matchday.model.*;
 import self.me.matchday.plugin.artwork.creator.ArtworkCreatorPlugin;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @Transactional
@@ -102,8 +101,8 @@ public class ArtworkService {
 
   public Artwork createArtwork(@NotNull Image image) throws IOException {
 
-    final byte[] data = image.getData();
-    final MediaType type = image.getContentType();
+    final byte[] data = image.data();
+    final MediaType type = image.contentType();
     // parse image
     final ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
     final BufferedImage bufferedImage = ImageIO.read(inputStream);

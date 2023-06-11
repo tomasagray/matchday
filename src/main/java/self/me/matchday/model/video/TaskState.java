@@ -20,16 +20,16 @@
 package self.me.matchday.model.video;
 
 import javax.persistence.Entity;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
 @ToString(callSuper = true)
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
 public class TaskState extends StreamJobState {}

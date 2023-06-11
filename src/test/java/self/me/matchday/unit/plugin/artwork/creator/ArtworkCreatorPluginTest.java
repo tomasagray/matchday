@@ -19,6 +19,12 @@
 
 package self.me.matchday.unit.plugin.artwork.creator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -35,13 +41,6 @@ import self.me.matchday.model.Match;
 import self.me.matchday.model.Param;
 import self.me.matchday.plugin.artwork.creator.ArtworkCreatorPlugin;
 import self.me.matchday.util.ResourceFileReader;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -111,7 +110,7 @@ class ArtworkCreatorPluginTest {
 
     // then
     assertThat(artwork).isNotNull();
-    assertThat(artwork.getData().length).isGreaterThanOrEqualTo(expectedImageSize);
+    assertThat(artwork.data().length).isGreaterThanOrEqualTo(expectedImageSize);
   }
 
   private @NotNull @Unmodifiable Collection<Param<?>> createTemplateParams() throws IOException {

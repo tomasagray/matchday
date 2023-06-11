@@ -173,7 +173,7 @@ public class MatchService implements EntityService<Match, UUID> {
     byte[] data;
     if (emblem != null) {
       final Image image = artworkService.fetchArtworkData(emblem);
-      data = image.getData();
+      data = image.data();
     } else {
       data = Arrays.copyOf(defaultEmblem, defaultEmblem.length);
     }

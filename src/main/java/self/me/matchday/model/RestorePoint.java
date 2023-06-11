@@ -1,23 +1,28 @@
 package self.me.matchday.model;
 
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import self.me.matchday.db.converter.PathConverter;
 import self.me.matchday.db.converter.TimestampConverter;
 
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.util.UUID;
-
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
 @AllArgsConstructor
 public class RestorePoint {
@@ -42,4 +47,19 @@ public class RestorePoint {
     private Integer fileServerUserCount;
 
     public RestorePoint() {}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o))
+            return false;
+        RestorePoint that = (RestorePoint) o;
+        return getId() != null && Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

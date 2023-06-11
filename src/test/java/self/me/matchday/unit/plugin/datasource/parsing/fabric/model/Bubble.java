@@ -19,17 +19,7 @@
 
 package self.me.matchday.unit.plugin.datasource.parsing.fabric.model;
 
-public class Bubble {
-
-  private final String name;
-
-  public Bubble(String name) {
-    this.name = name;
-  }
-
-  public String getName() {
-    return name;
-  }
+public record Bubble(String name) {
 
   public String toString() {
     return "Bubble{" + "name='" + name + "'" + '}';

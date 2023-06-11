@@ -190,7 +190,7 @@ public class TeamController {
       @PathVariable UUID teamId, @PathVariable ArtworkRole role) throws IOException {
     final Image image = teamService.fetchSelectedArtwork(teamId, role);
     return image != null
-        ? ResponseEntity.ok().contentType(image.getContentType()).body(image.getData())
+        ? ResponseEntity.ok().contentType(image.contentType()).body(image.data())
         : ResponseEntity.notFound().build();
   }
 
@@ -220,7 +220,7 @@ public class TeamController {
       throws IOException {
     final Image image = teamService.fetchArtworkImageData(teamId, role, artworkId);
     return image != null
-        ? ResponseEntity.ok().contentType(image.getContentType()).body(image.getData())
+        ? ResponseEntity.ok().contentType(image.contentType()).body(image.data())
         : ResponseEntity.notFound().build();
   }
 

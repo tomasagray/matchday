@@ -19,14 +19,13 @@
 
 package self.me.matchday.plugin.datasource.parsing;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Match;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Stream;
 
 @Component
 public class HypertextEntityParser {
@@ -51,28 +50,13 @@ public class HypertextEntityParser {
 
     return (DataSourceParser<T, String>)
         this.parsers.stream()
-            .filter(entry -> entry.getClazz().equals(clazz))
+            .filter(entry -> entry.clazz().equals(clazz))
             .findFirst()
-            .map(ParserEntry::getParser)
+            .map(ParserEntry::parser)
             .orElseThrow(() -> new IllegalArgumentException(errMsg));
   }
 
-  private static class ParserEntry<T> {
+  private record ParserEntry<T>(Class<T> clazz, DataSourceParser<T, String> parser) {
 
-    private final Class<T> clazz;
-    private final DataSourceParser<T, String> parser;
-
-    public ParserEntry(Class<T> clazz, DataSourceParser<T, String> parser) {
-      this.clazz = clazz;
-      this.parser = parser;
-    }
-
-    public DataSourceParser<T, String> getParser() {
-      return parser;
-    }
-
-    public Class<T> getClazz() {
-      return clazz;
-    }
   }
 }

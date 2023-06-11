@@ -19,19 +19,9 @@
 
 package self.me.matchday.unit.plugin.datasource.parsing.fabric.model;
 
-public class Bar {
-
-  private final String title;
-
-  public Bar(String title) {
-    this.title = title;
-  }
-
-  public String getTitle() {
-    return title;
-  }
+public record Bar(String title) {
 
   public String toString() {
-    return this.getTitle();
+    return this.title();
   }
 }

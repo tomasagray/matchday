@@ -48,7 +48,7 @@ public class ArtworkServiceLog {
     final Object[] args = jp.getArgs();
     final Object collection = args[0];
     final Image image = (Image) args[1];
-    final int imageSize = image.getData().length;
+    final int imageSize = image.data().length;
     logger.info("Adding image with {} bytes to collection: {}", imageSize, collection);
 
     final Object modifiedCollection = jp.proceed();

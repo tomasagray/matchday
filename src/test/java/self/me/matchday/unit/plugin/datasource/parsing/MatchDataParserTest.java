@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -107,7 +106,7 @@ public class MatchDataParserTest {
     final List<Element> links =
         document.select("a").stream()
             .filter(link -> linkPattern.matcher(link.attr("href")).find())
-            .collect(Collectors.toList());
+            .toList();
 
     for (final Element link : links) {
       logger.info("Got link URL: {}", link);
@@ -125,7 +124,7 @@ public class MatchDataParserTest {
 
     final String data = entry.getContent().getData();
     final List<? extends Event> events =
-        matchDataParser.getEntityStream(testDataSource, data).collect(Collectors.toList());
+        matchDataParser.getEntityStream(testDataSource, data).toList();
     final int actualEventCount = events.size();
     logger.info("Found: {} Events in current data", actualEventCount);
     assertThat(actualEventCount).isNotZero();
