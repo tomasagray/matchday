@@ -19,11 +19,10 @@
 
 package self.me.matchday.plugin.datasource.parsing.fabric;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
+import org.jetbrains.annotations.NotNull;
 
 public class DefaultBolt<T> implements Bolt<T> {
 

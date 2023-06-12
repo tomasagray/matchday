@@ -19,15 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.http.HttpCookie;
-import org.springframework.stereotype.Service;
-import self.me.matchday.db.FileServerUserRepo;
-import self.me.matchday.model.FileServerUser;
-import self.me.matchday.model.SecureCookie;
-import self.me.matchday.plugin.fileserver.FileServerPlugin;
-
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
@@ -36,6 +27,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.http.HttpCookie;
+import org.springframework.stereotype.Service;
+import self.me.matchday.db.FileServerUserRepo;
+import self.me.matchday.model.FileServerUser;
+import self.me.matchday.model.SecureCookie;
+import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
 /**
  * Class to route requests for URL parsing (external -> internal decoding) to the appropriate File

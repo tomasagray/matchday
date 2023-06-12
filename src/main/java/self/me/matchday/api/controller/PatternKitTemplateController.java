@@ -19,6 +19,9 @@
 
 package self.me.matchday.api.controller;
 
+import static self.me.matchday.api.resource.PatternKitTemplateResource.TemplateResourceAssembler;
+
+import java.util.List;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.PatternKitTemplateResource;
 import self.me.matchday.api.service.PatternKitTemplateService;
 import self.me.matchday.model.PatternKitTemplate;
-
-import java.util.List;
-
-import static self.me.matchday.api.resource.PatternKitTemplateResource.TemplateResourceAssembler;
 
 @RestController
 @RequestMapping("/pattern-kit-templates")

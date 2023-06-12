@@ -19,14 +19,13 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
+import java.net.URI;
+import java.net.URL;
+import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
-
-import java.net.URI;
-import java.net.URL;
-import java.util.Map;
 
 @SuperBuilder
 @Getter

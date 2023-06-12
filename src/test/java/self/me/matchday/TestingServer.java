@@ -22,7 +22,4 @@ package self.me.matchday;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController("/testing")
-public class TestingServer {
-
-
-}
+public class TestingServer {}

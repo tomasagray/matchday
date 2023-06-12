@@ -28,5 +28,4 @@ public interface Plugin {
   String getTitle();
 
   String getDescription();
-
 }

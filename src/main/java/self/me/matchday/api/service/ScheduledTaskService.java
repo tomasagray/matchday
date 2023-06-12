@@ -54,6 +54,7 @@ public class ScheduledTaskService {
   private final VideoStreamingService videoStreamingService;
   private final EventService eventService;
   private final Map<TaskType, ScheduledFuture<?>> scheduledTasks = new HashMap<>();
+
   public ScheduledTaskService(
       DataSourceService dataSourceService,
       VideoStreamLocatorPlaylistService streamPlaylistService,
@@ -119,11 +120,6 @@ public class ScheduledTaskService {
     return sinceCreation.compareTo(expiredDays) > 0;
   }
 
-  private enum TaskType {
-    REFRESH_EVENTS,
-    PRUNE_VIDEOS,
-  }
-
   public void refreshEventData() throws IOException {
     // find latest Events (date sorted)
     final List<Event> events = eventService.fetchAll();
@@ -143,6 +139,11 @@ public class ScheduledTaskService {
         videoStreamingService.deleteAllVideoData(playlist);
       }
     }
+  }
+
+  private enum TaskType {
+    REFRESH_EVENTS,
+    PRUNE_VIDEOS,
   }
 
   @Component

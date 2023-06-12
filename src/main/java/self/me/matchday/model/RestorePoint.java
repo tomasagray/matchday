@@ -27,39 +27,37 @@ import self.me.matchday.db.converter.TimestampConverter;
 @AllArgsConstructor
 public class RestorePoint {
 
-    @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Type(type="uuid-char")
-    private UUID id;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @Type(type = "uuid-char")
+  private UUID id;
 
-    @Convert(converter = PathConverter.class)
-    private Path backupArchive;
+  @Convert(converter = PathConverter.class)
+  private Path backupArchive;
 
-    @Convert(converter = TimestampConverter.class)
-    private Timestamp timestamp;
+  @Convert(converter = TimestampConverter.class)
+  private Timestamp timestamp;
 
-    private Long filesize;
-    private Integer eventCount;
-    private Integer competitionCount;
-    private Integer teamCount;
-    private Integer dataSourceCount;
-    private Integer fileServerUserCount;
+  private Long filesize;
+  private Integer eventCount;
+  private Integer competitionCount;
+  private Integer teamCount;
+  private Integer dataSourceCount;
+  private Integer fileServerUserCount;
 
-    public RestorePoint() {}
+  public RestorePoint() {}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o))
-            return false;
-        RestorePoint that = (RestorePoint) o;
-        return getId() != null && Objects.equals(getId(), that.getId());
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    RestorePoint that = (RestorePoint) o;
+    return getId() != null && Objects.equals(getId(), that.getId());
+  }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }

@@ -98,13 +98,9 @@ class DefaultBoltTest {
     final int LOTTA_BUBBLES = 100;
 
     final List<? extends Foo> genericFoos =
-        IntStream.range(START, END)
-            .mapToObj(i -> new Foo(String.format("f:[%s]", i)))
-            .toList();
+        IntStream.range(START, END).mapToObj(i -> new Foo(String.format("f:[%s]", i))).toList();
     final List<? extends Bar> genericBars =
-        IntStream.range(START, END)
-            .mapToObj(i -> new Bar(String.format("b:{%s}", i)))
-            .toList();
+        IntStream.range(START, END).mapToObj(i -> new Bar(String.format("b:{%s}", i))).toList();
     final List<? extends Marklar> genericMarklars =
         IntStream.range(START, END)
             .mapToObj(i -> new Marklar(String.format("M:((%s))", i)))

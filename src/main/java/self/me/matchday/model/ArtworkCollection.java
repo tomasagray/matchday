@@ -19,27 +19,28 @@
 
 package self.me.matchday.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import javax.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Getter
 @Setter
 public class ArtworkCollection {
 
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
-
   private final ArtworkRole role;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private final Set<Artwork> collection = new LinkedHashSet<>();
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   private int selectedIndex;
 

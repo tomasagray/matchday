@@ -19,17 +19,16 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import reactor.core.publisher.Flux;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import reactor.core.publisher.Flux;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

@@ -19,6 +19,13 @@
 
 package self.me.matchday.api.service.admin;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -31,14 +38,6 @@ import self.me.matchday.model.SanityReport.ArtworkSanityReport.ArtworkSanityRepo
 import self.me.matchday.model.SanityReport.VideoSanityReport.VideoSanityReportBuilder;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SanityCheckService {
@@ -183,5 +182,4 @@ public class SanityCheckService {
     reportBuilder.danglingPlaylists(danglingPlaylists);
     return reportBuilder;
   }
-
 }

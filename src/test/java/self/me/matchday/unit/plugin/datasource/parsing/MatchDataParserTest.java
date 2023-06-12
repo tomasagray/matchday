@@ -58,12 +58,10 @@ public class MatchDataParserTest {
 
   private static final Logger logger = LogManager.getLogger(MatchDataParserTest.class);
   private static final String TEST_DATA_FILE = "data/blogger/blogger_html_single_team.html";
-
+  private static String testHtml;
   private final MatchDataParser matchDataParser;
-
   // test resources
   private final DataSource<Match> testDataSource;
-  private static String testHtml;
 
   @Autowired
   public MatchDataParserTest(

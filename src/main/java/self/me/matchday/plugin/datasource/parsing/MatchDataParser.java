@@ -19,6 +19,12 @@
 
 package self.me.matchday.plugin.datasource.parsing;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -30,13 +36,6 @@ import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.plugin.datasource.parsing.fabric.Bolt;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 @Component
 public class MatchDataParser implements DataSourceParser<Match, String> {

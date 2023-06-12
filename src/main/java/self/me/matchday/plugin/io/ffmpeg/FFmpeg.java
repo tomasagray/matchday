@@ -19,14 +19,13 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
-
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 public class FFmpeg {
 
@@ -39,12 +38,7 @@ public class FFmpeg {
   public FFmpeg(@NotNull final String execPath) {
     this.execPath = execPath;
     this.baseArgs =
-        List.of(
-            "-v",
-            "info",
-            "-y",
-            "-protocol_whitelist",
-            "concat,file,http,https,tcp,tls,crypto");
+        List.of("-v", "info", "-y", "-protocol_whitelist", "concat,file,http,https,tcp,tls,crypto");
   }
 
   /**
@@ -94,7 +88,7 @@ public class FFmpeg {
     final Path absoluteStorageLocation = storageLocation.toAbsolutePath();
     final Path segmentPattern = absoluteStorageLocation.resolve(SEGMENT_PATTERN);
     // Add arguments
-    transcodeArgs.addAll(List.of("-vcodec","copy"));
+    transcodeArgs.addAll(List.of("-vcodec", "copy"));
     transcodeArgs.addAll(List.of("-acodec", "copy"));
     transcodeArgs.addAll(List.of("-muxdelay", "0"));
     transcodeArgs.addAll(List.of("-f", "hls"));

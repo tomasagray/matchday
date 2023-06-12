@@ -19,16 +19,15 @@
 
 package self.me.matchday.api.service;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.plugin.datasource.DataSourcePlugin;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+import self.me.matchday.model.DataSource;
+import self.me.matchday.plugin.datasource.DataSourcePlugin;
 
 @Service
 public class DataSourcePluginService {

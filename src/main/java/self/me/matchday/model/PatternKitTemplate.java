@@ -19,6 +19,11 @@
 
 package self.me.matchday.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -28,18 +33,10 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 @Getter
 @Setter
 @Entity
 public class PatternKitTemplate {
-
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
 
   @Type(type = "java.lang.Class")
   private final Class<?> type;
@@ -53,6 +50,9 @@ public class PatternKitTemplate {
   @LazyCollection(LazyCollectionOption.FALSE)
   private final List<PatternKitTemplate> relatedTemplates = new ArrayList<>();
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   public PatternKitTemplate() {
     this.type = null;
@@ -66,18 +66,14 @@ public class PatternKitTemplate {
 
   public void addField(@NotNull String fieldName, boolean required) {
     final boolean present =
-        this.fields.stream()
-            .map(Field::getFieldName)
-            .anyMatch(name -> name.equals(fieldName));
+        this.fields.stream().map(Field::getFieldName).anyMatch(name -> name.equals(fieldName));
     if (!present) {
       this.fields.add(new Field(fieldName, required));
     }
   }
 
   public void addFields(@NotNull String... fields) {
-        Arrays.stream(fields)
-            .map(field -> new Field(field, false))
-            .forEach(this.fields::add);
+    Arrays.stream(fields).map(field -> new Field(field, false)).forEach(this.fields::add);
   }
 
   public void addRelatedTemplate(@NotNull PatternKitTemplate template) {

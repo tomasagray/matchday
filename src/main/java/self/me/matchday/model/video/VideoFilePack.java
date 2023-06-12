@@ -19,12 +19,6 @@
 
 package self.me.matchday.model.video;
 
-import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
-import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -34,21 +28,26 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.persistence.*;
+import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
+import org.jetbrains.annotations.NotNull;
 
 @ToString
 @Entity
 public class VideoFilePack {
 
-  @Id
-  @GeneratedValue(generator = "uuid2")
-  @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Type(type="uuid-char")
-  private UUID id;
-
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   @MapKeyEnumerated
   @MapKeyColumn(name = "pack_id")
   private final Map<PartIdentifier, VideoFile> videoFiles = new ConcurrentSkipListMap<>();
+
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @Type(type = "uuid-char")
+  private UUID id;
 
   public void put(@NotNull VideoFile videoFile) {
     videoFiles.putIfAbsent(videoFile.getTitle(), videoFile);

@@ -34,5 +34,4 @@ public class SecureDataService {
   public @NotNull <T> T decryptData(@NotNull final T data) {
     return data;
   }
-
 }

@@ -19,8 +19,6 @@
 
 package self.me.matchday.plugin.datasource.parsing.fabric;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -29,6 +27,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.jetbrains.annotations.NotNull;
 
 public class Fabric {
 

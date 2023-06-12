@@ -92,6 +92,22 @@ public class TeamController {
     this.collectionModeller = collectionModeller;
   }
 
+  private static void addArtworkLinks(
+      @NotNull ArtworkResource artwork, @NotNull UUID teamId, @NotNull ArtworkRole role) {
+
+    try {
+      final Long artworkId = artwork.getId();
+      artwork.add(
+          linkTo(methodOn(TeamController.class).fetchTeamArtworkImageData(teamId, role, artworkId))
+              .withRel("image"));
+      artwork.add(
+          linkTo(methodOn(TeamController.class).fetchTeamArtworkMetadata(teamId, role, artworkId))
+              .withRel("metadata"));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
   /**
    * Publish all Teams to the API.
    *
@@ -259,22 +275,6 @@ public class TeamController {
     resource.add(
         linkTo(methodOn(TeamController.class).addTeamArtwork(teamId, role, image)).withSelfRel());
     return ResponseEntity.ok(resource);
-  }
-
-  private static void addArtworkLinks(
-      @NotNull ArtworkResource artwork, @NotNull UUID teamId, @NotNull ArtworkRole role) {
-
-    try {
-      final Long artworkId = artwork.getId();
-      artwork.add(
-          linkTo(methodOn(TeamController.class).fetchTeamArtworkImageData(teamId, role, artworkId))
-              .withRel("image"));
-      artwork.add(
-          linkTo(methodOn(TeamController.class).fetchTeamArtworkMetadata(teamId, role, artworkId))
-              .withRel("metadata"));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
   }
 
   @RequestMapping(

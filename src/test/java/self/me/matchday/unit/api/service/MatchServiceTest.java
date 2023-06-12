@@ -49,14 +49,12 @@ import self.me.matchday.model.Team;
 class MatchServiceTest {
 
   private static final Logger logger = LogManager.getLogger(MatchServiceTest.class);
-
+  private static final List<Event> cleanupData = new ArrayList<>();
   private final MatchService matchService;
-
   // Test data
   private final Competition testCompetition;
   private final Team testTeam;
   private final Match testMatch;
-  private static final List<Event> cleanupData = new ArrayList<>();
 
   @Autowired
   public MatchServiceTest(@NotNull TestDataCreator testDataCreator, MatchService matchService) {

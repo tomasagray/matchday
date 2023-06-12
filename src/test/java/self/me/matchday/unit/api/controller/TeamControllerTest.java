@@ -62,14 +62,12 @@ import self.me.matchday.model.Team;
 class TeamControllerTest {
 
   private static final Logger logger = LogManager.getLogger(TeamControllerTest.class);
-
+  private static final String NAME = "TeamControllerTest ";
+  private static final List<Event> testMatches = new ArrayList<>();
+  private static List<Team> testTeams;
+  private static TestDataCreator testDataCreator;
   @LocalServerPort private int port;
   @Autowired private TestRestTemplate restTemplate;
-
-  private static final String NAME = "TeamControllerTest ";
-  private static List<Team> testTeams;
-  private static final List<Event> testMatches = new ArrayList<>();
-  private static TestDataCreator testDataCreator;
 
   @BeforeAll
   static void setup(@Autowired TestDataCreator testDataCreator) {

@@ -19,6 +19,11 @@
 
 package self.me.matchday.unit.db;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
@@ -31,12 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.db.DataSourceRepository;
 import self.me.matchday.model.*;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest

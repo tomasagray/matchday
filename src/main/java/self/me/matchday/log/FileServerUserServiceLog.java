@@ -19,6 +19,8 @@
 
 package self.me.matchday.log;
 
+import java.util.List;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -29,9 +31,6 @@ import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.model.FileServerUser;
-
-import java.util.List;
-import java.util.UUID;
 
 @Aspect
 public class FileServerUserServiceLog {

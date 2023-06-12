@@ -34,17 +34,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RootController {
 
+  public static final int DEFAULT_PAGE_SIZE = 16;
+  public static final int DEFAULT_PAGE = 0;
   // Link relation identifiers
   private static final LinkRelation EVENTS_REL = LinkRelation.of("events");
   private static final LinkRelation MATCHES_REL = LinkRelation.of("matches");
   private static final LinkRelation HIGHLIGHTS_REL = LinkRelation.of("highlights");
   private static final LinkRelation TEAMS_REL = LinkRelation.of("teams");
   private static final LinkRelation COMPETITIONS_REL = LinkRelation.of("competitions");
-  public static final int DEFAULT_PAGE_SIZE = 16;
-  public static final int DEFAULT_PAGE = 0;
-
-  /** Container for root endpoint. */
-  private static class RootResource extends RepresentationModel<RootResource> {}
 
   @RequestMapping(
       value = {"", "/"},
@@ -75,4 +72,7 @@ public class RootController {
 
     return new ResponseEntity<>(root, HttpStatus.OK);
   }
+
+  /** Container for root endpoint. */
+  private static class RootResource extends RepresentationModel<RootResource> {}
 }

@@ -19,17 +19,16 @@
 
 package self.me.matchday.plugin.io.diskmanager;
 
-import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
-import self.me.matchday.api.service.SettingsService;
-import self.me.matchday.model.FileSize;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+import self.me.matchday.api.service.SettingsService;
+import self.me.matchday.model.FileSize;
 
 @Component
 public class DiskManager {

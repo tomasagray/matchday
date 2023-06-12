@@ -19,15 +19,15 @@
 
 package self.me.matchday.api.service;
 
+import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import self.me.matchday.model.FileServerUser;
 
-import java.util.regex.Pattern;
-
 @Service
 public class UserValidationService {
 
+  public static final int MIN_PASSWORD_LEN = 5;
   // Validation patterns
   private static final String EMAIL_REGEX =
       "(?:[a-z\\d!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z\\d!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-"
@@ -37,7 +37,6 @@ public class UserValidationService {
           + "\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])";
   private static final String PASSWORD_REGEX =
       "^[a-zA-Z\\d,_\\-()!@#$%^&*=+{\\[}\\];:'\"<>/?~`]{8,}$";
-  public static final int MIN_PASSWORD_LEN = 5;
 
   public void validateUserForLogin(@NotNull final FileServerUser user) {
     validateEmailAddress(user.getUsername());

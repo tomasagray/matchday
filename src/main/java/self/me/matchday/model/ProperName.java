@@ -30,9 +30,11 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 public class ProperName implements Comparable<ProperName> {
 
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
-
   private final String name;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<Synonym> synonyms = new HashSet<>();

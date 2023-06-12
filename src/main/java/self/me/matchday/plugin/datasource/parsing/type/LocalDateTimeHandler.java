@@ -19,16 +19,15 @@
 
 package self.me.matchday.plugin.datasource.parsing.type;
 
-import org.jetbrains.annotations.Nullable;
-import org.springframework.stereotype.Component;
-import self.me.matchday.plugin.datasource.parsing.TypeHandler;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Component;
+import self.me.matchday.plugin.datasource.parsing.TypeHandler;
 
 @Component
 public class LocalDateTimeHandler extends TypeHandler<LocalDateTime> {

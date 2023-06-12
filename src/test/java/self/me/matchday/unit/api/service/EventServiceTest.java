@@ -19,6 +19,17 @@
 
 package self.me.matchday.unit.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static self.me.matchday.model.video.Resolution.R_1080p;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -36,31 +47,17 @@ import self.me.matchday.model.*;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static self.me.matchday.model.video.Resolution.R_1080p;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for Event service")
 class EventServiceTest {
 
   private static final Logger logger = LogManager.getLogger(EventServiceTest.class);
-
+  // Test data
+  private static final List<Event> cleanupData = new ArrayList<>();
   // Test resources
   private final TestDataCreator testDataCreator;
   private final EventService eventService;
-
-  // Test data
-  private static final List<Event> cleanupData = new ArrayList<>();
   private final Match testMatch;
   private final Match unUpdatedEvent;
   private final VideoFileSource testFileSource;

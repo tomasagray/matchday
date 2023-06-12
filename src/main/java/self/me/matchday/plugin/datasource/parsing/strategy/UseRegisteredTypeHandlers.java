@@ -19,11 +19,10 @@
 
 package self.me.matchday.plugin.datasource.parsing.strategy;
 
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.plugin.datasource.parsing.CreationStrategy;
 import self.me.matchday.plugin.datasource.parsing.TypeHandler;
-
-import java.util.List;
 
 public class UseRegisteredTypeHandlers implements CreationStrategy {
 

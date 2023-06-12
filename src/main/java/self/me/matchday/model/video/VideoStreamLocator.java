@@ -19,17 +19,16 @@
 
 package self.me.matchday.model.video;
 
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Objects;
+import javax.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.PathConverter;
-
-import javax.persistence.*;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.Objects;
 
 @Entity
 @Getter
@@ -38,13 +37,11 @@ import java.util.Objects;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class VideoStreamLocator {
 
+  @EqualsAndHashCode.Exclude protected final Instant timestamp = Instant.now();
   @Id @GeneratedValue protected Long streamLocatorId;
 
   @Convert(converter = PathConverter.class)
   protected Path playlistPath;
-
-  @EqualsAndHashCode.Exclude protected final Instant timestamp = Instant.now();
-
   @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
   protected VideoFile videoFile;
 
@@ -58,9 +55,7 @@ public abstract class VideoStreamLocator {
   }
 
   public void updateState(
-          @NotNull StreamJobState.JobStatus status,
-          Double completionRatio,
-          VideoStreamingError error) {
+      @NotNull StreamJobState.JobStatus status, Double completionRatio, VideoStreamingError error) {
     updateState(status, completionRatio);
     this.state.setError(error);
   }

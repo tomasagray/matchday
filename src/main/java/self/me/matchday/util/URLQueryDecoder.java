@@ -19,18 +19,17 @@
 
 package self.me.matchday.util;
 
-import org.jetbrains.annotations.NotNull;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
+import org.jetbrains.annotations.NotNull;
 
 public class URLQueryDecoder {
 
@@ -54,16 +53,13 @@ public class URLQueryDecoder {
       }
 
       // Split URL query, map to key/value pairs & return
-      return
-          Arrays
-              .stream(url.getQuery().split("&"))
-              .map(URLQueryDecoder::splitQueryParameter)
-              .collect(
-                  Collectors
-                      .groupingBy(
-                          SimpleImmutableEntry::getKey,
-                          LinkedHashMap::new,
-                          mapping(Map.Entry::getValue, toList())));
+      return Arrays.stream(url.getQuery().split("&"))
+          .map(URLQueryDecoder::splitQueryParameter)
+          .collect(
+              Collectors.groupingBy(
+                  SimpleImmutableEntry::getKey,
+                  LinkedHashMap::new,
+                  mapping(Map.Entry::getValue, toList())));
 
     } catch (MalformedURLException | RuntimeException e) {
       // A problem was encountered; return an empty map
@@ -88,11 +84,11 @@ public class URLQueryDecoder {
 
   /**
    * Determines whether the given String is null or empty or contains only whitespace.
+   *
    * @param string The String to be tested
    * @return True / false
    */
   private static boolean isNullOrEmpty(final String string) {
-    return
-        (string == null) || ("".equals(string.trim()));
+    return (string == null) || ("".equals(string.trim()));
   }
 }

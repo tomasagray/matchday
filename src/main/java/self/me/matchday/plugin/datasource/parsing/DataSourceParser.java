@@ -19,10 +19,9 @@
 
 package self.me.matchday.plugin.datasource.parsing;
 
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.DataSource;
-
-import java.util.stream.Stream;
 
 public interface DataSourceParser<T, D> {
 

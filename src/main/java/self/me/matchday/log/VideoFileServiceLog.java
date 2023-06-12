@@ -19,6 +19,7 @@
 
 package self.me.matchday.log;
 
+import java.sql.Timestamp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -28,8 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.video.VideoFileService;
 import self.me.matchday.model.video.VideoFile;
-
-import java.sql.Timestamp;
 
 @Aspect
 @Component

@@ -19,13 +19,12 @@
 
 package self.me.matchday.api.service.video;
 
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.model.video.StreamJobState.JobStatus;
-import self.me.matchday.model.video.VideoStreamLocator;
-
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jetbrains.annotations.NotNull;
+import self.me.matchday.model.video.StreamJobState.JobStatus;
+import self.me.matchday.model.video.VideoStreamLocator;
 
 /**
  * Receives log emissions from FFMPEG, interprets them and updates the specified VideoStreamLocator

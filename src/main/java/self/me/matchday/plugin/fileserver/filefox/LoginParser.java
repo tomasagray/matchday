@@ -19,6 +19,12 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -27,13 +33,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import self.me.matchday.model.FileServerUser;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Data
 @Component

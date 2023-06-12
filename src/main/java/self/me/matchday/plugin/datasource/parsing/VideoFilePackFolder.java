@@ -19,14 +19,13 @@
 
 package self.me.matchday.plugin.datasource.parsing;
 
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.plugin.datasource.parsing.fabric.Folder;
-
-import java.util.function.BiConsumer;
-import java.util.function.BiPredicate;
-import java.util.function.Supplier;
 
 public class VideoFilePackFolder<T extends VideoFile> extends Folder<T, VideoFilePack> {
 

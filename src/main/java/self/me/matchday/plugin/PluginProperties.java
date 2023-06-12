@@ -27,5 +27,4 @@ public abstract class PluginProperties {
   protected String id;
   protected String title;
   protected String description;
-
 }

@@ -19,6 +19,7 @@
 
 package self.me.matchday.log;
 
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -29,8 +30,6 @@ import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.model.Competition;
-
-import java.util.List;
 
 @Aspect
 public class CompetitionServiceLog {

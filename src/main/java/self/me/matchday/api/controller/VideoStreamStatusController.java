@@ -19,6 +19,10 @@
 
 package self.me.matchday.api.controller;
 
+import static self.me.matchday.config.VideoStatusWebConfigurer.BROKER_ROOT;
+
+import java.util.List;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
@@ -32,11 +36,6 @@ import self.me.matchday.model.video.StreamJobState.JobStatus;
 import self.me.matchday.model.video.TaskState;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamingError;
-
-import java.util.List;
-import java.util.UUID;
-
-import static self.me.matchday.config.VideoStatusWebConfigurer.BROKER_ROOT;
 
 @Controller
 public class VideoStreamStatusController {
@@ -61,17 +60,17 @@ public class VideoStreamStatusController {
       final Double completionRatio = state.getCompletionRatio();
       final VideoStreamingError error = state.getError();
       return VideoStreamStatusMessage.builder()
-              .videoFileId(videoFileId)
-              .status(status)
-              .completionRatio(completionRatio)
-              .error(error)
-              .build();
+          .videoFileId(videoFileId)
+          .status(status)
+          .completionRatio(completionRatio)
+          .error(error)
+          .build();
     } else {
       return VideoStreamStatusMessage.builder()
-              .videoFileId(videoFileId)
-              .status(null)
-              .completionRatio(0d)
-              .build();
+          .videoFileId(videoFileId)
+          .status(null)
+          .completionRatio(0d)
+          .build();
     }
   }
 

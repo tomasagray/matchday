@@ -19,28 +19,26 @@
 
 package self.me.matchday.unit.plugin.io.ffmpeg;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.TestDataCreator;
-import self.me.matchday.plugin.io.ffmpeg.FFmpeg;
-import self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask;
-import self.me.matchday.util.ResourceFileReader;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import self.me.matchday.TestDataCreator;
+import self.me.matchday.plugin.io.ffmpeg.FFmpeg;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -49,52 +47,41 @@ class FFmpegTest {
 
   private static final Logger logger = LogManager.getLogger(FFmpegTest.class);
 
-  private static final String FFMPEG_PROPERTIES = "plugins/ffmpeg/ffmpeg.properties";
+  //  private static final String FFMPEG_PROPERTIES = "plugins/ffmpeg/ffmpeg.properties";
   private static final String DEFAULT_ARGS =
       "-v info -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
-  private final TestDataCreator testDataCreator;
-
   // Test resources
   private static FFmpegStreamTask hlsStreamTask;
-  private static String storageLocation;
+  private final TestDataCreator testDataCreator;
+  @Value("${video-resources.file-storage-location}")
+  private String storageLocation;
+  @Value("${plugin.ffmpeg.ffmpeg-location}")
+  private String ffmpegLocation;
 
   @Autowired
-  public FFmpegTest(TestDataCreator testDataCreator) throws URISyntaxException, IOException {
+  public FFmpegTest(TestDataCreator testDataCreator) {
     this.testDataCreator = testDataCreator;
-    setup();
   }
 
-  private static String getStorageLocation() throws IOException {
-    final Map<String, String> resources =
-            ResourceFileReader.readPropertiesResource("settings.default.properties");
-    return resources.get("video-resources.file-storage-location");
-  }
-
-  private void setup() throws IOException, URISyntaxException {
-
-    // Read configuration resources
-    final Map<String, String> resources =
-        ResourceFileReader.readPropertiesResource(FFMPEG_PROPERTIES);
-
-    String FFMPEG_EXE = resources.get("plugin.ffmpeg.ffmpeg-location");
-    assertThat(FFMPEG_EXE).isNotNull().isNotEmpty();
-    logger.info("Instantiating FFmpeg Plugin with executable: " + FFMPEG_EXE);
-    FFmpeg ffmpeg = new FFmpeg(FFMPEG_EXE);
-
-    // Create URLs
-    final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
-    final URL secondHalfUrl = testDataCreator.getSecondHalfUrl();
-    assertThat(firstHalfUrl).isNotNull();
-    assertThat(secondHalfUrl).isNotNull();
-
-    final List<URI> urls = List.of(firstHalfUrl.toURI(), secondHalfUrl.toURI());
-    storageLocation = getStorageLocation();
-    hlsStreamTask = ffmpeg.getHlsStreamTask(Path.of(storageLocation), urls.toArray(new URI[0]));
+  @BeforeEach
+  public void setup() throws URISyntaxException {
+    if (hlsStreamTask == null) {
+      FFmpeg ffmpeg = new FFmpeg(ffmpegLocation);
+      // Create URLs
+      final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
+      final URL secondHalfUrl = testDataCreator.getSecondHalfUrl();
+      assertThat(firstHalfUrl).isNotNull();
+      assertThat(secondHalfUrl).isNotNull();
+      final List<URI> urls = List.of(firstHalfUrl.toURI(), secondHalfUrl.toURI());
+      hlsStreamTask = ffmpeg.getHlsStreamTask(Path.of(storageLocation), urls.toArray(new URI[0]));
+    }
   }
 
   @Test
   @DisplayName("Ensure task has correct # of arguments")
-  void minArgLength() {
+  void minArgLength() throws URISyntaxException {
+
+    setup();
 
     // Test params
     final int minArgLength = 7;
@@ -121,7 +108,7 @@ class FFmpegTest {
   @DisplayName("Verify output path")
   void outputPath() {
 
-    final Path expectedOutputPath = Path.of(FFmpegTest.storageLocation);
+    final Path expectedOutputPath = Path.of(storageLocation);
     final Path actualOutputPath = hlsStreamTask.getPlaylistPath();
 
     logger.info("Testing output path: " + actualOutputPath);

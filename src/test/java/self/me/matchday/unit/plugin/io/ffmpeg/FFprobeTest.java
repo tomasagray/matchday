@@ -19,13 +19,19 @@
 
 package self.me.matchday.unit.plugin.io.ffmpeg;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
@@ -33,14 +39,6 @@ import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import self.me.matchday.plugin.io.ffmpeg.FFprobe;
 import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.ResourceFileReader;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -50,28 +48,24 @@ class FFprobeTest {
 
   private static final Logger logger = LogManager.getLogger(FFprobeTest.class);
 
-  private static final String FFPROBE_PATH = "plugin.ffmpeg.ffprobe-location";
-  private static final String FFMPEG_PROPERTIES = "plugins/ffmpeg/ffmpeg.properties";
   private static final String SAMPLE_METADATA_JSON = "data/ffprobe_sample_metadata.json";
 
   private static FFprobe ffProbe;
   private static URL testUrl;
   private static FFmpegMetadata expectedMetadata;
 
-  @BeforeAll
-  static void setUp(@Autowired @NotNull final TestDataCreator testDataCreator) throws IOException {
+  private final TestDataCreator testDataCreator;
+  @Value("${plugin.ffmpeg.ffprobe-location}")
+  private String ffprobePath;
 
-    // Read plugin resources file
-    Map<String, String> resources = ResourceFileReader.readPropertiesResource(FFMPEG_PROPERTIES);
+  @Autowired
+  FFprobeTest(TestDataCreator testDataCreator) throws IOException {
+
+    this.testDataCreator = testDataCreator;
     // Read test metadata & deserialize
     String sampleMetadata = ResourceFileReader.readTextResource(SAMPLE_METADATA_JSON);
     // Parse JSON to object
     expectedMetadata = JsonParser.fromJson(sampleMetadata, FFmpegMetadata.class);
-
-    // Create FFprobe instance
-    logger.info("Instantiating FFprobe with executable: " + FFPROBE_PATH);
-    ffProbe = new FFprobe(resources.get(FFPROBE_PATH));
-    FFprobeTest.testUrl = testDataCreator.getFirstHalfUrl();
   }
 
   @Test
@@ -79,6 +73,10 @@ class FFprobeTest {
   @DisplayName("Check creation of FFprobe instance")
   void checkFFprobeCreation() {
 
+    // Create FFprobe instance
+    logger.info("Instantiating FFprobe with executable: " + ffprobePath);
+    ffProbe = new FFprobe(ffprobePath);
+    FFprobeTest.testUrl = testDataCreator.getFirstHalfUrl();
     logger.info("Verifying FFprobe instance is NOT NULL...");
     assertThat(ffProbe).isNotNull();
   }

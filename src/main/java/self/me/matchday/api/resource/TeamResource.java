@@ -19,7 +19,16 @@
 
 package self.me.matchday.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static self.me.matchday.util.Constants.*;
+
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
@@ -35,16 +44,6 @@ import self.me.matchday.model.ArtworkRole;
 import self.me.matchday.model.Country;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Team;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import static self.me.matchday.util.Constants.*;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -134,10 +133,7 @@ public class TeamResource extends RepresentationModel<TeamResource> {
     }
 
     private List<ColorResource> getColorResources(@NotNull Team team) {
-      return team.getColors()
-              .stream()
-              .map(colorModeller::toModel)
-              .collect(Collectors.toList());
+      return team.getColors().stream().map(colorModeller::toModel).collect(Collectors.toList());
     }
   }
 }

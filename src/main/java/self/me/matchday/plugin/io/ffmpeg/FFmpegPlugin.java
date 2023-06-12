@@ -19,16 +19,15 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import self.me.matchday.plugin.Plugin;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import self.me.matchday.plugin.Plugin;
 
 @Component
 public class FFmpegPlugin implements Plugin {

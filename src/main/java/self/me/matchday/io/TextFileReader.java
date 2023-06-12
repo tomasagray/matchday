@@ -23,14 +23,13 @@
  */
 package self.me.matchday.io;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import org.jetbrains.annotations.NotNull;
 
 /** A simple class for reading text files into a String. */
 public class TextFileReader {

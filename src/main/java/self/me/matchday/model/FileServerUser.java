@@ -19,6 +19,12 @@
 
 package self.me.matchday.model;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -26,25 +32,11 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.UUID;
-
 /** Represents a file server user */
 @Getter
 @RequiredArgsConstructor
 @Entity
 public final class FileServerUser implements Serializable {
-
-  @Id
-  @GeneratedValue(generator = "uuid2")
-  @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Type(type="uuid-char")
-  @Setter
-  private UUID userId;
 
   @Column(columnDefinition = "TEXT")
   private final String username;
@@ -55,17 +47,24 @@ public final class FileServerUser implements Serializable {
   @Column(columnDefinition = "TEXT")
   private final String email;
 
-  private boolean loggedIn;
-
-  @Type(type="uuid-char")
-  private UUID serverId;
-
   @OneToMany(
       targetEntity = SecureCookie.class,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.EAGER)
   private final Collection<SecureCookie> cookies = new ArrayList<>();
+
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @Type(type = "uuid-char")
+  @Setter
+  private UUID userId;
+
+  private boolean loggedIn;
+
+  @Type(type = "uuid-char")
+  private UUID serverId;
 
   public FileServerUser() {
     this.username = this.email = null;

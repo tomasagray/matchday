@@ -47,12 +47,10 @@ import self.me.matchday.plugin.io.diskmanager.DiskManager;
 @DisplayName("DiskManagerTest - Verify DiskManager plugin")
 class DiskManagerTest {
 
+  public static final int TEST_DATA_LINES = 10_000;
   private static final Logger logger = LogManager.getLogger(DiskManagerTest.class);
-
   private static final Long SPACE_ENOUGH_FOR = FileSize.ofGigabytes(1);
   private static final Long TOO_MUCH_SPACE = FileSize.ofGigabytes(Long.MAX_VALUE);
-  public static final int TEST_DATA_LINES = 10_000;
-
   private static DiskManager diskManager;
 
   @BeforeAll

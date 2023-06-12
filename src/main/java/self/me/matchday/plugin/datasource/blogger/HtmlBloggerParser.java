@@ -19,6 +19,13 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
@@ -30,14 +37,6 @@ import self.me.matchday.plugin.datasource.blogger.model.Blogger;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerEntry;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.Link;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class HtmlBloggerParser implements BloggerParser {
 
@@ -112,6 +111,24 @@ public class HtmlBloggerParser implements BloggerParser {
       this.html = html;
     }
 
+    @Nullable
+    private static BloggerFeed.Link getSelfLink(@NotNull final Element elem) {
+      final String rel = elem.attr("rel");
+      switch (rel) {
+        case "canonical", "alternate", "service.post" -> {
+          try {
+            final Link link = new Link();
+            link.setHref(new URL(elem.attr("href")));
+            link.setRel(rel);
+            link.setType(elem.attr("type"));
+            return link;
+          } catch (MalformedURLException ignored) {
+          }
+        }
+      }
+      return null;
+    }
+
     URL getXmlNs() {
       try {
         final Element tag = this.html.selectFirst("html");
@@ -177,24 +194,6 @@ public class HtmlBloggerParser implements BloggerParser {
         links.add(nextLink);
       }
       return links;
-    }
-
-    @Nullable
-    private static BloggerFeed.Link getSelfLink(@NotNull final Element elem) {
-      final String rel = elem.attr("rel");
-      switch (rel) {
-        case "canonical", "alternate", "service.post" -> {
-          try {
-            final Link link = new Link();
-            link.setHref(new URL(elem.attr("href")));
-            link.setRel(rel);
-            link.setType(elem.attr("type"));
-            return link;
-          } catch (MalformedURLException ignored) {
-          }
-        }
-      }
-      return null;
     }
 
     @Nullable

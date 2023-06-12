@@ -19,6 +19,20 @@
 
 package self.me.matchday.plugin.artwork.creator;
 
+import java.awt.*;
+import java.awt.geom.GeneralPath;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URL;
+import java.util.*;
+import java.util.List;
+import java.util.stream.Stream;
+import javax.imageio.ImageIO;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,21 +47,6 @@ import self.me.matchday.model.Image;
 import self.me.matchday.model.Param;
 import self.me.matchday.plugin.Plugin;
 import self.me.matchday.util.ResourceFileReader;
-
-import javax.imageio.ImageIO;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import java.awt.*;
-import java.awt.geom.GeneralPath;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.URL;
-import java.util.List;
-import java.util.*;
-import java.util.stream.Stream;
 
 @Component
 public class ArtworkCreatorPlugin implements Plugin {

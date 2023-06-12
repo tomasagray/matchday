@@ -19,14 +19,13 @@
 
 package self.me.matchday.model.video;
 
+import java.util.Objects;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import self.me.matchday.db.converter.VideoStreamingErrorConverter;
-
-import javax.persistence.*;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -36,7 +35,9 @@ import java.util.Objects;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class StreamJobState {
 
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   private JobStatus status = JobStatus.CREATED;
   private Double completionRatio = 0.0;

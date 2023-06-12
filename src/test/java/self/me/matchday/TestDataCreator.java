@@ -90,21 +90,41 @@ public class TestDataCreator {
     videoResources = ResourceFileReader.readPropertiesResource("settings.default.properties");
   }
 
-  public Map<String, String> getVideoResources() {
-    return videoResources;
-  }
-
   private static int getRandomNumber(int min, int max) {
     final int number = (int) ((Math.random() * (min - max)) + min);
     return Math.abs(number);
+  }
+
+  public static void deleteGeneratedMatchArtwork(@NotNull Collection<Event> cleanupData)
+      throws IOException {
+
+    logger.info("Attempting to delete: {} test-generated files...", cleanupData.size());
+    for (Event event : cleanupData) {
+      final File file = event.getArtwork().getFile().toFile();
+      logger.info("Deleting test-generated Artwork file: " + file);
+      final boolean deleted = file.delete();
+      if (deleted || !file.exists()) {
+        logger.info("Successfully deleted file: " + file);
+      } else {
+        throw new IOException("Could not delete file: " + file);
+      }
+    }
+  }
+
+  public static String getRandomizedName(@NotNull String name, int start, int end) {
+    final int seed = getRandomNumber(start, end);
+    return String.format("Test Competition %s [%d]", name, seed);
+  }
+
+  public Map<String, String> getVideoResources() {
+    return videoResources;
   }
 
   public DataSource<Match> readTestJsonDataSource() throws IOException {
     return readTestDataSource();
   }
 
-  private @NotNull DataSource<Match> readTestDataSource()
-      throws IOException {
+  private @NotNull DataSource<Match> readTestDataSource() throws IOException {
 
     String filename = "data/datasource/test_json_blogger_datasource.json";
     final String dataSourceJson = ResourceFileReader.readTextResource(filename);
@@ -143,6 +163,8 @@ public class TestDataCreator {
     final Type type = new TypeToken<PatternKit<Event>>() {}.getType();
     return JsonParser.fromJson(patternKitData, type);
   }
+
+  // ================ EVENTS ======================
 
   @NotNull
   public PatternKit<VideoFileSource> createFileSourcePatternKitManually() {
@@ -194,33 +216,10 @@ public class TestDataCreator {
     return JsonParser.fromJson(patternKitData, type);
   }
 
-  // ================ EVENTS ======================
-
-  public static void deleteGeneratedMatchArtwork(@NotNull Collection<Event> cleanupData)
-      throws IOException {
-
-    logger.info("Attempting to delete: {} test-generated files...", cleanupData.size());
-    for (Event event : cleanupData) {
-      final File file = event.getArtwork().getFile().toFile();
-      logger.info("Deleting test-generated Artwork file: " + file);
-      final boolean deleted = file.delete();
-      if (deleted || !file.exists()) {
-        logger.info("Successfully deleted file: " + file);
-      } else {
-        throw new IOException("Could not delete file: " + file);
-      }
-    }
-  }
-
   @Transactional
   @NotNull
   public Match createTestMatch() {
     return this.createTestMatch("Test ");
-  }
-
-  public static String getRandomizedName(@NotNull String name, int start, int end) {
-    final int seed = getRandomNumber(start, end);
-    return String.format("Test Competition %s [%d]", name, seed);
   }
 
   @Transactional
@@ -370,7 +369,7 @@ public class TestDataCreator {
     final String password = String.format("password-%s", numGen.nextInt(Integer.MAX_VALUE));
     final FileServerUser user =
         new FileServerUser(username, password, TestFileServerPlugin.pluginId);
-//    user.setLoggedIntoServer(TestFileServerPlugin.pluginId, new ArrayList<>());
+    //    user.setLoggedIntoServer(TestFileServerPlugin.pluginId, new ArrayList<>());
     return userService.login(user);
   }
 

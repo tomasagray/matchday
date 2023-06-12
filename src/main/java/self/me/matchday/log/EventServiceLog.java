@@ -53,8 +53,7 @@ public class EventServiceLog {
   @Before("execution(* self.me.matchday.api.service.EventService.saveAll(..))")
   public void logSaveManyEvents(@NotNull JoinPoint jp) {
     final Iterable<?> events = (Iterable<?>) jp.getArgs()[0];
-    final List<?> eventList =
-        StreamSupport.stream(events.spliterator(), false).toList();
+    final List<?> eventList = StreamSupport.stream(events.spliterator(), false).toList();
     logger.info("Saving: {} Events...", eventList.size());
   }
 
@@ -103,8 +102,7 @@ public class EventServiceLog {
   @Before("execution(* self.me.matchday.api.service.EventService.updateAll(..))")
   public void logUpdateManyEvents(@NotNull JoinPoint jp) {
     final Iterable<?> events = (Iterable<?>) jp.getArgs()[0];
-    final List<?> eventsList =
-        StreamSupport.stream(events.spliterator(), false).toList();
+    final List<?> eventsList = StreamSupport.stream(events.spliterator(), false).toList();
     logger.info("Updating: {} Events...", eventsList.size());
   }
 
@@ -116,8 +114,7 @@ public class EventServiceLog {
   @Before("execution(* self.me.matchday.api.service.EventService.deleteAll(..))")
   public void logDeleteManyEvents(@NotNull JoinPoint jp) {
     final Iterable<?> events = (Iterable<?>) jp.getArgs()[0];
-    final List<?> eventList =
-        StreamSupport.stream(events.spliterator(), false).toList();
+    final List<?> eventList = StreamSupport.stream(events.spliterator(), false).toList();
     logger.info("Deleting: {} Events...", eventList.size());
   }
 }

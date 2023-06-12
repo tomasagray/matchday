@@ -19,12 +19,7 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.jsoup.select.Evaluator;
-import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed;
+import static self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,8 +27,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.jsoup.select.Evaluator;
+import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed;
 
 class BloggerEntryParser {
 
@@ -41,6 +40,19 @@ class BloggerEntryParser {
 
   BloggerEntryParser(@NotNull final Element element) {
     this.element = element;
+  }
+
+  @Nullable
+  private static Link getLink(String _url) {
+    try {
+      final URL url = new URL(_url);
+      final Link link = new Link();
+      link.setHref(url);
+      link.setRel("self");
+      return link;
+    } catch (MalformedURLException ignored) {
+    }
+    return null;
   }
 
   BloggerFeed.Generic<String> getId() {
@@ -87,19 +99,6 @@ class BloggerEntryParser {
         .map(Element::toString)
         .map(Str::new)
         .orElse(null);
-  }
-
-  @Nullable
-  private static Link getLink(String _url) {
-    try {
-      final URL url = new URL(_url);
-      final Link link = new Link();
-      link.setHref(url);
-      link.setRel("self");
-      return link;
-    } catch (MalformedURLException ignored) {
-    }
-    return null;
   }
 
   List<Link> getLinks() {

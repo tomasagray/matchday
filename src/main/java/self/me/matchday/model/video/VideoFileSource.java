@@ -19,13 +19,12 @@
 
 package self.me.matchday.model.video;
 
+import java.util.*;
+import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.*;
-import java.util.*;
 
 /**
  * Represents a collection of files which compose an Event. Includes metadata describing the media
@@ -43,7 +42,7 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Type(type="uuid-char")
+  @Type(type = "uuid-char")
   private UUID fileSrcId;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)

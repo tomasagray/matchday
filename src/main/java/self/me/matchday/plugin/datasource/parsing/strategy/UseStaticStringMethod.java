@@ -19,11 +19,10 @@
 
 package self.me.matchday.plugin.datasource.parsing.strategy;
 
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.plugin.datasource.parsing.CreationStrategy;
-
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import org.jetbrains.annotations.NotNull;
+import self.me.matchday.plugin.datasource.parsing.CreationStrategy;
 
 public class UseStaticStringMethod implements CreationStrategy {
 

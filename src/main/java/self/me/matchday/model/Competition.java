@@ -44,17 +44,16 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 public class Competition implements Serializable {
 
-  @Id
-  @GeneratedValue(generator = "uuid2")
-  @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Type(type="uuid-char")
-  private UUID id;
-
   @OneToOne(cascade = CascadeType.ALL)
   private final ProperName name;
 
-  @ManyToOne
-  private Country country;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @Type(type = "uuid-char")
+  private UUID id;
+
+  @ManyToOne private Country country;
 
   // artwork
   @OneToOne(cascade = CascadeType.ALL)

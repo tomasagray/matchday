@@ -46,5 +46,5 @@ public class EntityServiceRegistry {
             () -> new IllegalArgumentException("No Service found for class: " + clazz.getName()));
   }
 
-    private record Entry<T, S extends EntityService<T, ?>>(Class<T> clazz, S service) {}
+  private record Entry<T, S extends EntityService<T, ?>>(Class<T> clazz, S service) {}
 }

@@ -19,17 +19,16 @@
 
 package self.me.matchday.model;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
+import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.Corrected;
 import self.me.matchday.model.video.VideoFileSource;
-
-import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.*;
 
 /** A sporting Event */
 @Getter
@@ -40,10 +39,14 @@ import java.util.*;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Event {
 
+  @Setter(AccessLevel.NONE)
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+  protected final Set<VideoFileSource> fileSources = new HashSet<>();
+
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Type(type="uuid-char")
+  @Type(type = "uuid-char")
   protected UUID eventId;
 
   @Corrected
@@ -51,13 +54,7 @@ public abstract class Event {
   protected Competition competition;
 
   @Embedded protected Season season = new Season();
-
   @Embedded protected Fixture fixture = new Fixture();
-
-  @Setter(AccessLevel.NONE)
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-  protected final Set<VideoFileSource> fileSources = new HashSet<>();
-
   protected LocalDateTime date;
 
   @OneToOne(cascade = CascadeType.ALL)

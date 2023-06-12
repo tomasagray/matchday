@@ -19,8 +19,14 @@
 
 package self.me.matchday.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static self.me.matchday.api.resource.EventsResource.VIDEO_LINK;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,13 +41,6 @@ import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.model.Fixture;
 import self.me.matchday.model.Highlight;
 import self.me.matchday.model.Season;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import static self.me.matchday.api.resource.EventsResource.VIDEO_LINK;
 
 @Data
 @NoArgsConstructor

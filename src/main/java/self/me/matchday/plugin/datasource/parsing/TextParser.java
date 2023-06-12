@@ -19,6 +19,12 @@
 
 package self.me.matchday.plugin.datasource.parsing;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -30,13 +36,6 @@ import self.me.matchday.plugin.datasource.parsing.strategy.UseRegisteredTypeHand
 import self.me.matchday.plugin.datasource.parsing.strategy.UseStaticStringMethod;
 import self.me.matchday.plugin.datasource.parsing.strategy.UseStringConstructor;
 import self.me.matchday.util.ReflectionUtils;
-
-import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.stream.Stream;
 
 @Component
 public class TextParser {

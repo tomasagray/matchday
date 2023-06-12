@@ -19,10 +19,9 @@
 
 package self.me.matchday.plugin.datasource.parsing;
 
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.function.Function;
 
 @Data
 @AllArgsConstructor

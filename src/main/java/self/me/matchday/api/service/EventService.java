@@ -43,9 +43,8 @@ import self.me.matchday.model.video.VideoFileSource;
 @Transactional
 public class EventService implements EntityService<Event, UUID> {
 
-  private static final EventSorter EVENT_SORTER = new EventSorter();
   public static final Sort DEFAULT_EVENT_SORT = Sort.by(Direction.DESC, "date");
-
+  private static final EventSorter EVENT_SORTER = new EventSorter();
   private final EventRepository eventRepository;
   private final VideoFileSrcRepository fileSrcRepository;
   private final MatchService matchService;

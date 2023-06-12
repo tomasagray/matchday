@@ -66,14 +66,12 @@ import self.me.matchday.plugin.datasource.parsing.fabric.Bolt;
 class CompetitionControllerTest {
 
   private static final Logger logger = LogManager.getLogger(CompetitionControllerTest.class);
-
+  private static final String NAME = "CompetitionControllerTest ";
+  private static final List<Event> testMatches = new ArrayList<>();
+  private static List<Competition> testCompetitions;
+  private static TestDataCreator testDataCreator;
   @LocalServerPort private int port;
   @Autowired private TestRestTemplate restTemplate;
-
-  private static final String NAME = "CompetitionControllerTest ";
-  private static List<Competition> testCompetitions;
-  private static final List<Event> testMatches = new ArrayList<>();
-  private static TestDataCreator testDataCreator;
 
   @BeforeAll
   static void setup(@Autowired @NotNull TestDataCreator testDataCreator) {

@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service;
 
+import java.util.*;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,9 +29,6 @@ import self.me.matchday.db.FileServerUserRepo;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.SecureCookie;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class FileServerUserService {

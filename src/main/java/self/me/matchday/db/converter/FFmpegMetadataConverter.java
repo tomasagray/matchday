@@ -19,11 +19,10 @@
 
 package self.me.matchday.db.converter;
 
-import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
-import self.me.matchday.util.JsonParser;
-
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
+import self.me.matchday.util.JsonParser;
 
 @Converter
 public class FFmpegMetadataConverter implements AttributeConverter<FFmpegMetadata, String> {

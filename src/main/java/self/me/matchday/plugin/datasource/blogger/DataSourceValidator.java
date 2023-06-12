@@ -19,16 +19,15 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
+import java.net.URI;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.PlaintextDataSource;
-
-import java.net.URI;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 public class DataSourceValidator {

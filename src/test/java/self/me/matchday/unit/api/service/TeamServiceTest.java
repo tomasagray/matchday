@@ -50,11 +50,10 @@ import self.me.matchday.model.Team;
 class TeamServiceTest {
 
   private static final Logger logger = LogManager.getLogger(TeamServiceTest.class);
-
+  private static final List<Event> cleanupData = new ArrayList<>();
   private final TeamService teamService;
   private final Competition testCompetition;
   private final Team testTeam;
-  private static final List<Event> cleanupData = new ArrayList<>();
 
   @Autowired
   public TeamServiceTest(@NotNull TestDataCreator testDataCreator, TeamService teamService) {

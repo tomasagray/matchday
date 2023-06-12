@@ -19,17 +19,6 @@
 
 package self.me.matchday.api.service.video;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import self.me.matchday.api.service.FileServerPluginService;
-import self.me.matchday.model.video.VideoFile;
-import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
-import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
-
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -40,6 +29,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import javax.transaction.Transactional;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import self.me.matchday.api.service.FileServerPluginService;
+import self.me.matchday.model.video.VideoFile;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
+import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 
 @Service
 @Transactional

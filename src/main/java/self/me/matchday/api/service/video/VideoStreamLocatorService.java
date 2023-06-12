@@ -37,12 +37,12 @@ import self.me.matchday.model.video.VideoStreamLocator;
 @Service
 public class VideoStreamLocatorService {
 
-  @Value("${video-resources.playlist-name}")
-  private String PLAYLIST_NAME;
-
   private final VideoStreamLocatorRepo streamLocatorRepo;
   private final VideoStreamStatusController streamStatusController;
   private final SimpMessagingTemplate messagingTemplate;
+
+  @Value("${video-resources.playlist-name}")
+  private String PLAYLIST_NAME;
 
   public VideoStreamLocatorService(
       final VideoStreamLocatorRepo streamLocatorRepo,

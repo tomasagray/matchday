@@ -19,12 +19,6 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -32,6 +26,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

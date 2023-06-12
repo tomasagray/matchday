@@ -19,14 +19,13 @@
 
 package self.me.matchday.model;
 
-import lombok.*;
-import org.hibernate.Hibernate;
-import self.me.matchday.db.converter.PathConverter;
-
-import javax.persistence.*;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.persistence.*;
+import lombok.*;
+import org.hibernate.Hibernate;
+import self.me.matchday.db.converter.PathConverter;
 
 @Entity
 @Getter
@@ -37,7 +36,9 @@ import java.util.Objects;
 @Builder
 public class Artwork {
 
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   @Convert(converter = PathConverter.class)
   private Path file;

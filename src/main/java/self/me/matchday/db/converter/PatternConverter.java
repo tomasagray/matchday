@@ -19,9 +19,9 @@
 
 package self.me.matchday.db.converter;
 
+import java.util.regex.Pattern;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-import java.util.regex.Pattern;
 
 @Converter
 public class PatternConverter implements AttributeConverter<Pattern, String> {

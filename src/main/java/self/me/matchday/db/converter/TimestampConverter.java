@@ -19,10 +19,10 @@
 
 package self.me.matchday.db.converter;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 import java.sql.Timestamp;
 import java.time.Instant;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 @Converter
 public class TimestampConverter implements AttributeConverter<Timestamp, Long> {

@@ -19,6 +19,10 @@
 
 package self.me.matchday.api.service.video;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -29,11 +33,6 @@ import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @PropertySource("classpath:video.properties")
@@ -46,9 +45,10 @@ public class VideoStreamLocatorPlaylistService {
   private final SettingsService settingsService;
 
   public VideoStreamLocatorPlaylistService(
-          final VideoStreamLocatorPlaylistRepo playlistRepo,
-          final VideoStreamLocatorService locatorService,
-          final VideoFileSelectorService videoFileSelectorService, SettingsService settingsService) {
+      final VideoStreamLocatorPlaylistRepo playlistRepo,
+      final VideoStreamLocatorService locatorService,
+      final VideoFileSelectorService videoFileSelectorService,
+      SettingsService settingsService) {
 
     this.playlistRepo = playlistRepo;
     this.locatorService = locatorService;

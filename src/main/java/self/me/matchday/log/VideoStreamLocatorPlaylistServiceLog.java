@@ -19,6 +19,7 @@
 
 package self.me.matchday.log;
 
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -30,8 +31,6 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-
-import java.util.List;
 
 @Aspect
 public class VideoStreamLocatorPlaylistServiceLog {

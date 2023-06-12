@@ -19,10 +19,9 @@
 
 package self.me.matchday.plugin.datasource.parsing.strategy;
 
+import java.lang.reflect.Constructor;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.plugin.datasource.parsing.CreationStrategy;
-
-import java.lang.reflect.Constructor;
 
 public class UseStringConstructor implements CreationStrategy {
 

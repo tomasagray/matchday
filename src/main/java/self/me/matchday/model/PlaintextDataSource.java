@@ -19,18 +19,17 @@
 
 package self.me.matchday.model;
 
-import lombok.Getter;
-import lombok.ToString;
-import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import lombok.Getter;
+import lombok.ToString;
+import org.jetbrains.annotations.NotNull;
 
 @ToString(callSuper = true)
 @Entity

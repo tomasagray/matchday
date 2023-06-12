@@ -19,10 +19,9 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import lombok.Data;
-
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
 
 /** Represents audio/video file metadata returned by FFPROBE */
 @Data

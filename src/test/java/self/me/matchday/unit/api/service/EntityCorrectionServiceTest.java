@@ -62,21 +62,15 @@ import self.me.matchday.model.video.VideoFileSource;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class EntityCorrectionServiceTest {
 
-  private static final Logger logger = LogManager.getLogger(EntityCorrectionServiceTest.class);
   static final String UEFA_CHAMPIONS_LEAGUE = "UEFA Champions League ";
+  private static final Logger logger = LogManager.getLogger(EntityCorrectionServiceTest.class);
   private static final String FC_BARCELONA = "FC Barcelona ";
   private static final String ATLETICO_DE_MADRID = "Atletico de Madrid ";
-
+  // Test data
+  private static final List<Event> cleanupData = new ArrayList<>();
   private final EntityCorrectionService entityCorrectionService;
   private final EventService eventService;
   private final SynonymService synonymService;
-  // Test data
-  private static final List<Event> cleanupData = new ArrayList<>();
-
-  @AfterAll
-  static void cleanup() throws IOException {
-    TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
-  }
 
   @Autowired
   public EntityCorrectionServiceTest(
@@ -90,6 +84,11 @@ class EntityCorrectionServiceTest {
 
     createProperEvent();
     createSynonyms();
+  }
+
+  @AfterAll
+  static void cleanup() throws IOException {
+    TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
   }
 
   private void createProperEvent() throws MalformedURLException {

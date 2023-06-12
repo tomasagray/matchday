@@ -19,14 +19,13 @@
 
 package self.me.matchday.plugin.datasource.parsing.fabric;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import org.jetbrains.annotations.NotNull;
 
 class FolderSpliterator<R, T> extends Spliterators.AbstractSpliterator<R> {
 

@@ -19,9 +19,9 @@
 
 package self.me.matchday.db.converter;
 
+import java.net.URI;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-import java.net.URI;
 
 @Converter
 public class UriConverter implements AttributeConverter<URI, String> {

@@ -19,6 +19,22 @@
 
 package self.me.matchday.api.service.video;
 
+import static self.me.matchday.model.video.StreamJobState.JobStatus;
+
+import java.io.*;
+import java.net.URI;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,25 +53,15 @@ import self.me.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegStreamTask;
 import self.me.matchday.util.RecursiveDirectoryDeleter;
 
-import java.io.*;
-import java.net.URI;
-import java.nio.channels.AsynchronousFileChannel;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-
-import static self.me.matchday.model.video.StreamJobState.JobStatus;
-
 @Service
 public class VideoStreamManager {
+
+  private final VideoStreamLocatorPlaylistService playlistService;
+  private final VideoStreamLocatorService locatorService;
+  private final VideoFileService videoFileService;
+  private final FFmpegPlugin ffmpegPlugin;
+  private final Map<Long, Future<Long>> streamQueue = new HashMap<>();
+  private final ThreadPoolTaskExecutor executor;
 
   @Value("${video-resources.file-read-buffer-size}")
   private int BUFFER_SIZE;
@@ -66,18 +72,11 @@ public class VideoStreamManager {
   @Value("${video-resources.max-recheck-seconds}")
   private int MAX_RECHECK_TIMEOUT;
 
-  private final VideoStreamLocatorPlaylistService playlistService;
-  private final VideoStreamLocatorService locatorService;
-  private final VideoFileService videoFileService;
-  private final FFmpegPlugin ffmpegPlugin;
-  private final Map<Long, Future<Long>> streamQueue = new HashMap<>();
-  private final ThreadPoolTaskExecutor executor;
-
   public VideoStreamManager(
-          final VideoStreamLocatorPlaylistService playlistService,
-          final VideoStreamLocatorService locatorService,
-          final VideoFileService videoFileService,
-          final VideoStreamingConfig streamingConfig,
+      final VideoStreamLocatorPlaylistService playlistService,
+      final VideoStreamLocatorService locatorService,
+      final VideoFileService videoFileService,
+      final VideoStreamingConfig streamingConfig,
       final FFmpegPlugin ffmpegPlugin) {
 
     this.playlistService = playlistService;
@@ -102,10 +101,12 @@ public class VideoStreamManager {
 
   public void queueStreamJob(@NotNull VideoStreamLocator locator) {
     updateLocatorTaskState(locator, JobStatus.QUEUED, 0d);
-    final Future<Long> streamTask = executor.submit(() -> {
-      beginStreaming(locator);
-      return locator.getStreamLocatorId();
-    });
+    final Future<Long> streamTask =
+        executor.submit(
+            () -> {
+              beginStreaming(locator);
+              return locator.getStreamLocatorId();
+            });
     streamQueue.put(locator.getStreamLocatorId(), streamTask);
   }
 
@@ -137,8 +138,8 @@ public class VideoStreamManager {
   }
 
   private void streamWithLogging(
-          @NotNull final VideoStreamLocator streamLocator, @NotNull final FFmpegStreamTask streamTask)
-          throws IOException {
+      @NotNull final VideoStreamLocator streamLocator, @NotNull final FFmpegStreamTask streamTask)
+      throws IOException {
 
     final Process streamProcess = streamTask.execute();
     final FFmpegLogger logger = new FFmpegLogger(streamProcess, streamTask.getDataDir());
@@ -147,20 +148,20 @@ public class VideoStreamManager {
     AsynchronousFileChannel fw = AsynchronousFileChannel.open(logger.getLogFile(), options);
     final Flux<String> logEmitter = logger.beginLogging(fw);
     logEmitter
-            .doOnNext(logReader)
-            .doOnComplete(
-                    () -> {
-                      final JobStatus previousStatus =
-                              locatorService
-                                      .getStreamLocator(streamLocator.getStreamLocatorId())
-                                      .map(VideoStreamLocator::getState)
-                                      .map(TaskState::getStatus)
-                                      .orElse(JobStatus.COMPLETED);
-                      if (previousStatus.compareTo(JobStatus.STOPPED) > 0) {
-                        updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0);
-                      }
-                    })
-            .subscribe();
+        .doOnNext(logReader)
+        .doOnComplete(
+            () -> {
+              final JobStatus previousStatus =
+                  locatorService
+                      .getStreamLocator(streamLocator.getStreamLocatorId())
+                      .map(VideoStreamLocator::getState)
+                      .map(TaskState::getStatus)
+                      .orElse(JobStatus.COMPLETED);
+              if (previousStatus.compareTo(JobStatus.STOPPED) > 0) {
+                updateLocatorTaskState(streamLocator, JobStatus.COMPLETED, 1.0);
+              }
+            })
+        .subscribe();
   }
 
   private void streamWithoutLog(@NotNull final FFmpegStreamTask streamTask)
@@ -203,7 +204,7 @@ public class VideoStreamManager {
    * @return The playlist file as a String or empty
    */
   private @Nullable String readLocatorPlaylist(@NotNull final VideoStreamLocator streamLocator)
-          throws Exception {
+      throws Exception {
 
     final StringBuilder sb = new StringBuilder();
     final Path playlistPath = streamLocator.getPlaylistPath();
@@ -326,7 +327,7 @@ public class VideoStreamManager {
   }
 
   private void deleteVideoDataFromDisk(@NotNull VideoStreamLocator streamLocator)
-          throws IOException {
+      throws IOException {
 
     final Path playlistPath = streamLocator.getPlaylistPath();
     final File playlistFile = playlistPath.toFile();
@@ -336,9 +337,9 @@ public class VideoStreamManager {
     }
     if (!playlistFile.isFile()) {
       final String msg =
-              String.format(
-                      "VideoStreamLocator: %s does not refer to a file! Will not delete",
-                      streamLocator.getStreamLocatorId());
+          String.format(
+              "VideoStreamLocator: %s does not refer to a file! Will not delete",
+              streamLocator.getStreamLocatorId());
       throw new IllegalArgumentException(msg);
     }
 
@@ -359,8 +360,7 @@ public class VideoStreamManager {
   }
 
   private void setLocatorErrorState(
-          @NotNull VideoStreamLocator streamLocator,
-          @NotNull Throwable error) {
+      @NotNull VideoStreamLocator streamLocator, @NotNull Throwable error) {
     streamLocator.updateState(JobStatus.ERROR, -1.0, new VideoStreamingError(error));
     locatorService.updateStreamLocator(streamLocator);
   }

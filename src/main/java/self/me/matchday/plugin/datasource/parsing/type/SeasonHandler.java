@@ -19,12 +19,11 @@
 
 package self.me.matchday.plugin.datasource.parsing.type;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.Season;
 import self.me.matchday.plugin.datasource.parsing.TypeHandler;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 public class SeasonHandler extends TypeHandler<Season> {

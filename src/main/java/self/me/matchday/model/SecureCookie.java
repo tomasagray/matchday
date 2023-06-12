@@ -19,6 +19,9 @@
 
 package self.me.matchday.model;
 
+import java.time.Duration;
+import java.util.Objects;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -28,10 +31,6 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 
-import javax.persistence.*;
-import java.time.Duration;
-import java.util.Objects;
-
 /** Wraps Spring's HttpCookie & ResponseCookie classes for JPA persistence */
 @Entity
 @Getter
@@ -39,13 +38,15 @@ import java.util.Objects;
 @ToString
 public class SecureCookie {
 
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
-
   // HttpCookie
   private final String name;
 
   @Column(columnDefinition = "LONGTEXT")
   private final String cookieValue;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
   // ResponseCookie
   @Nullable private Duration maxAge;
   @Nullable private String domain;
@@ -126,7 +127,15 @@ public class SecureCookie {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getName(), getCookieValue(), getMaxAge(), getDomain(),
-            getPath(), isSecure(), isHttpOnly(), getSameSite());
+    return Objects.hash(
+        getId(),
+        getName(),
+        getCookieValue(),
+        getMaxAge(),
+        getDomain(),
+        getPath(),
+        isSecure(),
+        isHttpOnly(),
+        getSameSite());
   }
 }

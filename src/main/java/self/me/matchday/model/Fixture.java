@@ -19,14 +19,13 @@
 
 package self.me.matchday.model;
 
+import java.io.Serializable;
+import java.util.Objects;
+import javax.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.Embeddable;
-import java.io.Serializable;
-import java.util.Objects;
 
 /** Represents a specific Fixture within a Season. This object is immutable. */
 @Getter

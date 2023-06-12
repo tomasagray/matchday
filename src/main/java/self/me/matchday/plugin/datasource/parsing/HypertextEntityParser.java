@@ -56,7 +56,5 @@ public class HypertextEntityParser {
             .orElseThrow(() -> new IllegalArgumentException(errMsg));
   }
 
-  private record ParserEntry<T>(Class<T> clazz, DataSourceParser<T, String> parser) {
-
-  }
+  private record ParserEntry<T>(Class<T> clazz, DataSourceParser<T, String> parser) {}
 }

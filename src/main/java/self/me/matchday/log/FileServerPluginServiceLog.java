@@ -19,6 +19,9 @@
 
 package self.me.matchday.log;
 
+import java.net.URL;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -28,10 +31,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
-
-import java.net.URL;
-import java.util.Optional;
-import java.util.UUID;
 
 @Aspect
 public class FileServerPluginServiceLog {

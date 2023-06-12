@@ -19,6 +19,18 @@
 
 package self.me.matchday.integration.api.service.video;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -40,19 +52,6 @@ import self.me.matchday.model.FileServerUser;
 import self.me.matchday.model.video.*;
 import self.me.matchday.util.RecursiveDirectoryDeleter;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for video streaming service")
@@ -61,20 +60,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class VideoStreamingServiceTest {
 
   private static final Logger logger = LogManager.getLogger(VideoStreamingServiceTest.class);
-
-  // Service dependencies
-  private static VideoStreamingService streamingService;
-  private final VideoStreamLocatorPlaylistService locatorPlaylistService;
-  private final VideoStreamLocatorService streamLocatorService;
-
   // Test data
   private static final List<Event> cleanupData = new ArrayList<>();
+  private static final List<String> videoStorageDirs = new ArrayList<>();
+  // Service dependencies
+  private static VideoStreamingService streamingService;
+  private static VideoFileSource testFileSource;
+  private final VideoStreamLocatorPlaylistService locatorPlaylistService;
+  private final VideoStreamLocatorService streamLocatorService;
   private final Event testMatch;
   private final VideoFile testVideoFile;
-  private static VideoFileSource testFileSource;
   private int testStreamTaskCount;
-
-  private static final List<String> videoStorageDirs = new ArrayList<>();
 
   @Value("${video-resources.file-storage-location}")
   private String baseVideoStorage;

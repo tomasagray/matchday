@@ -19,13 +19,12 @@
 
 package self.me.matchday.plugin.datasource.blogger.model;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 
 @Getter
 @Setter

@@ -19,6 +19,9 @@
 
 package self.me.matchday.api.service;
 
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,16 +34,13 @@ import org.springframework.stereotype.Service;
 import self.me.matchday.db.SettingsRepository;
 import self.me.matchday.model.Settings;
 
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.util.List;
-
 @Service
 public class SettingsService {
 
   private final Settings defaultSettings;
   private final SettingsRepository settingsRepository;
   private final ApplicationEventPublisher eventPublisher;
+
   public SettingsService(
       DefaultSettings defaultSettings,
       SettingsRepository settingsRepository,

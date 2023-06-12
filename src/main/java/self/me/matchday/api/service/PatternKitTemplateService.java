@@ -19,14 +19,13 @@
 
 package self.me.matchday.api.service;
 
+import java.util.List;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.PatternKitTemplateRepository;
 import self.me.matchday.model.PatternKitTemplate;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional

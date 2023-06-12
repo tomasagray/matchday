@@ -49,58 +49,58 @@ import self.me.matchday.model.video.VideoPlaylist;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class VideoPlaylistResource extends RepresentationModel<VideoPlaylistResource> {
 
-    private final List<Pair> uris = new ArrayList<>();
+  private final List<Pair> uris = new ArrayList<>();
 
-    public void addUri(@NotNull String title, @NotNull URI uri) {
-        uris.add(new Pair(title, uri));
+  public void addUri(@NotNull String title, @NotNull URI uri) {
+    uris.add(new Pair(title, uri));
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof VideoPlaylistResource that)) return false;
+    if (!super.equals(o)) return false;
+    return Objects.equals(getUris(), that.getUris());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), getUris());
+  }
+
+  public record Pair(String title, URI uri) {}
+
+  @Component
+  public static class VideoPlaylistResourceAssembler
+      extends RepresentationModelAssemblerSupport<VideoPlaylist, VideoPlaylistResource> {
+
+    VideoPlaylistResourceAssembler() {
+      super(VideoStreamingService.class, VideoPlaylistResource.class);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof VideoPlaylistResource that)) return false;
-        if (!super.equals(o)) return false;
-        return Objects.equals(getUris(), that.getUris());
+    public @NotNull VideoPlaylistResource toModel(@NotNull VideoPlaylist playlist) {
+
+      final VideoPlaylistResource resource = instantiateModel(playlist);
+      final UUID eventId = playlist.getEventId();
+      final UUID fileSrcId = playlist.getFileSrcId();
+      final List<Entry<Long, PartIdentifier>> locatorIds =
+          new ArrayList<>(playlist.getLocatorIds().entrySet());
+      locatorIds.sort(Entry.comparingByValue());
+      locatorIds.forEach(
+          entry -> {
+            final Long locatorId = entry.getKey();
+            final PartIdentifier partId = entry.getValue();
+            final URI playlistUri =
+                linkTo(
+                        methodOn(VideoStreamingController.class)
+                            .getVideoPartPlaylist(eventId, fileSrcId, locatorId))
+                    .withSelfRel()
+                    .toUri();
+            final String title = partId != null ? partId.getPartName() : "";
+            resource.addUri(title, playlistUri);
+          });
+      return resource;
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), getUris());
-    }
-
-    public record Pair(String title, URI uri) {}
-
-    @Component
-    public static class VideoPlaylistResourceAssembler
-            extends RepresentationModelAssemblerSupport<VideoPlaylist, VideoPlaylistResource> {
-
-        VideoPlaylistResourceAssembler() {
-            super(VideoStreamingService.class, VideoPlaylistResource.class);
-        }
-
-        @Override
-        public @NotNull VideoPlaylistResource toModel(@NotNull VideoPlaylist playlist) {
-
-            final VideoPlaylistResource resource = instantiateModel(playlist);
-            final UUID eventId = playlist.getEventId();
-            final UUID fileSrcId = playlist.getFileSrcId();
-            final List<Entry<Long, PartIdentifier>> locatorIds =
-                new ArrayList<>(playlist.getLocatorIds().entrySet());
-            locatorIds.sort(Entry.comparingByValue());
-            locatorIds
-                .forEach(entry -> {
-                    final Long locatorId = entry.getKey();
-                    final PartIdentifier partId = entry.getValue();
-                    final URI playlistUri =
-                        linkTo(
-                            methodOn(VideoStreamingController.class)
-                                .getVideoPartPlaylist(eventId, fileSrcId, locatorId))
-                            .withSelfRel()
-                            .toUri();
-                    final String title = partId != null ? partId.getPartName() : "";
-                    resource.addUri(title, playlistUri);
-            });
-            return resource;
-        }
-    }
+  }
 }

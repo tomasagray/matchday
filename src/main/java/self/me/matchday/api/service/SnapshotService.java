@@ -19,13 +19,12 @@
 
 package self.me.matchday.api.service;
 
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import self.me.matchday.model.Snapshot;
-
-import java.util.stream.Stream;
 
 @Service
 public class SnapshotService {
@@ -48,8 +47,7 @@ public class SnapshotService {
             // send to appropriate service
             service.save(datum);
           } catch (Throwable e) {
-            logger.info("Did not save Entity of type: [{}]: {}",
-                    clazz.getName(), e.getMessage());
+            logger.info("Did not save Entity of type: [{}]: {}", clazz.getName(), e.getMessage());
           }
         });
   }

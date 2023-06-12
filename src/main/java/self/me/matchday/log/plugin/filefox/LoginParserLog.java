@@ -19,6 +19,8 @@
 
 package self.me.matchday.log.plugin.filefox;
 
+import java.time.Duration;
+import java.time.Instant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -26,9 +28,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.plugin.fileserver.filefox.LoginParser;
-
-import java.time.Duration;
-import java.time.Instant;
 
 @Aspect
 public class LoginParserLog {

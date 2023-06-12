@@ -19,16 +19,15 @@
 
 package self.me.matchday.plugin.fileserver.filefox;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.regex.Pattern;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import self.me.matchday.plugin.PluginProperties;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.regex.Pattern;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

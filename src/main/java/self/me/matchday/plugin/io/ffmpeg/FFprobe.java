@@ -19,9 +19,6 @@
 
 package self.me.matchday.plugin.io.ffmpeg;
 
-import org.jetbrains.annotations.NotNull;
-import self.me.matchday.util.JsonParser;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +27,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
+import self.me.matchday.util.JsonParser;
 
 public class FFprobe {
 

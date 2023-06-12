@@ -31,8 +31,6 @@ public class AdminDashboardConfig implements WebMvcConfigurer {
   public void addResourceHandlers(@NotNull ResourceHandlerRegistry registry) {
 
     // Add admin dashboard
-    registry
-        .addResourceHandler("/admin/**")
-        .addResourceLocations("classpath:/public/admin/");
+    registry.addResourceHandler("/admin/**").addResourceLocations("classpath:/public/admin/");
   }
 }

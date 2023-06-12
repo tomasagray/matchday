@@ -19,13 +19,12 @@
 
 package self.me.matchday.plugin.datasource.parsing;
 
-import self.me.matchday.plugin.datasource.parsing.fabric.Folder;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import self.me.matchday.plugin.datasource.parsing.fabric.Folder;
 
 public class ListFolder<T> extends Folder<T, List<T>> {
 

@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.controller;
 
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -30,8 +31,6 @@ import self.me.matchday.api.service.admin.SanityCheckService;
 import self.me.matchday.model.SanityReport;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
-
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/sanity-report")

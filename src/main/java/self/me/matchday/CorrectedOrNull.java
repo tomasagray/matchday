@@ -19,10 +19,9 @@
 
 package self.me.matchday;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import org.jetbrains.annotations.Nullable;
 
 @Nullable
 @Retention(RetentionPolicy.RUNTIME)

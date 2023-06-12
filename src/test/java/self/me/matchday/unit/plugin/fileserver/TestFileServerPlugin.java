@@ -37,9 +37,8 @@ import self.me.matchday.plugin.fileserver.FileServerPlugin;
 @Component
 public class TestFileServerPlugin implements FileServerPlugin {
 
+  public static final UUID pluginId = UUID.fromString("4636e383-2ddb-477e-85f2-36e6cd7a434b");
   private static URL url;
-
-  private boolean enabled = true;
 
   static {
     try {
@@ -49,8 +48,8 @@ public class TestFileServerPlugin implements FileServerPlugin {
     }
   }
 
-  public static final UUID pluginId = UUID.fromString("4636e383-2ddb-477e-85f2-36e6cd7a434b");
   private final Pattern urlPattern = Pattern.compile("^https?://[\\w-.:]+/data/");
+  private boolean enabled = true;
 
   @Override
   public @NotNull ClientResponse login(@NotNull FileServerUser user) {

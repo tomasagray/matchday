@@ -19,6 +19,11 @@
 
 package self.me.matchday.model.video;
 
+import java.net.URL;
+import java.sql.Timestamp;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,12 +33,6 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.FFmpegMetadataConverter;
 import self.me.matchday.db.converter.TimestampConverter;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
-
-import javax.persistence.*;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -46,7 +45,7 @@ public class VideoFile implements Comparable<VideoFile> {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Type(type="uuid-char")
+  @Type(type = "uuid-char")
   private UUID fileId;
 
   private URL externalUrl;

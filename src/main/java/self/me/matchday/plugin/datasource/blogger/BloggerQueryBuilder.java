@@ -19,16 +19,15 @@
 
 package self.me.matchday.plugin.datasource.blogger;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.yaml.snakeyaml.util.UriEncoder;
-import self.me.matchday.model.SnapshotRequest;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.yaml.snakeyaml.util.UriEncoder;
+import self.me.matchday.model.SnapshotRequest;
 
 public abstract class BloggerQueryBuilder {
 

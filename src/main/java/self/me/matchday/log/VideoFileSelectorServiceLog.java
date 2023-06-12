@@ -19,6 +19,7 @@
 
 package self.me.matchday.log;
 
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -28,8 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.video.VideoFileSelectorService;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.video.VideoFileSource;
-
-import java.util.UUID;
 
 @Aspect
 public class VideoFileSelectorServiceLog {

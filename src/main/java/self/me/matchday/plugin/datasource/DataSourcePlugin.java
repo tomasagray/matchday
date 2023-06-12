@@ -19,13 +19,12 @@
 
 package self.me.matchday.plugin.datasource;
 
+import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.plugin.Plugin;
-
-import java.io.IOException;
 
 public interface DataSourcePlugin extends Plugin {
 

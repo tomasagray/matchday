@@ -19,17 +19,16 @@
 
 package self.me.matchday.model;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Type;
 import self.me.matchday.db.converter.PatternConverter;
-
-import javax.persistence.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 @Getter
 @Setter
@@ -38,10 +37,12 @@ import java.util.regex.Pattern;
 @Entity
 public class PatternKit<T> {
 
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
-
   @Type(type = "java.lang.Class")
   private final Class<T> clazz;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   @Column(columnDefinition = "LONGTEXT")
   @Convert(converter = PatternConverter.class)

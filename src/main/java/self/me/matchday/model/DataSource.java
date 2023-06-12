@@ -19,6 +19,10 @@
 
 package self.me.matchday.model;
 
+import java.net.URI;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -27,23 +31,12 @@ import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.UriConverter;
 
-import javax.persistence.*;
-import java.net.URI;
-import java.util.Objects;
-import java.util.UUID;
-
 @Getter
 @Setter
 @Entity
 @ToString
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class DataSource<T> {
-
-  @Id
-  @GeneratedValue(generator = "uuid2")
-  @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Type(type="uuid-char")
-  private UUID dataSourceId;
 
   @Type(type = "java.lang.Class")
   private final Class<T> clazz;
@@ -53,7 +46,13 @@ public abstract class DataSource<T> {
   @Convert(converter = UriConverter.class)
   private final URI baseUri;
 
-  @Type(type="uuid-char")
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @Type(type = "uuid-char")
+  private UUID dataSourceId;
+
+  @Type(type = "uuid-char")
   private UUID pluginId;
 
   private boolean enabled = true;
@@ -74,20 +73,17 @@ public abstract class DataSource<T> {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof DataSource<?> that)) return false;
-    return isEnabled() == that.isEnabled() &&
-            Objects.equals(getDataSourceId(), that.getDataSourceId()) &&
-            Objects.equals(getClazz(), that.getClazz()) &&
-            Objects.equals(getTitle(), that.getTitle()) &&
-            Objects.equals(getBaseUri(), that.getBaseUri()) &&
-            Objects.equals(getPluginId(), that.getPluginId());
+    return isEnabled() == that.isEnabled()
+        && Objects.equals(getDataSourceId(), that.getDataSourceId())
+        && Objects.equals(getClazz(), that.getClazz())
+        && Objects.equals(getTitle(), that.getTitle())
+        && Objects.equals(getBaseUri(), that.getBaseUri())
+        && Objects.equals(getPluginId(), that.getPluginId());
   }
 
   @Override
   public int hashCode() {
-    return
-            Objects.hash(
-                    getDataSourceId(), getClazz(), getTitle(), getBaseUri(),
-                    getPluginId(), isEnabled()
-            );
+    return Objects.hash(
+        getDataSourceId(), getClazz(), getTitle(), getBaseUri(), getPluginId(), isEnabled());
   }
 }
