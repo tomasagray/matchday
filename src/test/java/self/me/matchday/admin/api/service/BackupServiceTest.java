@@ -95,8 +95,11 @@ class BackupServiceTest {
     logger.info("Done.");
 
     // then
-    assertThat(optional).isPresent();
-    assertThat(optional.get()).isEqualTo(restorePoint);
+    final boolean isPresent = optional.isPresent();
+    assertThat(isPresent).isTrue();
+    if (isPresent) {
+      assertThat(optional.get()).isEqualTo(restorePoint);
+    }
   }
 
   @Test

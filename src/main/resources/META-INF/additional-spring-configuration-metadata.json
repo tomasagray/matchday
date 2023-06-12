@@ -19,6 +19,54 @@
       "name": "artwork.default-competition-emblem",
       "type": "java.lang.String",
       "description": "Default competition emblem art when specific art is not available."
+    },
+    {
+      "name": "artwork.default-competition-landscape",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.blogger.id",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.blogger.title",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.blogger.description",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.blogger.json-url-pattern",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.blogger.date-time-format-pattern",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.disk-manager.id",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.disk-manager.title",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.disk-manager.description",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.ffmpeg.id",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.ffmpeg.title",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "plugin.ffmpeg.description",
+      "type": "java.lang.String"
     }
   ]
 }
