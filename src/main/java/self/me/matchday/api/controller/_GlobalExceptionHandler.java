@@ -44,6 +44,13 @@ public class _GlobalExceptionHandler {
     return "File not found: " + handleError(e);
   }
 
+  @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public String handleSqlIntegrityError(@NotNull Throwable e) {
+    return handleError(e);
+  }
+
   @ExceptionHandler({IllegalStateException.class, IllegalArgumentException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
@@ -51,10 +58,10 @@ public class _GlobalExceptionHandler {
     return handleError(e);
   }
 
-  @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(RuntimeException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
-  public String handleSqlIntegrityError(@NotNull Throwable e) {
+  public String handleRuntimeError(@NotNull Throwable e) {
     return handleError(e);
   }
 
