@@ -100,7 +100,9 @@ public class MatchResource extends RepresentationModel<MatchResource> {
         resource.setHomeTeam(homeTeam);
         resource.setAwayTeam(awayTeam);
         resource.add(
-            linkTo(methodOn(MatchController.class).fetchMatchArtworkImage(eventId))
+            linkTo(
+                    methodOn(MatchController.class)
+                        .fetchMatchArtworkImage(eventId, entity.getArtwork().getId()))
                 .withRel(ARTWORK_REL));
         resource.add(
             linkTo(methodOn(VideoStreamingController.class).getVideoResources(eventId))

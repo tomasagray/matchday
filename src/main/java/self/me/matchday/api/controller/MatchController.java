@@ -25,6 +25,8 @@ import static self.me.matchday.api.controller.CompetitionController.IMAGE_SVG_VA
 
 import java.io.IOException;
 import java.util.UUID;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -55,6 +57,8 @@ import self.me.matchday.model.Match;
 @RestController
 @RequestMapping(value = "/matches")
 public class MatchController {
+
+  private static final Logger logger = LogManager.getLogger(MatchController.class);
 
   private final MatchService matchService;
   private final EventsResourceAssembler eventsAssembler;
@@ -117,9 +121,10 @@ public class MatchController {
       value = "/match/{matchId}/artwork",
       method = RequestMethod.GET,
       produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, IMAGE_SVG_VALUE})
-  public ResponseEntity<byte[]> fetchMatchArtworkImage(@PathVariable UUID matchId)
+  public ResponseEntity<byte[]> fetchMatchArtworkImage(
+      @PathVariable UUID matchId, @RequestParam(name = "v", defaultValue = "0") long version)
       throws IOException {
-
+    logger.info("Fetching Artwork for Match: {}, v: {}", matchId, version);
     final Image artwork = matchService.fetchMatchArtwork(matchId);
     return ResponseEntity.ok().contentType(artwork.contentType()).body(artwork.data());
   }
@@ -165,6 +170,8 @@ public class MatchController {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public String handleInvalidEvent(@NotNull InvalidEventException e) {
-    return e.getMessage();
+    String message = e.getMessage();
+    logger.error("Found invalid Match: {}", message);
+    return message;
   }
 }
