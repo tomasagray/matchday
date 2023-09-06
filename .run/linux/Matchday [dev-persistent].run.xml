@@ -5,7 +5,7 @@
             <env name="DATA_ROOT" value="/projectdata/matchday/dev/staging"/>
             <env name="DB_PASSWORD" value="{M4tchD4y}"/>
             <env name="DB_URL"
-                 value="jdbc:mysql://192.168.0.107:30306/matchday?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
+                 value="jdbc:mysql://192.168.0.107:30306/md_dev?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
             <env name="DB_USER" value="matchday"/>
             <env name="FFMPEG" value="/usr/bin/ffmpeg"/>
             <env name="FFPROBE" value="/usr/bin/ffprobe"/>
