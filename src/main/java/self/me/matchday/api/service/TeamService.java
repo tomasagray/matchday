@@ -163,41 +163,16 @@ public class TeamService implements EntityService<Team, UUID> {
 
   @Override
   public Team update(@NotNull Team team) {
-    validateForUpdate(team);
+    fetchById(team.getId())
+        .ifPresentOrElse(
+            existing -> validator.validateForUpdate(existing, team),
+            () -> {
+              throw new IllegalArgumentException("Trying to update non-existent Team: " + team);
+            });
+    synonymService.updateProperName(team.getName());
     artworkService.repairArtworkFilePaths(team.getEmblem());
     artworkService.repairArtworkFilePaths(team.getFanart());
     return save(team);
-  }
-
-  private void validateForUpdate(@NotNull Team updated) {
-    validateUpdateId(updated);
-    validateUpdatedName(updated);
-  }
-
-  private void validateUpdateId(@NotNull Team updated) {
-    if (updated.getId() == null) {
-      throw new IllegalArgumentException("Trying to update unknown Team: " + updated);
-    }
-  }
-
-  private void validateUpdatedName(@NotNull Team updated) {
-
-    final ProperName name = updated.getName();
-    synonymService.validateProperName(name);
-
-    final String updatedName = name.getName();
-    final Optional<Team> optional = getTeamByName(updatedName);
-    if (optional.isPresent()) {
-      final Team existing = optional.get();
-      final UUID existingId = existing.getId();
-      if (!existingId.equals(updated.getId())) {
-        final String msg =
-            String.format(
-                "A Team with name: %s already exists; please use the merge function instead",
-                updatedName);
-        throw new IllegalArgumentException(msg);
-      }
-    }
   }
 
   @Override

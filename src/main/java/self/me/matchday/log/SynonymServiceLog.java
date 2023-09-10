@@ -34,22 +34,6 @@ public class SynonymServiceLog {
 
   private static final Logger logger = LogManager.getLogger(SynonymService.class);
 
-  @Before("execution(* self.me.matchday.api.service.SynonymService.validateProperName(..))")
-  public void logValidateProperName(@NotNull JoinPoint jp) {
-    logger.debug("Validating ProperName: {}", jp.getArgs()[0]);
-  }
-
-  @Before("execution(* self.me.matchday.api.service.SynonymService.validateSynonym(..))")
-  public void logValidateSynonym(@NotNull JoinPoint jp) {
-    logger.debug("Validating Synonym: {}", jp.getArgs()[0]);
-  }
-
-  @Before(
-      "execution(* self.me.matchday.api.service.SynonymService.validateSynonymIsNotProperName(..))")
-  public void logValidateSynonymIsNotProperName(@NotNull JoinPoint jp) {
-    logger.debug("Ensuring Synonym: {} is NOT a ProperName", jp.getArgs()[0]);
-  }
-
   @Before("execution(* self.me.matchday.api.service.SynonymService.initialize(..))")
   public void logInitializeSynonym(@NotNull JoinPoint jp) {
     logger.debug("Initializing Synonym: {}", jp.getArgs()[0]);
@@ -87,7 +71,7 @@ public class SynonymServiceLog {
     logger.debug("Fetching Synonym by name: {}", jp.getArgs()[0]);
   }
 
-  @Before("execution(* self.me.matchday.api.service.SynonymService.fetchProperNameFor(..))")
+  @Before("execution(* self.me.matchday.api.service.SynonymService.fetchProperNameBySynonym(..))")
   public void logFetchProperName(@NotNull JoinPoint jp) {
     logger.debug("Fetching ProperName for: {}", jp.getArgs()[0]);
   }

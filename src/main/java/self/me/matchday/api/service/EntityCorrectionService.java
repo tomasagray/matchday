@@ -118,7 +118,9 @@ public class EntityCorrectionService {
                         synonym ->
                             getEntityByName(
                                 entity,
-                                synonymService.fetchProperNameFor(synonym.getName()).getName())))
+                                synonymService
+                                    .fetchProperNameBySynonym(synonym.getName())
+                                    .getName())))
         .orElse(entity);
   }
 

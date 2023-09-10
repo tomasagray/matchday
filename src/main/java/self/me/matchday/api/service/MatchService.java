@@ -275,9 +275,9 @@ public class MatchService implements EntityService<Match, UUID> {
     final Optional<Match> optional = fetchById(eventId);
     if (optional.isPresent()) {
       final Match existing = optional.get();
+      eventValidator.validateForUpdate(existing, updated);
       // perform update...
       updateMatch(existing, updated);
-      eventValidator.validate(existing);
       return save(existing);
     }
     // else..

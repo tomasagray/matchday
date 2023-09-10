@@ -30,11 +30,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import self.me.matchday.db.ProperNameRepository;
 import self.me.matchday.db.SynonymRepository;
+import self.me.matchday.model.Md5Id;
 import self.me.matchday.model.ProperName;
 import self.me.matchday.model.Synonym;
 
 @Service
-public class SynonymService implements EntityService<Synonym, Long> {
+public class SynonymService implements EntityService<Synonym, Md5Id> {
 
   private final SynonymRepository synonymRepository;
   private final ProperNameRepository properNameRepository;
@@ -43,68 +44,6 @@ public class SynonymService implements EntityService<Synonym, Long> {
       SynonymRepository synonymRepository, ProperNameRepository properNameRepository) {
     this.synonymRepository = synonymRepository;
     this.properNameRepository = properNameRepository;
-  }
-
-  public void validateProperName(@NotNull ProperName properName) {
-
-    final Set<Synonym> synonyms = properName.getSynonyms();
-    // get ids
-    final List<Long> synonymIds = getSynonymIds(synonyms);
-    synonyms.forEach(
-        synonym -> {
-          validateSynonym(synonym, synonymIds);
-          validateSynonymIsNotProperName(synonym);
-        });
-  }
-
-  public void validateSynonym(Synonym synonym, List<Long> synonymIds) {
-
-    if (synonym == null) {
-      throw new IllegalArgumentException("Synonym was null");
-    }
-    final String name = synonym.getName();
-    if (name == null || "".equals(name)) {
-      throw new IllegalArgumentException("Found empty Synonym");
-    }
-    // check if synonym already exists
-    final Optional<Synonym> synonymOptional = findSynonym(name);
-    if (synonymOptional.isPresent()) {
-      final Synonym existingSynonym = synonymOptional.get();
-      // synonym exists, but associated with another entity?
-      if (!synonymIds.contains(existingSynonym.getId())) {
-        final String msg =
-            String.format("Synonym: %s already exists and is associated with another entity", name);
-        throw new IllegalArgumentException(msg);
-      }
-    }
-  }
-
-  private Optional<Synonym> findSynonym(String name) {
-    List<Synonym> synonyms = synonymRepository.findSynonymByName(name);
-    if (synonyms.size() > 1) {
-      String msg = String.format("Duplicated Synonyms found for %s: %s", name, synonyms);
-      throw new IllegalArgumentException(msg);
-    } else if (synonyms.size() == 1) {
-      return Optional.of(synonyms.get(0));
-    } else {
-      return Optional.empty();
-    }
-  }
-
-  public void validateSynonymIsNotProperName(@NotNull Synonym synonym) {
-
-    final String name = synonym.getName();
-    final List<ProperName> matchingProperNames = properNameRepository.findProperNameByName(name);
-    if (matchingProperNames.size() > 0) {
-      final String msg =
-          String.format("Synonym [%s] already exists as ProperName: %s", name, matchingProperNames);
-      throw new IllegalArgumentException(msg);
-    }
-  }
-
-  @NotNull
-  private List<Long> getSynonymIds(@NotNull Set<Synonym> synonyms) {
-    return synonyms.stream().map(Synonym::getId).collect(Collectors.toList());
   }
 
   @Override
@@ -130,7 +69,7 @@ public class SynonymService implements EntityService<Synonym, Long> {
   }
 
   @Override
-  public Optional<Synonym> fetchById(@NotNull Long id) {
+  public Optional<Synonym> fetchById(@NotNull Md5Id id) {
     return synonymRepository.findById(id);
   }
 
@@ -143,7 +82,29 @@ public class SynonymService implements EntityService<Synonym, Long> {
     return findSynonym(name);
   }
 
-  public ProperName fetchProperNameFor(@NotNull String synonym) {
+  private Optional<Synonym> findSynonym(String name) {
+    List<Synonym> synonyms = synonymRepository.findSynonymByName(name);
+    if (synonyms.size() > 1) {
+      String msg = String.format("Duplicated Synonyms found for %s: %s", name, synonyms);
+      throw new IllegalArgumentException(msg);
+    } else if (synonyms.size() == 1) {
+      return Optional.of(synonyms.get(0));
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  public Optional<ProperName> fetchProperName(@NotNull String name) {
+    List<ProperName> names = properNameRepository.findProperNameByName(name);
+    if (names.size() > 1) {
+      throw new IllegalStateException("More than one ProperName exists with name: " + name);
+    } else if (names.size() == 1) {
+      return Optional.of(names.get(0));
+    }
+    return Optional.empty();
+  }
+
+  public ProperName fetchProperNameBySynonym(@NotNull String synonym) {
     return properNameRepository
         .findProperNameForSynonym(synonym)
         .orElseThrow(
@@ -172,6 +133,29 @@ public class SynonymService implements EntityService<Synonym, Long> {
     return this.save(synonym);
   }
 
+  public ProperName updateProperName(@NotNull ProperName updatedName) {
+    deleteRemovedSynonyms(updatedName);
+    return updatedName;
+  }
+
+  private void deleteRemovedSynonyms(@NotNull ProperName updatedName) {
+    properNameRepository
+        .findById(updatedName.getId())
+        .ifPresent(
+            existingName -> {
+              Set<Synonym> existingSynonyms = existingName.getSynonyms();
+              Set<Synonym> updatedSynonyms = updatedName.getSynonyms();
+              List<Synonym> removed =
+                  existingSynonyms.stream()
+                      .filter(synonym -> !updatedSynonyms.contains(synonym))
+                      .toList();
+              removed.stream()
+                  .peek(existingSynonyms::remove)
+                  .map(Synonym::getId)
+                  .forEach(this::delete);
+            });
+  }
+
   @Override
   public List<Synonym> updateAll(@NotNull Iterable<? extends Synonym> synonyms) {
     return StreamSupport.stream(synonyms.spliterator(), false)
@@ -180,7 +164,7 @@ public class SynonymService implements EntityService<Synonym, Long> {
   }
 
   @Override
-  public void delete(@NotNull Long id) {
+  public void delete(@NotNull Md5Id id) {
     synonymRepository.deleteById(id);
   }
 

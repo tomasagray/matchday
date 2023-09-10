@@ -87,7 +87,7 @@ class SynonymServiceTest {
     synonyms.forEach(
         synonym -> {
           logger.info("Fetching ProperName for: {}", synonym);
-          final ProperName properName = synonymService.fetchProperNameFor(synonym);
+          final ProperName properName = synonymService.fetchProperNameBySynonym(synonym);
           logger.info("Found ProperName: {} for Synonym: {}", properName, synonym);
           final List<String> matchingSynonyms =
               properName.getSynonyms().stream().map(Synonym::getName).collect(Collectors.toList());

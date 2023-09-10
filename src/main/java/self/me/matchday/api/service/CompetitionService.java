@@ -218,8 +218,14 @@ public class CompetitionService implements EntityService<Competition, UUID> {
 
   @Override
   public Competition update(@NotNull Competition competition) {
+    fetchById(competition.getId())
+        .ifPresentOrElse(
+            existing -> validator.validateForUpdate(existing, competition),
+            () -> {
+              throw new IllegalArgumentException(
+                  "Trying to update unknown Competition: " + competition);
+            });
 
-    validator.validate(competition);
     // correct missing artwork file paths
     artworkService.repairArtworkFilePaths(competition.getEmblem());
     artworkService.repairArtworkFilePaths(competition.getFanart());

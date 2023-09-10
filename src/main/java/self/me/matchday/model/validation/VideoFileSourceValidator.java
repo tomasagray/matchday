@@ -56,4 +56,10 @@ public class VideoFileSourceValidator implements EntityValidator<VideoFileSource
       throw new InvalidVideoFileSourceException("No valid VideoFilePacks in VideoFileSource");
     }
   }
+
+  @Override
+  public void validateForUpdate(
+      @NotNull VideoFileSource existing, @NotNull VideoFileSource updated) {
+    // nothing to validate yet...
+  }
 }

@@ -1,6 +1,7 @@
 package self.me.matchday.model.validation;
 
 import java.time.LocalDateTime;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.InvalidEventException;
@@ -39,5 +40,11 @@ public class EventValidator implements EntityValidator<Event> {
     if (event.getDate() == null) {
       event.setDate(LocalDateTime.now());
     }
+  }
+
+  @Override
+  public void validateForUpdate(@NotNull Event existing, @NotNull Event updated) {
+    validate(updated);
+    // that's all for now...
   }
 }
