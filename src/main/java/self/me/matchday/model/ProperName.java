@@ -44,7 +44,7 @@ public class ProperName implements Comparable<ProperName> {
   }
 
   public ProperName(@NotNull String name) {
-    this.name = name;
+    this.name = name.trim();
   }
 
   public void addSynonym(@NotNull Synonym synonym) {

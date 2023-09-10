@@ -20,12 +20,10 @@
 package self.me.matchday.model;
 
 import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
@@ -33,18 +31,21 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 public class Synonym {
 
+  @EmbeddedId
+  @GenericGenerator(name = "synonym_id_gen", strategy = "self.me.matchday.db.SynonymIdGenerator")
+  @GeneratedValue(generator = "synonym_id_gen")
+  private Md5Id id;
+
   private final String name;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
-
   public Synonym() {
+    this.id = null;
     this.name = null;
   }
 
   public Synonym(@NotNull String name) {
-    this.name = name;
+    this.name = name.trim();
+    this.id = new Md5Id(this.name);
   }
 
   @Override
