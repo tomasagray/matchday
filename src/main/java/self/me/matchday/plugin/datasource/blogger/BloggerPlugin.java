@@ -169,13 +169,25 @@ public class BloggerPlugin implements DataSourcePlugin {
     return allEntries;
   }
 
+  private static void correctPublished(@NotNull BloggerEntry entry) {
+    if (entry.getPublished() == null) {
+      BloggerFeed.Generic<LocalDateTime> current = BloggerFeed.Generic.of(LocalDateTime.now());
+      entry.setPublished(current);
+    }
+  }
+
   @Nullable
   private URL getNextUrl(
       @NotNull BloggerFeed feed, @NotNull List<BloggerEntry> entries, LocalDateTime target) {
 
     if (target != null) {
-      entries.sort(Comparator.comparing(e -> e.getPublished().$t));
-      final BloggerEntry leastRecent = entries.get(entries.size() - 1);
+      List<BloggerEntry> sorted =
+          new ArrayList<>(entries)
+              .stream()
+                  .peek(BloggerPlugin::correctPublished)
+                  .sorted(Comparator.comparing(e -> e.getPublished().$t))
+                  .toList();
+      final BloggerEntry leastRecent = sorted.get(entries.size() - 1);
       final LocalDateTime current = leastRecent.getPublished().$t;
       if (current != null && !current.isBefore(target)) {
         return feed.getNext().getHref();

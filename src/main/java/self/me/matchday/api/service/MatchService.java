@@ -226,9 +226,9 @@ public class MatchService implements EntityService<Match, UUID> {
   @Override
   public Match save(@NotNull Match match) {
 
-    eventValidator.validate(match);
     try {
       entityCorrectionService.correctEntityFields(match);
+      eventValidator.validate(match);
       // See if Event already exists in DB
       final Optional<Match> eventOptional = matchRepository.findOne(getExampleEvent(match));
       if (eventOptional.isPresent()) {

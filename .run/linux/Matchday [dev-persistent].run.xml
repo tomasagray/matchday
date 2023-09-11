@@ -2,7 +2,7 @@
     <configuration default="false" name="Matchday [dev-persistent]" type="SpringBootApplicationConfigurationType"
                    factoryName="Spring Boot">
         <envs>
-            <env name="DATA_ROOT" value="/projectdata/matchday/dev/staging"/>
+            <env name="DATA_ROOT" value="/projectdata/matchday/dev/persistent"/>
             <env name="DB_PASSWORD" value="{M4tchD4y}"/>
             <env name="DB_URL"
                  value="jdbc:mysql://192.168.0.107:30306/md_dev?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
