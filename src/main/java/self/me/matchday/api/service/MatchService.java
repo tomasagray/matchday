@@ -270,11 +270,11 @@ public class MatchService implements EntityService<Match, UUID> {
 
   @Override
   public Match update(@NotNull Match updated) {
-
     final UUID eventId = updated.getEventId();
     final Optional<Match> optional = fetchById(eventId);
     if (optional.isPresent()) {
       final Match existing = optional.get();
+      updated.getFileSources().addAll(existing.getFileSources());
       eventValidator.validateForUpdate(existing, updated);
       // perform update...
       updateMatch(existing, updated);
