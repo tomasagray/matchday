@@ -21,6 +21,8 @@ package self.me.matchday.unit.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.URL;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -87,5 +89,31 @@ class VideoFileServiceTest {
     // Test metadata set
     assertThat(metadata).isNotNull();
     assertThat(metadata.getStreams().size()).isGreaterThanOrEqualTo(expectedStreamCount);
+  }
+
+  @Test
+  @DisplayName("Validate VideoFile is removed from locked list on error")
+  void testVideoFileIsRemovedFromLockedListOnError() throws Exception {
+
+    // given
+    final URL url = new URL("https://www.nothing-land.com/non-existent-video.mp4");
+    final VideoFile nonRefreshable = new VideoFile(PartIdentifier.DEFAULT, url);
+    logger.info("Refreshing non-refreshable VideoFile: {}", nonRefreshable);
+
+    // when
+    VideoFile refreshed = null;
+    try {
+      refreshed = videoFileService.refreshVideoFile(nonRefreshable, false);
+    } catch (Exception e) {
+      logger.error("Caught error when refreshing: {}", e.getMessage());
+    } finally {
+      logger.info("After refresh, VideoFile is: {}", refreshed);
+    }
+
+    // then
+    List<VideoFile> lockedVideoFiles = videoFileService.getLockedVideoFiles();
+    logger.info("Currently locked VideoFiles: {}", lockedVideoFiles);
+    assertThat(lockedVideoFiles).doesNotContain(nonRefreshable);
+    assertThat(lockedVideoFiles).doesNotContain(refreshed);
   }
 }

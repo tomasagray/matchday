@@ -56,6 +56,10 @@ public class VideoFileService {
     this.ffmpegPlugin = ffmpegPlugin;
   }
 
+  public List<VideoFile> getLockedVideoFiles() {
+    return lockedVideoFiles;
+  }
+
   /**
    * Add an VideoFile refresh task to the job queue
    *
@@ -63,20 +67,21 @@ public class VideoFileService {
    * @param fetchMetadata Whether to pre-fetch file metadata
    * @return A Future representing the refreshed file
    */
-  public VideoFile refreshVideoFile(@NotNull final VideoFile videoFile, final boolean fetchMetadata)
-      throws Exception {
+  public synchronized VideoFile refreshVideoFile(
+      @NotNull final VideoFile videoFile, final boolean fetchMetadata) throws Exception {
 
-    // todo - remove on complete, error, etc.
     if (lockedVideoFiles.contains(videoFile)) {
       rejectRequest(videoFile);
     }
-    if (shouldRefreshData(videoFile)) {
-      lockedVideoFiles.add(videoFile);
-      final VideoFile refreshedVideoFile = doVideoFileRefresh(videoFile, fetchMetadata).get();
+    try {
+      if (shouldRefreshData(videoFile)) {
+        lockedVideoFiles.add(videoFile);
+        return doVideoFileRefresh(videoFile, fetchMetadata).get();
+      }
+      return videoFile;
+    } finally {
       lockedVideoFiles.remove(videoFile);
-      return refreshedVideoFile;
     }
-    return videoFile;
   }
 
   private void rejectRequest(@NotNull VideoFile videoFile) {
