@@ -118,7 +118,7 @@ public abstract class BloggerQueryBuilder {
 
     @Override
     String getLabelPrefix() {
-      return "/label/";
+      return "search/label/";
     }
 
     @NotNull

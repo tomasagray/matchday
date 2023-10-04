@@ -192,4 +192,31 @@ class BloggerPluginTest {
     logger.info("Least recent post: {}", leastRecent);
     assertThat(leastRecent.getPublished()).isBetween(limit.minusWeeks(1), limit);
   }
+
+  @Test
+  @DisplayName("Validate query of Blogger blog with labels query")
+  void testLabelBloggerQuery() throws IOException {
+
+    // given
+    final List<String> labels = List.of("label #1");
+    logger.info("Getting posts with label: {}", labels);
+
+    // when
+    SnapshotRequest request = SnapshotRequest.builder().labels(labels).build();
+    logger.info("Getting BloggerTest Snapshot with request: {}", request);
+    Snapshot<BloggerTestEntity> snapshot = plugin.getSnapshot(request, testDataSource);
+    List<BloggerTestEntity> entities = snapshot.getData().toList();
+
+    // then
+    int count = entities.size();
+    logger.info("Found: {} BloggerTestEntities...", count);
+    assertThat(count).isNotZero();
+    entities.forEach(
+        entity -> {
+          logger.info("Found BloggerTestEntity: {}", entity);
+          assertThat(entity.getTitle()).isNotNull().isNotEmpty();
+          assertThat(entity.getText()).isNotNull().isNotEmpty();
+          assertThat(entity.getPublished()).isNotNull();
+        });
+  }
 }
