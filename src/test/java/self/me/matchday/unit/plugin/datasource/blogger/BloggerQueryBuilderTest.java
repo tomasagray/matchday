@@ -59,8 +59,7 @@ class BloggerQueryBuilderTest {
     logger.info("Building HTML Blogger query with SnapshotRequest:\n" + testSnapshotRequest);
 
     final String expectedQuery =
-        "/search/label/Something/Something%20Else?"
-            + "max-results=25&updated-min=2020-10-11T00:00:00&orderBy=updated";
+        "//label/Something/Something%20Else?" + "max-results=25&updated-min=2020-10-11T00:00:00";
     final String actualQuery = queryBuilderService.buildQueryFrom(testSnapshotRequest, HTML);
     logger.info("Got query:\n\t" + actualQuery);
     assertThat(actualQuery).isEqualTo(expectedQuery);
@@ -74,8 +73,8 @@ class BloggerQueryBuilderTest {
     logger.info("Building JSON Blogger query with SnapshotRequest:\n" + testSnapshotRequest);
 
     final String expectedQuery =
-        "/-/Something/Something%20Else?"
-            + "alt=json&max-results=25&updated-min=2020-10-11T00:00:00&orderBy=updated";
+        "//-/Something/Something%20Else?"
+            + "alt=json&max-results=25&updated-min=2020-10-11T00:00:00";
     final String actualQuery = queryBuilderService.buildQueryFrom(testSnapshotRequest, JSON);
     logger.info("Got query:\n\t" + actualQuery);
     assertThat(actualQuery).isEqualTo(expectedQuery);

@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -41,6 +42,7 @@ import self.me.matchday.plugin.datasource.parsing.fabric.Bolt;
 public class MatchDataParser implements DataSourceParser<Match, String> {
 
   private final TextParser textParser;
+  @Getter private final Class<Match> type = Match.class;
 
   public MatchDataParser(TextParser textParser) {
     this.textParser = textParser;

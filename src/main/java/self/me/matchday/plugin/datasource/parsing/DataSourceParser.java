@@ -26,4 +26,6 @@ import self.me.matchday.model.DataSource;
 public interface DataSourceParser<T, D> {
 
   Stream<? extends T> getEntityStream(@NotNull DataSource<? extends T> dataSource, @NotNull D data);
+
+  Class<T> getType();
 }

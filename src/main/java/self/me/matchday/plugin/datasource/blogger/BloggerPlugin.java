@@ -131,7 +131,7 @@ public class BloggerPlugin implements DataSourcePlugin {
     // parse request into blogger query
     final String query = queryBuilder.buildQueryFrom(request, type);
     URL queryUrl = baseUri.resolve(query).toURL();
-    final LocalDateTime target = request.getEndDate();
+    final LocalDateTime target = request.getStartDate();
     final List<BloggerEntry> entries = getEntriesUntil(parser, queryUrl, target);
     return entries.stream().map(BloggerEntry::getContent).map(BloggerFeed.Str::getData);
   }
@@ -187,10 +187,13 @@ public class BloggerPlugin implements DataSourcePlugin {
                   .peek(BloggerPlugin::correctPublished)
                   .sorted(Comparator.comparing(e -> e.getPublished().$t))
                   .toList();
-      final BloggerEntry leastRecent = sorted.get(entries.size() - 1);
+      final BloggerEntry leastRecent = sorted.get(0);
       final LocalDateTime current = leastRecent.getPublished().$t;
       if (current != null && !current.isBefore(target)) {
-        return feed.getNext().getHref();
+        BloggerFeed.Link next = feed.getNext();
+        if (next != null) {
+          return next.getHref();
+        }
       }
     }
     return null;

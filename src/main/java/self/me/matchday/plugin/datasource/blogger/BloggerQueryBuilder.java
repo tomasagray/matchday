@@ -77,9 +77,7 @@ public abstract class BloggerQueryBuilder {
     final LocalDateTime endDate = request.getEndDate();
     String updatedMax = null;
     if (endDate != null) {
-      updatedMax =
-          String.format(
-              "updated-max=%s&orderBy=updated", endDate.format(DateTimeFormatter.ISO_DATE_TIME));
+      updatedMax = String.format("updated-max=%s", endDate.format(DateTimeFormatter.ISO_DATE_TIME));
     }
     return updatedMax;
   }
@@ -91,8 +89,7 @@ public abstract class BloggerQueryBuilder {
     String updatedMin = null;
     if (startDate != null) {
       updatedMin =
-          String.format(
-              "updated-min=%s&orderBy=updated", startDate.format(DateTimeFormatter.ISO_DATE_TIME));
+          String.format("updated-min=%s", startDate.format(DateTimeFormatter.ISO_DATE_TIME));
     }
     return updatedMin;
   }
@@ -116,7 +113,7 @@ public abstract class BloggerQueryBuilder {
 
     @Override
     String getQueryUrlPrefix() {
-      return "/search";
+      return "/";
     }
 
     @Override
@@ -144,7 +141,7 @@ public abstract class BloggerQueryBuilder {
 
     @Override
     String getQueryUrlPrefix() {
-      return "";
+      return "/";
     }
 
     @Override

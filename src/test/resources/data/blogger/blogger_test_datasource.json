@@ -1,0 +1,22 @@
+{
+  "dataSourceId": "718d9c24-8b26-44fa-9fa9-f5c7bfb4ca42",
+  "clazz": "self.me.matchday.unit.plugin.datasource.blogger.BloggerTestEntity",
+  "title": "Blogger Plugin Test DataSource",
+  "baseUri": "https://mdbloggertest1.blogspot.com/",
+  "pluginId": "64d08bc8-bd9f-11ea-b3de-0242ac130004",
+  "enabled": true,
+  "patternKits": [
+    {
+      "id": 1,
+      "clazz": "self.me.matchday.unit.plugin.datasource.blogger.BloggerTestEntity",
+      "pattern": {
+        "pattern": "Title: ([^\\n]*) Text: ([^\\n]*) Published: (\\d+\\/\\d+\\/\\d+)"
+      },
+      "fields": {
+        "1": "title",
+        "2": "text",
+        "3": "published"
+      }
+    }
+  ]
+}

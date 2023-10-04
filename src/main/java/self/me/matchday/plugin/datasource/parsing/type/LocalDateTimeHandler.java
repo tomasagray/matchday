@@ -36,6 +36,7 @@ public class LocalDateTimeHandler extends TypeHandler<LocalDateTime> {
 
   static {
     patterns.add("dd/MM/yyyy");
+    patterns.add("MM/dd/yyyy");
   }
 
   public LocalDateTimeHandler() {

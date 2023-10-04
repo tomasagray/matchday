@@ -1,8 +1,8 @@
 {
   "dataSourceId": "718d9c24-8b26-44fa-9fa9-f5c7bfb4ca42",
   "clazz": "self.me.matchday.model.Match",
-  "title": "GaLaTaMaN HD Football",
-  "baseUri": "https://galatamanhdfb.blogspot.com/",
+  "title": "Local Backup",
+  "baseUri": "https://galataman4k.blogspot.com/",
   "pluginId": "64d08bc8-bd9f-11ea-b3de-0242ac130004",
   "enabled": true,
   "patternKits": [

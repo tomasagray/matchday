@@ -19,42 +19,36 @@
 
 package self.me.matchday.plugin.datasource.parsing;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Match;
 
 @Component
 public class HypertextEntityParser {
 
-  private final Set<ParserEntry<?>> parsers = new HashSet<>();
+  private final List<DataSourceParser<?, ?>> parsers;
 
-  public HypertextEntityParser(MatchDataParser matchDataParser) {
+  public HypertextEntityParser(List<DataSourceParser<?, ?>> dataSourceParsers) {
     // register autowired parsers
-    parsers.add(new ParserEntry<>(Match.class, matchDataParser));
+    this.parsers = dataSourceParsers;
   }
 
-  public <T> Stream<? extends T> getEntityStream(
-      @NotNull DataSource<T> dataSource, @NotNull String data) {
-    final DataSourceParser<T, String> parser = getParserForType(dataSource.getClazz());
+  public <T, D> Stream<? extends T> getEntityStream(
+      @NotNull DataSource<T> dataSource, @NotNull D data) {
+    final DataSourceParser<T, D> parser = getParserForType(dataSource.getClazz());
     return parser.getEntityStream(dataSource, data);
   }
 
   @SuppressWarnings("unchecked cast")
-  private <T> DataSourceParser<T, String> getParserForType(Class<T> clazz) {
+  private <T, D> DataSourceParser<T, D> getParserForType(Class<T> clazz) {
 
     final String errMsg = "No entity parser registered for type: " + clazz;
-
-    return (DataSourceParser<T, String>)
+    return (DataSourceParser<T, D>)
         this.parsers.stream()
-            .filter(entry -> entry.clazz().equals(clazz))
+            .filter(entry -> entry.getType().equals(clazz))
             .findFirst()
-            .map(ParserEntry::parser)
             .orElseThrow(() -> new IllegalArgumentException(errMsg));
   }
-
-  private record ParserEntry<T>(Class<T> clazz, DataSourceParser<T, String> parser) {}
 }

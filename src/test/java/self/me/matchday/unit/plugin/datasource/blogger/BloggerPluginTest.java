@@ -21,16 +21,14 @@ package self.me.matchday.unit.plugin.datasource.blogger;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,15 +36,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
-import self.me.matchday.model.DataSource;
-import self.me.matchday.model.Event;
-import self.me.matchday.model.Match;
-import self.me.matchday.model.PatternKit;
-import self.me.matchday.model.PlaintextDataSource;
-import self.me.matchday.model.Snapshot;
-import self.me.matchday.model.SnapshotRequest;
-import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.*;
 import self.me.matchday.plugin.datasource.blogger.BloggerPlugin;
+import self.me.matchday.util.JsonParser;
+import self.me.matchday.util.ResourceFileReader;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -56,13 +49,22 @@ class BloggerPluginTest {
   private static final Logger logger = LogManager.getLogger(BloggerPluginTest.class);
 
   private final BloggerPlugin plugin;
-  private final DataSource<Match> testDataSource;
+  private final DataSource<BloggerTestEntity> testDataSource;
+  private final DataSource<Match> matchDataSource;
 
   @Autowired
-  public BloggerPluginTest(@NotNull TestDataCreator testDataCreator, BloggerPlugin bloggerPlugin)
+  public BloggerPluginTest(BloggerPlugin bloggerPlugin, TestDataCreator testDataCreator)
       throws IOException {
     this.plugin = bloggerPlugin;
-    this.testDataSource = testDataCreator.readTestJsonDataSource();
+    this.testDataSource = readTestDataSource();
+    this.matchDataSource = testDataCreator.readTestJsonDataSource();
+  }
+
+  private static DataSource<BloggerTestEntity> readTestDataSource() throws IOException {
+    final String filepath = "data/blogger/blogger_test_datasource.json";
+    String data = ResourceFileReader.readTextResource(filepath);
+    final Type type = new TypeReference<PlaintextDataSource<BloggerTestEntity>>() {}.getType();
+    return JsonParser.fromJson(data, type);
   }
 
   @Test
@@ -98,52 +100,50 @@ class BloggerPluginTest {
   @DisplayName("Ensure that a DataSource can be added via the BloggerPlugin")
   void addDataSource() {
 
-    final int minimumPatternKitCount = 2;
+    final int minimumPatternKitCount = 1;
     logger.info("Added datasource:\n{}", testDataSource);
     assertThat(testDataSource).isNotNull();
     assertThat(testDataSource.getBaseUri()).isNotNull();
-    final List<PatternKit<? extends Match>> metadataPatterns =
-        ((PlaintextDataSource<? extends Match>) testDataSource).getPatternKitsFor(Match.class);
+    final List<PatternKit<? extends BloggerTestEntity>> metadataPatterns =
+        ((PlaintextDataSource<? extends BloggerTestEntity>) testDataSource)
+            .getPatternKitsFor(BloggerTestEntity.class);
     assertThat(metadataPatterns).isNotNull();
     assertThat(metadataPatterns.size()).isNotZero().isGreaterThanOrEqualTo(minimumPatternKitCount);
   }
 
   @Test
-  @DisplayName("Get a Snapshot from the test HTML DataSource")
-  void getHtmlSnapshot() throws IOException {
+  @DisplayName("Get a Snapshot from a test Blogger blog (HTML)")
+  void getKnownTestSnapshot() throws IOException {
 
     logger.info(
-        "Getting Snapshot with DataSource:\n{}  --  {}",
+        "Getting Snapshot with DataSource: {}  --  {}",
         testDataSource.getPluginId(),
         testDataSource.getBaseUri());
-    final SnapshotRequest request = SnapshotRequest.builder().labels(List.of("Barcelona")).build();
-    final Snapshot<? extends Match> testSnapshot = plugin.getSnapshot(request, testDataSource);
+    final SnapshotRequest request = SnapshotRequest.builder().build();
+    final Snapshot<? extends BloggerTestEntity> testSnapshot =
+        plugin.getSnapshot(request, testDataSource);
     assertThat(testSnapshot).isNotNull();
 
-    final List<Match> testData = testSnapshot.getData().collect(Collectors.toList());
+    final List<BloggerTestEntity> testData = testSnapshot.getData().collect(Collectors.toList());
     final int eventCount = testData.size();
-    logger.info("Found {} events\n", eventCount);
+    logger.info("Found {} BloggerTestEntities...", eventCount);
     assertThat(eventCount).isNotZero();
     testData.stream()
         .filter(Objects::nonNull)
         .forEach(
-            event -> {
-              logger.info("Got Event:\n{}", event);
-              assertThat(event.getCompetition()).isNotNull();
-              assertThat(event.getDate()).isNotNull().isAfter(LocalDateTime.MIN);
-              final Set<VideoFileSource> fileSources = event.getFileSources();
-              assertThat(fileSources).isNotNull();
-              assertThat(fileSources.size()).isNotZero();
+            entity -> {
+              logger.info("Found Entity: {}", entity);
+              assertThat(entity.getTitle()).isNotNull().isNotEmpty();
+              assertThat(entity.getText()).isNotNull().isNotEmpty();
             });
   }
 
   @Test
-  @DisplayName("Get a Snapshot from test JSON Blogger DataSource")
-  void getJsonSnapshot() throws IOException {
+  @DisplayName("Get a Snapshot from a live Match DataSource (max: 25)")
+  void getLiveSnapshot() throws IOException {
 
-    final SnapshotRequest request =
-        SnapshotRequest.builder().labels(List.of("Barcelona")).maxResults(25).build();
-    final Snapshot<? extends Event> snapshot = plugin.getSnapshot(request, testDataSource);
+    final SnapshotRequest request = SnapshotRequest.builder().maxResults(25).build();
+    final Snapshot<? extends Event> snapshot = plugin.getSnapshot(request, matchDataSource);
     assertThat(snapshot).isNotNull();
 
     final List<Event> events = snapshot.getData().collect(Collectors.toList());
@@ -158,5 +158,38 @@ class BloggerPluginTest {
           assertThat(event.getCompetition()).isNotNull();
           assertThat(event.getDate()).isNotNull().isAfter(LocalDateTime.MIN);
         });
+  }
+
+  @Test
+  @DisplayName("Get a date-limited Snapshot from test blog")
+  void dateLimitedSnapshotTest() throws IOException {
+
+    // given
+    final LocalDateTime limit = LocalDateTime.of(2023, 9, 1, 0, 0);
+    logger.info("Getting posts until: {}", limit);
+
+    // when
+    SnapshotRequest request = SnapshotRequest.builder().startDate(limit).build();
+    logger.info("Getting BloggerTest Snapshot with request: {}", request);
+    Snapshot<BloggerTestEntity> snapshot = plugin.getSnapshot(request, testDataSource);
+    List<BloggerTestEntity> entities = snapshot.getData().toList();
+
+    // then
+    int count = entities.size();
+    logger.info("Found: {} BloggerTestEntities...", count);
+    assertThat(count).isNotZero();
+    entities.forEach(
+        entity -> {
+          logger.info("Found BloggerTestEntity: {}", entity);
+          assertThat(entity.getTitle()).isNotNull().isNotEmpty();
+          assertThat(entity.getText()).isNotNull().isNotEmpty();
+          assertThat(entity.getPublished()).isNotNull();
+        });
+
+    ArrayList<BloggerTestEntity> modifiable = new ArrayList<>(entities);
+    modifiable.sort(Comparator.comparing(BloggerTestEntity::getPublished));
+    BloggerTestEntity leastRecent = modifiable.get(0);
+    logger.info("Least recent post: {}", leastRecent);
+    assertThat(leastRecent.getPublished()).isBetween(limit.minusWeeks(1), limit);
   }
 }

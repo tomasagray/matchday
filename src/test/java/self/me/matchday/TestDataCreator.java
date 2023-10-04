@@ -126,7 +126,7 @@ public class TestDataCreator {
 
   private @NotNull DataSource<Match> readTestDataSource() throws IOException {
 
-    String filename = "data/datasource/test_json_blogger_datasource.json";
+    String filename = "data/datasource/test_html_blogger_datasource.json";
     final String dataSourceJson = ResourceFileReader.readTextResource(filename);
     final Type type = new TypeReference<PlaintextDataSource<Match>>() {}.getType();
     final PlaintextDataSource<Match> testDataSource = JsonParser.fromJson(dataSourceJson, type);
