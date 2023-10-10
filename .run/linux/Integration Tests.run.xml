@@ -9,7 +9,7 @@
         <option name="VM_PARAMETERS"
                 value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit"/>
         <envs>
-            <env name="DATA_ROOT" value="/projectdata/matchday/test/unit"/>
+            <env name="DATA_ROOT" value="/projectdata/matchday/test/integration"/>
             <env name="DB_PASSWORD" value="as"/>
             <env name="DB_URL" value="jdbc:h2:mem:matchday"/>
             <env name="DB_USER" value="sa"/>
