@@ -61,6 +61,11 @@ public class DataSourceServiceLog {
     }
   }
 
+  @Before("execution(* self.me.matchday.api.service.DataSourceService.refreshOnUrl(..))")
+  public void logRefreshDataSourcesOnUrl(@NotNull JoinPoint jp) {
+    logger.info("Refreshing all DataSources using URL: {}", jp.getArgs()[0]);
+  }
+
   @Before("execution(* self.me.matchday.api.service.DataSourceService.save(..))")
   public void logSaveNewDataSource(@NotNull JoinPoint jp) {
     logger.info("Attempting to save new DataSource: {}", jp.getArgs()[0]);

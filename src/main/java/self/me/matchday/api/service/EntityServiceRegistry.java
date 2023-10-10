@@ -36,6 +36,10 @@ public class EntityServiceRegistry {
     registry.add(new Entry<>(Match.class, matchService));
   }
 
+  public <T, I> void registerService(Class<T> type, EntityService<T, I> service) {
+    registry.add(new Entry<>(type, service));
+  }
+
   @SuppressWarnings("unchecked cast")
   public <T, I> EntityService<T, I> getServiceFor(@NotNull Class<T> clazz) {
     return registry.stream()

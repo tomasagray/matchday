@@ -49,6 +49,7 @@ import self.me.matchday.model.*;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.unit.plugin.datasource.blogger.BloggerTestEntity;
 import self.me.matchday.unit.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.ResourceFileReader;
@@ -120,16 +121,20 @@ public class TestDataCreator {
     return videoResources;
   }
 
-  public DataSource<Match> readTestJsonDataSource() throws IOException {
-    return readTestDataSource();
+  public DataSource<Match> readTestLiveDataSource() throws IOException {
+    return readTestDataSource("data/datasource/test_html_blogger_datasource.json");
   }
 
-  private @NotNull DataSource<Match> readTestDataSource() throws IOException {
+  public DataSource<BloggerTestEntity> readTestBloggerDataSource() throws IOException {
+    return readTestDataSource("data/blogger/blogger_test_datasource.json");
+  }
 
-    String filename = "data/datasource/test_html_blogger_datasource.json";
+  private <T> @NotNull DataSource<T> readTestDataSource(@NotNull String filename)
+      throws IOException {
+
     final String dataSourceJson = ResourceFileReader.readTextResource(filename);
-    final Type type = new TypeReference<PlaintextDataSource<Match>>() {}.getType();
-    final PlaintextDataSource<Match> testDataSource = JsonParser.fromJson(dataSourceJson, type);
+    final Type type = new TypeReference<PlaintextDataSource<T>>() {}.getType();
+    final PlaintextDataSource<T> testDataSource = JsonParser.fromJson(dataSourceJson, type);
     assertThat(testDataSource).isNotNull();
 
     // randomize IDs to avoid collisions

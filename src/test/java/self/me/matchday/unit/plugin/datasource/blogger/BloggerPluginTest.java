@@ -57,7 +57,7 @@ class BloggerPluginTest {
       throws IOException {
     this.plugin = bloggerPlugin;
     this.testDataSource = readTestDataSource();
-    this.matchDataSource = testDataCreator.readTestJsonDataSource();
+    this.matchDataSource = testDataCreator.readTestLiveDataSource();
   }
 
   private static DataSource<BloggerTestEntity> readTestDataSource() throws IOException {

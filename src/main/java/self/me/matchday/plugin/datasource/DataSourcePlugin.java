@@ -20,6 +20,7 @@
 package self.me.matchday.plugin.datasource;
 
 import java.io.IOException;
+import java.net.URL;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Snapshot;
@@ -32,6 +33,9 @@ public interface DataSourcePlugin extends Plugin {
 
   <T> Snapshot<T> getSnapshot(
       @NotNull final SnapshotRequest request, @NotNull final DataSource<T> dataSource)
+      throws IOException;
+
+  <T> Snapshot<T> getUrlSnapshot(@NotNull URL url, @NotNull DataSource<T> dataSource)
       throws IOException;
 
   boolean isEnabled();

@@ -110,6 +110,17 @@ public class BloggerPlugin implements DataSourcePlugin {
   }
 
   @Override
+  public <T> Snapshot<T> getUrlSnapshot(@NotNull URL url, @NotNull DataSource<T> dataSource)
+      throws IOException {
+
+    final List<BloggerEntry> entries = getEntriesUntil(new HtmlBloggerParser(), url, null);
+    Stream<String> feed =
+        entries.stream().map(BloggerEntry::getContent).map(BloggerFeed.Str::getData);
+    Stream<T> entities = feed.flatMap(data -> entityParser.getEntityStream(dataSource, data));
+    return Snapshot.of(entities);
+  }
+
+  @Override
   public boolean isEnabled() {
     return this.enabled;
   }

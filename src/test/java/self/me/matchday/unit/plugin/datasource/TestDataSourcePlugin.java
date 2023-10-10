@@ -19,6 +19,7 @@
 
 package self.me.matchday.unit.plugin.datasource;
 
+import java.net.URL;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Contract;
@@ -64,6 +65,11 @@ public class TestDataSourcePlugin implements DataSourcePlugin {
   public <T> Snapshot<T> getSnapshot(
       @NotNull SnapshotRequest request, @NotNull DataSource<T> dataSource) {
     return Snapshot.of(Stream.of(testDataCreator.createTestMatch()).map(obj -> (T) obj));
+  }
+
+  @Override
+  public <T> Snapshot<T> getUrlSnapshot(@NotNull URL url, @NotNull DataSource<T> dataSource) {
+    return getSnapshot(SnapshotRequest.builder().build(), dataSource);
   }
 
   @Override

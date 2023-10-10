@@ -68,7 +68,7 @@ public class MatchDataParserTest {
       @NotNull TestDataCreator testDataCreator, MatchDataParser matchDataParser)
       throws IOException {
     this.matchDataParser = matchDataParser;
-    this.testDataSource = testDataCreator.readTestJsonDataSource(); // .readTestHtmlDataSource();
+    this.testDataSource = testDataCreator.readTestLiveDataSource(); // .readTestHtmlDataSource();
     testHtml = readTestResources();
   }
 

@@ -22,8 +22,11 @@ package self.me.matchday.api.controller;
 import static self.me.matchday.api.resource.DataSourceResource.DataSourceResourceAssembler;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.UUID;
+import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +40,14 @@ import self.me.matchday.model.SnapshotRequest;
 @RestController
 @RequestMapping(value = "/data-sources")
 public class DataSourceController {
+
+  @RequestMapping(
+      value = "/refresh/on-url",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  public void refreshOnUrl(@RequestBody @NotNull UrlRequest request) throws IOException {
+    dataSourceService.refreshOnUrl(request.getUrl());
+  }
 
   private final DataSourceService dataSourceService;
   private final DataSourceResourceAssembler dataSourceResourceAssembler;
@@ -67,6 +78,11 @@ public class DataSourceController {
       @RequestBody SnapshotRequest snapshotRequest) throws IOException {
     final SnapshotRequest status = dataSourceService.refreshAllDataSources(snapshotRequest);
     return ResponseEntity.ok().body(status);
+  }
+
+  @Data
+  public static class UrlRequest {
+    private URL url;
   }
 
   @RequestMapping(

@@ -20,6 +20,7 @@
 package self.me.matchday.api.service;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,6 +90,31 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
         pluginService.getEnabledPlugin(dataSource.getPluginId());
     final Snapshot<T> snapshot = dataSourcePlugin.getSnapshot(request, dataSource);
     snapshotService.saveSnapshot(snapshot, dataSource.getClazz());
+  }
+
+  @SuppressWarnings("unchecked cast")
+  public <T> void refreshOnUrl(@NotNull URL url) throws IOException {
+
+    Optional<DataSource<?>> dataSourceOptional = findDataSourceForUrl(url);
+    if (dataSourceOptional.isPresent()) {
+      DataSource<T> dataSource = (DataSource<T>) dataSourceOptional.get();
+      DataSourcePlugin plugin = pluginService.getEnabledPlugin(dataSource.getPluginId());
+      Snapshot<T> snapshot = plugin.getUrlSnapshot(url, dataSource);
+      snapshotService.saveSnapshot(snapshot, dataSource.getClazz());
+    } else {
+      throw new IllegalArgumentException("No matching DataSource for URL: " + url);
+    }
+  }
+
+  private Optional<DataSource<?>> findDataSourceForUrl(@NotNull URL url) {
+    List<DataSource<?>> dataSources = dataSourceRepository.findAll();
+    for (DataSource<?> dataSource : dataSources) {
+      String sourceHost = dataSource.getBaseUri().toString();
+      if (url.toString().startsWith(sourceHost)) {
+        return Optional.of(dataSource);
+      }
+    }
+    return Optional.empty();
   }
 
   @Override

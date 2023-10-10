@@ -57,7 +57,7 @@ class DataSourceRepositoryTest {
   @Test
   @DisplayName("Ensure DataSource is not corrupted when saving to DB")
   void testSaveToDatabase() throws IOException {
-    final DataSource<Match> dataSource = testDataCreator.readTestJsonDataSource();
+    final DataSource<Match> dataSource = testDataCreator.readTestLiveDataSource();
     final DataSource<Match> savedDataSource = repository.save(dataSource);
     final PlaintextDataSource<Match> plaintextDataSource = (PlaintextDataSource<Match>) dataSource;
     final List<PatternKit<?>> readPkp = plaintextDataSource.getPatternKits();
@@ -83,7 +83,7 @@ class DataSourceRepositoryTest {
   void testFetchByPluginId() throws IOException {
 
     final PlaintextDataSource<Match> eventDataSource =
-        (PlaintextDataSource<Match>) testDataCreator.readTestJsonDataSource();
+        (PlaintextDataSource<Match>) testDataCreator.readTestLiveDataSource();
     final PlaintextDataSource<Match> savedDataSource = repository.save(eventDataSource);
     logger.info("Saved DataSource:\n{}", savedDataSource);
 

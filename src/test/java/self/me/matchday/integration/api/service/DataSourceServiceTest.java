@@ -22,6 +22,7 @@ package self.me.matchday.integration.api.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,12 +37,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.DataSourceService;
+import self.me.matchday.api.service.EntityServiceRegistry;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.DataSource;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.PatternKit;
 import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.model.SnapshotRequest;
+import self.me.matchday.unit.plugin.datasource.blogger.BloggerTestEntity;
+import self.me.matchday.unit.plugin.datasource.blogger.BloggerTestEntityService;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -51,19 +55,25 @@ class DataSourceServiceTest {
 
   private static final Logger logger = LogManager.getLogger(DataSourceServiceTest.class);
 
-  private final DataSourceService dataSourceService;
   private final TestDataCreator testDataCreator;
+  private final DataSourceService dataSourceService;
   private final EventService eventService;
+  private final EntityServiceRegistry serviceRegistry;
+  private final BloggerTestEntityService testEntityService;
 
   @Autowired
   public DataSourceServiceTest(
       DataSourceService dataSourceService,
       TestDataCreator testDataCreator,
-      EventService eventService) {
+      EventService eventService,
+      EntityServiceRegistry serviceRegistry,
+      BloggerTestEntityService testEntityService) {
 
     this.dataSourceService = dataSourceService;
     this.testDataCreator = testDataCreator;
     this.eventService = eventService;
+    this.serviceRegistry = serviceRegistry;
+    this.testEntityService = testEntityService;
   }
 
   @Test
@@ -77,7 +87,7 @@ class DataSourceServiceTest {
     logger.info("Preliminary DataSources:\n{}", preliminaryDataSources);
 
     final PlaintextDataSource<?> testDataSource =
-        (PlaintextDataSource<?>) testDataCreator.readTestJsonDataSource();
+        (PlaintextDataSource<?>) testDataCreator.readTestLiveDataSource();
     logger.info("Read test DataSource:\n{}", testDataSource);
     final List<PatternKit<?>> testPatternKitPack = testDataSource.getPatternKits();
     assertThat(testPatternKitPack).isNotNull();
@@ -116,5 +126,27 @@ class DataSourceServiceTest {
     final List<Event> events = eventService.fetchAll();
     final int actualEventCount = events.size();
     assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
+  }
+
+  @Test
+  @DisplayName("Validate refreshing DataSource on URL")
+  @Order(3)
+  void testUrlRefresh() throws IOException {
+
+    // given
+    DataSource<BloggerTestEntity> dataSource = testDataCreator.readTestBloggerDataSource();
+    dataSourceService.save(dataSource);
+    serviceRegistry.registerService(BloggerTestEntity.class, testEntityService);
+    URL testUrl = new URL("https://mdbloggertest1.blogspot.com/2023/09/post-9.html");
+
+    // when
+    logger.info("Refreshing against URL: {}", testUrl);
+    dataSourceService.refreshOnUrl(testUrl);
+
+    // then
+    List<BloggerTestEntity> entities = testEntityService.fetchAll();
+    logger.info("After URL refresh, entities are: {}", entities);
+    assertThat(entities).isNotNull();
+    assertThat(entities.size()).isNotZero();
   }
 }
