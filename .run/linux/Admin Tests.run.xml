@@ -8,12 +8,13 @@
         <option name="METHOD_NAME" value=""/>
         <option name="TEST_OBJECT" value="package"/>
         <option name="VM_PARAMETERS"
-                value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit"/>
+                value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit -Dspring.profiles.active=test-persistent"/>
         <envs>
-            <env name="DATA_ROOT" value="/projectdata/matchday/test/unit"/>
-            <env name="DB_PASSWORD" value="as"/>
-            <env name="DB_URL" value="jdbc:h2:mem:matchday"/>
-            <env name="DB_USER" value="sa"/>
+            <env name="DATA_ROOT" value="/projectdata/matchday/test/admin"/>
+            <env name="DB_PASSWORD" value="{M4tchD4y}"/>
+            <env name="DB_URL"
+                 value="jdbc:mysql://192.168.0.107:30306/md_test_admin?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
+            <env name="DB_USER" value="matchday"/>
             <env name="FFMPEG" value="/usr/bin/ffmpeg"/>
             <env name="FFPROBE" value="/usr/bin/ffprobe"/>
         </envs>

@@ -7,7 +7,7 @@
         <option name="METHOD_NAME" value=""/>
         <option name="TEST_OBJECT" value="directory"/>
         <option name="VM_PARAMETERS"
-                value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit"/>
+                value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit -Dspring.profiles.active=test-volatile"/>
         <envs>
             <env name="DATA_ROOT" value="/projectdata/matchday/test/unit"/>
             <env name="DB_PASSWORD" value="as"/>
