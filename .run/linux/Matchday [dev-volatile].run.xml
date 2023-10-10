@@ -4,7 +4,7 @@
         <envs>
             <env name="DATA_ROOT" value="/projectdata/matchday/dev/volatile"/>
             <env name="DB_PASSWORD" value="as"/>
-            <env name="DB_URL" value="jdbc:h2:mem:matchday"/>
+            <env name="DB_URL" value="jdbc:h2:mem:matchday;MODE=MYSQL"/>
             <env name="DB_USER" value="sa"/>
             <env name="FFMPEG" value="/usr/bin/ffmpeg"/>
             <env name="FFPROBE" value="/usr/bin/ffprobe"/>
