@@ -136,6 +136,18 @@ public class JsonParser {
                       //noinspection MagicConstant
                       return Pattern.compile(pattern, flags);
                     })
+            .registerTypeAdapter(
+                Pattern.class,
+                (JsonSerializer<Pattern>)
+                    (pattern, type, context) -> {
+                      if (pattern == null) {
+                        return null;
+                      }
+                      JsonObject o = new JsonObject();
+                      o.addProperty("pattern", pattern.pattern());
+                      o.addProperty("flags", pattern.flags());
+                      return o;
+                    })
             .registerTypeHierarchyAdapter(
                 Path.class,
                 (JsonDeserializer<Path>)
