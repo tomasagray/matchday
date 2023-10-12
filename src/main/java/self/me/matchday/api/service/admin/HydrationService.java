@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.service.*;
 import self.me.matchday.db.FileServerUserRepo;
 import self.me.matchday.model.*;
@@ -20,6 +21,7 @@ import self.me.matchday.model.validation.EventValidator;
 import self.me.matchday.util.JsonParser;
 
 @Service
+@Transactional
 public class HydrationService {
 
   private static final Type TYPE = new TypeReference<SystemImage>() {}.getType();
