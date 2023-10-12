@@ -44,7 +44,7 @@ public class ArtworkServiceLog {
   }
 
   @Around("execution(* self.me.matchday.api.service.ArtworkService.addArtworkToCollection(..))")
-  public Object logAddCompetitionEmblem(@NotNull ProceedingJoinPoint jp) throws Throwable {
+  public Object logAddArtworkToCollection(@NotNull ProceedingJoinPoint jp) throws Throwable {
     final Object[] args = jp.getArgs();
     final Object collection = args[0];
     final Image image = (Image) args[1];

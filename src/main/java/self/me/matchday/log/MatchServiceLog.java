@@ -60,6 +60,19 @@ public class MatchServiceLog {
     return events;
   }
 
+  @Around("execution(* self.me.matchday.api.service.MatchService.makeMatchArtwork(..))")
+  public Object logMakeMatchArtwork(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.info("Making new Match artwork for: {}", jp.getArgs()[0]);
+    Object result = jp.proceed();
+    logger.info("Created new Match artwork: {}", result);
+    return result;
+  }
+
+  @Before("execution(* self.me.matchday.api.service.MatchService.refreshMatchArtwork(..))")
+  public void logRefreshMatchArtwork(@NotNull JoinPoint jp) {
+    logger.info("Refreshing artwork for Match: {}", jp.getArgs()[0]);
+  }
+
   @Around("execution(* self.me.matchday.api.service.MatchService.save(..))")
   public Object logSaveMatch(@NotNull ProceedingJoinPoint jp) throws Throwable {
     try {
@@ -83,12 +96,6 @@ public class MatchServiceLog {
   @Before("execution(* self.me.matchday.api.service.MatchService.update(..))")
   public void logUpdateMatch(@NotNull JoinPoint jp) {
     logger.info("Updating Match: {}...", jp.getArgs()[0]);
-  }
-
-  @Before("execution(* self.me.matchday.api.service.MatchService.updateMatch(..))")
-  public void logUpdateMatchWith(@NotNull JoinPoint jp) {
-    final Object[] args = jp.getArgs();
-    logger.info("Updating Match: {} with: {}", args[0], args[1]);
   }
 
   @Before("execution(* self.me.matchday.api.service.MatchService.updateAll(..))")

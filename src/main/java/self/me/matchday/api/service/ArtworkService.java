@@ -228,12 +228,18 @@ public class ArtworkService {
       @NotNull ArtworkCollection collection, @NotNull Long artworkId) throws IOException {
 
     final Artwork artwork = collection.getById(artworkId);
+    return deleteArtworkFromCollection(collection, artwork);
+  }
+
+  private @NotNull ArtworkCollection deleteArtworkFromCollection(
+      @NotNull ArtworkCollection collection, Artwork artwork) throws IOException {
+
     deleteArtworkFromDisk(artwork);
     final Artwork selected = collection.getSelected();
     collection.remove(artwork);
     if (selected != null) {
       // if we are deleting selected art
-      if (selected.getId().equals(artworkId)) {
+      if (selected.getId().equals(artwork.getId())) {
         collection.setSelectedIndex(0);
       } else {
         // get index of mutated collection
@@ -245,8 +251,16 @@ public class ArtworkService {
   }
 
   public void deleteArtwork(@NotNull Artwork artwork) throws IOException {
-    deleteArtworkFromDisk(artwork);
-    artworkRepository.delete(artwork);
+
+    Optional<ArtworkCollection> collectionOptional =
+        collectionRepository.getCollectionForArtwork(artwork);
+    if (collectionOptional.isPresent()) {
+      ArtworkCollection collection = collectionOptional.get();
+      deleteArtworkFromCollection(collection, artwork);
+    } else {
+      deleteArtworkFromDisk(artwork);
+    }
+    artworkRepository.deleteById(artwork.getId());
   }
 
   public void deleteArtworkCollection(@NotNull ArtworkCollection collection) throws IOException {
@@ -263,7 +277,8 @@ public class ArtworkService {
     }
   }
 
-  public void deleteArtworkFromDisk(@NotNull Artwork artwork) throws IOException {
+  public void deleteArtworkFromDisk(Artwork artwork) throws IOException {
+    if (artwork == null) return;
     final File artworkFile = artwork.getFile().toFile();
     final boolean deleted = artworkFile.delete();
     if (!deleted || artworkFile.exists()) {

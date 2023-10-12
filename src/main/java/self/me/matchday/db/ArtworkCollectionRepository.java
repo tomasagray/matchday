@@ -19,7 +19,14 @@
 
 package self.me.matchday.db;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import self.me.matchday.model.Artwork;
 import self.me.matchday.model.ArtworkCollection;
 
-public interface ArtworkCollectionRepository extends JpaRepository<ArtworkCollection, Long> {}
+public interface ArtworkCollectionRepository extends JpaRepository<ArtworkCollection, Long> {
+
+  @Query("SELECT ac FROM ArtworkCollection ac WHERE :artwork IN elements(ac.collection)")
+  Optional<ArtworkCollection> getCollectionForArtwork(Artwork artwork);
+}
