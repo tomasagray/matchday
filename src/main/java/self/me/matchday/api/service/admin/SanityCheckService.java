@@ -121,7 +121,7 @@ public class SanityCheckService {
     // check if each Artwork file exists
     for (final Artwork artwork : artworks) {
       final Path artworkFile = artwork.getFile();
-      if (!artworkFile.toFile().exists()) {
+      if (artworkFile == null || !artworkFile.toFile().exists()) {
         danglingEntries.add(artwork);
       }
     }

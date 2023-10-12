@@ -42,6 +42,7 @@ import self.me.matchday.api.controller.MatchController;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
+import self.me.matchday.model.Artwork;
 import self.me.matchday.model.Fixture;
 import self.me.matchday.model.Match;
 import self.me.matchday.model.Season;
@@ -99,11 +100,14 @@ public class MatchResource extends RepresentationModel<MatchResource> {
         resource.setCompetition(competition);
         resource.setHomeTeam(homeTeam);
         resource.setAwayTeam(awayTeam);
-        resource.add(
-            linkTo(
-                    methodOn(MatchController.class)
-                        .fetchMatchArtworkImage(eventId, entity.getArtwork().getId()))
-                .withRel(ARTWORK_REL));
+        Artwork artwork = entity.getArtwork();
+        if (artwork != null) {
+          resource.add(
+              linkTo(
+                      methodOn(MatchController.class)
+                          .fetchMatchArtworkImage(eventId, artwork.getId()))
+                  .withRel(ARTWORK_REL));
+        }
         resource.add(
             linkTo(methodOn(VideoStreamingController.class).getVideoResources(eventId))
                 .withRel(VIDEO_LINK));

@@ -142,6 +142,7 @@ public class MatchService implements EntityService<Match, UUID> {
   public Artwork makeMatchArtwork(@NotNull Match match) throws IOException {
     final Artwork existingArtwork = match.getArtwork();
     if (existingArtwork != null) {
+      match.setArtwork(null);
       artworkService.deleteArtwork(existingArtwork);
     }
     final Collection<Param<?>> params = createMatchArtworkParams(match);

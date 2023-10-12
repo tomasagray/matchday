@@ -30,7 +30,6 @@ import javax.imageio.ImageIO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.domain.Example;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -213,14 +212,13 @@ public class ArtworkService {
     final Set<Artwork> artworks = collection.getCollection();
     if (artworks != null) {
       artworks.forEach(
-          artwork ->
-              artworkRepository
-                  .findOne(Example.of(artwork))
-                  .map(
-                      art -> {
-                        artwork.setFile(art.getFile());
-                        return artwork;
-                      }));
+          artwork -> {
+            Optional<Artwork> artworkOptional = artworkRepository.findById(artwork.getId());
+            if (artworkOptional.isPresent()) {
+              Artwork existing = artworkOptional.get();
+              artwork.setFile(existing.getFile());
+            }
+          });
     }
   }
 
