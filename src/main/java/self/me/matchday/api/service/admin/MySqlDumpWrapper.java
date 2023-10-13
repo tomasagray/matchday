@@ -21,9 +21,6 @@ public class MySqlDumpWrapper {
   private static final String filenamePrefix = "matchday_dump_";
   private final SettingsService settingsService;
 
-  @Value("${application.datasource.defaults-file}")
-  private String defaultsFile;
-
   @Value("${spring.datasource.url}")
   private String dataSourceUrl;
 
@@ -34,9 +31,9 @@ public class MySqlDumpWrapper {
   @Contract("_ -> new")
   private static @NotNull MysqlDump executeDump(@NotNull String cmd) throws IOException {
 
-    final Process dumpProcess = Runtime.getRuntime().exec(cmd);
     final LinkedList<String> data = new LinkedList<>();
     final LinkedList<String> error = new LinkedList<>();
+    final Process dumpProcess = Runtime.getRuntime().exec(cmd);
     try (final InputStream is = dumpProcess.getInputStream();
         final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         final InputStream es = dumpProcess.getErrorStream();
@@ -89,16 +86,15 @@ public class MySqlDumpWrapper {
       final String host = matcher.group(1);
       final int port = Integer.parseInt(matcher.group(2));
       final String database = matcher.group(3);
+      final String additionalOpts = "--add-drop-database --no-tablespaces";
       return String.format(
-          "mysqldump --defaults-file=%s -h %s -P %d -uroot --add-drop-database --databases %s",
-          this.defaultsFile, host, port, database);
+          "mysqldump -h %s -P %d %s --databases %s", host, port, additionalOpts, database);
     }
     throw new IllegalArgumentException("Could not parse database URL: " + this.dataSourceUrl);
   }
 
   @NotNull
   private Path createBackupFilepath() throws IOException {
-    // create file path
     final Path backupLocation = getBackupLocation();
     final long timestamp = Instant.now().toEpochMilli();
     final String filename = String.format("%s%s.sql", filenamePrefix, timestamp);

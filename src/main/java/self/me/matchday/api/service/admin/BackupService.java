@@ -31,7 +31,8 @@ import self.me.matchday.util.RecursiveDirectoryDeleter;
 public class BackupService {
 
   private static final String ERROR_MSG = "Could not create backup: ";
-  private static final String ARCHIVE_NAME = "matchday_backup_%s.zip";
+  private static final String BACKUP_PREFIX = "matchday_";
+  private static final String ARCHIVE_NAME = BACKUP_PREFIX + "backup_%s.zip";
   private static final String LOG_PATH = "log";
   private static final String ARTWORK_PATH = "artwork";
 
@@ -146,24 +147,12 @@ public class BackupService {
     return restorePointRepository.findAll();
   }
 
-  public Path createBackup() throws IOException {
-
-    // get settings
-    Settings settings = settingsService.getSettings();
-    Path artworkStorageLocation = settings.getArtworkStorageLocation();
-    Path logPath = settings.getLogFilename().getParent();
-    Path archive = getArchivePath(settings);
-
-    Path tmp = Files.createTempDirectory("matchday_");
-    copy(artworkStorageLocation, tmp.resolve(ARTWORK_PATH));
-    copy(logPath, tmp.resolve(LOG_PATH));
-    Path databaseDump = databaseService.createDatabaseDump();
-    Files.copy(databaseDump, tmp.resolve(databaseDump.getFileName()));
-    zipService.zipFiles(archive.toFile(), tmp, tmp.toFile());
-
-    deleteDatabaseDump(databaseDump);
-    Files.walkFileTree(tmp, new RecursiveDirectoryDeleter());
-    return archive;
+  private static void installData(@NotNull Path tmp, Path artworkLocation, Path logLocation)
+      throws IOException {
+    Path tmpArtwork = tmp.resolve(ARTWORK_PATH);
+    Path tmpLog = tmp.resolve(LOG_PATH);
+    if (tmpArtwork.toFile().exists()) copy(tmpArtwork, artworkLocation);
+    if (tmpLog.toFile().exists()) copy(tmpLog, logLocation);
   }
 
   private void checkSanity() {
@@ -185,25 +174,63 @@ public class BackupService {
     }
   }
 
+  public Path createBackup() throws IOException {
+
+    // get settings
+    Settings settings = settingsService.getSettings();
+    Path artworkStorageLocation = settings.getArtworkStorageLocation();
+    Path logPath = settings.getLogFilename().getParent();
+    Path archive = getArchivePath(settings);
+
+    Path tmp = Files.createTempDirectory(BACKUP_PREFIX);
+    copy(artworkStorageLocation, tmp.resolve(ARTWORK_PATH));
+    copy(logPath, tmp.resolve(LOG_PATH));
+    Path databaseDump = databaseService.createDatabaseDump();
+    Files.copy(databaseDump, tmp.resolve(databaseDump.getFileName()));
+    zipService.zipFiles(archive.toFile(), tmp, tmp.toFile());
+
+    deleteDatabaseDump(databaseDump);
+    Files.walkFileTree(tmp, new RecursiveDirectoryDeleter());
+    return archive;
+  }
+
   public void loadBackupArchive(@NotNull Path archive) throws IOException, SQLException {
 
     Settings settings = settingsService.getSettings();
     Path artworkLocation = settings.getArtworkStorageLocation();
     Path logLocation = settings.getLogFilename().getParent();
 
-    Files.walkFileTree(artworkLocation, new RecursiveDirectoryDeleter());
-    Files.walkFileTree(logLocation, new RecursiveDirectoryDeleter());
-
-    Path tmp = Files.createTempDirectory("matchday_");
-    zipService.unzipArchive(archive.toFile(), tmp.toFile());
-    Path tmpArtwork = tmp.resolve(ARTWORK_PATH);
-    Path tmpLog = tmp.resolve(LOG_PATH);
-    if (tmpArtwork.toFile().exists()) copy(tmpArtwork, artworkLocation);
-    if (tmpLog.toFile().exists()) copy(tmpLog, logLocation);
+    removeOldData(artworkLocation, logLocation);
+    Path tmp = unzipBackup(archive);
+    installData(tmp, artworkLocation, logLocation);
+    // install database
     Path dumpFile = findDumpFile(tmp);
     databaseService.installDatabase(dumpFile);
-
+    // remove temporary files
     Files.walkFileTree(tmp, new RecursiveDirectoryDeleter());
+  }
+
+  @NotNull
+  private Path unzipBackup(@NotNull Path archive) throws IOException {
+    Path tmp = Files.createTempDirectory(BACKUP_PREFIX);
+    zipService.unzipArchive(archive.toFile(), tmp.toFile());
+    return tmp;
+  }
+
+  private void removeOldData(Path artworkLocation, Path logLocation) throws IOException {
+    Files.walkFileTree(artworkLocation, new RecursiveDirectoryDeleter());
+    Files.walkFileTree(logLocation, new RecursiveDirectoryDeleter());
+    ensureDirExists(artworkLocation);
+    ensureDirExists(logLocation);
+  }
+
+  private void ensureDirExists(@NotNull Path dir) throws IOException {
+    File file = dir.toFile();
+    if (!file.exists()) {
+      if (!file.mkdirs()) {
+        throw new IOException("Could not create required directory: " + dir);
+      }
+    }
   }
 
   public byte[] readBackupArchive(@NotNull UUID restorePointId) throws IOException {
