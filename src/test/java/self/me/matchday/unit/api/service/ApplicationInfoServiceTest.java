@@ -35,6 +35,7 @@ class ApplicationInfoServiceTest {
     int minimumPid = 1_000;
     Pattern versionPattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");
     Pattern systemPattern = Pattern.compile("[\\w.-]{3,}");
+    Pattern ipPattern = Pattern.compile("(?:\\d{1,3}.){4}");
 
     // when
     logger.info("Getting application info...");
@@ -42,13 +43,16 @@ class ApplicationInfoServiceTest {
     Long pid = applicationInfo.getPid();
     String version = applicationInfo.getVersion();
     String system = applicationInfo.getSystem();
+    String ip = applicationInfo.getIp();
 
     // then
-    logger.info("Found: PID={}, Version={}, System={}", pid, version, system);
+    logger.info("Found: PID={}, Version={}, System={}, IP Address={}", pid, version, system, ip);
     assertThat(pid).isGreaterThan(minimumPid);
     final boolean versionFound = versionPattern.matcher(version).find();
     final boolean systemFound = systemPattern.matcher(system).find();
+    final boolean ipFound = ipPattern.matcher(ip).find();
     assertThat(versionFound).isTrue();
     assertThat(systemFound).isTrue();
+    assertThat(ipFound).isTrue();
   }
 }

@@ -79,6 +79,11 @@
       "name": "plugin.ffmpeg.description",
       "type": "java.lang.String",
       "description": "The description of the bundled FFMPEG plugin."
+    },
+    {
+      "name": "system.info.external-ip-service-url",
+      "type": "java.net.URL",
+      "description": "The URL from which the application system's IP address can be obtained."
     }
   ]
 }
