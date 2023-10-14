@@ -22,51 +22,63 @@
     },
     {
       "name": "artwork.default-competition-landscape",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "Default competition landscape (fanart) image."
     },
     {
       "name": "plugin.blogger.id",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "The plugin ID of the Blogger plugin."
     },
     {
       "name": "plugin.blogger.title",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "The title of the Blogger plugin."
     },
     {
       "name": "plugin.blogger.description",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "The required description of the Blogger plugin."
     },
     {
       "name": "plugin.blogger.json-url-pattern",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "Regex pattern to determine if Blogger URL is for JSON data."
     },
     {
       "name": "plugin.blogger.date-time-format-pattern",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "DateTime format of Blogger post published & updated data."
     },
     {
       "name": "plugin.disk-manager.id",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "The plugin ID of the bundled Disk Manager plugin."
     },
     {
       "name": "plugin.disk-manager.title",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "The title of the bundled Disk Manager plugin."
     },
     {
       "name": "plugin.disk-manager.description",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "The description of the bundled Disk Manager plugin."
     },
     {
       "name": "plugin.ffmpeg.id",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "The plugin ID of the bundled FFMPEG plugin."
     },
     {
       "name": "plugin.ffmpeg.title",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "The title of the bundled FFMPEG plugin."
     },
     {
       "name": "plugin.ffmpeg.description",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "description": "The description of the bundled FFMPEG plugin."
     }
   ]
 }
