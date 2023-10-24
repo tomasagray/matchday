@@ -21,7 +21,7 @@
       "id": 2,
       "clazz": "self.me.matchday.model.video.VideoFileSource",
       "pattern": {
-        "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\d\\s\\.+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\s\\d-]*) Language[\\p{L}\\s]*:? ([\\p{L}\\d+\\s./]*) Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖ (\\p{L}\\.\\d+) (\\p{L}+) ‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [HhDd]* (\\d+[pi])",
+        "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\d\\s\\.+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\s\\d-]*) Language[\\p{L}\\s]*:? [\\d.\\s]*([\\p{L}]+)[\\/\\s\\d\\.\\p{L}]* Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖([\\p{L}\\d\\s.]+)‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d\\s]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [\\w\\s\\d(]+([\\d]{4}[pi])\\)?",
         "flags": 64
       },
       "fields": {

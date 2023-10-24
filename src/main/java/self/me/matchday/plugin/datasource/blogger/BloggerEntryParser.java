@@ -23,9 +23,12 @@ import static self.me.matchday.plugin.datasource.blogger.model.BloggerFeed.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +38,9 @@ import org.jsoup.select.Evaluator;
 import self.me.matchday.plugin.datasource.blogger.model.BloggerFeed;
 
 class BloggerEntryParser {
+
+  private static final Pattern PUB_PATTERN = Pattern.compile("\\d{2}/\\d{2}/\\d{2,4}");
+  private static final DateTimeFormatter PUB_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
   private final Element element;
 
@@ -72,17 +78,14 @@ class BloggerEntryParser {
   }
 
   BloggerFeed.Generic<LocalDateTime> getPublished() {
-    return element.select("abbr.published").stream()
-        .findFirst()
-        .map(
-            elem -> {
-              final String title = elem.attr("title");
-              final LocalDateTime published =
-                  LocalDateTime.parse(
-                      title, DateTimeFormatter.ofPattern(BloggerParser.DATETIME_PATTERN));
-              return Generic.of(published);
-            })
-        .orElse(null);
+    final String text = element.text();
+    final Matcher matcher = PUB_PATTERN.matcher(text);
+    if (matcher.find()) {
+      final String data = matcher.group();
+      final LocalDateTime published = LocalDate.parse(data, PUB_FORMATTER).atStartOfDay();
+      return Generic.of(published);
+    }
+    return null;
   }
 
   Str getTitle() {

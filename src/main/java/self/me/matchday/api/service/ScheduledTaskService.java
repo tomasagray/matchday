@@ -31,7 +31,6 @@ import java.util.concurrent.ScheduledFuture;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationListener;
-import org.springframework.data.domain.Page;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -122,15 +121,17 @@ public class ScheduledTaskService {
   }
 
   public void refreshEventData() throws IOException {
-    // find latest Event
-    final Page<Event> events = eventService.fetchAllPaged(0, 1);
-    LocalDateTime startDate = null;
-    if (events.getTotalElements() > 0) {
-      final Event latest = events.getContent().get(0);
-      startDate = latest.getDate();
-    }
+    final LocalDateTime startDate = getLatestEventDate();
     final SnapshotRequest snapshotRequest = SnapshotRequest.builder().startDate(startDate).build();
     dataSourceService.refreshAllDataSources(snapshotRequest);
+  }
+
+  private LocalDateTime getLatestEventDate() {
+    final int eventCount = 1;
+    return eventService.fetchAllPaged(0, eventCount).stream()
+        .map(Event::getDate)
+        .findFirst()
+        .orElse(null);
   }
 
   public void pruneVideoData() throws IOException {

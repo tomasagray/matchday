@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -39,6 +40,14 @@ public class ScheduledTaskServiceLog {
   @Before("execution(* self.me.matchday.api.service.ScheduledTaskService.refreshEventData())")
   public void logRefreshAllDataSources() {
     logger.info("Refreshing all Data Sources with default SnapshotRequest...");
+  }
+
+  @AfterReturning(
+      value =
+          "execution(* self.me.matchday.api.service.ScheduledTaskService.getLatestEventDate(..))",
+      returning = "latest")
+  public void logGetLatestEventDate(@NotNull Object latest) {
+    logger.info("Found latest Event date for refresh: {}", latest);
   }
 
   @Before("execution(* self.me.matchday.api.service.ScheduledTaskService.pruneVideoData())")
