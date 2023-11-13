@@ -21,8 +21,11 @@ public class VideoFileSourceValidator implements EntityValidator<VideoFileSource
 
   private static boolean isValidVideoFilePack(@NotNull VideoFilePack filePack) {
     final Map<PartIdentifier, VideoFile> files = filePack.allFiles();
-    return files.containsKey(PartIdentifier.FIRST_HALF)
-        && files.containsKey(PartIdentifier.SECOND_HALF);
+    final boolean hasBothHalves =
+        files.containsKey(PartIdentifier.FIRST_HALF)
+            && files.containsKey(PartIdentifier.SECOND_HALF);
+    final boolean isFullCoverage = files.containsKey(PartIdentifier.FULL_COVERAGE);
+    return hasBothHalves || isFullCoverage;
   }
 
   @Override
