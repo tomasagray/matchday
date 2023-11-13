@@ -23,7 +23,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.model.Country;
@@ -91,15 +93,15 @@ public class VideoFileSelectorService {
     return sortedFileSources.get(0);
   }
 
-  private int compareLanguages(@NotNull Country country, String first, String second) {
-
+  private int compareLanguages(@Nullable Country country, String first, String second) {
+    if (country == null) return 0;
+    List<Locale> locales = country.getLocales();
+    if (locales == null || locales.size() == 0) return 0;
     final Boolean firstMatches =
-        country.getLocales().stream()
-            .anyMatch(locale -> locale.getDisplayLanguage().contains(first));
+        locales.stream().map(Locale::getDisplayLanguage).anyMatch(locale -> locale.equals(first));
     final Boolean secondMatches =
-        country.getLocales().stream()
-            .anyMatch(locale -> locale.getDisplayLanguage().contains(second));
-    return firstMatches.compareTo(secondMatches);
+        locales.stream().map(Locale::getDisplayLanguage).anyMatch(locale -> locale.equals(second));
+    return secondMatches.compareTo(firstMatches);
   }
 
   /**
