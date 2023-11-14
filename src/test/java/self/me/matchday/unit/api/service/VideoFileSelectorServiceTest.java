@@ -23,8 +23,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +38,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.TestDataCreator;
 import self.me.matchday.api.service.video.VideoFileSelectorService;
+import self.me.matchday.model.Country;
+import self.me.matchday.model.Match;
 import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
@@ -48,17 +53,18 @@ class VideoFileSelectorServiceTest {
 
   private static final Logger logger = LogManager.getLogger(VideoFileSelectorServiceTest.class);
 
-  private final VideoFileSource testVideoFileSource;
   private final VideoFileSelectorService fileSelectorService;
+  private final TestDataCreator testDataCreator;
+  // test data
+  private final VideoFileSource testVideoFileSource;
 
   @Autowired
   public VideoFileSelectorServiceTest(
       @NotNull TestDataCreator testDataCreator, VideoFileSelectorService fileSelectorService) {
-
+    this.testDataCreator = testDataCreator;
     this.fileSelectorService = fileSelectorService;
     // Create test data
     testVideoFileSource = testDataCreator.createVideoFileSourceAndSave();
-    // Set internal urls for testing
     setInternalUrls(testVideoFileSource.getVideoFilePacks());
   }
 
@@ -108,5 +114,46 @@ class VideoFileSelectorServiceTest {
     assertThat(firstHalf.getTitle()).isEqualTo(PartIdentifier.FIRST_HALF);
     assertThat(secondHalf.getTitle()).isEqualTo(PartIdentifier.SECOND_HALF);
     assertThat(postMatch.getTitle()).isEqualTo(PartIdentifier.POST_MATCH);
+  }
+
+  @Contract("_ -> new")
+  @NotNull
+  private static Country createTestCountry(@NotNull Locale testLocale) {
+    return new Country(testLocale.getCountry(), List.of(testLocale), "test.svg");
+  }
+
+  private @NotNull VideoFileSource createTestFileSource(@NotNull String lang) {
+    VideoFileSource fileSource = testDataCreator.createVideoFileSource();
+    fileSource.setLanguages(lang);
+    return fileSource;
+  }
+
+  @Test
+  @DisplayName("Validate that VideoFileSources are correctly sorted according to language")
+  void testSourceLanguageOrdering() {
+    // given
+    final Locale testLocale = Locale.ITALY;
+    final String testName = this.getClass().getSimpleName();
+    final Match testMatch = testDataCreator.createTestMatch(testName);
+    final Country testCountry = createTestCountry(testLocale);
+    testMatch.getCompetition().setCountry(testCountry);
+    logger.info("Test Match is: {}", testMatch);
+
+    // additional file sources
+    Set<VideoFileSource> fileSources = testMatch.getFileSources();
+    fileSources.add(createTestFileSource("Spanish"));
+    fileSources.add(createTestFileSource("Italian"));
+    fileSources.add(createTestFileSource("French"));
+    fileSources.add(createTestFileSource("Arabic"));
+
+    // when
+    logger.info("Getting 'best' VideoFileSource...");
+    VideoFileSource bestFileSource = fileSelectorService.getBestFileSource(testMatch);
+    String bestLanguage = bestFileSource.getLanguages();
+
+    // then
+    final String expectedLanguage = testLocale.getDisplayLanguage();
+    logger.info("Best file source language: {}; expected: {}", bestLanguage, expectedLanguage);
+    assertThat(bestLanguage).isEqualTo(expectedLanguage);
   }
 }

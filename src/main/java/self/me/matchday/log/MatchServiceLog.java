@@ -81,8 +81,8 @@ public class MatchServiceLog {
       logger.info("Match saved as: {}", saved);
       return saved;
     } catch (Throwable e) {
-      logger.error("Could not save Match: " + e.getMessage());
-      throw e;
+      logger.error("Could not save Match: {}", e.getMessage());
+      return null;
     }
   }
 

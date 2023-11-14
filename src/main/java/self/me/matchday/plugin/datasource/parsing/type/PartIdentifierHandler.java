@@ -41,7 +41,9 @@ public class PartIdentifierHandler extends TypeHandler<PartIdentifier> {
           Pattern.compile("Trophy"),
           PartIdentifier.TROPHY_CEREMONY,
           Pattern.compile("Post"),
-          PartIdentifier.POST_MATCH);
+          PartIdentifier.POST_MATCH,
+          Pattern.compile("Full Coverage"),
+          PartIdentifier.FULL_COVERAGE);
 
   public PartIdentifierHandler() {
     super(
@@ -51,6 +53,6 @@ public class PartIdentifierHandler extends TypeHandler<PartIdentifier> {
                 .filter(entry -> entry.getKey().matcher(s).find())
                 .findFirst()
                 .map(Map.Entry::getValue)
-                .orElse(PartIdentifier.DEFAULT));
+                .orElse(PartIdentifier.FULL_COVERAGE));
   }
 }

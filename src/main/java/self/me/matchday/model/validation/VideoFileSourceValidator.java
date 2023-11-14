@@ -2,6 +2,8 @@ package self.me.matchday.model.validation;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -15,23 +17,28 @@ import self.me.matchday.model.video.VideoFileSource;
 @Component
 public class VideoFileSourceValidator implements EntityValidator<VideoFileSource> {
 
-  private static boolean isValidVideoFilePack(@NotNull VideoFilePack filePack) {
+  private static final Logger logger = LogManager.getLogger(VideoFileSourceValidator.class);
 
+  private static boolean isValidVideoFilePack(@NotNull VideoFilePack filePack) {
     final Map<PartIdentifier, VideoFile> files = filePack.allFiles();
-    return files.containsKey(PartIdentifier.FIRST_HALF)
-        && files.containsKey(PartIdentifier.SECOND_HALF);
+    final boolean hasBothHalves =
+        files.containsKey(PartIdentifier.FIRST_HALF)
+            && files.containsKey(PartIdentifier.SECOND_HALF);
+    final boolean isFullCoverage = files.containsKey(PartIdentifier.FULL_COVERAGE);
+    return hasBothHalves || isFullCoverage;
   }
 
   @Override
   public void validateAll(@NotNull Iterable<? extends VideoFileSource> fileSources) {
-
     int validCount = 0;
     for (VideoFileSource fileSource : fileSources) {
       try {
         validate(fileSource);
         validCount++;
-      } catch (Throwable ignored) {
-        System.out.println("VideoFileSource invalid: " + fileSource);
+      } catch (Throwable e) {
+        final String msg = e.getMessage();
+        logger.trace("Invalid VideoFileSource: {}; {}", fileSource, msg);
+        logger.error("VideoFileSource is invalid: {}", msg);
       }
     }
     if (validCount == 0) {
@@ -41,7 +48,6 @@ public class VideoFileSourceValidator implements EntityValidator<VideoFileSource
 
   @Override
   public void validate(@Nullable VideoFileSource fileSource) {
-
     if (fileSource == null) {
       throw new InvalidVideoFileSourceException("VideoFileSource is null");
     }

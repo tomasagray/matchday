@@ -29,7 +29,8 @@ public enum PartIdentifier {
   SECOND_HALF("2nd Half"),
   EXTRA_TIME("Extra-Time/Penalties"),
   TROPHY_CEREMONY("Trophy Ceremony"),
-  POST_MATCH("Post-Match");
+  POST_MATCH("Post-Match"),
+  FULL_COVERAGE("Full Coverage");
 
   private final String partName;
 
