@@ -4,7 +4,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.service.admin.ApplicationInfoService;
-import self.me.matchday.api.service.admin.ApplicationInfoService.ApplicationInfo;
+import self.me.matchday.model.ApplicationInfo;
 
 @RestController
 public class ApplicationInfoController {

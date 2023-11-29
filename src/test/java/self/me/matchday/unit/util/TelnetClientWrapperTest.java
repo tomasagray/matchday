@@ -19,9 +19,10 @@ import self.me.matchday.util.TelnetClientWrapper;
 class TelnetClientWrapperTest {
 
   private static final Logger logger = LogManager.getLogger(TelnetClientWrapperTest.class);
-  private static final int WAIT_SECONDS = 2;
+  private static final String TERMINATOR = "\n.";
   private static final String TEST_HOST = "telehack.com";
   private static final int TEST_PORT = 23;
+  private static final int WAIT_SECONDS = 2;
 
   private final TelnetClientWrapper client;
 
@@ -36,7 +37,8 @@ class TelnetClientWrapperTest {
 
     // when
     logger.info("Testing telnet connection to: {}:{}...", TEST_HOST, TEST_PORT);
-    String connected = client.connect(TEST_HOST, TEST_PORT, "\n.");
+    client.connect(TEST_HOST, TEST_PORT);
+    final String connected = client.receive(TERMINATOR);
     logger.info("Connected! Got response:\n{}", connected);
 
     // then
@@ -52,16 +54,20 @@ class TelnetClientWrapperTest {
 
     // given
     logger.info("Connecting to: {}:{}...", TEST_HOST, TEST_PORT);
-    client.connect(TEST_HOST, TEST_PORT, "\n.");
+    client.connect(TEST_HOST, TEST_PORT);
     logger.info("Successfully connected!");
+    String loginMsg = client.receive(TERMINATOR);
+    logger.info("Got login message:\n{}", loginMsg);
 
     // when
-    String response1 = client.send("when");
+    client.send("when");
+    final String response1 = client.receive(TERMINATOR);
     logger.info("Command: 'when' got response: {}", response1);
 
     logger.info("Waiting {} seconds before repeating command...", WAIT_SECONDS);
     TimeUnit.SECONDS.sleep(WAIT_SECONDS);
-    String response2 = client.send("when");
+    client.send("when");
+    final String response2 = client.receive(TERMINATOR);
     logger.info("Repeated command: 'when' got response: {}", response2);
 
     // then

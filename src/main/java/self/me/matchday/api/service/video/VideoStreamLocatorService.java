@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.service.video;
 
+import static self.me.matchday.api.controller.VideoStreamStatusController.VIDEO_STREAM_EMIT_ENDPOINT;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -125,7 +127,6 @@ public class VideoStreamLocatorService {
   public void publishLocatorStatus(@NotNull VideoStreamLocator streamLocator) {
     final UUID videoFileId = streamLocator.getVideoFile().getFileId();
     messagingTemplate.convertAndSend(
-        VideoStreamStatusController.EMIT_ENDPOINT,
-        streamStatusController.publishVideoStreamStatus(videoFileId));
+        VIDEO_STREAM_EMIT_ENDPOINT, streamStatusController.publishVideoStreamStatus(videoFileId));
   }
 }

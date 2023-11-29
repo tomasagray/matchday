@@ -84,6 +84,21 @@
       "name": "system.info.external-ip-service-url",
       "type": "java.net.URL",
       "description": "The URL from which the application system's IP address can be obtained."
+    },
+    {
+      "name": "system.vpn.init-script",
+      "type": "java.lang.String",
+      "description": "Location of the start-yp script for the VPN service."
+    },
+    {
+      "name": "system.vpn.management.port",
+      "type": "java.lang.String",
+      "description": "Telnet port for control of the VPN service."
+    },
+    {
+      "name": "application.api.version",
+      "type": "java.lang.String",
+      "description": "Version string for the API."
     }
   ]
 }
