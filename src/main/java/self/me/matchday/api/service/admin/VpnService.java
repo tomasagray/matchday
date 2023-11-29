@@ -133,9 +133,12 @@ public class VpnService {
     process.waitFor();
     waitForIpRecheck();
 
-    final VpnConnectionStatus vpnStatus = getVpnStatus();
     final String ipAddress = ipService.getIpAddress();
-    final String vpnServer = getVpnServer(configuration);
+    final VpnConnectionStatus vpnStatus = getVpnStatus();
+    String vpnServer = "";
+    if (vpnStatus.equals(VpnConnectionStatus.CONNECTED)) {
+      vpnServer = getVpnServer(configuration);
+    }
     publishVpnStatus(new VpnStatus(vpnStatus, ipAddress, vpnServer));
   }
 
