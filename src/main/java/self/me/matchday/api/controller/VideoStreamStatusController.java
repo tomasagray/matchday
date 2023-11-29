@@ -19,7 +19,7 @@
 
 package self.me.matchday.api.controller;
 
-import static self.me.matchday.config.VideoStatusWebConfigurer.BROKER_ROOT;
+import static self.me.matchday.config.StatusWebSocketConfigurer.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,16 +40,17 @@ import self.me.matchday.model.video.VideoStreamingError;
 @Controller
 public class VideoStreamStatusController {
 
-  public static final String EMIT_ENDPOINT = BROKER_ROOT + "/video-stream";
-  public static final String RECEIVE_ENDPOINT = "/status";
+  public static final String RECEIVE_ENDPOINT = "/video-stream-status";
+  public static final String VIDEO_STREAM_EMIT_ENDPOINT = BROKER_ROOT + "/video-stream-status";
+
   private final VideoStreamLocatorRepo locatorRepo;
 
   public VideoStreamStatusController(VideoStreamLocatorRepo locatorRepo) {
     this.locatorRepo = locatorRepo;
   }
 
-  @SendTo(EMIT_ENDPOINT)
   @MessageMapping(RECEIVE_ENDPOINT)
+  @SendTo(VIDEO_STREAM_EMIT_ENDPOINT)
   @Transactional
   public VideoStreamStatusMessage publishVideoStreamStatus(@NotNull UUID videoFileId) {
 

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import self.me.matchday.api.service.admin.ApplicationInfoService;
+import self.me.matchday.model.ApplicationInfo;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -32,27 +33,23 @@ class ApplicationInfoServiceTest {
   void getApplicationInfo() {
 
     // given
-    int minimumPid = 1_000;
-    Pattern versionPattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");
-    Pattern systemPattern = Pattern.compile("[\\w.-]{3,}");
-    Pattern ipPattern = Pattern.compile("(?:\\d{1,3}.){4}");
+    final int minimumPid = 1_000;
+    final Pattern versionPattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");
+    final Pattern systemPattern = Pattern.compile("[\\w.-]{3,}");
 
     // when
     logger.info("Getting application info...");
-    ApplicationInfoService.ApplicationInfo applicationInfo = infoService.getApplicationInfo();
+    ApplicationInfo applicationInfo = infoService.getApplicationInfo();
     Long pid = applicationInfo.getPid();
     String version = applicationInfo.getVersion();
     String system = applicationInfo.getSystem();
-    String ip = applicationInfo.getIp();
 
     // then
-    logger.info("Found: PID={}, Version={}, System={}, IP Address={}", pid, version, system, ip);
+    logger.info("Found: PID={}, Version={}, System={}", pid, version, system);
     assertThat(pid).isGreaterThan(minimumPid);
     final boolean versionFound = versionPattern.matcher(version).find();
     final boolean systemFound = systemPattern.matcher(system).find();
-    final boolean ipFound = ipPattern.matcher(ip).find();
     assertThat(versionFound).isTrue();
     assertThat(systemFound).isTrue();
-    assertThat(ipFound).isTrue();
   }
 }

@@ -50,8 +50,10 @@
         <include within="self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService"/>
         <include within="self.me.matchday.api.service.video.VideoStreamManager"/>
         <!-- admin services -->
+        <include within="self.me.matchday.api.service.admin.ApplicationInfoService"/>
         <include within="self.me.matchday.api.service.admin.DatabaseManagementService"/>
         <include within="self.me.matchday.api.service.admin.BackupService"/>
+        <include within="self.me.matchday.api.service.admin.VpnService"/>
         <!-- plugin-->
         <include within="self.me.matchday.plugin.datasource.blogger.*"/>
         <include within="self.me.matchday.plugin.datasource.parsing.*"/>
@@ -62,6 +64,7 @@
     </weaver>
     <aspects>
         <!-- service -->
+        <aspect name="self.me.matchday.log.ApplicationInfoServiceLog"/>
         <aspect name="self.me.matchday.log.ArtworkServiceLog"/>
         <aspect name="self.me.matchday.log.BackupServiceLog"/>
         <aspect name="self.me.matchday.log.CompetitionServiceLog"/>
@@ -88,6 +91,7 @@
         <aspect name="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog"/>
         <aspect name="self.me.matchday.log.VideoStreamLocatorServiceLog"/>
         <aspect name="self.me.matchday.log.VideoStreamManagerLog"/>
+        <aspect name="self.me.matchday.log.VpnServiceLog"/>
         <!-- plugin -->
         <aspect name="self.me.matchday.log.MatchDataParserLog"/>
         <aspect name="self.me.matchday.log.plugin.blogger.BloggerPluginLog"/>
