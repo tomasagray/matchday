@@ -33,11 +33,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.EventRepository;
 import self.me.matchday.db.VideoFileSrcRepository;
 import self.me.matchday.model.*;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.video.VideoPlaylist;
 
 @Service
 @Transactional
@@ -50,18 +52,21 @@ public class EventService implements EntityService<Event, UUID> {
   private final MatchService matchService;
   private final HighlightService highlightService;
   private final CompetitionService competitionService;
+  private final VideoStreamingService streamingService;
 
   EventService(
       EventRepository eventRepository,
       MatchService matchService,
       HighlightService highlightService,
       CompetitionService competitionService,
-      VideoFileSrcRepository fileSrcRepository) {
+      VideoFileSrcRepository fileSrcRepository,
+      VideoStreamingService streamingService) {
     this.eventRepository = eventRepository;
     this.fileSrcRepository = fileSrcRepository;
     this.matchService = matchService;
     this.highlightService = highlightService;
     this.competitionService = competitionService;
+    this.streamingService = streamingService;
   }
 
   @Override
@@ -182,5 +187,15 @@ public class EventService implements EntityService<Event, UUID> {
   @Override
   public void deleteAll(@NotNull Iterable<? extends Event> events) {
     eventRepository.deleteAll(events);
+  }
+
+  public Optional<VideoPlaylist> getPreferredPlaylist(@NotNull UUID eventId) {
+    return fetchById(eventId).flatMap(streamingService::getBestVideoStreamPlaylist);
+  }
+
+  public Optional<VideoPlaylist> getVideoStreamPlaylist(
+      @NotNull UUID eventId, @NotNull UUID fileSrcId) {
+    return fetchById(eventId)
+        .flatMap(event -> streamingService.getOrCreateVideoStreamPlaylist(event, fileSrcId));
   }
 }

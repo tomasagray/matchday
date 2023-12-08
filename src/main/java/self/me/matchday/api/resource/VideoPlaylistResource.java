@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.UUID;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -78,28 +77,30 @@ public class VideoPlaylistResource extends RepresentationModel<VideoPlaylistReso
       super(VideoStreamingService.class, VideoPlaylistResource.class);
     }
 
+    private static void addPlaylistLink(
+        @NotNull VideoPlaylistResource resource, @NotNull Entry<Long, PartIdentifier> entry) {
+      try {
+        final Long locatorId = entry.getKey();
+        final PartIdentifier partId = entry.getValue();
+        final URI playlistUri =
+            linkTo(methodOn(VideoStreamingController.class).getVideoPartPlaylist(locatorId))
+                .withSelfRel()
+                .toUri();
+        final String title = partId != null ? partId.getPartName() : "";
+        resource.addUri(title, playlistUri);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
     @Override
     public @NotNull VideoPlaylistResource toModel(@NotNull VideoPlaylist playlist) {
 
       final VideoPlaylistResource resource = instantiateModel(playlist);
-      final UUID eventId = playlist.getEventId();
-      final UUID fileSrcId = playlist.getFileSrcId();
       final List<Entry<Long, PartIdentifier>> locatorIds =
           new ArrayList<>(playlist.getLocatorIds().entrySet());
       locatorIds.sort(Entry.comparingByValue());
-      locatorIds.forEach(
-          entry -> {
-            final Long locatorId = entry.getKey();
-            final PartIdentifier partId = entry.getValue();
-            final URI playlistUri =
-                linkTo(
-                        methodOn(VideoStreamingController.class)
-                            .getVideoPartPlaylist(eventId, fileSrcId, locatorId))
-                    .withSelfRel()
-                    .toUri();
-            final String title = partId != null ? partId.getPartName() : "";
-            resource.addUri(title, playlistUri);
-          });
+      locatorIds.forEach(entry -> addPlaylistLink(resource, entry));
       return resource;
     }
   }

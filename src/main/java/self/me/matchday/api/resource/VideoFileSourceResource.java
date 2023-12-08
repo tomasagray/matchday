@@ -25,18 +25,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
@@ -45,8 +40,11 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
+import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.resource.VideoFileResource.VideoFileResourceModeller;
+import self.me.matchday.db.EventRepository;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.Resolution;
 import self.me.matchday.model.video.VideoFilePack;
@@ -82,11 +80,13 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
       extends RepresentationModelAssemblerSupport<VideoFileSource, VideoFileSourceResource> {
 
     private final VideoFileResourceModeller videoFileModeller;
-    @Getter @Setter private UUID eventId;
+    private final EventRepository eventRepository;
 
-    public VideoFileSourceResourceAssembler(VideoFileResourceModeller videoFileModeller) {
+    public VideoFileSourceResourceAssembler(
+        VideoFileResourceModeller videoFileModeller, EventRepository eventRepository) {
       super(VideoStreamingController.class, VideoFileSourceResource.class);
       this.videoFileModeller = videoFileModeller;
+      this.eventRepository = eventRepository;
     }
 
     @Override
@@ -94,6 +94,7 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
 
       final VideoFileSourceResource videoFileSourceResource = instantiateModel(entity);
 
+      final UUID eventId = getEventId(entity);
       final UUID fileSrcId = entity.getFileSrcId();
       final int framerate = entity.getFramerate();
       final Resolution resolution = entity.getResolution();
@@ -116,11 +117,14 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
         videoFileSourceResource.setFrameRate(framerate);
       }
       videoFileSourceResource.add(
-          linkTo(
-                  methodOn(VideoStreamingController.class)
-                      .getVideoStreamPlaylist(eventId, fileSrcId))
+          linkTo(methodOn(EventController.class).getVideoStreamPlaylist(eventId, fileSrcId))
               .withRel(STREAM));
       return videoFileSourceResource;
+    }
+
+    @Nullable
+    private UUID getEventId(@NotNull VideoFileSource entity) {
+      return eventRepository.fetchEventForFileSource(entity).map(Event::getEventId).orElse(null);
     }
 
     private @Nullable Map<PartIdentifier, VideoFileResource> getVideoFiles(
@@ -140,18 +144,15 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
       return null;
     }
 
-    @Override
     public @NotNull CollectionModel<VideoFileSourceResource> toCollectionModel(
-        @NotNull Iterable<? extends VideoFileSource> entities) {
+        @NotNull UUID eventId, @NotNull Iterable<? extends VideoFileSource> entities) {
 
-      final CollectionModel<VideoFileSourceResource> videoResources =
-          super.toCollectionModel(entities);
-
+      final CollectionModel<VideoFileSourceResource> resources = super.toCollectionModel(entities);
       // Add link to master playlist
-      videoResources.add(
-          linkTo(methodOn(VideoStreamingController.class).getPreferredPlaylist(eventId))
+      resources.add(
+          linkTo(methodOn(EventController.class).getPreferredPlaylist(eventId))
               .withRel(PREFERRED_PLAYLIST));
-      return videoResources;
+      return resources;
     }
   }
 }

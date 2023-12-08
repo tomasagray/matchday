@@ -22,115 +22,39 @@ package self.me.matchday.api.controller;
 import java.io.IOException;
 import java.util.UUID;
 import org.springframework.core.io.Resource;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import self.me.matchday.api.resource.VideoFileSourceResource;
-import self.me.matchday.api.resource.VideoFileSourceResource.VideoFileSourceResourceAssembler;
-import self.me.matchday.api.resource.VideoPlaylistResource;
-import self.me.matchday.api.resource.VideoPlaylistResource.VideoPlaylistResourceAssembler;
-import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.video.VideoStreamingService;
 
 @RestController
-@RequestMapping(value = "/events/event/{eventId}/video")
+@RequestMapping(value = "/video")
 public class VideoStreamingController {
 
   public static final String MEDIA_TYPE_APPLE_MPEGURL = "application/vnd.apple.mpegurl";
 
-  private final EventService eventService;
   private final VideoStreamingService streamingService;
-  private final VideoFileSourceResourceAssembler resourceAssembler;
-  private final VideoPlaylistResourceAssembler playlistResourceAssembler;
 
-  public VideoStreamingController(
-      EventService eventService,
-      VideoStreamingService streamingService,
-      final VideoFileSourceResourceAssembler resourceAssembler,
-      final VideoPlaylistResourceAssembler playlistResourceAssembler) {
-    this.eventService = eventService;
+  public VideoStreamingController(VideoStreamingService streamingService) {
     this.streamingService = streamingService;
-    this.resourceAssembler = resourceAssembler;
-    this.playlistResourceAssembler = playlistResourceAssembler;
   }
 
   @RequestMapping(
-      value = {"", "/"},
-      method = RequestMethod.GET)
-  public ResponseEntity<CollectionModel<VideoFileSourceResource>> getVideoResources(
-      @PathVariable final UUID eventId) {
-
-    resourceAssembler.setEventId(eventId);
-    return eventService
-        .fetchVideoFileSources(eventId)
-        .map(resourceAssembler::toCollectionModel)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-  }
-
-  @RequestMapping(
-      value = "/playlist/preferred",
-      method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<VideoPlaylistResource> getPreferredPlaylist(
-      @PathVariable final UUID eventId) {
-
-    return eventService
-        .fetchById(eventId)
-        .flatMap(streamingService::getBestVideoStreamPlaylist)
-        .map(playlistResourceAssembler::toModel)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-  }
-
-  @RequestMapping(
-      value = "/stream/{fileSrcId}/playlist",
-      method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<VideoPlaylistResource> getVideoStreamPlaylist(
-      @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId) {
-
-    return eventService
-        .fetchById(eventId)
-        .flatMap(event -> streamingService.getOrCreateVideoStreamPlaylist(event, fileSrcId))
-        .map(playlistResourceAssembler::toModel)
-        .map(ResponseEntity::ok)
-        .orElseThrow(
-            () -> {
-              final String errMsg =
-                  String.format(
-                      "Unable to stream Event: %s, VideoFileSource: %s", eventId, fileSrcId);
-              return new IllegalArgumentException(errMsg);
-            });
-  }
-
-  @RequestMapping(
-      value = "/stream/{fileSrcId}/{partId}/playlist.m3u8",
+      value = "/part/{partId}/playlist.m3u8",
       method = RequestMethod.GET,
       produces = MEDIA_TYPE_APPLE_MPEGURL)
-  public ResponseEntity<String> getVideoPartPlaylist(
-      @PathVariable("eventId") UUID eventId,
-      @PathVariable("fileSrcId") UUID fileSrcId,
-      @PathVariable("partId") Long partId) {
-
-    try {
-      final String playlistFile = streamingService.readPlaylistFile(partId);
-      return ResponseEntity.ok(playlistFile);
-    } catch (Exception e) {
-      return ResponseEntity.internalServerError().body(e.getMessage());
-    }
+  public ResponseEntity<String> getVideoPartPlaylist(@PathVariable("partId") Long partId)
+      throws Exception {
+    final String playlistFile = streamingService.readPlaylistFile(partId);
+    return ResponseEntity.ok(playlistFile);
   }
 
   @RequestMapping(
-      value = "/stream/{fileSrcId}/{partId}/{segmentId}.ts",
+      value = "/part/{partId}/{segmentId}.ts",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<Resource> getSegmentFile(
-      @PathVariable("eventId") UUID eventId,
-      @PathVariable("fileSrcId") UUID fileSrcId,
-      @PathVariable("partId") Long partId,
-      @PathVariable("segmentId") String segmentId) {
+      @PathVariable("partId") Long partId, @PathVariable("segmentId") String segmentId) {
 
     final Resource videoSegmentResource =
         streamingService.getVideoSegmentResource(partId, segmentId);
@@ -144,8 +68,7 @@ public class VideoStreamingController {
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Integer> killStreamTasks(
-      @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId) {
+  public ResponseEntity<Integer> killStreamTasks(@PathVariable("fileSrcId") UUID fileSrcId) {
     return ResponseEntity.ok(streamingService.killAllStreamsFor(fileSrcId));
   }
 
@@ -154,8 +77,7 @@ public class VideoStreamingController {
       method = RequestMethod.DELETE,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<UUID> deleteVideoData(
-      @PathVariable("eventId") UUID eventId, @PathVariable("fileSrcId") UUID fileSrcId)
+  public ResponseEntity<UUID> deleteVideoData(@PathVariable("fileSrcId") UUID fileSrcId)
       throws IOException {
     streamingService.deleteAllVideoData(fileSrcId);
     return ResponseEntity.ok(fileSrcId);
@@ -166,8 +88,7 @@ public class VideoStreamingController {
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<UUID> killStream(
-      @PathVariable("eventId") UUID eventId, @PathVariable("videoFileId") UUID videoFileId) {
+  public ResponseEntity<UUID> killStream(@PathVariable("videoFileId") UUID videoFileId) {
     streamingService.killStreamFor(videoFileId);
     return ResponseEntity.ok(videoFileId);
   }
@@ -177,8 +98,7 @@ public class VideoStreamingController {
       method = RequestMethod.DELETE,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<UUID> deleteStream(
-      @PathVariable("eventId") UUID eventId, @PathVariable("videoFileId") UUID videoFileId)
+  public ResponseEntity<UUID> deleteStream(@PathVariable("videoFileId") UUID videoFileId)
       throws IOException {
     streamingService.deleteVideoData(videoFileId);
     return ResponseEntity.ok(videoFileId);

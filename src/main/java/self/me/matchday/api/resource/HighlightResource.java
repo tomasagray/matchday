@@ -36,8 +36,8 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
+import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.controller.HighlightController;
-import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.model.Fixture;
 import self.me.matchday.model.Highlight;
 import self.me.matchday.model.Season;
@@ -76,8 +76,7 @@ public class HighlightResource extends RepresentationModel<HighlightResource> {
       resource.setFixture(entity.getFixture());
       resource.setDate(entity.getDate());
       resource.add(
-          linkTo(methodOn(VideoStreamingController.class).getVideoResources(eventId))
-              .withRel(VIDEO_LINK));
+          linkTo(methodOn(EventController.class).getVideoResources(eventId)).withRel(VIDEO_LINK));
       resource.add(
           linkTo(methodOn(HighlightController.class).fetchHighlightById(eventId)).withSelfRel());
       return resource;

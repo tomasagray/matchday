@@ -38,8 +38,8 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
+import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.controller.MatchController;
-import self.me.matchday.api.controller.VideoStreamingController;
 import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
 import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
 import self.me.matchday.model.Artwork;
@@ -109,8 +109,7 @@ public class MatchResource extends RepresentationModel<MatchResource> {
                   .withRel(ARTWORK_REL));
         }
         resource.add(
-            linkTo(methodOn(VideoStreamingController.class).getVideoResources(eventId))
-                .withRel(VIDEO_LINK));
+            linkTo(methodOn(EventController.class).getVideoResources(eventId)).withRel(VIDEO_LINK));
         resource.add(linkTo(methodOn(MatchController.class).fetchMatchById(eventId)).withSelfRel());
         return resource;
       } catch (IOException e) {
