@@ -73,6 +73,16 @@ public class VideoStreamingController {
   }
 
   @RequestMapping(
+      value = "/stream/{videoFileId}/kill-stream",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<UUID> killStream(@PathVariable("videoFileId") UUID videoFileId) {
+    streamingService.killStreamFor(videoFileId);
+    return ResponseEntity.ok(videoFileId);
+  }
+
+  @RequestMapping(
       value = "/stream/{fileSrcId}/delete-streams",
       method = RequestMethod.DELETE,
       consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -81,16 +91,6 @@ public class VideoStreamingController {
       throws IOException {
     streamingService.deleteAllVideoData(fileSrcId);
     return ResponseEntity.ok(fileSrcId);
-  }
-
-  @RequestMapping(
-      value = "/stream/{videoFileId}/kill-stream",
-      method = RequestMethod.POST,
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<UUID> killStream(@PathVariable("videoFileId") UUID videoFileId) {
-    streamingService.killStreamFor(videoFileId);
-    return ResponseEntity.ok(videoFileId);
   }
 
   @RequestMapping(

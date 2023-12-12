@@ -22,6 +22,7 @@ package self.me.matchday.api.controller;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import java.io.IOException;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import self.me.matchday.api.resource.VideoFileSourceResource;
 import self.me.matchday.api.resource.VideoPlaylistResource;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.video.VideoFileSource;
 
 @RestController
 @RequestMapping("/events")
@@ -95,6 +97,28 @@ public class EventController {
         .map(sources -> fileSourceAssembler.toCollectionModel(eventId, sources))
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
+  }
+
+  @RequestMapping(
+      value = "/event/{eventId}/video/stream/update",
+      method = RequestMethod.PATCH,
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<VideoFileSourceResource> updateVideoStream(
+      @PathVariable UUID eventId, @RequestBody VideoFileSourceResource resource) {
+    VideoFileSource source = fileSourceAssembler.fromModel(resource);
+    VideoFileSource updated = eventService.updateVideoFileSource(eventId, source);
+    VideoFileSourceResource model = fileSourceAssembler.toModel(updated);
+    return ResponseEntity.ok(model);
+  }
+
+  @RequestMapping(
+      value = "/event/{eventId}/video/stream/{fileSrcId}/delete",
+      method = RequestMethod.DELETE)
+  public ResponseEntity<?> deleteVideoSource(
+      @PathVariable UUID eventId, @PathVariable UUID fileSrcId) throws IOException {
+    eventService.deleteVideoFileSource(eventId, fileSrcId);
+    return ResponseEntity.ok().build();
   }
 
   @RequestMapping(

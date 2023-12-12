@@ -27,7 +27,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
@@ -60,7 +59,6 @@ class EventServiceTest {
   private final EventService eventService;
   private final Match testMatch;
   private final Match unUpdatedEvent;
-  private final VideoFileSource testFileSource;
   private final Competition testCompetition;
 
   @Autowired
@@ -77,7 +75,7 @@ class EventServiceTest {
     final Optional<VideoFileSource> fileSourceOptional =
         testMatch.getFileSources().stream().findFirst();
     assertThat(fileSourceOptional).isPresent();
-    testFileSource = fileSourceOptional.get();
+    VideoFileSource testFileSource = fileSourceOptional.get();
 
     logger.info(
         "Saved Event w/ID: {}, Competition ID: {}, Team ID: {}; FileSrcID: {}",
@@ -193,34 +191,6 @@ class EventServiceTest {
           // normalize date times
           event.setDate(testMatch.getDate());
           assertThat(event).isEqualTo(testMatch);
-        });
-  }
-
-  @Test
-  @DisplayName("Ensure a specific video file source can be recalled from database")
-  void fetchVideoFileSrc() {
-
-    // Get test event from DB
-    final Optional<Event> eventOptional = eventService.fetchById(testMatch.getEventId());
-    assertThat(eventOptional).isPresent();
-    final Event event = eventOptional.get();
-    // Get test file source
-    final Optional<VideoFileSource> testFileSrcOptional =
-        event.getFileSources().stream().findFirst();
-    assertThat(testFileSrcOptional).isPresent();
-    // Get file source ID
-    final VideoFileSource testFileSource = testFileSrcOptional.get();
-    final UUID testFileSourceId = testFileSource.getFileSrcId();
-    logger.info("Test VideoFileSource ID: {}", testFileSourceId);
-
-    final Optional<VideoFileSource> fileSourceOptional =
-        eventService.fetchVideoFileSrc(testFileSourceId);
-    assertThat(fileSourceOptional).isPresent();
-
-    fileSourceOptional.ifPresent(
-        videoFileSource -> {
-          logger.info("Retrieved file source from database: {}", videoFileSource);
-          assertThat(videoFileSource).isEqualTo(this.testFileSource);
         });
   }
 

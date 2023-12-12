@@ -35,6 +35,7 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
+import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 
 @Data
@@ -67,6 +68,14 @@ public class VideoFileResource extends RepresentationModel<VideoFileSourceResour
       model.setLastRefresh(entity.getLastRefreshed());
       model.setTitle(entity.getTitle().getPartName());
       return model;
+    }
+
+    public VideoFile fromModel(@NotNull VideoFileResource resource) {
+      final VideoFile file = new VideoFile();
+      file.setFileId(resource.getVideoFileId());
+      file.setTitle(PartIdentifier.valueOf(resource.getTitle()));
+      file.setExternalUrl(resource.getExternalUrl());
+      return file;
     }
   }
 }
