@@ -19,6 +19,7 @@
 
 package self.me.matchday.model.video;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.api.controller.converter.VideoFilesDeserializer;
 
 @ToString
 @Entity
@@ -41,7 +43,8 @@ public class VideoFilePack {
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   @MapKeyEnumerated
   @MapKeyColumn(name = "pack_id")
-  private final Map<PartIdentifier, VideoFile> videoFiles = new ConcurrentSkipListMap<>();
+  @JsonDeserialize(using = VideoFilesDeserializer.class)
+  private Map<PartIdentifier, VideoFile> videoFiles = new ConcurrentSkipListMap<>();
 
   @Id
   @GeneratedValue(generator = "uuid2")

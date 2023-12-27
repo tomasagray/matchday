@@ -33,17 +33,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.TeamController;
-import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionResourceAssembler;
+import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionModeller;
 import self.me.matchday.api.resource.ColorResource.ColorResourceModeller;
-import self.me.matchday.model.ArtworkRole;
-import self.me.matchday.model.Country;
-import self.me.matchday.model.ProperName;
-import self.me.matchday.model.Team;
+import self.me.matchday.model.*;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -59,17 +56,15 @@ public class TeamResource extends RepresentationModel<TeamResource> {
   private ArtworkCollectionResource fanart;
 
   @Component
-  public static class TeamResourceAssembler
-      extends RepresentationModelAssemblerSupport<Team, TeamResource> {
+  public static class TeamModeller extends EntityModeller<Team, TeamResource> {
 
-    private final ArtworkCollectionResourceAssembler collectionModeller;
+    private final ArtworkCollectionModeller artworkModeller;
     private final ColorResourceModeller colorModeller;
 
-    public TeamResourceAssembler(
-        ArtworkCollectionResourceAssembler collectionModeller,
-        ColorResourceModeller colorModeller) {
+    public TeamModeller(
+        ArtworkCollectionModeller artworkModeller, ColorResourceModeller colorModeller) {
       super(TeamController.class, TeamResource.class);
-      this.collectionModeller = collectionModeller;
+      this.artworkModeller = artworkModeller;
       this.colorModeller = colorModeller;
     }
 
@@ -104,15 +99,15 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       teamResource.setColors(getColorResources(team));
 
       // artwork
-      teamResource.setEmblem(collectionModeller.toModel(team.getEmblem()));
-      teamResource.setFanart(collectionModeller.toModel(team.getFanart()));
+      teamResource.setEmblem(artworkModeller.toModel(team.getEmblem()));
+      teamResource.setFanart(artworkModeller.toModel(team.getFanart()));
       teamResource
           .getEmblem()
-          .getArtwork()
+          .getCollection()
           .forEach(artwork -> addArtworkLinks(teamId, ArtworkRole.EMBLEM, artwork));
       teamResource
           .getFanart()
-          .getArtwork()
+          .getCollection()
           .forEach(artwork -> addArtworkLinks(teamId, ArtworkRole.FANART, artwork));
 
       // attach links
@@ -132,8 +127,40 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       return teamResource;
     }
 
+    @Override
+    public Team fromModel(@Nullable TeamResource resource) {
+      if (resource == null) return null;
+      final ArtworkCollection emblem =
+          getArtworkCollection(resource.getEmblem(), ArtworkRole.EMBLEM);
+      final ArtworkCollection fanart =
+          getArtworkCollection(resource.getFanart(), ArtworkRole.FANART);
+      final Team team = new Team(resource.getName());
+      team.setId(resource.getId());
+      team.setColors(getColorsFromResources(resource.getColors()));
+      team.setCountry(resource.getCountry());
+      team.setEmblem(emblem);
+      team.setFanart(fanart);
+      return team;
+    }
+
+    private ArtworkCollection getArtworkCollection(
+        @NotNull ArtworkCollectionResource resource, @NotNull ArtworkRole role) {
+      final ArtworkCollection collection = artworkModeller.fromModel(resource);
+      if (collection != null) {
+        collection.setRole(role);
+      }
+      return collection;
+    }
+
     private List<ColorResource> getColorResources(@NotNull Team team) {
-      return team.getColors().stream().map(colorModeller::toModel).collect(Collectors.toList());
+      List<Color> colors = team.getColors();
+      if (colors == null) return List.of();
+      return colors.stream().map(colorModeller::toModel).collect(Collectors.toList());
+    }
+
+    private List<Color> getColorsFromResources(@Nullable List<ColorResource> resources) {
+      if (resources == null) return List.of();
+      return resources.stream().map(colorModeller::fromModel).toList();
     }
   }
 }

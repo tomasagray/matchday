@@ -157,8 +157,8 @@ public class CompetitionService implements EntityService<Competition, UUID> {
   public Image fetchSelectedArtworkImage(@NotNull UUID competitionId, @NotNull ArtworkRole role)
       throws IOException {
     final Artwork artwork = fetchSelectedArtworkMetadata(competitionId, role);
-    if (artwork != null) {
-      return artworkService.fetchArtworkData(artwork);
+    if (artwork != null && artwork.getFile() != null) {
+      return artworkService.readArtworkData(artwork);
     }
     return null;
   }
@@ -180,7 +180,7 @@ public class CompetitionService implements EntityService<Competition, UUID> {
       @NotNull UUID competitionId, @NotNull ArtworkRole role, @NotNull Long artworkId)
       throws IOException {
     final Artwork artwork = fetchArtworkMetadata(competitionId, role, artworkId);
-    return artworkService.fetchArtworkData(artwork);
+    return artworkService.readArtworkData(artwork);
   }
 
   public ArtworkCollection addArtworkToCollection(

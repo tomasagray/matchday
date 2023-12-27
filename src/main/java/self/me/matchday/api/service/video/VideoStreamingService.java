@@ -21,6 +21,7 @@ package self.me.matchday.api.service.video;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,17 +39,20 @@ public class VideoStreamingService {
   private final VideoStreamManager videoStreamManager;
   private final VideoStreamLocatorPlaylistService playlistService;
   private final VideoStreamLocatorService locatorService;
+  private final VideoSourceService videoSourceService;
 
   public VideoStreamingService(
       VideoFileSelectorService selectorService,
       VideoStreamManager videoStreamManager,
       VideoStreamLocatorPlaylistService playlistService,
-      VideoStreamLocatorService locatorService) {
+      VideoStreamLocatorService locatorService,
+      VideoSourceService videoSourceService) {
 
     this.selectorService = selectorService;
     this.videoStreamManager = videoStreamManager;
     this.playlistService = playlistService;
     this.locatorService = locatorService;
+    this.videoSourceService = videoSourceService;
   }
 
   public List<VideoStreamLocatorPlaylist> fetchAllPlaylists() {
@@ -235,5 +239,28 @@ public class VideoStreamingService {
     } else {
       throw new IllegalArgumentException("No stream locator exists for VideoFile: " + videoFileId);
     }
+  }
+
+  public VideoFileSource addOrUpdateVideoSource(
+      @NotNull Collection<VideoFileSource> sources, @NotNull VideoFileSource source) {
+    Optional<UUID> existing =
+        sources.stream()
+            .map(VideoFileSource::getFileSrcId)
+            .filter(id -> id.equals(source.getFileSrcId()))
+            .findAny();
+    if (existing.isPresent()) {
+      return videoSourceService.update(source);
+    } else {
+      removeIds(source);
+      sources.add(source);
+      return source;
+    }
+  }
+
+  private void removeIds(@NotNull VideoFileSource source) {
+    source.setFileSrcId(null);
+    source
+        .getVideoFilePacks()
+        .forEach(pack -> pack.allFiles().forEach((title, file) -> file.setFileId(null)));
   }
 }

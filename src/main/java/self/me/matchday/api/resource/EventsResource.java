@@ -30,11 +30,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.resource.HighlightResource.HighlightResourceAssembler;
@@ -58,14 +58,14 @@ public class EventsResource extends RepresentationModel<EventsResource> {
   private final List<HighlightResource> highlights = new ArrayList<>();
 
   @Component
-  public static class EventsResourceAssembler
-      extends RepresentationModelAssemblerSupport<Collection<? extends Event>, EventsResource> {
+  public static class EventsModeller
+      extends EntityModeller<Collection<? extends Event>, EventsResource> {
 
     private final MatchResourceAssembler matchAssembler;
     private final HighlightResourceAssembler highlightAssembler;
 
     @Autowired
-    public EventsResourceAssembler(
+    public EventsModeller(
         MatchResourceAssembler matchAssembler, HighlightResourceAssembler highlightAssembler) {
 
       super(EventController.class, EventsResource.class);
@@ -86,6 +86,18 @@ public class EventsResource extends RepresentationModel<EventsResource> {
             }
           });
       return eventsResource;
+    }
+
+    @Override
+    public Collection<? extends Event> fromModel(@Nullable EventsResource model) {
+      if (model == null) return null;
+      List<? extends Event> matches =
+          model.getMatches().stream().map(matchAssembler::fromModel).toList();
+      List<? extends Event> highlights =
+          model.getHighlights().stream().map(highlightAssembler::fromModel).toList();
+      List<Event> events = new ArrayList<>(matches);
+      events.addAll(highlights);
+      return events;
     }
   }
 }

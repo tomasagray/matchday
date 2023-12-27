@@ -20,18 +20,20 @@
 package self.me.matchday.api.resource;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.ArtworkController;
-import self.me.matchday.api.resource.ArtworkResource.ArtworkResourceAssembler;
+import self.me.matchday.api.resource.ArtworkResource.ArtworkModeller;
+import self.me.matchday.model.Artwork;
 import self.me.matchday.model.ArtworkCollection;
 import self.me.matchday.model.ArtworkRole;
 
@@ -46,15 +48,15 @@ public class ArtworkCollectionResource extends RepresentationModel<ArtworkCollec
   private Long id;
   private ArtworkRole role;
   private int selectedIndex;
-  private CollectionModel<ArtworkResource> artwork;
+  private CollectionModel<ArtworkResource> collection;
 
   @Component
-  public static class ArtworkCollectionResourceAssembler
-      extends RepresentationModelAssemblerSupport<ArtworkCollection, ArtworkCollectionResource> {
+  public static class ArtworkCollectionModeller
+      extends EntityModeller<ArtworkCollection, ArtworkCollectionResource> {
 
-    private final ArtworkResourceAssembler artworkModeller;
+    private final ArtworkModeller artworkModeller;
 
-    public ArtworkCollectionResourceAssembler(ArtworkResourceAssembler artworkModeller) {
+    public ArtworkCollectionModeller(ArtworkModeller artworkModeller) {
       super(ArtworkController.class, ArtworkCollectionResource.class);
       this.artworkModeller = artworkModeller;
     }
@@ -65,8 +67,22 @@ public class ArtworkCollectionResource extends RepresentationModel<ArtworkCollec
       model.setId(collection.getId());
       model.setRole(collection.getRole());
       model.setSelectedIndex(collection.getSelectedIndex());
-      model.setArtwork(artworkModeller.fromCollection(collection));
+      model.setCollection(artworkModeller.fromCollection(collection));
       return model;
+    }
+
+    @Override
+    public ArtworkCollection fromModel(@Nullable ArtworkCollectionResource model) {
+      if (model == null) return null;
+      final CollectionModel<ArtworkResource> collection = model.getCollection();
+      if (collection == null) return null;
+      final List<Artwork> artwork =
+          collection.getContent().stream().map(artworkModeller::fromModel).toList();
+      final ArtworkCollection artworkCollection = new ArtworkCollection(model.getRole());
+      artworkCollection.setId(model.getId());
+      artworkCollection.addAll(artwork);
+      artworkCollection.setSelectedIndex(model.getSelectedIndex());
+      return artworkCollection;
     }
   }
 }

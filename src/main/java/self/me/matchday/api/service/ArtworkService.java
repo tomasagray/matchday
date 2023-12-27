@@ -67,8 +67,7 @@ public class ArtworkService {
     this.settingsService = settingsService;
   }
 
-  public Image fetchArtworkData(@NotNull Artwork artwork) throws IOException {
-
+  public Image readArtworkData(@NotNull Artwork artwork) throws IOException {
     final byte[] data = readArtworkImageData(artwork);
     final MediaType mediaType = MediaType.valueOf(artwork.getMediaType());
     return new Image(data, mediaType);

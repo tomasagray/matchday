@@ -35,7 +35,7 @@ public class ArtworkServiceLog {
 
   private static final Logger logger = LogManager.getLogger(ArtworkService.class);
 
-  @Around("execution(* self.me.matchday.api.service.ArtworkService.fetchArtworkData(..))")
+  @Around("execution(* self.me.matchday.api.service.ArtworkService.readArtworkData(..))")
   public Object logFetchArtworkData(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Reading data from disk for Artwork: {}", jp.getArgs()[0]);
     final Object image = jp.proceed();

@@ -19,7 +19,9 @@
 
 package self.me.matchday.db;
 
+import java.util.Optional;
 import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,6 +29,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Event;
+import self.me.matchday.model.video.VideoFileSource;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, UUID> {
@@ -42,4 +45,7 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
           + "ORDER BY ev.date DESC")
   Page<Event> fetchEventsByCompetition(
       @Param("competitionId") UUID competitionId, Pageable request);
+
+  @Query("SELECT ev FROM Event ev WHERE :fileSource IN elements(ev.fileSources)")
+  Optional<Event> fetchEventForFileSource(@NotNull VideoFileSource fileSource);
 }

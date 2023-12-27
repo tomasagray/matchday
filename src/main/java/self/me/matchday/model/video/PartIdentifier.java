@@ -19,6 +19,7 @@
 
 package self.me.matchday.model.video;
 
+import java.util.Arrays;
 import org.jetbrains.annotations.NotNull;
 
 /** Football match part identifiers */
@@ -45,5 +46,16 @@ public enum PartIdentifier {
   @Override
   public String toString() {
     return getPartName();
+  }
+
+  public static PartIdentifier from(@NotNull String value) {
+    try {
+      return PartIdentifier.valueOf(value);
+    } catch (IllegalArgumentException e) {
+      return Arrays.stream(PartIdentifier.values())
+          .filter(name -> name.getPartName().equals(value))
+          .findAny()
+          .orElseThrow(() -> e);
+    }
   }
 }

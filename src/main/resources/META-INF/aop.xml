@@ -37,6 +37,7 @@
         <include within="self.me.matchday.api.service.EventService"/>
         <include within="self.me.matchday.api.service.FileServerPluginService"/>
         <include within="self.me.matchday.api.service.FileServerUserService"/>
+        <include within="self.me.matchday.api.service.MatchArtworkService"/>
         <include within="self.me.matchday.api.service.MatchService"/>
         <include within="self.me.matchday.api.service.PatternKitTemplateService"/>
         <include within="self.me.matchday.api.service.ScheduledTaskService"/>
@@ -46,6 +47,7 @@
         <include within="self.me.matchday.api.service.UserValidationService"/>
         <!-- video services -->
         <include within="self.me.matchday.api.service.video.VideoFileService"/>
+        <include within="self.me.matchday.api.service.video.VideoSourceService"/>
         <include within="self.me.matchday.api.service.video.VideoStreamingService"/>
         <include within="self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService"/>
         <include within="self.me.matchday.api.service.video.VideoStreamManager"/>
@@ -76,6 +78,7 @@
         <aspect name="self.me.matchday.log.EventServiceLog"/>
         <aspect name="self.me.matchday.log.FileServerPluginServiceLog"/>
         <aspect name="self.me.matchday.log.FileServerUserServiceLog"/>
+        <aspect name="self.me.matchday.log.MatchArtworkServiceLog"/>
         <aspect name="self.me.matchday.log.MatchDataParserLog"/>
         <aspect name="self.me.matchday.log.MatchServiceLog"/>
         <aspect name="self.me.matchday.log.PatternKitTemplateServiceLog"/>
@@ -86,6 +89,7 @@
         <aspect name="self.me.matchday.log.UserValidationServiceLog"/>
         <aspect name="self.me.matchday.log.VideoFileSelectorServiceLog"/>
         <aspect name="self.me.matchday.log.VideoFileServiceLog"/>
+        <aspect name="self.me.matchday.log.VideoSourceServiceLog"/>
         <aspect name="self.me.matchday.log.VideoStatusControllerLog"/>
         <aspect name="self.me.matchday.log.VideoStreamingServiceLog"/>
         <aspect name="self.me.matchday.log.VideoStreamLocatorPlaylistServiceLog"/>

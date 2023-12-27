@@ -28,7 +28,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.DisplayName;
@@ -77,19 +76,10 @@ class ArtworkLifeCycleTest {
   }
 
   private static void updateFilesToDeleteList(String json) throws JSONException {
-
-    logger.info("Parsing JSON: {}", json);
     final JSONObject jsonObject = new JSONObject(json);
-    final JSONObject artworks = jsonObject.getJSONObject("artwork");
-    final JSONArray content = artworks.getJSONArray("content");
-    logger.info("Found: {} objects in 'content'", content.length());
-
-    for (int i = 0; i < content.length(); i++) {
-      final JSONObject o = content.getJSONObject(i);
-      final Long id = o.getLong("id");
-      logger.info("Adding ID: {} to delete list", id);
-      deleteList.add(id);
-    }
+    final Long artworkId = jsonObject.getLong("id");
+    logger.info("Adding Artwork ID: {} to delete list", artworkId);
+    deleteList.add(artworkId);
   }
 
   private String getEmblemCollectionUri(UUID id) {

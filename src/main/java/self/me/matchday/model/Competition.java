@@ -66,6 +66,10 @@ public class Competition implements Serializable {
     this.name = new ProperName(name);
   }
 
+  public Competition(@NotNull ProperName name) {
+    this.name = name;
+  }
+
   public Competition() {
     this.name = null;
   }

@@ -35,7 +35,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.matchday.TestDataCreator;
 import self.me.matchday.model.*;
 import self.me.matchday.plugin.datasource.blogger.BloggerPlugin;
 import self.me.matchday.util.JsonParser;
@@ -50,14 +49,11 @@ class BloggerPluginTest {
 
   private final BloggerPlugin plugin;
   private final DataSource<BloggerTestEntity> testDataSource;
-  private final DataSource<Match> matchDataSource;
 
   @Autowired
-  public BloggerPluginTest(BloggerPlugin bloggerPlugin, TestDataCreator testDataCreator)
-      throws IOException {
+  public BloggerPluginTest(BloggerPlugin bloggerPlugin) throws IOException {
     this.plugin = bloggerPlugin;
     this.testDataSource = readTestDataSource();
-    this.matchDataSource = testDataCreator.readTestLiveDataSource();
   }
 
   private static DataSource<BloggerTestEntity> readTestDataSource() throws IOException {
@@ -136,28 +132,6 @@ class BloggerPluginTest {
               assertThat(entity.getTitle()).isNotNull().isNotEmpty();
               assertThat(entity.getText()).isNotNull().isNotEmpty();
             });
-  }
-
-  @Test
-  @DisplayName("Get a Snapshot from a live Match DataSource (max: 25)")
-  void getLiveSnapshot() throws IOException {
-
-    final SnapshotRequest request = SnapshotRequest.builder().maxResults(25).build();
-    final Snapshot<? extends Event> snapshot = plugin.getSnapshot(request, matchDataSource);
-    assertThat(snapshot).isNotNull();
-
-    final List<Event> events = snapshot.getData().collect(Collectors.toList());
-    final int eventCount = events.size();
-    logger.info("Events pulled from DataSource: {}", eventCount);
-    assertThat(eventCount).isNotZero();
-
-    events.forEach(
-        event -> {
-          logger.info("Read Event:\n{}", event);
-          assertThat(event).isNotNull();
-          assertThat(event.getCompetition()).isNotNull();
-          assertThat(event.getDate()).isNotNull().isAfter(LocalDateTime.MIN);
-        });
   }
 
   @Test

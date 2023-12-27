@@ -60,14 +60,6 @@ public class MatchServiceLog {
     return events;
   }
 
-  @Around("execution(* self.me.matchday.api.service.MatchService.makeMatchArtwork(..))")
-  public Object logMakeMatchArtwork(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    logger.info("Making new Match artwork for: {}", jp.getArgs()[0]);
-    Object result = jp.proceed();
-    logger.info("Created new Match artwork: {}", result);
-    return result;
-  }
-
   @Before("execution(* self.me.matchday.api.service.MatchService.refreshMatchArtwork(..))")
   public void logRefreshMatchArtwork(@NotNull JoinPoint jp) {
     logger.info("Refreshing artwork for Match: {}", jp.getArgs()[0]);
@@ -81,8 +73,8 @@ public class MatchServiceLog {
       logger.info("Match saved as: {}", saved);
       return saved;
     } catch (Throwable e) {
-      logger.error("Could not save Match: {}", e.getMessage());
-      return null;
+      logger.error("Could not save Match: {}", e.getMessage(), e);
+      throw e;
     }
   }
 

@@ -76,14 +76,6 @@ public class EventServiceLog {
     return result;
   }
 
-  @Around("execution(* self.me.matchday.api.service.EventService.fetchVideoFileSrc(..))")
-  public Object logFetchVideoFileSource(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    logger.info("Fetching VideoFileSource with ID: {} from database...", jp.getArgs()[0]);
-    Object result = jp.proceed();
-    logger.info("... Retrieved VideoFileSource: {}", result);
-    return result;
-  }
-
   @Around("execution(* self.me.matchday.api.service.EventService.fetchEventsForCompetition(..))")
   public Object logFetchEventsForCompetition(@NotNull ProceedingJoinPoint jp) throws Throwable {
     Object competitionId = jp.getArgs()[0];

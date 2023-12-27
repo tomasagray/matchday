@@ -34,18 +34,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
+import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.controller.MatchController;
-import self.me.matchday.api.controller.VideoStreamingController;
-import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
-import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
-import self.me.matchday.model.Artwork;
-import self.me.matchday.model.Fixture;
-import self.me.matchday.model.Match;
-import self.me.matchday.model.Season;
+import self.me.matchday.api.resource.CompetitionResource.CompetitionModeller;
+import self.me.matchday.api.resource.TeamResource.TeamModeller;
+import self.me.matchday.model.*;
 
 @Data
 @NoArgsConstructor
@@ -63,19 +60,18 @@ public class MatchResource extends RepresentationModel<MatchResource> {
   private Season season;
   private Fixture fixture;
   private LocalDateTime date;
-  private RepresentationModel<CompetitionResource> competition;
-  private RepresentationModel<TeamResource> homeTeam;
-  private RepresentationModel<TeamResource> awayTeam;
+  private CompetitionResource competition;
+  private TeamResource homeTeam;
+  private TeamResource awayTeam;
 
   @Component
-  public static class MatchResourceAssembler
-      extends RepresentationModelAssemblerSupport<Match, MatchResource> {
+  public static class MatchResourceAssembler extends EntityModeller<Match, MatchResource> {
 
-    private final CompetitionResourceAssembler competitionAssembler;
-    private final TeamResourceAssembler teamAssembler;
+    private final CompetitionModeller competitionAssembler;
+    private final TeamModeller teamAssembler;
 
     public MatchResourceAssembler(
-        CompetitionResourceAssembler competitionAssembler, TeamResourceAssembler teamAssembler) {
+        CompetitionModeller competitionAssembler, TeamModeller teamAssembler) {
       super(MatchController.class, MatchResource.class);
       this.competitionAssembler = competitionAssembler;
       this.teamAssembler = teamAssembler;
@@ -83,7 +79,6 @@ public class MatchResource extends RepresentationModel<MatchResource> {
 
     @Override
     public @NotNull MatchResource toModel(@NotNull Match entity) {
-
       try {
         final MatchResource resource = instantiateModel(entity);
         final CompetitionResource competition =
@@ -109,13 +104,29 @@ public class MatchResource extends RepresentationModel<MatchResource> {
                   .withRel(ARTWORK_REL));
         }
         resource.add(
-            linkTo(methodOn(VideoStreamingController.class).getVideoResources(eventId))
-                .withRel(VIDEO_LINK));
+            linkTo(methodOn(EventController.class).getVideoResources(eventId)).withRel(VIDEO_LINK));
         resource.add(linkTo(methodOn(MatchController.class).fetchMatchById(eventId)).withSelfRel());
         return resource;
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
+    }
+
+    @Override
+    public Match fromModel(@Nullable MatchResource resource) {
+      if (resource == null) return null;
+      final Competition competition = competitionAssembler.fromModel(resource.getCompetition());
+      final Team homeTeam = teamAssembler.fromModel(resource.getHomeTeam());
+      final Team awayTeam = teamAssembler.fromModel(resource.getAwayTeam());
+      return Match.builder()
+          .eventId(resource.getEventId())
+          .competition(competition)
+          .homeTeam(homeTeam)
+          .awayTeam(awayTeam)
+          .date(resource.getDate())
+          .season(resource.getSeason())
+          .fixture(resource.getFixture())
+          .build();
     }
   }
 }

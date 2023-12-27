@@ -25,11 +25,9 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.service.video.VideoStreamingService;
@@ -37,42 +35,48 @@ import self.me.matchday.db.MatchRepository;
 import self.me.matchday.model.*;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.validation.EventValidator;
-import self.me.matchday.util.ResourceFileReader;
+import self.me.matchday.model.video.VideoFilePack;
+import self.me.matchday.model.video.VideoFileSource;
 
 @Service
 @Transactional
 public class MatchService implements EntityService<Match, UUID> {
 
   private static final EventSorter EVENT_SORTER = new EventSorter();
-  private static final Color DEFAULT_HOME_COLOR = new Color(35, 38, 45);
-  private static final Color DEFAULT_AWAY_COLOR = new Color(46, 50, 57);
 
   private final MatchRepository matchRepository;
-  private final EntityCorrectionService entityCorrectionService;
+  private final MatchArtworkService artworkService;
   private final TeamService teamService;
   private final CompetitionService competitionService;
-  private final ArtworkService artworkService;
   private final VideoStreamingService streamingService;
   private final EventValidator eventValidator;
-  private final byte[] defaultEmblem;
+  private final EntityCorrectionService entityCorrectionService;
 
   public MatchService(
       MatchRepository matchRepository,
-      EntityCorrectionService entityCorrectionService,
+      MatchArtworkService artworkService,
       TeamService teamService,
       CompetitionService competitionService,
-      ArtworkService artworkService,
       VideoStreamingService streamingService,
-      EventValidator eventValidator)
+      EventValidator eventValidator,
+      EntityCorrectionService entityCorrectionService)
       throws IOException {
     this.matchRepository = matchRepository;
+    this.artworkService = artworkService;
     this.entityCorrectionService = entityCorrectionService;
     this.teamService = teamService;
     this.competitionService = competitionService;
-    this.artworkService = artworkService;
     this.streamingService = streamingService;
     this.eventValidator = eventValidator;
-    this.defaultEmblem = ResourceFileReader.readBinaryData("image/default_team_emblem.png");
+  }
+
+  private static void nullifyVideoFileIds(@NotNull Match match) {
+    match.getFileSources().stream()
+        .map(VideoFileSource::getVideoFilePacks)
+        .flatMap(List::stream)
+        .map(VideoFilePack::allFiles)
+        .flatMap((part) -> part.values().stream())
+        .forEach(video -> video.setFileId(null));
   }
 
   @Override
@@ -139,66 +143,16 @@ public class MatchService implements EntityService<Match, UUID> {
         .collect(Collectors.toList());
   }
 
-  public Artwork makeMatchArtwork(@NotNull Match match) throws IOException {
-    final Artwork existingArtwork = match.getArtwork();
-    if (existingArtwork != null) {
-      match.setArtwork(null);
-      artworkService.deleteArtwork(existingArtwork);
-    }
-    final Collection<Param<?>> params = createMatchArtworkParams(match);
-    return artworkService.createArtwork(Match.class, params);
-  }
-
-  private @NotNull @Unmodifiable Collection<Param<?>> createMatchArtworkParams(@NotNull Match match)
-      throws IOException {
-
-    final Team homeTeam = match.getHomeTeam();
-    final Team awayTeam = match.getAwayTeam();
-    // emblems
-    final Param<?> homeTeamEmblem = createTeamEmblemParam(homeTeam, "#home-team-emblem");
-    final Param<?> awayTeamEmblem = createTeamEmblemParam(awayTeam, "#away-team-emblem");
-    // colors
-    final Color[] teamColors = getContrastingTeamColors(homeTeam, awayTeam);
-    final Param<Color> homeTeamColor = new Param<>("#home-team-color", teamColors[0]);
-    final Param<Color> awayTeamColor = new Param<>("#away-team-color", teamColors[1]);
-    // other
-    final Param<MediaType> type = new Param<>("#type", MediaType.IMAGE_PNG);
-
-    return List.of(homeTeamEmblem, awayTeamEmblem, homeTeamColor, awayTeamColor, type);
-  }
-
-  private @NotNull Param<?> createTeamEmblemParam(@NotNull Team team, @NotNull String tag)
-      throws IOException {
-
-    final Artwork emblem = team.getEmblem().getSelected();
-    byte[] data;
-    if (emblem != null) {
-      final Image image = artworkService.fetchArtworkData(emblem);
-      data = image.data();
-    } else {
-      data = Arrays.copyOf(defaultEmblem, defaultEmblem.length);
-    }
-    return new Param<>(tag, data);
-  }
-
-  private Color @NotNull [] getContrastingTeamColors(@NotNull Team home, @NotNull Team away) {
-
-    final List<Color> homeColors = home.getColors();
-    final List<Color> awayColors = away.getColors();
-    final Color[] colorPair = artworkService.getContrastingColorPair(homeColors, awayColors);
-    return colorPair != null ? colorPair : new Color[] {DEFAULT_HOME_COLOR, DEFAULT_AWAY_COLOR};
-  }
-
   public Artwork refreshMatchArtwork(@NotNull UUID matchId) throws IOException {
     final Optional<Match> matchOptional = fetchById(matchId);
     if (matchOptional.isPresent()) {
       final Match match = matchOptional.get();
-      final Artwork artwork = makeMatchArtwork(match);
+      final Artwork artwork = artworkService.makeMatchArtwork(match);
       match.setArtwork(artwork);
       return artwork;
     }
     // else...
-    throw new IllegalArgumentException("No Match with ID: " + matchId);
+    throw new IllegalArgumentException("Cannot refresh Artwork for non-existent Match: " + matchId);
   }
 
   public Image fetchMatchArtwork(@NotNull UUID matchId) throws IOException {
@@ -207,13 +161,13 @@ public class MatchService implements EntityService<Match, UUID> {
       final Match match = optional.get();
       final Artwork artwork = match.getArtwork();
       if (artwork != null) {
-        return artworkService.fetchArtworkData(artwork);
+        return artworkService.readArtworkData(artwork);
       }
       // else...
       throw new IllegalArgumentException("No artwork for match: " + matchId);
     }
     // else...
-    throw new IllegalArgumentException("No Match with ID: " + matchId);
+    throw new IllegalArgumentException("Cannot fetch Artwork for non-existent Match: " + matchId);
   }
 
   public Artwork fetchMatchArtworkMetadata(@NotNull UUID matchId) {
@@ -224,26 +178,31 @@ public class MatchService implements EntityService<Match, UUID> {
             () -> new IllegalArgumentException("No Artwork found for Match ID: " + matchId));
   }
 
+  public Match saveNew(@NotNull Match match) {
+    nullifyVideoFileIds(match);
+    return save(match);
+  }
+
   @Override
   public Match save(@NotNull Match match) {
-
     try {
       entityCorrectionService.correctEntityFields(match);
       eventValidator.validate(match);
-      // See if Event already exists in DB
+      // see if Match already exists in DB
       final Optional<Match> eventOptional = matchRepository.findOne(getExampleEvent(match));
       if (eventOptional.isPresent()) {
-        final Match existingEvent = eventOptional.get();
-        existingEvent.addAllFileSources(match.getFileSources());
-        return initialize(existingEvent);
+        Match existing = eventOptional.get();
+        existing.addAllFileSources(match.getFileSources());
+        return existing;
       }
-      final Match saved = matchRepository.saveAndFlush(match);
+
+      final Match entity = matchRepository.saveAndFlush(match);
       // ensure Artwork is attached
-      if (saved.getArtwork() == null) {
-        final Artwork artwork = makeMatchArtwork(saved);
-        saved.setArtwork(artwork);
+      if (entity.getArtwork() == null) {
+        final Artwork artwork = artworkService.makeMatchArtwork(entity);
+        entity.setArtwork(artwork);
       }
-      return initialize(saved);
+      return initialize(entity);
     } catch (ReflectiveOperationException | IOException e) {
       throw new RuntimeException(e);
     }
@@ -324,7 +283,6 @@ public class MatchService implements EntityService<Match, UUID> {
 
   @Override
   public void delete(@NotNull UUID matchId) throws IOException {
-
     final Optional<Match> matchOptional = fetchById(matchId);
     if (matchOptional.isPresent()) {
       final Match match = matchOptional.get();

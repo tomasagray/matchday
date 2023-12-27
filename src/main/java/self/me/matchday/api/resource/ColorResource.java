@@ -25,9 +25,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.ArtworkController;
 import self.me.matchday.model.Color;
@@ -44,6 +44,7 @@ public class ColorResource extends RepresentationModel<ColorResource> {
   private String hex;
 
   @Data
+  @AllArgsConstructor
   static class Rgb {
     private int r;
     private int g;
@@ -59,6 +60,7 @@ public class ColorResource extends RepresentationModel<ColorResource> {
   }
 
   @Data
+  @AllArgsConstructor
   static class Hsl {
     private double h;
     private int s;
@@ -156,8 +158,7 @@ public class ColorResource extends RepresentationModel<ColorResource> {
   }
 
   @Component
-  public static class ColorResourceModeller
-      extends RepresentationModelAssemblerSupport<Color, ColorResource> {
+  public static class ColorResourceModeller extends EntityModeller<Color, ColorResource> {
 
     public ColorResourceModeller() {
       super(ArtworkController.class, ColorResource.class);
@@ -186,6 +187,13 @@ public class ColorResource extends RepresentationModel<ColorResource> {
         return "00";
       }
       return Integer.toHexString(color);
+    }
+
+    @Override
+    public Color fromModel(@Nullable ColorResource resource) {
+      if (resource == null) return null;
+      final Rgb rgb = resource.getRgb();
+      return new Color(rgb.getR(), rgb.getG(), rgb.getB(), rgb.getA());
     }
   }
 }

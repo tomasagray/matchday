@@ -33,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
 @Setter
 public class ArtworkCollection {
 
-  private final ArtworkRole role;
+  private ArtworkRole role;
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private final Set<Artwork> collection = new LinkedHashSet<>();

@@ -32,12 +32,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
+import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.controller.HighlightController;
-import self.me.matchday.api.controller.VideoStreamingController;
+import self.me.matchday.api.resource.CompetitionResource.CompetitionModeller;
+import self.me.matchday.model.Competition;
 import self.me.matchday.model.Fixture;
 import self.me.matchday.model.Highlight;
 import self.me.matchday.model.Season;
@@ -53,16 +55,20 @@ public class HighlightResource extends RepresentationModel<HighlightResource> {
 
   private UUID eventId;
   private String title;
+  private CompetitionResource competition;
   private Season season;
   private Fixture fixture;
   private LocalDateTime date;
 
   @Component
   public static class HighlightResourceAssembler
-      extends RepresentationModelAssemblerSupport<Highlight, HighlightResource> {
+      extends EntityModeller<Highlight, HighlightResource> {
 
-    public HighlightResourceAssembler() {
+    private final CompetitionModeller competitionModeller;
+
+    public HighlightResourceAssembler(CompetitionModeller competitionModeller) {
       super(HighlightController.class, HighlightResource.class);
+      this.competitionModeller = competitionModeller;
     }
 
     @Override
@@ -70,17 +76,33 @@ public class HighlightResource extends RepresentationModel<HighlightResource> {
 
       final HighlightResource resource = instantiateModel(entity);
       final UUID eventId = entity.getEventId();
+      final CompetitionResource competitionModel =
+          competitionModeller.toModel(entity.getCompetition());
+
       resource.setEventId(eventId);
       resource.setTitle(entity.getTitle());
+      resource.setCompetition(competitionModel);
       resource.setSeason(entity.getSeason());
       resource.setFixture(entity.getFixture());
       resource.setDate(entity.getDate());
       resource.add(
-          linkTo(methodOn(VideoStreamingController.class).getVideoResources(eventId))
-              .withRel(VIDEO_LINK));
+          linkTo(methodOn(EventController.class).getVideoResources(eventId)).withRel(VIDEO_LINK));
       resource.add(
           linkTo(methodOn(HighlightController.class).fetchHighlightById(eventId)).withSelfRel());
       return resource;
+    }
+
+    @Override
+    public Highlight fromModel(@Nullable HighlightResource resource) {
+      if (resource == null) return null;
+      final Competition competition = competitionModeller.fromModel(resource.getCompetition());
+      return Highlight.highlightBuilder()
+          .eventId(resource.getEventId())
+          .competition(competition)
+          .season(resource.getSeason())
+          .fixture(resource.getFixture())
+          .date(resource.getDate())
+          .build();
     }
   }
 }

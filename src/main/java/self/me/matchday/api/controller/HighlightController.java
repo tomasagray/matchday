@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.EventsResource;
-import self.me.matchday.api.resource.EventsResource.EventsResourceAssembler;
+import self.me.matchday.api.resource.EventsResource.EventsModeller;
 import self.me.matchday.api.resource.HighlightResource;
 import self.me.matchday.api.service.HighlightService;
 import self.me.matchday.model.Highlight;
@@ -43,13 +43,13 @@ import self.me.matchday.model.Highlight;
 public class HighlightController {
 
   private final HighlightService highlightService;
-  private final EventsResourceAssembler eventAssembler;
+  private final EventsModeller eventAssembler;
   private final HighlightResource.HighlightResourceAssembler highlightAssembler;
 
   @Autowired
   public HighlightController(
       HighlightService highlightService,
-      EventsResourceAssembler eventAssembler,
+      EventsModeller eventAssembler,
       HighlightResource.HighlightResourceAssembler highlightAssembler) {
 
     this.highlightService = highlightService;

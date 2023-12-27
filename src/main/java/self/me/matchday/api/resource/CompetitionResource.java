@@ -32,20 +32,17 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.controller.CompetitionController;
 import self.me.matchday.api.controller.RootController;
-import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionResourceAssembler;
-import self.me.matchday.model.ArtworkRole;
-import self.me.matchday.model.Competition;
-import self.me.matchday.model.Country;
-import self.me.matchday.model.ProperName;
+import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionModeller;
+import self.me.matchday.model.*;
 
 @Data
 @NoArgsConstructor
@@ -62,17 +59,16 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
   private ArtworkCollectionResource fanart;
 
   @Component
-  public static class CompetitionResourceAssembler
-      extends RepresentationModelAssemblerSupport<Competition, CompetitionResource> {
+  public static class CompetitionModeller extends EntityModeller<Competition, CompetitionResource> {
 
     private static final LinkRelation TEAMS = LinkRelation.of("teams");
     private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
     private static final LinkRelation FANART = LinkRelation.of("fanart");
     private static final LinkRelation EVENTS = LinkRelation.of("events");
 
-    private final ArtworkCollectionResourceAssembler artworkModeller;
+    private final ArtworkCollectionModeller artworkModeller;
 
-    public CompetitionResourceAssembler(ArtworkCollectionResourceAssembler artworkModeller) {
+    public CompetitionModeller(ArtworkCollectionModeller artworkModeller) {
       super(CompetitionController.class, CompetitionResource.class);
       this.artworkModeller = artworkModeller;
     }
@@ -117,11 +113,11 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       // add artwork links
       competitionResource
           .getEmblem()
-          .getArtwork()
+          .getCollection()
           .forEach(artwork -> addArtworkLinks(competitionId, ArtworkRole.EMBLEM, artwork));
       competitionResource
           .getFanart()
-          .getArtwork()
+          .getCollection()
           .forEach(artwork -> addArtworkLinks(competitionId, ArtworkRole.FANART, artwork));
 
       // links
@@ -164,6 +160,30 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       competitionResources.add(
           linkTo(methodOn(CompetitionController.class).fetchAllCompetitions()).withSelfRel());
       return competitionResources;
+    }
+
+    @Override
+    public Competition fromModel(@Nullable CompetitionResource resource) {
+      if (resource == null) return null;
+      final ArtworkCollection emblem =
+          getArtworkCollection(resource.getEmblem(), ArtworkRole.EMBLEM);
+      final ArtworkCollection fanart =
+          getArtworkCollection(resource.getFanart(), ArtworkRole.FANART);
+      final Competition competition = new Competition(resource.getName());
+      competition.setId(resource.getId());
+      competition.setCountry(resource.getCountry());
+      competition.setEmblem(emblem);
+      competition.setFanart(fanart);
+      return competition;
+    }
+
+    private ArtworkCollection getArtworkCollection(
+        @NotNull ArtworkCollectionResource resource, @NotNull ArtworkRole role) {
+      final ArtworkCollection collection = artworkModeller.fromModel(resource);
+      if (collection != null) {
+        collection.setRole(role);
+      }
+      return collection;
     }
   }
 }

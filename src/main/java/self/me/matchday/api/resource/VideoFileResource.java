@@ -30,11 +30,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.VideoStreamingController;
+import self.me.matchday.model.video.PartIdentifier;
 import self.me.matchday.model.video.VideoFile;
 
 @Data
@@ -53,7 +54,7 @@ public class VideoFileResource extends RepresentationModel<VideoFileSourceResour
 
   @Component
   public static class VideoFileResourceModeller
-      extends RepresentationModelAssemblerSupport<VideoFile, VideoFileResource> {
+      extends EntityModeller<VideoFile, VideoFileResource> {
 
     public VideoFileResourceModeller() {
       super(VideoStreamingController.class, VideoFileResource.class);
@@ -67,6 +68,16 @@ public class VideoFileResource extends RepresentationModel<VideoFileSourceResour
       model.setLastRefresh(entity.getLastRefreshed());
       model.setTitle(entity.getTitle().getPartName());
       return model;
+    }
+
+    @Override
+    public VideoFile fromModel(@Nullable VideoFileResource resource) {
+      if (resource == null) return null;
+      final VideoFile file = new VideoFile();
+      file.setFileId(resource.getVideoFileId());
+      file.setTitle(PartIdentifier.from(resource.getTitle()));
+      file.setExternalUrl(resource.getExternalUrl());
+      return file;
     }
   }
 }

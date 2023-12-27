@@ -19,10 +19,8 @@
 
 package self.me.matchday.api.service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
@@ -33,11 +31,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.EventRepository;
-import self.me.matchday.db.VideoFileSrcRepository;
 import self.me.matchday.model.*;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.video.VideoFileSource;
+import self.me.matchday.model.video.VideoPlaylist;
 
 @Service
 @Transactional
@@ -46,22 +45,22 @@ public class EventService implements EntityService<Event, UUID> {
   public static final Sort DEFAULT_EVENT_SORT = Sort.by(Direction.DESC, "date");
   private static final EventSorter EVENT_SORTER = new EventSorter();
   private final EventRepository eventRepository;
-  private final VideoFileSrcRepository fileSrcRepository;
   private final MatchService matchService;
   private final HighlightService highlightService;
   private final CompetitionService competitionService;
+  private final VideoStreamingService streamingService;
 
   EventService(
       EventRepository eventRepository,
       MatchService matchService,
       HighlightService highlightService,
       CompetitionService competitionService,
-      VideoFileSrcRepository fileSrcRepository) {
+      VideoStreamingService streamingService) {
     this.eventRepository = eventRepository;
-    this.fileSrcRepository = fileSrcRepository;
     this.matchService = matchService;
     this.highlightService = highlightService;
     this.competitionService = competitionService;
+    this.streamingService = streamingService;
   }
 
   @Override
@@ -120,10 +119,6 @@ public class EventService implements EntityService<Event, UUID> {
     return fetchById(eventId).map(Event::getFileSources);
   }
 
-  public Optional<VideoFileSource> fetchVideoFileSrc(final UUID fileSrcId) {
-    return fileSrcRepository.findById(fileSrcId);
-  }
-
   /**
    * Persist an Event; must pass validation, or will skip and make a note in logs.
    *
@@ -131,7 +126,6 @@ public class EventService implements EntityService<Event, UUID> {
    */
   @Override
   public Event save(@NotNull final Event event) {
-
     Event saved;
     if (event instanceof Match) {
       saved = matchService.save((Match) event);
@@ -182,5 +176,38 @@ public class EventService implements EntityService<Event, UUID> {
   @Override
   public void deleteAll(@NotNull Iterable<? extends Event> events) {
     eventRepository.deleteAll(events);
+  }
+
+  public Optional<VideoPlaylist> getPreferredPlaylist(@NotNull UUID eventId) {
+    return fetchById(eventId).flatMap(streamingService::getBestVideoStreamPlaylist);
+  }
+
+  public Optional<VideoPlaylist> getVideoStreamPlaylist(
+      @NotNull UUID eventId, @NotNull UUID fileSrcId) {
+    return fetchById(eventId)
+        .flatMap(event -> streamingService.getOrCreateVideoStreamPlaylist(event, fileSrcId));
+  }
+
+  public VideoFileSource updateVideoFileSource(
+      @NotNull UUID eventId, @NotNull VideoFileSource source) {
+    return fetchVideoFileSources(eventId)
+        .map(sources -> streamingService.addOrUpdateVideoSource(sources, source))
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    "Trying to update Video source for non-existent Event: " + eventId));
+  }
+
+  public void deleteVideoFileSource(@NotNull UUID eventId, @NotNull UUID fileSrcId)
+      throws IOException {
+    Optional<Event> eventOptional = fetchById(eventId);
+    if (eventOptional.isPresent()) {
+      Event event = eventOptional.get();
+      Set<VideoFileSource> fileSources = event.getFileSources();
+      streamingService.deleteAllVideoData(fileSrcId);
+      fileSources.removeIf(source -> fileSrcId.equals(source.getFileSrcId()));
+    } else {
+      throw new IllegalArgumentException("Event does not exist: " + eventId);
+    }
   }
 }

@@ -62,6 +62,10 @@ public class Team {
   @OneToOne(cascade = CascadeType.ALL)
   private ArtworkCollection fanart = new ArtworkCollection(ArtworkRole.FANART);
 
+  public Team(@NotNull ProperName name) {
+    this.name = name;
+  }
+
   public Team(@NotNull String name) {
     this.name = new ProperName(name);
   }
