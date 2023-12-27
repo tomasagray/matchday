@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+### Added
+
+### Fixed
+
+## [0.3.0] - 2023-12-26
+
+### Added
+
+- Add new Match dialog
+- Add/edit Video Stream dialog
+
 ## [0.2.0] - 2023-11-18
+
+### Added
 
 - Add VPN control
 - Add this changelog!
