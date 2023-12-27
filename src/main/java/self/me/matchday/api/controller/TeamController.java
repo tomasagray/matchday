@@ -40,15 +40,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.api.resource.ArtworkCollectionResource;
-import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionResourceAssembler;
+import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionModeller;
 import self.me.matchday.api.resource.ArtworkResource;
-import self.me.matchday.api.resource.ArtworkResource.ArtworkResourceAssembler;
+import self.me.matchday.api.resource.ArtworkResource.ArtworkModeller;
 import self.me.matchday.api.resource.CompetitionResource;
-import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
+import self.me.matchday.api.resource.CompetitionResource.CompetitionModeller;
 import self.me.matchday.api.resource.MatchResource;
 import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
 import self.me.matchday.api.resource.TeamResource;
-import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
+import self.me.matchday.api.resource.TeamResource.TeamModeller;
 import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.api.service.MatchService;
 import self.me.matchday.api.service.TeamService;
@@ -64,29 +64,29 @@ import self.me.matchday.model.Team;
 public class TeamController {
 
   private final TeamService teamService;
-  private final TeamResourceAssembler teamResourceAssembler;
+  private final TeamModeller teamModeller;
   private final CompetitionService competitionService;
-  private final CompetitionResourceAssembler competitionResourceAssembler;
+  private final CompetitionModeller competitionModeller;
   private final MatchService matchService;
   private final MatchResourceAssembler matchAssembler;
-  private final ArtworkResourceAssembler artworkModeller;
-  private final ArtworkCollectionResourceAssembler collectionModeller;
+  private final ArtworkModeller artworkModeller;
+  private final ArtworkCollectionModeller collectionModeller;
 
   public TeamController(
       TeamService teamService,
       CompetitionService competitionService,
       MatchService matchService,
-      TeamResourceAssembler teamResourceAssembler,
-      CompetitionResourceAssembler competitionResourceAssembler,
+      TeamModeller teamModeller,
+      CompetitionModeller competitionModeller,
       MatchResourceAssembler matchAssembler,
-      ArtworkResourceAssembler artworkModeller,
-      ArtworkCollectionResourceAssembler collectionModeller) {
+      ArtworkModeller artworkModeller,
+      ArtworkCollectionModeller collectionModeller) {
 
     this.teamService = teamService;
-    this.teamResourceAssembler = teamResourceAssembler;
+    this.teamModeller = teamModeller;
     this.competitionService = competitionService;
     this.matchService = matchService;
-    this.competitionResourceAssembler = competitionResourceAssembler;
+    this.competitionModeller = competitionModeller;
     this.matchAssembler = matchAssembler;
     this.artworkModeller = artworkModeller;
     this.collectionModeller = collectionModeller;
@@ -123,7 +123,7 @@ public class TeamController {
 
     final Page<Team> teamPage = teamService.fetchAllPaged(page, size);
     final CollectionModel<TeamResource> model =
-        teamResourceAssembler.toCollectionModel(teamPage.getContent());
+        teamModeller.toCollectionModel(teamPage.getContent());
     if (teamPage.hasNext()) {
       model.add(
           linkTo(methodOn(TeamController.class).fetchAllTeams(teamPage.getNumber() + 1, size))
@@ -146,7 +146,7 @@ public class TeamController {
 
     return teamService
         .fetchById(teamId)
-        .map(teamResourceAssembler::toModel)
+        .map(teamModeller::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
@@ -178,8 +178,41 @@ public class TeamController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public CollectionModel<CompetitionResource> fetchCompetitionsForTeam(
       @PathVariable final UUID teamId) {
-    return competitionResourceAssembler.toCollectionModel(
+    return competitionModeller.toCollectionModel(
         competitionService.fetchCompetitionsForTeam(teamId));
+  }
+
+  @RequestMapping(
+      value = "/team/add",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<TeamResource> addNewTeam(@RequestBody TeamResource resource) {
+    final Team team = teamModeller.fromModel(resource);
+    final Team saved = teamService.save(team);
+    final TeamResource model = teamModeller.toModel(saved);
+    return ResponseEntity.ok(model);
+  }
+
+  @RequestMapping(
+      value = "/team/update",
+      method = RequestMethod.PATCH,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<TeamResource> updateTeam(@RequestBody TeamResource resource) {
+    final Team team = teamModeller.fromModel(resource);
+    final Team update = teamService.update(team);
+    final TeamResource model = teamModeller.toModel(update);
+    return ResponseEntity.ok(model);
+  }
+
+  @RequestMapping(
+      value = "/team/{teamId}/delete",
+      method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<UUID> deleteTeam(@PathVariable UUID teamId) throws IOException {
+    teamService.delete(teamId);
+    return ResponseEntity.ok(teamId);
   }
 
   @RequestMapping(
@@ -194,7 +227,7 @@ public class TeamController {
     resources.add(
         linkTo(methodOn(TeamController.class).fetchTeamArtworkCollection(teamId, role))
             .withSelfRel());
-    resources.forEach(artwork -> TeamResourceAssembler.addArtworkLinks(teamId, role, artwork));
+    resources.forEach(artwork -> TeamModeller.addArtworkLinks(teamId, role, artwork));
     return ResponseEntity.ok(resources);
   }
 
@@ -270,8 +303,8 @@ public class TeamController {
         teamService.addTeamArtwork(teamId, role, Image.fromMultipartFile(image));
     final ArtworkCollectionResource resource = collectionModeller.toModel(collection);
     resource
-        .getArtwork()
-        .forEach(artwork -> TeamResourceAssembler.addArtworkLinks(teamId, role, artwork));
+        .getCollection()
+        .forEach(artwork -> TeamModeller.addArtworkLinks(teamId, role, artwork));
     resource.add(
         linkTo(methodOn(TeamController.class).addTeamArtwork(teamId, role, image)).withSelfRel());
     return ResponseEntity.ok(resource);
@@ -287,27 +320,7 @@ public class TeamController {
     final ArtworkCollection collection = teamService.removeTeamArtwork(teamId, role, artworkId);
     final ArtworkCollectionResource resource = collectionModeller.toModel(collection);
     // add links
-    resource.getArtwork().forEach(artwork -> addArtworkLinks(artwork, teamId, role));
+    resource.getCollection().forEach(artwork -> addArtworkLinks(artwork, teamId, role));
     return ResponseEntity.ok(resource);
-  }
-
-  @RequestMapping(
-      value = "/team/{teamId}/update",
-      method = RequestMethod.PATCH,
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<TeamResource> updateTeam(@RequestBody Team team) {
-    final Team update = teamService.update(team);
-    final TeamResource resource = teamResourceAssembler.toModel(update);
-    return ResponseEntity.ok(resource);
-  }
-
-  @RequestMapping(
-      value = "/team/{teamId}/delete",
-      method = RequestMethod.DELETE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<UUID> deleteTeam(@PathVariable UUID teamId) throws IOException {
-    teamService.delete(teamId);
-    return ResponseEntity.ok(teamId);
   }
 }

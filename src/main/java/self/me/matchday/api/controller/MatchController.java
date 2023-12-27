@@ -43,9 +43,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.resource.ArtworkResource;
-import self.me.matchday.api.resource.ArtworkResource.ArtworkResourceAssembler;
+import self.me.matchday.api.resource.ArtworkResource.ArtworkModeller;
 import self.me.matchday.api.resource.EventsResource;
-import self.me.matchday.api.resource.EventsResource.EventsResourceAssembler;
+import self.me.matchday.api.resource.EventsResource.EventsModeller;
 import self.me.matchday.api.resource.MatchResource;
 import self.me.matchday.api.resource.MatchResource.MatchResourceAssembler;
 import self.me.matchday.api.service.InvalidEventException;
@@ -61,17 +61,16 @@ public class MatchController {
   private static final Logger logger = LogManager.getLogger(MatchController.class);
 
   private final MatchService matchService;
-  private final EventsResourceAssembler eventsAssembler;
+  private final EventsModeller eventsAssembler;
   private final MatchResourceAssembler matchAssembler;
-  private final ArtworkResourceAssembler artworkModeller;
+  private final ArtworkModeller artworkModeller;
 
   @Autowired
   public MatchController(
       MatchService matchService,
-      EventsResourceAssembler eventsAssembler,
+      EventsModeller eventsAssembler,
       MatchResourceAssembler matchAssembler,
-      ArtworkResourceAssembler artworkModeller) {
-
+      ArtworkModeller artworkModeller) {
     this.matchService = matchService;
     this.eventsAssembler = eventsAssembler;
     this.matchAssembler = matchAssembler;
@@ -118,6 +117,36 @@ public class MatchController {
   }
 
   @RequestMapping(
+      value = "/match/add",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<MatchResource> addNewMatch(@RequestBody Match match) {
+    final Match saved = matchService.saveNew(match);
+    final MatchResource model = matchAssembler.toModel(saved);
+    return ResponseEntity.ok(model);
+  }
+
+  @RequestMapping(
+      value = "/match/update",
+      method = RequestMethod.PATCH,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<MatchResource> updateMatch(@RequestBody final MatchResource resource) {
+    final Match match = matchAssembler.fromModel(resource);
+    final Match updated = matchService.update(match);
+    return ResponseEntity.ok(matchAssembler.toModel(updated));
+  }
+
+  @RequestMapping(
+      value = "/match/{matchId}/delete",
+      method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<UUID> deleteMatch(@PathVariable UUID matchId) throws IOException {
+    matchService.delete(matchId);
+    return ResponseEntity.ok(matchId);
+  }
+
+  @RequestMapping(
       value = "/match/{matchId}/artwork",
       method = RequestMethod.GET,
       produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, IMAGE_SVG_VALUE})
@@ -146,24 +175,6 @@ public class MatchController {
       throws IOException {
     final Artwork artwork = matchService.refreshMatchArtwork(matchId);
     return ResponseEntity.ok().body(artworkModeller.toModel(artwork));
-  }
-
-  @RequestMapping(
-      value = "/match/{matchId}/delete",
-      method = RequestMethod.DELETE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<UUID> deleteMatch(@PathVariable UUID matchId) throws IOException {
-    matchService.delete(matchId);
-    return ResponseEntity.ok(matchId);
-  }
-
-  @RequestMapping(
-      value = "/match/update",
-      method = RequestMethod.PATCH,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MatchResource> updateMatch(@RequestBody final Match match) {
-    final Match updated = matchService.update(match);
-    return ResponseEntity.ok(matchAssembler.toModel(updated));
   }
 
   @ExceptionHandler(InvalidEventException.class)

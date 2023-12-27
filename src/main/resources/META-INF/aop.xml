@@ -37,6 +37,7 @@
         <include within="self.me.matchday.api.service.EventService"/>
         <include within="self.me.matchday.api.service.FileServerPluginService"/>
         <include within="self.me.matchday.api.service.FileServerUserService"/>
+        <include within="self.me.matchday.api.service.MatchArtworkService"/>
         <include within="self.me.matchday.api.service.MatchService"/>
         <include within="self.me.matchday.api.service.PatternKitTemplateService"/>
         <include within="self.me.matchday.api.service.ScheduledTaskService"/>
@@ -77,6 +78,7 @@
         <aspect name="self.me.matchday.log.EventServiceLog"/>
         <aspect name="self.me.matchday.log.FileServerPluginServiceLog"/>
         <aspect name="self.me.matchday.log.FileServerUserServiceLog"/>
+        <aspect name="self.me.matchday.log.MatchArtworkServiceLog"/>
         <aspect name="self.me.matchday.log.MatchDataParserLog"/>
         <aspect name="self.me.matchday.log.MatchServiceLog"/>
         <aspect name="self.me.matchday.log.PatternKitTemplateServiceLog"/>

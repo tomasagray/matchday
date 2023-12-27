@@ -38,15 +38,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import self.me.matchday.api.resource.ArtworkCollectionResource;
-import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionResourceAssembler;
+import self.me.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionModeller;
 import self.me.matchday.api.resource.ArtworkResource;
-import self.me.matchday.api.resource.ArtworkResource.ArtworkResourceAssembler;
+import self.me.matchday.api.resource.ArtworkResource.ArtworkModeller;
 import self.me.matchday.api.resource.CompetitionResource;
-import self.me.matchday.api.resource.CompetitionResource.CompetitionResourceAssembler;
+import self.me.matchday.api.resource.CompetitionResource.CompetitionModeller;
 import self.me.matchday.api.resource.EventsResource;
-import self.me.matchday.api.resource.EventsResource.EventsResourceAssembler;
+import self.me.matchday.api.resource.EventsResource.EventsModeller;
 import self.me.matchday.api.resource.TeamResource;
-import self.me.matchday.api.resource.TeamResource.TeamResourceAssembler;
+import self.me.matchday.api.resource.TeamResource.TeamModeller;
 import self.me.matchday.api.service.CompetitionService;
 import self.me.matchday.api.service.EventService;
 import self.me.matchday.api.service.TeamService;
@@ -63,30 +63,29 @@ import self.me.matchday.model.Team;
 public class CompetitionController {
   public static final String IMAGE_SVG_VALUE = "image/svg+xml";
 
-  private final CompetitionService competitionService;
-  private final CompetitionResourceAssembler resourceAssembler;
-  private final TeamService teamService;
-  private final TeamResourceAssembler teamResourceAssembler;
   private final EventService eventService;
-  private final EventsResourceAssembler eventsModeller;
-
-  private final ArtworkResourceAssembler artworkModeller;
-  private final ArtworkCollectionResourceAssembler collectionModeller;
+  private final CompetitionService competitionService;
+  private final TeamService teamService;
+  private final CompetitionModeller competitionModeller;
+  private final TeamModeller teamModeller;
+  private final EventsModeller eventsModeller;
+  private final ArtworkModeller artworkModeller;
+  private final ArtworkCollectionModeller collectionModeller;
 
   public CompetitionController(
-      CompetitionService competitionService,
-      CompetitionResourceAssembler resourceAssembler,
-      TeamService teamService,
-      TeamResourceAssembler teamResourceAssembler,
       EventService eventService,
-      EventsResourceAssembler eventsModeller,
-      ArtworkResourceAssembler artworkModeller,
-      ArtworkCollectionResourceAssembler collectionModeller) {
+      CompetitionService competitionService,
+      TeamService teamService,
+      CompetitionModeller competitionModeller,
+      TeamModeller teamModeller,
+      EventsModeller eventsModeller,
+      ArtworkModeller artworkModeller,
+      ArtworkCollectionModeller collectionModeller) {
 
     this.competitionService = competitionService;
-    this.resourceAssembler = resourceAssembler;
+    this.competitionModeller = competitionModeller;
     this.teamService = teamService;
-    this.teamResourceAssembler = teamResourceAssembler;
+    this.teamModeller = teamModeller;
     this.eventService = eventService;
     this.eventsModeller = eventsModeller;
     this.artworkModeller = artworkModeller;
@@ -105,7 +104,7 @@ public class CompetitionController {
   public ResponseEntity<CollectionModel<CompetitionResource>> fetchAllCompetitions() {
     final List<Competition> competitions = competitionService.fetchAll();
     final CollectionModel<CompetitionResource> model =
-        resourceAssembler.toCollectionModel(competitions);
+        competitionModeller.toCollectionModel(competitions);
     model.add(linkTo(methodOn(CompetitionController.class).fetchAllCompetitions()).withSelfRel());
     return ResponseEntity.ok(model);
   }
@@ -125,7 +124,7 @@ public class CompetitionController {
 
     return competitionService
         .fetchById(competitionId)
-        .map(resourceAssembler::toModel)
+        .map(competitionModeller::toModel)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
@@ -171,10 +170,23 @@ public class CompetitionController {
       @PathVariable final UUID competitionId) {
 
     final List<Team> teams = teamService.fetchTeamsByCompetitionId(competitionId);
-    final CollectionModel<TeamResource> model = teamResourceAssembler.toCollectionModel(teams);
+    final CollectionModel<TeamResource> model = teamModeller.toCollectionModel(teams);
     model.add(
         linkTo(methodOn(CompetitionController.class).fetchCompetitionTeams(competitionId))
             .withSelfRel());
+    return ResponseEntity.ok(model);
+  }
+
+  @RequestMapping(
+      value = "/competition/add",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<CompetitionResource> addNewCompetition(
+      @RequestBody CompetitionResource resource) {
+    final Competition competition = competitionModeller.fromModel(resource);
+    final Competition saved = competitionService.save(competition);
+    final CompetitionResource model = competitionModeller.toModel(saved);
     return ResponseEntity.ok(model);
   }
 
@@ -184,10 +196,11 @@ public class CompetitionController {
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CompetitionResource> updateCompetition(
-      @RequestBody Competition competition) {
+      @RequestBody CompetitionResource resource) {
+    final Competition competition = competitionModeller.fromModel(resource);
     final Competition update = competitionService.update(competition);
-    final CompetitionResource resource = resourceAssembler.toModel(update);
-    return ResponseEntity.ok(resource);
+    final CompetitionResource model = competitionModeller.toModel(update);
+    return ResponseEntity.ok(model);
   }
 
   @RequestMapping(
@@ -223,7 +236,7 @@ public class CompetitionController {
                     .fetchCompetitionArtworkCollection(competitionId, role))
             .withSelfRel());
     resources.forEach(
-        resource -> CompetitionResourceAssembler.addArtworkLinks(competitionId, role, resource));
+        resource -> CompetitionModeller.addArtworkLinks(competitionId, role, resource));
     return ResponseEntity.ok(resources);
   }
 
@@ -320,10 +333,10 @@ public class CompetitionController {
         competitionService.addArtworkToCollection(competitionId, role, image);
     final ArtworkCollectionResource resources = collectionModeller.toModel(collection);
     resources
-        .getArtwork()
+        .getCollection()
         .forEach(
             artworkResource ->
-                CompetitionResourceAssembler.addArtworkLinks(competitionId, role, artworkResource));
+                CompetitionModeller.addArtworkLinks(competitionId, role, artworkResource));
     resources.add(
         linkTo(
                 methodOn(CompetitionController.class)
@@ -346,9 +359,8 @@ public class CompetitionController {
     final ArtworkCollectionResource resource = collectionModeller.toModel(collection);
     // add links
     resource
-        .getArtwork()
-        .forEach(
-            artwork -> CompetitionResourceAssembler.addArtworkLinks(competitionId, role, artwork));
+        .getCollection()
+        .forEach(artwork -> CompetitionModeller.addArtworkLinks(competitionId, role, artwork));
     return ResponseEntity.ok(resource);
   }
 }

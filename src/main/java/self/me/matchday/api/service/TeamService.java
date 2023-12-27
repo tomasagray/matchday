@@ -238,8 +238,8 @@ public class TeamService implements EntityService<Team, UUID> {
   public Image fetchSelectedArtwork(@NotNull UUID teamId, @NotNull ArtworkRole role)
       throws IOException {
     final Artwork artwork = fetchSelectedArtworkMetadata(teamId, role);
-    if (artwork != null) {
-      return artworkService.fetchArtworkData(artwork);
+    if (artwork != null && artwork.getFile() != null) {
+      return artworkService.readArtworkData(artwork);
     }
     return null;
   }
@@ -261,7 +261,7 @@ public class TeamService implements EntityService<Team, UUID> {
       @NotNull UUID teamId, @NotNull ArtworkRole role, @NotNull Long artworkId) throws IOException {
     final Artwork artwork = fetchArtworkMetadata(teamId, role, artworkId);
     if (artwork != null) {
-      return artworkService.fetchArtworkData(artwork);
+      return artworkService.readArtworkData(artwork);
     }
     return null;
   }

@@ -243,7 +243,7 @@ class EventServiceTest {
   void deleteEvent() {
 
     // Create test data
-    final Event saveEvent = testDataCreator.createTestMatch();
+    final Event saveEvent = testDataCreator.createTestMatch("Delete Event test");
     cleanupData.add(saveEvent);
 
     final List<Event> initialEvents = eventService.fetchAll();

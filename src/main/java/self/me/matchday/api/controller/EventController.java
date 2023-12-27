@@ -33,7 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.EventsResource;
-import self.me.matchday.api.resource.EventsResource.EventsResourceAssembler;
+import self.me.matchday.api.resource.EventsResource.EventsModeller;
 import self.me.matchday.api.resource.VideoFileSourceResource;
 import self.me.matchday.api.resource.VideoPlaylistResource;
 import self.me.matchday.api.service.EventService;
@@ -47,15 +47,15 @@ public class EventController {
   private static final LinkRelation NEXT_LINK = LinkRelation.of("next");
 
   private final EventService eventService;
-  private final EventsResourceAssembler eventAssembler;
-  private final VideoFileSourceResource.VideoFileSourceResourceAssembler fileSourceAssembler;
+  private final EventsModeller eventAssembler;
+  private final VideoFileSourceResource.VideoSourceModeller fileSourceAssembler;
   private final VideoPlaylistResource.VideoPlaylistResourceAssembler playlistAssembler;
 
   @Autowired
   EventController(
       EventService eventService,
-      EventsResourceAssembler eventAssembler,
-      VideoFileSourceResource.VideoFileSourceResourceAssembler fileSourceAssembler,
+      EventsModeller eventAssembler,
+      VideoFileSourceResource.VideoSourceModeller fileSourceAssembler,
       VideoPlaylistResource.VideoPlaylistResourceAssembler playlistAssembler) {
     this.eventService = eventService;
     this.eventAssembler = eventAssembler;

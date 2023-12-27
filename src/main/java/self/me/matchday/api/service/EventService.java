@@ -126,7 +126,6 @@ public class EventService implements EntityService<Event, UUID> {
    */
   @Override
   public Event save(@NotNull final Event event) {
-
     Event saved;
     if (event instanceof Match) {
       saved = matchService.save((Match) event);

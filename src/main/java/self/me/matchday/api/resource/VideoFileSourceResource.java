@@ -36,7 +36,6 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.EventController;
 import self.me.matchday.api.controller.VideoStreamingController;
@@ -68,18 +67,18 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
   private Long audioBitrate;
   private String audioCodec;
   private String audioChannels;
-  private String duration;
+  private String approximateDuration;
   private Long filesize;
   private Map<PartIdentifier, VideoFileResource> videoFiles;
 
   @Component
-  public static class VideoFileSourceResourceAssembler
-      extends RepresentationModelAssemblerSupport<VideoFileSource, VideoFileSourceResource> {
+  public static class VideoSourceModeller
+      extends EntityModeller<VideoFileSource, VideoFileSourceResource> {
 
     private final VideoFileResourceModeller videoFileModeller;
     private final EventRepository eventRepository;
 
-    public VideoFileSourceResourceAssembler(
+    public VideoSourceModeller(
         VideoFileResourceModeller videoFileModeller, EventRepository eventRepository) {
       super(VideoStreamingController.class, VideoFileSourceResource.class);
       this.videoFileModeller = videoFileModeller;
@@ -108,7 +107,7 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
       resource.setAudioBitrate(entity.getAudioBitrate());
       resource.setAudioCodec(entity.getAudioCodec());
       resource.setAudioChannels(entity.getAudioChannels());
-      resource.setDuration(entity.getApproximateDuration());
+      resource.setApproximateDuration(entity.getApproximateDuration());
       resource.setFilesize(entity.getFilesize());
       resource.setVideoFiles(getVideoFiles(entity));
       if (resolution != null) {
@@ -157,12 +156,15 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
     }
 
     private Map<PartIdentifier, VideoFile> getVideoFilesFromModel(
-        @NotNull Map<PartIdentifier, VideoFileResource> resources) {
+        @Nullable Map<PartIdentifier, VideoFileResource> resources) {
+      if (resources == null) return null;
       return resources.entrySet().stream()
           .collect(Collectors.toMap(Entry::getKey, e -> videoFileModeller.fromModel(e.getValue())));
     }
 
-    public VideoFileSource fromModel(@NotNull VideoFileSourceResource resource) {
+    @Override
+    public VideoFileSource fromModel(@Nullable VideoFileSourceResource resource) {
+      if (resource == null) return null;
       final Resolution resolution = Resolution.fromString(resource.getResolution());
       final VideoFilePack videoFilePack = new VideoFilePack();
       videoFilePack.putAll(getVideoFilesFromModel(resource.getVideoFiles()));
@@ -179,7 +181,7 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
           .audioBitrate(resource.getAudioBitrate())
           .audioCodec(resource.getAudioCodec())
           .audioChannels(resource.getAudioChannels())
-          .approximateDuration(resource.getDuration())
+          .approximateDuration(resource.getApproximateDuration())
           .filesize(resource.getFilesize())
           .videoFilePacks(List.of(videoFilePack))
           .build();

@@ -26,10 +26,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.controller.ArtworkController;
 import self.me.matchday.model.Artwork;
@@ -53,10 +53,9 @@ public class ArtworkResource extends RepresentationModel<ArtworkResource> {
   private boolean selected;
 
   @Component
-  public static class ArtworkResourceAssembler
-      extends RepresentationModelAssemblerSupport<Artwork, ArtworkResource> {
+  public static class ArtworkModeller extends EntityModeller<Artwork, ArtworkResource> {
 
-    public ArtworkResourceAssembler() {
+    public ArtworkModeller() {
       super(ArtworkController.class, ArtworkResource.class);
     }
 
@@ -83,6 +82,20 @@ public class ArtworkResource extends RepresentationModel<ArtworkResource> {
       }
       // else...
       return CollectionModel.empty();
+    }
+
+    @Override
+    public Artwork fromModel(@Nullable ArtworkResource model) {
+      if (model == null) return null;
+      return Artwork.builder()
+          .id(model.getId())
+          .fileSize(model.getFileSize())
+          .mediaType(model.getMediaType())
+          .width(model.getWidth())
+          .height(model.getHeight())
+          .created(model.getCreated())
+          .modified(model.getModified())
+          .build();
     }
   }
 }

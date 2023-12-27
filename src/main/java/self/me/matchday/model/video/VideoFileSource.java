@@ -19,12 +19,14 @@
 
 package self.me.matchday.model.video;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.*;
 import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
+import self.me.matchday.api.controller.converter.ResolutionDeserializer;
 
 /**
  * Represents a collection of files which compose an Event. Includes metadata describing the media
@@ -53,7 +55,10 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
   private String source;
   private String approximateDuration;
   private String languages;
+
+  @JsonDeserialize(using = ResolutionDeserializer.class)
   private Resolution resolution;
+
   private String mediaContainer;
   private String videoCodec;
   private String audioCodec;
@@ -83,10 +88,6 @@ public class VideoFileSource implements Comparable<VideoFileSource> {
     } else {
       this.videoFilePacks.add(filePack);
     }
-  }
-
-  public boolean removeVideoFilePack(VideoFilePack filePack) {
-    return this.videoFilePacks.remove(filePack);
   }
 
   /**
