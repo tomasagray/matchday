@@ -58,11 +58,9 @@
         <include within="self.me.matchday.api.service.admin.VpnService"/>
         <!-- plugin-->
         <include within="self.me.matchday.plugin.datasource.blogger.*"/>
+        <include within="self.me.matchday.plugin.datasource.forum.*"/>
         <include within="self.me.matchday.plugin.datasource.parsing.*"/>
         <include within="self.me.matchday.plugin.fileserver.filefox.*"/>
-        <!-- plugin -->
-        <include within="self.me.matchday.log.plugin.blogger.*"/>
-        <include within="self.me.matchday.log.plugin.filefox.*"/>
     </weaver>
     <aspects>
         <!-- service -->
@@ -101,6 +99,7 @@
         <aspect name="self.me.matchday.log.plugin.blogger.BloggerPluginLog"/>
         <aspect name="self.me.matchday.log.plugin.ffmpeg.FFmpegPluginLog"/>
         <aspect name="self.me.matchday.log.plugin.ffmpeg.FFmpegSingleStreamTaskLog"/>
+        <aspect name="self.me.matchday.log.plugin.ForumPluginLog"/>
         <aspect name="self.me.matchday.log.plugin.filefox.LoginParserLog"/>
     </aspects>
 </aspectj>
