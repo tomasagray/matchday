@@ -51,7 +51,7 @@ class ForumPluginTest {
     }
 
     @Test
-    @DisplayName("Verify a life Snapshot returns sensible data")
+    @DisplayName("Verify a Snapshot returns sensible data from a known source")
     void getSnapshot() throws IOException {
         // given
         final int expectedMatchCount = 10;
@@ -108,7 +108,6 @@ class ForumPluginTest {
         logger.info("Validating plugin ID: {}", actualPluginId);
         assertThat(actualPluginId).isNotNull().isEqualTo(expectedPluginId);
     }
-
 
     @Test
     @DisplayName("Validate plugin title")

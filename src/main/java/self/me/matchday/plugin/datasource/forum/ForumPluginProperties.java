@@ -16,7 +16,5 @@ import self.me.matchday.plugin.PluginProperties;
 public class ForumPluginProperties extends PluginProperties {
 
     private String linkSelector;
-    private String matchPattern;
-    private String dateFormatter;
     private int scrapeSteps;
 }

@@ -92,6 +92,14 @@ public class ForumPlugin implements DataSourcePlugin {
         }
     }
 
+    private static int getCurrentPage(@NotNull List<String> pages) {
+        final int DEFAULT_PAGE = 0;
+
+        if (pages.isEmpty()) return DEFAULT_PAGE;
+        final String page = pages.get(0);
+        return page.matches("\\d") ? Integer.parseInt(page) : DEFAULT_PAGE;
+    }
+
     @Override
     @SuppressWarnings("unchecked cast")
     public <T> Snapshot<T> getSnapshot(@NotNull SnapshotRequest request, @NotNull DataSource<T> dataSource)
@@ -125,7 +133,7 @@ public class ForumPlugin implements DataSourcePlugin {
         String currentPageQuery = getQuery(params);
         List<String> pages = params.remove(PAGE_KEY);
         if (pages != null && !pages.isEmpty()) {
-            int currentPage = Integer.parseInt(pages.get(0));
+            int currentPage = getCurrentPage(pages);
             params.put(PAGE_KEY, List.of(++currentPage + ""));
             String nextPageQuery = getQuery(params);
             String nextPageUrl = url.toString().replace(currentPageQuery, nextPageQuery);
@@ -137,7 +145,7 @@ public class ForumPlugin implements DataSourcePlugin {
     }
 
     private @NotNull Stream<Event> readEventStream(@NotNull String data, @NotNull DataSource<? extends Event> dataSource) {
-        return eventListParser.getEventsList(data).entrySet().stream()
+        return eventListParser.getEventsList(data, dataSource).entrySet().stream()
                 .filter(entry -> isValidEvent(entry.getValue()))
                 .map(entry -> readListEvent(entry, dataSource))
                 .filter(Objects::nonNull);
