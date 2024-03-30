@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.3.1 - 0.3.2]
+
+### Added
+
+- Forum datasource plugin
+
 ## [0.3.0] - 2023-12-26
 
 ### Added

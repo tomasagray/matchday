@@ -1,0 +1,224 @@
+{
+  "dataSourceId": "481826b7-6622-4690-bba2-ddc6119e1725",
+  "clazz": "self.me.matchday.model.Match",
+  "title": "Test DataSource for Forum Plugin",
+  "baseUri": "http://192.168.0.107:7000/forum/forum_event_list.htm",
+  "pluginId": "7e230b0d-45a3-4738-8a43-c3b1d6f61df4",
+  "enabled": true,
+  "patternKits": [
+    {
+      "clazz": "self.me.matchday.model.video.VideoFile",
+      "id": 1,
+      "pattern": {
+        "pattern": "[1st2ndFirSeco-]+ Half|[Postre]+-Match|Extra-[Tt]ime [\\/ Penalties]*",
+        "flags": 64
+      },
+      "fields": {
+        "0": "title"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.Match",
+      "id": 3,
+      "pattern": {
+        "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]* (\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]* ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "fixture",
+        "4": "date",
+        "5": "homeTeam",
+        "6": "awayTeam"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.Match",
+      "id": 4,
+      "pattern": {
+        "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2}\\/\\d{2}) -([SemiFinalLegstndrdth\\d\\s-]*) (\\d{1,2}[\\p{L}\\s]+) - ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "4": "fixture",
+        "5": "homeTeam",
+        "6": "awayTeam",
+        "7": "date"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.Match",
+      "id": 5,
+      "pattern": {
+        "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]*(\\d+) - ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "fixture",
+        "4": "homeTeam",
+        "5": "awayTeam",
+        "6": "date"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.Match",
+      "id": 6,
+      "pattern": {
+        "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\d\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "fixture",
+        "4": "date",
+        "5": "homeTeam",
+        "6": "awayTeam"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.Match",
+      "id": 7,
+      "pattern": {
+        "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "fixture",
+        "4": "date",
+        "5": "homeTeam",
+        "6": "awayTeam"
+      }
+    },
+    {
+      "clazz": "java.net.URL",
+      "id": 8,
+      "pattern": {
+        "pattern": "^http[s]?://[\\p{L}.]*filefox.cc/[\\w]+/[\\w-]*.(mkv|ts)",
+        "flags": 64
+      },
+      "fields": {
+        "0": "url"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.Match",
+      "id": 9,
+      "pattern": {
+        "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2}\\/\\d{2}) - ([\\w\\d\\s-]*\\d*) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "date",
+        "4": "fixture",
+        "5": "homeTeam",
+        "6": "awayTeam"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.Match",
+      "id": 10,
+      "pattern": {
+        "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2}\\/\\d{2}) - ([\\w\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\d\\s\\.-]+) v[s\\.]? ([\\p{L}\\d\\s\\.-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "fixture",
+        "4": "date",
+        "5": "homeTeam",
+        "6": "awayTeam"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.Match",
+      "id": 11,
+      "pattern": {
+        "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2,4}\\/\\d{2,4}) - [\\w\\s]+([\\d]+) - ([\\w\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.]+ ([\\p{L}\\s\\d\\.-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "fixture",
+        "5": "date",
+        "6": "homeTeam",
+        "7": "awayTeam"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.Match",
+      "id": 12,
+      "pattern": {
+        "pattern": "([\\p{L}\\s\\.-]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.]+ ([\\p{L}\\s\\d\\.-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "season",
+        "3": "fixture",
+        "4": "date",
+        "5": "homeTeam",
+        "6": "awayTeam"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.Match",
+      "id": 13,
+      "pattern": {
+        "pattern": "([\\p{L}\\s\\d\\.-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.]+ ([\\p{L}\\s\\d\\.-]+)",
+        "flags": 64
+      },
+      "fields": {
+        "1": "competition",
+        "2": "date",
+        "3": "homeTeam",
+        "4": "awayTeam"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.video.VideoFileSource",
+      "id": 14,
+      "pattern": {
+        "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\d\\s\\.+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\s\\d-]*) Language[\\p{L}\\s]*:? [\\d.\\s]*([\\p{L}]+)[\\/\\s\\d\\.\\p{L}]* Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* \\| ([\\w\\.]+) \\| (\\d+)[fps]* Audio[\\s]*:? (\\d+)[\\sKkMmbps]+ \\| ([\\p{L}\\d\\s]+) \\| ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [\\w\\s\\d(]+([\\d]{4}[pi])\\)?",
+        "flags": 64
+      },
+      "fields": {
+        "1": "channel",
+        "2": "source",
+        "3": "languages",
+        "4": "videoBitrate",
+        "5": "videoCodec",
+        "6": "mediaContainer",
+        "7": "framerate",
+        "8": "audioBitrate",
+        "9": "audioCodec",
+        "10": "audioChannels",
+        "11": "approximateDuration",
+        "12": "filesize",
+        "13": "resolution"
+      }
+    },
+    {
+      "clazz": "self.me.matchday.model.video.VideoFile",
+      "id": 15,
+      "pattern": {
+        "pattern": "Full Coverage",
+        "flags": 64
+      },
+      "fields": {
+        "0": "title"
+      }
+    }
+  ]
+}
