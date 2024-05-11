@@ -2,6 +2,7 @@
     <configuration default="false" name="Matchday [dev-volatile]" type="SpringBootApplicationConfigurationType"
                    factoryName="Spring Boot">
         <envs>
+            <env name="CONFIG_ROOT" value="/projectdata/matchday/dev/staging/config"/>
             <env name="DATA_ROOT" value="/projectdata/matchday/dev/volatile"/>
             <env name="DB_PASSWORD" value="as"/>
             <env name="DB_URL" value="jdbc:h2:mem:matchday;MODE=MYSQL"/>

@@ -10,6 +10,7 @@
         <option name="VM_PARAMETERS"
                 value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit -Dspring.profiles.active=test-persistent"/>
         <envs>
+            <env name="CONFIG_ROOT" value="/projectdata/matchday/test/admin/config"/>
             <env name="DATA_ROOT" value="/projectdata/matchday/test/admin"/>
             <env name="DB_PASSWORD" value="{M4tchD4y}"/>
             <env name="DB_URL"
