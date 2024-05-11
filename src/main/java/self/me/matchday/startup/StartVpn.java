@@ -1,10 +1,12 @@
 package self.me.matchday.startup;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.admin.VpnService;
 
 @Component
+@Profile("production")
 public class StartVpn implements CommandLineRunner {
 
   private final VpnService vpnService;
