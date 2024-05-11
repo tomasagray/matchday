@@ -19,11 +19,6 @@
 
 package self.me.matchday.unit.api.service.video;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +27,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -44,114 +40,128 @@ import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @DisplayName("Testing for playlist locator service")
 class VideoStreamLocatorServiceTest {
 
-  private static final Logger logger = LogManager.getLogger(VideoStreamLocatorServiceTest.class);
+    private static final Logger logger = LogManager.getLogger(VideoStreamLocatorServiceTest.class);
 
-  private final VideoStreamLocatorService videoStreamLocatorService;
-  private final VideoFile testVideoFile;
-  private final Path testStorage;
-  // test resources
-  private VideoStreamLocator testStreamLocator;
+    private final VideoStreamLocatorService videoStreamLocatorService;
+    private final VideoFile testVideoFile;
+    private final VideoFileSource testVideoFileSource;
+    // test resources
+    private Path testStorage;
+    private VideoStreamLocator testStreamLocator;
 
-  @Autowired
-  public VideoStreamLocatorServiceTest(
-      @NotNull TestDataCreator testDataCreator,
-      VideoStreamLocatorService videoStreamLocatorService) {
+    @Value("${DATA_ROOT}/videos")
+    private Path storageLocation;
 
-    this.videoStreamLocatorService = videoStreamLocatorService;
-    // Get managed copy of test file source
-    VideoFileSource testVideoFileSource = testDataCreator.createVideoFileSourceAndSave();
-    this.testVideoFile =
-        testVideoFileSource.getVideoFilePacks().get(0).get(PartIdentifier.FIRST_HALF);
-    // resolve test data storage path
-    final String storageLocation =
-        testDataCreator.getVideoResources().get("video-resources.file-storage-location");
-    this.testStorage =
-        Path.of(storageLocation).resolve(testVideoFileSource.getFileSrcId().toString());
-  }
+    @Autowired
+    public VideoStreamLocatorServiceTest(
+            @NotNull TestDataCreator testDataCreator,
+            VideoStreamLocatorService videoStreamLocatorService) {
 
-  @AfterEach
-  void tearDown() {
-    // Ensure test data is cleaned up
-    if (testStreamLocator != null) {
-      logger.info("Deleting test locator from DB...: " + testStreamLocator.getStreamLocatorId());
-      videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
+        this.videoStreamLocatorService = videoStreamLocatorService;
+        // Get managed copy of test file source
+        this.testVideoFileSource = testDataCreator.createVideoFileSourceAndSave();
+        this.testVideoFile =
+                testVideoFileSource.getVideoFilePacks().get(0).get(PartIdentifier.FIRST_HALF);
     }
-  }
 
-  @Test
-  @DisplayName("Test creation of new playlist locator")
-  void createNewPlaylistLocator() {
+    private Path getTestStorage() {
+        if (this.testStorage == null) {
+            UUID fileSrcId = testVideoFileSource.getFileSrcId();
+            this.testStorage = storageLocation.resolve(fileSrcId.toString());
+        }
+        return this.testStorage;
+    }
 
-    assertThat(testVideoFile).isNotNull();
-    testStreamLocator = videoStreamLocatorService.createStreamLocator(testStorage, testVideoFile);
 
-    logger.info("Created playlist locator: " + testStreamLocator);
-    assertThat(testStreamLocator).isNotNull();
-    assertThat(testStreamLocator.getStreamLocatorId()).isNotNull();
-  }
+    @AfterEach
+    void tearDown() {
+        // Ensure test data is cleaned up
+        if (testStreamLocator != null) {
+            logger.info("Deleting test locator from DB...: {}", testStreamLocator.getStreamLocatorId());
+            videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
+        }
+    }
 
-  @Test
-  @DisplayName("Test retrieval of all playlist locators from database")
-  void getAllPlaylistLocators() {
+    @Test
+    @DisplayName("Test creation of new playlist locator")
+    void createNewPlaylistLocator() {
+        assertThat(testVideoFile).isNotNull();
+        testStreamLocator = videoStreamLocatorService.createStreamLocator(getTestStorage(), testVideoFile);
 
-    final int expectedPlaylistLocatorCount = 1;
-    logger.info("Adding test stream locator to database...");
-    testStreamLocator = videoStreamLocatorService.createStreamLocator(testStorage, testVideoFile);
+        logger.info("Created playlist locator: {}", testStreamLocator);
+        assertThat(testStreamLocator).isNotNull();
+        assertThat(testStreamLocator.getStreamLocatorId()).isNotNull();
+    }
 
-    final List<VideoStreamLocator> playlistLocators =
-        videoStreamLocatorService.getAllStreamLocators();
-    final int actualPlaylistLocatorCount = playlistLocators.size();
-    logger.info("Fetched {} playlist locators from database", actualPlaylistLocatorCount);
+    @Test
+    @DisplayName("Test retrieval of all playlist locators from database")
+    void getAllPlaylistLocators() {
 
-    assertThat(actualPlaylistLocatorCount).isGreaterThanOrEqualTo(expectedPlaylistLocatorCount);
-    // Remove test resource
-    videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
-  }
+        final int expectedPlaylistLocatorCount = 1;
+        logger.info("Adding test stream locator to database...");
+        testStreamLocator = videoStreamLocatorService.createStreamLocator(getTestStorage(), testVideoFile);
 
-  @Test
-  @DisplayName("Test retrieval of specific playlist locator from database")
-  @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  void getPlaylistLocator() {
+        final List<VideoStreamLocator> playlistLocators =
+                videoStreamLocatorService.getAllStreamLocators();
+        final int actualPlaylistLocatorCount = playlistLocators.size();
+        logger.info("Fetched {} playlist locators from database", actualPlaylistLocatorCount);
 
-    // Create test resource
-    testStreamLocator = videoStreamLocatorService.createStreamLocator(testStorage, testVideoFile);
+        assertThat(actualPlaylistLocatorCount).isGreaterThanOrEqualTo(expectedPlaylistLocatorCount);
+        // Remove test resource
+        videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
+    }
 
-    final Long testStreamLocatorId = testStreamLocator.getStreamLocatorId();
-    final Optional<VideoStreamLocator> streamLocatorOptional =
-        videoStreamLocatorService.getStreamLocator(testStreamLocatorId);
-    assertThat(streamLocatorOptional).isPresent();
+    @Test
+    @DisplayName("Test retrieval of specific playlist locator from database")
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void getPlaylistLocator() {
 
-    final VideoStreamLocator actualStreamLocator = streamLocatorOptional.get();
-    logger.info("Retrieved playlist locator: " + actualStreamLocator);
+        // Create test resource
+        testStreamLocator = videoStreamLocatorService.createStreamLocator(getTestStorage(), testVideoFile);
 
-    // Test playlist locator fields; timestamp will be different
-    assertThat(actualStreamLocator.getStreamLocatorId())
-        .isEqualTo(testStreamLocator.getStreamLocatorId());
-    assertThat(actualStreamLocator.getPlaylistPath())
-        .isEqualTo(testStreamLocator.getPlaylistPath());
-    assertThat(actualStreamLocator.getVideoFile()).isEqualTo(testStreamLocator.getVideoFile());
-    assertThat(actualStreamLocator.getState()).isEqualTo(testStreamLocator.getState());
-  }
+        final Long testStreamLocatorId = testStreamLocator.getStreamLocatorId();
+        final Optional<VideoStreamLocator> streamLocatorOptional =
+                videoStreamLocatorService.getStreamLocator(testStreamLocatorId);
+        assertThat(streamLocatorOptional).isPresent();
 
-  @Test
-  @DisplayName("Test deletion of playlist locator")
-  void deletePlaylistLocator() {
+        final VideoStreamLocator actualStreamLocator = streamLocatorOptional.get();
+        logger.info("Retrieved playlist locator: {}", actualStreamLocator);
 
-    // Create test resource
-    testStreamLocator = videoStreamLocatorService.createStreamLocator(testStorage, testVideoFile);
+        // Test playlist locator fields; timestamp will be different
+        assertThat(actualStreamLocator.getStreamLocatorId())
+                .isEqualTo(testStreamLocator.getStreamLocatorId());
+        assertThat(actualStreamLocator.getPlaylistPath())
+                .isEqualTo(testStreamLocator.getPlaylistPath());
+        assertThat(actualStreamLocator.getVideoFile()).isEqualTo(testStreamLocator.getVideoFile());
+        assertThat(actualStreamLocator.getState()).isEqualTo(testStreamLocator.getState());
+    }
 
-    final int sizeBeforeDelete = videoStreamLocatorService.getAllStreamLocators().size();
-    // Perform deletion
-    videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
-    final int sizeAfterDelete = videoStreamLocatorService.getAllStreamLocators().size();
-    final int actualDifference = sizeBeforeDelete - sizeAfterDelete;
-    final int expectedDifference = 1;
-    assertThat(actualDifference).isEqualTo(expectedDifference);
-  }
+    @Test
+    @DisplayName("Test deletion of playlist locator")
+    void deletePlaylistLocator() {
+
+        // Create test resource
+        testStreamLocator = videoStreamLocatorService.createStreamLocator(getTestStorage(), testVideoFile);
+
+        final int sizeBeforeDelete = videoStreamLocatorService.getAllStreamLocators().size();
+        // Perform deletion
+        videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
+        final int sizeAfterDelete = videoStreamLocatorService.getAllStreamLocators().size();
+        final int actualDifference = sizeBeforeDelete - sizeAfterDelete;
+        final int expectedDifference = 1;
+        assertThat(actualDifference).isEqualTo(expectedDifference);
+    }
 }
