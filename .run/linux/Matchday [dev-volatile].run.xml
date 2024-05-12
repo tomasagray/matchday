@@ -1,22 +1,20 @@
 <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="Matchday [dev-volatile]" type="SpringBootApplicationConfigurationType"
-                   factoryName="Spring Boot">
-        <envs>
-            <env name="CONFIG_ROOT" value="/projectdata/matchday/dev/staging/config"/>
-            <env name="DATA_ROOT" value="/projectdata/matchday/dev/volatile"/>
-            <env name="DB_PASSWORD" value="as"/>
-            <env name="DB_URL" value="jdbc:h2:mem:matchday;MODE=MYSQL"/>
-            <env name="DB_USER" value="sa"/>
-            <env name="FFMPEG" value="/usr/bin/ffmpeg"/>
-            <env name="FFPROBE" value="/usr/bin/ffprobe"/>
-        </envs>
-        <module name="matchday.main"/>
-        <target name="@@@LOCAL@@@"/>
-        <option name="SPRING_BOOT_MAIN_CLASS" value="self.me.matchday.MatchdayApplication"/>
-        <option name="VM_PARAMETERS"
-                value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit -Dspring.profiles.active=dev-volatile"/>
-        <method v="2">
-            <option name="Make" enabled="true"/>
-        </method>
-    </configuration>
+  <configuration default="false" name="Matchday [dev-volatile]" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <envs>
+      <env name="CONFIG_ROOT" value="/projectdata/matchday/dev/volatile/config" />
+      <env name="DATA_ROOT" value="/projectdata/matchday/dev/volatile" />
+      <env name="DB_PASSWORD" value="as" />
+      <env name="DB_URL" value="jdbc:h2:mem:matchday;MODE=MYSQL" />
+      <env name="DB_USER" value="sa" />
+      <env name="FFMPEG" value="/usr/bin/ffmpeg" />
+      <env name="FFPROBE" value="/usr/bin/ffprobe" />
+    </envs>
+    <module name="self.me.matchday.main" />
+    <target name="@@@LOCAL@@@" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="self.me.matchday.MatchdayApplication" />
+    <option name="VM_PARAMETERS" value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit -Dspring.profiles.active=dev-volatile" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
 </component>

@@ -1,25 +1,24 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Unit Tests" type="JUnit" factoryName="JUnit">
-    <module name="matchday.test"/>
-    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true"/>
-    <option name="ALTERNATIVE_JRE_PATH" value="17"/>
-    <option name="MAIN_CLASS_NAME" value=""/>
-    <option name="METHOD_NAME" value=""/>
-    <option name="TEST_OBJECT" value="directory"/>
-    <option name="VM_PARAMETERS"
-            value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit -Dspring.profiles.active=test-volatile"/>
+    <module name="matchday.test" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="ALTERNATIVE_JRE_PATH" value="17" />
+    <option name="MAIN_CLASS_NAME" value="" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="directory" />
+    <option name="VM_PARAMETERS" value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit -Dspring.profiles.active=test-volatile" />
     <envs>
-      <env name="CONFIG_ROOT" value="/projectdata/matchday/test/unit/config"/>
-      <env name="DATA_ROOT" value="/projectdata/matchday/test/unit"/>
-      <env name="DB_PASSWORD" value="as"/>
-      <env name="DB_URL" value="jdbc:h2:mem:matchday"/>
-      <env name="DB_USER" value="sa"/>
-      <env name="FFMPEG" value="/usr/bin/ffmpeg"/>
-      <env name="FFPROBE" value="/usr/bin/ffprobe"/>
+      <env name="CONFIG_ROOT" value="/projectdata/matchday/test/unit/config" />
+      <env name="DATA_ROOT" value="/projectdata/matchday/test/unit" />
+      <env name="DB_PASSWORD" value="as" />
+      <env name="DB_URL" value="jdbc:h2:mem:matchday" />
+      <env name="DB_USER" value="sa" />
+      <env name="FFMPEG" value="/usr/bin/ffmpeg" />
+      <env name="FFPROBE" value="/usr/bin/ffprobe" />
     </envs>
-    <dir value="$PROJECT_DIR$/src/test/java/self/me/matchday/unit"/>
+    <dir value="$PROJECT_DIR$/src/test/java/self/me/matchday/unit" />
     <method v="2">
-      <option name="Make" enabled="true"/>
+      <option name="Make" enabled="true" />
     </method>
   </configuration>
 </component>

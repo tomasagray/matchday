@@ -19,28 +19,32 @@
 
 package self.me.matchday.plugin.io.diskmanager;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import self.me.matchday.api.service.SettingsService;
 import self.me.matchday.model.FileSize;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Stream;
+
+import static self.me.matchday.config.settings.VideoStorageLocation.VIDEO_STORAGE;
+
+@Getter
 @Component
 public class DiskManager {
 
   private static final Long MIN_FREE_DISK_SPACE = FileSize.ofGigabytes(40);
   private static final Long MAX_DISK_CONSUMPTION = FileSize.ofGigabytes(300);
 
-  @Getter private final Path storageLocation;
-  @Getter private final Path fileSystemRoot;
+  private final Path storageLocation;
+  private final Path fileSystemRoot;
 
   public DiskManager(@NotNull SettingsService settingsService) {
-    this.storageLocation = settingsService.getSettings().getVideoStorageLocation();
+    this.storageLocation = settingsService.getSetting(VIDEO_STORAGE, Path.class);
     this.fileSystemRoot = determineFileSystemRoot();
   }
 

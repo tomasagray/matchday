@@ -19,113 +19,139 @@
 
 package self.me.matchday.api.service;
 
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.util.List;
+import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.Getter;
+import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.stereotype.Component;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import self.me.matchday.db.SettingsRepository;
-import self.me.matchday.model.Settings;
+import self.me.matchday.model.ApplicationSettings;
+import self.me.matchday.model.Setting;
+import self.me.matchday.util.JsonParser;
+
+import java.io.*;
+import java.lang.reflect.Type;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.concurrent.Semaphore;
+import java.util.stream.Collectors;
 
 @Service
 public class SettingsService {
 
-  private final Settings defaultSettings;
-  private final SettingsRepository settingsRepository;
-  private final ApplicationEventPublisher eventPublisher;
+    @Getter
+    private final ApplicationSettings settings = new ApplicationSettings();
+    private final ApplicationEventPublisher eventPublisher;
+    private final SettingsFileService fileService;
 
-  public SettingsService(
-      DefaultSettings defaultSettings,
-      SettingsRepository settingsRepository,
-      ApplicationEventPublisher eventPublisher) {
-    this.defaultSettings = defaultSettings;
-    this.settingsRepository = settingsRepository;
-    this.eventPublisher = eventPublisher;
-  }
-
-  public Settings getSettings() {
-    final List<Settings> settings = settingsRepository.findLatestSettings();
-    if (settings.size() > 0) {
-      return settings.get(0);
-    }
-    return defaultSettings;
-  }
-
-  public Settings updateSettings(@NotNull Settings settings) {
-    final Settings updated = settingsRepository.save(settings);
-    eventPublisher.publishEvent(new SettingsUpdatedEvent(this, updated));
-    return updated;
-  }
-
-  public int deleteSettingsHistory(@Nullable Timestamp before) {
-    if (before != null) {
-      return settingsRepository.deleteAllByTimestampBefore(before);
-    } else {
-      final int count = settingsRepository.findAll().size();
-      settingsRepository.deleteAll();
-      return count;
-    }
-  }
-
-  @Component
-  @PropertySource("classpath:settings.default.properties")
-  public static final class DefaultSettings extends Settings {
-
-    @Value("${logging.file.name}")
-    public void setLogFilename(String logFilename) {
-      super.setLogFilename(Path.of(logFilename));
+    public SettingsService(
+            Collection<? extends Setting<?>> settings,
+            ApplicationEventPublisher eventPublisher, SettingsFileService fileService) {
+        this.eventPublisher = eventPublisher;
+        this.fileService = fileService;
+        this.settings.putAll(settings);
     }
 
-    @Value("${artwork.storage-location}")
-    public void setArtworkStorageLocation(String artworkStorageLocation) {
-      super.setArtworkStorageLocation(Path.of(artworkStorageLocation));
+    @SuppressWarnings("unchecked cast")
+    public <T> T getSetting(@NotNull Path path, @NotNull Class<T> type) {
+        Setting<?> setting = settings.get(path);
+        Object data = setting.getData();
+        if (!type.isInstance(data)) {
+            final String msg = String.format("Setting value <%s> is not of type %s", data, type);
+            throw new IllegalArgumentException(msg);
+        }
+        return (T) data;
     }
 
-    @Value("${video-resources.file-storage-location}")
-    public void setVideoStorageLocation(String videoStorageLocation) {
-      super.setVideoStorageLocation(Path.of(videoStorageLocation));
+    public ApplicationSettings updateSettings(@NotNull ApplicationSettings _settings)
+            throws IOException, InterruptedException {
+        Collection<? extends Setting<?>> settings = _settings.getAll();
+        for (Setting<?> setting : settings) {
+            if (setting.getPath() == null) {
+                throw new IllegalArgumentException("Setting path was null");
+            }
+            this.settings.put(setting);
+        }
+
+        eventPublisher.publishEvent(new SettingsUpdatedEvent(this));
+
+        fileService.backupSettingsFile();
+        fileService.writeSettingsFile(getSettings());
+        return getSettings();
     }
 
-    @Value("${application.backup-location}")
-    public void setBackupLocation(String backupLocation) {
-      super.setBackupLocation(Path.of(backupLocation));
+    public int loadSettings() throws IOException, InterruptedException {
+        ApplicationSettings settingsFile = fileService.readSettingsFile();
+        Collection<? extends Setting<?>> settings = settingsFile.getAll();
+        this.settings.putAll(settings);
+        return settings.size();
     }
 
-    @Value("${scheduled-tasks.cron.refresh-event-data}")
-    public void setRefreshEventCron(String refreshEventCron) {
-      super.setRefreshEvents(new CronTrigger(refreshEventCron));
+    @Getter
+    public static final class SettingsUpdatedEvent extends ApplicationEvent {
+        public SettingsUpdatedEvent(Object source) {
+            super(source);
+        }
     }
 
-    @Value("${scheduled-tasks.cron.prune-video-data}")
-    public void setPruneVideoCron(String pruneVideoCron) {
-      super.setPruneVideos(new CronTrigger(pruneVideoCron));
+    @Service
+    public static class SettingsFileService {
+
+        public static final String SETTINGS_FILE = "settings.json";
+        public static final String SETTINGS_BACKUP = "settings.backup.json";
+        private static final Type TYPE = new TypeReference<ApplicationSettings>() {
+        }.getType();
+
+        private final Semaphore lock = new Semaphore(1, true);
+
+        @Value("${application.config.root}")
+        private Path configRoot;
+
+        private static void writeData(@NotNull ApplicationSettings settings, @NotNull Path settingsFile)
+                throws IOException {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(settingsFile.toFile(), false))) {
+                final String json = JsonParser.toJson(settings, TYPE);
+                writer.write(json);
+            }
+        }
+
+        @Async
+        public void writeSettingsFile(@NotNull ApplicationSettings settings) throws IOException, InterruptedException {
+            try {
+                lock.acquire();
+                Path settingsFile = getSettingsFile();
+                writeData(settings, settingsFile);
+            } finally {
+                lock.release();
+            }
+        }
+
+        public ApplicationSettings readSettingsFile() throws IOException, InterruptedException {
+            lock.acquire();
+            Path settings = getSettingsFile();
+            try (BufferedReader reader = new BufferedReader(new FileReader(settings.toFile()))) {
+                String data = reader.lines().collect(Collectors.joining(""));
+                return JsonParser.fromJson(data, TYPE);
+            } finally {
+                lock.release();
+            }
+        }
+
+        public @NotNull Path getSettingsFile() {
+            return configRoot.resolve(SETTINGS_FILE);
+        }
+
+        @SneakyThrows
+        public void backupSettingsFile() {
+            Path settingsFile = getSettingsFile();
+            if (settingsFile.toFile().exists()) {
+                ApplicationSettings settings = readSettingsFile();
+                Path backup = configRoot.resolve(SETTINGS_BACKUP);
+                writeData(settings, backup);
+            }
+        }
     }
-
-    @Override
-    @Value("${scheduled-tasks.cron.video-data-expired-days}")
-    public void setVideoExpiredDays(int videoExpiredDays) {
-      super.setVideoExpiredDays(videoExpiredDays);
-    }
-  }
-
-  public static final class SettingsUpdatedEvent extends ApplicationEvent {
-
-    private final Settings settings;
-
-    public SettingsUpdatedEvent(Object source, Settings settings) {
-      super(source);
-      this.settings = settings;
-    }
-
-    public Settings getSettings() {
-      return settings;
-    }
-  }
 }
