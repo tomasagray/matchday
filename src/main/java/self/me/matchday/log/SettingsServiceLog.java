@@ -31,27 +31,31 @@ import org.jetbrains.annotations.Nullable;
 @Aspect
 public class SettingsServiceLog {
 
-  private static final Logger logger = LogManager.getLogger(SettingsServiceLog.class);
+    private static final Logger logger = LogManager.getLogger(SettingsServiceLog.class);
 
-  @AfterReturning(
-      value = "execution(* self.me.matchday.api.service.SettingsService.getSettings(..))",
-      returning = "settings")
-  public void logGetSettings(@Nullable Object settings) {
-    logger.debug("Application settings are: {}", settings);
-  }
+    @AfterReturning(
+            value = "execution(* self.me.matchday.api.service.SettingsService.getSettings(..))",
+            returning = "settings")
+    public void logGetSettings(@Nullable Object settings) {
+        logger.debug("Application settings are: {}", settings);
+    }
 
-  @AfterReturning(
-      value = "execution(* self.me.matchday.api.service.SettingsService.updateSettings(..))",
-      returning = "settings")
-  public void logUpdateSettings(@Nullable Object settings) {
-    logger.info("Updated application settings to: {}", settings);
-  }
+    @AfterReturning(
+            value = "execution(* self.me.matchday.api.service.SettingsService.updateSettings(..))",
+            returning = "settings")
+    public void logUpdateSettings(@Nullable Object settings) {
+        logger.info("Updated application settings to: {}", settings);
+    }
 
-  @Around("execution(* self.me.matchday.api.service.SettingsService.deleteSettingsHistory(..))")
-  public Object logDeleteSettingsHistory(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    logger.info("Deleting application settings history before: {}", jp.getArgs()[0]);
-    final Object deleted = jp.proceed();
-    logger.info("Deleted: {} records", deleted);
-    return deleted;
-  }
+    @Around("execution(* self.me.matchday.api.service.SettingsService.loadSettings(..))")
+    public Object logLoadSettings(@NotNull ProceedingJoinPoint jp) throws Throwable {
+        logger.info("Loading Application Settings from disk...");
+        int loaded = (int) jp.proceed();
+        if (loaded > 0) {
+            logger.info("Successfully loaded {} settings from disk", loaded);
+        } else {
+            logger.error("Could not load settings from disk! Reverting to defaults...");
+        }
+        return loaded;
+    }
 }
