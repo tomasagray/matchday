@@ -17,7 +17,15 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package self.me.matchday.unit.plugin.fileserver;
+package self.me.matchday;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import self.me.matchday.model.FileServerUser;
+import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
 import java.io.IOException;
 import java.net.URL;
@@ -26,13 +34,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import self.me.matchday.model.FileServerUser;
-import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
 @Component
 public class TestFileServerPlugin implements FileServerPlugin {
@@ -49,7 +50,6 @@ public class TestFileServerPlugin implements FileServerPlugin {
   }
 
   private final Pattern urlPattern = Pattern.compile("^https?://[\\w-.:]+/data/");
-  private boolean enabled = true;
 
   @Override
   public @NotNull ClientResponse login(@NotNull FileServerUser user) {
@@ -89,16 +89,6 @@ public class TestFileServerPlugin implements FileServerPlugin {
       throw new RuntimeException(e);
     }
     return Optional.of(url);
-  }
-
-  @Override
-  public boolean isEnabled() {
-    return this.enabled;
-  }
-
-  @Override
-  public void setEnabled(boolean enabled) {
-    this.enabled = enabled;
   }
 
   @Override

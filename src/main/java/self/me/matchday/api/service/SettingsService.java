@@ -66,21 +66,39 @@ public class SettingsService {
         return (T) data;
     }
 
+    private static void validateSetting(@NotNull Setting<?> setting) {
+        if (setting.getPath() == null) {
+            throw new IllegalArgumentException("Setting path was null");
+        }
+    }
+
     public ApplicationSettings updateSettings(@NotNull ApplicationSettings _settings)
             throws IOException, InterruptedException {
         Collection<? extends Setting<?>> settings = _settings.getAll();
+        return updateSettings(settings);
+    }
+
+    public ApplicationSettings updateSettings(@NotNull Collection<? extends Setting<?>> settings)
+            throws IOException, InterruptedException {
         for (Setting<?> setting : settings) {
-            if (setting.getPath() == null) {
-                throw new IllegalArgumentException("Setting path was null");
-            }
+            validateSetting(setting);
             this.settings.put(setting);
         }
 
-        eventPublisher.publishEvent(new SettingsUpdatedEvent(this));
+        onSettingsUpdated();
+        return getSettings();
+    }
 
+    public void updateSetting(@NotNull Setting<?> setting) throws IOException, InterruptedException {
+        validateSetting(setting);
+        this.settings.put(setting);
+        onSettingsUpdated();
+    }
+
+    private void onSettingsUpdated() throws IOException, InterruptedException {
+        eventPublisher.publishEvent(new SettingsUpdatedEvent(this));
         fileService.backupSettingsFile();
         fileService.writeSettingsFile(getSettings());
-        return getSettings();
     }
 
     public int loadSettings() throws IOException, InterruptedException {

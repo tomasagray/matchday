@@ -32,8 +32,6 @@ public class ForumPlugin implements DataSourcePlugin {
     private final EventListParser eventListParser;
     private final EventPageParser eventPageParser;
 
-    private boolean isEnabled = true;  // TODO: move this to application-level control
-
     public ForumPlugin(
             ForumPluginProperties pluginProperties,
             ForumDataSourceValidator dataSourceValidator,
@@ -94,7 +92,6 @@ public class ForumPlugin implements DataSourcePlugin {
 
     private static int getCurrentPage(@NotNull List<String> pages) {
         final int DEFAULT_PAGE = 0;
-
         if (pages.isEmpty()) return DEFAULT_PAGE;
         final String page = pages.get(0);
         return page.matches("\\d") ? Integer.parseInt(page) : DEFAULT_PAGE;
@@ -191,16 +188,6 @@ public class ForumPlugin implements DataSourcePlugin {
     public <T> Snapshot<T> getUrlSnapshot(@NotNull URL url, @NotNull DataSource<T> dataSource) throws IOException {
         Event event = readEvent(url, (DataSource<? extends Event>) dataSource);
         return Snapshot.of(Stream.of((T) event));
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.isEnabled;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        this.isEnabled = enabled;
     }
 
     @Override

@@ -19,13 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -37,6 +30,14 @@ import self.me.matchday.model.PlaintextDataSource;
 import self.me.matchday.model.Snapshot;
 import self.me.matchday.model.SnapshotRequest;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
@@ -66,7 +67,6 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
    */
   public SnapshotRequest refreshAllDataSources(@NotNull final SnapshotRequest request)
       throws IOException {
-
     for (DataSourcePlugin plugin : pluginService.getEnabledPlugins()) {
       refreshDataSourcesForPlugin(request, plugin);
     }

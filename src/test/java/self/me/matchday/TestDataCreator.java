@@ -37,7 +37,6 @@ import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoFilePack;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.unit.plugin.datasource.blogger.BloggerTestEntity;
-import self.me.matchday.unit.plugin.fileserver.TestFileServerPlugin;
 import self.me.matchday.util.JsonParser;
 import self.me.matchday.util.ResourceFileReader;
 
