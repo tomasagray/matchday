@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -148,15 +149,16 @@ public class ForumPlugin implements DataSourcePlugin {
                 .filter(Objects::nonNull);
     }
 
-    private @Nullable Event readListEvent(Map.@NotNull Entry<URL, ? extends Event> entry, @NotNull DataSource<? extends Event> dataSource) {
-        URL url = entry.getKey();
+    private @Nullable Event readListEvent(
+            Map.@NotNull Entry<URI, ? extends Event> entry, @NotNull DataSource<? extends Event> dataSource) {
+        URI uri = entry.getKey();
         Event event = entry.getValue();
 
         Optional<? extends Event> existingOptional = eventRepo.fetchEventLike(event);
         if (existingOptional.isEmpty()) {
             // this Event was not found in DB; it's new!
             try {
-                Event metadata = readEvent(url, dataSource);
+                Event metadata = readEvent(uri.toURL(), dataSource);
                 if (metadata != null) {
                     Set<VideoFileSource> fileSources = metadata.getFileSources();
                     event.getFileSources().addAll(fileSources);

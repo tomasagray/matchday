@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import self.me.matchday.model.*;
 import self.me.matchday.plugin.datasource.parsing.TextParser;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,24 +28,25 @@ public class EventListParser {
         this.textParser = textParser;
     }
 
-    public Map<URL, ? extends Event> getEventsList(@NotNull String data, DataSource<? extends Event> dataSource) {
+    public Map<URI, ? extends Event> getEventsList(@NotNull String data, DataSource<? extends Event> dataSource) {
         Document document = Jsoup.parse(data);
         Elements links = document.select(this.linkSelector);
         return links.stream()
                 .collect(Collectors.toMap(this::getLinkHref, link -> parseMatchLink(link, dataSource), (e1, e2) -> e1));
     }
 
-    private @Nullable URL getLinkHref(@NotNull Element link) {
+    private @Nullable URI getLinkHref(@NotNull Element link) {
         try {
-            return new URL(link.attr("href"));
-        } catch (MalformedURLException e) {
+            return new URI(link.attr("href"));
+        } catch (URISyntaxException e) {
             return null;
         }
     }
 
     private @NotNull Event parseMatchLink(@NotNull Element link, @NotNull DataSource<? extends Event> dataSource) {
         if (!(dataSource instanceof PlaintextDataSource<? extends Event>)) {
-            String msg = String.format("Cannot parse Event data; %s is not a Plaintext datasource: ", dataSource.getDataSourceId());
+            String msg = String.format(
+                    "Cannot parse Event data; %s is not a Plaintext datasource: ", dataSource.getDataSourceId());
             throw new IllegalArgumentException(msg);
         }
         List<PatternKit<? extends Match>> patternKits =

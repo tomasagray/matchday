@@ -19,7 +19,7 @@ import self.me.matchday.util.ResourceFileReader;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URL;
+import java.net.URI;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +58,7 @@ class EventListParserTest {
 
         // when
         logger.info("Testing parsing of Events from sample HTML...");
-        Map<URL, ? extends Event> events = eventListParser.getEventsList(testData, testDataSource);
+        Map<URI, ? extends Event> events = eventListParser.getEventsList(testData, testDataSource);
         int actualEventCount = events.size();
         logger.info("Found: {} Matches...", actualEventCount);
         events.forEach((href, event) -> System.out.println(event));
