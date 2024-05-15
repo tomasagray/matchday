@@ -19,161 +19,150 @@
 
 package self.me.matchday.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.*;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class ResourceFileReader {
 
-  private static final Logger logger = LogManager.getLogger(ResourceFileReader.class);
-  private static final ClassLoader classLoader = ResourceFileReader.class.getClassLoader();
+    private static final Logger logger = LogManager.getLogger(ResourceFileReader.class);
+    private static final ClassLoader classLoader = ResourceFileReader.class.getClassLoader();
 
-  public static <T> @NotNull T getObjectFromProperties(
-      @NotNull final Class<T> t_class, @NotNull final String filename, final String prefix)
-      throws IOException, ReflectiveOperationException {
-
-    // Instantiate object
-    final T instance = t_class.getConstructor().newInstance();
-    // Read properties file from disk
-    final Map<String, String> properties = readPropertiesResource(filename);
-    properties.forEach(
-        (prop, val) -> {
-          try {
-            // Skip comments
-            if (prop.startsWith("#")) {
-              return;
-            }
-            // Parse property key
-            if (prefix != null && prop.startsWith(prefix)) {
-              // remove prefix from key
-              prop = prop.replace(prefix + ".", "");
-            }
-            final String fieldName = dashToCamelCase(prop);
-            // Get field
-            final Field field = t_class.getDeclaredField(fieldName);
-            // Save accessible
-            final boolean accessible = field.canAccess(instance);
-            // Set field
-            field.setAccessible(true);
-            final Long aLong = isLong(val);
-            field.set(instance, Objects.requireNonNullElse(aLong, val));
-            // Restore access state
-            field.setAccessible(accessible);
-          } catch (ReflectiveOperationException e) {
-            final String msg =
-                String.format(
-                    "Property [%s] does not match a field in class %s; skipping...", prop, t_class);
-            logger.error(msg, e);
-          }
-        });
-    return instance;
-  }
-
-  public static @NotNull Map<String, String> readPropertiesResource(@NotNull final String filename)
-      throws IOException {
-
-    final String data = readTextResource(filename);
-    return parsePropertiesData(data);
-  }
-
-  public static @NotNull String readTextResource(@NotNull final String filename)
-      throws IOException {
-
-    logger.trace("Attempting to read data at: {}", filename);
-
-    InputStream resourceAsStream = classLoader.getResourceAsStream(filename);
-    if (resourceAsStream == null) {
-      throw new FileNotFoundException("No resources found at: " + filename);
+    public static <T> @NotNull T getObjectFromProperties(
+            @NotNull final Class<T> t_class, @NotNull final String filename, final String prefix)
+            throws IOException, ReflectiveOperationException {
+        // Instantiate object
+        final T instance = t_class.getConstructor().newInstance();
+        // Read properties file from disk
+        final Map<String, String> properties = readPropertiesResource(filename);
+        properties.forEach(
+                (prop, val) -> {
+                    try {
+                        // Skip comments
+                        if (prop.startsWith("#")) {
+                            return;
+                        }
+                        // Parse property key
+                        if (prefix != null && prop.startsWith(prefix)) {
+                            // remove prefix from key
+                            prop = prop.replace(prefix + ".", "");
+                        }
+                        final String fieldName = dashToCamelCase(prop);
+                        // Get field
+                        final Field field = t_class.getDeclaredField(fieldName);
+                        // Save accessible
+                        final boolean accessible = field.canAccess(instance);
+                        // Set field
+                        field.setAccessible(true);
+                        final Long aLong = isLong(val);
+                        field.set(instance, Objects.requireNonNullElse(aLong, val));
+                        // Restore access state
+                        field.setAccessible(accessible);
+                    } catch (ReflectiveOperationException e) {
+                        final String msg =
+                                String.format(
+                                        "Property [%s] does not match a field in class %s; skipping...", prop, t_class);
+                        logger.error(msg, e);
+                    }
+                });
+        return instance;
     }
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
-      return reader.lines().collect(Collectors.joining("\n"));
+
+    public static @NotNull Map<String, String> readPropertiesResource(@NotNull final String filename)
+            throws IOException {
+
+        final String data = readTextResource(filename);
+        return parsePropertiesData(data);
     }
-  }
 
-  @NotNull
-  private static Map<String, String> parsePropertiesData(@NotNull String data) {
+    public static @NotNull String readTextResource(@NotNull final String filename)
+            throws IOException {
 
-    // Result container
-    final Map<String, String> resources = new HashMap<>();
-    final String[] lines = data.split("\n");
-    String lastKey = null;
-    // Examine file line by line
-    for (String line : lines) {
-      if (!(line.equals("")) && !line.startsWith("#")) {
-        // Split line
-        String[] split = line.split("=", 2);
-        if (split.length > 0) {
-          final String key = split[0];
-          final String value = split.length == 2 ? split[1].replace(" \\", "").trim() : null;
-          if (value == null && lastKey != null) {
-            // Append to previous line
-            String lastVal = resources.get(lastKey);
-            resources.put(lastKey, lastVal + key);
-            lastKey = null;
-          } else {
-            // Add to Map
-            resources.put(key, value);
-            lastKey = key;
-          }
+        logger.trace("Attempting to read data at: {}", filename);
+
+        InputStream resourceAsStream = classLoader.getResourceAsStream(filename);
+        if (resourceAsStream == null) {
+            throw new FileNotFoundException("No resources found at: " + filename);
         }
-      }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
     }
-    return resources;
-  }
 
-  private static @NotNull String dashToCamelCase(@NotNull final String str) {
+    @NotNull
+    private static Map<String, String> parsePropertiesData(@NotNull String data) {
 
-    // Split on dashes
-    final String[] words = str.split("-");
-    final List<String> camelWords = new ArrayList<>();
-    camelWords.add(words[0]);
-    // Capitalize words
-    for (int i = 1; i < words.length; ++i) {
-      final String word = words[i];
-      if (word != null && !("".equals(word))) {
-        final String firstLetter = word.substring(0, 1).toUpperCase();
-        camelWords.add(firstLetter + word.substring(1));
-      }
+        // Result container
+        final Map<String, String> resources = new HashMap<>();
+        final String[] lines = data.split("\n");
+        String lastKey = null;
+        // Examine file line by line
+        for (String line : lines) {
+            if (!(line.isEmpty()) && !line.startsWith("#")) {
+                // Split line
+                String[] split = line.split("=", 2);
+                if (split.length > 0) {
+                    final String key = split[0];
+                    final String value = split.length == 2 ? split[1].replace(" \\", "").trim() : null;
+                    if (value == null && lastKey != null) {
+                        // Append to previous line
+                        resources.compute(lastKey, (k, lastVal) -> lastVal + key);
+                        lastKey = null;
+                    } else {
+                        // Add to Map
+                        resources.put(key, value);
+                        lastKey = key;
+                    }
+                }
+            }
+        }
+        return resources;
     }
-    // Collate & return
-    return String.join("", camelWords);
-  }
 
-  private static @Nullable Long isLong(@NotNull final String str) {
-    try {
-      return Long.parseLong(str);
-    } catch (NumberFormatException e) {
-      return null;
-    }
-  }
+    private static @NotNull String dashToCamelCase(@NotNull final String str) {
 
-  public static byte[] readBinaryData(@NotNull String path) throws IOException {
-    final InputStream stream = classLoader.getResourceAsStream(path);
-    if (stream == null) {
-      throw new IOException("Could not find resource at: " + path);
+        // Split on dashes
+        final String[] words = str.split("-");
+        final List<String> camelWords = new ArrayList<>();
+        camelWords.add(words[0]);
+        // Capitalize words
+        for (int i = 1; i < words.length; ++i) {
+            final String word = words[i];
+            if (word != null && !(word.isEmpty())) {
+                final String firstLetter = word.substring(0, 1).toUpperCase();
+                camelWords.add(firstLetter + word.substring(1));
+            }
+        }
+        // Collate & return
+        return String.join("", camelWords);
     }
-    try (final DataInputStream is = new DataInputStream(new BufferedInputStream(stream))) {
-      return is.readAllBytes();
-    }
-  }
 
-  public static URL getResourceUrl(@NotNull String name) {
-    return classLoader.getResource(name);
-  }
+    private static @Nullable Long isLong(@NotNull final String str) {
+        try {
+            return Long.parseLong(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    public static byte[] readBinaryData(@NotNull String path) throws IOException {
+        final InputStream stream = classLoader.getResourceAsStream(path);
+        if (stream == null) {
+            throw new IOException("Could not find resource at: " + path);
+        }
+        try (final DataInputStream is = new DataInputStream(new BufferedInputStream(stream))) {
+            return is.readAllBytes();
+        }
+    }
+
+    public static URL getResourceUrl(@NotNull String name) {
+        return classLoader.getResource(name);
+    }
 }

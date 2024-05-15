@@ -25,39 +25,38 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import self.me.matchday.api.resource.SettingsResource;
-import self.me.matchday.api.resource.SettingsResource.SettingsResourceModeller;
 import self.me.matchday.api.service.SettingsService;
-import self.me.matchday.model.Settings;
+import self.me.matchday.model.ApplicationSettings;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/settings")
 public class SettingsController {
 
-  private final SettingsService settingsService;
-  private final SettingsResourceModeller modeller;
+    private final SettingsService settingsService;
 
-  public SettingsController(SettingsService settingsService, SettingsResourceModeller modeller) {
-    this.settingsService = settingsService;
-    this.modeller = modeller;
-  }
+    public SettingsController(SettingsService settingsService) {
+        this.settingsService = settingsService;
+    }
 
-  @RequestMapping(
-      value = {"", "/"},
-      method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SettingsResource> getSettings() {
-    final Settings settings = settingsService.getSettings();
-    return ResponseEntity.ok(modeller.toModel(settings));
-  }
+    @RequestMapping(
+            value = {"", "/"},
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getSettings() {
+        final ApplicationSettings settings = settingsService.getSettings();
+        return ResponseEntity.ok(settings);
+    }
 
-  @RequestMapping(
-      value = "/update",
-      method = RequestMethod.POST,
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SettingsResource> updateSettings(@RequestBody Settings settings) {
-    final Settings updated = settingsService.updateSettings(settings);
-    return ResponseEntity.ok(modeller.toModel(updated));
-  }
+    @RequestMapping(
+            value = "/update",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateSettings(@RequestBody ApplicationSettings settings)
+            throws IOException, InterruptedException {
+        final ApplicationSettings updated = settingsService.updateSettings(settings);
+        return ResponseEntity.ok(updated);
+    }
 }

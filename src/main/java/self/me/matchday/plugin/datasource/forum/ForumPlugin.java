@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -31,8 +32,6 @@ public class ForumPlugin implements DataSourcePlugin {
     private final EventService eventRepo;
     private final EventListParser eventListParser;
     private final EventPageParser eventPageParser;
-
-    private boolean isEnabled = true;  // TODO: move this to application-level control
 
     public ForumPlugin(
             ForumPluginProperties pluginProperties,
@@ -94,7 +93,6 @@ public class ForumPlugin implements DataSourcePlugin {
 
     private static int getCurrentPage(@NotNull List<String> pages) {
         final int DEFAULT_PAGE = 0;
-
         if (pages.isEmpty()) return DEFAULT_PAGE;
         final String page = pages.get(0);
         return page.matches("\\d") ? Integer.parseInt(page) : DEFAULT_PAGE;
@@ -151,15 +149,16 @@ public class ForumPlugin implements DataSourcePlugin {
                 .filter(Objects::nonNull);
     }
 
-    private @Nullable Event readListEvent(Map.@NotNull Entry<URL, ? extends Event> entry, @NotNull DataSource<? extends Event> dataSource) {
-        URL url = entry.getKey();
+    private @Nullable Event readListEvent(
+            Map.@NotNull Entry<URI, ? extends Event> entry, @NotNull DataSource<? extends Event> dataSource) {
+        URI uri = entry.getKey();
         Event event = entry.getValue();
 
         Optional<? extends Event> existingOptional = eventRepo.fetchEventLike(event);
         if (existingOptional.isEmpty()) {
             // this Event was not found in DB; it's new!
             try {
-                Event metadata = readEvent(url, dataSource);
+                Event metadata = readEvent(uri.toURL(), dataSource);
                 if (metadata != null) {
                     Set<VideoFileSource> fileSources = metadata.getFileSources();
                     event.getFileSources().addAll(fileSources);
@@ -191,16 +190,6 @@ public class ForumPlugin implements DataSourcePlugin {
     public <T> Snapshot<T> getUrlSnapshot(@NotNull URL url, @NotNull DataSource<T> dataSource) throws IOException {
         Event event = readEvent(url, (DataSource<? extends Event>) dataSource);
         return Snapshot.of(Stream.of((T) event));
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.isEnabled;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        this.isEnabled = enabled;
     }
 
     @Override

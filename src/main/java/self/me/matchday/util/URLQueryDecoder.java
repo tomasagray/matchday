@@ -19,17 +19,18 @@
 
 package self.me.matchday.util;
 
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.*;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
+
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 
 public class URLQueryDecoder {
 
@@ -89,6 +90,6 @@ public class URLQueryDecoder {
    * @return True / false
    */
   private static boolean isNullOrEmpty(final String string) {
-    return (string == null) || ("".equals(string.trim()));
+    return (string == null) || (string.trim().isEmpty());
   }
 }

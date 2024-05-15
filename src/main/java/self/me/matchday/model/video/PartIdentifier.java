@@ -19,43 +19,42 @@
 
 package self.me.matchday.model.video;
 
-import java.util.Arrays;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 /** Football match part identifiers */
+@Getter
 public enum PartIdentifier {
-  DEFAULT("<>"),
-  PRE_MATCH("Pre-Match"),
-  FIRST_HALF("1st Half"),
-  SECOND_HALF("2nd Half"),
-  EXTRA_TIME("Extra-Time/Penalties"),
-  TROPHY_CEREMONY("Trophy Ceremony"),
-  POST_MATCH("Post-Match"),
-  FULL_COVERAGE("Full Coverage");
+    DEFAULT("<>"),
+    PRE_MATCH("Pre-Match"),
+    FIRST_HALF("1st Half"),
+    SECOND_HALF("2nd Half"),
+    EXTRA_TIME("Extra-Time/Penalties"),
+    TROPHY_CEREMONY("Trophy Ceremony"),
+    POST_MATCH("Post-Match"),
+    FULL_COVERAGE("Full Coverage");
 
-  private final String partName;
+    private final String partName;
 
-  PartIdentifier(@NotNull String partName) {
-    this.partName = partName;
-  }
-
-  public String getPartName() {
-    return partName;
-  }
-
-  @Override
-  public String toString() {
-    return getPartName();
-  }
-
-  public static PartIdentifier from(@NotNull String value) {
-    try {
-      return PartIdentifier.valueOf(value);
-    } catch (IllegalArgumentException e) {
-      return Arrays.stream(PartIdentifier.values())
-          .filter(name -> name.getPartName().equals(value))
-          .findAny()
-          .orElseThrow(() -> e);
+    PartIdentifier(@NotNull String partName) {
+        this.partName = partName;
     }
-  }
+
+    public static PartIdentifier from(@NotNull String value) {
+        try {
+            return PartIdentifier.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return Arrays.stream(PartIdentifier.values())
+                    .filter(name -> name.getPartName().equals(value))
+                    .findAny()
+                    .orElseThrow(() -> e);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return getPartName();
+    }
 }

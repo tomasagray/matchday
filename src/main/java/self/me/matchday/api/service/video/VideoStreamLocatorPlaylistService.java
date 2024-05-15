@@ -34,6 +34,8 @@ import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
+import static self.me.matchday.config.settings.VideoStorageLocation.VIDEO_STORAGE;
+
 @Service
 @PropertySource("classpath:video.properties")
 @Transactional
@@ -79,7 +81,7 @@ public class VideoStreamLocatorPlaylistService {
       throw new EmptyVideoFileSourceException(fileSource);
     }
 
-    final Path fileStorageLocation = settingsService.getSettings().getVideoStorageLocation();
+    final Path fileStorageLocation = settingsService.getSetting(VIDEO_STORAGE, Path.class);
     final UUID fileSrcId = fileSource.getFileSrcId();
     final Path storageLocation = fileStorageLocation.resolve(fileSrcId.toString());
     final VideoStreamLocatorPlaylist streamPlaylist =
@@ -105,7 +107,7 @@ public class VideoStreamLocatorPlaylistService {
 
     final List<VideoStreamLocatorPlaylist> playlists =
         playlistRepo.fetchPlaylistsForFileSrc(fileSrcId);
-    if (playlists != null && playlists.size() > 0) {
+    if (playlists != null && !playlists.isEmpty()) {
       // Return most recent playlist
       return Optional.of(playlists.get(0));
     }

@@ -19,9 +19,6 @@
 
 package self.me.matchday.api.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
@@ -30,6 +27,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class RootController {
@@ -74,5 +74,6 @@ public class RootController {
   }
 
   /** Container for root endpoint. */
-  private static class RootResource extends RepresentationModel<RootResource> {}
+  public static class RootResource extends RepresentationModel<RootResource> {
+  }
 }

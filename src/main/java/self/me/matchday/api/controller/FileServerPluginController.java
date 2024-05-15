@@ -19,8 +19,6 @@
 
 package self.me.matchday.api.controller;
 
-import java.io.IOException;
-import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -28,16 +26,13 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import self.me.matchday.api.resource.FileServerResource;
-import self.me.matchday.api.resource.FileServerResource.FileServerResourceAssembler;
+import org.springframework.web.bind.annotation.*;
+import self.me.matchday.api.resource.FileServerPluginResource;
+import self.me.matchday.api.resource.FileServerPluginResource.FileServerResourceAssembler;
 import self.me.matchday.api.service.FileServerPluginService;
+
+import java.io.IOException;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/file-servers")
@@ -60,7 +55,7 @@ public class FileServerPluginController {
       value = "/all",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public CollectionModel<FileServerResource> getAllFileServerPlugins() {
+  public CollectionModel<FileServerPluginResource> getAllFileServerPlugins() {
     return serverResourceAssembler.toCollectionModel(
         fileServerPluginService.getFileServerPlugins());
   }
@@ -69,7 +64,7 @@ public class FileServerPluginController {
       value = "/all/enabled",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public CollectionModel<FileServerResource> getEnabledFileServers() {
+  public CollectionModel<FileServerPluginResource> getEnabledFileServers() {
     return serverResourceAssembler.toCollectionModel(fileServerPluginService.getEnabledPlugins());
   }
 
@@ -77,7 +72,7 @@ public class FileServerPluginController {
       value = "/file-server/{id}",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<FileServerResource> getFileServerById(
+  public ResponseEntity<FileServerPluginResource> getFileServerById(
       @PathVariable("id") final UUID pluginId) {
 
     return fileServerPluginService
