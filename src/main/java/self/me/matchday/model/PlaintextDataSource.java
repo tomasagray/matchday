@@ -19,45 +19,46 @@
 
 package self.me.matchday.model;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
 import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Getter
 @ToString(callSuper = true)
 @Entity
 public final class PlaintextDataSource<T> extends DataSource<T> {
 
-  @Getter
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private final List<PatternKit<?>> patternKits = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private final List<PatternKit<?>> patternKits = new ArrayList<>();
 
-  public PlaintextDataSource() {
-    super();
-  }
+    public PlaintextDataSource() {
+        super();
+    }
 
-  public PlaintextDataSource(
-      @NotNull String title,
-      @NotNull URI baseUri,
-      @NotNull Class<T> clazz,
-      @NotNull List<PatternKit<?>> patternKits) {
-    super(title, baseUri, clazz);
-    this.patternKits.addAll(patternKits);
-  }
+    public PlaintextDataSource(
+            @NotNull String title,
+            @NotNull URI baseUri,
+            @NotNull Class<T> clazz,
+            @NotNull List<PatternKit<?>> patternKits) {
+        super(title, baseUri, clazz);
+        this.patternKits.addAll(patternKits);
+    }
 
-  @SuppressWarnings("unchecked cast")
-  public <S> List<PatternKit<? extends S>> getPatternKitsFor(@NotNull Class<S> clazz) {
+    @SuppressWarnings("unchecked cast")
+    public <S> List<PatternKit<? extends S>> getPatternKitsFor(@NotNull Class<S> clazz) {
 
-    return patternKits.stream()
-        .filter(patternKit -> patternKit.getClazz().equals(clazz))
-        .map(patternKit -> (PatternKit<? extends S>) patternKit)
-        .collect(Collectors.toList());
-  }
+        return patternKits.stream()
+                .filter(patternKit -> patternKit.getClazz().equals(clazz))
+                .map(patternKit -> (PatternKit<? extends S>) patternKit)
+                .collect(Collectors.toList());
+    }
 }

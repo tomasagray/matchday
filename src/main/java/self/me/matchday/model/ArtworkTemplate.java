@@ -19,180 +19,135 @@
 
 package self.me.matchday.model;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import java.util.List;
 
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "template")
 public class ArtworkTemplate {
 
-  private List<Layer> layer;
-  private int width;
-  private int height;
-
-  @XmlElement
-  public List<Layer> getLayer() {
-    return layer;
-  }
-
-  public void setLayer(List<Layer> layer) {
-    this.layer = layer;
-  }
-
-  @XmlAttribute
-  public int getWidth() {
-    return width;
-  }
-
-  public void setWidth(int width) {
-    this.width = width;
-  }
-
-  @XmlAttribute
-  public int getHeight() {
-    return height;
-  }
-
-  public void setHeight(int height) {
-    this.height = height;
-  }
-
-  @AllArgsConstructor
-  @NoArgsConstructor
-  public static class Layer {
-
-    private String name;
-    private List<Image> image;
-    private List<Shape> shape;
-
-    @XmlAttribute
-    public String getName() {
-      return name;
-    }
-
-    public void setName(String name) {
-      this.name = name;
-    }
-
-    @XmlElement
-    public List<Image> getImage() {
-      return image;
-    }
-
-    public void setImage(List<Image> image) {
-      this.image = image;
-    }
-
-    @XmlElement
-    public List<Shape> getShape() {
-      return shape;
-    }
-
-    public void setShape(List<Shape> shape) {
-      this.shape = shape;
-    }
-  }
-
-  @AllArgsConstructor
-  @NoArgsConstructor
-  public static class Image {
-
+    private List<Layer> layer;
     private int width;
     private int height;
-    private String src;
-    private Coordinate origin;
+
+    @XmlElement
+    public List<Layer> getLayer() {
+        return layer;
+    }
 
     @XmlAttribute
     public int getWidth() {
-      return width;
-    }
-
-    public void setWidth(int width) {
-      this.width = width;
+        return width;
     }
 
     @XmlAttribute
     public int getHeight() {
-      return height;
+        return height;
     }
 
-    public void setHeight(int height) {
-      this.height = height;
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Layer {
+
+        private String name;
+        private List<Image> image;
+        private List<Shape> shape;
+
+        @XmlAttribute
+        public String getName() {
+            return name;
+        }
+
+        @XmlElement
+        public List<Image> getImage() {
+            return image;
+        }
+
+        @XmlElement
+        public List<Shape> getShape() {
+            return shape;
+        }
+
     }
 
-    @XmlAttribute
-    public String getSrc() {
-      return src;
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Image {
+
+        private int width;
+        private int height;
+        private String src;
+        private Coordinate origin;
+
+        @XmlAttribute
+        public int getWidth() {
+            return width;
+        }
+
+        @XmlAttribute
+        public int getHeight() {
+            return height;
+        }
+
+        @XmlAttribute
+        public String getSrc() {
+            return src;
+        }
+
+        @XmlElement
+        public Coordinate getOrigin() {
+            return origin;
+        }
+
     }
 
-    public void setSrc(String src) {
-      this.src = src;
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Shape {
+
+        private String color;
+        private List<Coordinate> coords;
+
+        @XmlAttribute
+        public String getColor() {
+            return color;
+        }
+
+        @XmlElement
+        public List<Coordinate> getCoords() {
+            return coords;
+        }
+
     }
 
-    @XmlElement
-    public Coordinate getOrigin() {
-      return origin;
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Coordinate {
+
+        private int x;
+        private int y;
+
+        @XmlAttribute
+        public int getX() {
+            return x;
+        }
+
+        @XmlAttribute
+        public int getY() {
+            return y;
+        }
+
     }
-
-    public void setOrigin(Coordinate origin) {
-      this.origin = origin;
-    }
-  }
-
-  @AllArgsConstructor
-  @NoArgsConstructor
-  public static class Shape {
-
-    private String color;
-    private List<Coordinate> coords;
-
-    @XmlAttribute
-    public String getColor() {
-      return color;
-    }
-
-    public void setColor(String color) {
-      this.color = color;
-    }
-
-    @XmlElement
-    public List<Coordinate> getCoords() {
-      return coords;
-    }
-
-    public void setCoords(List<Coordinate> coords) {
-      this.coords = coords;
-    }
-  }
-
-  @AllArgsConstructor
-  @NoArgsConstructor
-  public static class Coordinate {
-
-    private int x;
-    private int y;
-
-    @XmlAttribute
-    public int getX() {
-      return x;
-    }
-
-    public void setX(int x) {
-      this.x = x;
-    }
-
-    @XmlAttribute
-    public int getY() {
-      return y;
-    }
-
-    public void setY(int y) {
-      this.y = y;
-    }
-  }
 }

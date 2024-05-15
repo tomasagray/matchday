@@ -22,51 +22,47 @@ package self.me.matchday.api.controller.converter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import self.me.matchday.model.Country;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
 @Component
 public class StringToCountryConverter implements Converter<String, Country> {
 
-  @Value("${artwork.flag-uri-format}")
-  private String FLAG_URI_FORMATTER;
+    @Value("${artwork.flag-uri-format}")
+    private String FLAG_URI_FORMATTER;
 
-  @Override
-  public Country convert(@NotNull String name) {
+    @Override
+    public Country convert(@NotNull String name) {
 
-    final List<Locale> locales =
-        Arrays.stream(Locale.getAvailableLocales())
-            .filter(locale -> locale.getDisplayCountry().equals(name))
-            .filter(locale -> locale.toString().matches("[a-z]{2}_[A-Z]{2}"))
-            .collect(Collectors.toList());
-    if (locales.size() > 0) {
-      try {
-        final Locale primaryLocale = locales.get(0);
-        final String countryCode = primaryLocale.getCountry();
-        final String flagPath = String.format(FLAG_URI_FORMATTER, countryCode);
-        return new Country(name, locales, flagPath);
-      } catch (RuntimeException e) {
-        e.printStackTrace();
-        throw e;
-      }
-    } else {
-      throw new IllegalArgumentException("No country matching: " + name);
+        final List<Locale> locales =
+                Arrays.stream(Locale.getAvailableLocales())
+                        .filter(locale -> locale.getDisplayCountry().equals(name))
+                        .filter(locale -> locale.toString().matches("[a-z]{2}_[A-Z]{2}"))
+                        .collect(Collectors.toList());
+        if (!locales.isEmpty()) {
+            final Locale primaryLocale = locales.get(0);
+            final String countryCode = primaryLocale.getCountry();
+            final String flagPath = String.format(FLAG_URI_FORMATTER, countryCode);
+            return new Country(name, locales, flagPath);
+        } else {
+            throw new IllegalArgumentException("No country matching: " + name);
+        }
     }
-  }
 
-  @Override
-  public JavaType getInputType(@NotNull TypeFactory typeFactory) {
-    return typeFactory.constructType(String.class);
-  }
+    @Override
+    public JavaType getInputType(@NotNull TypeFactory typeFactory) {
+        return typeFactory.constructType(String.class);
+    }
 
-  @Override
-  public JavaType getOutputType(@NotNull TypeFactory typeFactory) {
-    return typeFactory.constructType(Country.class);
-  }
+    @Override
+    public JavaType getOutputType(@NotNull TypeFactory typeFactory) {
+        return typeFactory.constructType(Country.class);
+    }
 }

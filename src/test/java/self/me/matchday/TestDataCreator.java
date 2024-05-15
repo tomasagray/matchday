@@ -77,8 +77,7 @@ public class TestDataCreator {
             HighlightService highlightService,
             CompetitionService competitionService,
             TeamService teamService,
-            FileServerUserService userService)
-            throws IOException {
+            FileServerUserService userService) {
         this.eventService = eventService;
         this.fileSrcRepository = fileSrcRepository;
         this.highlightService = highlightService;

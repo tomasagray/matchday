@@ -19,11 +19,6 @@
 
 package self.me.matchday.api.service;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Example;
@@ -35,10 +30,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.db.EventRepository;
-import self.me.matchday.model.*;
+import self.me.matchday.model.Competition;
+import self.me.matchday.model.Event;
 import self.me.matchday.model.Event.EventSorter;
+import self.me.matchday.model.Highlight;
+import self.me.matchday.model.Match;
 import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoPlaylist;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
@@ -89,7 +92,7 @@ public class EventService implements EntityService<Event, UUID> {
     @Override
     public List<Event> fetchAll() {
         final List<Event> events = eventRepository.findAll();
-        if (events.size() > 0) {
+        if (!events.isEmpty()) {
             events.forEach(this::initialize);
             events.sort(EVENT_SORTER);
         }

@@ -19,116 +19,112 @@
 
 package self.me.matchday.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
+
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Getter
 @Setter
 public class ArtworkCollection {
 
-  private ArtworkRole role;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private final Set<Artwork> collection = new LinkedHashSet<>();
+    private ArtworkRole role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private final Set<Artwork> collection = new LinkedHashSet<>();
+    @Getter
+    private int selectedIndex;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
-
-  private int selectedIndex;
-
-  public ArtworkCollection() {
-    this.role = null;
-  }
-
-  public ArtworkCollection(final ArtworkRole role) {
-    this.role = role;
-  }
-
-  public Artwork get(int index) {
-    return new ArrayList<>(collection).get(index);
-  }
-
-  public boolean setSelected(@NotNull Artwork artwork) {
-    final int selectedIndex = collection.size();
-    final boolean added = add(artwork);
-    if (added) {
-      setSelectedIndex(selectedIndex);
-    } else {
-      setSelectedIndex(indexOf(artwork));
+    public ArtworkCollection() {
+        this.role = null;
     }
-    return added;
-  }
 
-  public int getSelectedIndex() {
-    return this.selectedIndex;
-  }
-
-  public void setSelectedIndex(int index) {
-    final int size = collection.size();
-    if (index < 0 || (size > 0 && index >= size)) {
-      throw new IndexOutOfBoundsException("Invalid selectedIndex: " + index);
+    public ArtworkCollection(final ArtworkRole role) {
+        this.role = role;
     }
-    this.selectedIndex = index;
-  }
 
-  public Artwork getSelected() {
-    if (collection.size() == 0) {
-      return null;
+    public Artwork get(int index) {
+        return new ArrayList<>(collection).get(index);
     }
-    return get(selectedIndex);
-  }
 
-  public Artwork getById(@NotNull Long artworkId) {
-    return collection.stream()
-        .filter(artwork -> artworkId.equals(artwork.getId()))
-        .findFirst()
-        .orElseThrow(
-            () ->
-                new IllegalArgumentException(
-                    "No artwork in this collection with ID: " + artworkId));
-  }
-
-  public int indexOf(Artwork t) {
-    for (int i = 0; i < collection.size(); i++) {
-      final Artwork ti = get(i);
-      if (ti == null) {
-        if (t == null) {
-          return i;
+    public boolean setSelected(@NotNull Artwork artwork) {
+        final int selectedIndex = collection.size();
+        final boolean added = add(artwork);
+        if (added) {
+            setSelectedIndex(selectedIndex);
+        } else {
+            setSelectedIndex(indexOf(artwork));
         }
-      } else if (ti.equals(t)) {
-        return i;
-      }
+        return added;
     }
-    throw new IndexOutOfBoundsException("No such element: " + t);
-  }
 
-  public boolean add(Artwork artwork) {
-    return collection.add(artwork);
-  }
+    public void setSelectedIndex(int index) {
+        final int size = collection.size();
+        if (index < 0 || (size > 0 && index >= size)) {
+            throw new IndexOutOfBoundsException("Invalid selectedIndex: " + index);
+        }
+        this.selectedIndex = index;
+    }
 
-  public void addAll(Collection<Artwork> collection) {
-    this.collection.addAll(collection);
-  }
+    public Artwork getSelected() {
+        if (collection.isEmpty()) {
+            return null;
+        }
+        return get(selectedIndex);
+    }
 
-  public boolean remove(Artwork artwork) {
-    return collection.remove(artwork);
-  }
+    public Artwork getById(@NotNull Long artworkId) {
+        return collection.stream()
+                .filter(artwork -> artworkId.equals(artwork.getId()))
+                .findFirst()
+                .orElseThrow(
+                        () ->
+                                new IllegalArgumentException(
+                                        "No artwork in this collection with ID: " + artworkId));
+    }
 
-  public int size() {
-    return collection.size();
-  }
+    public int indexOf(Artwork t) {
+        for (int i = 0; i < collection.size(); i++) {
+            final Artwork ti = get(i);
+            if (ti == null) {
+                if (t == null) {
+                    return i;
+                }
+            } else if (ti.equals(t)) {
+                return i;
+            }
+        }
+        throw new IndexOutOfBoundsException("No such element: " + t);
+    }
 
-  @Override
-  public String toString() {
-    return String.format(
-        "ArtworkCollection{id=%s, size=%d, selectedIndex=%d]", id, size(), selectedIndex);
-  }
+    public boolean add(Artwork artwork) {
+        return collection.add(artwork);
+    }
+
+    public void addAll(Collection<Artwork> collection) {
+        this.collection.addAll(collection);
+    }
+
+    public boolean remove(Artwork artwork) {
+        return collection.remove(artwork);
+    }
+
+    public int size() {
+        return collection.size();
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "ArtworkCollection{id=%s, size=%d, selectedIndex=%d]", id, size(), selectedIndex);
+    }
 }
