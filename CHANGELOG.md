@@ -7,16 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
-### Added
+## [0.3.3] - 2024-05-15
 
 ### Fixed
+
+- Plugin state (enabled/disabled) now saved between application restarts
+- Fixed silent transaction rollback when one or more scanned Events is invalid
 
 ### Changed
 
 - Moved settings persistence from database to file
 - Decoupled settings
 
-## [0.3.1 - 0.3.2]
+## [0.3.1 - 0.3.2] - 2024-03-30
 
 ### Added
 
