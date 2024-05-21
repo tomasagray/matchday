@@ -64,7 +64,7 @@ public class BackupService {
 
     private static void analyzeReport(@NotNull SanityReport report) {
         SanityReport.ArtworkSanityReport artworkReport = report.getArtworkSanityReport();
-        List<String> danglingArtwork = artworkReport.getDanglingFiles();
+        List<Path> danglingArtwork = artworkReport.getDanglingFiles();
         if (!danglingArtwork.isEmpty()) {
             fail("Found dangling Artwork: " + danglingArtwork);
         }
@@ -77,7 +77,7 @@ public class BackupService {
         if (!danglingPlaylists.isEmpty()) {
             fail("Found dangling VideoStreamLocatorPlaylists: " + danglingPlaylists);
         }
-        List<VideoStreamLocator> danglingLocators = videoSanityReport.getDanglingStreamLocators();
+        List<? extends VideoStreamLocator> danglingLocators = videoSanityReport.getDanglingStreamLocators();
         if (!danglingLocators.isEmpty()) {
             fail("Found dangling VideoStreamLocators: " + danglingLocators);
         }

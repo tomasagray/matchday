@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -39,94 +40,99 @@ import self.me.matchday.model.video.VideoStreamLocator;
 @Service
 public class VideoStreamLocatorService {
 
-  private final VideoStreamLocatorRepo streamLocatorRepo;
-  private final VideoStreamStatusController streamStatusController;
-  private final SimpMessagingTemplate messagingTemplate;
+    private final VideoStreamLocatorRepo streamLocatorRepo;
+    private final VideoStreamStatusController streamStatusController;
+    private final SimpMessagingTemplate messagingTemplate;
 
-  @Value("${video-resources.playlist-name}")
-  private String PLAYLIST_NAME;
+    @Value("${video-resources.playlist-name}")
+    private String PLAYLIST_NAME;
 
-  public VideoStreamLocatorService(
-      final VideoStreamLocatorRepo streamLocatorRepo,
-      VideoStreamStatusController streamStatusController,
-      SimpMessagingTemplate messagingTemplate) {
-    this.streamLocatorRepo = streamLocatorRepo;
-    this.streamStatusController = streamStatusController;
-    this.messagingTemplate = messagingTemplate;
-  }
-
-  /**
-   * Get all playlist locators from database
-   *
-   * @return A List of VideoStreamPlaylistLocators
-   */
-  public List<VideoStreamLocator> getAllStreamLocators() {
-    return streamLocatorRepo.findAll();
-  }
-
-  /**
-   * Find a VideoStreamLocator in the database.
-   *
-   * @param streamLocatorId The ID of the video stream data locator
-   * @return An Optional of the playlist locator
-   */
-  public Optional<VideoStreamLocator> getStreamLocator(final Long streamLocatorId) {
-    return streamLocatorRepo.findById(streamLocatorId);
-  }
-
-  /**
-   * Find the latest video stream locator for a given video file
-   *
-   * @param videoFileId The ID of the video file representation
-   * @return The most recent stream locator for this video file, or Optional.empty();
-   */
-  public Optional<VideoStreamLocator> getStreamLocatorFor(@NotNull UUID videoFileId) {
-
-    final List<VideoStreamLocator> streamLocators =
-        streamLocatorRepo.getStreamLocatorsFor(videoFileId);
-    if (streamLocators.isEmpty()) {
-      return Optional.empty();
+    public VideoStreamLocatorService(
+            final VideoStreamLocatorRepo streamLocatorRepo,
+            VideoStreamStatusController streamStatusController,
+            SimpMessagingTemplate messagingTemplate) {
+        this.streamLocatorRepo = streamLocatorRepo;
+        this.streamStatusController = streamStatusController;
+        this.messagingTemplate = messagingTemplate;
     }
-    // return first (latest) locator
-    return Optional.of(streamLocators.get(0));
-  }
 
-  /**
-   * Creates a new VideoStreamLocator and saves it to database.
-   *
-   * @param storageLocation The Path of the data directory
-   * @param videoFile Video data for the stream
-   * @return The newly created VideoStreamLocator
-   */
-  public VideoStreamLocator createStreamLocator(
-      @NotNull final Path storageLocation, @NotNull final VideoFile videoFile) {
+    /**
+     * Get all playlist locators from database
+     *
+     * @return A List of VideoStreamPlaylistLocators
+     */
+    public List<VideoStreamLocator> getAllStreamLocators() {
+        return streamLocatorRepo.findAll();
+    }
 
-    final UUID fileId = videoFile.getFileId();
-    final Path playlistPath = storageLocation.resolve(fileId.toString()).resolve(PLAYLIST_NAME);
-    final SingleStreamLocator locator = new SingleStreamLocator(playlistPath, videoFile);
-    return streamLocatorRepo.save(locator);
-  }
+    /**
+     * Find a VideoStreamLocator in the database.
+     *
+     * @param streamLocatorId The ID of the video stream data locator
+     * @return An Optional of the playlist locator
+     */
+    public Optional<VideoStreamLocator> getStreamLocator(final Long streamLocatorId) {
+        return streamLocatorRepo.findById(streamLocatorId);
+    }
 
-  @Transactional
-  public void updateStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
-    streamLocatorRepo.saveAndFlush(streamLocator);
-    publishLocatorStatus(streamLocator);
-  }
+    /**
+     * Find the latest video stream locator for a given video file
+     *
+     * @param videoFileId The ID of the video file representation
+     * @return The most recent stream locator for this video file, or Optional.empty();
+     */
+    public Optional<VideoStreamLocator> getStreamLocatorFor(@NotNull UUID videoFileId) {
 
-  /**
-   * Delete the playlist locator
-   *
-   * @param streamLocator The playlist to be deleted
-   */
-  @Transactional
-  public void deleteStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
-    streamLocatorRepo.delete(streamLocator);
-    publishLocatorStatus(streamLocator);
-  }
+        final List<VideoStreamLocator> streamLocators =
+                streamLocatorRepo.getStreamLocatorsFor(videoFileId);
+        if (streamLocators.isEmpty()) {
+            return Optional.empty();
+        }
+        // return first (latest) locator
+        return Optional.of(streamLocators.get(0));
+    }
 
-  public void publishLocatorStatus(@NotNull VideoStreamLocator streamLocator) {
-    final UUID videoFileId = streamLocator.getVideoFile().getFileId();
-    messagingTemplate.convertAndSend(
-        VIDEO_STREAM_EMIT_ENDPOINT, streamStatusController.publishVideoStreamStatus(videoFileId));
-  }
+    /**
+     * Creates a new VideoStreamLocator and saves it to database.
+     *
+     * @param storageLocation The Path of the data directory
+     * @param videoFile Video data for the stream
+     * @return The newly created VideoStreamLocator
+     */
+    public VideoStreamLocator createStreamLocator(
+            @NotNull final Path storageLocation, @NotNull final VideoFile videoFile) {
+
+        final UUID fileId = videoFile.getFileId();
+        final Path playlistPath = storageLocation.resolve(fileId.toString()).resolve(PLAYLIST_NAME);
+        final SingleStreamLocator locator = new SingleStreamLocator(playlistPath, videoFile);
+        return streamLocatorRepo.save(locator);
+    }
+
+    @Transactional
+    public void updateStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
+        streamLocatorRepo.saveAndFlush(streamLocator);
+        publishLocatorStatus(streamLocator);
+    }
+
+    /**
+     * Delete the playlist locator
+     *
+     * @param streamLocator The playlist to be deleted
+     */
+    @Transactional
+    public void deleteStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
+        streamLocatorRepo.delete(streamLocator);
+        publishLocatorStatus(streamLocator);
+    }
+
+    @Transactional
+    public void deleteStreamLocator(@NotNull Long locatorId) {
+        streamLocatorRepo.deleteById(locatorId);
+    }
+
+    public void publishLocatorStatus(@NotNull VideoStreamLocator streamLocator) {
+        final UUID videoFileId = streamLocator.getVideoFile().getFileId();
+        messagingTemplate.convertAndSend(
+                VIDEO_STREAM_EMIT_ENDPOINT, streamStatusController.publishVideoStreamStatus(videoFileId));
+    }
 }

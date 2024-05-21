@@ -328,7 +328,6 @@ public class VideoStreamManager {
 
   private void deleteVideoDataFromDisk(@NotNull VideoStreamLocator streamLocator)
       throws IOException {
-
     final Path playlistPath = streamLocator.getPlaylistPath();
     final File playlistFile = playlistPath.toFile();
     // if the file doesn't exist, just return

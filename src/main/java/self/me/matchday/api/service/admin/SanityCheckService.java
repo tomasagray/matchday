@@ -19,14 +19,6 @@
 
 package self.me.matchday.api.service.admin;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -39,6 +31,15 @@ import self.me.matchday.model.SanityReport.ArtworkSanityReport.ArtworkSanityRepo
 import self.me.matchday.model.SanityReport.VideoSanityReport.VideoSanityReportBuilder;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static self.me.matchday.config.settings.ArtworkStorageLocation.ARTWORK_LOCATION;
 
@@ -58,10 +59,24 @@ public class SanityCheckService {
         this.settingsService = settingsService;
     }
 
+    private static boolean getRequiresHealing(
+            SanityReport.@NotNull ArtworkSanityReport artworkSanityReport,
+            SanityReport.@NotNull VideoSanityReport videoSanityReport) {
+        int errorCount = videoSanityReport.getDanglingPlaylists().size() +
+                videoSanityReport.getDanglingStreamLocators().size() +
+                artworkSanityReport.getDanglingDbEntries().size() +
+                artworkSanityReport.getDanglingFiles().size();
+        return errorCount > 0;
+    }
+
     public SanityReport createSanityReport() {
+        SanityReport.ArtworkSanityReport artworkSanityReport = createArtworkSanityReport();
+        SanityReport.VideoSanityReport videoSanityReport = createVideoSanityReport();
+        boolean requiresHealing = getRequiresHealing(artworkSanityReport, videoSanityReport);
         return SanityReport.builder()
-                .artworkSanityReport(createArtworkSanityReport())
-                .videoSanityReport(createVideoSanityReport())
+                .artworkSanityReport(artworkSanityReport)
+                .videoSanityReport(videoSanityReport)
+                .requiresHealing(requiresHealing)
                 .timestamp(Timestamp.from(Instant.now()))
                 .build();
     }
@@ -76,6 +91,57 @@ public class SanityCheckService {
         return findDanglingLocatorPlaylists(findDanglingVideoStreamLocators(reportBuilder)).build();
     }
 
+    // TODO: make this asynchronous task, report status via WebSocket
+    public SanityReport autoHealSystem(@NotNull SanityReport report) throws IOException {
+        SanityReport.ArtworkSanityReport healedArt = autoHealArtwork(report.getArtworkSanityReport());
+        SanityReport.VideoSanityReport healedVideos = autoHealVideos(report.getVideoSanityReport());
+        boolean requiresHealing = getRequiresHealing(healedArt, healedVideos);
+        return SanityReport.builder()
+                .artworkSanityReport(healedArt)
+                .videoSanityReport(healedVideos)
+                .requiresHealing(requiresHealing)
+                .timestamp(Timestamp.from(Instant.now()))
+                .build();
+    }
+
+    public SanityReport.ArtworkSanityReport autoHealArtwork(@NotNull SanityReport.ArtworkSanityReport report)
+            throws IOException {
+        List<Artwork> danglingDbEntries = report.getDanglingDbEntries();
+        for (Artwork artwork : danglingDbEntries) {
+            artworkService.deleteArtwork(artwork);
+        }
+
+        List<Path> danglingFiles = report.getDanglingFiles();
+        deleteArtworkFiles(danglingFiles);
+        return createArtworkSanityReport();
+    }
+
+    public void deleteArtworkFiles(@NotNull List<Path> danglingFiles) throws IOException {
+        for (Path art : danglingFiles) {
+            File artFile = art.toFile();
+            if (!artFile.exists()) continue;
+            boolean deleted = artFile.delete();
+            if (!deleted || artFile.exists()) {
+                throw new IOException("Could not delete Artwork file at: " + art);
+            }
+        }
+    }
+
+    public SanityReport.VideoSanityReport autoHealVideos(@NotNull SanityReport.VideoSanityReport report)
+            throws IOException {
+        List<? extends VideoStreamLocator> danglingStreamLocators = report.getDanglingStreamLocators();
+        for (VideoStreamLocator locator : danglingStreamLocators) {
+            videoStreamingService.deleteVideoStreamLocator(locator);
+        }
+
+        List<VideoStreamLocatorPlaylist> danglingPlaylists = report.getDanglingPlaylists();
+        for (VideoStreamLocatorPlaylist playlist : danglingPlaylists) {
+            videoStreamingService.deleteAllVideoData(playlist);
+        }
+
+        return createVideoSanityReport();
+    }
+
     /**
      * Finds files which reside in the Artwork storage path, but do not have a corresponding entry in the database.
      *
@@ -85,8 +151,7 @@ public class SanityCheckService {
     @Contract("_ -> param1")
     private @NotNull ArtworkSanityReportBuilder findDanglingArtworkFiles(
             @NotNull ArtworkSanityReportBuilder reportBuilder) {
-
-        final List<String> danglingFiles = new ArrayList<>();
+        final List<Path> danglingFiles = new ArrayList<>();
         // find all Artwork files
         final File storage = settingsService.getSetting(ARTWORK_LOCATION, Path.class).toFile();
         final File[] artworkFiles = storage.listFiles();
@@ -98,7 +163,7 @@ public class SanityCheckService {
                 final Optional<Artwork> artwork = artworkService.fetchArtworkAt(filepath);
                 if (artwork.isEmpty()) {
                     // artwork not in DB
-                    danglingFiles.add(filepath.toString());
+                    danglingFiles.add(filepath);
                 }
             }
         }
@@ -115,7 +180,6 @@ public class SanityCheckService {
     @Contract("_ -> param1")
     private @NotNull ArtworkSanityReportBuilder findDanglingEntries(
             @NotNull ArtworkSanityReportBuilder reportBuilder) {
-
         final List<Artwork> danglingEntries = new ArrayList<>();
         final List<Artwork> artworks = artworkService.fetchAllArtwork();
         // - add total Artwork count to report
@@ -142,7 +206,7 @@ public class SanityCheckService {
     private @NotNull VideoSanityReportBuilder findDanglingVideoStreamLocators(
             @NotNull VideoSanityReportBuilder reportBuilder) {
 
-        final List<VideoStreamLocator> danglingLocators = new ArrayList<>();
+        final List<SanityReport.DanglingVideoStreamLocator> danglingLocators = new ArrayList<>();
         final List<VideoStreamLocator> streamLocators =
                 videoStreamingService.fetchAllVideoStreamLocators();
         // - save total stream locators in database
@@ -151,7 +215,8 @@ public class SanityCheckService {
         for (final VideoStreamLocator locator : streamLocators) {
             final Path playlistPath = locator.getPlaylistPath();
             if (!playlistPath.toFile().exists()) {
-                danglingLocators.add(locator);
+                SanityReport.DanglingVideoStreamLocator dangler = new SanityReport.DanglingVideoStreamLocator(locator);
+                danglingLocators.add(dangler);
             }
         }
         // - add dangling locators
@@ -168,7 +233,6 @@ public class SanityCheckService {
     @Contract("_ -> param1")
     private @NotNull VideoSanityReportBuilder findDanglingLocatorPlaylists(
             @NotNull VideoSanityReportBuilder reportBuilder) {
-
         final List<VideoStreamLocatorPlaylist> danglingPlaylists = new ArrayList<>();
         final List<VideoStreamLocatorPlaylist> playlists = videoStreamingService.fetchAllPlaylists();
         // - save total count of playlists

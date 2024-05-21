@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.3.4] - 2024-05-21
+
+### Added
+
+- Can change log level at runtime
+- Auto-heal system based on Sanity Report
+
 ## [0.3.3] - 2024-05-15
 
 ### Fixed
