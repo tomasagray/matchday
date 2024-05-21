@@ -252,7 +252,6 @@ public class ArtworkService {
     }
 
     public void deleteArtwork(@NotNull Artwork artwork) throws IOException {
-
         Optional<ArtworkCollection> collectionOptional =
                 collectionRepository.getCollectionForArtwork(artwork);
         if (collectionOptional.isPresent()) {
@@ -281,6 +280,7 @@ public class ArtworkService {
     public void deleteArtworkFromDisk(Artwork artwork) throws IOException {
         if (artwork == null) return;
         final File artworkFile = artwork.getFile().toFile();
+        if (!artworkFile.exists()) return;
         final boolean deleted = artworkFile.delete();
         if (!deleted || artworkFile.exists()) {
             throw new IOException("Could not delete Artwork from disk: " + artwork);

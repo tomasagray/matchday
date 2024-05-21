@@ -53,8 +53,9 @@
         <include within="self.me.matchday.api.service.video.VideoStreamManager"/>
         <!-- admin services -->
         <include within="self.me.matchday.api.service.admin.ApplicationInfoService"/>
-        <include within="self.me.matchday.api.service.admin.DatabaseManagementService"/>
         <include within="self.me.matchday.api.service.admin.BackupService"/>
+        <include within="self.me.matchday.api.service.admin.DatabaseManagementService"/>
+        <include within="self.me.matchday.api.service.admin.SanityCheckService"/>
         <include within="self.me.matchday.api.service.admin.VpnService"/>
         <!-- plugin-->
         <include within="self.me.matchday.plugin.datasource.blogger.*"/>
@@ -80,6 +81,7 @@
         <aspect name="self.me.matchday.log.MatchDataParserLog"/>
         <aspect name="self.me.matchday.log.MatchServiceLog"/>
         <aspect name="self.me.matchday.log.PatternKitTemplateServiceLog"/>
+        <aspect name="self.me.matchday.log.SanityCheckServiceLog"/>
         <aspect name="self.me.matchday.log.ScheduledTaskServiceLog"/>
         <aspect name="self.me.matchday.log.SettingsServiceLog"/>
         <aspect name="self.me.matchday.log.SynonymServiceLog"/>

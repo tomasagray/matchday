@@ -19,14 +19,14 @@
 
 package self.me.matchday.api.controller;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
+
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.service.admin.SanityCheckService;
 import self.me.matchday.model.SanityReport;
 import self.me.matchday.model.video.VideoStreamLocator;
@@ -36,38 +36,47 @@ import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 @RequestMapping("/sanity-report")
 public class SanityReportController {
 
-  private final SanityCheckService sanityCheckService;
+    private final SanityCheckService sanityCheckService;
 
-  public SanityReportController(SanityCheckService sanityCheckService) {
-    this.sanityCheckService = sanityCheckService;
-  }
+    public SanityReportController(SanityCheckService sanityCheckService) {
+        this.sanityCheckService = sanityCheckService;
+    }
 
-  @GetMapping(value = "/generate/html", produces = MediaType.TEXT_HTML_VALUE)
-  public String generateSanityReport(@NotNull Model model) {
-    final SanityReport report = sanityCheckService.createSanityReport();
-    model.addAttribute("report", report);
-    model.addAttribute("danglingLocatorIds", getDanglingLocatorIds(report));
-    model.addAttribute("danglingPlaylistIds", getDanglingPlaylistIds(report));
-    return "sanity_report";
-  }
+    @GetMapping(value = "/generate/html", produces = MediaType.TEXT_HTML_VALUE)
+    public String generateSanityReport(@NotNull Model model) {
+        final SanityReport report = sanityCheckService.createSanityReport();
+        model.addAttribute("report", report);
+        model.addAttribute("danglingLocatorIds", getDanglingLocatorIds(report));
+        model.addAttribute("danglingPlaylistIds", getDanglingPlaylistIds(report));
+        return "sanity_report";
+    }
 
-  private String getDanglingLocatorIds(@NotNull SanityReport report) {
-    return report.getVideoSanityReport().getDanglingStreamLocators().stream()
-        .map(VideoStreamLocator::getStreamLocatorId)
-        .map(Object::toString)
-        .collect(Collectors.joining(", "));
-  }
+    private String getDanglingLocatorIds(@NotNull SanityReport report) {
+        return report.getVideoSanityReport().getDanglingStreamLocators().stream()
+                .map(VideoStreamLocator::getStreamLocatorId)
+                .map(Object::toString)
+                .collect(Collectors.joining(", "));
+    }
 
-  private String getDanglingPlaylistIds(@NotNull SanityReport report) {
-    return report.getVideoSanityReport().getDanglingPlaylists().stream()
-        .map(VideoStreamLocatorPlaylist::getId)
-        .map(Object::toString)
-        .collect(Collectors.joining(", "));
-  }
+    private String getDanglingPlaylistIds(@NotNull SanityReport report) {
+        return report.getVideoSanityReport().getDanglingPlaylists().stream()
+                .map(VideoStreamLocatorPlaylist::getId)
+                .map(Object::toString)
+                .collect(Collectors.joining(", "));
+    }
 
-  @GetMapping(value = "/generate/json", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ResponseBody
-  public SanityReport generateSanityReportJson() {
-    return sanityCheckService.createSanityReport();
-  }
+    @GetMapping(value = "/generate/json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public SanityReport generateSanityReportJson() {
+        return sanityCheckService.createSanityReport();
+    }
+
+    @PostMapping(value = "/auto-heal",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public SanityReport attemptAutoHeal(@RequestBody SanityReport report) throws IOException {
+        System.out.println("Report: " + report);
+        return sanityCheckService.autoHealSystem(report);
+    }
 }
