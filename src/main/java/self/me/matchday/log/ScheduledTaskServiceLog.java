@@ -55,7 +55,7 @@ public class ScheduledTaskServiceLog {
         logger.info("Pruning video data more than 2 weeks old...");
     }
 
-    @Around("execution(* self.me.matchday.api.service.ScheduledTaskService.videoDataIsStale(..))")
+    @Around("execution(* self.me.matchday.api.service.ScheduledTaskService.isVideoDataStale(..))")
     public Object logIsVideoDataStale(@NotNull ProceedingJoinPoint jp) throws Throwable {
         VideoStreamLocatorPlaylist playlist = (VideoStreamLocatorPlaylist) jp.getArgs()[0];
         Path storageLocation = playlist.getStorageLocation();
