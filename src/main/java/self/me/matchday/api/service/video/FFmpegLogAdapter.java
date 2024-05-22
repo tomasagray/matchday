@@ -19,12 +19,15 @@
 
 package self.me.matchday.api.service.video;
 
-import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.video.StreamJobState.JobStatus;
 import self.me.matchday.model.video.VideoStreamLocator;
+
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Receives log emissions from FFMPEG, interprets them and updates the specified VideoStreamLocator
@@ -32,62 +35,68 @@ import self.me.matchday.model.video.VideoStreamLocator;
  */
 public class FFmpegLogAdapter implements Consumer<String> {
 
-  private static final Pattern durationPattern = Pattern.compile("^\\s*Duration: ([\\d:.]*)");
-  private static final Pattern timeProgressPattern =
-      Pattern.compile(
-          "frame=(\\s*\\d+) fps=(\\s*[\\d.]+) q=([\\d-.]*) size=([\\w/]*) time=([\\d:.]*) bitrate=([\\w/])* speed=([\\d.]*x)");
+    private static final Pattern DURATION_PATTERN = Pattern.compile("^\\s*Duration: ([\\d:.]*)");
+    private static final Pattern LOG_LINE_PATTERN = Pattern.compile("(\\w+=\\s*[\\w:.\\-/]+)");
+    private static final Pattern TIME_PATTERN = Pattern.compile("((?:[\\d.]+:)+[\\d.]+)");
 
-  private final VideoStreamLocatorService locatorService;
-  private final VideoStreamLocator streamLocator;
-  private long streamDuration;
+    private final VideoStreamLocatorService locatorService;
+    private final VideoStreamLocator streamLocator;
+    private long streamDuration;
 
-  public FFmpegLogAdapter(
-      @NotNull final VideoStreamLocatorService locatorService,
-      @NotNull final VideoStreamLocator streamLocator) {
-    this.locatorService = locatorService;
-    this.streamLocator = streamLocator;
-  }
-
-  @Override
-  public void accept(String data) {
-
-    // compute job % done
-    final Matcher durationMatcher = durationPattern.matcher(data);
-    final Matcher timeProgressMatcher = timeProgressPattern.matcher(data);
-
-    // if it's the "duration" line
-    if (durationMatcher.find()) {
-      final String duration = durationMatcher.group(1);
-      streamDuration = parseLogTime(duration);
-    } else if (timeProgressMatcher.find()) {
-      final String time = timeProgressMatcher.group(5);
-      final long progress = parseLogTime(time);
-      final double completionRatio = (progress / (double) streamDuration);
-      updateStreamLocatorState(completionRatio);
+    public FFmpegLogAdapter(VideoStreamLocatorService locatorService, VideoStreamLocator streamLocator) {
+        this.locatorService = locatorService;
+        this.streamLocator = streamLocator;
     }
-  }
 
-  private long parseLogTime(@NotNull final String data) {
-
-    final Pattern pattern = Pattern.compile("(\\d{2}):(\\d{2}):(\\d{2})([\\d.]*)");
-    final Matcher matcher = pattern.matcher(data);
-
-    if (matcher.find()) {
-      final long hours = Integer.parseInt(matcher.group(1));
-      final long mins = Integer.parseInt(matcher.group(2));
-      final long secs = Integer.parseInt(matcher.group(3));
-      final String nanoStr = matcher.group(4);
-      long nanos = 0;
-      if (!nanoStr.isEmpty()) {
-        nanos = (long) (Double.parseDouble(nanoStr) * 1_000d);
-      }
-      return (hours * 60 * 60 * 1_000) + (mins * 60 * 1_000) + (secs * 1_000) + nanos;
+    /**
+     * Find the stream time within a log line. Assumes Matcher.find() has already been
+     * called at least once.
+     *
+     * @param matcher The pattern matcher for the log line
+     * @return The number of milliseconds streamed thus far or 0 if unable to determine
+     */
+    private static long parseTime(@NotNull Matcher matcher) {
+        do {
+            String data = matcher.group();  // get the next match
+            Matcher timeMatcher = TIME_PATTERN.matcher(data);
+            if (timeMatcher.find()) {
+                return parseLogTime(timeMatcher.group());
+            }
+        } while (matcher.find());
+        return 0;
     }
-    return 0;
-  }
 
-  private void updateStreamLocatorState(final double completionRatio) {
-    streamLocator.updateState(JobStatus.STREAMING, completionRatio);
-    locatorService.updateStreamLocator(streamLocator);
-  }
+    /**
+     * Reads a time String and returns the number of milliseconds that time represents
+     * @param data A String representing a time, e.g., 00:13:43.32 or 00:00
+     * @return The number of milliseconds for the given time
+     */
+    private static long parseLogTime(@NotNull final String data) {
+        final Matcher matcher = TIME_PATTERN.matcher(data);
+        if (matcher.find()) {
+            LocalTime time = LocalTime.parse(matcher.group());
+            return time.getLong(ChronoField.MILLI_OF_DAY);
+        }
+        return 0;
+    }
+
+    @Override
+    public void accept(String data) {
+        Matcher durationMatcher = DURATION_PATTERN.matcher(data);
+        Matcher dataMatcher = LOG_LINE_PATTERN.matcher(data);
+
+        if (durationMatcher.find()) {
+            String duration = durationMatcher.group(1);
+            streamDuration = parseLogTime(duration);
+        } else if (streamDuration > 0 && dataMatcher.find()) {
+            long progress = parseTime(dataMatcher);
+            final double completionRatio = (progress / (double) streamDuration);
+            updateStreamLocatorState(completionRatio);
+        }
+    }
+
+    private void updateStreamLocatorState(final double completionRatio) {
+        streamLocator.updateState(JobStatus.STREAMING, completionRatio);
+        locatorService.updateStreamLocator(streamLocator);
+    }
 }
