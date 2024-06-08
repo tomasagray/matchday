@@ -26,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.db.VideoStreamLocatorRepo;
 import self.me.matchday.model.video.StreamJobState.JobStatus;
 import self.me.matchday.model.video.TaskState;
@@ -52,9 +51,7 @@ public class VideoStreamStatusController {
 
     @MessageMapping(RECEIVE_ENDPOINT)
     @SendTo(VIDEO_STREAM_EMIT_ENDPOINT)
-    @Transactional
     public VideoStreamStatusMessage publishVideoStreamStatus(@NotNull UUID videoFileId) {
-
         final VideoStreamLocator streamLocator = getStreamLocatorFor(videoFileId);
         if (streamLocator != null) {
             final TaskState state = streamLocator.getState();

@@ -87,6 +87,7 @@ public class EventController {
     return ResponseEntity.ok(resource);
   }
 
+  // TODO: move to VideoStreamingController
   @RequestMapping(
       value = {"/event/{eventId}/video"},
       method = RequestMethod.GET)

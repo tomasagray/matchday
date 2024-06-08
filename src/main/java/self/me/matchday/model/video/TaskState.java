@@ -19,17 +19,22 @@
 
 package self.me.matchday.model.video;
 
-import javax.persistence.Entity;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import javax.persistence.Entity;
 
 @Getter
 @Setter
 @ToString(callSuper = true)
 @AllArgsConstructor
-@Builder
 @Entity
-public class TaskState extends StreamJobState {}
+public class TaskState extends StreamJobState {
+
+    public TaskState(JobStatus status, Double completionRatio) {
+        this.status = status;
+        this.completionRatio = completionRatio;
+    }
+}

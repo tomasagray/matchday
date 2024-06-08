@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,31 +39,30 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 public class TaskListState extends StreamJobState {
 
-  @OneToMany(cascade = CascadeType.ALL)
-  private final List<TaskState> taskStates = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    private final List<TaskState> taskStates = new ArrayList<>();
 
-  public void addTaskState(@NotNull TaskState state) {
-    taskStates.add(state);
-  }
-
-  public void removeTaskState(@NotNull TaskState state) {
-    taskStates.remove(state);
-  }
-
-  public void computeState() {
-
-    Double aggregateCompletionTotal = 0.0;
-    for (final TaskState state : getTaskStates()) {
-      final JobStatus status = state.getStatus();
-      if (status.equals(JobStatus.STOPPED) || status.equals(JobStatus.ERROR)) {
-        setStatus(status);
-        return;
-      } else if (status.compareTo(this.getStatus()) > 0) {
-        setStatus(status);
-      }
-      aggregateCompletionTotal += state.getCompletionRatio();
+    public void addTaskState(@NotNull TaskState state) {
+        taskStates.add(state);
     }
-    final double playlistCompletionRatio = aggregateCompletionTotal / taskStates.size();
-    setCompletionRatio(playlistCompletionRatio);
-  }
+
+    public void removeTaskState(@NotNull TaskState state) {
+        taskStates.remove(state);
+    }
+
+    public void computeState() {
+        Double aggregateCompletionTotal = 0.0;
+        for (TaskState state : getTaskStates()) {
+            JobStatus status = state.getStatus();
+            if (status.equals(JobStatus.STOPPED) || status.equals(JobStatus.ERROR)) {
+                setStatus(status);
+                return;
+            } else if (status.compareTo(this.getStatus()) > 0) {
+                setStatus(status);
+            }
+            aggregateCompletionTotal += state.getCompletionRatio();
+        }
+        double playlistCompletionRatio = aggregateCompletionTotal / taskStates.size();
+        setCompletionRatio(playlistCompletionRatio);
+    }
 }

@@ -39,12 +39,12 @@ public abstract class StreamJobState {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private JobStatus status = JobStatus.CREATED;
-  private Double completionRatio = 0.0;
+  protected JobStatus status = JobStatus.CREATED;
+  protected Double completionRatio = 0.0;
 
   @Column(columnDefinition = "LONGTEXT")
   @Convert(converter = VideoStreamingErrorConverter.class)
-  private VideoStreamingError error;
+  protected VideoStreamingError error;
 
   @Override
   public boolean equals(Object o) {

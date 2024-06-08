@@ -19,16 +19,18 @@
 
 package self.me.matchday.model.video;
 
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.Objects;
-import javax.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.db.converter.PathConverter;
+import self.me.matchday.model.video.StreamJobState.JobStatus;
+
+import javax.persistence.*;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -37,48 +39,51 @@ import self.me.matchday.db.converter.PathConverter;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class VideoStreamLocator {
 
-  @EqualsAndHashCode.Exclude protected final Instant timestamp = Instant.now();
-  @Id @GeneratedValue protected Long streamLocatorId;
+    @Id
+    @GeneratedValue
+    protected Long streamLocatorId;
 
-  @Convert(converter = PathConverter.class)
-  protected Path playlistPath;
-  @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
-  protected VideoFile videoFile;
+    @EqualsAndHashCode.Exclude
+    protected final Instant timestamp = Instant.now();
 
-  @OneToOne(cascade = CascadeType.ALL)
-  protected TaskState state = TaskState.builder().build();
+    @Convert(converter = PathConverter.class)
+    protected Path playlistPath;
 
-  public void updateState(
-      @NotNull final StreamJobState.JobStatus status, final Double completionRatio) {
-    this.state.setStatus(status);
-    this.state.setCompletionRatio(completionRatio);
-  }
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    protected VideoFile videoFile;
 
-  public void updateState(
-      @NotNull StreamJobState.JobStatus status, Double completionRatio, VideoStreamingError error) {
-    updateState(status, completionRatio);
-    this.state.setError(error);
-  }
+    @OneToOne(cascade = CascadeType.ALL)
+    protected TaskState state = new TaskState();
 
-  @Override
-  public String toString() {
-    return String.format(
-        "<<VideoStreamLocator>>(streamLocatorId=[%s], playlistPath=[%s], timestamp=[%s], VideoFile=[%s], state=[%s])",
-        streamLocatorId, playlistPath, timestamp, videoFile, state);
-  }
+    public void updateState(@NotNull JobStatus status, Double completionRatio) {
+        this.state.setStatus(status);
+        this.state.setCompletionRatio(completionRatio);
+    }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(playlistPath, timestamp, videoFile, state);
-  }
+    public void updateState(@NotNull JobStatus status, Double completionRatio, VideoStreamingError error) {
+        updateState(status, completionRatio);
+        this.state.setError(error);
+    }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof final VideoStreamLocator that)) return false;
-    return Objects.equals(getPlaylistPath(), that.getPlaylistPath())
-        && Objects.equals(getTimestamp(), that.getTimestamp())
-        && Objects.equals(getVideoFile(), that.getVideoFile())
-        && Objects.equals(getState(), that.getState());
-  }
+    @Override
+    public String toString() {
+        return String.format(
+                "<<VideoStreamLocator>>(streamLocatorId=[%s], playlistPath=[%s], timestamp=[%s], VideoFile=[%s], state=[%s])",
+                streamLocatorId, playlistPath, timestamp, videoFile, state);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(playlistPath, timestamp, videoFile, state);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof final VideoStreamLocator that)) return false;
+        return Objects.equals(getPlaylistPath(), that.getPlaylistPath())
+                && Objects.equals(getTimestamp(), that.getTimestamp())
+                && Objects.equals(getVideoFile(), that.getVideoFile())
+                && Objects.equals(getState(), that.getState());
+    }
 }

@@ -19,23 +19,24 @@
 
 package self.me.matchday.api.service.video;
 
-import static self.me.matchday.api.controller.VideoStreamStatusController.VIDEO_STREAM_EMIT_ENDPOINT;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.api.controller.VideoStreamStatusController;
+import self.me.matchday.api.controller.VideoStreamStatusController.VideoStreamStatusMessage;
 import self.me.matchday.db.VideoStreamLocatorRepo;
 import self.me.matchday.model.video.SingleStreamLocator;
 import self.me.matchday.model.video.VideoFile;
 import self.me.matchday.model.video.VideoStreamLocator;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static self.me.matchday.api.controller.VideoStreamStatusController.VIDEO_STREAM_EMIT_ENDPOINT;
 
 @Service
 public class VideoStreamLocatorService {
@@ -48,8 +49,7 @@ public class VideoStreamLocatorService {
     private String PLAYLIST_NAME;
 
     public VideoStreamLocatorService(
-            final VideoStreamLocatorRepo streamLocatorRepo,
-            VideoStreamStatusController streamStatusController,
+            VideoStreamLocatorRepo streamLocatorRepo, VideoStreamStatusController streamStatusController,
             SimpMessagingTemplate messagingTemplate) {
         this.streamLocatorRepo = streamLocatorRepo;
         this.streamStatusController = streamStatusController;
@@ -99,40 +99,31 @@ public class VideoStreamLocatorService {
      * @param videoFile Video data for the stream
      * @return The newly created VideoStreamLocator
      */
-    public VideoStreamLocator createStreamLocator(
-            @NotNull final Path storageLocation, @NotNull final VideoFile videoFile) {
-
+    public VideoStreamLocator createStreamLocator(@NotNull Path storageLocation, @NotNull VideoFile videoFile) {
         final UUID fileId = videoFile.getFileId();
         final Path playlistPath = storageLocation.resolve(fileId.toString()).resolve(PLAYLIST_NAME);
         final SingleStreamLocator locator = new SingleStreamLocator(playlistPath, videoFile);
         return streamLocatorRepo.save(locator);
     }
 
-    @Transactional
-    public void updateStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
+    public void updateStreamLocator(@NotNull VideoStreamLocator streamLocator) {
         streamLocatorRepo.saveAndFlush(streamLocator);
-        publishLocatorStatus(streamLocator);
     }
 
     /**
-     * Delete the playlist locator
+     * Delete the stream locator
      *
      * @param streamLocator The playlist to be deleted
      */
     @Transactional
-    public void deleteStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
-        streamLocatorRepo.delete(streamLocator);
+    public void deleteStreamLocator(@NotNull VideoStreamLocator streamLocator) {
+        streamLocatorRepo.deleteById(streamLocator.getStreamLocatorId());
         publishLocatorStatus(streamLocator);
     }
 
-    @Transactional
-    public void deleteStreamLocator(@NotNull Long locatorId) {
-        streamLocatorRepo.deleteById(locatorId);
-    }
-
     public void publishLocatorStatus(@NotNull VideoStreamLocator streamLocator) {
-        final UUID videoFileId = streamLocator.getVideoFile().getFileId();
-        messagingTemplate.convertAndSend(
-                VIDEO_STREAM_EMIT_ENDPOINT, streamStatusController.publishVideoStreamStatus(videoFileId));
+        UUID videoFileId = streamLocator.getVideoFile().getFileId();
+        VideoStreamStatusMessage message = streamStatusController.publishVideoStreamStatus(videoFileId);
+        messagingTemplate.convertAndSend(VIDEO_STREAM_EMIT_ENDPOINT, message);
     }
 }

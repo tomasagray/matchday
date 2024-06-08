@@ -21,10 +21,12 @@ package self.me.matchday.api.service.video;
 
 import org.jetbrains.annotations.NotNull;
 import self.me.matchday.model.video.StreamJobState.JobStatus;
+import self.me.matchday.model.video.TaskState;
 import self.me.matchday.model.video.VideoStreamLocator;
 
 import java.time.LocalTime;
 import java.time.temporal.ChronoField;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,13 +41,13 @@ public class FFmpegLogAdapter implements Consumer<String> {
     private static final Pattern LOG_LINE_PATTERN = Pattern.compile("(\\w+=\\s*[\\w:.\\-/]+)");
     private static final Pattern TIME_PATTERN = Pattern.compile("((?:[\\d.]+:)+[\\d.]+)");
 
-    private final VideoStreamLocatorService locatorService;
+    private final BiConsumer<VideoStreamLocator, TaskState> onUpdate;
     private final VideoStreamLocator streamLocator;
     private long streamDuration;
 
-    public FFmpegLogAdapter(VideoStreamLocatorService locatorService, VideoStreamLocator streamLocator) {
-        this.locatorService = locatorService;
+    public FFmpegLogAdapter(VideoStreamLocator streamLocator, BiConsumer<VideoStreamLocator, TaskState> onUpdate) {
         this.streamLocator = streamLocator;
+        this.onUpdate = onUpdate;
     }
 
     /**
@@ -90,13 +92,12 @@ public class FFmpegLogAdapter implements Consumer<String> {
             streamDuration = parseLogTime(duration);
         } else if (streamDuration > 0 && dataMatcher.find()) {
             long progress = parseTime(dataMatcher);
-            final double completionRatio = (progress / (double) streamDuration);
+            double completionRatio = (progress / (double) streamDuration);
             updateStreamLocatorState(completionRatio);
         }
     }
 
-    private void updateStreamLocatorState(final double completionRatio) {
-        streamLocator.updateState(JobStatus.STREAMING, completionRatio);
-        locatorService.updateStreamLocator(streamLocator);
+    private void updateStreamLocatorState(double completionRatio) {
+        onUpdate.accept(streamLocator, new TaskState(JobStatus.STREAMING, completionRatio));
     }
 }

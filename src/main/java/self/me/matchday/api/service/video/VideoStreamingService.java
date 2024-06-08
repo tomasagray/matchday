@@ -100,9 +100,7 @@ public class VideoStreamingService {
      * @return An Optional containing the playlist, if one was found; empty indicates one is being
      *     created
      */
-    public Optional<VideoPlaylist> getOrCreateVideoStreamPlaylist(
-            @NotNull Event event, @NotNull final UUID fileSrcId) {
-
+    public Optional<VideoPlaylist> getOrCreateVideoStreamPlaylist(@NotNull Event event, @NotNull UUID fileSrcId) {
         final VideoFileSource videoFileSource = event.getFileSource(fileSrcId);
         if (videoFileSource != null) {
             return videoStreamManager
@@ -122,7 +120,6 @@ public class VideoStreamingService {
             @NotNull UUID eventId,
             @NotNull UUID fileSrcId,
             @NotNull VideoStreamLocatorPlaylist playlist) {
-
         final VideoPlaylist videoPlaylist = new VideoPlaylist(eventId, fileSrcId);
         playlist
                 .getStreamLocators()
@@ -143,7 +140,6 @@ public class VideoStreamingService {
      */
     public @NotNull VideoStreamLocatorPlaylist createVideoStream(
             @NotNull final VideoFileSource videoFileSource) {
-
         final VideoStreamLocatorPlaylist playlist =
                 videoStreamManager.createVideoStreamFrom(videoFileSource);
         videoStreamManager.queueStreamJobs(playlist);
@@ -230,8 +226,7 @@ public class VideoStreamingService {
     }
 
     public void deleteVideoData(@NotNull UUID videoFileId) throws IOException {
-        final Optional<VideoStreamLocator> locatorOptional =
-                locatorService.getStreamLocatorFor(videoFileId);
+        final Optional<VideoStreamLocator> locatorOptional = locatorService.getStreamLocatorFor(videoFileId);
         if (locatorOptional.isPresent()) {
             final VideoStreamLocator locator = locatorOptional.get();
             videoStreamManager.deleteStreamLocatorWithData(locator);
@@ -241,7 +236,7 @@ public class VideoStreamingService {
     }
 
     public void deleteVideoStreamLocator(@NotNull VideoStreamLocator locator) {
-        locatorService.deleteStreamLocator(locator.getStreamLocatorId());
+        locatorService.deleteStreamLocator(locator);
     }
 
     public VideoFileSource addOrUpdateVideoSource(
