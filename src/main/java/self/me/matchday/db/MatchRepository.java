@@ -19,25 +19,26 @@
 
 package self.me.matchday.db;
 
-import java.util.List;
-import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import self.me.matchday.model.Match;
 
+import java.util.List;
+import java.util.UUID;
+
 @Repository
 public interface MatchRepository extends JpaRepository<Match, UUID> {
 
-  /**
-   * Retrieve all Events associated with the specified Team.
-   *
-   * @param teamId The name of the Team.
-   * @return A List of Events which include this Team.
-   */
-  @Query(
-      "SELECT mt FROM MatchGame mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
-          + "WHERE ht.id = :teamId OR at.id = :teamId ORDER BY mt.date DESC")
-  List<Match> fetchMatchesByTeam(@Param("teamId") UUID teamId);
+    /**
+     * Retrieve all Events associated with the specified Team.
+     *
+     * @param teamId The name of the Team.
+     * @return A List of Events which include this Team.
+     */
+    @Query(
+            "SELECT mt FROM MatchGame mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
+                    + "WHERE ht.id = :teamId OR at.id = :teamId ORDER BY mt.date DESC")
+    List<Match> fetchMatchesByTeam(@Param("teamId") UUID teamId);
 }

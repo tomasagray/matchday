@@ -93,7 +93,6 @@ public class TestDataCreator {
 
     public static void deleteGeneratedMatchArtwork(@NotNull Collection<Event> cleanupData)
             throws IOException {
-
         logger.info("Attempting to delete: {} test-generated files...", cleanupData.size());
         for (Event event : cleanupData) {
             final File file = event.getArtwork().getFile().toFile();
@@ -122,7 +121,6 @@ public class TestDataCreator {
 
     private <T> @NotNull DataSource<T> readTestDataSource(@NotNull String filename)
             throws IOException {
-
         final String dataSourceJson = ResourceFileReader.readTextResource(filename);
         final Type type = new TypeReference<PlaintextDataSource<T>>() {
         }.getType();
@@ -138,7 +136,6 @@ public class TestDataCreator {
     }
 
     public @NotNull PatternKit<Event> createEventPatternKitManually(@NotNull String regex) {
-
         final PatternKit<Event> patternKit = new PatternKit<>(Event.class);
         patternKit.setPattern(Pattern.compile(regex, Pattern.UNICODE_CASE));
 
@@ -154,7 +151,6 @@ public class TestDataCreator {
     }
 
     public PatternKit<Event> createEventPatternKitFromFile() throws IOException {
-
         final String patternKitData =
                 ResourceFileReader.readTextResource("data/test_event_pattern_kit.json");
         final Type type = new TypeToken<PatternKit<Event>>() {
@@ -166,7 +162,6 @@ public class TestDataCreator {
 
     @NotNull
     public PatternKit<VideoFileSource> createFileSourcePatternKitManually() {
-
         final Pattern pattern =
                 Pattern.compile(
                         "Channel[\\s\\p{L}]*:? ([\\p{L}\\s+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\d-]*) "
@@ -207,7 +202,6 @@ public class TestDataCreator {
     }
 
     public PatternKit<VideoFileSource> createFileSourcePatternFromFile() throws IOException {
-
         final String patternKitData =
                 ResourceFileReader.readTextResource("data/datasource/test_filesource_pattern_kit.json");
         final Type type = new TypeToken<PatternKit<VideoFileSource>>() {
@@ -224,7 +218,6 @@ public class TestDataCreator {
     @Transactional
     @NotNull
     public Match createTestMatch(@NotNull String name) {
-
         final Competition testCompetition =
                 createTestCompetition("Competition " + getRandomizedName(name, 100, 1000));
         final Team homeTeam = createTestTeam("Home Team " + getRandomizedName(name, 10_000, 100_000));
@@ -285,23 +278,22 @@ public class TestDataCreator {
 
     public VideoFileSource createVideoFileSource() {
         final int fileSetCount = 1;
-
         final List<VideoFilePack> videoFilePacks = createTestVideoFiles(fileSetCount);
+        final String testChannel = "Test Channel " + getRandomNumber(0, 10);
+        Long filesize = FileSize.ofGigabytes(getRandomNumber(8, 16));
+        long videoBitrate = getRandomNumber(8, 10) * 1_000L;
         return VideoFileSource.builder()
-                //        .fileSrcId(UUID.randomUUID())
-                .channel("Test Channel")
+                .channel(testChannel)
                 .resolution(R_1080p)
                 .languages("English")
-                .videoBitrate(8_000L)
+                .videoBitrate(videoBitrate)
                 .videoFilePacks(videoFilePacks)
-                .filesize(FileSize.ofGigabytes(8))
+                .filesize(filesize)
                 .build();
     }
 
     public @NotNull List<VideoFilePack> createTestVideoFiles(final int count) {
-
         List<VideoFilePack> videoFiles = new ArrayList<>();
-
         for (int i = 0; i < count; ++i) {
             URL preMatchUrl = getPreMatchUrl();
             URL firstHalfUrl = getFirstHalfUrl();
@@ -362,7 +354,6 @@ public class TestDataCreator {
     @Transactional
     @NotNull
     public FileServerUser createTestFileServerUser() {
-
         // ensure different userdata each time
         final String username = String.format("user-%s@server.com", numGen.nextInt(Integer.MAX_VALUE));
         final String password = String.format("password-%s", numGen.nextInt(Integer.MAX_VALUE));
@@ -374,7 +365,6 @@ public class TestDataCreator {
 
     @Transactional
     public Highlight createHighlightShow() {
-
         // Create test highlight show
         //    final String title = "Test Highlight Show " + numGen.nextInt();
         final Competition testCompetition = createTestCompetition();

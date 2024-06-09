@@ -211,15 +211,13 @@ public class MatchService implements EntityService<Match, UUID> {
     }
 
     private @NotNull Example<Match> getExampleEvent(@NotNull Match match) {
-
-        final Match exampleEvent =
-                Match.builder()
-                        .competition(match.getCompetition())
-                        .season(match.getSeason())
-                        .fixture(match.getFixture())
-                        .homeTeam(match.getHomeTeam())
-                        .awayTeam(match.getAwayTeam())
-                        .build();
+        final Match exampleEvent = Match.builder()
+                .competition(match.getCompetition())
+                .season(match.getSeason())
+                .fixture(match.getFixture())
+                .homeTeam(match.getHomeTeam())
+                .awayTeam(match.getAwayTeam())
+                .build();
         return Example.of(exampleEvent);
     }
 

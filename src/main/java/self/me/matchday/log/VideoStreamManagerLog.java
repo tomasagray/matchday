@@ -19,8 +19,6 @@
 
 package self.me.matchday.log;
 
-import java.time.Duration;
-import java.time.Instant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -37,69 +35,54 @@ import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 @Aspect
 public class VideoStreamManagerLog {
 
-  private static final Logger logger = LogManager.getLogger(VideoStreamManager.class);
+    private static final Logger logger = LogManager.getLogger(VideoStreamManager.class);
 
-  @Around(
-      "execution(* self.me.matchday.api.service.video.VideoStreamManager.createVideoStreamFrom(..))")
-  public Object logCreateVideoStreamFrom(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    final VideoFileSource fileSource = (VideoFileSource) jp.getArgs()[0];
-    logger.info("Creating video stream from VideoFileSource: {}", fileSource.getFileSrcId());
-    final Object result = jp.proceed();
-    logger.info("Produced playlist: {}", result);
-    return result;
-  }
+    @Around(
+            "execution(* self.me.matchday.api.service.video.VideoStreamManager.createVideoStreamFrom(..))")
+    public Object logCreateVideoStreamFrom(@NotNull ProceedingJoinPoint jp) throws Throwable {
+        final VideoFileSource fileSource = (VideoFileSource) jp.getArgs()[0];
+        logger.info("Creating video stream from VideoFileSource: {}", fileSource.getFileSrcId());
+        final Object result = jp.proceed();
+        logger.info("Produced playlist: {}", result);
+        return result;
+    }
 
-  @Around(
-      "execution(* self.me.matchday.api.service.video.VideoStreamManager.getLocalStreamFor(..))")
-  public Object logGetLocalStreamFor(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    final Object arg = jp.getArgs()[0];
-    logger.info("Getting local stream for File Source: {}", arg);
-    final Object result = jp.proceed();
-    logger.info("Got local stream: {} for File Source: {}", result, arg);
-    return result;
-  }
+    @Around(
+            "execution(* self.me.matchday.api.service.video.VideoStreamManager.getLocalStreamFor(..))")
+    public Object logGetLocalStreamFor(@NotNull ProceedingJoinPoint jp) throws Throwable {
+        final Object arg = jp.getArgs()[0];
+        logger.info("Getting local stream for File Source: {}", arg);
+        final Object result = jp.proceed();
+        logger.info("Got local stream: {} for File Source: {}", result, arg);
+        return result;
+    }
 
-  @Before(
-      "execution(* self.me.matchday.api.service.video.VideoStreamManager.deleteLocalStreams(..))")
-  public void logDeleteLocalStream(@NotNull JoinPoint jp) {
-    final VideoStreamLocatorPlaylist playlist = (VideoStreamLocatorPlaylist) jp.getArgs()[0];
-    logger.info("Deleting local stream for VideoStreamLocatorPlaylist: {}", playlist.getId());
-  }
+    @Before(
+            "execution(* self.me.matchday.api.service.video.VideoStreamManager.deleteLocalStreams(..))")
+    public void logDeleteLocalStream(@NotNull JoinPoint jp) {
+        final VideoStreamLocatorPlaylist playlist = (VideoStreamLocatorPlaylist) jp.getArgs()[0];
+        logger.info("Deleting local stream for VideoStreamLocatorPlaylist: {}", playlist.getId());
+    }
 
-  @Around("execution(* self.me.matchday.api.service.video.VideoStreamManager.beginStreaming(..))")
-  public Object logBeginStreaming(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    @Around("execution(* self.me.matchday.api.service.video.VideoStreamManager.killAllStreams())")
+    public Object logKillAllStreams(@NotNull ProceedingJoinPoint jp) throws Throwable {
+        logger.info("Attempting to kill all streaming tasks...");
+        final int result = (int) jp.proceed();
+        logger.info("Interrupted {} streaming tasks", result);
+        return result;
+    }
 
-    final VideoStreamLocator locator = (VideoStreamLocator) jp.getArgs()[0];
-    final Long streamLocatorId = locator.getStreamLocatorId();
-    logger.info("Beginning streaming for VideoStreamLocator: {}", streamLocatorId);
-    final Instant start = Instant.now();
-    final Object result = jp.proceed();
-    final Instant end = Instant.now();
-    final long duration = Duration.between(start, end).toSeconds();
-    logger.debug(
-        "Streaming took: {} seconds for VideoStreamLocator: {}", duration, streamLocatorId);
-    return result;
-  }
+    @Before(
+            "execution(* self.me.matchday.api.service.video.VideoStreamManager.killAllStreamsFor(..))")
+    public void logKillAllStreamsFor(@NotNull JoinPoint jp) {
+        final VideoStreamLocatorPlaylist playlist = (VideoStreamLocatorPlaylist) jp.getArgs()[0];
+        logger.info("Killing all streams for VideoStreamLocatorPlaylist: {}", playlist.getId());
+    }
 
-  @Around("execution(* self.me.matchday.api.service.video.VideoStreamManager.killAllStreams())")
-  public Object logKillAllStreams(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    logger.info("Attempting to kill all streaming tasks...");
-    final int result = (int) jp.proceed();
-    logger.info("Interrupted {} streaming tasks", result);
-    return result;
-  }
-
-  @Before(
-      "execution(* self.me.matchday.api.service.video.VideoStreamManager.killAllStreamsFor(..))")
-  public void logKillAllStreamsFor(@NotNull JoinPoint jp) {
-    final VideoStreamLocatorPlaylist playlist = (VideoStreamLocatorPlaylist) jp.getArgs()[0];
-    logger.info("Killing all streams for VideoStreamLocatorPlaylist: {}", playlist.getId());
-  }
-
-  @Before(
-      "execution(* self.me.matchday.api.service.video.VideoStreamManager.killStreamingTask(..))")
-  public void logKillStreamingTask(@NotNull JoinPoint jp) {
-    final VideoStreamLocator locator = (VideoStreamLocator) jp.getArgs()[0];
-    logger.info("Killing streaming task for VideoStreamLocator: {}", locator.getStreamLocatorId());
-  }
+    @Before(
+            "execution(* self.me.matchday.api.service.video.VideoStreamManager.killStreamingTask(..))")
+    public void logKillStreamingTask(@NotNull JoinPoint jp) {
+        final VideoStreamLocator locator = (VideoStreamLocator) jp.getArgs()[0];
+        logger.info("Killing streaming task for VideoStreamLocator: {}", locator.getStreamLocatorId());
+    }
 }
