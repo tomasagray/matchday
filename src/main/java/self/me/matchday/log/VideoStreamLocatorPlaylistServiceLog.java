@@ -42,7 +42,6 @@ public class VideoStreamLocatorPlaylistServiceLog {
   @Around(
       "execution(* self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService.getAllVideoStreamPlaylists())")
   public Object logGetAllVideoStreamPlaylists(@NotNull ProceedingJoinPoint jp) throws Throwable {
-
     logger.info("Retrieving all VideoStreamLocatorPlaylists...");
     final List<VideoStreamLocatorPlaylist> playlists =
         (List<VideoStreamLocatorPlaylist>) jp.proceed();

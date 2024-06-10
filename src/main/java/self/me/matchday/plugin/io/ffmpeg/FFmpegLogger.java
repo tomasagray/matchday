@@ -49,7 +49,6 @@ public class FFmpegLogger {
   }
 
   public Flux<String> beginLogging(@NotNull final AsynchronousFileChannel fileChannel) {
-
     final AtomicInteger pos = new AtomicInteger(0);
     logEmitter =
         Flux.using(

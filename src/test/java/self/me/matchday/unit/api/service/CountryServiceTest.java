@@ -52,7 +52,6 @@ class CountryServiceTest {
   @Test
   @DisplayName("Ensure expected country count is achieved")
   void getAllCountries() {
-
     // given
     final int expectedCountry = 245;
     logger.info("Expected country count: {}", expectedCountry);
@@ -68,7 +67,6 @@ class CountryServiceTest {
   @Test
   @DisplayName("Validate retrieving a particular country by name")
   void getCountry() {
-
     // given
     final String countryName = "Spain";
     logger.info("Looking up: {}", countryName);
@@ -85,7 +83,6 @@ class CountryServiceTest {
   @Test
   @DisplayName("Validate reading flag image data for a specified country")
   void getFlag() throws IOException {
-
     // given
     final long expectedBytes = 91_814;
     final String countryName = "Spain";

@@ -29,7 +29,6 @@ public class QueryBuilderService {
 
   public @NotNull String buildQueryFrom(
       @NotNull final SnapshotRequest request, @NotNull SourceType type) {
-
     final BloggerQueryBuilder queryBuilder =
         type == SourceType.JSON
             ? new BloggerQueryBuilder.JsonQueryBuilder(request)

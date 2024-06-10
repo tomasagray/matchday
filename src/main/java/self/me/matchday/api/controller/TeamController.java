@@ -94,7 +94,6 @@ public class TeamController {
 
   private static void addArtworkLinks(
       @NotNull ArtworkResource artwork, @NotNull UUID teamId, @NotNull ArtworkRole role) {
-
     try {
       final Long artworkId = artwork.getId();
       artwork.add(
@@ -120,7 +119,6 @@ public class TeamController {
   public ResponseEntity<CollectionModel<TeamResource>> fetchAllTeams(
       @RequestParam(name = "page", defaultValue = "0") int page,
       @RequestParam(name = "size", defaultValue = "20") int size) {
-
     final Page<Team> teamPage = teamService.fetchAllPaged(page, size);
     final CollectionModel<TeamResource> model =
         teamModeller.toCollectionModel(teamPage.getContent());
@@ -143,7 +141,6 @@ public class TeamController {
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<TeamResource> fetchTeamByName(@PathVariable final UUID teamId) {
-
     return teamService
         .fetchById(teamId)
         .map(teamModeller::toModel)
@@ -163,7 +160,6 @@ public class TeamController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CollectionModel<MatchResource>> fetchEventsForTeam(
       @PathVariable final UUID teamId) {
-
     final List<Match> events = matchService.fetchMatchesForTeam(teamId);
     final CollectionModel<MatchResource> eventResources =
         matchAssembler
@@ -221,7 +217,6 @@ public class TeamController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CollectionModel<ArtworkResource>> fetchTeamArtworkCollection(
       @PathVariable UUID teamId, @PathVariable ArtworkRole role) {
-
     final ArtworkCollection collection = teamService.fetchArtworkCollection(teamId, role);
     final CollectionModel<ArtworkResource> resources = artworkModeller.fromCollection(collection);
     resources.add(

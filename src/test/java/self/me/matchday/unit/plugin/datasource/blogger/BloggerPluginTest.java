@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,6 +64,19 @@ class BloggerPluginTest {
     return JsonParser.fromJson(data, type);
   }
 
+  private static void testEntities(@NotNull List<BloggerTestEntity> entities) {
+    int count = entities.size();
+    logger.info("Found: {} BloggerTestEntities...", count);
+    assertThat(count).isNotZero();
+    entities.forEach(
+        entity -> {
+          logger.info("Found BloggerTestEntity: {}", entity);
+          assertThat(entity.getTitle()).isNotNull().isNotEmpty();
+          assertThat(entity.getText()).isNotNull().isNotEmpty();
+          assertThat(entity.getPublished()).isNotNull();
+        });
+  }
+
   @Test
   @DisplayName("Validate plugin ID")
   void getPluginId() {
@@ -95,7 +109,6 @@ class BloggerPluginTest {
   @Test
   @DisplayName("Ensure that a DataSource can be added via the BloggerPlugin")
   void addDataSource() {
-
     final int minimumPatternKitCount = 1;
     logger.info("Added datasource:\n{}", testDataSource);
     assertThat(testDataSource).isNotNull();
@@ -110,7 +123,6 @@ class BloggerPluginTest {
   @Test
   @DisplayName("Get a Snapshot from a test Blogger blog (HTML)")
   void getKnownTestSnapshot() throws IOException {
-
     logger.info(
         "Getting Snapshot with DataSource: {}  --  {}",
         testDataSource.getPluginId(),
@@ -137,28 +149,18 @@ class BloggerPluginTest {
   @Test
   @DisplayName("Get a date-limited Snapshot from test blog")
   void dateLimitedSnapshotTest() throws IOException {
-
     // given
     final LocalDateTime limit = LocalDateTime.of(2023, 9, 1, 0, 0);
     logger.info("Getting posts until: {}", limit);
 
     // when
     SnapshotRequest request = SnapshotRequest.builder().startDate(limit).build();
-    logger.info("Getting BloggerTest Snapshot with request: {}", request);
+    logger.info("Getting Snapshot with request: {}", request);
     Snapshot<BloggerTestEntity> snapshot = plugin.getSnapshot(request, testDataSource);
     List<BloggerTestEntity> entities = snapshot.getData().toList();
 
     // then
-    int count = entities.size();
-    logger.info("Found: {} BloggerTestEntities...", count);
-    assertThat(count).isNotZero();
-    entities.forEach(
-        entity -> {
-          logger.info("Found BloggerTestEntity: {}", entity);
-          assertThat(entity.getTitle()).isNotNull().isNotEmpty();
-          assertThat(entity.getText()).isNotNull().isNotEmpty();
-          assertThat(entity.getPublished()).isNotNull();
-        });
+    testEntities(entities);
 
     ArrayList<BloggerTestEntity> modifiable = new ArrayList<>(entities);
     modifiable.sort(Comparator.comparing(BloggerTestEntity::getPublished));
@@ -170,7 +172,6 @@ class BloggerPluginTest {
   @Test
   @DisplayName("Validate query of Blogger blog with labels query")
   void testLabelBloggerQuery() throws IOException {
-
     // given
     final List<String> labels = List.of("label #1");
     logger.info("Getting posts with label: {}", labels);
@@ -182,15 +183,6 @@ class BloggerPluginTest {
     List<BloggerTestEntity> entities = snapshot.getData().toList();
 
     // then
-    int count = entities.size();
-    logger.info("Found: {} BloggerTestEntities...", count);
-    assertThat(count).isNotZero();
-    entities.forEach(
-        entity -> {
-          logger.info("Found BloggerTestEntity: {}", entity);
-          assertThat(entity.getTitle()).isNotNull().isNotEmpty();
-          assertThat(entity.getText()).isNotNull().isNotEmpty();
-          assertThat(entity.getPublished()).isNotNull();
-        });
+    testEntities(entities);
   }
 }

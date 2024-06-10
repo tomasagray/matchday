@@ -21,7 +21,6 @@ package self.me.matchday.model.video;
 
 import java.nio.file.Path;
 import javax.persistence.Entity;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -31,13 +30,13 @@ import org.jetbrains.annotations.NotNull;
 @Setter
 public class SingleStreamLocator extends VideoStreamLocator {
 
-    public SingleStreamLocator() {
-        this.playlistPath = null;
-        this.videoFile = null;
-    }
+  public SingleStreamLocator() {
+    this.playlistPath = null;
+    this.videoFile = null;
+  }
 
-    public SingleStreamLocator(@NotNull Path playlistPath, @NotNull VideoFile videoFile) {
-        this.playlistPath = playlistPath;
-        this.videoFile = videoFile;
-    }
+  public SingleStreamLocator(@NotNull Path playlistPath, @NotNull VideoFile videoFile) {
+    this.playlistPath = playlistPath;
+    this.videoFile = videoFile;
+  }
 }

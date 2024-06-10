@@ -36,7 +36,6 @@ public class FFprobe {
   private String result;
 
   public FFprobe(@NotNull final String execPath) {
-
     // Setup global CLI arguments
     baseArgs =
         List.of(
@@ -56,7 +55,6 @@ public class FFprobe {
    * @throws IOException If the metadata could not be read or parsed
    */
   public FFmpegMetadata getFileMetadata(@NotNull final URI uri) throws IOException {
-
     readFileMetadata(uri);
     return JsonParser.fromJson(result, FFmpegMetadata.class);
   }
@@ -68,7 +66,6 @@ public class FFprobe {
    * @throws IOException If there is an error reading data
    */
   private void readFileMetadata(@NotNull final URI uri) throws IOException {
-
     // Assemble args for this job
     List<String> processArgs = new ArrayList<>(baseArgs);
     // Add remote URL to job args

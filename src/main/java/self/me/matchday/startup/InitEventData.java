@@ -37,7 +37,6 @@ public class InitEventData {
   @Bean
   CommandLineRunner initialEventDataLoad(
       final DataSourceService dataSourceService, final Environment env) {
-
     return args -> {
       final String property = env.getProperty("startup-refresh");
       if (property == null) {

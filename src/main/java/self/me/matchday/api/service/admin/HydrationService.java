@@ -54,7 +54,6 @@ public class HydrationService {
 
   @NotNull
   public Path dehydrate(@NotNull Path to) throws IOException {
-
     if (!to.toFile().isDirectory()) {
       throw new IllegalArgumentException("Path is not a directory: " + to);
     }
@@ -106,7 +105,6 @@ public class HydrationService {
   }
 
   private void validateEmptySystemImage(@NotNull SystemImage image) {
-
     int eventCount = image.getEvents().size();
     int competitionCount = image.getCompetitions().size();
     int teamCount = image.getTeams().size();

@@ -33,6 +33,7 @@ public interface ProperNameRepository extends JpaRepository<ProperName, Long> {
   List<ProperName> findProperNameByName(@Param("name") String name);
 
   @Query(
-      "SELECT pn FROM ProperName pn WHERE :synonym = pn.name OR :synonym IN (SELECT sy.name FROM Synonym sy WHERE sy IN elements(pn.synonyms))")
+      "SELECT pn FROM ProperName pn WHERE :synonym = pn.name OR :synonym IN "
+          + "(SELECT sy.name FROM Synonym sy WHERE sy IN elements(pn.synonyms))")
   Optional<ProperName> findProperNameForSynonym(@Param("synonym") String synonym);
 }

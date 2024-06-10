@@ -95,7 +95,6 @@ class TeamControllerTest {
   }
 
   private Stream<Arguments> getAllTeamsArgs() {
-
     final String url = "http://localhost:" + port + "/teams/";
     logger.info("Fetching all Teams from: {}", url);
     final ResponseEntity<CollectionModel<TeamResource>> response =
@@ -129,10 +128,9 @@ class TeamControllerTest {
   @MethodSource("getTeamByNameArgs")
   @DisplayName("Validate retrieval of Team from database via REST controller by name")
   void fetchTeamByName(@NotNull Team team) {
-
     final UUID teamName = team.getId();
     final ResponseEntity<TeamResource> response = getTeam(teamName);
-    logger.info("Got response: {}", response);
+    logger.info("Got Team: {}", response);
     assertThat(response).isNotNull();
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
@@ -146,7 +144,6 @@ class TeamControllerTest {
   @MethodSource("getTeamByNameArgs")
   @DisplayName("Validate retrieval of Events related to Team specified by {0} via REST controller")
   void fetchEventsForTeam(@NotNull Team team) {
-
     final UUID teamId = team.getId();
     final String url = String.format("http://localhost:%d/teams/team/%s", port, teamId);
     logger.info(String.format("Getting Events for Team: %s @ URL: %s", teamId, url));

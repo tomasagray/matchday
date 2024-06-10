@@ -56,7 +56,6 @@ class VideoFileServiceTest {
       @NotNull TestDataCreator testDataCreator,
       @NotNull FileServerUserService userService,
       VideoFileService videoFileService) {
-
     this.videoFileService = videoFileService;
     // Create test user & login
     final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
@@ -70,7 +69,6 @@ class VideoFileServiceTest {
   @Test
   @DisplayName("Refresh data for a test VideoFile")
   void refreshVideoFileData() throws Exception {
-
     final int expectedStreamCount = 2;
 
     // Get test VideoFile
@@ -94,7 +92,6 @@ class VideoFileServiceTest {
   @Test
   @DisplayName("Validate VideoFile is removed from locked list on error")
   void testVideoFileIsRemovedFromLockedListOnError() throws Exception {
-
     // given
     final URL url = new URL("https://www.nothing-land.com/non-existent-video.mp4");
     final VideoFile nonRefreshable = new VideoFile(PartIdentifier.DEFAULT, url);

@@ -15,15 +15,15 @@ public class ApplicationInfoService {
     this.buildProperties = properties;
   }
 
-  public ApplicationInfo getApplicationInfo() {
-    final String appVersion = buildProperties.getVersion();
-    return ApplicationInfo.builder().version(appVersion).system(osData).pid(pid).build();
-  }
-
   private static String getOsData() {
     final String name = System.getProperty("os.name");
     final String version = System.getProperty("os.version");
     final String arch = System.getProperty("os.arch");
     return String.format("%s %s %s", name, version, arch);
+  }
+
+  public ApplicationInfo getApplicationInfo() {
+    final String appVersion = buildProperties.getVersion();
+    return ApplicationInfo.builder().version(appVersion).system(osData).pid(pid).build();
   }
 }

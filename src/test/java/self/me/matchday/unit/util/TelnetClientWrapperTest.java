@@ -34,7 +34,6 @@ class TelnetClientWrapperTest {
   @Test
   @DisplayName("Validate client sending simple command to service")
   void testSimpleConnection() throws IOException {
-
     // when
     logger.info("Testing telnet connection to: {}:{}...", TEST_HOST, TEST_PORT);
     client.connect(TEST_HOST, TEST_PORT);
@@ -51,7 +50,6 @@ class TelnetClientWrapperTest {
   @Test
   @DisplayName("Ensure repeating commands behaves as expected")
   void testRepeatedCommand() throws Exception {
-
     // given
     logger.info("Connecting to: {}:{}...", TEST_HOST, TEST_PORT);
     client.connect(TEST_HOST, TEST_PORT);

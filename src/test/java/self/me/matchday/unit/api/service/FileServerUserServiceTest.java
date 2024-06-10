@@ -66,7 +66,6 @@ public class FileServerUserServiceTest {
 
   @NotNull
   private FileServerUser getFreshManagedUser() {
-
     final Optional<FileServerUser> userOptional =
         userService.getUserById(testFileServerUser.getUserId());
     assertThat(userOptional).isPresent();
@@ -76,12 +75,11 @@ public class FileServerUserServiceTest {
   @Test
   @DisplayName("Validate login, logout & re-login functionality of file server service")
   void loginAndLogout() {
-
     // Login
-    logger.info("Attempting login with user: " + testFileServerUser);
+    logger.info("Attempting login with user: {}", testFileServerUser);
     final FileServerUser loggedInUser = userService.login(testFileServerUser);
 
-    logger.info("Got logged in user: " + loggedInUser);
+    logger.info("Got logged in user: {}", loggedInUser);
     assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
     // Logout
@@ -103,7 +101,6 @@ public class FileServerUserServiceTest {
   @Test
   @DisplayName("Validate retrieval of all users from server")
   void getAllServerUsers() {
-
     final int expectedUserCount = 1;
     // Ensure user is registered with plugin
     logger.info(
@@ -115,7 +112,7 @@ public class FileServerUserServiceTest {
     final List<FileServerUser> fileServerUsers =
         userService.getAllServerUsers(testFileServerPlugin.getPluginId());
 
-    logger.info("Fetched all users from plugin: " + fileServerUsers);
+    logger.info("Fetched all users from plugin: {}", fileServerUsers);
     assertThat(fileServerUsers.size()).isGreaterThanOrEqualTo(expectedUserCount);
     assertThat(fileServerUsers).contains(testFileServerUser);
   }
@@ -123,21 +120,20 @@ public class FileServerUserServiceTest {
   @Test
   @DisplayName("Validate retrieval of specific user by ID")
   void getUserById() {
-
     final UUID testPluginId = testFileServerPlugin.getPluginId();
     final FileServerUser testUser = testDataCreator.createTestFileServerUser();
     logger.info("Logging in to File Server Plugin: {}%n with user: {}", testPluginId, testUser);
     final FileServerUser loggedInUser = userService.login(testUser);
-    logger.info("Got logged-in user: " + loggedInUser);
+    logger.info("Got logged-in user: {}", loggedInUser);
 
     final UUID testUserId = testUser.getUserId();
-    logger.info("Attempting to retrieve user with ID: " + testUserId);
+    logger.info("Attempting to retrieve user with ID: {}", testUserId);
     final Optional<FileServerUser> userOptional = userService.getUserById(testUserId);
     assertThat(userOptional.isPresent()).isTrue();
 
     userOptional.ifPresent(
         fileServerUser -> {
-          logger.info("Retrieved user from plugin: " + fileServerUser);
+          logger.info("Retrieved user from plugin: {}", fileServerUser);
           assertThat(fileServerUser).isEqualTo(testUser);
         });
 
@@ -147,13 +143,12 @@ public class FileServerUserServiceTest {
   @Test
   @DisplayName("Ensure file server user can be deleted from database")
   void deleteUser() {
-
     final UUID testUserId = testFileServerUser.getUserId();
-    logger.info("Deleting user: " + testUserId);
+    logger.info("Deleting user: {}", testUserId);
     userService.deleteUser(testUserId);
 
     final Optional<FileServerUser> userOptional = userService.getUserById(testUserId);
-    logger.info("User deleted; user is now: " + userOptional);
+    logger.info("User deleted; user is now: {}", userOptional);
     assertThat(userOptional).isEmpty();
   }
 }

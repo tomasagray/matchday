@@ -80,7 +80,6 @@ public abstract class FileFoxPage {
   @Data
   @SuperBuilder
   public static class Login extends FileFoxPage {
-
     private final boolean premium = false;
     private final boolean loggedIn = false;
   }
@@ -89,7 +88,6 @@ public abstract class FileFoxPage {
   @Data
   @SuperBuilder
   public static class Profile extends FileFoxPage {
-
     private final boolean premium;
     private final boolean loggedIn = true;
   }

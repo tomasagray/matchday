@@ -68,6 +68,12 @@ class VideoFileSelectorServiceTest {
     setInternalUrls(testVideoFileSource.getVideoFilePacks());
   }
 
+  @Contract("_ -> new")
+  @NotNull
+  private static Country createTestCountry(@NotNull Locale testLocale) {
+    return new Country(testLocale.getCountry(), List.of(testLocale), "test.svg");
+  }
+
   private void setInternalUrls(@NotNull final List<VideoFilePack> videoFiles) {
     videoFiles.forEach(
         pack ->
@@ -78,11 +84,10 @@ class VideoFileSelectorServiceTest {
   @Test
   @DisplayName("Validate service correctly chooses VideoFiles")
   void getPlaylistFiles() {
-
     // Test parameters
     final int expectedVideoFileCount = 4;
 
-    logger.info("Testing VideoFileSource: " + testVideoFileSource);
+    logger.info("Testing VideoFileSource: {}", testVideoFileSource);
     final VideoFilePack testPlaylistFiles =
         fileSelectorService.getPlaylistFiles(testVideoFileSource);
 
@@ -90,9 +95,9 @@ class VideoFileSelectorServiceTest {
     assertThat(actualVideoFileCount).isEqualTo(expectedVideoFileCount);
     testPlaylistFiles.forEachVideoFile(
         (title, videoFile) -> {
-          logger.info("Got VideoFile: " + videoFile);
+          logger.info("Got VideoFile: {}", videoFile);
           final URL internalUrl = videoFile.getInternalUrl();
-          logger.info("Internal URL: " + internalUrl);
+          logger.info("Internal URL: {}", internalUrl);
           assertThat(videoFile).isNotNull();
           assertThat(internalUrl).isNotNull();
         });
@@ -101,9 +106,8 @@ class VideoFileSelectorServiceTest {
   @Test
   @DisplayName("Validate order of VideoFiles returned by service")
   void testVideoFileOrder() {
-
     final VideoFilePack testFileList = fileSelectorService.getPlaylistFiles(testVideoFileSource);
-    logger.info("Testing event file order for: " + testFileList);
+    logger.info("Testing event file order for: {}", testFileList);
 
     final VideoFile preMatch = testFileList.get(PartIdentifier.PRE_MATCH);
     final VideoFile firstHalf = testFileList.get(PartIdentifier.FIRST_HALF);
@@ -114,12 +118,6 @@ class VideoFileSelectorServiceTest {
     assertThat(firstHalf.getTitle()).isEqualTo(PartIdentifier.FIRST_HALF);
     assertThat(secondHalf.getTitle()).isEqualTo(PartIdentifier.SECOND_HALF);
     assertThat(postMatch.getTitle()).isEqualTo(PartIdentifier.POST_MATCH);
-  }
-
-  @Contract("_ -> new")
-  @NotNull
-  private static Country createTestCountry(@NotNull Locale testLocale) {
-    return new Country(testLocale.getCountry(), List.of(testLocale), "test.svg");
   }
 
   private @NotNull VideoFileSource createTestFileSource(@NotNull String lang) {

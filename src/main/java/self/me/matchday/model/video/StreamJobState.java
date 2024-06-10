@@ -35,16 +35,16 @@ import self.me.matchday.db.converter.VideoStreamingErrorConverter;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class StreamJobState {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
-
   protected JobStatus status = JobStatus.CREATED;
   protected Double completionRatio = 0.0;
 
   @Column(columnDefinition = "LONGTEXT")
   @Convert(converter = VideoStreamingErrorConverter.class)
   protected VideoStreamingError error;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   @Override
   public boolean equals(Object o) {

@@ -66,7 +66,6 @@ class CompetitionServiceTest {
   @Test
   @DisplayName("Verify retrieval of ALL competitions from database")
   void fetchAllCompetitions() {
-
     final int MIN_REQUIRED_COMPETITIONS = 1;
 
     final List<Competition> competitions = competitionService.fetchAll();
@@ -77,7 +76,6 @@ class CompetitionServiceTest {
   @Test
   @DisplayName("Validate retrieval of a single competition from database")
   void fetchCompetitionById() {
-
     final UUID testCompetitionId = testCompetition.getId();
 
     final Optional<Competition> competitionOptional =

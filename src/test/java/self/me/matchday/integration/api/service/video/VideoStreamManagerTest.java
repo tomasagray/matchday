@@ -19,6 +19,14 @@
 
 package self.me.matchday.integration.api.service.video;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -42,236 +50,240 @@ import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for video stream manager")
 @Transactional
 class VideoStreamManagerTest {
 
-    private static final Logger logger = LogManager.getLogger(VideoStreamManagerTest.class);
+  private static final Logger logger = LogManager.getLogger(VideoStreamManagerTest.class);
 
-    private static final int WAIT_SECONDS = 5;
+  private static final int WAIT_SECONDS = 5;
 
-    private final VideoStreamManager streamManager;
-    private final ThreadPoolTaskExecutor executor;
-    private final VideoFileSource testFileSource;
-    private final FileServerPluginService dataSourcePluginService;
+  private final VideoStreamManager streamManager;
+  private final ThreadPoolTaskExecutor executor;
+  private final VideoFileSource testFileSource;
+  private final FileServerPluginService dataSourcePluginService;
 
-    @Autowired
-    public VideoStreamManagerTest(
-            @NotNull TestDataCreator testDataCreator, @NotNull FileServerUserService userService,
-            @NotNull List<ThreadPoolTaskExecutor> executors, @NotNull FileServerPluginService dataSourcePluginService,
-            VideoStreamManager streamManager) {
-        this.streamManager = streamManager;
-        this.testFileSource = testDataCreator.createVideoFileSourceAndSave();
-        this.executor = executors.get(0);
-        this.dataSourcePluginService = dataSourcePluginService;
-        setup(testDataCreator, userService);
-    }
+  @Autowired
+  public VideoStreamManagerTest(
+      @NotNull TestDataCreator testDataCreator,
+      @NotNull FileServerUserService userService,
+      @NotNull List<ThreadPoolTaskExecutor> executors,
+      @NotNull FileServerPluginService dataSourcePluginService,
+      VideoStreamManager streamManager) {
+    this.streamManager = streamManager;
+    this.testFileSource = testDataCreator.createVideoFileSourceAndSave();
+    this.executor = executors.get(0);
+    this.dataSourcePluginService = dataSourcePluginService;
+    setup(testDataCreator, userService);
+  }
 
-    private static void setup(@NotNull TestDataCreator testDataCreator, @NotNull FileServerUserService userService) {
-        final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
-        logger.info("Logging in test user: {}", testFileServerUser);
-        final FileServerUser loggedInUser = userService.login(testFileServerUser);
+  private static void setup(
+      @NotNull TestDataCreator testDataCreator, @NotNull FileServerUserService userService) {
+    final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
+    logger.info("Logging in test user: {}", testFileServerUser);
+    final FileServerUser loggedInUser = userService.login(testFileServerUser);
 
-        final boolean loginStatus = loggedInUser.isLoggedIn();
-        assertThat(loginStatus).isTrue();
-    }
+    final boolean loginStatus = loggedInUser.isLoggedIn();
+    assertThat(loginStatus).isTrue();
+  }
 
-    private VideoStreamLocatorPlaylist createTestPlaylist() {
-        VideoStreamLocatorPlaylist playlist = streamManager.createVideoStreamFrom(testFileSource);
-        logger.info("Created test playlist: {}", playlist);
-        return playlist;
-    }
+  private VideoStreamLocatorPlaylist createTestPlaylist() {
+    VideoStreamLocatorPlaylist playlist = streamManager.createVideoStreamFrom(testFileSource);
+    logger.info("Created test playlist: {}", playlist);
+    return playlist;
+  }
 
-    private void enableFileServer() {
-        UUID pluginId = TestFileServerPlugin.PLUGIN_ID;
-        logger.info("Enabling TestFileServerPlugin {} ...", pluginId);
-        dataSourcePluginService.enablePlugin(pluginId);
-    }
+  private void enableFileServer() {
+    UUID pluginId = TestFileServerPlugin.PLUGIN_ID;
+    logger.info("Enabling TestFileServerPlugin {} ...", pluginId);
+    dataSourcePluginService.enablePlugin(pluginId);
+  }
 
-    private VideoStreamLocator startVideoStream() {
-        enableFileServer();
-        VideoStreamLocatorPlaylist testPlaylist = createTestPlaylist();
-        VideoStreamLocator locator = testPlaylist.getStreamLocators().get(0);
-        assertThat(locator).isNotNull();
-        streamManager.queueStreamJob(locator);
-        return locator;
-    }
+  private VideoStreamLocator startVideoStream() {
+    enableFileServer();
+    VideoStreamLocatorPlaylist testPlaylist = createTestPlaylist();
+    VideoStreamLocator locator = testPlaylist.getStreamLocators().get(0);
+    assertThat(locator).isNotNull();
+    streamManager.queueStreamJob(locator);
+    return locator;
+  }
 
-    private void cleanup() throws IOException, InterruptedException {
-        streamManager.killAllStreams();
-        TimeUnit.SECONDS.sleep(WAIT_SECONDS);
-        VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
-        streamManager.deleteLocalStreams(playlist);
-    }
+  private void cleanup() throws IOException, InterruptedException {
+    streamManager.killAllStreams();
+    TimeUnit.SECONDS.sleep(WAIT_SECONDS);
+    VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
+    streamManager.deleteLocalStreams(playlist);
+  }
 
-    @Test
-    @DisplayName("Validate creation of VideoStreamLocatorPlaylists from VideoFileSources")
-    void createVideoStreamFrom() {
-        // given
-        final JobStatus expectedStateStatus = JobStatus.CREATED;
-        final double expectedCompletionRatio = 0.0;
-        final int expectedStreamLocatorCount = 4;
+  @Test
+  @DisplayName("Validate creation of VideoStreamLocatorPlaylists from VideoFileSources")
+  void createVideoStreamFrom() {
+    // given
+    final JobStatus expectedStateStatus = JobStatus.CREATED;
+    final double expectedCompletionRatio = 0.0;
+    final int expectedStreamLocatorCount = 4;
 
-        logger.info(
-                "Testing VideoStreamLocatorPlaylist creation using File Source:\n{}", testFileSource);
+    logger.info(
+        "Testing VideoStreamLocatorPlaylist creation using File Source:\n{}", testFileSource);
 
-        // get test data
-        final VideoStreamLocatorPlaylist actualLocatorPlaylist =
-                streamManager.createVideoStreamFrom(this.testFileSource);
-        assertThat(actualLocatorPlaylist).isNotNull();
-        final TaskListState actualState = actualLocatorPlaylist.getState();
-        final JobStatus actualStateStatus = actualState.getStatus();
-        final Double actualCompletionRatio = actualState.getCompletionRatio();
-        final List<VideoStreamLocator> actualStreamLocators = actualLocatorPlaylist.getStreamLocators();
+    // get test data
+    final VideoStreamLocatorPlaylist actualLocatorPlaylist =
+        streamManager.createVideoStreamFrom(this.testFileSource);
+    assertThat(actualLocatorPlaylist).isNotNull();
+    final TaskListState actualState = actualLocatorPlaylist.getState();
+    final JobStatus actualStateStatus = actualState.getStatus();
+    final Double actualCompletionRatio = actualState.getCompletionRatio();
+    final List<VideoStreamLocator> actualStreamLocators = actualLocatorPlaylist.getStreamLocators();
 
-        logger.info(
-                "VideoStreamManager created VideoStreamLocatorPlaylist:\n{}", actualLocatorPlaylist);
+    logger.info(
+        "VideoStreamManager created VideoStreamLocatorPlaylist:\n{}", actualLocatorPlaylist);
 
-        assertThat(actualStateStatus).isEqualTo(expectedStateStatus);
-        assertThat(actualCompletionRatio).isEqualTo(expectedCompletionRatio);
-        assertThat(actualStreamLocators.size()).isEqualTo(expectedStreamLocatorCount);
-    }
+    assertThat(actualStateStatus).isEqualTo(expectedStateStatus);
+    assertThat(actualCompletionRatio).isEqualTo(expectedCompletionRatio);
+    assertThat(actualStreamLocators.size()).isEqualTo(expectedStreamLocatorCount);
+  }
 
-    @Test
-    @DisplayName("Validate retrieval of previously created playlist")
-    void getLocalStreamFor() {
-        // given
-        final UUID testFileSrcId = testFileSource.getFileSrcId();
-        createTestPlaylist();
-        logger.info("Attempting playlist lookup for file source ID: {}", testFileSrcId);
+  @Test
+  @DisplayName("Validate retrieval of previously created playlist")
+  void getLocalStreamFor() {
+    // given
+    final UUID testFileSrcId = testFileSource.getFileSrcId();
+    createTestPlaylist();
+    logger.info("Attempting playlist lookup for file source ID: {}", testFileSrcId);
 
-        // when
-        final Optional<VideoStreamLocatorPlaylist> playlistOptional = streamManager.getLocalStreamFor(testFileSrcId);
+    // when
+    final Optional<VideoStreamLocatorPlaylist> playlistOptional =
+        streamManager.getLocalStreamFor(testFileSrcId);
 
-        // then
-        assertThat(playlistOptional).isPresent();
-        logger.info("Successfully retrieved locator playlist: {}", playlistOptional.get());
-    }
+    // then
+    assertThat(playlistOptional).isPresent();
+    logger.info("Successfully retrieved locator playlist: {}", playlistOptional.get());
+  }
 
-    @Test
-    @DisplayName("Validate asynchronous video streaming")
-    void queueStreamJob() throws InterruptedException, IOException {
-        // given
-        VideoStreamLocator locator = startVideoStream();
+  @Test
+  @DisplayName("Validate asynchronous video streaming")
+  void queueStreamJob() throws InterruptedException, IOException {
+    // given
+    VideoStreamLocator locator = startVideoStream();
 
-        // when
-        logger.info("Beginning streaming of locator: {}", locator);
-        streamManager.queueStreamJob(locator);
+    // when
+    logger.info("Beginning streaming of locator: {}", locator);
+    streamManager.queueStreamJob(locator);
 
-        logger.info("Giving stream a {}-second head start", WAIT_SECONDS);
-        TimeUnit.SECONDS.sleep(WAIT_SECONDS);
-        final boolean terminated = executor.getThreadPoolExecutor().awaitTermination(WAIT_SECONDS, TimeUnit.SECONDS);
-        logger.info("Wait terminated successfully? {}", terminated);
+    logger.info("Giving stream a {}-second head start", WAIT_SECONDS);
+    TimeUnit.SECONDS.sleep(WAIT_SECONDS);
+    final boolean terminated =
+        executor.getThreadPoolExecutor().awaitTermination(WAIT_SECONDS, TimeUnit.SECONDS);
+    logger.info("Wait terminated successfully? {}", terminated);
 
-        // then
-        final JobStatus actualStatus = locator.getState().getStatus();
-        logger.info("Locator status after starting stream: {}", actualStatus);
-        assertThat(actualStatus).isGreaterThanOrEqualTo(JobStatus.STARTED);
+    // then
+    final JobStatus actualStatus = locator.getState().getStatus();
+    logger.info("Locator status after starting stream: {}", actualStatus);
+    assertThat(actualStatus).isGreaterThanOrEqualTo(JobStatus.STARTED);
 
-        cleanup();
-    }
+    cleanup();
+  }
 
-    @Test
-    @DisplayName("Validate that streaming has registered in the database")
-    void isStreamReady() throws InterruptedException, IOException {
-        // given
-        logger.info("There are currently: {} active streams", streamManager.getActiveStreamCount());
-        VideoStreamLocator locator = startVideoStream();
+  @Test
+  @DisplayName("Validate that streaming has registered in the database")
+  void isStreamReady() throws InterruptedException, IOException {
+    // given
+    logger.info("There are currently: {} active streams", streamManager.getActiveStreamCount());
+    VideoStreamLocator locator = startVideoStream();
 
-        // when
-        TimeUnit.SECONDS.sleep(WAIT_SECONDS);
-        boolean terminated = executor.getThreadPoolExecutor().awaitTermination(WAIT_SECONDS, TimeUnit.SECONDS);
-        logger.info("Testing status of Stream for VideoStreamLocator: {}", locator.getStreamLocatorId());
-        logger.info("Done waiting; successful? {}; checking stream status...", terminated);
+    // when
+    TimeUnit.SECONDS.sleep(WAIT_SECONDS);
+    boolean terminated =
+        executor.getThreadPoolExecutor().awaitTermination(WAIT_SECONDS, TimeUnit.SECONDS);
+    logger.info(
+        "Testing status of Stream for VideoStreamLocator: {}", locator.getStreamLocatorId());
+    logger.info("Done waiting; successful? {}; checking stream status...", terminated);
 
-        // then
-        streamManager.getLocalStreamFor(testFileSource.getFileSrcId()).ifPresent(off -> {
-            List<VideoStreamLocator> streamLocators = off.getStreamLocators();
-            streamLocators.forEach(System.out::println);
-        });
-        final JobStatus actualStreamStatus = locator.getState().getStatus();
-        logger.info("Stream status was: {}", actualStreamStatus);
-        assertThat(actualStreamStatus).isGreaterThanOrEqualTo(JobStatus.STREAMING);
+    // then
+    streamManager
+        .getLocalStreamFor(testFileSource.getFileSrcId())
+        .ifPresent(
+            off -> {
+              List<VideoStreamLocator> streamLocators = off.getStreamLocators();
+              streamLocators.forEach(System.out::println);
+            });
+    final JobStatus actualStreamStatus = locator.getState().getStatus();
+    logger.info("Stream status was: {}", actualStreamStatus);
+    assertThat(actualStreamStatus).isGreaterThanOrEqualTo(JobStatus.STREAMING);
 
-        cleanup();
-    }
+    cleanup();
+  }
 
-    @Test
-    @DisplayName("Validate VideoStreamManager can interrupt streaming tasks")
-    void killAllStreamsFor() throws InterruptedException, IOException {
-        // given
-        startVideoStream();
+  @Test
+  @DisplayName("Validate VideoStreamManager can interrupt streaming tasks")
+  void killAllStreamsFor() throws InterruptedException, IOException {
+    // given
+    startVideoStream();
 
-        // when
-        final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
-        logger.info("Attempting to kill all streams for VideoStreamLocatorPlaylist: {}", playlist);
-        streamManager.killAllStreamsFor(playlist);
+    // when
+    final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
+    logger.info("Attempting to kill all streams for VideoStreamLocatorPlaylist: {}", playlist);
+    streamManager.killAllStreamsFor(playlist);
 
-        logger.info(String.format("Waiting %d seconds for streaming tasks to die...", WAIT_SECONDS));
-        TimeUnit.SECONDS.sleep(WAIT_SECONDS);
+    logger.info(String.format("Waiting %d seconds for streaming tasks to die...", WAIT_SECONDS));
+    TimeUnit.SECONDS.sleep(WAIT_SECONDS);
 
-        // then
-        logger.info("Ensuring all tasks are dead");
-        final VideoStreamLocatorPlaylist deadPlaylist = getStreamLocatorPlaylist();
-        final JobStatus killedStatus = deadPlaylist.getState().getStatus();
-        final boolean streamReady = killedStatus == JobStatus.COMPLETED || killedStatus == JobStatus.STREAMING;
-        logger.info("JobStatus: {}", killedStatus);
+    // then
+    logger.info("Ensuring all tasks are dead");
+    final VideoStreamLocatorPlaylist deadPlaylist = getStreamLocatorPlaylist();
+    final JobStatus killedStatus = deadPlaylist.getState().getStatus();
+    final boolean streamReady =
+        killedStatus == JobStatus.COMPLETED || killedStatus == JobStatus.STREAMING;
+    logger.info("JobStatus: {}", killedStatus);
 
-        deadPlaylist
-                .getStreamLocators()
-                .forEach(
-                        stream -> {
-                            JobStatus status = stream.getState().getStatus();
-                            logger.info("Stream Locator: {}, status: {}", stream.getStreamLocatorId(), status);
-                        });
-        assertThat(streamReady).isFalse();
-        assertThat(killedStatus).isEqualTo(JobStatus.STOPPED);
+    deadPlaylist
+        .getStreamLocators()
+        .forEach(
+            stream -> {
+              JobStatus status = stream.getState().getStatus();
+              logger.info("Stream Locator: {}, status: {}", stream.getStreamLocatorId(), status);
+            });
+    assertThat(streamReady).isFalse();
+    assertThat(killedStatus).isEqualTo(JobStatus.STOPPED);
 
-        cleanup();
-    }
+    cleanup();
+  }
 
-    @Test
-    @DisplayName("Ensure VideoStreamManager can delete local data")
-    void deleteLocalStream() throws IOException, InterruptedException {
-        // given
-        startVideoStream();
-        TimeUnit.SECONDS.sleep(10);
+  @Test
+  @DisplayName("Ensure VideoStreamManager can delete local data")
+  void deleteLocalStream() throws IOException, InterruptedException {
+    // given
+    startVideoStream();
+    TimeUnit.SECONDS.sleep(10);
 
-        final UUID fileSrcId = testFileSource.getFileSrcId();
-        final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
-        final Path storageLocation = playlist.getStorageLocation();
-        logger.info("Deleting local data associated with VideoStreamLocatorPlaylist: {}", playlist);
+    final UUID fileSrcId = testFileSource.getFileSrcId();
+    final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
+    final Path storageLocation = playlist.getStorageLocation();
+    logger.info("Deleting local data associated with VideoStreamLocatorPlaylist: {}", playlist);
 
-        // when
-        streamManager.deleteLocalStreams(playlist);
+    // when
+    streamManager.deleteLocalStreams(playlist);
 
-        // then
-        logger.info("Ensuring local data is actually gone...");
-        assertThat(storageLocation).doesNotExist();
-        final Optional<VideoStreamLocatorPlaylist> optionalAfterDelete = streamManager.getLocalStreamFor(fileSrcId);
-        assertThat(optionalAfterDelete).isEmpty();
-    }
+    // then
+    logger.info("Ensuring local data is actually gone...");
+    assertThat(storageLocation).doesNotExist();
+    final Optional<VideoStreamLocatorPlaylist> optionalAfterDelete =
+        streamManager.getLocalStreamFor(fileSrcId);
+    assertThat(optionalAfterDelete).isEmpty();
+  }
 
-    /**
-     * Get a consistent playlist
-     *
-     * @return a VideoStreamLocatorPlaylist
-     */
-    private @NotNull VideoStreamLocatorPlaylist getStreamLocatorPlaylist() {
-        final UUID fileSrcId = testFileSource.getFileSrcId();
-        final Optional<VideoStreamLocatorPlaylist> playlistOptional = streamManager.getLocalStreamFor(fileSrcId);
-        assertThat(playlistOptional).isPresent();
-        return playlistOptional.get();
-    }
+  /**
+   * Get a consistent playlist
+   *
+   * @return a VideoStreamLocatorPlaylist
+   */
+  private @NotNull VideoStreamLocatorPlaylist getStreamLocatorPlaylist() {
+    final UUID fileSrcId = testFileSource.getFileSrcId();
+    final Optional<VideoStreamLocatorPlaylist> playlistOptional =
+        streamManager.getLocalStreamFor(fileSrcId);
+    assertThat(playlistOptional).isPresent();
+    return playlistOptional.get();
+  }
 }

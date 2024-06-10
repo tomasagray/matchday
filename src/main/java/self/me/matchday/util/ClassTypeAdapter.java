@@ -30,7 +30,6 @@ public class ClassTypeAdapter extends TypeAdapter<Class<?>> {
 
   @Override
   public void write(JsonWriter jsonWriter, Class<?> clazz) throws IOException {
-
     if (clazz == null) {
       jsonWriter.nullValue();
       return;
@@ -40,7 +39,6 @@ public class ClassTypeAdapter extends TypeAdapter<Class<?>> {
 
   @Override
   public Class<?> read(@NotNull JsonReader jsonReader) throws IOException {
-
     if (jsonReader.peek() == JsonToken.NULL) {
       jsonReader.nextNull();
       return null;

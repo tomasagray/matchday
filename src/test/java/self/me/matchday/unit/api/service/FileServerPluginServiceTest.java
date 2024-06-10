@@ -19,6 +19,15 @@
 
 package self.me.matchday.unit.api.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static self.me.matchday.config.settings.EnabledFileServerPlugins.ENABLED_FILESERVERS;
+
+import java.io.IOException;
+import java.net.URL;
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -37,131 +46,116 @@ import self.me.matchday.api.service.PluginService;
 import self.me.matchday.model.FileServerUser;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
-import java.io.IOException;
-import java.net.URL;
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static self.me.matchday.config.settings.EnabledFileServerPlugins.ENABLED_FILESERVERS;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Testing for remote file server PLUGIN management service")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class FileServerPluginServiceTest {
 
-    private static final Logger logger = LogManager.getLogger(FileServerPluginServiceTest.class);
+  private static final Logger logger = LogManager.getLogger(FileServerPluginServiceTest.class);
 
-    private final TestDataCreator testDataCreator;
-    private final FileServerPluginService fileServerPluginService;
-    private final FileServerUserService userService;
-    private final FileServerPlugin testFileServerPlugin;
-    private final FileServerUser testFileServerUser;
+  private final TestDataCreator testDataCreator;
+  private final FileServerPluginService fileServerPluginService;
+  private final FileServerUserService userService;
+  private final FileServerPlugin testFileServerPlugin;
+  private final FileServerUser testFileServerUser;
 
-    @Autowired
-    public FileServerPluginServiceTest(
-            @NotNull PluginService pluginService,
-            @NotNull TestDataCreator testDataCreator,
-            FileServerPluginService fileServerPluginService,
-            FileServerUserService userService,
-            TestFileServerPlugin testFileServerPlugin) {
-        this.testDataCreator = testDataCreator;
-        this.fileServerPluginService = fileServerPluginService;
-        this.userService = userService;
-        this.testFileServerPlugin = testFileServerPlugin;
+  @Autowired
+  public FileServerPluginServiceTest(
+      @NotNull PluginService pluginService,
+      @NotNull TestDataCreator testDataCreator,
+      FileServerPluginService fileServerPluginService,
+      FileServerUserService userService,
+      TestFileServerPlugin testFileServerPlugin) {
+    this.testDataCreator = testDataCreator;
+    this.fileServerPluginService = fileServerPluginService;
+    this.userService = userService;
+    this.testFileServerPlugin = testFileServerPlugin;
 
-        // setup
-        this.testFileServerUser = testDataCreator.createTestFileServerUser();
-        pluginService.enablePlugin(testFileServerPlugin, ENABLED_FILESERVERS);
-    }
+    // setup
+    this.testFileServerUser = testDataCreator.createTestFileServerUser();
+    pluginService.enablePlugin(testFileServerPlugin, ENABLED_FILESERVERS);
+  }
 
-    @Test
-    @DisplayName("Test retrieval of registered file server plugin by ID")
-    void getPluginById() {
+  @Test
+  @DisplayName("Test retrieval of registered file server plugin by ID")
+  void getPluginById() {
+    logger.info("Attempting to get test plugin with ID: {}", testFileServerPlugin.getPluginId());
+    final Optional<FileServerPlugin> pluginOptional =
+        fileServerPluginService.getPluginById(testFileServerPlugin.getPluginId());
+    assertThat(pluginOptional).isPresent();
 
-        logger.info("Attempting to get test plugin with ID: {}", testFileServerPlugin.getPluginId());
-        final Optional<FileServerPlugin> pluginOptional =
-                fileServerPluginService.getPluginById(testFileServerPlugin.getPluginId());
-        assertThat(pluginOptional).isPresent();
+    pluginOptional.ifPresent(
+        fileServerPlugin -> {
+          logger.info("Successfully found plugin: {}", fileServerPlugin);
+          assertThat(fileServerPlugin.getPluginId()).isEqualTo(testFileServerPlugin.getPluginId());
+          assertThat(fileServerPlugin.getTitle()).isEqualTo(testFileServerPlugin.getTitle());
+          assertThat(fileServerPlugin.getDescription())
+              .isEqualTo(testFileServerPlugin.getDescription());
+        });
+  }
 
-        pluginOptional.ifPresent(
-                fileServerPlugin -> {
-                    logger.info("Successfully found plugin: {}", fileServerPlugin);
-                    assertThat(fileServerPlugin.getPluginId()).isEqualTo(testFileServerPlugin.getPluginId());
-                    assertThat(fileServerPlugin.getTitle()).isEqualTo(testFileServerPlugin.getTitle());
-                    assertThat(fileServerPlugin.getDescription())
-                            .isEqualTo(testFileServerPlugin.getDescription());
-                });
-    }
+  @Test
+  @DisplayName("Validate retrieval of all file server plugins")
+  void getFileServerPlugins() {
+    final int expectedPluginCount = 2;
+    final List<FileServerPlugin> fileServerPlugins = fileServerPluginService.getFileServerPlugins();
+    final int actualPluginCount = fileServerPlugins.size();
+    logger.info("Found FileServerPlugins:\n{}", fileServerPlugins);
+    logger.info("Found: {} plugins; expected: {}", actualPluginCount, expectedPluginCount);
 
-    @Test
-    @DisplayName("Validate retrieval of all file server plugins")
-    void getFileServerPlugins() {
+    assertThat(actualPluginCount).isGreaterThanOrEqualTo(expectedPluginCount);
+    assertThat(fileServerPlugins).contains(testFileServerPlugin);
+  }
 
-        final int expectedPluginCount = 2;
-        final List<FileServerPlugin> fileServerPlugins = fileServerPluginService.getFileServerPlugins();
-        final int actualPluginCount = fileServerPlugins.size();
-        logger.info("Found FileServerPlugins:\n{}", fileServerPlugins);
-        logger.info("Found: {} plugins; expected: {}", actualPluginCount, expectedPluginCount);
+  @Test
+  @DisplayName("Test enabling & disabling of plugin")
+  void testPluginEnableAndDisable() {
+    final UUID testPluginId = testFileServerPlugin.getPluginId();
 
-        assertThat(actualPluginCount).isGreaterThanOrEqualTo(expectedPluginCount);
-        assertThat(fileServerPlugins).contains(testFileServerPlugin);
-    }
+    // test default enable
+    logger.info("Verifying plugin is enabled by default...");
+    assertThat(fileServerPluginService.isPluginEnabled(testPluginId)).isTrue();
 
-    @Test
-    @DisplayName("Test enabling & disabling of plugin")
-    void testPluginEnableAndDisable() {
+    // test disable
+    logger.info("Verifying plugin can be disabled...");
+    fileServerPluginService.disablePlugin(testPluginId);
+    assertThat(fileServerPluginService.isPluginEnabled(testPluginId)).isFalse();
 
-        final UUID testPluginId = testFileServerPlugin.getPluginId();
+    // test re-enable
+    logger.info("Verifying plugin can be re-enabled...");
+    fileServerPluginService.enablePlugin(testPluginId);
+    assertThat(fileServerPluginService.isPluginEnabled(testPluginId)).isTrue();
+  }
 
-        // test default enable
-        logger.info("Verifying plugin is enabled by default...");
-        assertThat(fileServerPluginService.isPluginEnabled(testPluginId)).isTrue();
+  @Test
+  @DisplayName("Validate plugin internal URL extraction")
+  void getDownloadUrl() throws IOException {
+    // Ensure user is logged in
+    userService.login(testFileServerUser);
 
-        // test disable
-        logger.info("Verifying plugin can be disabled...");
-        fileServerPluginService.disablePlugin(testPluginId);
-        assertThat(fileServerPluginService.isPluginEnabled(testPluginId)).isFalse();
+    final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
+    assertThat(firstHalfUrl).isNotNull();
 
-        // test re-enable
-        logger.info("Verifying plugin can be re-enabled...");
-        fileServerPluginService.enablePlugin(testPluginId);
-        assertThat(fileServerPluginService.isPluginEnabled(testPluginId)).isTrue();
-    }
+    final Optional<URL> optionalURL = fileServerPluginService.getDownloadUrl(firstHalfUrl);
+    assertThat(optionalURL.isPresent()).isTrue();
+    optionalURL.ifPresent(
+        url -> {
+          logger.info("Got download URL from plugin: {}", url);
+          assertThat(url).isNotNull();
+        });
+  }
 
-    @Test
-    @DisplayName("Validate plugin internal URL extraction")
-    void getDownloadUrl() throws IOException {
+  @Test
+  @DisplayName("Validate plugin refresh rate retrieval in plugin service")
+  void getFileServerRefreshRate() {
+    final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
+    assertThat(firstHalfUrl).isNotNull();
+    logger.info("Testing server refresh rate for URL: {}", firstHalfUrl);
 
-        // Ensure user is logged in
-        userService.login(testFileServerUser);
-
-        final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
-        assertThat(firstHalfUrl).isNotNull();
-
-        final Optional<URL> optionalURL = fileServerPluginService.getDownloadUrl(firstHalfUrl);
-        assertThat(optionalURL.isPresent()).isTrue();
-        optionalURL.ifPresent(
-                url -> {
-                    logger.info("Got download URL from plugin: {}", url);
-                    assertThat(url).isNotNull();
-                });
-    }
-
-    @Test
-    @DisplayName("Validate plugin refresh rate retrieval in plugin service")
-    void getFileServerRefreshRate() {
-
-        final URL firstHalfUrl = testDataCreator.getFirstHalfUrl();
-        assertThat(firstHalfUrl).isNotNull();
-        logger.info("Testing server refresh rate for URL: {}", firstHalfUrl);
-
-        final Duration actualServerRefreshRate =
-                fileServerPluginService.getFileServerRefreshRate(firstHalfUrl);
-        final Duration expectedServerRefreshRate = testFileServerPlugin.getRefreshRate();
-        assertThat(actualServerRefreshRate).isEqualTo(expectedServerRefreshRate);
-    }
+    final Duration actualServerRefreshRate =
+        fileServerPluginService.getFileServerRefreshRate(firstHalfUrl);
+    final Duration expectedServerRefreshRate = testFileServerPlugin.getRefreshRate();
+    assertThat(actualServerRefreshRate).isEqualTo(expectedServerRefreshRate);
+  }
 }

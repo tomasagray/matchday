@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -53,240 +52,233 @@ import self.me.matchday.model.video.VideoFileSource;
 @DisplayName("Testing for Event service")
 class EventServiceTest {
 
-    private static final Logger logger = LogManager.getLogger(EventServiceTest.class);
-    // Test data
-    private static final List<Event> cleanupData = new ArrayList<>();
-    // Test resources
-    private final TestDataCreator testDataCreator;
-    private final EventService eventService;
-    private final Match testMatch;
-    private final Match unUpdatedEvent;
-    private final Competition testCompetition;
+  private static final Logger logger = LogManager.getLogger(EventServiceTest.class);
+  // Test data
+  private static final List<Event> cleanupData = new ArrayList<>();
+  // Test resources
+  private final TestDataCreator testDataCreator;
+  private final EventService eventService;
+  private final Match testMatch;
+  private final Match unUpdatedEvent;
+  private final Competition testCompetition;
 
-    @Autowired
-    public EventServiceTest(@NotNull TestDataCreator testDataCreator, EventService eventService) {
+  @Autowired
+  public EventServiceTest(@NotNull TestDataCreator testDataCreator, EventService eventService) {
+    this.testDataCreator = testDataCreator;
+    this.eventService = eventService;
 
-        this.testDataCreator = testDataCreator;
-        this.eventService = eventService;
+    testMatch = testDataCreator.createTestMatch("EventServiceTest");
+    cleanupData.add(testMatch);
+    testCompetition = testMatch.getCompetition();
+    Team testTeam = testMatch.getHomeTeam();
 
-        testMatch = testDataCreator.createTestMatch("EventServiceTest");
-        cleanupData.add(testMatch);
-        testCompetition = testMatch.getCompetition();
-        Team testTeam = testMatch.getHomeTeam();
+    final Optional<VideoFileSource> fileSourceOptional =
+        testMatch.getFileSources().stream().findFirst();
+    assertThat(fileSourceOptional).isPresent();
+    VideoFileSource testFileSource = fileSourceOptional.get();
 
-        final Optional<VideoFileSource> fileSourceOptional =
-                testMatch.getFileSources().stream().findFirst();
-        assertThat(fileSourceOptional).isPresent();
-        VideoFileSource testFileSource = fileSourceOptional.get();
+    logger.info(
+        "Saved Event w/ID: {}, Competition ID: {}, Team ID: {}; FileSrcID: {}",
+        testMatch.getEventId(),
+        testCompetition.getId(),
+        testTeam.getId(),
+        testFileSource.getFileSrcId());
 
-        logger.info(
-                "Saved Event w/ID: {}, Competition ID: {}, Team ID: {}; FileSrcID: {}",
-                testMatch.getEventId(),
-                testCompetition.getId(),
-                testTeam.getId(),
-                testFileSource.getFileSrcId());
+    // create Event for updating test
+    unUpdatedEvent = testDataCreator.createTestMatch("Non-Updated Event");
+    cleanupData.add(unUpdatedEvent);
+    logger.info("Created Event for update() test: {}", unUpdatedEvent);
+  }
 
-        // create Event for updating test
-        unUpdatedEvent = testDataCreator.createTestMatch("Non-Updated Event");
-        cleanupData.add(unUpdatedEvent);
-        logger.info("Created Event for update() test: {}", unUpdatedEvent);
-    }
+  @AfterAll
+  public static void cleanup() throws IOException {
+    TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
+  }
 
-    @AfterAll
-    public static void cleanup() throws IOException {
-        TestDataCreator.deleteGeneratedMatchArtwork(cleanupData);
-    }
+  private @NotNull Match createUnsavedMatch(String name) {
+    final Match match =
+        Match.builder()
+            .competition(new Competition(TestDataCreator.getRandomizedName(name, 10, 100)))
+            .homeTeam(new Team(TestDataCreator.getRandomizedName(name + " Home", 100, 1000)))
+            .awayTeam(new Team(TestDataCreator.getRandomizedName(name + " Away", 100, 1000)))
+            .fixture(new Fixture(5))
+            .season(new Season())
+            .date(LocalDateTime.now())
+            .build();
+    match.getFileSources().add(createVideoFileSource());
+    return match;
+  }
 
-    private @NotNull Match createUnsavedMatch(String name) {
-        final Match match =
-                Match.builder()
-                        .competition(new Competition(TestDataCreator.getRandomizedName(name, 10, 100)))
-                        .homeTeam(new Team(TestDataCreator.getRandomizedName(name + " Home", 100, 1000)))
-                        .awayTeam(new Team(TestDataCreator.getRandomizedName(name + " Away", 100, 1000)))
-                        .fixture(new Fixture(5))
-                        .season(new Season())
-                        .date(LocalDateTime.now())
-                        .build();
-        match.getFileSources().add(createVideoFileSource());
-        return match;
-    }
+  private VideoFileSource createVideoFileSource() {
+    final int fileSetCount = 1;
+    final List<VideoFilePack> videoFilePacks = testDataCreator.createTestVideoFiles(fileSetCount);
+    return VideoFileSource.builder()
+        .channel("Event Service Test Channel")
+        .resolution(R_1080p)
+        .languages("English")
+        .videoBitrate(8_000L)
+        .videoFilePacks(videoFilePacks)
+        .filesize(FileSize.ofGigabytes(8))
+        .build();
+  }
 
-    private VideoFileSource createVideoFileSource() {
+  @Test
+  @DisplayName("Test saving an Event to database")
+  void save() {
+    final List<Event> initialEvents = eventService.fetchAll();
+    final int initialCount = initialEvents.size();
+    logger.info("Before save() database has: {} Events", initialCount);
+    final Event testMatch = createUnsavedMatch("SaveTest " + Math.random());
+    logger.info("Created Test Event: {}", testMatch);
 
-        final int fileSetCount = 1;
-        final List<VideoFilePack> videoFilePacks = testDataCreator.createTestVideoFiles(fileSetCount);
-        return VideoFileSource.builder()
-                .channel("Event Service Test Channel")
-                .resolution(R_1080p)
-                .languages("English")
-                .videoBitrate(8_000L)
-                .videoFilePacks(videoFilePacks)
-                .filesize(FileSize.ofGigabytes(8))
-                .build();
-    }
+    final Event savedEvent = eventService.save(testMatch);
+    cleanupData.add(savedEvent);
+    logger.info("Saved Event with save(): {}", savedEvent);
+    assertThat(savedEvent).isNotNull();
 
-    @Test
-    @DisplayName("Test saving an Event to database")
-    void save() {
-        final List<Event> initialEvents = eventService.fetchAll();
-        final int initialCount = initialEvents.size();
-        logger.info("Before save() database has: {} Events", initialCount);
-        final Event testMatch = createUnsavedMatch("SaveTest " + Math.random());
-        logger.info("Created Test Event: {}", testMatch);
+    final List<Event> afterEvents = eventService.fetchAll();
+    final int afterCount = afterEvents.size();
+    logger.info("After saving, database contains: {} Events", afterCount);
+    final int diff = afterCount - initialCount;
+    assertThat(diff).isEqualTo(1);
+  }
 
-        final Event savedEvent = eventService.save(testMatch);
-        cleanupData.add(savedEvent);
-        logger.info("Saved Event with save(): {}", savedEvent);
-        assertThat(savedEvent).isNotNull();
+  @Test
+  @DisplayName("Test saving several Events")
+  void saveAll() {
+    final int SAVE_COUNT = 5;
 
-        final List<Event> afterEvents = eventService.fetchAll();
-        final int afterCount = afterEvents.size();
-        logger.info("After saving, database contains: {} Events", afterCount);
-        final int diff = afterCount - initialCount;
-        assertThat(diff).isEqualTo(1);
-    }
+    final List<Event> initialEvents = eventService.fetchAll();
+    final int initialCount = initialEvents.size();
+    logger.info("Before saveAll() database has: {} Events", initialCount);
 
-    @Test
-    @DisplayName("Test saving several Events")
-    void saveAll() {
+    final List<Event> testEvents =
+        IntStream.range(0, SAVE_COUNT)
+            .mapToObj(i -> createUnsavedMatch("SaveAllMatch " + i))
+            .collect(Collectors.toList());
+    final List<Event> savedEvents = eventService.saveAll(testEvents);
+    cleanupData.addAll(savedEvents);
+    logger.info("Saved Event with saveAll(): {}", savedEvents);
+    assertThat(savedEvents).isNotNull().isNotEmpty();
+    assertThat(savedEvents.size()).isEqualTo(SAVE_COUNT);
+  }
 
-        final int SAVE_COUNT = 5;
+  @Test
+  @DisplayName("Ensure fetchAllPaged() returns all Events; at least @MIN_EVENT_COUNT")
+  void fetchAllEvents() {
+    final int expectedEventCount = 1; // minimum
+    final List<Event> events = eventService.fetchAll();
 
-        final List<Event> initialEvents = eventService.fetchAll();
-        final int initialCount = initialEvents.size();
-        logger.info("Before saveAll() database has: {} Events", initialCount);
+    // Perform tests
+    final int actualEventCount = events.size();
+    logger.info(
+        "Testing Event count: expected: {}, actual: {}", expectedEventCount, actualEventCount);
+    assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
+  }
 
-        final List<Event> testEvents =
-                IntStream.range(0, SAVE_COUNT)
-                        .mapToObj(i -> createUnsavedMatch("SaveAllMatch " + i))
-                        .collect(Collectors.toList());
-        final List<Event> savedEvents = eventService.saveAll(testEvents);
-        cleanupData.addAll(savedEvents);
-        logger.info("Saved Event with saveAll(): {}", savedEvents);
-        assertThat(savedEvents).isNotNull().isNotEmpty();
-        assertThat(savedEvents.size()).isEqualTo(SAVE_COUNT);
-    }
+  @Test
+  @DisplayName("Ensure a specific Event can be recalled from database")
+  void fetchById() {
+    // Fetch data from database
+    final Optional<Event> eventOptional = eventService.fetchById(testMatch.getEventId());
+    assertThat(eventOptional).isPresent();
+    eventOptional.ifPresent(
+        event -> {
+          // normalize date times
+          event.setDate(testMatch.getDate());
+          assertThat(event).isEqualTo(testMatch);
+        });
+  }
 
-    @Test
-    @DisplayName("Ensure fetchAllPaged() returns all Events; at least @MIN_EVENT_COUNT")
-    void fetchAllEvents() {
+  @Test
+  @DisplayName("Ensure fetches Events for a given Competition")
+  void fetchEventsForCompetition() {
+    final int page = 0;
+    final int pageSize = 16;
+    final int minExpectedEventCount = 1;
+    final Page<Event> eventsPage =
+        eventService.fetchEventsForCompetition(testCompetition.getId(), page, pageSize);
+    final List<Event> events = eventsPage.getContent();
+    assertThat(events.size()).isGreaterThanOrEqualTo(minExpectedEventCount);
+  }
 
-        final int expectedEventCount = 1; // minimum
-        final List<Event> events = eventService.fetchAll();
+  @Test
+  @DisplayName("Validate updating Event in database")
+  void update() {
+    logger.info("Original Event: {}", unUpdatedEvent);
 
-        // Perform tests
-        final int actualEventCount = events.size();
-        logger.info(
-                "Testing Event count: expected: {}, actual: {}", expectedEventCount, actualEventCount);
-        assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
-    }
+    final Match testEvent = getPristineEventCopy(unUpdatedEvent);
+    final Competition updatedCompetition =
+        testDataCreator.createTestCompetition("Updated Competition for EventServiceTest");
+    testEvent.setCompetition(updatedCompetition);
+    logger.info("Attempting to update Event with: {}", testEvent);
 
-    @Test
-    @DisplayName("Ensure a specific Event can be recalled from database")
-    void fetchById() {
+    final Match updatedEvent = (Match) eventService.update(testEvent);
+    logger.info("Got updated Event: {}", updatedEvent);
+    assertThat(updatedEvent).isNotEqualTo(unUpdatedEvent);
+  }
 
-        // Fetch data from database
-        final Optional<Event> eventOptional = eventService.fetchById(testMatch.getEventId());
-        assertThat(eventOptional).isPresent();
-        eventOptional.ifPresent(
-                event -> {
-                    // normalize date times
-                    event.setDate(testMatch.getDate());
-                    assertThat(event).isEqualTo(testMatch);
-                });
-    }
+  private @NotNull Match getPristineEventCopy(@NotNull Match event) {
+    final Match pristine = new Match();
+    pristine.setEventId(event.getEventId());
+    pristine.setCompetition(event.getCompetition());
+    pristine.setHomeTeam(event.getHomeTeam());
+    pristine.setAwayTeam(event.getAwayTeam());
+    pristine.setDate(event.getDate());
+    pristine.setFixture(event.getFixture());
+    pristine.setSeason(event.getSeason());
+    pristine.addAllFileSources(event.getFileSources());
+    return pristine;
+  }
 
-    @Test
-    @DisplayName("Ensure fetches Events for a given Competition")
-    void fetchEventsForCompetition() {
+  @Test
+  @DisplayName("Ensure an Event can be saved to the database & then deleted")
+  void deleteEvent() {
+    // Create test data
+    final Event saveEvent = testDataCreator.createTestMatch("Delete Event test");
+    cleanupData.add(saveEvent);
 
-        final int page = 0;
-        final int pageSize = 16;
-        final int minExpectedEventCount = 1;
-        final Page<Event> eventsPage =
-                eventService.fetchEventsForCompetition(testCompetition.getId(), page, pageSize);
-        final List<Event> events = eventsPage.getContent();
-        assertThat(events.size()).isGreaterThanOrEqualTo(minExpectedEventCount);
-    }
+    final List<Event> initialEvents = eventService.fetchAll();
+    final int initialEventCount = initialEvents.size();
+    assertThat(initialEventCount).isNotZero();
 
-    @Test
-    @DisplayName("Validate updating Event in database")
-    void update() {
+    // Delete test data
+    eventService.delete(saveEvent.getEventId());
 
-        logger.info("Original Event: {}", unUpdatedEvent);
+    // Verify Event count has returned to previous of test
+    final List<Event> postTestEvents = eventService.fetchAll();
+    final int postTestEventCount = postTestEvents.size();
+    assertThat(postTestEventCount).isEqualTo(initialEventCount - 1);
+  }
 
-        final Match testEvent = getPristineEventCopy(unUpdatedEvent);
-        final Competition updatedCompetition =
-                testDataCreator.createTestCompetition("Updated Competition for EventServiceTest");
-        testEvent.setCompetition(updatedCompetition);
-        logger.info("Attempting to update Event with: {}", testEvent);
+  @Test
+  @DisplayName("Ensure Event VideoFileSources are merged correctly")
+  void testUpdateEventWithNewVideoSources() {
+    // given
+    Match existing = (Match) eventService.fetchAll().get(0);
+    Set<VideoFileSource> fileSources = existing.getFileSources();
+    int initialFileSourceCount = fileSources.size();
 
-        final Match updatedEvent = (Match) eventService.update(testEvent);
-        logger.info("Got updated Event: {}", updatedEvent);
-        assertThat(updatedEvent).isNotEqualTo(unUpdatedEvent);
-    }
+    Match incoming =
+        Match.builder()
+            .fixture(existing.getFixture())
+            .date(existing.getDate())
+            .competition(existing.getCompetition())
+            .homeTeam(existing.getHomeTeam())
+            .awayTeam(existing.getAwayTeam())
+            .season(existing.getSeason())
+            .build();
+    VideoFileSource incomingFileSource = testDataCreator.createVideoFileSource();
+    incoming.getFileSources().add(incomingFileSource);
 
-    private @NotNull Match getPristineEventCopy(@NotNull Match event) {
+    // when
+    eventService.save(incoming);
+    Optional<Event> eventOptional = eventService.fetchById(existing.getEventId());
+    assertThat(eventOptional).isPresent();
+    Event updated = eventOptional.get();
 
-        final Match pristine = new Match();
-        pristine.setEventId(event.getEventId());
-        pristine.setCompetition(event.getCompetition());
-        pristine.setHomeTeam(event.getHomeTeam());
-        pristine.setAwayTeam(event.getAwayTeam());
-        pristine.setDate(event.getDate());
-        pristine.setFixture(event.getFixture());
-        pristine.setSeason(event.getSeason());
-        pristine.addAllFileSources(event.getFileSources());
-        return pristine;
-    }
-
-    @Test
-    @DisplayName("Ensure an Event can be saved to the database & then deleted")
-    void deleteEvent() {
-
-        // Create test data
-        final Event saveEvent = testDataCreator.createTestMatch("Delete Event test");
-        cleanupData.add(saveEvent);
-
-        final List<Event> initialEvents = eventService.fetchAll();
-        final int initialEventCount = initialEvents.size();
-        assertThat(initialEventCount).isNotZero();
-
-        // Delete test data
-        eventService.delete(saveEvent.getEventId());
-
-        // Verify Event count has returned to previous of test
-        final List<Event> postTestEvents = eventService.fetchAll();
-        final int postTestEventCount = postTestEvents.size();
-        assertThat(postTestEventCount).isEqualTo(initialEventCount - 1);
-    }
-
-    @Test
-    @DisplayName("Ensure Event VideoFileSources are merged correctly")
-    void testUpdateEventWithNewVideoSources() {
-        // given
-        Match existing = (Match) eventService.fetchAll().get(0);
-        Set<VideoFileSource> fileSources = existing.getFileSources();
-        int initialFileSourceCount = fileSources.size();
-
-        Match incoming = Match.builder().fixture(existing.getFixture())
-                .date(existing.getDate())
-                .competition(existing.getCompetition())
-                .homeTeam(existing.getHomeTeam())
-                .awayTeam(existing.getAwayTeam())
-                .season(existing.getSeason())
-                .build();
-        VideoFileSource incomingFileSource = testDataCreator.createVideoFileSource();
-        incoming.getFileSources().add(incomingFileSource);
-
-        // when
-        eventService.save(incoming);
-        Optional<Event> eventOptional = eventService.fetchById(existing.getEventId());
-        assertThat(eventOptional).isPresent();
-        Event updated = eventOptional.get();
-
-        // then
-        int updatedFileSourceCount = updated.getFileSources().size();
-        assertThat(updatedFileSourceCount).isNotZero().isEqualTo(initialFileSourceCount + 1);
-    }
+    // then
+    int updatedFileSourceCount = updated.getFileSources().size();
+    assertThat(updatedFileSourceCount).isNotZero().isEqualTo(initialFileSourceCount + 1);
+  }
 }

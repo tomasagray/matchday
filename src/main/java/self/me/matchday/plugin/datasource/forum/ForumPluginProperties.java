@@ -1,6 +1,5 @@
 package self.me.matchday.plugin.datasource.forum;
 
-
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,6 +14,6 @@ import self.me.matchday.plugin.PluginProperties;
 @Setter
 public class ForumPluginProperties extends PluginProperties {
 
-    private String linkSelector;
-    private int scrapeSteps;
+  private String linkSelector;
+  private int scrapeSteps;
 }

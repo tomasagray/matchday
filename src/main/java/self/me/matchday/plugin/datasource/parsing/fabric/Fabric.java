@@ -33,7 +33,6 @@ public class Fabric {
 
   public static <L, R> @NotNull Stream<L> zip(
       @NotNull Stream<L> leftStream, @NotNull Stream<R> rightStream, BiConsumer<L, R> combiner) {
-
     Spliterator<L> leftSplit = leftStream.spliterator();
     Spliterator<R> rightSplit = rightStream.spliterator();
     long leftSize = leftSplit.estimateSize();
@@ -64,7 +63,6 @@ public class Fabric {
 
   public static <L, R, A> @NotNull Stream<A> zip(
       @NotNull Stream<L> leftStream, @NotNull Stream<R> rightStream, BiFunction<L, R, A> combiner) {
-
     Spliterator<L> leftSplit = leftStream.spliterator();
     Spliterator<R> rightSplit = rightStream.spliterator();
     final long minSize = Long.min(leftSplit.estimateSize(), rightSplit.estimateSize());
@@ -89,7 +87,6 @@ public class Fabric {
   }
 
   public static <T, R> Stream<R> fold(@NotNull Stream<T> stream, @NotNull Folder<T, R> folder) {
-
     final Spliterator<T> spliterator = stream.spliterator();
     final boolean parallel = stream.isParallel();
     final Spliterator<R> folderSpliterator = new FolderSpliterator<>(spliterator, folder);

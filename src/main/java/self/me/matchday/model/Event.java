@@ -83,7 +83,6 @@ public abstract class Event {
    * @return the requested file source, or null if not found
    */
   public VideoFileSource getFileSource(final @NotNull UUID fileSrcId) {
-
     // Search the collection of file sources for the ID
     for (VideoFileSource fileSrc : fileSources) {
       if (fileSrc.getFileSrcId().equals(fileSrcId)) {

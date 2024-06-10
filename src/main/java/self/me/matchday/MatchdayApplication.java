@@ -21,7 +21,6 @@ package self.me.matchday;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.EnableLoadTimeWeaving;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -34,7 +33,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 public class MatchdayApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(MatchdayApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(MatchdayApplication.class, args);
+  }
 }

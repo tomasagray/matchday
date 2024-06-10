@@ -33,7 +33,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,88 +46,86 @@ import self.me.matchday.db.converter.PathConverter;
 @Entity
 public class VideoStreamLocatorPlaylist {
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
-    private final VideoFileSource fileSource;
+  @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+  private final VideoFileSource fileSource;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @LazyCollection(LazyCollectionOption.FALSE)
-    private final List<VideoStreamLocator> streamLocators = new ArrayList<>();
+  @OneToMany(cascade = CascadeType.ALL)
+  @LazyCollection(LazyCollectionOption.FALSE)
+  private final List<VideoStreamLocator> streamLocators = new ArrayList<>();
 
-    @Convert(converter = PathConverter.class)
-    private final Path storageLocation;
+  @Convert(converter = PathConverter.class)
+  private final Path storageLocation;
 
-    @EqualsAndHashCode.Exclude
-    private final Instant timestamp = Instant.now();
-    @Id
-    @GeneratedValue
-    private Long id;
+  @EqualsAndHashCode.Exclude private final Instant timestamp = Instant.now();
+  @Id @GeneratedValue private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private TaskListState state = TaskListState.builder().build();
+  @OneToOne(cascade = CascadeType.ALL)
+  private TaskListState state = TaskListState.builder().build();
 
-    public VideoStreamLocatorPlaylist() {
-        this.fileSource = null;
-        this.storageLocation = null;
-    }
+  public VideoStreamLocatorPlaylist() {
+    this.fileSource = null;
+    this.storageLocation = null;
+  }
 
-    public VideoStreamLocatorPlaylist(@NotNull  VideoFileSource fileSource, @NotNull  Path storageLocation) {
-        this.fileSource = fileSource;
-        this.storageLocation = storageLocation;
-    }
+  public VideoStreamLocatorPlaylist(
+      @NotNull VideoFileSource fileSource, @NotNull Path storageLocation) {
+    this.fileSource = fileSource;
+    this.storageLocation = storageLocation;
+  }
 
-    public void addStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
-        this.streamLocators.add(streamLocator);
-        this.state.addTaskState(streamLocator.getState());
-    }
+  public void addStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
+    this.streamLocators.add(streamLocator);
+    this.state.addTaskState(streamLocator.getState());
+  }
 
-    public TaskListState getState() {
-        // ensure state is fresh
-        this.state.computeState();
-        return this.state;
-    }
+  public TaskListState getState() {
+    // ensure state is fresh
+    this.state.computeState();
+    return this.state;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof VideoStreamLocatorPlaylist playlist)) return false;
-        return Objects.equals(getFileSource(), playlist.getFileSource())
-                && Objects.equals(getStreamLocators(), playlist.getStreamLocators())
-                && Objects.equals(getStorageLocation(), playlist.getStorageLocation())
-                && Objects.equals(getTimestamp(), playlist.getTimestamp())
-                && Objects.equals(getId(), playlist.getId())
-                && Objects.equals(getState(), playlist.getState());
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof VideoStreamLocatorPlaylist playlist)) return false;
+    return Objects.equals(getFileSource(), playlist.getFileSource())
+        && Objects.equals(getStreamLocators(), playlist.getStreamLocators())
+        && Objects.equals(getStorageLocation(), playlist.getStorageLocation())
+        && Objects.equals(getTimestamp(), playlist.getTimestamp())
+        && Objects.equals(getId(), playlist.getId())
+        && Objects.equals(getState(), playlist.getState());
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(
-                getFileSource(),
-                getStreamLocators(),
-                getStorageLocation(),
-                getTimestamp(),
-                getId(),
-                getState());
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        getFileSource(),
+        getStreamLocators(),
+        getStorageLocation(),
+        getTimestamp(),
+        getId(),
+        getState());
+  }
 
-    @Override
-    public String toString() {
-        final UUID fileSrcId = fileSource != null ? fileSource.getFileSrcId() : null;
-        return getClass().getSimpleName()
-                + "("
-                + "id = "
-                + id
-                + ", "
-                + "fileSource = "
-                + fileSrcId
-                + ", "
-                + "storageLocation = "
-                + storageLocation
-                + ", "
-                + "timestamp = "
-                + timestamp
-                + ", "
-                + "state = "
-                + state
-                + ")";
-    }
+  @Override
+  public String toString() {
+    final UUID fileSrcId = fileSource != null ? fileSource.getFileSrcId() : null;
+    return getClass().getSimpleName()
+        + "("
+        + "id = "
+        + id
+        + ", "
+        + "fileSource = "
+        + fileSrcId
+        + ", "
+        + "storageLocation = "
+        + storageLocation
+        + ", "
+        + "timestamp = "
+        + timestamp
+        + ", "
+        + "state = "
+        + state
+        + ")";
+  }
 }

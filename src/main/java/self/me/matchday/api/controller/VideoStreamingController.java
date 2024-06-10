@@ -55,9 +55,7 @@ public class VideoStreamingController {
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<Resource> getSegmentFile(
       @PathVariable("partId") Long partId, @PathVariable("segmentId") String segmentId) {
-
-    final Resource videoSegmentResource =
-        streamingService.getVideoSegmentResource(partId, segmentId);
+    Resource videoSegmentResource = streamingService.getVideoSegmentResource(partId, segmentId);
     return videoSegmentResource != null
         ? ResponseEntity.ok(videoSegmentResource)
         : ResponseEntity.notFound().build();

@@ -31,7 +31,6 @@ class ApplicationInfoServiceTest {
   @Test
   @DisplayName("Validate application info")
   void getApplicationInfo() {
-
     // given
     final int minimumPid = 1_000;
     final Pattern versionPattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");

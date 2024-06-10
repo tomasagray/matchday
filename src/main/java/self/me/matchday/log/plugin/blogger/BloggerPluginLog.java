@@ -33,24 +33,24 @@ import self.me.matchday.plugin.datasource.blogger.BloggerPlugin;
 @Aspect
 public class BloggerPluginLog {
 
-    private static final Logger logger = LogManager.getLogger(BloggerPlugin.class);
+  private static final Logger logger = LogManager.getLogger(BloggerPlugin.class);
 
-    @Around("execution(* self.me.matchday.plugin.datasource.blogger.BloggerPlugin.getSnapshot(..))")
-    public Object logGetSnapshot(@NotNull ProceedingJoinPoint jp) throws Throwable {
-        final Object[] args = jp.getArgs();
-        if (args.length == 2) {
-            final Object request = args[0];
-            final DataSource<?> dataSource = (DataSource<?>) args[1];
-            logger.info(
-                    "Getting Snapshot using Request: {}, Data Source: {}",
-                    request,
-                    dataSource.getDataSourceId());
-        }
-        return jp.proceed();
+  @Around("execution(* self.me.matchday.plugin.datasource.blogger.BloggerPlugin.getSnapshot(..))")
+  public Object logGetSnapshot(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    final Object[] args = jp.getArgs();
+    if (args.length == 2) {
+      final Object request = args[0];
+      final DataSource<?> dataSource = (DataSource<?>) args[1];
+      logger.info(
+          "Getting Snapshot using Request: {}, Data Source: {}",
+          request,
+          dataSource.getDataSourceId());
     }
+    return jp.proceed();
+  }
 
-    @Before("execution(* self.me.matchday.plugin.datasource.blogger.BloggerParser.getBlogger(..))")
-    public void logGetBloggerFromUrl(@NotNull JoinPoint jp) {
-        logger.info("Fetching Blogger instance from: {}", jp.getArgs()[0]);
-    }
+  @Before("execution(* self.me.matchday.plugin.datasource.blogger.BloggerParser.getBlogger(..))")
+  public void logGetBloggerFromUrl(@NotNull JoinPoint jp) {
+    logger.info("Fetching Blogger instance from: {}", jp.getArgs()[0]);
+  }
 }

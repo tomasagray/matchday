@@ -19,6 +19,8 @@
 
 package self.me.matchday.log;
 
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -31,122 +33,119 @@ import org.jetbrains.annotations.NotNull;
 import self.me.matchday.api.service.video.VideoStreamingService;
 import self.me.matchday.model.video.VideoFileSource;
 
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-
 @Aspect
 public class VideoStreamingServiceLog {
 
-    private static final Logger logger = LogManager.getLogger(VideoStreamingService.class);
+  private static final Logger logger = LogManager.getLogger(VideoStreamingService.class);
 
-    @Before(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.getBestVideoStreamPlaylist(..))")
-    public void logGetBestVideoStreamPlaylist(@NotNull JoinPoint jp) {
-        logger.info("Getting 'best' video stream for Event: {}", jp.getArgs()[0]);
-    }
+  @Before(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.getBestVideoStreamPlaylist(..))")
+  public void logGetBestVideoStreamPlaylist(@NotNull JoinPoint jp) {
+    logger.info("Getting 'best' video stream for Event: {}", jp.getArgs()[0]);
+  }
 
-    @Before(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.findExistingStream(..))")
-    public void logFindExistingStream(@NotNull JoinPoint jp) {
-        logger.info("Finding existing stream for Event: {}", jp.getArgs()[0]);
-    }
+  @Before(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.findExistingStream(..))")
+  public void logFindExistingStream(@NotNull JoinPoint jp) {
+    logger.info("Finding existing stream for Event: {}", jp.getArgs()[0]);
+  }
 
-    @Around(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.getVideoSegmentResource(..))")
-    public Object logGetVideoSegmentResource(@NotNull ProceedingJoinPoint jp) throws Throwable {
-        logger.trace(
-                "Reading video segment resource for Locator ID: {}, Segment: {}",
-                jp.getArgs()[0],
-                jp.getArgs()[1]);
-        final Object result = jp.proceed();
-        logger.debug("Read: {} for Locator: {}", result, jp.getArgs()[0]);
-        return result;
-    }
+  @Around(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.getVideoSegmentResource(..))")
+  public Object logGetVideoSegmentResource(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.trace(
+        "Reading video segment resource for Locator ID: {}, Segment: {}",
+        jp.getArgs()[0],
+        jp.getArgs()[1]);
+    final Object result = jp.proceed();
+    logger.debug("Read: {} for Locator: {}", result, jp.getArgs()[0]);
+    return result;
+  }
 
-    @Around(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.renderPlaylist(..))")
-    public Object logRenderPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
-        final Object[] args = jp.getArgs();
-        logger.info(
-                "Rendering playlist for Event: {}, File Source: {}, locator playlist: {}",
-                args[0],
-                args[1],
-                args[2]);
-        final Object result = jp.proceed();
-        logger.info("Rendered playlist: {} for File Source: {}", result, args[1]);
-        return result;
-    }
+  @Around(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.renderPlaylist(..))")
+  public Object logRenderPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    final Object[] args = jp.getArgs();
+    logger.info(
+        "Rendering playlist for Event: {}, File Source: {}, locator playlist: {}",
+        args[0],
+        args[1],
+        args[2]);
+    final Object result = jp.proceed();
+    logger.info("Rendered playlist: {} for File Source: {}", result, args[1]);
+    return result;
+  }
 
-    @Around(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.createVideoStream(..))")
-    public Object logCreatePlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
-        final VideoFileSource fileSource = (VideoFileSource) jp.getArgs()[0];
-        final UUID fileSrcId = fileSource.getFileSrcId();
-        logger.info("Creating playlist for VideoFileSource: {}", fileSrcId);
-        final Object result = jp.proceed();
-        logger.info("Created playlist: {} for VideoFileSource: {}", result, fileSrcId);
-        return result;
-    }
+  @Around(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.createVideoStream(..))")
+  public Object logCreatePlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    final VideoFileSource fileSource = (VideoFileSource) jp.getArgs()[0];
+    final UUID fileSrcId = fileSource.getFileSrcId();
+    logger.info("Creating playlist for VideoFileSource: {}", fileSrcId);
+    final Object result = jp.proceed();
+    logger.info("Created playlist: {} for VideoFileSource: {}", result, fileSrcId);
+    return result;
+  }
 
-    @Around(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.getOrCreateVideoStreamPlaylist(..))")
-    public Object logGetVideoStreamPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
-        logger.info(
-                "Getting VideoStreamPlaylist for Event: {}, File Source: {}",
-                jp.getArgs()[0],
-                jp.getArgs()[1]);
-        final Object result = jp.proceed();
-        logger.info("Found: {}", result);
-        return result;
-    }
+  @Around(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.getOrCreateVideoStreamPlaylist(..))")
+  public Object logGetVideoStreamPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.info(
+        "Getting VideoStreamPlaylist for Event: {}, File Source: {}",
+        jp.getArgs()[0],
+        jp.getArgs()[1]);
+    final Object result = jp.proceed();
+    logger.info("Found: {}", result);
+    return result;
+  }
 
-    @Around(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.readPlaylistFile(..))")
-    public Object logReadPlaylistFile(@NotNull ProceedingJoinPoint jp) throws Throwable {
-        logger.trace("Attempting to read playlist file for Locator ID: {}", jp.getArgs()[0]);
-        final String result = (String) jp.proceed();
-        final int byteCount = result.getBytes(StandardCharsets.UTF_8).length;
-        logger.debug("Read {} bytes of playlist file", byteCount);
-        return result;
-    }
+  @Around(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.readPlaylistFile(..))")
+  public Object logReadPlaylistFile(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.trace("Attempting to read playlist file for Locator ID: {}", jp.getArgs()[0]);
+    final String result = (String) jp.proceed();
+    final int byteCount = result.getBytes(StandardCharsets.UTF_8).length;
+    logger.debug("Read {} bytes of playlist file", byteCount);
+    return result;
+  }
 
-    @AfterReturning(
-            value =
-                    "execution(* self.me.matchday.api.service.video.VideoStreamingService.getActiveStreamingTaskCount(..))",
-            returning = "count")
-    public void logGetActiveStreamTaskCount(@NotNull Object count) {
-        logger.info("There are currently {} active video stream tasks", count);
-    }
+  @AfterReturning(
+      value =
+          "execution(* self.me.matchday.api.service.video.VideoStreamingService.getActiveStreamingTaskCount(..))",
+      returning = "count")
+  public void logGetActiveStreamTaskCount(@NotNull Object count) {
+    logger.info("There are currently {} active video stream tasks", count);
+  }
 
-    @Around(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.killAllStreamingTasks())")
-    public Object logKillAllStreamingTasks(@NotNull ProceedingJoinPoint jp) throws Throwable {
-        logger.info("Attempting to kill all streaming tasks...");
-        final Object result = jp.proceed();
-        logger.info("Killed: {} tasks", result);
-        return result;
-    }
+  @Around(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.killAllStreamingTasks())")
+  public Object logKillAllStreamingTasks(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.info("Attempting to kill all streaming tasks...");
+    final Object result = jp.proceed();
+    logger.info("Killed: {} tasks", result);
+    return result;
+  }
 
-    @Before(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.killAllStreamsFor(..))")
-    public void logKillStreamingFor(@NotNull JoinPoint jp) {
-        logger.info("Attempting to kill streams for Video File Source: {}", jp.getArgs()[0]);
-    }
+  @Before(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.killAllStreamsFor(..))")
+  public void logKillStreamingFor(@NotNull JoinPoint jp) {
+    logger.info("Attempting to kill streams for Video File Source: {}", jp.getArgs()[0]);
+  }
 
-    @Before("execution(* self.me.matchday.api.service.video.VideoStreamingService.killStreamFor(..))")
-    public void logKillVideoFileStream(@NotNull JoinPoint jp) {
-        logger.info("Attempting to kill stream for VideoFile: {}", jp.getArgs()[0]);
-    }
+  @Before("execution(* self.me.matchday.api.service.video.VideoStreamingService.killStreamFor(..))")
+  public void logKillVideoFileStream(@NotNull JoinPoint jp) {
+    logger.info("Attempting to kill stream for VideoFile: {}", jp.getArgs()[0]);
+  }
 
-    @Before(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.deleteAllVideoData(..))")
-    public void logDeleteAllVideoDataForSource(@NotNull JoinPoint jp) {
-        logger.info("Attempting to delete video data from disk for: {}", jp.getArgs()[0]);
-    }
+  @Before(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.deleteAllVideoData(..))")
+  public void logDeleteAllVideoDataForSource(@NotNull JoinPoint jp) {
+    logger.info("Attempting to delete video data from disk for: {}", jp.getArgs()[0]);
+  }
 
-    @Before(
-            "execution(* self.me.matchday.api.service.video.VideoStreamingService.deleteVideoData(..))")
-    public void logDeleteVideoStreamForVideoFile(@NotNull JoinPoint jp) {
-        logger.info("Deleting video stream data for VideoFile: {}", jp.getArgs()[0]);
-    }
+  @Before(
+      "execution(* self.me.matchday.api.service.video.VideoStreamingService.deleteVideoData(..))")
+  public void logDeleteVideoStreamForVideoFile(@NotNull JoinPoint jp) {
+    logger.info("Deleting video stream data for VideoFile: {}", jp.getArgs()[0]);
+  }
 }

@@ -47,7 +47,6 @@ public final class FFmpegConcatProtocolStreamTask extends FFmpegStreamTask {
       boolean loggingEnabled,
       List<String> transcodeArgs,
       List<URI> uris) {
-
     this.execPath = execPath;
     this.ffmpegArgs = ffmpegArgs;
     this.playlistPath = outputPath;
@@ -74,7 +73,6 @@ public final class FFmpegConcatProtocolStreamTask extends FFmpegStreamTask {
 
   @Override
   public @NotNull @Unmodifiable List<String> getInputArg() {
-
     final List<String> uriStrings = uris.stream().map(URI::toString).collect(Collectors.toList());
     final String concatText = String.join("|", uriStrings);
     // Create input String & return

@@ -19,6 +19,12 @@
 
 package self.me.matchday.api.service.video;
 
+import static self.me.matchday.config.settings.VideoStorageLocation.VIDEO_STORAGE;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -29,96 +35,91 @@ import self.me.matchday.model.video.VideoFileSource;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamLocatorPlaylist;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static self.me.matchday.config.settings.VideoStorageLocation.VIDEO_STORAGE;
-
 @Service
 @PropertySource("classpath:video.properties")
 public class VideoStreamLocatorPlaylistService {
 
-    private final VideoStreamLocatorPlaylistRepo playlistRepo;
-    private final VideoStreamLocatorService locatorService;
-    private final VideoFileSelectorService videoFileSelectorService;
-    private final SettingsService settingsService;
+  private final VideoStreamLocatorPlaylistRepo playlistRepo;
+  private final VideoStreamLocatorService locatorService;
+  private final VideoFileSelectorService videoFileSelectorService;
+  private final SettingsService settingsService;
 
-    public VideoStreamLocatorPlaylistService(
-            final VideoStreamLocatorPlaylistRepo playlistRepo,
-            final VideoStreamLocatorService locatorService,
-            final VideoFileSelectorService videoFileSelectorService,
-            SettingsService settingsService) {
-        this.playlistRepo = playlistRepo;
-        this.locatorService = locatorService;
-        this.videoFileSelectorService = videoFileSelectorService;
-        this.settingsService = settingsService;
+  public VideoStreamLocatorPlaylistService(
+      final VideoStreamLocatorPlaylistRepo playlistRepo,
+      final VideoStreamLocatorService locatorService,
+      final VideoFileSelectorService videoFileSelectorService,
+      SettingsService settingsService) {
+    this.playlistRepo = playlistRepo;
+    this.locatorService = locatorService;
+    this.videoFileSelectorService = videoFileSelectorService;
+    this.settingsService = settingsService;
+  }
+
+  /**
+   * Retrieve all video stream playlists.
+   *
+   * @return A List of all video stream playlists in the database
+   */
+  public List<VideoStreamLocatorPlaylist> getAllVideoStreamPlaylists() {
+    return playlistRepo.findAll();
+  }
+
+  /**
+   * Create a playlist of video streams. Directories for video data will be automatically created.
+   *
+   * @param fileSource The VideoFileSource from which the stream will be created
+   * @return The playlist of video streams
+   */
+  public VideoStreamLocatorPlaylist createVideoStreamPlaylist(@NotNull VideoFileSource fileSource) {
+    final VideoFilePack playlistFiles = videoFileSelectorService.getPlaylistFiles(fileSource);
+    if (playlistFiles == null || playlistFiles.size() == 0) {
+      throw new EmptyVideoFileSourceException(fileSource);
     }
 
-    /**
-     * Retrieve all video stream playlists.
-     *
-     * @return A List of all video stream playlists in the database
-     */
-    public List<VideoStreamLocatorPlaylist> getAllVideoStreamPlaylists() {
-        return playlistRepo.findAll();
+    final Path fileStorageLocation = settingsService.getSetting(VIDEO_STORAGE, Path.class);
+    final UUID fileSrcId = fileSource.getFileSrcId();
+    final Path storageLocation = fileStorageLocation.resolve(fileSrcId.toString());
+    final VideoStreamLocatorPlaylist streamPlaylist =
+        new VideoStreamLocatorPlaylist(fileSource, storageLocation);
+
+    playlistFiles.forEachVideoFile(
+        (title, videoFile) -> {
+          final VideoStreamLocator streamLocator =
+              locatorService.createStreamLocator(storageLocation, videoFile);
+          streamPlaylist.addStreamLocator(streamLocator);
+        });
+    return playlistRepo.saveAndFlush(streamPlaylist);
+  }
+
+  /**
+   * Retrieve the most recently created playlist from the database
+   *
+   * @param fileSrcId The ID of the VideoFileSource this playlist was created from
+   * @return An Optional containing the most recent playlist
+   */
+  public Optional<VideoStreamLocatorPlaylist> getVideoStreamPlaylistFor(@NotNull UUID fileSrcId) {
+    final List<VideoStreamLocatorPlaylist> playlists =
+        playlistRepo.fetchPlaylistsForFileSrc(fileSrcId);
+    if (playlists != null && !playlists.isEmpty()) {
+      // Return most recent playlist
+      return Optional.of(playlists.get(0));
     }
+    // Nothing found
+    return Optional.empty();
+  }
 
-    /**
-     * Create a playlist of video streams. Directories for video data will be automatically created.
-     *
-     * @param fileSource The VideoFileSource from which the stream will be created
-     * @return The playlist of video streams
-     */
-    public VideoStreamLocatorPlaylist createVideoStreamPlaylist(@NotNull VideoFileSource fileSource) {
-        final VideoFilePack playlistFiles = videoFileSelectorService.getPlaylistFiles(fileSource);
-        if (playlistFiles == null || playlistFiles.size() == 0) {
-            throw new EmptyVideoFileSourceException(fileSource);
-        }
+  public Optional<VideoStreamLocatorPlaylist> getVideoStreamPlaylistContaining(
+      @NotNull Long locatorId) {
+    return playlistRepo.fetchPlaylistContaining(locatorId);
+  }
 
-        final Path fileStorageLocation = settingsService.getSetting(VIDEO_STORAGE, Path.class);
-        final UUID fileSrcId = fileSource.getFileSrcId();
-        final Path storageLocation = fileStorageLocation.resolve(fileSrcId.toString());
-        final VideoStreamLocatorPlaylist streamPlaylist =
-                new VideoStreamLocatorPlaylist(fileSource, storageLocation);
-
-        playlistFiles.forEachVideoFile(
-                (title, videoFile) -> {
-                    final VideoStreamLocator streamLocator =
-                            locatorService.createStreamLocator(storageLocation, videoFile);
-                    streamPlaylist.addStreamLocator(streamLocator);
-                });
-        return playlistRepo.saveAndFlush(streamPlaylist);
-    }
-
-    /**
-     * Retrieve the most recently created playlist from the database
-     *
-     * @param fileSrcId The ID of the VideoFileSource this playlist was created from
-     * @return An Optional containing the most recent playlist
-     */
-    public Optional<VideoStreamLocatorPlaylist> getVideoStreamPlaylistFor(@NotNull UUID fileSrcId) {
-        final List<VideoStreamLocatorPlaylist> playlists = playlistRepo.fetchPlaylistsForFileSrc(fileSrcId);
-        if (playlists != null && !playlists.isEmpty()) {
-            // Return most recent playlist
-            return Optional.of(playlists.get(0));
-        }
-        // Nothing found
-        return Optional.empty();
-    }
-
-    public Optional<VideoStreamLocatorPlaylist> getVideoStreamPlaylistContaining(@NotNull Long locatorId) {
-        return playlistRepo.fetchPlaylistContaining(locatorId);
-    }
-
-    /**
-     * Delete a video stream playlist & it's associated stream locators from database
-     *
-     * @param playlist The playlist to be deleted
-     */
-    public void deleteVideoStreamPlaylist(@NotNull VideoStreamLocatorPlaylist playlist) {
-        playlistRepo.delete(playlist);
-        playlist.getStreamLocators().forEach(locatorService::publishLocatorStatus);
-    }
+  /**
+   * Delete a video stream playlist & it's associated stream locators from database
+   *
+   * @param playlist The playlist to be deleted
+   */
+  public void deleteVideoStreamPlaylist(@NotNull VideoStreamLocatorPlaylist playlist) {
+    playlistRepo.delete(playlist);
+    playlist.getStreamLocators().forEach(locatorService::publishLocatorStatus);
+  }
 }

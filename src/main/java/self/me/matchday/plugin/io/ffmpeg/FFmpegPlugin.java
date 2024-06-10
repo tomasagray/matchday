@@ -40,7 +40,6 @@ public class FFmpegPlugin implements Plugin {
 
   @Autowired
   public FFmpegPlugin(@NotNull final FFmpegPluginProperties pluginProperties) {
-
     this.pluginProperties = pluginProperties;
     // Create executable instances
     this.ffmpeg = new FFmpeg(pluginProperties.getFFmpegLocation());
@@ -55,7 +54,6 @@ public class FFmpegPlugin implements Plugin {
    * @return The path of the playlist file produced by FFMPEG
    */
   public FFmpegStreamTask streamUris(@NotNull final Path playlistPath, @NotNull final URI... uris) {
-
     // Get absolute path for task key
     final Path absolutePath = playlistPath.toAbsolutePath();
     checkTaskAlreadyExecuting(absolutePath);
@@ -81,7 +79,6 @@ public class FFmpegPlugin implements Plugin {
    * @param outputPath The path of the stream data
    */
   public void interruptStreamingTask(@NotNull final Path outputPath) {
-
     // Get absolute path for task key
     final Path absolutePath = outputPath.toAbsolutePath();
     // Get requested task
@@ -134,7 +131,6 @@ public class FFmpegPlugin implements Plugin {
    * @param absolutePath The path of the streaming task
    */
   private void checkTaskAlreadyExecuting(@NotNull final Path absolutePath) {
-
     // Check if a task is already working in path
     FFmpegStreamTask prevTask = streamingTasks.get(absolutePath);
     if (prevTask != null) {

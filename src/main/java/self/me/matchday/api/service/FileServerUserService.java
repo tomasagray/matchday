@@ -59,7 +59,6 @@ public class FileServerUserService {
    */
   @Transactional
   public FileServerUser login(@NotNull final FileServerUser user) {
-
     userValidationService.validateUserForLogin(user);
 
     final UUID pluginId = user.getServerId();
@@ -100,7 +99,6 @@ public class FileServerUserService {
   @Transactional
   public FileServerUser loginWithCookies(
       @NotNull final FileServerUser user, @NotNull final String cookieData) {
-
     userValidationService.validateEmailAddress(user.getUsername());
     final UUID pluginId = user.getServerId();
     final Optional<FileServerPlugin> pluginOptional = pluginService.getPluginById(pluginId);
@@ -119,7 +117,6 @@ public class FileServerUserService {
       @NotNull FileServerUser user,
       @NotNull UUID serverId,
       @NotNull Collection<SecureCookie> cookies) {
-
     final Optional<FileServerUser> loggedInOptional = userRepo.findByUsername(user.getUsername());
     if (loggedInOptional.isPresent()) {
       final FileServerUser loggedInUser = loggedInOptional.get();
@@ -147,7 +144,6 @@ public class FileServerUserService {
    */
   @Transactional
   public FileServerUser logout(@NotNull final UUID userId) {
-
     // Find required user
     final Optional<FileServerUser> userOptional = userRepo.findById(userId);
     if (userOptional.isPresent()) {
@@ -170,7 +166,6 @@ public class FileServerUserService {
    */
   @Transactional
   public FileServerUser relogin(@NotNull final UUID userId) {
-
     final Optional<FileServerUser> userOptional = userRepo.findById(userId);
     if (userOptional.isPresent()) {
       final FileServerUser fileServerUser = userOptional.get();
@@ -214,7 +209,6 @@ public class FileServerUserService {
    */
   @Transactional
   public void deleteUser(@NotNull final UUID userId) {
-
     final Optional<FileServerUser> userOptional = userRepo.findById(userId);
     if (userOptional.isPresent()) {
       final FileServerUser fileServerUser = userOptional.get();

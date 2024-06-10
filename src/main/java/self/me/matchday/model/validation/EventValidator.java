@@ -26,7 +26,6 @@ public class EventValidator implements EntityValidator<Event> {
 
   @Override
   public void validate(@Nullable Event event) {
-
     if (event == null) {
       throw new InvalidEventException("Event is null");
     }

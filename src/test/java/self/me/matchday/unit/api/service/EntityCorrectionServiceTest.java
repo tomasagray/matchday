@@ -59,11 +59,10 @@ class EntityCorrectionServiceTest {
   private static final Logger logger = LogManager.getLogger(EntityCorrectionServiceTest.class);
   private static final String FC_BARCELONA = "FC Barcelona ";
   private static final String ATLETICO_DE_MADRID = "Atletico de Madrid ";
-
-  private final EntityCorrectionService entityCorrectionService;
-  private final EventService eventService;
   // Test data
   private static final List<Event> cleanupData = new ArrayList<>();
+  private final EntityCorrectionService entityCorrectionService;
+  private final EventService eventService;
   private final int seed = R.nextInt(100);
   private final Competition competition = new Competition(UEFA_CHAMPIONS_LEAGUE + seed);
   private final Competition searchCompetition = new Competition("UCL" + seed);
@@ -104,7 +103,7 @@ class EntityCorrectionServiceTest {
     properEvent.addFileSource(fileSource);
     createSynonyms(properEvent);
     final Event saved = eventService.save(properEvent);
-    logger.info("Saved proper event: " + saved);
+    logger.info("Saved proper event: {}", saved);
     cleanupData.add(saved);
   }
 
@@ -124,10 +123,10 @@ class EntityCorrectionServiceTest {
             .awayTeam(searchAwayTeam)
             .date(LocalDateTime.now())
             .build();
-    logger.info("Created uncorrected Event: " + testEvent);
+    logger.info("Created uncorrected Event: {}", testEvent);
 
     entityCorrectionService.correctEntityFields(testEvent);
-    logger.info("Got corrected Event: " + testEvent);
+    logger.info("Got corrected Event: {}", testEvent);
     assertThat(testEvent.getCompetition().getName().getName())
         .isEqualTo(UEFA_CHAMPIONS_LEAGUE + seed);
     assertThat(testEvent.getHomeTeam().getName().getName()).isEqualTo(FC_BARCELONA + seed);
@@ -137,7 +136,6 @@ class EntityCorrectionServiceTest {
   @Test
   @DisplayName("Ensure fields not marked for correction are not altered")
   void testNonCorrectedFields() throws ReflectiveOperationException {
-
     final Season testSeason = new Season(2022, 2023);
     final Fixture testFixture = new Fixture(16);
     final LocalDateTime testDate = LocalDateTime.now();
@@ -151,11 +149,11 @@ class EntityCorrectionServiceTest {
             .fixture(testFixture)
             .date(testDate)
             .build();
-    logger.info("Created raw event: " + testEvent);
+    logger.info("Created raw event: {}", testEvent);
 
     entityCorrectionService.correctEntityFields(testEvent);
 
-    logger.info("Event has been corrected to: " + testEvent);
+    logger.info("Event has been corrected to: {}", testEvent);
     assertThat(testEvent.getCompetition().getName().getName())
         .isEqualTo(UEFA_CHAMPIONS_LEAGUE + seed);
     assertThat(testEvent.getHomeTeam().getName().getName()).isEqualTo(FC_BARCELONA + seed);

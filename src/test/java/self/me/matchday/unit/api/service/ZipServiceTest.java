@@ -42,7 +42,6 @@ class ZipServiceTest {
 
   @BeforeEach
   void setup() throws IOException {
-
     final File outputDir = new File(OUTPUT_DIR);
     if (!outputDir.exists()) {
       logger.info("Test output dir {} does not exist; creating...", outputDir);
@@ -57,7 +56,6 @@ class ZipServiceTest {
 
   @AfterEach
   void cleanup() throws IOException {
-
     logger.info("Cleaning up test output...");
     Files.walkFileTree(
         Path.of(OUTPUT_DIR),
@@ -82,7 +80,6 @@ class ZipServiceTest {
   @Test
   @DisplayName("Validating zipping multiple files & directories")
   void testZipFilesAndDirs() throws IOException {
-
     // given
     final long expectedFileSize = 65_734;
     final String archiveName = OUTPUT_DIR + "zip-test-output.zip";
@@ -104,7 +101,6 @@ class ZipServiceTest {
   @Test
   @DisplayName("Validate ability to unzip archive")
   void testUnzipArchive() throws IOException {
-
     // given
     testZipFilesAndDirs(); // create test archive
     final File archiveName = new File(OUTPUT_DIR + "zip-test-output.zip");

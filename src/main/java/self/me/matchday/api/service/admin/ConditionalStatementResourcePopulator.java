@@ -43,7 +43,6 @@ public class ConditionalStatementResourcePopulator extends ResourceDatabasePopul
 
   @Contract(pure = true)
   private Resource @NotNull [] parseResources(Resource @NotNull ... resources) throws IOException {
-
     final List<Resource> parsed = new ArrayList<>();
     for (Resource resource : resources) {
       Resource cleanResource = cleanResource(resource);
@@ -54,7 +53,6 @@ public class ConditionalStatementResourcePopulator extends ResourceDatabasePopul
 
   @Contract("_ -> new")
   private @NotNull Resource cleanResource(@NotNull Resource resource) throws IOException {
-
     final EncodedResource encodedResource = new EncodedResource(resource, this.sqlScriptEncoding);
     try (final BufferedReader reader = new BufferedReader(encodedResource.getReader())) {
       final String cleanedResource =

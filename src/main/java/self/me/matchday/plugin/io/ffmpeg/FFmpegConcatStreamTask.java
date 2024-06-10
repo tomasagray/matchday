@@ -50,7 +50,6 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
       boolean loggingEnabled,
       List<String> transcodeArgs,
       List<URI> uris) {
-
     this.execPath = execPath;
     this.ffmpegArgs = ffmpegArgs;
     this.playlistPath = playlistPath;
@@ -89,7 +88,6 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
    * @throws IOException If there is an error creating or writing the file
    */
   private Path createConcatFile() throws IOException {
-
     // Map each URI to en entry in the concat file
     final String concatFileText =
         uris.stream().map(url -> String.format("file '%s'\n", url)).collect(Collectors.joining());

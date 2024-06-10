@@ -43,7 +43,6 @@ public class MatchDataParserLog {
   @Before(
       "execution(* self.me.matchday.plugin.datasource.parsing.MatchDataParser.getEntityStream(..))")
   public void logAroundEventParsing(@NotNull JoinPoint jp) {
-
     final Object[] args = jp.getArgs();
     if (args.length == 2) {
       if (args[0] instanceof final DataSource<?> dataSource

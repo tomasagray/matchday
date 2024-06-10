@@ -53,7 +53,6 @@ class PatternKitTest {
   }
 
   private static @NotNull Stream<Arguments> getPatternKitArgs() throws IOException {
-
     final String regex =
         "([\\p{L}\\d\\s]+) (\\d{2,4}/\\d{2,4})[-Matchdy\\s]*(\\d+)[\\s-]*([\\p{L}\\s-]+) "
             + "vs.? ([\\p{L}\\s-]+) - (\\d{2}/\\d{2}/\\d{2,4})";
@@ -71,9 +70,8 @@ class PatternKitTest {
   @MethodSource("getPatternKitArgs")
   @DisplayName("Test similarity of programmatically created PatternKits vs. those read from JSON")
   void testFileAndManualPatternEquals(PatternKit<?> manualKit, PatternKit<?> fromFileKit) {
-
-    logger.info("Manually created Kit:\n" + manualKit);
-    logger.info("Kit from file:\n" + fromFileKit);
+    logger.info("Manually created Kit:\n{}", manualKit);
+    logger.info("Kit from file:\n{}", fromFileKit);
 
     assertThat(manualKit).isNotNull();
     assertThat(fromFileKit).isNotNull();

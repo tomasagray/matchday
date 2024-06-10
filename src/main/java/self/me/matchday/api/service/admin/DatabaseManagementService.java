@@ -38,7 +38,6 @@ public class DatabaseManagementService {
 
   @Transactional
   public void installDatabase(@NotNull Path dumpFile) throws SQLException, IOException {
-
     int version = getMysqlVersion();
     final Resource resource = new FileSystemResource(dumpFile);
     final ResourceDatabasePopulator populator =

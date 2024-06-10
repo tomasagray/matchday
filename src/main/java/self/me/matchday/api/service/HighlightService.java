@@ -19,6 +19,11 @@
 
 package self.me.matchday.api.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Example;
@@ -29,130 +34,122 @@ import self.me.matchday.db.HighlightRepository;
 import self.me.matchday.model.Event.EventSorter;
 import self.me.matchday.model.Highlight;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 @Service
 public class HighlightService implements EntityService<Highlight, UUID> {
 
-    private static final EventSorter EVENT_SORTER = new EventSorter();
+  private static final EventSorter EVENT_SORTER = new EventSorter();
 
-    private final HighlightRepository highlightRepository;
-    private final EntityCorrectionService entityCorrectionService;
+  private final HighlightRepository highlightRepository;
+  private final EntityCorrectionService entityCorrectionService;
 
-    public HighlightService(
-            HighlightRepository highlightRepository, EntityCorrectionService entityCorrectionService) {
+  public HighlightService(
+      HighlightRepository highlightRepository, EntityCorrectionService entityCorrectionService) {
+    this.highlightRepository = highlightRepository;
+    this.entityCorrectionService = entityCorrectionService;
+  }
 
-        this.highlightRepository = highlightRepository;
-        this.entityCorrectionService = entityCorrectionService;
+  @Override
+  public Highlight initialize(@NotNull Highlight highlight) {
+    Hibernate.initialize(highlight);
+    return highlight;
+  }
+
+  /**
+   * Retrieve all Highlight Shows from the database.
+   *
+   * @return Optional collection model of highlight show resources.
+   */
+  @Override
+  public List<Highlight> fetchAll() {
+    final List<Highlight> highlights = highlightRepository.findAll();
+    if (!highlights.isEmpty()) {
+      highlights.sort(EVENT_SORTER);
+      highlights.forEach(this::initialize);
     }
+    return highlights;
+  }
 
-    @Override
-    public Highlight initialize(@NotNull Highlight highlight) {
-        Hibernate.initialize(highlight);
-        return highlight;
+  public Page<Highlight> fetchAll(final int page, final int size) {
+    final PageRequest request = PageRequest.of(page, size, EventService.DEFAULT_EVENT_SORT);
+    final Page<Highlight> highlights = highlightRepository.findAll(request);
+    highlights.forEach(this::initialize);
+    return highlights;
+  }
+
+  /**
+   * Retrieve a specific Highlight from the database.
+   *
+   * @param highlightShowId ID of the Highlight Show.
+   * @return The requested Highlight, or empty().
+   */
+  @Override
+  public Optional<Highlight> fetchById(@NotNull UUID highlightShowId) {
+    return highlightRepository.findById(highlightShowId).map(this::initialize);
+  }
+
+  @Override
+  public Highlight save(@NotNull Highlight highlight) {
+    try {
+      entityCorrectionService.correctEntityFields(highlight);
+      // See if Event already exists in DB
+      final Optional<Highlight> eventOptional =
+          highlightRepository.findOne(getExampleEvent(highlight));
+      if (eventOptional.isPresent()) {
+        final Highlight existingEvent = eventOptional.get();
+        existingEvent.addAllFileSources(highlight.getFileSources());
+        return existingEvent;
+      }
+      final Highlight saved = highlightRepository.save(highlight);
+      return initialize(saved);
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    /**
-     * Retrieve all Highlight Shows from the database.
-     *
-     * @return Optional collection model of highlight show resources.
-     */
-    @Override
-    public List<Highlight> fetchAll() {
+  private @NotNull Example<Highlight> getExampleEvent(@NotNull Highlight highlight) {
+    final Highlight example =
+        Highlight.highlightBuilder()
+            .competition(highlight.getCompetition())
+            .season(highlight.getSeason())
+            .fixture(highlight.getFixture())
+            .date(highlight.getDate())
+            .build();
+    return Example.of(example);
+  }
 
-        final List<Highlight> highlights = highlightRepository.findAll();
-        if (!highlights.isEmpty()) {
-            highlights.sort(EVENT_SORTER);
-            highlights.forEach(this::initialize);
-        }
-        return highlights;
+  @Override
+  public List<Highlight> saveAll(@NotNull Iterable<? extends Highlight> highlights) {
+    return StreamSupport.stream(highlights.spliterator(), false)
+        .map(this::save)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public Highlight update(@NotNull Highlight highlight) {
+    final UUID eventId = highlight.getEventId();
+    final Optional<Highlight> optional = fetchById(eventId);
+    if (optional.isPresent()) {
+      return save(highlight);
     }
+    // else..
+    throw new IllegalArgumentException(
+        "Trying to update non-existent Highlight Show with ID: " + eventId);
+  }
 
-    public Page<Highlight> fetchAll(final int page, final int size) {
-        final PageRequest request = PageRequest.of(page, size, EventService.DEFAULT_EVENT_SORT);
-        final Page<Highlight> highlights = highlightRepository.findAll(request);
-        highlights.forEach(this::initialize);
-        return highlights;
-    }
+  @Override
+  public List<Highlight> updateAll(@NotNull Iterable<? extends Highlight> highlights) {
+    return StreamSupport.stream(highlights.spliterator(), false)
+        .map(this::update)
+        .collect(Collectors.toList());
+  }
 
-    /**
-     * Retrieve a specific Highlight from the database.
-     *
-     * @param highlightShowId ID of the Highlight Show.
-     * @return The requested Highlight, or empty().
-     */
-    @Override
-    public Optional<Highlight> fetchById(@NotNull UUID highlightShowId) {
-        return highlightRepository.findById(highlightShowId).map(this::initialize);
-    }
+  @Override
+  public void delete(@NotNull UUID highlightId) {
+    highlightRepository.deleteById(highlightId);
+  }
 
-    @Override
-    public Highlight save(@NotNull Highlight highlight) {
-        try {
-            entityCorrectionService.correctEntityFields(highlight);
-            // See if Event already exists in DB
-            final Optional<Highlight> eventOptional =
-                    highlightRepository.findOne(getExampleEvent(highlight));
-            if (eventOptional.isPresent()) {
-                final Highlight existingEvent = eventOptional.get();
-                existingEvent.addAllFileSources(highlight.getFileSources());
-                return existingEvent;
-            }
-            final Highlight saved = highlightRepository.save(highlight);
-            return initialize(saved);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private @NotNull Example<Highlight> getExampleEvent(@NotNull Highlight highlight) {
-        final Highlight example =
-                Highlight.highlightBuilder()
-                        .competition(highlight.getCompetition())
-                        .season(highlight.getSeason())
-                        .fixture(highlight.getFixture())
-                        .date(highlight.getDate())
-                        .build();
-        return Example.of(example);
-    }
-
-    @Override
-    public List<Highlight> saveAll(@NotNull Iterable<? extends Highlight> highlights) {
-        return StreamSupport.stream(highlights.spliterator(), false)
-                .map(this::save)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Highlight update(@NotNull Highlight highlight) {
-        final UUID eventId = highlight.getEventId();
-        final Optional<Highlight> optional = fetchById(eventId);
-        if (optional.isPresent()) {
-            return save(highlight);
-        }
-        // else..
-        throw new IllegalArgumentException(
-                "Trying to update non-existent Highlight Show with ID: " + eventId);
-    }
-
-    @Override
-    public List<Highlight> updateAll(@NotNull Iterable<? extends Highlight> highlights) {
-        return StreamSupport.stream(highlights.spliterator(), false)
-                .map(this::update)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void delete(@NotNull UUID highlightId) {
-        highlightRepository.deleteById(highlightId);
-    }
-
-    @Override
-    public void deleteAll(@NotNull Iterable<? extends Highlight> highlights) {
-        highlightRepository.deleteAll(highlights);
-    }
+  @Override
+  public void deleteAll(@NotNull Iterable<? extends Highlight> highlights) {
+    highlightRepository.deleteAll(highlights);
+  }
 }

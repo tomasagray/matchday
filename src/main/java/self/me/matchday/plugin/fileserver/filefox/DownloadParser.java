@@ -45,7 +45,6 @@ public class DownloadParser {
 
   public URL parseDownloadRequest(
       @NotNull final URI uri, @NotNull MultiValueMap<String, String> cookieJar) throws IOException {
-
     // Read remote page
     final FileFoxPage.DownloadLanding downloadLanding = readDownloadLandingPage(uri, cookieJar);
     // Get hidden input fields

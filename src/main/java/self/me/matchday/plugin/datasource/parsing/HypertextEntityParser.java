@@ -43,7 +43,6 @@ public class HypertextEntityParser {
 
   @SuppressWarnings("unchecked cast")
   private <T, D> DataSourceParser<T, D> getParserForType(Class<T> clazz) {
-
     final String errMsg = "No entity parser registered for type: " + clazz;
     return (DataSourceParser<T, D>)
         this.parsers.stream()

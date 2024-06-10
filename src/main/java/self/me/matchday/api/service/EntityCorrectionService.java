@@ -45,14 +45,12 @@ public class EntityCorrectionService {
       SynonymService synonymService,
       CompetitionService competitionService,
       TeamService teamService) {
-
     this.synonymService = synonymService;
     this.competitionService = competitionService;
     this.teamService = teamService;
   }
 
   public <T> void correctEntityFields(@NotNull T entity) throws ReflectiveOperationException {
-
     final Class<?> clazz = entity.getClass();
     final Field[] fields = ReflectionUtils.getAllFields(clazz);
     for (Field field : fields) {
@@ -70,7 +68,6 @@ public class EntityCorrectionService {
   }
 
   private void validateCorrectedIsNotNull(@NotNull Field field, Object fieldValue) {
-
     if (field.getAnnotation(Corrected.class) != null && fieldValue == null) {
       final String msg = String.format("Field: [%s] marked with @Corrected was null", field);
       throw new IllegalArgumentException(msg);
@@ -78,7 +75,6 @@ public class EntityCorrectionService {
   }
 
   private boolean isCorrectable(@NotNull Field field, Object fieldValue) {
-
     final boolean isCorrected = field.getAnnotation(Corrected.class) != null;
     final boolean isCorrectedOrNull =
         field.getAnnotation(CorrectedOrNull.class) != null && fieldValue != null;
@@ -88,7 +84,6 @@ public class EntityCorrectionService {
   @NotNull
   private Method getGetterMethod(@NotNull Class<?> clazz, @NotNull Field field)
       throws NoSuchMethodException {
-
     final String methodStub = getAccessorMethodStub(field);
     return clazz.getDeclaredMethod("get" + methodStub);
   }
@@ -96,7 +91,6 @@ public class EntityCorrectionService {
   @NotNull
   private Method getSetterMethod(@NotNull Class<?> clazz, @NotNull Field field)
       throws NoSuchMethodException {
-
     final String methodStub = getAccessorMethodStub(field);
     return clazz.getDeclaredMethod("set" + methodStub, field.getType());
   }
@@ -107,7 +101,6 @@ public class EntityCorrectionService {
   }
 
   public <T> T getCorrectedEntity(@NotNull T entity) {
-
     final String name = getName(entity);
     return getEntityByName(entity, name)
         .or(
@@ -125,7 +118,6 @@ public class EntityCorrectionService {
   }
 
   private String getName(@NotNull Object o) {
-
     try {
       final Field field = o.getClass().getDeclaredField("name");
       final boolean accessible = field.canAccess(o);

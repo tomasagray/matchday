@@ -50,7 +50,6 @@ public class FFmpeg {
    */
   public FFmpegStreamTask getHlsStreamTask(
       @NotNull final Path playlistPath, @NotNull final URI @NotNull ... uris) {
-
     // Assemble arguments
     final Path playlistAbsolutePath = playlistPath.toAbsolutePath();
     final Path dataDir = playlistAbsolutePath.getParent();
@@ -83,7 +82,6 @@ public class FFmpeg {
   }
 
   private @NotNull List<String> getDefaultTranscodeArgs(@NotNull final Path storageLocation) {
-
     final List<String> transcodeArgs = new ArrayList<>();
     final Path absoluteStorageLocation = storageLocation.toAbsolutePath();
     final Path segmentPattern = absoluteStorageLocation.resolve(SEGMENT_PATTERN);

@@ -19,6 +19,11 @@
 
 package self.me.matchday.model.video;
 
+import java.net.URL;
+import java.sql.Timestamp;
+import java.util.Objects;
+import java.util.UUID;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,76 +34,70 @@ import self.me.matchday.db.converter.FFmpegMetadataConverter;
 import self.me.matchday.db.converter.TimestampConverter;
 import self.me.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 
-import javax.persistence.*;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.util.Objects;
-import java.util.UUID;
-
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 public class VideoFile implements Comparable<VideoFile> {
 
-    private static double DEFAULT_DURATION = -1.0;
+  private static double DEFAULT_DURATION = -1.0;
 
-    @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Type(type = "uuid-char")
-    private UUID fileId;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @Type(type = "uuid-char")
+  private UUID fileId;
 
-    private URL externalUrl;
-    private PartIdentifier title;
+  private URL externalUrl;
+  private PartIdentifier title;
 
-    @Column(columnDefinition = "LONGTEXT")
-    private URL internalUrl;
+  @Column(columnDefinition = "LONGTEXT")
+  private URL internalUrl;
 
-    @Convert(converter = FFmpegMetadataConverter.class)
-    @Column(columnDefinition = "LONGTEXT")
-    private FFmpegMetadata metadata;
+  @Convert(converter = FFmpegMetadataConverter.class)
+  @Column(columnDefinition = "LONGTEXT")
+  private FFmpegMetadata metadata;
 
-    @Convert(converter = TimestampConverter.class)
-    private Timestamp lastRefreshed = new Timestamp(0L);
+  @Convert(converter = TimestampConverter.class)
+  private Timestamp lastRefreshed = new Timestamp(0L);
 
-    public VideoFile(@NotNull final PartIdentifier title, @NotNull final URL externalUrl) {
-        this.title = title;
-        this.externalUrl = externalUrl;
+  public VideoFile(@NotNull final PartIdentifier title, @NotNull final URL externalUrl) {
+    this.title = title;
+    this.externalUrl = externalUrl;
+  }
+
+  /**
+   * Returns the duration of this VideoFile, in milliseconds.
+   *
+   * @return The duration of this VideoFile (millis).
+   */
+  public double getDuration() {
+    if (getMetadata() != null && getMetadata().getFormat() != null) {
+      return getMetadata().getFormat().getDuration();
+    } else {
+      return DEFAULT_DURATION;
     }
+  }
 
-    /**
-     * Returns the duration of this VideoFile, in milliseconds.
-     *
-     * @return The duration of this VideoFile (millis).
-     */
-    public double getDuration() {
-        if (getMetadata() != null && getMetadata().getFormat() != null) {
-            return getMetadata().getFormat().getDuration();
-        } else {
-            return DEFAULT_DURATION;
-        }
-    }
+  public String toString() {
+    return String.format("%s - %s", getTitle(), getExternalUrl());
+  }
 
-    public String toString() {
-        return String.format("%s - %s", getTitle(), getExternalUrl());
-    }
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) return true;
+    if (!(obj instanceof final VideoFile videoFile)) return false;
+    return Objects.equals(videoFile.getExternalUrl(), this.getExternalUrl());
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (!(obj instanceof final VideoFile videoFile)) return false;
-        return Objects.equals(videoFile.getExternalUrl(), this.getExternalUrl());
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(fileId, externalUrl, title, internalUrl, metadata, lastRefreshed);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(fileId, externalUrl, title, internalUrl, metadata, lastRefreshed);
-    }
-
-    @Override
-    public int compareTo(@NotNull VideoFile test) {
-        final PartIdentifier otherTitle = test.getTitle();
-        return this.getTitle().compareTo(otherTitle);
-    }
+  @Override
+  public int compareTo(@NotNull VideoFile test) {
+    final PartIdentifier otherTitle = test.getTitle();
+    return this.getTitle().compareTo(otherTitle);
+  }
 }

@@ -54,30 +54,28 @@ class BloggerQueryBuilderTest {
   @Test
   @DisplayName("Ensure a valid HTML query is built")
   void buildHtmlQueryFrom() {
-
     final SnapshotRequest testSnapshotRequest = getTestSnapshotRequest();
-    logger.info("Building HTML Blogger query with SnapshotRequest:\n" + testSnapshotRequest);
+    logger.info("Building HTML Blogger query with SnapshotRequest:\n{}", testSnapshotRequest);
 
     final String expectedQuery =
         "/search/label/Something/Something%20Else?"
             + "max-results=25&updated-min=2020-10-11T00:00:00";
     final String actualQuery = queryBuilderService.buildQueryFrom(testSnapshotRequest, HTML);
-    logger.info("Got query:\n\t" + actualQuery);
+    logger.info("Got HTML query:\n\t{}", actualQuery);
     assertThat(actualQuery).isEqualTo(expectedQuery);
   }
 
   @Test
   @DisplayName("Ensure a valid JSON query is built")
   void buildJsonQueryFrom() {
-
     final SnapshotRequest testSnapshotRequest = getTestSnapshotRequest();
-    logger.info("Building JSON Blogger query with SnapshotRequest:\n" + testSnapshotRequest);
+    logger.info("Building JSON Blogger query with SnapshotRequest:\n{}", testSnapshotRequest);
 
     final String expectedQuery =
         "//-/Something/Something%20Else?"
             + "alt=json&max-results=25&updated-min=2020-10-11T00:00:00";
     final String actualQuery = queryBuilderService.buildQueryFrom(testSnapshotRequest, JSON);
-    logger.info("Got query:\n\t" + actualQuery);
+    logger.info("Got JSON query:\n\t{}", actualQuery);
     assertThat(actualQuery).isEqualTo(expectedQuery);
   }
 

@@ -52,7 +52,6 @@ public class MatchDataParser implements DataSourceParser<Match, String> {
   @Override
   public Stream<? extends Match> getEntityStream(
       @NotNull DataSource<? extends Match> dataSource, @NotNull String data) {
-
     final Document document = Jsoup.parse(data);
     final String text = document.text();
 
@@ -82,7 +81,6 @@ public class MatchDataParser implements DataSourceParser<Match, String> {
 
   private Stream<URL> createUrlStreams(
       @NotNull Collection<PatternKit<? extends URL>> patternKits, @NotNull Document document) {
-
     Stream<URL> base = Stream.empty();
     for (PatternKit<? extends URL> patternKit : patternKits) {
       final Stream<URL> urlStream = createUrlStream(document, patternKit);
@@ -97,7 +95,6 @@ public class MatchDataParser implements DataSourceParser<Match, String> {
 
   private Stream<URL> createUrlStream(
       @NotNull Document document, @NotNull PatternKit<? extends URL> patternKit) {
-
     final Pattern urlPattern = patternKit.getPattern();
     final String query = String.format("a[href~=%s]", urlPattern);
     return document.select(query).stream()

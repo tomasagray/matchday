@@ -47,6 +47,7 @@ public class SecureCookie {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
   // ResponseCookie
   @Nullable private Duration maxAge;
   @Nullable private String domain;
@@ -72,7 +73,6 @@ public class SecureCookie {
    * @return A SecureCookie
    */
   public static @NotNull SecureCookie fromSpringCookie(@NotNull final HttpCookie cookie) {
-
     // Create base instance
     final SecureCookie secureCookie = new SecureCookie(cookie.getName(), cookie.getValue());
 
@@ -96,7 +96,6 @@ public class SecureCookie {
    * @return A Spring HttpCookie
    */
   public static @NotNull HttpCookie toSpringCookie(@NotNull final SecureCookie secureCookie) {
-
     // If secure cookie is a response cookie
     if ((secureCookie.getMaxAge() != null)
         && (secureCookie.getDomain() != null)

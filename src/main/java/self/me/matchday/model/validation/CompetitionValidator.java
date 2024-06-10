@@ -16,20 +16,19 @@ public class CompetitionValidator implements EntityValidator<Competition> {
     this.nameValidator = nameValidator;
   }
 
+  private static void validateId(@NotNull Competition updated) {
+    if (updated.getId() == null) {
+      throw new IllegalArgumentException("Trying to update unknown Competition: " + updated);
+    }
+  }
+
   @Override
   public void validate(@Nullable Competition competition) {
-
     if (competition == null) {
       throw new IllegalArgumentException("Competition is null");
     }
     final ProperName name = competition.getName();
     nameValidator.validate(name);
-  }
-
-  private static void validateId(@NotNull Competition updated) {
-    if (updated.getId() == null) {
-      throw new IllegalArgumentException("Trying to update unknown Competition: " + updated);
-    }
   }
 
   @Override
@@ -40,7 +39,6 @@ public class CompetitionValidator implements EntityValidator<Competition> {
   }
 
   private void validateUpdatedName(@NotNull Competition existing, @NotNull Competition updated) {
-
     final ProperName name = updated.getName();
     final String updatedName = name.getName();
     final UUID existingId = existing.getId();

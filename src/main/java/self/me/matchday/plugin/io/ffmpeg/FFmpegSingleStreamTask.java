@@ -49,7 +49,6 @@ public class FFmpegSingleStreamTask extends FFmpegStreamTask {
       boolean loggingEnabled,
       List<String> transcodeArgs,
       URI uri) {
-
     this.execPath = execPath;
     this.ffmpegArgs = ffmpegArgs;
     this.playlistPath = playlistPath;

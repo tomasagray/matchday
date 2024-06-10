@@ -73,7 +73,6 @@ class MatchServiceTest {
   @Test
   @DisplayName("Test fetching all Matches from database")
   void fetchAllMatches() {
-
     final int expectedMatchCount = 1; // minimum
     final List<Match> matches = matchService.fetchAll();
 
@@ -85,7 +84,6 @@ class MatchServiceTest {
   @Test
   @DisplayName("Test retrieval of a particular Match from database")
   void fetchMatch() {
-
     final UUID testMatchId = testMatch.getEventId();
     logger.info("Attempting to retrieve Match from database; ID: {}", testMatchId);
     final Optional<Match> optionalMatch = matchService.fetchById(testMatchId);
@@ -102,7 +100,6 @@ class MatchServiceTest {
   @Test
   @DisplayName("Ensure fetches all Matches for specified Team")
   void fetchMatchesForTeam() {
-
     // Minimum expected Events
     final int expectedEventCount = 1;
     logger.info("All Matches in database:\n{}", matchService.fetchAll());

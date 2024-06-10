@@ -19,6 +19,8 @@
 
 package self.me.matchday.api.controller;
 
+import java.io.IOException;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -30,9 +32,6 @@ import org.springframework.web.bind.annotation.*;
 import self.me.matchday.api.resource.FileServerPluginResource;
 import self.me.matchday.api.resource.FileServerPluginResource.FileServerResourceAssembler;
 import self.me.matchday.api.service.FileServerPluginService;
-
-import java.io.IOException;
-import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/file-servers")

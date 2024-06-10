@@ -22,7 +22,6 @@ public class TeamValidator implements EntityValidator<Team> {
 
   @Override
   public void validate(@Nullable Team team) {
-
     if (team == null) {
       throw new IllegalArgumentException("Team is null");
     }
@@ -46,7 +45,6 @@ public class TeamValidator implements EntityValidator<Team> {
   }
 
   private void validateUpdatedName(@NotNull Team existing, @NotNull Team updated) {
-
     final ProperName name = updated.getName();
     final String updatedName = name.getName();
     final UUID existingId = existing.getId();
@@ -61,7 +59,6 @@ public class TeamValidator implements EntityValidator<Team> {
 
   private void validateArtworkCollection(
       @NotNull ArtworkCollection existing, @NotNull ArtworkCollection updated) {
-
     Long updatedId = updated.getId();
     if (!(existing.getId().equals(updatedId))) {
       throw new IllegalArgumentException("ArtworkCollection ID illegally modified: " + updatedId);

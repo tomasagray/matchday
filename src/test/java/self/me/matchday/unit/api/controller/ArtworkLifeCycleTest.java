@@ -127,7 +127,6 @@ class ArtworkLifeCycleTest {
   @Order(2)
   @DisplayName("Validate retrieval of ArtworkCollection for Competition emblem")
   void fetchCompetitionEmblem() throws Exception {
-
     // given
     final String getUri = getEmblemCollectionUri(testCompetition.getId());
     logger.info("Getting Emblem collection for Competition: {}", testCompetition);
@@ -138,7 +137,7 @@ class ArtworkLifeCycleTest {
     final MockHttpServletResponse response = result.getResponse();
     final int actualStatus = response.getStatus();
     final String content = response.getContentAsString();
-    logger.info("Got response: [{}] {}", actualStatus, content);
+    logger.info("Got emblem: [{}] {}", actualStatus, content);
 
     // then
     assertThat(actualStatus).isEqualTo(200);
@@ -149,7 +148,6 @@ class ArtworkLifeCycleTest {
   @Order(3)
   @DisplayName("Validate deleting Artwork with file data via API")
   void deleteArtwork() throws Exception {
-
     assertThat(deleteList).isNotEmpty();
     for (final Long artworkId : deleteList) {
       // given

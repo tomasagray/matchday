@@ -43,64 +43,60 @@ class FabricTest {
   @Test
   @DisplayName("Test 1:1 Stream zipping")
   void zip() {
-
     AtomicInteger zippedFooCount = new AtomicInteger(0);
     final Stream<Foo> zippedFoos = FabricTestDataCreator.getZippedFoos();
     zippedFoos.forEach(
         foo -> {
-          logger.info("Got zipped Foo: " + foo);
+          logger.info("Got zipped Foo: {}", foo);
           assertThat(foo).isNotNull();
           zippedFooCount.getAndIncrement();
         });
 
     final int count = zippedFooCount.get();
-    logger.info("Total Zipped Foo count: " + count);
+    logger.info("Total Zipped Foo count: {}", count);
     assertThat(count).isEqualTo(FabricTestDataCreator.END_IDX);
   }
 
   @Test
   @DisplayName("Test multi-Stream zip")
   void testMultiStreamZip() {
-
     AtomicInteger zippedMarklarCount = new AtomicInteger(0);
     final Stream<Marklar> zippedMarklars = FabricTestDataCreator.getZippedMarklars();
     zippedMarklars.forEach(
         marklar -> {
-          logger.info("Got zipped Marklar:\n" + marklar);
+          logger.info("Got zipped Marklar:\n{}", marklar);
           assertThat(marklar).isNotNull();
           zippedMarklarCount.getAndIncrement();
         });
 
     final int count = zippedMarklarCount.get();
-    logger.info("Zipped Marklar count: " + count);
+    logger.info("Zipped Marklar count: {}", count);
     assertThat(count).isEqualTo(FabricTestDataCreator.END_IDX);
   }
 
   @Test
   @DisplayName("Test Stream folding")
   void fold() {
-
     final Stream<Bubble> bubbleStream = FabricTestDataCreator.getBubbles();
 
     AtomicInteger foldedBubbleCount = new AtomicInteger(0);
     final Stream<List<Bubble>> foldedBubbles = Fabric.fold(bubbleStream, bubbleFolder);
     foldedBubbles.forEach(
         bubbles -> {
-          logger.info("Got folded Bubbles:\n" + bubbles);
+          logger.info("Got folded Bubbles:\n{}", bubbles);
           assertThat(bubbles).isNotNull().isNotEmpty();
           assertThat(bubbles.size()).isEqualTo(FabricTestDataCreator.MAX_BUBBLES);
           foldedBubbleCount.getAndIncrement();
         });
 
     final int count = foldedBubbleCount.get();
-    logger.info("Folded Bubble count: " + count);
+    logger.info("Folded Bubble count: {}", count);
     assertThat(count).isEqualTo(FabricTestDataCreator.END_IDX);
   }
 
   @Test
   @DisplayName("Test Stream folding & zipping")
   void testFoldingAndZipping() {
-
     final Stream<Bubble> bubbleStream = FabricTestDataCreator.getBubbles();
     final Stream<List<Bubble>> foldedBubbles = Fabric.fold(bubbleStream, bubbleFolder);
     final Stream<Marklar> zippedMarklars = FabricTestDataCreator.getZippedMarklars();
@@ -110,14 +106,14 @@ class FabricTest {
     final AtomicInteger count = new AtomicInteger(0);
     zippedAndFolded.forEach(
         marklar -> {
-          logger.info("Zipped & Folded Marklar:\n" + marklar);
+          logger.info("Zipped & Folded Marklar:\n{}", marklar);
           assertThat(marklar).isNotNull();
           assertThat(marklar.getBubbles().size()).isEqualTo(FabricTestDataCreator.MAX_BUBBLES);
           count.incrementAndGet();
         });
 
     final int actualMarklarCount = count.get();
-    logger.info("Final Zipped  Folded item count: " + actualMarklarCount);
+    logger.info("Final Zipped  Folded item count: {}", actualMarklarCount);
     assertThat(actualMarklarCount).isEqualTo(FabricTestDataCreator.END_IDX);
   }
 }

@@ -19,8 +19,13 @@
 
 package self.me.matchday.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static self.me.matchday.config.settings.EnabledDataSourcePlugins.ENABLED_DATASOURCES;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,12 +40,6 @@ import self.me.matchday.api.controller.DataSourcePluginController;
 import self.me.matchday.api.service.PluginService;
 import self.me.matchday.plugin.datasource.DataSourcePlugin;
 
-import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import static self.me.matchday.config.settings.EnabledDataSourcePlugins.ENABLED_DATASOURCES;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,46 +49,46 @@ import static self.me.matchday.config.settings.EnabledDataSourcePlugins.ENABLED_
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class DataSourcePluginResource extends RepresentationModel<DataSourcePluginResource> {
 
-    private UUID id;
-    private String title;
-    private String description;
-    private boolean enabled = true;
+  private UUID id;
+  private String title;
+  private String description;
+  private boolean enabled = true;
 
-    @Component
-    public static class DataSourcePluginResourceAssembler
-            extends RepresentationModelAssemblerSupport<DataSourcePlugin, DataSourcePluginResource> {
+  @Component
+  public static class DataSourcePluginResourceAssembler
+      extends RepresentationModelAssemblerSupport<DataSourcePlugin, DataSourcePluginResource> {
 
-        private final PluginService pluginService;
+    private final PluginService pluginService;
 
-        DataSourcePluginResourceAssembler(PluginService pluginService) {
-            super(DataSourcePluginController.class, DataSourcePluginResource.class);
-            this.pluginService = pluginService;
-        }
-
-        @Override
-        public @NotNull DataSourcePluginResource toModel(@NotNull final DataSourcePlugin plugin) {
-            final DataSourcePluginResource pluginResource = instantiateModel(plugin);
-            pluginResource.setId(plugin.getPluginId());
-            pluginResource.setTitle(plugin.getTitle());
-            pluginResource.setDescription(plugin.getDescription());
-            boolean isEnabled = pluginService.isPluginEnabled(plugin, ENABLED_DATASOURCES);
-            pluginResource.setEnabled(isEnabled);
-
-            // Attach self link
-            pluginResource.add(
-                    linkTo(methodOn(DataSourcePluginController.class).getAllPlugins()).withSelfRel());
-            return pluginResource;
-        }
-
-        @Override
-        public @NotNull CollectionModel<DataSourcePluginResource> toCollectionModel(
-                @NotNull Iterable<? extends DataSourcePlugin> plugins) {
-            final CollectionModel<DataSourcePluginResource> pluginResources =
-                    super.toCollectionModel(plugins);
-            // Add self link
-            pluginResources.add(
-                    linkTo(methodOn(DataSourcePluginController.class).getAllPlugins()).withSelfRel());
-            return pluginResources;
-        }
+    DataSourcePluginResourceAssembler(PluginService pluginService) {
+      super(DataSourcePluginController.class, DataSourcePluginResource.class);
+      this.pluginService = pluginService;
     }
+
+    @Override
+    public @NotNull DataSourcePluginResource toModel(@NotNull final DataSourcePlugin plugin) {
+      final DataSourcePluginResource pluginResource = instantiateModel(plugin);
+      pluginResource.setId(plugin.getPluginId());
+      pluginResource.setTitle(plugin.getTitle());
+      pluginResource.setDescription(plugin.getDescription());
+      boolean isEnabled = pluginService.isPluginEnabled(plugin, ENABLED_DATASOURCES);
+      pluginResource.setEnabled(isEnabled);
+
+      // Attach self link
+      pluginResource.add(
+          linkTo(methodOn(DataSourcePluginController.class).getAllPlugins()).withSelfRel());
+      return pluginResource;
+    }
+
+    @Override
+    public @NotNull CollectionModel<DataSourcePluginResource> toCollectionModel(
+        @NotNull Iterable<? extends DataSourcePlugin> plugins) {
+      final CollectionModel<DataSourcePluginResource> pluginResources =
+          super.toCollectionModel(plugins);
+      // Add self link
+      pluginResources.add(
+          linkTo(methodOn(DataSourcePluginController.class).getAllPlugins()).withSelfRel());
+      return pluginResources;
+    }
+  }
 }

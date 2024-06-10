@@ -47,7 +47,6 @@ public class HtmlBloggerParser implements BloggerParser {
   }
 
   private @NotNull Blogger parseBlogger(@NotNull final Document html) {
-
     final Blogger blogger = new Blogger();
     // parse version
     final Element header = html.select("div#Header1").first();
@@ -83,7 +82,6 @@ public class HtmlBloggerParser implements BloggerParser {
   }
 
   private BloggerFeed parseFeed(@NotNull final Document html) {
-
     final BloggerFeedParser feedParser = new BloggerFeedParser(html);
     return BloggerFeed.builder()
         .xmlns(feedParser.getXmlNs())
@@ -166,7 +164,6 @@ public class HtmlBloggerParser implements BloggerParser {
     }
 
     String getMetadata(@NotNull final String property) {
-
       final Evaluator.AttributeWithValue eval =
           new Evaluator.AttributeWithValue("property", property);
       final Elements metas = html.select("meta");

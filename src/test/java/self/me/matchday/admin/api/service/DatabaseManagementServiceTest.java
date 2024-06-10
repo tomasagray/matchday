@@ -72,7 +72,6 @@ class DatabaseManagementServiceTest {
   @Test
   @DisplayName("Validate creating a MySQL dump file (.sql)")
   void createDatabaseDump() throws IOException {
-
     // when
     logger.info("Creating test database dump...");
     Path dumpPath = databaseMgmtSvc.createDatabaseDump();
@@ -89,7 +88,6 @@ class DatabaseManagementServiceTest {
   @Test
   @DisplayName("Check re-install database functionality")
   void testDropDatabase() throws IOException, SQLException {
-
     // given
     List<Match> beforeEvents = eventService.fetchAll();
     List<PatternKitTemplate> beforeTemplates = templateService.fetchAll();

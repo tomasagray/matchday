@@ -81,7 +81,6 @@ class DataSourceRepositoryTest {
   @DisplayName("Ensure valid data read when fetching by Plugin ID")
   @Transactional
   void testFetchByPluginId() throws IOException {
-
     final PlaintextDataSource<Match> eventDataSource =
         (PlaintextDataSource<Match>) testDataCreator.readTestLiveDataSource();
     final PlaintextDataSource<Match> savedDataSource = repository.save(eventDataSource);

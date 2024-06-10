@@ -52,7 +52,6 @@ public class TextParser {
 
   public <E> Stream<? extends E> createEntityStreams(
       @NotNull Collection<PatternKit<? extends E>> patternKits, @NotNull final String data) {
-
     Stream<? extends E> base = Stream.empty();
     for (PatternKit<? extends E> patternKit : patternKits) {
       base = (Stream<? extends E>) Stream.concat(base, createEntityStream(patternKit, data));
@@ -62,7 +61,6 @@ public class TextParser {
 
   public <E> Stream<? extends E> createEntityStream(
       @NotNull PatternKit<? extends E> patternKit, @NotNull String data) {
-
     final Stream.Builder<E> streamBuilder = Stream.builder();
     final Matcher matcher = patternKit.getPattern().matcher(data);
     while (matcher.find()) {
@@ -79,7 +77,6 @@ public class TextParser {
   @NotNull
   private <E> E parseEntity(@NotNull PatternKit<E> patternKit, Matcher matcher)
       throws ReflectiveOperationException {
-
     final Class<E> clazz = patternKit.getClazz();
     final E e = clazz.getConstructor().newInstance();
     patternKit
@@ -102,7 +99,6 @@ public class TextParser {
 
   @Nullable
   private Field getFieldByName(@NotNull Object obj, String name) {
-
     final Field[] fields = ReflectionUtils.getAllFields(obj.getClass());
     for (Field field : fields) {
       if (field.getName().equals(name)) {
@@ -114,7 +110,6 @@ public class TextParser {
 
   @Nullable
   private Object createFieldValue(Class<?> clazz, String data) {
-
     return creationStrategies.entrySet().stream()
         .flatMap(priorityLevel -> priorityLevel.getValue().stream())
         .map(creationStrategy -> applyCreationStrategy(creationStrategy, data, clazz))
@@ -126,7 +121,6 @@ public class TextParser {
   @Nullable
   private Object applyCreationStrategy(
       CreationStrategy creationStrategy, String data, Class<?> clazz) {
-
     try {
       return creationStrategy.apply(data, clazz);
     } catch (Throwable ignore) {
@@ -136,7 +130,6 @@ public class TextParser {
 
   private void setFieldValue(@NotNull Object prototype, @NotNull Field field, Object value)
       throws IllegalAccessException {
-
     final boolean canAccess = field.canAccess(prototype);
     field.setAccessible(true);
     field.set(prototype, value);

@@ -28,7 +28,6 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -65,7 +64,6 @@ public class MatchController {
   private final MatchResourceAssembler matchAssembler;
   private final ArtworkModeller artworkModeller;
 
-  @Autowired
   public MatchController(
       MatchService matchService,
       EventsModeller eventsAssembler,
@@ -108,7 +106,6 @@ public class MatchController {
   @RequestMapping(value = "/match/{matchId}", method = RequestMethod.GET)
   @ResponseBody
   public ResponseEntity<MatchResource> fetchMatchById(@PathVariable UUID matchId) {
-
     return matchService
         .fetchById(matchId)
         .map(matchAssembler::toModel)

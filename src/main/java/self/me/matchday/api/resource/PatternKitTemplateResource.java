@@ -60,7 +60,6 @@ public class PatternKitTemplateResource extends RepresentationModel<PatternKitTe
 
     @Override
     public @NotNull PatternKitTemplateResource toModel(@NotNull PatternKitTemplate entity) {
-
       final PatternKitTemplateResource resource = instantiateModel(entity);
       resource.setId(entity.getId());
       resource.setType(entity.getType());

@@ -36,7 +36,6 @@ public class ClassTypeAdapterFactory implements TypeAdapterFactory {
 
   @Override
   public <T> TypeAdapter<T> create(Gson gson, @NotNull TypeToken<T> typeToken) {
-
     if (!Class.class.isAssignableFrom(typeToken.getRawType())) {
       return null;
     }

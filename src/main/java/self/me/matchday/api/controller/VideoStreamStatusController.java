@@ -19,6 +19,10 @@
 
 package self.me.matchday.api.controller;
 
+import static self.me.matchday.config.StatusWebSocketConfigurer.BROKER_ROOT;
+
+import java.util.List;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
@@ -32,62 +36,57 @@ import self.me.matchday.model.video.TaskState;
 import self.me.matchday.model.video.VideoStreamLocator;
 import self.me.matchday.model.video.VideoStreamingError;
 
-import java.util.List;
-import java.util.UUID;
-
-import static self.me.matchday.config.StatusWebSocketConfigurer.BROKER_ROOT;
-
 @Controller
 public class VideoStreamStatusController {
 
-    public static final String RECEIVE_ENDPOINT = "/video-stream-status";
-    public static final String VIDEO_STREAM_EMIT_ENDPOINT = BROKER_ROOT + "/video-stream-status";
+  public static final String RECEIVE_ENDPOINT = "/video-stream-status";
+  public static final String VIDEO_STREAM_EMIT_ENDPOINT = BROKER_ROOT + "/video-stream-status";
 
-    private final VideoStreamLocatorRepo locatorRepo;
+  private final VideoStreamLocatorRepo locatorRepo;
 
-    public VideoStreamStatusController(VideoStreamLocatorRepo locatorRepo) {
-        this.locatorRepo = locatorRepo;
+  public VideoStreamStatusController(VideoStreamLocatorRepo locatorRepo) {
+    this.locatorRepo = locatorRepo;
+  }
+
+  @MessageMapping(RECEIVE_ENDPOINT)
+  @SendTo(VIDEO_STREAM_EMIT_ENDPOINT)
+  public VideoStreamStatusMessage publishVideoStreamStatus(@NotNull UUID videoFileId) {
+    final VideoStreamLocator streamLocator = getStreamLocatorFor(videoFileId);
+    if (streamLocator != null) {
+      final TaskState state = streamLocator.getState();
+      final JobStatus status = state.getStatus();
+      final Double completionRatio = state.getCompletionRatio();
+      final VideoStreamingError error = state.getError();
+      return VideoStreamStatusMessage.builder()
+          .videoFileId(videoFileId)
+          .status(status)
+          .completionRatio(completionRatio)
+          .error(error)
+          .build();
+    } else {
+      return VideoStreamStatusMessage.builder()
+          .videoFileId(videoFileId)
+          .status(null)
+          .completionRatio(0d)
+          .build();
     }
+  }
 
-    @MessageMapping(RECEIVE_ENDPOINT)
-    @SendTo(VIDEO_STREAM_EMIT_ENDPOINT)
-    public VideoStreamStatusMessage publishVideoStreamStatus(@NotNull UUID videoFileId) {
-        final VideoStreamLocator streamLocator = getStreamLocatorFor(videoFileId);
-        if (streamLocator != null) {
-            final TaskState state = streamLocator.getState();
-            final JobStatus status = state.getStatus();
-            final Double completionRatio = state.getCompletionRatio();
-            final VideoStreamingError error = state.getError();
-            return VideoStreamStatusMessage.builder()
-                    .videoFileId(videoFileId)
-                    .status(status)
-                    .completionRatio(completionRatio)
-                    .error(error)
-                    .build();
-        } else {
-            return VideoStreamStatusMessage.builder()
-                    .videoFileId(videoFileId)
-                    .status(null)
-                    .completionRatio(0d)
-                    .build();
-        }
+  private @Nullable VideoStreamLocator getStreamLocatorFor(@NotNull UUID videoFileId) {
+    final List<VideoStreamLocator> locators = locatorRepo.getStreamLocatorsFor(videoFileId);
+    if (!locators.isEmpty()) {
+      return locators.get(0);
+    } else {
+      return null;
     }
+  }
 
-    private @Nullable VideoStreamLocator getStreamLocatorFor(@NotNull UUID videoFileId) {
-        final List<VideoStreamLocator> locators = locatorRepo.getStreamLocatorsFor(videoFileId);
-        if (!locators.isEmpty()) {
-            return locators.get(0);
-        } else {
-            return null;
-        }
-    }
-
-    @Data
-    @Builder
-    public static class VideoStreamStatusMessage {
-        private final UUID videoFileId;
-        private final JobStatus status;
-        private final Double completionRatio;
-        private VideoStreamingError error;
-    }
+  @Data
+  @Builder
+  public static class VideoStreamStatusMessage {
+    private final UUID videoFileId;
+    private final JobStatus status;
+    private final Double completionRatio;
+    private VideoStreamingError error;
+  }
 }

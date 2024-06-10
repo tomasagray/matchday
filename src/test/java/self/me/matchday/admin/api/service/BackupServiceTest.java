@@ -63,14 +63,13 @@ class BackupServiceTest {
   @Test
   @DisplayName("Validate creation of backup archive")
   void testCreateBackup() throws IOException {
-
     // given
     final long expectedFilesize = 560_000L;
 
     // when
     logger.info("Creating application backup...");
     Path backup = backupService.createBackup();
-    logger.info("Created backup at: " + backup);
+    logger.info("Created backup at: {}", backup);
     cleanupFiles.add(backup);
 
     // then
@@ -83,7 +82,6 @@ class BackupServiceTest {
   @Test
   @DisplayName("Validate ability to delete previously created System Restore Point")
   void testDeleteBackup() throws IOException {
-
     // given
     logger.info("Creating test restore point for deletion...");
     RestorePoint restorePoint = backupService.createRestorePoint();
@@ -105,7 +103,6 @@ class BackupServiceTest {
   @Test
   @DisplayName("Validate restoration of backup functionality")
   void testRestore() throws IOException, SQLException {
-
     // given
     int additionalMatchCount = 3;
     int beforeMatchCount = matchService.fetchAll().size();
@@ -137,7 +134,6 @@ class BackupServiceTest {
   @Test
   @DisplayName("Validate dehydrating system")
   void testDehydrate() throws IOException {
-
     // given
     int expectedFilesize = 100_000;
 
@@ -149,7 +145,7 @@ class BackupServiceTest {
     cleanupFiles.add(dehydrated);
 
     // then
-    logger.info("Dehydrated system to: " + dehydrated);
+    logger.info("Dehydrated system to: {}", dehydrated);
     String json = Files.readString(dehydrated);
     int dataSize = json.getBytes(StandardCharsets.UTF_8).length;
     logger.info("Dehydrated data is {} bytes", dataSize);

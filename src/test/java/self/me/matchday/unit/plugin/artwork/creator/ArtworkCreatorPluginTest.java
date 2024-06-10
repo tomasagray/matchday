@@ -97,7 +97,6 @@ class ArtworkCreatorPluginTest {
   @Test
   @DisplayName("Validate creation of Artwork image from template, params")
   void createArtwork() throws IOException {
-
     // given
     final int expectedImageSize = 30_000;
     logger.info("Creating params...");
@@ -114,7 +113,6 @@ class ArtworkCreatorPluginTest {
   }
 
   private @NotNull @Unmodifiable Collection<Param<?>> createTemplateParams() throws IOException {
-
     final Color home = new Color(0, 0, 255);
     final Color away = new Color(0, 255, 255);
 

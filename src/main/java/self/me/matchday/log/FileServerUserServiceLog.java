@@ -57,7 +57,8 @@ public class FileServerUserServiceLog {
         user,
         user.getServerId());
     FileServerUser loggedInUser = (FileServerUser) jp.proceed();
-    logger.info("User: {} logged in successfully? {}", user.getUsername(), user.isLoggedIn());
+    logger.info(
+        "User: {} logged in with cookies successfully? {}", user.getUsername(), user.isLoggedIn());
     return loggedInUser;
   }
 

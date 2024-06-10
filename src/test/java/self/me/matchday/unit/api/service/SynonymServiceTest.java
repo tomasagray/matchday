@@ -57,18 +57,16 @@ class SynonymServiceTest {
   @Test
   @DisplayName("Validate a Synonym can be added to & retrieved from database")
   void testAddSynonym() {
-
     final String synonymName = "Beth";
     final Synonym beth = new Synonym(synonymName);
     final Synonym addedSynonym = synonymService.save(beth);
-    logger.info("Added Synonym: " + addedSynonym);
+    logger.info("Added Synonym: {}", addedSynonym);
     assertThat(addedSynonym.getName()).isEqualTo(synonymName);
   }
 
   @Test
   @DisplayName("Validate Synonyms for a ProperName can be retrieved")
   void testSynonymProperNameRetrieval() {
-
     // given
     final String synonymName = "Sammy";
     final String properNameName = "Samuel";
@@ -80,7 +78,7 @@ class SynonymServiceTest {
 
     // when
     final List<String> synonyms = synonymService.fetchSynonymsFor(properNameName);
-    logger.info("Got Synonyms: " + synonyms);
+    logger.info("Got Synonyms: {}", synonyms);
 
     // then
     assertThat(synonyms.size()).isNotZero();

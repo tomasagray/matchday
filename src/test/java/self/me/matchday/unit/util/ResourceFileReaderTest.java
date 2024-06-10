@@ -37,7 +37,6 @@ class ResourceFileReaderTest {
   @Test
   @DisplayName("Ensure reads and splits resource file key/value pairs correctly")
   void testReadPropertiesResourceFile() throws IOException {
-
     Map<String, String> resourceFile = ResourceFileReader.readPropertiesResource(PROPERTIES_FILE);
 
     // Perform tests

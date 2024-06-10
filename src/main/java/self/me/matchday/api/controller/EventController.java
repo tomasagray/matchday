@@ -25,7 +25,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.io.IOException;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.LinkRelation;
@@ -51,7 +50,6 @@ public class EventController {
   private final VideoFileSourceResource.VideoSourceModeller fileSourceAssembler;
   private final VideoPlaylistResource.VideoPlaylistResourceAssembler playlistAssembler;
 
-  @Autowired
   EventController(
       EventService eventService,
       EventsModeller eventAssembler,

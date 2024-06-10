@@ -19,17 +19,16 @@
 
 package self.me.matchday.api.service;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.ResponseCookie;
-import org.springframework.stereotype.Service;
-import self.me.matchday.model.SecureCookie;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Service;
+import self.me.matchday.model.SecureCookie;
 
 @Service
 public class CookiesService {
@@ -49,7 +48,6 @@ public class CookiesService {
    * @return A List<> of Sprint cookies
    */
   public Set<HttpCookie> parseCookies(@NotNull final String cookieText) {
-
     // Split on newline, remove blanks, & map to cookies
     return Arrays.stream(cookieText.split("\n"))
         .filter(this::isCookie)
@@ -64,13 +62,12 @@ public class CookiesService {
    * @return A Spring cookie
    */
   public HttpCookie parseCookie(@NotNull final String cookieText) {
-
     // Split the cookie text on tabs
     final List<String> fields =
         Arrays.stream(cookieText.split("\t"))
             // ... clean
             .map(String::trim)
-                .filter(substr -> !(substr.isEmpty()))
+            .filter(substr -> !(substr.isEmpty()))
             .toList();
 
     // Extract fields

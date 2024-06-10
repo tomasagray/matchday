@@ -55,7 +55,6 @@ class DiskManagerTest {
 
   @BeforeAll
   static void setUp(@Autowired @NotNull DiskManager diskManager) throws IOException {
-
     DiskManagerTest.diskManager = diskManager;
 
     // ensure test location exists
@@ -71,7 +70,6 @@ class DiskManagerTest {
   @Test
   @DisplayName("Ensure accurately detects adequate free space")
   void isSpaceAvailable() throws IOException {
-
     boolean isSpaceAvailable;
     boolean tooMuchSpaceAvailable;
 
@@ -88,7 +86,6 @@ class DiskManagerTest {
   @Test
   @DisplayName("Test free disk space computation")
   void getFreeDiskSpace() {
-
     final Long freeDiskSpace = diskManager.getFreeDiskSpace();
     logger.info("Found free disk space: {}", freeDiskSpace);
 
@@ -100,7 +97,6 @@ class DiskManagerTest {
   @Test
   @DisplayName("Test used space computation")
   void getUsedSpace() throws IOException {
-
     File testData = null;
     try {
       testData = createDiskSpaceTestData();
@@ -117,7 +113,7 @@ class DiskManagerTest {
     } finally {
       if (testData != null) {
         final boolean deleted = testData.delete();
-        logger.info("Test successfully deleted test data? " + deleted);
+        logger.info("Test successfully deleted test data? {}", deleted);
         assertThat(deleted).isTrue();
       }
     }
@@ -125,7 +121,6 @@ class DiskManagerTest {
 
   @NotNull
   private File createDiskSpaceTestData() throws IOException {
-
     Path storagePath = diskManager.getStorageLocation().toAbsolutePath();
     final File testDataFile = new File(storagePath.resolve("TEST_FILE.txt").toString());
     final boolean fileCreated = testDataFile.createNewFile();

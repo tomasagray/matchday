@@ -79,7 +79,6 @@ public class MatchDataParserTest {
   }
 
   private static Stream<Arguments> getBloggerEntryArgs() throws IOException {
-
     if (testHtml == null) {
       testHtml = readTestResources();
     }
@@ -92,7 +91,6 @@ public class MatchDataParserTest {
   @Test
   @DisplayName("Ensure sample HTML for testing is suitable")
   void validateTestHtml() {
-
     final int expectedUrlCount = 16;
 
     final Pattern linkPattern =
@@ -119,7 +117,6 @@ public class MatchDataParserTest {
   @MethodSource("getBloggerEntryArgs")
   @DisplayName("Validate each entry can be parsed")
   void testBloggerEntryParsing(@NotNull BloggerEntry entry) {
-
     final String data = entry.getContent().getData();
     final List<? extends Event> events =
         matchDataParser.getEntityStream(testDataSource, data).toList();

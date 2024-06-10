@@ -61,7 +61,6 @@ public class PageEvaluator {
   }
 
   private FileFoxPage getPageType(final String html) throws URISyntaxException {
-
     final Document page = Jsoup.parse(html);
     final String pageText = page.text();
     final Elements navBar = page.select(NAVBAR_SELECTOR);
@@ -106,7 +105,6 @@ public class PageEvaluator {
   }
 
   private @NotNull Map<String, String> getHiddenQueryParams(@NotNull final Document document) {
-
     final FormElement hiddenForm = document.getAllElements().forms().get(0);
     final Elements hiddenInputs = hiddenForm.select(HIDDEN_INPUT);
     // Parse inputs
@@ -123,7 +121,6 @@ public class PageEvaluator {
   @Contract("_ -> new")
   private @NotNull URI getHiddenFormUri(@NotNull final Document document)
       throws URISyntaxException {
-
     final Optional<Element> formOptional = document.getElementsByTag("form").stream().findFirst();
     if (formOptional.isPresent()) {
       final Element hiddenForm = formOptional.get();
@@ -136,7 +133,6 @@ public class PageEvaluator {
 
   @NotNull
   private Optional<URL> getDirectDownloadUrl(@NotNull Document document) {
-
     final Elements links = document.getElementsByTag("a");
     return links.stream()
         .filter(this::isDirectDownloadLink)

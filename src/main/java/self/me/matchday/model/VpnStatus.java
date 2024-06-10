@@ -12,6 +12,7 @@ public class VpnStatus {
   private final VpnConnectionStatus connectionStatus;
   private final String ipAddress;
   private String vpnServer = "";
+
   public enum VpnConnectionStatus {
     DISCONNECTED,
     CONNECTING,

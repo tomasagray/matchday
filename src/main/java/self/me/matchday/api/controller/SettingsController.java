@@ -19,6 +19,7 @@
 
 package self.me.matchday.api.controller;
 
+import java.io.IOException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,35 +29,33 @@ import org.springframework.web.bind.annotation.RestController;
 import self.me.matchday.api.service.SettingsService;
 import self.me.matchday.model.ApplicationSettings;
 
-import java.io.IOException;
-
 @RestController
 @RequestMapping("/settings")
 public class SettingsController {
 
-    private final SettingsService settingsService;
+  private final SettingsService settingsService;
 
-    public SettingsController(SettingsService settingsService) {
-        this.settingsService = settingsService;
-    }
+  public SettingsController(SettingsService settingsService) {
+    this.settingsService = settingsService;
+  }
 
-    @RequestMapping(
-            value = {"", "/"},
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getSettings() {
-        final ApplicationSettings settings = settingsService.getSettings();
-        return ResponseEntity.ok(settings);
-    }
+  @RequestMapping(
+      value = {"", "/"},
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> getSettings() {
+    final ApplicationSettings settings = settingsService.getSettings();
+    return ResponseEntity.ok(settings);
+  }
 
-    @RequestMapping(
-            value = "/update",
-            method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateSettings(@RequestBody ApplicationSettings settings)
-            throws IOException, InterruptedException {
-        final ApplicationSettings updated = settingsService.updateSettings(settings);
-        return ResponseEntity.ok(updated);
-    }
+  @RequestMapping(
+      value = "/update",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> updateSettings(@RequestBody ApplicationSettings settings)
+      throws IOException, InterruptedException {
+    final ApplicationSettings updated = settingsService.updateSettings(settings);
+    return ResponseEntity.ok(updated);
+  }
 }

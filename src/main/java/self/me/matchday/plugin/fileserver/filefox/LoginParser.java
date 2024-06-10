@@ -48,7 +48,6 @@ public class LoginParser {
       PageEvaluator pageEvaluator,
       @NotNull FileFoxPluginProperties pluginProperties)
       throws URISyntaxException {
-
     this.connectionManager = connectionManager;
     this.pageEvaluator = pageEvaluator;
     this.pluginProperties = pluginProperties;
@@ -56,7 +55,6 @@ public class LoginParser {
   }
 
   public ClientResponse performLogin(@NotNull final FileServerUser user) {
-
     final Map<String, String> loginData = getLoginData(user);
     final MultiValueMap<String, String> emptyCookies = new LinkedMultiValueMap<>();
     ClientResponse loginResponse = connectionManager.post(loginUri, emptyCookies, loginData);
@@ -65,7 +63,6 @@ public class LoginParser {
 
   private @NotNull ClientResponse evaluateLoginResponse(
       @NotNull final ClientResponse loginResponse) {
-
     final HttpStatus statusCode = loginResponse.statusCode();
     final String body = loginResponse.bodyToMono(String.class).block();
     final FileFoxPage page = pageEvaluator.getFileFoxPage(body);
@@ -86,7 +83,6 @@ public class LoginParser {
 
   @NotNull
   private Map<String, String> getLoginData(@NotNull FileServerUser user) {
-
     final String email = URLEncoder.encode(user.getUsername(), StandardCharsets.UTF_8);
     final String password = URLEncoder.encode(user.getPassword(), StandardCharsets.UTF_8);
 

@@ -58,7 +58,6 @@ class EventRepositoryTest {
   @Test
   @DisplayName("Fetch Event by matching characteristics")
   void testMatchingEventRetrieval() {
-
     final int seed = ThreadLocalRandom.current().nextInt();
     final String competitionName = "UEFA Champions League " + seed;
     final String homeTeamName = "Chelsea " + seed;

@@ -41,14 +41,6 @@ import self.me.matchday.model.SnapshotRequest;
 @RequestMapping(value = "/data-sources")
 public class DataSourceController {
 
-  @RequestMapping(
-      value = "/refresh/on-url",
-      method = RequestMethod.POST,
-      consumes = MediaType.APPLICATION_JSON_VALUE)
-  public void refreshOnUrl(@RequestBody @NotNull UrlRequest request) throws IOException {
-    dataSourceService.refreshOnUrl(request.getUrl());
-  }
-
   private final DataSourceService dataSourceService;
   private final DataSourceResourceAssembler dataSourceResourceAssembler;
 
@@ -58,6 +50,14 @@ public class DataSourceController {
 
     this.dataSourceService = dataSourceService;
     this.dataSourceResourceAssembler = dataSourceResourceAssembler;
+  }
+
+  @RequestMapping(
+      value = "/refresh/on-url",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  public void refreshOnUrl(@RequestBody @NotNull UrlRequest request) throws IOException {
+    dataSourceService.refreshOnUrl(request.getUrl());
   }
 
   @RequestMapping(
@@ -78,11 +78,6 @@ public class DataSourceController {
       @RequestBody SnapshotRequest snapshotRequest) throws IOException {
     final SnapshotRequest status = dataSourceService.refreshAllDataSources(snapshotRequest);
     return ResponseEntity.ok().body(status);
-  }
-
-  @Data
-  public static class UrlRequest {
-    private URL url;
   }
 
   @RequestMapping(
@@ -137,5 +132,10 @@ public class DataSourceController {
   public ResponseEntity<UUID> deleteDataSource(@PathVariable("dataSourceId") UUID dataSourceID) {
     dataSourceService.delete(dataSourceID);
     return ResponseEntity.ok(dataSourceID);
+  }
+
+  @Data
+  public static class UrlRequest {
+    private URL url;
   }
 }

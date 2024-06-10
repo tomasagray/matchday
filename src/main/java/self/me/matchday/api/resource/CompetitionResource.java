@@ -99,7 +99,6 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
     @Override
     @Transactional
     public CompetitionResource toModel(@NotNull Competition competition) {
-
       final CompetitionResource competitionResource = instantiateModel(competition);
 
       final UUID competitionId = competition.getId();

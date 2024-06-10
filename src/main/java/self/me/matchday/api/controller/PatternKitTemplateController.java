@@ -52,7 +52,6 @@ public class PatternKitTemplateController {
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CollectionModel<PatternKitTemplateResource>> fetchAllTemplates() {
-
     final List<PatternKitTemplate> templates = templateService.fetchAll();
     return ResponseEntity.ok(templateResourceAssembler.toCollectionModel(templates));
   }
@@ -63,7 +62,6 @@ public class PatternKitTemplateController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<PatternKitTemplateResource> fetchTemplateByClassName(
       @PathVariable String className) {
-
     return templateService
         .fetchByClassName(className)
         .map(templateResourceAssembler::toModel)

@@ -93,6 +93,7 @@ public class Highlight extends Event implements Serializable {
   public Artwork getArtwork() {
     return super.getArtwork();
   }
+
   // End redundant reflection overrides
   // ----------------------------------
 

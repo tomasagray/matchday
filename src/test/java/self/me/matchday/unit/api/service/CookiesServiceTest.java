@@ -49,7 +49,6 @@ class CookiesServiceTest {
 
   @BeforeAll
   static void setUp(@Autowired final CookiesService cookiesService) throws IOException {
-
     CookiesServiceTest.cookiesService = cookiesService;
 
     logger.info("Attempting to read cookie data from: {}", COOKIE_FILEPATH);
@@ -61,7 +60,6 @@ class CookiesServiceTest {
   @Test
   @DisplayName("Validate Netscape cookie parsing from a String")
   void parseNetscapeCookies() {
-
     final int expectedCookieCount = 9;
 
     final Set<HttpCookie> actualCookies = cookiesService.parseCookies(cookieFile);

@@ -21,11 +21,11 @@ package self.me.matchday.api.service.video;
 
 public class VideoStreamingException extends RuntimeException {
 
-    public VideoStreamingException(Throwable e) {
-        super(e);
-    }
+  public VideoStreamingException(Throwable e) {
+    super(e);
+  }
 
-    public VideoStreamingException(String message) {
-        super(message);
-    }
+  public VideoStreamingException(String message) {
+    super(message);
+  }
 }

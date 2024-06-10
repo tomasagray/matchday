@@ -19,9 +19,14 @@
 
 package self.me.matchday.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static self.me.matchday.config.settings.EnabledFileServerPlugins.ENABLED_FILESERVERS;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.util.UUID;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
@@ -33,12 +38,6 @@ import self.me.matchday.api.controller.FileServerPluginController;
 import self.me.matchday.api.service.PluginService;
 import self.me.matchday.plugin.fileserver.FileServerPlugin;
 
-import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import static self.me.matchday.config.settings.EnabledFileServerPlugins.ENABLED_FILESERVERS;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
@@ -49,49 +48,50 @@ import static self.me.matchday.config.settings.EnabledFileServerPlugins.ENABLED_
 @JsonInclude(value = Include.NON_NULL)
 public class FileServerPluginResource extends RepresentationModel<FileServerPluginResource> {
 
-    private UUID id;
-    private String title;
-    private String description;
-    private boolean isEnabled;
+  private UUID id;
+  private String title;
+  private String description;
+  private boolean isEnabled;
 
-    @Component
-    public static class FileServerResourceAssembler
-            extends RepresentationModelAssemblerSupport<FileServerPlugin, FileServerPluginResource> {
+  @Component
+  public static class FileServerResourceAssembler
+      extends RepresentationModelAssemblerSupport<FileServerPlugin, FileServerPluginResource> {
 
-        private final PluginService pluginService;
+    private final PluginService pluginService;
 
-        public FileServerResourceAssembler(PluginService pluginService) {
-            super(FileServerPluginController.class, FileServerPluginResource.class);
-            this.pluginService = pluginService;
-        }
-
-        @Override
-        public @NotNull FileServerPluginResource toModel(@NotNull final FileServerPlugin plugin) {
-            FileServerPluginResource resource = instantiateModel(plugin);
-            // Add data
-            resource.setId(plugin.getPluginId());
-            resource.setTitle(plugin.getTitle());
-            resource.setDescription(plugin.getDescription());
-            boolean isEnabled = pluginService.isPluginEnabled(plugin, ENABLED_FILESERVERS);
-            resource.setEnabled(isEnabled);
-
-            // Add HATEOAS self link
-            resource.add(
-                    linkTo(methodOn(FileServerPluginController.class).getFileServerById(plugin.getPluginId()))
-                            .withSelfRel());
-
-            return resource;
-        }
-
-        @Override
-        public @NotNull CollectionModel<FileServerPluginResource> toCollectionModel(
-                @NotNull final Iterable<? extends FileServerPlugin> entities) {
-            final CollectionModel<FileServerPluginResource> collectionModel = super.toCollectionModel(entities);
-            // Add HATEOAS self link & return
-            collectionModel.add(
-                    linkTo(methodOn(FileServerPluginController.class).getAllFileServerPlugins())
-                            .withSelfRel());
-            return collectionModel;
-        }
+    public FileServerResourceAssembler(PluginService pluginService) {
+      super(FileServerPluginController.class, FileServerPluginResource.class);
+      this.pluginService = pluginService;
     }
+
+    @Override
+    public @NotNull FileServerPluginResource toModel(@NotNull final FileServerPlugin plugin) {
+      FileServerPluginResource resource = instantiateModel(plugin);
+      // Add data
+      resource.setId(plugin.getPluginId());
+      resource.setTitle(plugin.getTitle());
+      resource.setDescription(plugin.getDescription());
+      boolean isEnabled = pluginService.isPluginEnabled(plugin, ENABLED_FILESERVERS);
+      resource.setEnabled(isEnabled);
+
+      // Add HATEOAS self link
+      resource.add(
+          linkTo(methodOn(FileServerPluginController.class).getFileServerById(plugin.getPluginId()))
+              .withSelfRel());
+
+      return resource;
+    }
+
+    @Override
+    public @NotNull CollectionModel<FileServerPluginResource> toCollectionModel(
+        @NotNull final Iterable<? extends FileServerPlugin> entities) {
+      final CollectionModel<FileServerPluginResource> collectionModel =
+          super.toCollectionModel(entities);
+      // Add HATEOAS self link & return
+      collectionModel.add(
+          linkTo(methodOn(FileServerPluginController.class).getAllFileServerPlugins())
+              .withSelfRel());
+      return collectionModel;
+    }
+  }
 }

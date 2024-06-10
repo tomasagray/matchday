@@ -55,12 +55,12 @@ class FFprobeTest {
   private static FFmpegMetadata expectedMetadata;
 
   private final TestDataCreator testDataCreator;
+
   @Value("${plugin.ffmpeg.ffprobe-location}")
   private String ffprobePath;
 
   @Autowired
   FFprobeTest(TestDataCreator testDataCreator) throws IOException {
-
     this.testDataCreator = testDataCreator;
     // Read test metadata & deserialize
     String sampleMetadata = ResourceFileReader.readTextResource(SAMPLE_METADATA_JSON);
@@ -72,9 +72,8 @@ class FFprobeTest {
   @Order(1)
   @DisplayName("Check creation of FFprobe instance")
   void checkFFprobeCreation() {
-
     // Create FFprobe instance
-    logger.info("Instantiating FFprobe with executable: " + ffprobePath);
+    logger.info("Instantiating FFprobe with executable: {}", ffprobePath);
     ffProbe = new FFprobe(ffprobePath);
     FFprobeTest.testUrl = testDataCreator.getFirstHalfUrl();
     logger.info("Verifying FFprobe instance is NOT NULL...");
@@ -85,9 +84,8 @@ class FFprobeTest {
   @Order(2)
   @DisplayName("Verify FFprobe can read remote file metadata")
   void testGetFileMetadata() throws URISyntaxException, IOException {
-
     final String baseUrl = testUrl.toString().replaceAll("\\?\\w*=[\\w-]*", "");
-    logger.info("Reading file data from: " + baseUrl);
+    logger.info("Reading file data from: {}", baseUrl);
     FFmpegMetadata actualMetadata = ffProbe.getFileMetadata(new URI(baseUrl));
 
     logger.info("Testing metadata for correctness...");

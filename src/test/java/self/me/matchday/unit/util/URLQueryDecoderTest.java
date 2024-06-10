@@ -41,7 +41,6 @@ class URLQueryDecoderTest {
   @Test
   @DisplayName("Validate URL query parameter parsing")
   void testDecode() {
-
     final Map<String, List<String>> actualParams = URLQueryDecoder.decode(TEST_URL);
 
     // Build test data
@@ -53,7 +52,7 @@ class URLQueryDecoderTest {
     expectedParams.put("sa", List.of("X"));
     expectedParams.put("ved", List.of("2ahUKEwing8K-qKvsAhX9IDKVjWAVoQ_AUoAXoECCEAw"));
 
-    logger.info("Testing parsed params: " + actualParams);
+    logger.info("Testing parsed params: {}", actualParams);
     assertThat(actualParams).isEqualTo(expectedParams);
   }
 }

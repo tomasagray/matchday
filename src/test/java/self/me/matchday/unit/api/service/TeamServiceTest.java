@@ -72,11 +72,10 @@ class TeamServiceTest {
   @Test
   @DisplayName("Validate retrieval of all teams from database")
   void fetchAllTeams() {
-
     final int expectedTeamCount = 1;
 
     final List<Team> teams = teamService.fetchAll();
-    logger.info("Got teams:\n" + teams);
+    logger.info("Got teams:\n{}", teams);
     assertThat(teams.size()).isGreaterThanOrEqualTo(expectedTeamCount);
     assertThat(teams).contains(testTeam);
   }
@@ -84,13 +83,12 @@ class TeamServiceTest {
   @Test
   @DisplayName("Verify retrieval of specific team from database")
   void fetchTeamById() {
-
     final Optional<Team> teamOptional = teamService.fetchById(testTeam.getId());
     assertThat(teamOptional).isPresent();
 
     teamOptional.ifPresent(
         team -> {
-          logger.info("Got team: " + team);
+          logger.info("Got team: {}", team);
           assertThat(team).isEqualTo(testTeam);
         });
   }
@@ -98,7 +96,6 @@ class TeamServiceTest {
   @Test
   @DisplayName("Validate retrieval of teams for a given Competition")
   void fetchTeamsByCompetitionId() {
-
     final List<Team> teams = teamService.fetchTeamsByCompetitionId(testCompetition.getId());
     logger.info("Found {} teams for Competition: {}", teams.size(), testCompetition);
     assertThat(teams).contains(testTeam);
@@ -107,7 +104,6 @@ class TeamServiceTest {
   @Test
   @DisplayName("Validate saving team to database")
   void saveTeam() {
-
     final Team savingTestTeam = new Team("Saving Test Team");
 
     final List<Team> teams = teamService.fetchAll();
@@ -115,7 +111,7 @@ class TeamServiceTest {
 
     // Save team to database
     final Team savedTeam = teamService.save(savingTestTeam);
-    logger.info("Successfully saved Team: " + savedTeam);
+    logger.info("Successfully saved Team: {}", savedTeam);
 
     // Get new team list
     final List<Team> teamsPostUpdate = teamService.fetchAll();
@@ -130,7 +126,6 @@ class TeamServiceTest {
   @Test
   @DisplayName("Validate team deletion")
   void deleteTeamById() {
-
     final Team deleteTestTeam = new Team("Delete Test Team");
     // Save to database
     teamService.save(deleteTestTeam);

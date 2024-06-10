@@ -23,7 +23,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,12 +45,10 @@ public class HighlightController {
   private final EventsModeller eventAssembler;
   private final HighlightResource.HighlightResourceAssembler highlightAssembler;
 
-  @Autowired
   public HighlightController(
       HighlightService highlightService,
       EventsModeller eventAssembler,
       HighlightResource.HighlightResourceAssembler highlightAssembler) {
-
     this.highlightService = highlightService;
     this.eventAssembler = eventAssembler;
     this.highlightAssembler = highlightAssembler;
@@ -88,7 +85,6 @@ public class HighlightController {
   @RequestMapping(value = "/highlight-shows/highlight/{eventId}", method = RequestMethod.GET)
   @ResponseBody
   public ResponseEntity<HighlightResource> fetchHighlightById(@PathVariable UUID eventId) {
-
     return highlightService
         .fetchById(eventId)
         .map(highlightAssembler::toModel)

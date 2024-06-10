@@ -37,7 +37,6 @@ public class ZipService {
   private static void zipAllFiles(
       @NotNull ZipOutputStream zos, @Nullable Path root, File @NotNull ... files)
       throws IOException {
-
     for (final File file : files) {
       if (file.isDirectory()) {
         // recursively zip directory contents
@@ -53,7 +52,6 @@ public class ZipService {
 
   private static void addFileToZip(
       @NotNull ZipOutputStream zos, @Nullable Path root, @NotNull File file) throws IOException {
-
     final String zipPath =
         root != null ? root.relativize(file.toPath()).toString() : file.getPath();
     zos.putNextEntry(new ZipEntry(zipPath));
@@ -68,7 +66,6 @@ public class ZipService {
 
   public void zipFiles(@NotNull File archive, @Nullable Path relative, File... files)
       throws IOException {
-
     try (final FileOutputStream fos = new FileOutputStream(archive);
         final ZipOutputStream zos = new ZipOutputStream(fos)) {
       zipAllFiles(zos, relative, files);
@@ -76,9 +73,7 @@ public class ZipService {
   }
 
   public void unzipArchive(@NotNull File archive, @NotNull File outputDir) throws IOException {
-
     try (final ZipInputStream zis = new ZipInputStream(new FileInputStream(archive))) {
-
       ZipEntry zipEntry = zis.getNextEntry();
       while (zipEntry != null) {
         final File file = createFile(outputDir, zipEntry);
@@ -97,7 +92,6 @@ public class ZipService {
 
   private @NotNull File createFile(@NotNull File output, @NotNull ZipEntry zipEntry)
       throws IOException {
-
     final File file = new File(output, zipEntry.getName());
     String outputPath = output.getCanonicalPath();
     String filePath = file.getCanonicalPath();

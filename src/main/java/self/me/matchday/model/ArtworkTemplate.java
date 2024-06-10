@@ -19,14 +19,13 @@
 
 package self.me.matchday.model;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Setter
 @AllArgsConstructor
@@ -34,120 +33,116 @@ import java.util.List;
 @XmlRootElement(name = "template")
 public class ArtworkTemplate {
 
-    private List<Layer> layer;
-    private int width;
-    private int height;
+  private List<Layer> layer;
+  private int width;
+  private int height;
+
+  @XmlElement
+  public List<Layer> getLayer() {
+    return layer;
+  }
+
+  @XmlAttribute
+  public int getWidth() {
+    return width;
+  }
+
+  @XmlAttribute
+  public int getHeight() {
+    return height;
+  }
+
+  @Setter
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class Layer {
+
+    private String name;
+    private List<Image> image;
+    private List<Shape> shape;
+
+    @XmlAttribute
+    public String getName() {
+      return name;
+    }
 
     @XmlElement
-    public List<Layer> getLayer() {
-        return layer;
+    public List<Image> getImage() {
+      return image;
     }
+
+    @XmlElement
+    public List<Shape> getShape() {
+      return shape;
+    }
+  }
+
+  @Setter
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class Image {
+
+    private int width;
+    private int height;
+    private String src;
+    private Coordinate origin;
 
     @XmlAttribute
     public int getWidth() {
-        return width;
+      return width;
     }
 
     @XmlAttribute
     public int getHeight() {
-        return height;
+      return height;
     }
 
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Layer {
-
-        private String name;
-        private List<Image> image;
-        private List<Shape> shape;
-
-        @XmlAttribute
-        public String getName() {
-            return name;
-        }
-
-        @XmlElement
-        public List<Image> getImage() {
-            return image;
-        }
-
-        @XmlElement
-        public List<Shape> getShape() {
-            return shape;
-        }
-
+    @XmlAttribute
+    public String getSrc() {
+      return src;
     }
 
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Image {
+    @XmlElement
+    public Coordinate getOrigin() {
+      return origin;
+    }
+  }
 
-        private int width;
-        private int height;
-        private String src;
-        private Coordinate origin;
+  @Setter
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class Shape {
 
-        @XmlAttribute
-        public int getWidth() {
-            return width;
-        }
+    private String color;
+    private List<Coordinate> coords;
 
-        @XmlAttribute
-        public int getHeight() {
-            return height;
-        }
-
-        @XmlAttribute
-        public String getSrc() {
-            return src;
-        }
-
-        @XmlElement
-        public Coordinate getOrigin() {
-            return origin;
-        }
-
+    @XmlAttribute
+    public String getColor() {
+      return color;
     }
 
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Shape {
+    @XmlElement
+    public List<Coordinate> getCoords() {
+      return coords;
+    }
+  }
 
-        private String color;
-        private List<Coordinate> coords;
+  @Setter
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class Coordinate {
 
-        @XmlAttribute
-        public String getColor() {
-            return color;
-        }
+    private int x;
+    private int y;
 
-        @XmlElement
-        public List<Coordinate> getCoords() {
-            return coords;
-        }
-
+    @XmlAttribute
+    public int getX() {
+      return x;
     }
 
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Coordinate {
-
-        private int x;
-        private int y;
-
-        @XmlAttribute
-        public int getX() {
-            return x;
-        }
-
-        @XmlAttribute
-        public int getY() {
-            return y;
-        }
-
+    @XmlAttribute
+    public int getY() {
+      return y;
     }
+  }
 }

@@ -132,6 +132,7 @@ public class Match extends Event {
   public Artwork getArtwork() {
     return super.getArtwork();
   }
+
   // End redundant reflection overrides
   // ----------------------------------
 

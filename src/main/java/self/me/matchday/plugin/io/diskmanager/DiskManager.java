@@ -19,19 +19,18 @@
 
 package self.me.matchday.plugin.io.diskmanager;
 
-import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
-import self.me.matchday.api.service.SettingsService;
-import self.me.matchday.model.FileSize;
+import static self.me.matchday.config.settings.VideoStorageLocation.VIDEO_STORAGE;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
-
-import static self.me.matchday.config.settings.VideoStorageLocation.VIDEO_STORAGE;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+import self.me.matchday.api.service.SettingsService;
+import self.me.matchday.model.FileSize;
 
 @Getter
 @Component
@@ -49,7 +48,6 @@ public class DiskManager {
   }
 
   public boolean isSpaceAvailable(@NotNull final Long fileSize) throws IOException {
-
     // Test criteria
     final Long totalProposedAllocation = getUsedSpace() + fileSize;
     final Long remainingDiskSpace = getFreeDiskSpace() - fileSize;
@@ -62,14 +60,12 @@ public class DiskManager {
   }
 
   public Long getFreeDiskSpace() {
-
     // Get a File reference to root
     final File root = fileSystemRoot.toFile();
     return root.getFreeSpace();
   }
 
   public Long getUsedSpace() throws IOException {
-
     try (Stream<Path> walker = Files.walk(storageLocation)) {
       return walker
           .filter(path -> path.toFile().isFile()) // find all files
@@ -79,7 +75,6 @@ public class DiskManager {
   }
 
   private Path determineFileSystemRoot() {
-
     // Copy reference to initial storage dir
     Path parent = storageLocation;
     // Recursively search for parents

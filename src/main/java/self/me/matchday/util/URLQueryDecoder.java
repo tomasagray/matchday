@@ -19,18 +19,17 @@
 
 package self.me.matchday.util;
 
-import org.jetbrains.annotations.NotNull;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
+import org.jetbrains.annotations.NotNull;
 
 public class URLQueryDecoder {
 
@@ -41,7 +40,6 @@ public class URLQueryDecoder {
    * @return A Map<> of key/value pairs, or empty map
    */
   public static Map<String, List<String>> decode(@NotNull final String urlString) {
-
     // Return an empty Set<> if any problems
     try {
 
@@ -76,7 +74,6 @@ public class URLQueryDecoder {
    */
   private static @NotNull SimpleImmutableEntry<String, String> splitQueryParameter(
       @NotNull final String param) {
-
     final int idx = param.indexOf("=");
     final String key = idx > 0 ? param.substring(0, idx) : param;
     final String value = idx > 0 && param.length() > idx + 1 ? param.substring(idx + 1) : null;

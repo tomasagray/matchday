@@ -117,7 +117,6 @@ public final class FileServerUser implements Serializable {
 
   @Override
   public boolean equals(final Object object) {
-
     if (!(object instanceof final FileServerUser fileServerUser)) {
       return false;
     }

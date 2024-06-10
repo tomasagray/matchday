@@ -54,50 +54,45 @@ class FileFoxPluginPropertiesTest {
   @Test
   @DisplayName("Validate plugin ID")
   void getId() {
-
     final UUID expectedPluginId = UUID.fromString("4e3389aa-3c86-4541-aaa1-9a6603753921");
     final UUID actualPluginId = UUID.fromString(pluginProperties.getId());
-    logger.info("Got plugin ID: " + actualPluginId);
+    logger.info("Got plugin ID: {}", actualPluginId);
     assertThat(actualPluginId).isEqualTo(expectedPluginId);
   }
 
   @Test
   @DisplayName("Validate plugin title")
   void getTitle() {
-
     final String expectedPluginTitle = "FileFox";
     final String actualPluginTitle = pluginProperties.getTitle();
-    logger.info("Got plugin title: " + actualPluginTitle);
+    logger.info("Got plugin title: {}", actualPluginTitle);
     assertThat(actualPluginTitle).isEqualTo(expectedPluginTitle);
   }
 
   @Test
   @DisplayName("Validate plugin description")
   void getDescription() {
-
     final String expectedDescription =
         "Manager for the FileFox online file service. Translates external "
             + "links into internal, downloadable links.";
     final String actualPluginDescription = pluginProperties.getDescription();
-    logger.info("Got plugin description: " + actualPluginDescription);
+    logger.info("Got plugin description: {}", actualPluginDescription);
     assertThat(actualPluginDescription).isEqualTo(expectedDescription);
   }
 
   @Test
   @DisplayName("Validate FileFox browser user agent")
   void getUserAgent() {
-
     final String expectedUserAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0";
     final String actualUserAgent = pluginProperties.getUserAgent();
-    logger.info("Got user agent: " + actualUserAgent);
+    logger.info("Got user agent: {}", actualUserAgent);
     assertThat(actualUserAgent).isEqualTo(expectedUserAgent);
   }
 
   @Test
   @DisplayName("Validate URL pattern matcher for external links")
   void getLinkUrlPattern() throws MalformedURLException {
-
     final URL testUrl = new URL("https://filefox.cc/79muv293uj1r/20210121-EIB-ATM-LL_1.ts");
     final Pattern actualLinkUrlPattern = pluginProperties.getLinkUrlPattern();
 
@@ -109,7 +104,6 @@ class FileFoxPluginPropertiesTest {
   @Test
   @DisplayName("Validate direct download URL pattern matcher")
   void getDirectDownloadUrlPattern() throws MalformedURLException {
-
     final URL testUrl =
         new URL(
             "https://s02.filefox.cc/wojxtujqwup7elabbssq26q4xhnjwzzgnrxcnsikekhsnu2h6db7ggkemibmq5l2px3e5rca/20210121-EIB-ATM-LL_1.ts");
@@ -123,10 +117,9 @@ class FileFoxPluginPropertiesTest {
   @Test
   @DisplayName("Validate plugin refresh rate")
   void getRefreshHours() {
-
     final int expectedRefreshRate = 4;
     final int actualRefreshRate = pluginProperties.getRefreshHours();
-    logger.info("Got refresh rate: " + actualRefreshRate);
+    logger.info("Got refresh rate: {}", actualRefreshRate);
     assertThat(actualRefreshRate).isEqualTo(expectedRefreshRate);
   }
 }

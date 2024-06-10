@@ -27,7 +27,6 @@ public class UseStringConstructor implements CreationStrategy {
 
   @Override
   public Object apply(String data, @NotNull Class<?> clazz) {
-
     try {
       final Constructor<?> constructor = clazz.getConstructor(String.class);
       return constructor.newInstance(data);

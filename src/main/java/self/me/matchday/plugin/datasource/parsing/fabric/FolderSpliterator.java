@@ -46,7 +46,6 @@ class FolderSpliterator<R, T> extends Spliterators.AbstractSpliterator<R> {
 
   @Override
   public boolean tryAdvance(Consumer<? super R> action) {
-
     synchronized (currentElement) {
       return spliterator.tryAdvance(
           t -> {

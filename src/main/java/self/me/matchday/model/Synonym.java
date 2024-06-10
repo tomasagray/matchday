@@ -31,12 +31,12 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 public class Synonym {
 
+  private final String name;
+
   @EmbeddedId
   @GenericGenerator(name = "synonym_id_gen", strategy = "self.me.matchday.db.SynonymIdGenerator")
   @GeneratedValue(generator = "synonym_id_gen")
   private Md5Id id;
-
-  private final String name;
 
   public Synonym() {
     this.id = null;

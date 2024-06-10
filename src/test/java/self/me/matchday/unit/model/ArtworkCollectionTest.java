@@ -46,7 +46,6 @@ public class ArtworkCollectionTest {
   @Test
   @DisplayName("Ensure ArtworkCollection.setSelected correctly sets selected Artwork")
   void testSetSelectedArtwork() {
-
     // given
     final int expectedIndex = 2;
     final Artwork artwork1 = getArtwork();
@@ -81,7 +80,6 @@ public class ArtworkCollectionTest {
   @Test
   @DisplayName("Verify calling setSelected() on already added element works as expected")
   void testSetAlreadySelected() {
-
     // given
     final int expectedIndexAfterCall = 1;
     final Artwork artwork1 = getArtwork();

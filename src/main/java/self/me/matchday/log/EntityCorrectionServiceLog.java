@@ -47,10 +47,9 @@ public class EntityCorrectionServiceLog {
       "execution(* self.me.matchday.api.service.EntityCorrectionService.getCorrectedEntity(..))")
   public Object logBeforeCorrectedEntityRetrieval(@NotNull ProceedingJoinPoint jp)
       throws Throwable {
-
     logger.info("Attempting to correct @Correctable Entity: {}", jp.getArgs());
     final Object result = jp.proceed();
-    logger.info("Entity corrected to: " + result);
+    logger.info("Entity corrected to: {}", result);
     return result;
   }
 

@@ -99,7 +99,6 @@ class CompetitionControllerTest {
   }
 
   private Stream<Arguments> getAllTestCompetitionsArgs() {
-
     final String url = "http://localhost:" + port + "/competitions/";
     logger.info("Fetching all Competitions from: {}", url);
     final ResponseEntity<CollectionModel<CompetitionResource>> response =
@@ -142,7 +141,6 @@ class CompetitionControllerTest {
   @MethodSource("getTestCompetitions")
   @DisplayName("Validate retrieving a Competition from the database by name")
   void fetchCompetitionByName(@NotNull Competition competition) {
-
     final UUID competitionId = competition.getId();
     logger.info("Testing with Competition Name: {}", competitionId);
     final ResponseEntity<CompetitionResource> response = getCompetition(competitionId);
@@ -150,7 +148,7 @@ class CompetitionControllerTest {
 
     final CompetitionResource body = response.getBody();
     assertThat(body).isNotNull();
-    logger.info("Got response: {}", body);
+    logger.info("Got Competition: {}", body);
     assertThat(body.getId()).isEqualTo(competitionId);
   }
 
@@ -158,7 +156,6 @@ class CompetitionControllerTest {
   @MethodSource("getTestCompetitions")
   @DisplayName("Validate retrieval of Teams by Competition name")
   void fetchCompetitionTeams(@NotNull Competition competition) {
-
     final String url =
         String.format(
             "http://localhost:%d/competitions/competition/%s/teams", port, competition.getId());
@@ -169,7 +166,7 @@ class CompetitionControllerTest {
         restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
     final CollectionModel<TeamResource> body = response.getBody();
-    logger.info("Got response: {}", body);
+    logger.info("Got Teams: {}", body);
 
     assertThat(body).isNotNull();
     final Collection<TeamResource> content = body.getContent();
@@ -185,7 +182,6 @@ class CompetitionControllerTest {
   @MethodSource("getTestCompetitions")
   @DisplayName("Validate retrieval of Events associated with a given Competition")
   void fetchCompetitionEvents(@NotNull Competition competition) {
-
     final String url =
         String.format(
             "http://localhost:%d/competitions/competition/%s/events", port, competition.getId());

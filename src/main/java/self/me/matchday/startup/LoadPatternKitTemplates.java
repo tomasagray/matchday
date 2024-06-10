@@ -44,7 +44,6 @@ public class LoadPatternKitTemplates implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
-
     logger.info("Checking for existence of [Match] PatternKitTemplate...");
     final Optional<PatternKitTemplate> templateOptional =
         templateService.fetchByClassName(Match.class.getSimpleName());
@@ -59,7 +58,6 @@ public class LoadPatternKitTemplates implements CommandLineRunner {
   }
 
   PatternKitTemplate readMatchTemplate() {
-
     logger.info("Reading PatternKitTemplate(s) for: Match");
 
     final PatternKitTemplate template = new PatternKitTemplate(Match.class);

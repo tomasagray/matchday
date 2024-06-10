@@ -57,7 +57,6 @@ class HighlightServiceTest {
   @Test
   @DisplayName("Validate retrieval of all Highlight shows from database")
   void fetchAllHighlights() {
-
     final int expectedHighlightCount = 1;
 
     final List<Highlight> highlights = highlightService.fetchAll();
@@ -69,7 +68,6 @@ class HighlightServiceTest {
   @Test
   @DisplayName("Validate retrieval of specific Highlight Show")
   void fetchHighlight() {
-
     final Optional<Highlight> highlightOptional =
         highlightService.fetchById(testHighlight.getEventId());
     assertThat(highlightOptional).isPresent();

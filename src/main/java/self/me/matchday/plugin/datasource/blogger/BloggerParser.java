@@ -39,7 +39,6 @@ public interface BloggerParser {
    * @throws IOException If data cannot be read from remote source
    */
   default Blogger getBlogger(@NotNull final URL url) throws IOException {
-
     try (final InputStreamReader in = new InputStreamReader(url.openStream());
         final BufferedReader reader = new BufferedReader(in)) {
       final String data = reader.lines().collect(Collectors.joining("\n"));

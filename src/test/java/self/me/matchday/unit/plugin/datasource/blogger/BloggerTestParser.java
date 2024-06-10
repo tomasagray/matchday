@@ -25,7 +25,6 @@ public final class BloggerTestParser implements DataSourceParser<BloggerTestEnti
   @Override
   public Stream<? extends BloggerTestEntity> getEntityStream(
       @NotNull DataSource<? extends BloggerTestEntity> dataSource, @NotNull String data) {
-
     // get PatternKits
     final PlaintextDataSource<BloggerTestEntity> plaintextDataSource =
         (PlaintextDataSource<BloggerTestEntity>) dataSource;

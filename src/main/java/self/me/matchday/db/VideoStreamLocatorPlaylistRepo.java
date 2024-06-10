@@ -40,7 +40,8 @@ public interface VideoStreamLocatorPlaylistRepo
       @Param("fileSrcId") final UUID fileSrcId);
 
   @Query(
-      "SELECT vslp FROM VideoStreamLocatorPlaylist vslp JOIN vslp.streamLocators l WHERE l.streamLocatorId = :locatorId")
+      "SELECT vslp FROM VideoStreamLocatorPlaylist vslp JOIN vslp.streamLocators l "
+          + "WHERE l.streamLocatorId = :locatorId")
   Optional<VideoStreamLocatorPlaylist> fetchPlaylistContaining(
       @Param("locatorId") final Long locatorId);
 }
