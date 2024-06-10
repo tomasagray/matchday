@@ -30,7 +30,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.matchday.TestDataCreator;
+import self.me.matchday.TestFileServerPlugin;
+import self.me.matchday.api.service.FileServerPluginService;
 import self.me.matchday.api.service.FileServerUserService;
 import self.me.matchday.api.service.video.VideoStreamLocatorPlaylistService;
 import self.me.matchday.api.service.video.VideoStreamLocatorService;
@@ -61,33 +64,42 @@ import static org.assertj.core.api.Assertions.assertThat;
 class VideoStreamingServiceTest {
 
     private static final Logger logger = LogManager.getLogger(VideoStreamingServiceTest.class);
+
+    private static final int WAIT_SECONDS = 5;
+
     // Test data
     private static final List<Event> cleanupData = new ArrayList<>();
     private static final List<String> videoStorageDirs = new ArrayList<>();
     // Service dependencies
     private static VideoStreamingService streamingService;
     private static VideoFileSource testFileSource;
-    private final VideoStreamLocatorPlaylistService locatorPlaylistService;
+    private final VideoStreamLocatorPlaylistService playlistService;
     private final VideoStreamLocatorService streamLocatorService;
-    private final Event testMatch;
-    private final VideoFile testVideoFile;
+
+    private Event testMatch;
+    private VideoFile testVideoFile;
     private int testStreamTaskCount;
+    private VideoStreamLocatorPlaylist deletablePlaylist;
 
     @Value("${DATA_ROOT}/videos")
     private String baseVideoStorage;
 
     @Autowired
     public VideoStreamingServiceTest(
-            @NotNull TestDataCreator testDataCreator,
-            @NotNull FileServerUserService userService,
-            VideoStreamingService streamingService,
-            VideoStreamLocatorPlaylistService locatorPlaylistService,
-            VideoStreamLocatorService streamLocatorService) {
-
+            FileServerPluginService fileServerPluginService, TestDataCreator testDataCreator,
+            FileServerUserService userService, VideoStreamingService streamingService,
+            VideoStreamLocatorPlaylistService playlistService, VideoStreamLocatorService streamLocatorService) {
         // static ref for cleanup
         VideoStreamingServiceTest.streamingService = streamingService;
         this.streamLocatorService = streamLocatorService;
-        this.locatorPlaylistService = locatorPlaylistService;
+        this.playlistService = playlistService;
+        setup(fileServerPluginService, testDataCreator, userService);
+    }
+
+    private void setup(@NotNull FileServerPluginService fileServerPluginService,
+                       @NotNull TestDataCreator testDataCreator,
+                       @NotNull FileServerUserService userService) {
+        fileServerPluginService.enablePlugin(TestFileServerPlugin.PLUGIN_ID);
 
         // Create test user & login
         FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
@@ -145,7 +157,6 @@ class VideoStreamingServiceTest {
     @Order(1)
     @DisplayName("Validate retrieval of file sources for a given Event")
     void fetchVideoFileSources() {
-
         logger.info("Fetching event with ID: {}", testMatch.getEventId());
         final Collection<VideoFileSource> actualFileSources = testMatch.getFileSources();
         logger.info("Retrieved files sources: {}", actualFileSources);
@@ -158,22 +169,20 @@ class VideoStreamingServiceTest {
     @Test
     @Order(2)
     @DisplayName("Test that a playlist is created & returned")
+    @Transactional
     void getVideoStreamPlaylist() {
-
         // test variables
         final UUID testEventId = testMatch.getEventId();
         final UUID testFileSrcId = testFileSource.getFileSrcId();
         logger.info("Testing with Match:\n{}", testMatch);
-        logger.info(
-                "Testing video stream creation with Event ID: {}, File Source ID: {}",
+        logger.info("Testing video stream creation with Event ID: {}, File Source ID: {}",
                 testEventId,
                 testFileSrcId);
 
         final Optional<VideoPlaylist> playlistOptional =
                 streamingService.getOrCreateVideoStreamPlaylist(testMatch, testFileSrcId);
         assertThat(playlistOptional).isPresent();
-        // for cleanup
-        videoStorageDirs.add(baseVideoStorage + "\\" + testFileSrcId);
+        videoStorageDirs.add(baseVideoStorage + "\\" + testFileSrcId);  // for cleanup
 
         final VideoPlaylist videoPlaylist = playlistOptional.get();
         logger.info("Retrieved VideoPlaylist: {}", videoPlaylist);
@@ -191,6 +200,12 @@ class VideoStreamingServiceTest {
             assertThat(streamingTaskCount).isNotZero();
             logger.info("There will be: {} streaming tasks...", streamingTaskCount);
             this.testStreamTaskCount = streamingTaskCount;
+
+            // for data deletion test
+            Optional<VideoStreamLocatorPlaylist> deletableOptional =
+                    playlistService.getVideoStreamPlaylistFor(testFileSrcId);
+            assertThat(deletableOptional).isPresent();
+            deletablePlaylist = deletableOptional.get();
         }
     }
 
@@ -198,23 +213,19 @@ class VideoStreamingServiceTest {
     @Order(3)
     @DisplayName("Validate reading playlist file from disk")
     void readPlaylistFile() throws Exception {
-
         final int MIN_PLAYLIST_LEN = 100;
 
-        final int waitSeconds = 15;
-        logger.info("Waiting {} seconds to ensure stream has started...", waitSeconds);
-        TimeUnit.SECONDS.sleep(waitSeconds);
+        logger.info("Waiting {} seconds to ensure stream has started...", WAIT_SECONDS);
+        TimeUnit.SECONDS.sleep(WAIT_SECONDS);
         logger.info("Done waiting. Proceeding with test...");
 
         final VideoStreamLocator testStreamLocator = getTestStreamLocator();
-        logger.info(
-                "Testing playlist file reading with File Source ID: {}, Stream Locator ID: {}",
+        logger.info("Testing playlist file reading with File Source ID: {}, Stream Locator ID: {}",
                 testFileSource.getFileSrcId(),
                 testStreamLocator.getStreamLocatorId());
 
         // Read test playlist file
-        final String actualPlaylistData =
-                streamingService.readPlaylistFile(testStreamLocator.getStreamLocatorId());
+        final String actualPlaylistData = streamingService.readPlaylistFile(testStreamLocator.getStreamLocatorId());
         final int actualPlaylistSize = actualPlaylistData.getBytes(StandardCharsets.UTF_8).length;
         logger.info("Read playlist data:\n{}", actualPlaylistData);
         logger.info("Data length: {}", actualPlaylistSize);
@@ -225,10 +236,11 @@ class VideoStreamingServiceTest {
     @Test
     @Order(4)
     @DisplayName("Validate reading of video segment (.ts) from disk")
-    void getVideoSegmentResource() throws IOException {
+    void getVideoSegmentResource() throws IOException, InterruptedException {
+        logger.info("Waiting {} seconds before proceeding with test...", WAIT_SECONDS);
+        TimeUnit.SECONDS.sleep(WAIT_SECONDS);
 
         final long minContentLength = 500_000L;
-
         final VideoStreamLocator testStreamLocator = getTestStreamLocator();
 
         // Test params
@@ -236,14 +248,13 @@ class VideoStreamingServiceTest {
         final UUID testVideoFileSrcId = testFileSource.getFileSrcId();
         final UUID testEventId = testMatch.getEventId();
         final String segmentId = "segment_00001";
-
-        logger.info(
-                "Testing video segment reading with Event ID: {}, File Source ID: {}, "
+        logger.info("Testing video segment reading with Event ID: {}, File Source ID: {}, "
                         + "Stream Locator ID: {}, Segment ID: {}",
                 testEventId,
                 testVideoFileSrcId,
                 testStreamLocatorId,
                 segmentId);
+
         // Read video resource
         final Resource actualVideoResource =
                 streamingService.getVideoSegmentResource(testStreamLocatorId, segmentId);
@@ -267,12 +278,10 @@ class VideoStreamingServiceTest {
     @Order(5)
     @DisplayName("Ensure streaming service can kill all current streaming tasks")
     void killAllStreamingTasks() {
-
         final int initialTasks = streamingService.getActiveStreamingTaskCount();
         logger.info("Before killing, there are {} active streaming tasks...", initialTasks);
 
-        logger.info(
-                "Executing killAllStreamingTasks() {} times, in case streaming is scheduled sequentially",
+        logger.info("Executing killAllStreamingTasks() {} times, in case streaming is scheduled sequentially",
                 this.testStreamTaskCount);
         int actualTasksKilled = 0;
         for (int i = 0; i < this.testStreamTaskCount; i++) {
@@ -291,23 +300,18 @@ class VideoStreamingServiceTest {
     @Order(6)
     @DisplayName("Validate ability to delete previously downloaded video data")
     void deleteVideoData() throws IOException, InterruptedException {
-
-        logger.info("Getting VideoStreamLocatorPlaylist for VideoFileSource: {}", testFileSource);
-        final Optional<VideoStreamLocatorPlaylist> playlistOptional =
-                locatorPlaylistService.getVideoStreamPlaylistFor(testFileSource.getFileSrcId());
-        assertThat(playlistOptional).isPresent();
-        VideoStreamLocatorPlaylist deletablePlaylist = playlistOptional.get();
+        // given
         assertThat(deletablePlaylist).isNotNull();
         final List<VideoStreamLocator> streamLocators = deletablePlaylist.getStreamLocators();
+
+        // when
         streamingService.killAllStreamingTasks();
-
-        final int killWait = 10;
-        logger.info("Waiting {} seconds for dust to settle...", killWait);
-        TimeUnit.SECONDS.sleep(killWait);
+        logger.info("Waiting {} seconds for dust to settle...", WAIT_SECONDS);
+        TimeUnit.SECONDS.sleep(WAIT_SECONDS);
         logger.info("Deleting video data...");
-        streamingService.deleteAllVideoData(testFileSource.getFileSrcId());
+        streamingService.deleteAllVideoData(deletablePlaylist);
 
-        // Validate data has been removed
+        // then
         streamLocators.forEach(
                 streamLocator -> {
                     final Path playlistPath = streamLocator.getPlaylistPath();
@@ -320,8 +324,8 @@ class VideoStreamingServiceTest {
     @Test
     @Order(7)
     @DisplayName("Validate ability to kill all streaming tasks")
+    @Transactional
     public void killStreamingFor() throws InterruptedException {
-
         logger.info(
                 "Before testing, there are: {} active streaming tasks...",
                 streamingService.getActiveStreamingTaskCount());
@@ -355,7 +359,6 @@ class VideoStreamingServiceTest {
     @Test
     @DisplayName("Validate that sorting VideoStreamLocatorPlaylist locators works as expected")
     public void testPlaylistLocatorSorting() throws IOException {
-
         final VideoStreamLocatorPlaylist playlist = new VideoStreamLocatorPlaylist();
         final SingleStreamLocator firstHalfLocator = new SingleStreamLocator();
         final SingleStreamLocator secondHalfLocator = new SingleStreamLocator();

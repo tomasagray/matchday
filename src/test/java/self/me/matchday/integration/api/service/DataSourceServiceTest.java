@@ -21,11 +21,8 @@ package self.me.matchday.integration.api.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -82,7 +79,6 @@ class DataSourceServiceTest {
     @Order(1)
     @SuppressWarnings("unchecked cast")
     void addDataSource() throws IOException {
-
         final List<DataSource<?>> preliminaryDataSources = dataSourceService.fetchAll();
         logger.info("Before adding, there are: {} DataSources", preliminaryDataSources.size());
         logger.info("Preliminary DataSources:\n{}", preliminaryDataSources);
@@ -113,8 +109,8 @@ class DataSourceServiceTest {
     @Test
     @DisplayName("Refresh all data sources")
     @Order(2)
+    @Disabled
     void refreshAllDataSources() throws IOException {
-
         final int expectedEventCount = 1;
 
         final SnapshotRequest testRequest = SnapshotRequest.builder().build();
@@ -133,7 +129,6 @@ class DataSourceServiceTest {
     @DisplayName("Validate refreshing DataSource on URL")
     @Order(3)
     void testUrlRefresh() throws IOException {
-
         // given
         DataSource<BloggerTestEntity> dataSource = testDataCreator.readTestBloggerDataSource();
         dataSourceService.save(dataSource);

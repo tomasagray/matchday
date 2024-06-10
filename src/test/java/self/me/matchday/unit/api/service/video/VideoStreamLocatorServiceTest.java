@@ -69,7 +69,6 @@ class VideoStreamLocatorServiceTest {
     public VideoStreamLocatorServiceTest(
             @NotNull TestDataCreator testDataCreator,
             VideoStreamLocatorService videoStreamLocatorService) {
-
         this.videoStreamLocatorService = videoStreamLocatorService;
         // Get managed copy of test file source
         this.testVideoFileSource = testDataCreator.createVideoFileSourceAndSave();
@@ -85,13 +84,15 @@ class VideoStreamLocatorServiceTest {
         return this.testStorage;
     }
 
-
     @AfterEach
     void tearDown() {
         // Ensure test data is cleaned up
         if (testStreamLocator != null) {
-            logger.info("Deleting test locator from DB...: {}", testStreamLocator.getStreamLocatorId());
-            videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
+            Long locatorId = testStreamLocator.getStreamLocatorId();
+            videoStreamLocatorService.getStreamLocator(locatorId).ifPresent(locator -> {
+                logger.info("Deleting test locator from DB...: {}", locatorId);
+                videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
+            });
         }
     }
 
@@ -109,7 +110,6 @@ class VideoStreamLocatorServiceTest {
     @Test
     @DisplayName("Test retrieval of all playlist locators from database")
     void getAllPlaylistLocators() {
-
         final int expectedPlaylistLocatorCount = 1;
         logger.info("Adding test stream locator to database...");
         testStreamLocator = videoStreamLocatorService.createStreamLocator(getTestStorage(), testVideoFile);
@@ -128,7 +128,6 @@ class VideoStreamLocatorServiceTest {
     @DisplayName("Test retrieval of specific playlist locator from database")
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     void getPlaylistLocator() {
-
         // Create test resource
         testStreamLocator = videoStreamLocatorService.createStreamLocator(getTestStorage(), testVideoFile);
 
@@ -152,11 +151,11 @@ class VideoStreamLocatorServiceTest {
     @Test
     @DisplayName("Test deletion of playlist locator")
     void deletePlaylistLocator() {
-
         // Create test resource
         testStreamLocator = videoStreamLocatorService.createStreamLocator(getTestStorage(), testVideoFile);
-
         final int sizeBeforeDelete = videoStreamLocatorService.getAllStreamLocators().size();
+        assertThat(sizeBeforeDelete).isGreaterThan(0);
+
         // Perform deletion
         videoStreamLocatorService.deleteStreamLocator(testStreamLocator);
         final int sizeAfterDelete = videoStreamLocatorService.getAllStreamLocators().size();

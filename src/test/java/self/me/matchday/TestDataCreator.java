@@ -358,7 +358,7 @@ public class TestDataCreator {
         final String username = String.format("user-%s@server.com", numGen.nextInt(Integer.MAX_VALUE));
         final String password = String.format("password-%s", numGen.nextInt(Integer.MAX_VALUE));
         final FileServerUser user =
-                new FileServerUser(username, password, TestFileServerPlugin.pluginId);
+                new FileServerUser(username, password, TestFileServerPlugin.PLUGIN_ID);
         //    user.setLoggedIntoServer(TestFileServerPlugin.pluginId, new ArrayList<>());
         return userService.login(user);
     }

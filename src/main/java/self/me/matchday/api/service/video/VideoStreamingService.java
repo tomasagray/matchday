@@ -19,19 +19,19 @@
 
 package self.me.matchday.api.service.video;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import self.me.matchday.model.Event;
 import self.me.matchday.model.video.*;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class VideoStreamingService {
@@ -204,13 +204,13 @@ public class VideoStreamingService {
                         });
     }
 
-    public void deleteAllVideoData(@NotNull final UUID fileSrcId) throws IOException {
-
-        final Optional<VideoStreamLocatorPlaylist> playlistOptional =
-                playlistService.getVideoStreamPlaylistFor(fileSrcId);
+    public void deleteAllVideoData(@NotNull UUID fileSrcId) throws IOException {
+        Optional<VideoStreamLocatorPlaylist> playlistOptional = playlistService.getVideoStreamPlaylistFor(fileSrcId);
         if (playlistOptional.isPresent()) {
-            final VideoStreamLocatorPlaylist playlist = playlistOptional.get();
+            VideoStreamLocatorPlaylist playlist = playlistOptional.get();
             deleteAllVideoData(playlist);
+        } else {
+            throw new IllegalArgumentException("No VideoStreamLocatorPlaylist exists for VideoFileSource: " + fileSrcId);
         }
     }
 

@@ -99,8 +99,7 @@ public class VideoStreamLocatorPlaylistService {
      * @return An Optional containing the most recent playlist
      */
     public Optional<VideoStreamLocatorPlaylist> getVideoStreamPlaylistFor(@NotNull UUID fileSrcId) {
-        final List<VideoStreamLocatorPlaylist> playlists =
-                playlistRepo.fetchPlaylistsForFileSrc(fileSrcId);
+        final List<VideoStreamLocatorPlaylist> playlists = playlistRepo.fetchPlaylistsForFileSrc(fileSrcId);
         if (playlists != null && !playlists.isEmpty()) {
             // Return most recent playlist
             return Optional.of(playlists.get(0));
