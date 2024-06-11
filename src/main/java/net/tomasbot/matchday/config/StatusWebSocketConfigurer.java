@@ -19,8 +19,6 @@
 
 package net.tomasbot.matchday.config;
 
-import static net.tomasbot.matchday.config.Properties.API_PREFIX;
-
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -32,10 +30,13 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class StatusWebSocketConfigurer implements WebSocketMessageBrokerConfigurer {
 
+  private static final String API_PREFIX = "/api/v1.0";
+  // ^ see: application.properties - server.servlet.contextPath
   private static final String WEBSOCKET_ROOT = API_PREFIX + "/ws";
-  public static final String STOMP_ENDPOINT = WEBSOCKET_ROOT + "/stomp";
+  private static final String STOMP_ENDPOINT = WEBSOCKET_ROOT + "/stomp";
+  private static final String SUBSCRIPTION_PREFIX = WEBSOCKET_ROOT + "/subscribe";
+
   public static final String BROKER_ROOT = WEBSOCKET_ROOT + "/subscription";
-  public static final String SUBSCRIPTION_PREFIX = WEBSOCKET_ROOT + "/subscribe";
 
   @Override
   public void registerStompEndpoints(@NotNull StompEndpointRegistry registry) {
