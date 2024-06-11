@@ -1,6 +1,6 @@
 {
   "dataSourceId": "718d9c24-8b26-44fa-9fa9-f5c7bfb4ca42",
-  "clazz": "self.me.matchday.model.Match",
+  "clazz": "net.tomasbot.matchday.model.Match",
   "title": "Local Backup",
   "baseUri": "https://galataman4k.blogspot.com/",
   "pluginId": "64d08bc8-bd9f-11ea-b3de-0242ac130004",
@@ -8,7 +8,7 @@
   "patternKits": [
     {
       "id": 1,
-      "clazz": "self.me.matchday.model.video.VideoFile",
+      "clazz": "net.tomasbot.matchday.model.video.VideoFile",
       "pattern": {
         "pattern": "[1st2ndFirSeco-]+ Half|[Postre]+-Match",
         "flags": 64
@@ -19,7 +19,7 @@
     },
     {
       "id": 2,
-      "clazz": "self.me.matchday.model.video.VideoFileSource",
+      "clazz": "net.tomasbot.matchday.model.video.VideoFileSource",
       "pattern": {
         "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\d\\s\\.+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\s\\d-]*) Language[\\p{L}\\s]*:? [\\d.\\s]*([\\p{L}]+)[\\/\\s\\d\\.\\p{L}]* Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* ‖([\\p{L}\\d\\s.]+)‖ (\\d+)[fps]* Audio[\\p{L}\\s]*:? (\\d+)[\\sKkMmbps]+ ‖ ([\\p{L}\\d\\s]+) ‖ ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [\\w\\s\\d(]+([\\d]{4}[pi])\\)?",
         "flags": 64
@@ -42,7 +42,7 @@
     },
     {
       "id": 3,
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "pattern": {
         "pattern": "([\\p{L}\\d\\s\\.]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]* (\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]* ([\\p{L}\\s-]+) v[s\\.] ([\\p{L}\\s-]+)",
         "flags": 64
@@ -58,7 +58,7 @@
     },
     {
       "id": 4,
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "pattern": {
         "pattern": "([\\p{L}\\d\\s]+) (\\d{2}\\/\\d{2}) -([SemiFinalLegstndrdth\\d\\s-]*) (\\d{1,2}[\\p{L}\\s]+) - ([\\p{L}\\d\\s-]+) v[s\\.] ([\\p{L}\\d\\s-]+) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})",
         "flags": 64
@@ -74,7 +74,7 @@
     },
     {
       "id": 5,
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "pattern": {
         "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]*(\\d+) - ([\\p{L}\\s-]+) v[s\\.] ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
         "flags": 64
@@ -90,7 +90,7 @@
     },
     {
       "id": 6,
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "pattern": {
         "pattern": "([\\s\\p{L}]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - ([\\p{L}\\s-]+) v[s\\.] ([\\p{L}\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
         "flags": 64
@@ -106,7 +106,7 @@
     },
     {
       "id": 7,
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "pattern": {
         "pattern": "([\\s\\p{L}]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s-]+) v[s\\.] ([\\p{L}\\s-]+)",
         "flags": 64
@@ -133,7 +133,7 @@
     },
     {
       "id": 9,
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "pattern": {
         "pattern": "([\\p{L}\\d\\s]+) (\\d{2}\\/\\d{2}) - ([PlayofLeg\\d\\s-]*) (\\d{1,2}) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}) ([\\p{L}\\d\\s-]+) v[s\\.] ([\\p{L}\\d\\s-]+)",
         "flags": 64
@@ -149,7 +149,7 @@
     },
     {
       "id": 25,
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "pattern": {
         "pattern": "([\\p{L}\\d\\s\\.-]+) ?- (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\d\\s\\.-]+) v[s\\.]? ([\\p{L}\\d\\s\\.-]+)",
         "flags": 64

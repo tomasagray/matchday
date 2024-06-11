@@ -24,7 +24,7 @@ processResources {
     }
 }
 
-group = 'self.me'
+group = 'net.tomasbot'
 version = findProperty('appVersion')
 sourceCompatibility = '17'
 
