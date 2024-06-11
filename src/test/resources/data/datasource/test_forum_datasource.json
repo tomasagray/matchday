@@ -1,13 +1,13 @@
 {
   "dataSourceId": "481826b7-6622-4690-bba2-ddc6119e1725",
-  "clazz": "self.me.matchday.model.Match",
+  "clazz": "net.tomasbot.matchday.model.Match",
   "title": "Test DataSource for Forum Plugin",
   "baseUri": "http://192.168.0.107:7000/forum/forum_event_list.htm",
   "pluginId": "7e230b0d-45a3-4738-8a43-c3b1d6f61df4",
   "enabled": true,
   "patternKits": [
     {
-      "clazz": "self.me.matchday.model.video.VideoFile",
+      "clazz": "net.tomasbot.matchday.model.video.VideoFile",
       "id": 1,
       "pattern": {
         "pattern": "[1st2ndFirSeco-]+ Half|[Postre]+-Match|Extra-[Tt]ime [\\/ Penalties]*",
@@ -18,7 +18,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "id": 3,
       "pattern": {
         "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]* (\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]* ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+)",
@@ -34,7 +34,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "id": 4,
       "pattern": {
         "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2}\\/\\d{2}) -([SemiFinalLegstndrdth\\d\\s-]*) (\\d{1,2}[\\p{L}\\s]+) - ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})",
@@ -50,7 +50,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "id": 5,
       "pattern": {
         "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2,4}\\/\\d{2,4}) [-Matchdy\\s]*(\\d+) - ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})",
@@ -66,7 +66,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "id": 6,
       "pattern": {
         "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\d\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+)",
@@ -82,7 +82,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "id": 7,
       "pattern": {
         "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+)",
@@ -109,7 +109,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "id": 9,
       "pattern": {
         "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2}\\/\\d{2}) - ([\\w\\d\\s-]*\\d*) - (\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.] ([\\p{L}\\s\\d\\.-]+)",
@@ -125,7 +125,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "id": 10,
       "pattern": {
         "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2}\\/\\d{2}) - ([\\w\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\d\\s\\.-]+) v[s\\.]? ([\\p{L}\\d\\s\\.-]+)",
@@ -141,7 +141,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "id": 11,
       "pattern": {
         "pattern": "([\\p{L}\\s\\d\\.-]+) (\\d{2,4}\\/\\d{2,4}) - [\\w\\s]+([\\d]+) - ([\\w\\s]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.]+ ([\\p{L}\\s\\d\\.-]+)",
@@ -157,7 +157,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "id": 12,
       "pattern": {
         "pattern": "([\\p{L}\\s\\.-]+) (\\d{2,4}\\/\\d{2,4}) - ([\\w\\s-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.]+ ([\\p{L}\\s\\d\\.-]+)",
@@ -173,7 +173,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.Match",
+      "clazz": "net.tomasbot.matchday.model.Match",
       "id": 13,
       "pattern": {
         "pattern": "([\\p{L}\\s\\d\\.-]+) - (\\d{2}\\/\\d{2}\\/\\d{2,4}) ([\\p{L}\\s\\d\\.-]+) v[s\\.]+ ([\\p{L}\\s\\d\\.-]+)",
@@ -187,7 +187,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.video.VideoFileSource",
+      "clazz": "net.tomasbot.matchday.model.video.VideoFileSource",
       "id": 14,
       "pattern": {
         "pattern": "Channel[\\s\\p{L}]*:? ([\\p{L}\\d\\s\\.+-]*) Source[\\p{L}\\s]*:? ([\\p{L}\\s\\d-]*) Language[\\p{L}\\s]*:? [\\d.\\s]*([\\p{L}]+)[\\/\\s\\d\\.\\p{L}]* Video[\\p{L}\\s]*:? (\\d+) [KkMmbps]* \\| ([\\w\\.]+) \\| (\\d+)[fps]* Audio[\\s]*:? (\\d+)[\\sKkMmbps]+ \\| ([\\p{L}\\d\\s]+) \\| ([\\d.]+) [chanelstro]* Duration[\\p{L}\\s]*:? (\\d+\\p{L}*) Size[\\p{L}\\s]*:? ~?(\\d+)[GgMmBb]* Release[\\p{L}\\s]*:? [\\w\\s\\d(]+([\\d]{4}[pi])\\)?",
@@ -210,7 +210,7 @@
       }
     },
     {
-      "clazz": "self.me.matchday.model.video.VideoFile",
+      "clazz": "net.tomasbot.matchday.model.video.VideoFile",
       "id": 15,
       "pattern": {
         "pattern": "Full Coverage",

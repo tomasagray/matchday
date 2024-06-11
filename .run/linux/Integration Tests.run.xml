@@ -17,7 +17,7 @@
             <env name="FFMPEG" value="/usr/bin/ffmpeg"/>
             <env name="FFPROBE" value="/usr/bin/ffprobe"/>
         </envs>
-        <dir value="$PROJECT_DIR$/src/test/java/self/me/matchday/integration"/>
+        <dir value="$PROJECT_DIR$/src/test/java/net/tomasbot/matchday/integration"/>
         <method v="2">
             <option name="Make" enabled="true"/>
         </method>

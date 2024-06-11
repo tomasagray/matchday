@@ -11,5 +11,5 @@
     "pattern": "([\\p{L}\\d\\s]+) (\\d{2,4}\\/\\d{2,4})[-Matchdy\\s]*(\\d+) - (\\d{2}\\/\\d{2}\\/\\d{2,4})[\\s-]*([\\p{L}\\s-]+) vs.? ([\\p{L}\\s-]+)",
     "flags": 64
   },
-  "clazz": "self.me.matchday.model.Event"
+  "clazz": "net.tomasbot.matchday.model.Event"
 }
