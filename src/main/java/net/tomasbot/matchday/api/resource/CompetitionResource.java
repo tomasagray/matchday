@@ -105,19 +105,18 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
       competitionResource.setId(competitionId);
       competitionResource.setCountry(competition.getCountry());
       competitionResource.setName(competition.getName());
+
       // setup artwork
       competitionResource.setEmblem(artworkModeller.toModel(competition.getEmblem()));
       competitionResource.setFanart(artworkModeller.toModel(competition.getFanart()));
-
-      // add artwork links
-      competitionResource
-          .getEmblem()
-          .getCollection()
-          .forEach(artwork -> addArtworkLinks(competitionId, ArtworkRole.EMBLEM, artwork));
       competitionResource
           .getFanart()
           .getCollection()
           .forEach(artwork -> addArtworkLinks(competitionId, ArtworkRole.FANART, artwork));
+      competitionResource
+          .getEmblem()
+          .getCollection()
+          .forEach(artwork -> addArtworkLinks(competitionId, ArtworkRole.EMBLEM, artwork));
 
       // links
       competitionResource.add(
