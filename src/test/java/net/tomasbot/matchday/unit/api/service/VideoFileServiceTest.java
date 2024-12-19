@@ -23,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
 import java.util.List;
+
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
 import net.tomasbot.matchday.TestDataCreator;
 import net.tomasbot.matchday.TestFileServerPlugin;
 import net.tomasbot.matchday.api.service.FileServerPluginService;
@@ -32,7 +34,6 @@ import net.tomasbot.matchday.model.FileServerUser;
 import net.tomasbot.matchday.model.video.PartIdentifier;
 import net.tomasbot.matchday.model.video.VideoFile;
 import net.tomasbot.matchday.model.video.VideoFileSource;
-import net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;

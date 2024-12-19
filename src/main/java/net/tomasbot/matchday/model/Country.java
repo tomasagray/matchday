@@ -42,7 +42,8 @@ public class Country {
 
   @Id private String name;
 
-  @ElementCollection private List<Locale> locales = new ArrayList<>();
+  @ElementCollection
+  private List<Locale> locales = new ArrayList<>();
 
   private String flagFileName;
 

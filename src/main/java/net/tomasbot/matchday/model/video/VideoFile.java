@@ -27,21 +27,19 @@ import javax.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
+import net.tomasbot.matchday.db.converter.FFmpegMetadataConverter;
+import net.tomasbot.matchday.db.converter.TimestampConverter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.db.converter.FFmpegMetadataConverter;
-import net.tomasbot.matchday.db.converter.TimestampConverter;
-import net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegMetadata;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 public class VideoFile implements Comparable<VideoFile> {
-
-  private static double DEFAULT_DURATION = -1.0;
-
+  
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
@@ -67,7 +65,8 @@ public class VideoFile implements Comparable<VideoFile> {
   }
 
   /**
-   * Returns the duration of this VideoFile, in milliseconds.
+   * Returns the duration of this VideoFile, in milliseconds, or -1 if the actual duration cannot be
+   * determined.
    *
    * @return The duration of this VideoFile (millis).
    */
@@ -75,7 +74,7 @@ public class VideoFile implements Comparable<VideoFile> {
     if (getMetadata() != null && getMetadata().getFormat() != null) {
       return getMetadata().getFormat().getDuration();
     } else {
-      return DEFAULT_DURATION;
+      return -1;
     }
   }
 

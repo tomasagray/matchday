@@ -95,8 +95,9 @@ class TeamControllerTest {
   }
 
   private Stream<Arguments> getAllTeamsArgs() {
-    final String url = "http://localhost:" + port + "/teams/";
+    final String url = "http://localhost:" + port + "/api/v1.0/teams/";
     logger.info("Fetching all Teams from: {}", url);
+
     final ResponseEntity<CollectionModel<TeamResource>> response =
         restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
     final CollectionModel<TeamResource> body = response.getBody();
@@ -120,7 +121,7 @@ class TeamControllerTest {
   }
 
   private ResponseEntity<TeamResource> getTeam(@NotNull UUID teamId) {
-    final String url = String.format("http://localhost:%d/teams/team/%s", port, teamId);
+    final String url = String.format("http://localhost:%d/api/v1.0/teams/team/%s", port, teamId);
     return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
   }
 
@@ -145,8 +146,8 @@ class TeamControllerTest {
   @DisplayName("Validate retrieval of Events related to Team specified by {0} via REST controller")
   void fetchEventsForTeam(@NotNull Team team) {
     final UUID teamId = team.getId();
-    final String url = String.format("http://localhost:%d/teams/team/%s", port, teamId);
-    logger.info(String.format("Getting Events for Team: %s @ URL: %s", teamId, url));
+    final String url = String.format("http://localhost:%d/api/v1.0/teams/team/%s", port, teamId);
+    logger.info("Getting Events for Team: {} @ URL: {}", teamId, url);
 
     final ResponseEntity<CollectionModel<Match>> response =
         restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});

@@ -27,17 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 import net.tomasbot.matchday.TestDataCreator;
 import net.tomasbot.matchday.TestFileServerPlugin;
 import net.tomasbot.matchday.api.service.FileServerPluginService;
@@ -49,6 +38,17 @@ import net.tomasbot.matchday.model.video.TaskListState;
 import net.tomasbot.matchday.model.video.VideoFileSource;
 import net.tomasbot.matchday.model.video.VideoStreamLocator;
 import net.tomasbot.matchday.model.video.VideoStreamLocatorPlaylist;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -227,7 +227,7 @@ class VideoStreamManagerTest {
     logger.info("Attempting to kill all streams for VideoStreamLocatorPlaylist: {}", playlist);
     streamManager.killAllStreamsFor(playlist);
 
-    logger.info(String.format("Waiting %d seconds for streaming tasks to die...", WAIT_SECONDS));
+    logger.info("Waiting {} seconds for streaming tasks to die...", WAIT_SECONDS);
     TimeUnit.SECONDS.sleep(WAIT_SECONDS);
 
     // then
@@ -255,8 +255,12 @@ class VideoStreamManagerTest {
   @DisplayName("Ensure VideoStreamManager can delete local data")
   void deleteLocalStream() throws IOException, InterruptedException {
     // given
+    logger.info("Starting streaming for test...");
     startVideoStream();
     TimeUnit.SECONDS.sleep(10);
+
+    logger.info("Killing test streams...");
+    streamManager.killAllStreams();
 
     final UUID fileSrcId = testFileSource.getFileSrcId();
     final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();

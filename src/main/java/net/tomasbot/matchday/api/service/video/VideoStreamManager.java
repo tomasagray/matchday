@@ -34,10 +34,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import net.tomasbot.matchday.model.video.TaskState;
-import net.tomasbot.matchday.model.video.VideoFileSource;
-import net.tomasbot.matchday.model.video.VideoStreamLocator;
-import net.tomasbot.matchday.model.video.VideoStreamLocatorPlaylist;
+import net.tomasbot.matchday.model.video.*;
 import net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import net.tomasbot.matchday.util.RecursiveDirectoryDeleter;
 import org.jetbrains.annotations.NotNull;
@@ -230,16 +227,21 @@ public class VideoStreamManager {
   public void killStreamingTask(@NotNull VideoStreamLocator streamLocator) {
     Long locatorId = streamLocator.getStreamLocatorId();
     Double completionRatio = streamLocator.getState().getCompletionRatio();
-    // cancel process
-    ffmpegPlugin.interruptStreamingTask(streamLocator.getPlaylistPath());
-    // cancel task
-    Future<Long> task = streamQueue.get(locatorId);
-    if (task != null) {
-      task.cancel(true);
-      streamQueue.remove(locatorId);
+    try { // cancel process
+      ffmpegPlugin.interruptStreamingTask(streamLocator.getPlaylistPath());
+      // cancel task
+      Future<Long> task = streamQueue.get(locatorId);
+      if (task != null) {
+        task.cancel(true);
+        streamQueue.remove(locatorId);
+      }
+      videoStreamer.updateLocatorTaskState(
+          streamLocator, new TaskState(JobStatus.STOPPED, completionRatio));
+    } catch (InterruptedException e) {
+      final TaskState state =
+          new TaskState(JobStatus.ERROR, completionRatio, new VideoStreamingError(e));
+      videoStreamer.updateLocatorTaskState(streamLocator, state);
     }
-    videoStreamer.updateLocatorTaskState(
-        streamLocator, new TaskState(JobStatus.STOPPED, completionRatio));
   }
 
   public void deleteLocalStreams(@NotNull final VideoStreamLocatorPlaylist playlist)

@@ -100,7 +100,6 @@
         <aspect name="net.tomasbot.matchday.log.MatchDataParserLog"/>
         <aspect name="net.tomasbot.matchday.log.plugin.blogger.BloggerPluginLog"/>
         <aspect name="net.tomasbot.matchday.log.plugin.ffmpeg.FFmpegPluginLog"/>
-        <aspect name="net.tomasbot.matchday.log.plugin.ffmpeg.FFmpegSingleStreamTaskLog"/>
         <aspect name="net.tomasbot.matchday.log.plugin.ForumPluginLog"/>
         <aspect name="net.tomasbot.matchday.log.plugin.filefox.LoginParserLog"/>
     </aspects>
