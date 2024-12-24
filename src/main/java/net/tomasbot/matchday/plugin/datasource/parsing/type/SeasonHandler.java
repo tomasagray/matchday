@@ -23,7 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 import net.tomasbot.matchday.model.Season;
-import net.tomasbot.matchday.plugin.datasource.parsing.TypeHandler;
 
 @Component
 public class SeasonHandler extends TypeHandler<Season> {

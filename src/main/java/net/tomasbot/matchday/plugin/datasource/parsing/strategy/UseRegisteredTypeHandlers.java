@@ -22,7 +22,7 @@ package net.tomasbot.matchday.plugin.datasource.parsing.strategy;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import net.tomasbot.matchday.plugin.datasource.parsing.CreationStrategy;
-import net.tomasbot.matchday.plugin.datasource.parsing.TypeHandler;
+import net.tomasbot.matchday.plugin.datasource.parsing.type.TypeHandler;
 
 public class UseRegisteredTypeHandlers implements CreationStrategy {
 
