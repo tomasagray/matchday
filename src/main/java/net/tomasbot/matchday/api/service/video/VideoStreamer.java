@@ -3,6 +3,7 @@ package net.tomasbot.matchday.api.service.video;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import net.tomasbot.ffmpeg_wrapper.request.SimpleTranscodeRequest;
@@ -65,6 +66,7 @@ public class VideoStreamer {
               .onError(e -> setLocatorErrorState(streamLocator, new IOException(e)))
               .onComplete(ec -> completeStream(streamLocator))
               .logFile(FFmpegStreamTask.getDefaultLogFile())
+              .additionalArgs(Map.of("-map", 0)) // include all streams
               .build();
       FFmpegStreamTask streamTask = ffmpegPlugin.streamUri(transcodeRequest);
       updateLocatorTaskState(streamLocator, new TaskState(JobStatus.STREAMING, 0.0));

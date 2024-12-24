@@ -37,7 +37,7 @@ configurations {
 
 dependencies {
     // Local libraries
-    implementation files('./lib/ffmpeg-wrapper-0.0.1.jar')
+    implementation files('./lib/ffmpeg-wrapper-0.0.2.jar')
 
     // Utilities
     implementation 'commons-net:commons-net:3.10.0'
