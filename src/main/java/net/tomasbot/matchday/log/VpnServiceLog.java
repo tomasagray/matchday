@@ -1,18 +1,24 @@
 package net.tomasbot.matchday.log;
 
+import net.tomasbot.matchday.api.service.admin.VpnService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.api.service.admin.VpnService;
 
 @Aspect
 public class VpnServiceLog {
 
   private static final Logger logger = LogManager.getLogger(VpnService.class);
+
+  @Before("execution(* net.tomasbot.matchday.api.service.admin.VpnService.publishVpnStatus(..))")
+  public void logPublishVpnStatus(@NotNull JoinPoint jp) {
+    logger.info("Publishing VPN connection status: {}", jp.getArgs());
+  }
 
   @Around("execution(* net.tomasbot.matchday.api.service.admin.VpnService.start(..))")
   public Object logStartVpnService(@NotNull ProceedingJoinPoint jp) throws Throwable {
@@ -46,5 +52,10 @@ public class VpnServiceLog {
     Object result = jp.proceed();
     logger.info("VPN signal `{}` got response: {}", signal, result);
     return result;
+  }
+  
+  @Before("execution(* net.tomasbot.matchday.api.service.admin.VpnService.heartbeat(..))")
+  public void logScheduledVpnHeartbeatCheck() {
+    logger.info("Performing VPN connection status check ...");
   }
 }

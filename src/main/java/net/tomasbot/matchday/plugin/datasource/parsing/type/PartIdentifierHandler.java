@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 import net.tomasbot.matchday.model.video.PartIdentifier;
-import net.tomasbot.matchday.plugin.datasource.parsing.TypeHandler;
 
 @Component
 public class PartIdentifierHandler extends TypeHandler<PartIdentifier> {

@@ -19,50 +19,66 @@
 
 package net.tomasbot.matchday.plugin.io.ffmpeg;
 
+import static net.tomasbot.matchday.config.settings.plugin.FFmpegBaseArgs.FFMPEG_BASE_ARGS;
+import static net.tomasbot.matchday.config.settings.plugin.FFprobeBaseArgs.FFPROBE_BASE_ARGS;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import net.tomasbot.ffmpeg_wrapper.FFmpeg;
+import net.tomasbot.ffmpeg_wrapper.FFprobe;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
+import net.tomasbot.ffmpeg_wrapper.request.TranscodeRequest;
+import net.tomasbot.ffmpeg_wrapper.task.FFmpegStreamTask;
+import net.tomasbot.matchday.api.service.SettingsService;
 import net.tomasbot.matchday.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
 @Component
 public class FFmpegPlugin implements Plugin {
-
+  
   private final FFmpegPluginProperties pluginProperties;
-  private final FFmpeg ffmpeg;
-  private final FFprobe ffprobe;
-  private final ConcurrentSkipListMap<Path, FFmpegStreamTask> streamingTasks =
-      new ConcurrentSkipListMap<>();
+  private final SettingsService settingsService;
 
-  @Autowired
-  public FFmpegPlugin(@NotNull final FFmpegPluginProperties pluginProperties) {
+  private final Map<Path, FFmpegStreamTask> streamingTasks = new ConcurrentSkipListMap<>();
+  private final String ffmpegExec;
+  private final String ffprobeExec;
+
+  public FFmpegPlugin(FFmpegPluginProperties pluginProperties, SettingsService settingsService) {
     this.pluginProperties = pluginProperties;
-    // Create executable instances
-    this.ffmpeg = new FFmpeg(pluginProperties.getFFmpegLocation());
-    this.ffprobe = new FFprobe(pluginProperties.getFFprobeLocation());
+    this.settingsService = settingsService;
+    this.ffmpegExec = pluginProperties.getFFmpegLocation();
+    this.ffprobeExec = pluginProperties.getFFprobeLocation();
   }
 
   /**
    * Create an HLS stream from a given collection of URIs
    *
-   * @param uris URI pointers to video data
-   * @param playlistPath The output location for stream data
+   * @param transcodeRequest Encapsulated parameters for streaming
    * @return The path of the playlist file produced by FFMPEG
    */
-  public FFmpegStreamTask streamUris(@NotNull final Path playlistPath, @NotNull final URI... uris) {
+  public FFmpegStreamTask streamUri(@NotNull TranscodeRequest transcodeRequest) {
     // Get absolute path for task key
-    final Path absolutePath = playlistPath.toAbsolutePath();
+    final Path absolutePath = transcodeRequest.getTo().toAbsolutePath();
     checkTaskAlreadyExecuting(absolutePath);
+
     // Create the streaming task
-    final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(playlistPath, uris);
+    final FFmpeg ffmpeg = getFFmpeg();
+    final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(transcodeRequest);
+
     // Add to collection
     streamingTasks.put(absolutePath, streamTask);
     // Return playlist file path
     return streamTask;
+  }
+
+  @SuppressWarnings("unchecked cast")
+  private @NotNull FFmpeg getFFmpeg() {
+    final List<String> baseArgs = settingsService.getSetting(FFMPEG_BASE_ARGS, List.class);
+    return new FFmpeg(this.ffmpegExec, baseArgs);
   }
 
   /** Cancels all streaming tasks running in the background */
@@ -78,9 +94,10 @@ public class FFmpegPlugin implements Plugin {
    *
    * @param outputPath The path of the stream data
    */
-  public void interruptStreamingTask(@NotNull final Path outputPath) {
+  public void interruptStreamingTask(@NotNull final Path outputPath) throws InterruptedException {
     // Get absolute path for task key
     final Path absolutePath = outputPath.toAbsolutePath();
+
     // Get requested task
     final FFmpegStreamTask streamingTask = streamingTasks.get(absolutePath);
     if (streamingTask != null) {
@@ -107,7 +124,14 @@ public class FFmpegPlugin implements Plugin {
    * @throws IOException I/O problem
    */
   public FFmpegMetadata readFileMetadata(@NotNull final URI uri) throws IOException {
+    FFprobe ffprobe = getFFprobe();
     return ffprobe.getFileMetadata(uri);
+  }
+
+  @SuppressWarnings("unchecked cast")
+  private @NotNull FFprobe getFFprobe() {
+    List<String> baseArgs = settingsService.getSetting(FFPROBE_BASE_ARGS, List.class);
+    return new FFprobe(this.ffprobeExec, baseArgs);
   }
 
   @Override
@@ -136,12 +160,25 @@ public class FFmpegPlugin implements Plugin {
     if (prevTask != null) {
       if (!prevTask.isAlive()) {
         // Kill zombie task & proceed
-        prevTask.kill();
+        try {
+          prevTask.kill();
+        } catch (InterruptedException ignore) {
+        }
         streamingTasks.remove(absolutePath);
       } else {
         throw new IllegalThreadStateException(
             "FFmpeg has already started streaming to path: " + absolutePath);
       }
     }
+  }
+
+  public String getFFmpegVersion() throws IOException {
+    FFmpeg ffmpeg = getFFmpeg();
+    return ffmpeg.getVersion();
+  }
+
+  public String getFFprobeVersion() throws IOException {
+    FFprobe ffprobe = getFFprobe();
+    return ffprobe.getVersion();
   }
 }

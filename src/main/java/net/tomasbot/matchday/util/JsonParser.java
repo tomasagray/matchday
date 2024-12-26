@@ -30,8 +30,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
-import org.springframework.scheduling.support.CronTrigger;
 import net.tomasbot.matchday.model.Setting;
+import org.springframework.scheduling.support.CronTrigger;
 
 public class JsonParser {
 

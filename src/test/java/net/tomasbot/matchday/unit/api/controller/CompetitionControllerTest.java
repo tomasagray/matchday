@@ -99,7 +99,7 @@ class CompetitionControllerTest {
   }
 
   private Stream<Arguments> getAllTestCompetitionsArgs() {
-    final String url = "http://localhost:" + port + "/competitions/";
+    final String url = "http://localhost:" + port + "/api/v1.0/competitions/";
     logger.info("Fetching all Competitions from: {}", url);
     final ResponseEntity<CollectionModel<CompetitionResource>> response =
         restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
@@ -132,7 +132,7 @@ class CompetitionControllerTest {
 
   private ResponseEntity<CompetitionResource> getCompetition(@NotNull UUID competitionId) {
     final String url =
-        String.format("http://localhost:%d/competitions/competition/%s", port, competitionId);
+        String.format("http://localhost:%d/api/v1.0/competitions/competition/%s", port, competitionId);
     logger.info("Getting data from URL: {}", url);
     return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
   }
@@ -158,7 +158,7 @@ class CompetitionControllerTest {
   void fetchCompetitionTeams(@NotNull Competition competition) {
     final String url =
         String.format(
-            "http://localhost:%d/competitions/competition/%s/teams", port, competition.getId());
+            "http://localhost:%d/api/v1.0/competitions/competition/%s/teams", port, competition.getId());
     logger.info("Getting teams from database for Competition: {}", competition);
     logger.info("Using URL: {}", url);
 
@@ -184,7 +184,7 @@ class CompetitionControllerTest {
   void fetchCompetitionEvents(@NotNull Competition competition) {
     final String url =
         String.format(
-            "http://localhost:%d/competitions/competition/%s/events", port, competition.getId());
+            "http://localhost:%d/api/v1.0/competitions/competition/%s/events", port, competition.getId());
     final ResponseEntity<EventsResource> response =
         restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();

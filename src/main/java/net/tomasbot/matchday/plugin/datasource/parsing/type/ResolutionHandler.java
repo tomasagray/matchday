@@ -21,7 +21,6 @@ package net.tomasbot.matchday.plugin.datasource.parsing.type;
 
 import org.springframework.stereotype.Component;
 import net.tomasbot.matchday.model.video.Resolution;
-import net.tomasbot.matchday.plugin.datasource.parsing.TypeHandler;
 
 @Component
 public class ResolutionHandler extends TypeHandler<Resolution> {

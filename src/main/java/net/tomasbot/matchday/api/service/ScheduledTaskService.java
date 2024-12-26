@@ -21,7 +21,9 @@ package net.tomasbot.matchday.api.service;
 
 import static net.tomasbot.matchday.config.settings.PruneVideos.PRUNE_VIDEOS;
 import static net.tomasbot.matchday.config.settings.RefreshDataSetting.REFRESH_DATASOURCES;
+import static net.tomasbot.matchday.config.settings.UnprotectedAddress.UNPROTECTED_ADDR;
 import static net.tomasbot.matchday.config.settings.VideoExpireDays.VIDEO_EXPIRE_DAYS;
+import static net.tomasbot.matchday.config.settings.VpnHeartbeat.VPN_HEARTBEAT;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -32,7 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
+import javax.annotation.PostConstruct;
 import net.tomasbot.matchday.api.service.SettingsService.SettingsUpdatedEvent;
+import net.tomasbot.matchday.api.service.admin.VpnService;
 import net.tomasbot.matchday.api.service.video.VideoStreamLocatorPlaylistService;
 import net.tomasbot.matchday.api.service.video.VideoStreamingService;
 import net.tomasbot.matchday.model.Event;
@@ -50,13 +54,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class ScheduledTaskService {
 
-  private final TaskScheduler taskScheduler;
   private final Map<TaskType, ScheduledFuture<?>> scheduledTasks = new HashMap<>();
+
+  private final TaskScheduler taskScheduler;
   private final SettingsService settingsService;
   private final DataSourceService dataSourceService;
   private final VideoStreamLocatorPlaylistService streamPlaylistService;
   private final VideoStreamingService videoStreamingService;
   private final EventService eventService;
+  private final VpnService vpnService;
 
   public ScheduledTaskService(
       DataSourceService dataSourceService,
@@ -64,13 +70,19 @@ public class ScheduledTaskService {
       VideoStreamingService videoStreamingService,
       EventService eventService,
       TaskScheduler taskScheduler,
-      SettingsService settingsService) {
+      SettingsService settingsService,
+      VpnService vpnService) {
     this.dataSourceService = dataSourceService;
     this.streamPlaylistService = streamPlaylistService;
     this.videoStreamingService = videoStreamingService;
     this.eventService = eventService;
     this.taskScheduler = taskScheduler;
     this.settingsService = settingsService;
+    this.vpnService = vpnService;
+  }
+
+  @PostConstruct
+  private void initialTaskSchedule() {
     if (settingsService != null) {
       scheduleTasks();
     }
@@ -83,12 +95,21 @@ public class ScheduledTaskService {
   }
 
   public void scheduleTasks() {
-    CronTrigger refreshEvents = settingsService.getSetting(REFRESH_DATASOURCES, CronTrigger.class);
-    CronTrigger pruneVideoData = settingsService.getSetting(PRUNE_VIDEOS, CronTrigger.class);
-    scheduledTasks.put(
-        TaskType.REFRESH_EVENTS, taskScheduler.schedule(this::refreshEventData, refreshEvents));
-    scheduledTasks.put(
-        TaskType.PRUNE_VIDEOS, taskScheduler.schedule(this::pruneVideoData, pruneVideoData));
+    CronTrigger refreshEventsSetting =
+        settingsService.getSetting(REFRESH_DATASOURCES, CronTrigger.class);
+    CronTrigger pruneVideoDataSetting = settingsService.getSetting(PRUNE_VIDEOS, CronTrigger.class);
+    CronTrigger vpnHeartbeatSetting = settingsService.getSetting(VPN_HEARTBEAT, CronTrigger.class);
+
+    ScheduledFuture<?> refreshEvents =
+        taskScheduler.schedule(this::refreshEventData, refreshEventsSetting);
+    ScheduledFuture<?> pruneVideoData =
+        taskScheduler.schedule(this::pruneVideoData, pruneVideoDataSetting);
+    ScheduledFuture<?> testVpnHeartbeat =
+        taskScheduler.schedule(this::testVpnHeartbeat, vpnHeartbeatSetting);
+
+    scheduledTasks.put(TaskType.REFRESH_EVENTS, refreshEvents);
+    scheduledTasks.put(TaskType.PRUNE_VIDEOS, pruneVideoData);
+    scheduledTasks.put(TaskType.VPN_HEARTBEAT, testVpnHeartbeat);
   }
 
   private boolean isVideoDataStale(@NotNull VideoStreamLocatorPlaylist playlist) {
@@ -132,9 +153,15 @@ public class ScheduledTaskService {
     }
   }
 
+  public void testVpnHeartbeat() {
+    String unprotectedIp = settingsService.getSetting(UNPROTECTED_ADDR, String.class);
+    vpnService.heartbeat(unprotectedIp);
+  }
+
   private enum TaskType {
     REFRESH_EVENTS,
     PRUNE_VIDEOS,
+    VPN_HEARTBEAT,
   }
 
   @Component

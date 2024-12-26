@@ -96,7 +96,7 @@ public class VpnService {
         CONFIG_LOCATION,
         new SimpleFileVisitor<>() {
           @Override
-          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+          public @NotNull FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) {
             final String fileName = file.getFileName().toString();
             if (fileName.startsWith(DEFAULT_VPN_PREFIX) && fileName.endsWith(VPN_FILE_EXT)) {
               configurations.add(file);
@@ -187,5 +187,23 @@ public class VpnService {
       // VPN disconnected
     }
     return vpnConnectionStatus;
+  }
+
+  public void heartbeat(String unprotectedIp) {
+    if (unprotectedIp == null || unprotectedIp.isEmpty()) {
+      publishVpnStatus(new VpnStatus(VpnConnectionStatus.ERROR, null));
+      return;
+    }
+
+    try {
+      String currentIpAddress = ipService.getIpAddress();
+      if (!currentIpAddress.equals(unprotectedIp)) {
+        publishVpnStatus(new VpnStatus(VpnConnectionStatus.CONNECTED, currentIpAddress));
+      } else {
+        publishVpnStatus(new VpnStatus(VpnConnectionStatus.DISCONNECTED, currentIpAddress));
+      }
+    } catch (IOException e) {
+      publishVpnStatus(new VpnStatus(VpnConnectionStatus.ERROR, null));
+    }
   }
 }

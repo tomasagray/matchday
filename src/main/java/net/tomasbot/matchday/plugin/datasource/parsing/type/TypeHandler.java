@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.tomasbot.matchday.plugin.datasource.parsing;
+package net.tomasbot.matchday.plugin.datasource.parsing.type;
 
 import java.util.function.Function;
 import lombok.AllArgsConstructor;

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Objects;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
-import net.tomasbot.matchday.plugin.datasource.parsing.TypeHandler;
 
 @Component
 public class LocalDateTimeHandler extends TypeHandler<LocalDateTime> {

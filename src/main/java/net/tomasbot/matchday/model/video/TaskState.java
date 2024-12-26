@@ -36,4 +36,9 @@ public class TaskState extends StreamJobState {
     this.status = status;
     this.completionRatio = completionRatio;
   }
+
+  public TaskState(JobStatus status, Double completionRatio, VideoStreamingError error) {
+    this(status, completionRatio);
+    this.error = error;
+  }
 }

@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.stream.Stream;
+
+import net.tomasbot.matchday.plugin.datasource.parsing.type.TypeHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;

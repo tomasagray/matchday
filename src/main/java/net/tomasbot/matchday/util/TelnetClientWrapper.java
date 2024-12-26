@@ -1,6 +1,7 @@
 package net.tomasbot.matchday.util;
 
 import java.io.*;
+import java.util.List;
 import org.apache.commons.net.telnet.TelnetClient;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -57,5 +58,17 @@ public class TelnetClientWrapper implements AutoCloseable {
   @Override
   public void close() throws Exception {
     disconnect();
+  }
+
+  public String getVersion() throws IOException {
+    List<String> commands = List.of("telnet", "--version");
+    Process process = new ProcessBuilder().command(commands).start();
+
+    try (InputStreamReader in = new InputStreamReader(process.getInputStream());
+        BufferedReader reader = new BufferedReader(in)) {
+      return reader.readLine();
+    } finally {
+      process.destroy();
+    }
   }
 }

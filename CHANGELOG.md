@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.4.0] - 2024-12-26
+
+### Added
+
+- VPN heartbeat (scheduled status check)
+- External, editable ffmpeg streaming arguments
+- Startup dependency validation
+
+### Changed
+
+- Switched to external ffmpeg-wrapper
+
+### Fixed
+
+- Fixture processing
+- Missing audio streams for match videos
+
 ## [0.3.5] - 2024-06-11
 
 ### Changed

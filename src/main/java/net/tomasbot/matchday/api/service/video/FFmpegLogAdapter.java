@@ -21,34 +21,24 @@ package net.tomasbot.matchday.api.service.video;
 
 import java.time.LocalTime;
 import java.time.temporal.ChronoField;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.tomasbot.matchday.model.video.StreamJobState.JobStatus;
-import net.tomasbot.matchday.model.video.TaskState;
-import net.tomasbot.matchday.model.video.VideoStreamLocator;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Receives log emissions from FFMPEG, interprets them and updates the specified VideoStreamLocator
  * state accordingly.
  */
-public class FFmpegLogAdapter implements Consumer<String> {
+public class FFmpegLogAdapter {
 
+  // todo - extract patterns
   private static final Pattern DURATION_PATTERN = Pattern.compile("^\\s*Duration: ([\\d:.]*)");
   private static final Pattern LOG_LINE_PATTERN = Pattern.compile("(\\w+=\\s*[\\w:.\\-/]+)");
   private static final Pattern TIME_PATTERN = Pattern.compile("((?:[\\d.]+:)+[\\d.]+)");
 
-  private final BiConsumer<VideoStreamLocator, TaskState> onUpdate;
-  private final VideoStreamLocator streamLocator;
   private long streamDuration;
-
-  public FFmpegLogAdapter(
-      VideoStreamLocator streamLocator, BiConsumer<VideoStreamLocator, TaskState> onUpdate) {
-    this.streamLocator = streamLocator;
-    this.onUpdate = onUpdate;
-  }
+  @Getter private double completionRatio;
 
   /**
    * Find the stream time within a log line. Assumes Matcher.find() has already been called at least
@@ -57,7 +47,7 @@ public class FFmpegLogAdapter implements Consumer<String> {
    * @param matcher The pattern matcher for the log line
    * @return The number of milliseconds streamed thus far or 0 if unable to determine
    */
-  private static long parseTime(@NotNull Matcher matcher) {
+  private static long parseLogLine(@NotNull Matcher matcher) {
     do {
       String data = matcher.group(); // get the next match
       Matcher timeMatcher = TIME_PATTERN.matcher(data);
@@ -83,22 +73,16 @@ public class FFmpegLogAdapter implements Consumer<String> {
     return 0;
   }
 
-  @Override
-  public void accept(String data) {
+  public void update(String data) {
     Matcher durationMatcher = DURATION_PATTERN.matcher(data);
     Matcher dataMatcher = LOG_LINE_PATTERN.matcher(data);
 
     if (durationMatcher.find()) {
       String duration = durationMatcher.group(1);
-      streamDuration = parseLogTime(duration);
+      this.streamDuration = parseLogTime(duration);
     } else if (streamDuration > 0 && dataMatcher.find()) {
-      long progress = parseTime(dataMatcher);
-      double completionRatio = (progress / (double) streamDuration);
-      updateStreamLocatorState(completionRatio);
+      long progress = parseLogLine(dataMatcher);
+      this.completionRatio = (progress / (double) streamDuration);
     }
-  }
-
-  private void updateStreamLocatorState(double completionRatio) {
-    onUpdate.accept(streamLocator, new TaskState(JobStatus.STREAMING, completionRatio));
   }
 }
