@@ -17,5 +17,6 @@ public class VpnStatus {
     DISCONNECTED,
     CONNECTING,
     CONNECTED,
+    ERROR,
   }
 }

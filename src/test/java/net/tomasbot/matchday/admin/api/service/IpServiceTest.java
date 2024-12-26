@@ -75,6 +75,7 @@ class IpServiceTest {
     final Duration testDuration = testData.duration();
 
     // then
+    logger.info("Read IP address: {}", testData.ip());
     logger.info("Retrieving IP address took: {}ms", testDuration.toMillis());
     assertThat(testDuration).isLessThan(maxTestTime);
   }

@@ -80,6 +80,7 @@ public class MySqlDumpWrapper {
     return filepath;
   }
 
+  @NotNull
   private String getDumpCommand() {
     final Matcher matcher = urlPattern.matcher(this.dataSourceUrl);
     if (matcher.find()) {
