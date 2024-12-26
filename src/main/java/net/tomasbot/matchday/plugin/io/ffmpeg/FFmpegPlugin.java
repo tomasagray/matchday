@@ -60,21 +60,25 @@ public class FFmpegPlugin implements Plugin {
    * @param transcodeRequest Encapsulated parameters for streaming
    * @return The path of the playlist file produced by FFMPEG
    */
-  @SuppressWarnings("unchecked cast")
   public FFmpegStreamTask streamUri(@NotNull TranscodeRequest transcodeRequest) {
     // Get absolute path for task key
     final Path absolutePath = transcodeRequest.getTo().toAbsolutePath();
     checkTaskAlreadyExecuting(absolutePath);
 
     // Create the streaming task
-    final List<String> baseArgs = settingsService.getSetting(FFMPEG_BASE_ARGS, List.class);
-    final FFmpeg ffmpeg = new FFmpeg(this.ffmpegExec, baseArgs);
+    final FFmpeg ffmpeg = getFFmpeg();
     final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(transcodeRequest);
 
     // Add to collection
     streamingTasks.put(absolutePath, streamTask);
     // Return playlist file path
     return streamTask;
+  }
+
+  @SuppressWarnings("unchecked cast")
+  private @NotNull FFmpeg getFFmpeg() {
+    final List<String> baseArgs = settingsService.getSetting(FFMPEG_BASE_ARGS, List.class);
+    return new FFmpeg(this.ffmpegExec, baseArgs);
   }
 
   /** Cancels all streaming tasks running in the background */
@@ -119,11 +123,15 @@ public class FFmpegPlugin implements Plugin {
    * @return An FFmpegMetadata object of the file's metadata, or null
    * @throws IOException I/O problem
    */
-  @SuppressWarnings("unchecked cast")
   public FFmpegMetadata readFileMetadata(@NotNull final URI uri) throws IOException {
-    List<String> baseArgs = settingsService.getSetting(FFPROBE_BASE_ARGS, List.class);
-    FFprobe ffprobe = new FFprobe(this.ffprobeExec, baseArgs);
+    FFprobe ffprobe = getFFprobe();
     return ffprobe.getFileMetadata(uri);
+  }
+
+  @SuppressWarnings("unchecked cast")
+  private @NotNull FFprobe getFFprobe() {
+    List<String> baseArgs = settingsService.getSetting(FFPROBE_BASE_ARGS, List.class);
+    return new FFprobe(this.ffprobeExec, baseArgs);
   }
 
   @Override
@@ -162,5 +170,15 @@ public class FFmpegPlugin implements Plugin {
             "FFmpeg has already started streaming to path: " + absolutePath);
       }
     }
+  }
+
+  public String getFFmpegVersion() throws IOException {
+    FFmpeg ffmpeg = getFFmpeg();
+    return ffmpeg.getVersion();
+  }
+
+  public String getFFprobeVersion() throws IOException {
+    FFprobe ffprobe = getFFprobe();
+    return ffprobe.getVersion();
   }
 }

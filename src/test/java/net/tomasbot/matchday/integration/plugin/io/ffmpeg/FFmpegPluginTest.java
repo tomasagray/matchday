@@ -34,6 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
 import net.tomasbot.ffmpeg_wrapper.request.SimpleTranscodeRequest;
@@ -223,6 +224,26 @@ class FFmpegPluginTest {
     final FFmpegMetadata actualMetadata = ffmpegPlugin.readFileMetadata(testUri);
     assertThat(actualMetadata).isEqualTo(expectedMetadata);
     logger.info("The data matches!");
+  }
+
+  @Test
+  @DisplayName("Validate versions of ffmpeg & ffprobe")
+  void testVersions() throws IOException {
+    // given
+    final Pattern versionPattern = Pattern.compile("[\\w\\s.]+");
+
+    // when
+    String ffmpegVersion = ffmpegPlugin.getFFmpegVersion();
+    String ffprobeVersion = ffmpegPlugin.getFFprobeVersion();
+
+    logger.info("Found ffmpeg version: {}", ffmpegVersion);
+    logger.info("Found ffprobe version: {}", ffprobeVersion);
+
+    // then
+    assertThat(ffmpegVersion).isNotNull().isNotEmpty();
+    assertThat(ffprobeVersion).isNotNull().isNotEmpty();
+    assertThat(versionPattern.matcher(ffmpegVersion).find()).isTrue();
+    assertThat(versionPattern.matcher(ffprobeVersion).find()).isTrue();
   }
 
   private List<URI> getTestUris() {

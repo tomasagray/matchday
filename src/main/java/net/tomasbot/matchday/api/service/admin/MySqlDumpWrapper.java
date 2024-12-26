@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.tomasbot.matchday.api.service.SettingsService;
@@ -30,9 +31,20 @@ public class MySqlDumpWrapper {
     this.settingsService = settingsService;
   }
 
+  public String getVersion() throws IOException {
+    List<String> commands = List.of("mysqldump", "--version");
+    Process process = new ProcessBuilder().command(commands).start();
+
+    try (InputStreamReader in = new InputStreamReader(process.getInputStream());
+        BufferedReader reader = new BufferedReader(in)) {
+      return reader.readLine();
+    } finally {
+      process.destroy();
+    }
+  }
+
   @Contract("_ -> new")
   private static @NotNull MysqlDump executeDump(@NotNull String cmd) throws IOException {
-
     final LinkedList<String> data = new LinkedList<>();
     final LinkedList<String> error = new LinkedList<>();
     final Process dumpProcess = Runtime.getRuntime().exec(cmd);
