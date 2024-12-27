@@ -16,9 +16,11 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
+@Order(0)
 public class DependencyValidation implements CommandLineRunner {
 
   private static final Logger logger = LogManager.getLogger(DependencyValidation.class);
@@ -36,6 +38,18 @@ public class DependencyValidation implements CommandLineRunner {
   @Value("${CONFIG_ROOT}")
   private Path configRoot;
 
+  @Value("${DATA_ROOT}/log/")
+  private Path logRoot;
+
+  @Value("${artwork.storage-location}")
+  private Path artworkRoot;
+
+  @Value("${video-resources.file-storage-location}")
+  private Path videoRoot;
+
+  @Value("${application.backup-location}")
+  private Path backupRoot;
+
   public DependencyValidation(
       FFmpegPlugin ffmpegPlugin, MySqlDumpWrapper mysqldump, TelnetClientWrapper telnet) {
     this.ffmpegPlugin = ffmpegPlugin;
@@ -45,6 +59,27 @@ public class DependencyValidation implements CommandLineRunner {
 
   private static void dependencyError(@NotNull String dependency) throws IOException {
     throw new IOException("Could not determine version of required dependency: " + dependency);
+  }
+
+  private static void checkAndCreateDirectory(@NotNull Path directory) throws IOException {
+    logger.info("Validating required directory: {}", directory);
+
+    if (!directory.toFile().exists()) {
+      logger.info("Creating required directory: {}", directory);
+      Files.createDirectories(directory);
+
+      if (!directory.toFile().exists())
+        throw new IOException("Could not find data storage directory: " + directory);
+    }
+
+    File dataTestDir = directory.resolve("__TMP__" + R.nextInt()).toFile();
+    dataTestDir.deleteOnExit();
+    cleanupDirs.add(dataTestDir);
+
+    // ensure required dirs are writable
+    Files.createDirectories(dataTestDir.toPath());
+    if (!dataTestDir.exists())
+      throw new IOException("Storage directory is not writable: " + dataTestDir);
   }
 
   @Override
@@ -65,6 +100,8 @@ public class DependencyValidation implements CommandLineRunner {
     logger.info("Cleaning up validation data ...");
 
     for (File testDir : cleanupDirs) {
+      if (!testDir.exists()) continue;
+
       boolean deleted = testDir.delete();
       if (!deleted || testDir.exists())
         throw new IOException("Could not delete validation data! " + testDir);
@@ -75,24 +112,12 @@ public class DependencyValidation implements CommandLineRunner {
     logger.info("Validating application storage directories ...");
 
     // ensure existence of required dirs
-    if (!dataRoot.toFile().exists())
-      throw new IOException("Could not find data storage directory: " + dataRoot);
-    if (!configRoot.toFile().exists())
-      throw new IOException("Could not find configuration directory: " + configRoot);
-
-    // ensure required dirs are writable
-    File dataTestDir = dataRoot.resolve("__TMP__" + R.nextInt()).toFile();
-    File configTestDir = configRoot.resolve("__TMP__" + R.nextInt()).toFile();
-    dataTestDir.deleteOnExit();
-    configTestDir.deleteOnExit();
-    cleanupDirs.add(dataTestDir);
-    cleanupDirs.add(configTestDir);
-
-    for (File testStorageDir : cleanupDirs) {
-      Files.createDirectories(testStorageDir.toPath());
-      if (!testStorageDir.exists())
-        throw new IOException("Storage directory is not writable: " + testStorageDir);
-    }
+    checkAndCreateDirectory(dataRoot);
+    checkAndCreateDirectory(configRoot);
+    checkAndCreateDirectory(logRoot);
+    checkAndCreateDirectory(artworkRoot);
+    checkAndCreateDirectory(videoRoot);
+    checkAndCreateDirectory(backupRoot);
   }
 
   private void validateFFmpeg() throws IOException {
