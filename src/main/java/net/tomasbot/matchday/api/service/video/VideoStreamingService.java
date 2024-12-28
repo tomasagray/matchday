@@ -200,7 +200,7 @@ public class VideoStreamingService {
             videoStreamManager::killStreamingTask,
             () -> {
               throw new IllegalArgumentException(
-                  "Cannot stop stream for non-existent VideoFile: " + videoFileId);
+                  "No VideoStreamLocator found for VideoFile: " + videoFileId);
             });
   }
 

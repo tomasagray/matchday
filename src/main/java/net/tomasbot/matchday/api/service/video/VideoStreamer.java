@@ -37,6 +37,7 @@ public class VideoStreamer {
   }
 
   @Async("VideoStreamExecutor")
+  @SuppressWarnings("all")
   public CompletableFuture<Long> beginStreaming(
       @NotNull VideoStreamLocator streamLocator, Runnable onComplete) {
     try {
@@ -69,8 +70,7 @@ public class VideoStreamer {
               .additionalArgs(Map.of("-map", 0)) // include all streams
               .build();
       FFmpegStreamTask streamTask = ffmpegPlugin.streamUri(transcodeRequest);
-      updateLocatorTaskState(streamLocator, new TaskState(JobStatus.STREAMING, 0.0));
-      streamTask.start();
+      streamTask.run();
       
       return CompletableFuture.completedFuture(locatorId);
     } catch (Throwable e) {
