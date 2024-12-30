@@ -24,11 +24,11 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
+import net.tomasbot.matchday.model.FileServerUser;
+import net.tomasbot.matchday.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpCookie;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import net.tomasbot.matchday.model.FileServerUser;
-import net.tomasbot.matchday.plugin.Plugin;
 
 /**
  * Represents a file server management service. Can log in/log out and translate download requests.
@@ -76,4 +76,14 @@ public interface FileServerPlugin extends Plugin {
    */
   Optional<URL> getDownloadURL(@NotNull final URL url, @NotNull final Set<HttpCookie> cookies)
       throws IOException;
+
+  /**
+   * Retrieve the remaining bandwidth available to the fileserver user as a decimal percentage. For
+   * example, 0.85 = 85%
+   *
+   * @param cookies any cookies need to log in to fileserver
+   * @return remaining bandwidth, as a decimal percent (e.g., 0.72)
+   * @throws IOException if there is a problem retrieving the data from the remote server
+   */
+  float getRemainingBandwidth(@NotNull Set<HttpCookie> cookies) throws IOException;
 }

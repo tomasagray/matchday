@@ -151,13 +151,9 @@ public class FileServerPluginService {
     if (pluginForUrl != null) {
       // Get a logged-in user
       final FileServerUser downloadUser = getDownloadUser(pluginForUrl.getPluginId());
+
       if (downloadUser != null) {
-        // Decrypt user cookies
-        final Set<HttpCookie> httpCookies =
-            downloadUser.getCookies().stream()
-                .map(secureDataService::decryptData)
-                .map(SecureCookie::toSpringCookie)
-                .collect(Collectors.toSet());
+        final Set<HttpCookie> httpCookies = getHttpCookies(downloadUser);
         // Use the FS plugin to get the internal (download) URL
         return pluginForUrl.getDownloadURL(externalUrl, httpCookies);
       } else {
@@ -166,6 +162,13 @@ public class FileServerPluginService {
     } else {
       throw new IOException("Could not find plugin matching URL: " + externalUrl);
     }
+  }
+
+  public @NotNull Set<HttpCookie> getHttpCookies(@NotNull FileServerUser downloadUser) {
+    return downloadUser.getCookies().stream()
+        .map(secureDataService::decryptData)
+        .map(SecureCookie::toSpringCookie)
+        .collect(Collectors.toSet());
   }
 
   /**

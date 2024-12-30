@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -41,14 +42,24 @@ public class FileFoxPlugin implements FileServerPlugin {
   private final FileFoxPluginProperties pluginProperties;
   private final LoginParser loginParser;
   private final DownloadParser downloadParser;
+  private final BandwidthParser bandwidthParser;
 
   public FileFoxPlugin(
       FileFoxPluginProperties pluginProperties,
       LoginParser loginParser,
-      DownloadParser downloadParser) {
+      DownloadParser downloadParser,
+      BandwidthParser bandwidthParser) {
     this.pluginProperties = pluginProperties;
     this.loginParser = loginParser;
     this.downloadParser = downloadParser;
+    this.bandwidthParser = bandwidthParser;
+  }
+
+  private static @NotNull LinkedMultiValueMap<String, String> getCookieJar(
+      @NotNull Collection<HttpCookie> cookies) {
+    final LinkedMultiValueMap<String, String> cookieJar = new LinkedMultiValueMap<>();
+    cookies.forEach(cookie -> cookieJar.add(cookie.getName(), cookie.getValue()));
+    return cookieJar;
   }
 
   @Override
@@ -95,10 +106,15 @@ public class FileFoxPlugin implements FileServerPlugin {
     final URI uri = URI.create(httpsUrl);
 
     // add cookies
-    final LinkedMultiValueMap<String, String> cookieJar = new LinkedMultiValueMap<>();
-    cookies.forEach(cookie -> cookieJar.add(cookie.getName(), cookie.getValue()));
+    final LinkedMultiValueMap<String, String> cookieJar = getCookieJar(cookies);
 
     final URL downloadUrl = downloadParser.parseDownloadRequest(uri, cookieJar);
     return Optional.of(downloadUrl);
+  }
+
+  @Override
+  public float getRemainingBandwidth(@NotNull Set<HttpCookie> cookies) throws IOException {
+    LinkedMultiValueMap<String, String> cookieJar = getCookieJar(cookies);
+    return bandwidthParser.getRemainingBandwidth(cookieJar);
   }
 }
