@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script type="text/javascript" src="https://filefox.cc/SOMETHING"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138338857-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'UA-138338857-1');
+    </script>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv=X-UA-Compatible>
+    <meta content="width=device-width,initial-scale=1" name=viewport>
+    <meta name="keywords" content="">
+    <meta name="description" content="FileFox.cc">
+    <meta name="robots" content="noindex, nofollow">
+    <title>FileFox</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic&subset=cyrillic-ext,latin,cyrillic'
+          rel='stylesheet' type='text/css'>
+    <link href='/css/bootstrap.min.css' rel='stylesheet'>
+    <link href='/css/style.min.css?v=8' rel='stylesheet'>
+
+
+    <!--[if lt IE 9]>
+    <script>if (top != self) top.location.href = self.document.location;</script>
+    <script src="/js/html5shiv.min.js"></script>
+    <script src="/js/respond.min.js"></script> <![endif]-->
+    <script src="/js/jquery-latest.min.js"></script>
+    <script src="/js/jquery.easyModal.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/script.js?v=10"></script>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<div class="main-wrap" id="container">
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#collapse-1"
+                        aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">
+                    <img src="/css/img/logo3.png" id="logo" alt="FileFox.cc">
+                </a>
+            </div>
+            <div class="collapse navbar-collapse" id="collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                    <li><a href="/profile">My Account</a></li>
+                    <li><a href="/files">My Files</a></li>
+                    <li><a href="/earnings">My Stats</a></li>
+
+
+                    <li><a href="/premium">Premium</a></li>
+                    <li><a href="/logout">Logout</a></li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="bodyline">
+        <div class="container">
+
+            <style>
+                .progress {
+                    width: 220px;
+                    height: 27px;
+                    margin-top: 7px;
+                    margin-bottom: 0;
+                }
+
+                .progress div#bar {
+                    border: 1px solid #f39000;
+                }
+
+                .progress.progress-basic div#bar {
+                    border: 1px solid #b0c4de;
+                }
+
+                .progress.progress-pro div#bar {
+                    /*border: 1px solid #7ec6f8;*/
+                    border: 1px solid #20b2aa;
+                }
+
+                .progress.progress-vip div#bar {
+                    /*border: 1px solid #61a067;*/
+                    border: 1px solid #50aff5;
+                }
+
+                .progress #bar div {
+                    height: 25px;
+                    line-height: 25px;
+                }
+
+                .premium-bage.premium-bage-basic,
+                .progress.progress-basic #bar div {
+                    background-color: #707e90;
+                }
+
+                .premium-bage.premium-bage-pro,
+                .progress.progress-pro #bar div {
+                    /*background-color: #50aff5;*/
+                    background-color: #20b2aa;
+                }
+
+                .premium-bage.premium-bage-vip,
+                .progress.progress-vip #bar div {
+                    /*background-color: #71bc78;*/
+                    background-color: #50aff5;
+                }
+
+                .premium-bage {
+                    position: absolute;
+                    bottom: 22px;
+                    text-transform: uppercase;
+                    font-size: 11px;
+                    color: #fff;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    margin-left: 5px;
+                }
+
+                .progress #bar span {
+                    position: absolute;
+                    top: 13px;
+                    left: 100px;
+                    color: #fff;
+                    font-weight: 600;
+                }
+
+                @media (max-width: 768px) {
+                    .progress #bar span {
+                        top: 6px;
+                    }
+                }
+
+                @media (max-width: 400px) {
+                    .progress {
+                        width: 90%;
+                    }
+                }
+            </style>
+
+
+            <form action="/" method="post" name="FA" autocomplete="off" id="content" class="my_account">
+                <div class="col-xs-12 full">
+                    <div class="row modal-box">
+                        <div class="box-header">
+
+                            <span class="pull-left">My Account</span>
+                            <span class="pull-right">Premium</span>
+
+                        </div>
+                        <div class="box-content">
+                            <div class="row profile">
+                                <div class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Username / Email</label>
+                                        <div class="col-sm-8">
+                                            <p class="form-control-static">
+
+                                                <!--<span>10580603045</span>-->
+                                                <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__"
+                                                         data-cfemail="6c1f0d011b151f090b0d010b09092c1c1e03180302420109">[email&#160;protected]</a></span>
+
+                                                <span class="premium-bage premium-bage-vip">Premium vip</span>
+
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <!--<div class="form-group">-->
+                                    <!--<label class="col-sm-4 control-label">Email</label>-->
+                                    <!--<div class="col-sm-8">-->
+                                    <!---->
+                                    <!--<p class="form-control-static">samwysegamgee@proton.me</p>-->
+                                    <!---->
+                                    <!--</div>-->
+                                    <!--</div>-->
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Premium account expires</label>
+                                        <div class="col-sm-8">
+                                            <p class="form-control-static">
+                                                <a href="/premium">5 April 2025</a> <span
+                                                    style="display:none;text-transform:uppercase;margin-left:7px">(Premium vip)</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display:none">
+                                        <label class="col-sm-4 control-label">Premium Plan</label>
+                                        <div class="col-sm-8">
+                                            <p class="form-control-static" style=""></p>
+                                        </div>
+                                    </div>
+                                    <!--<div class="form-group">-->
+                                    <!--<label class="col-sm-4 control-label"></label>-->
+                                    <!--<div class="col-sm-8">-->
+                                    <!--<a href="/premium" class="form-control btn btn-default">Extend Premium</a>-->
+                                    <!--</div>-->
+                                    <!--</div>-->
+                                    <!--<div class="form-group">-->
+                                    <!--<label class="col-sm-4 control-label">Traffic Available</label>-->
+                                    <!--<div class="col-sm-8">-->
+                                    <!--<p class="form-control-static">228984 MB</p>-->
+                                    <!--</div>-->
+                                    <!--</div>-->
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Traffic Available</label>
+                                        <div class="col-sm-8">
+                                            <div class="progress progress-vip">
+                                                <div id="bar">
+                                                    <div style="width: 76%">
+                                                    </div>
+                                                    <span>76%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Account Usage</label>
+                                        <div class="col-sm-8">
+                                            <p class="form-control-static">
+                                                0.0 MB<!-- of Unlimited-->
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Server Time</label>
+                                        <div class="col-sm-8">
+                                            <p class="form-control-static">2024-12-29 07:30:12</p>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Activate Reseller's Code</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" name="premium_key" value=""
+                                                   class="form-control input-stick" placeholder="Your code">
+                                            <button type="submit" class="form-control btn btn-default btn-stick"
+                                                    name="premium" value="1"
+                                                    onclick="javascript:if(document.forms['FA']['premium_key'].value == ''){alert('Please enter Resellers Code'); return false;}">
+                                                Activate
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xs-12 full">
+                    <div class="row modal-box">
+                        <div class="box-header">Account Settings</div>
+                        <div class="box-content">
+                            <div class="row profile">
+                                <div class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">New Password</label>
+                                        <div class="col-sm-8 new-pass">
+                                            <input type="password" name="password_new" class="form-control"
+                                                   placeholder="Minimum 8 characters" autocomplete="nope">
+                                            <input type="password" name="password_new2" class="form-control mtop-xs"
+                                                   placeholder="Retype new password" autocomplete="nope">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Access IPs</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" name="usr_allowed_ips" value="" class="form-control"
+                                                   placeholder="1.1.1.1, 2.2.2.2, 3.3.3.*">
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group mtop-lg">
+                                        <div class="col-sm-8 col-sm-offset-4">
+                                            <button name="settings_save_btn" class="btn btn-default">Save Settings
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--/settings-->
+
+
+                <div class="col-xs-12 full" id="sites">
+                    <div class="row modal-box">
+                        <div class="box-header">Affiliate Sites</div>
+                        <div class="box-content">
+                            <div class="row profile">
+                                <div class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Validate Site</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" name="site_url" class="form-control"
+                                                   placeholder="http://site.com/">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-8 col-sm-offset-4">
+                                            <p class="form-control-static">Place <b>FileFox.txt</b> in your website's
+                                                root directory. <br> It should only contain your user number 63384.</p>
+                                            <p class="form-control-static">You can also add meta tag to your site
+                                                code:<br>
+                                                &lt;meta content="63384" name="filefox" /></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-8 col-sm-offset-4">
+                                            <button name="site_validate" value="1" class="btn btn-default">Validate
+                                            </button>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="op" value="profile">
+                    <input type="hidden" name="settings_save" value="1">
+                </div>
+            </form>
+            <link href="/chosen/chosen.css" rel="stylesheet">
+            <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+            <script src="/chosen/chosen.jquery.js"></script>
+            <script>
+                // autofill fixes
+                $(window).load(function () {
+                    $('input[type=password]').val('');
+                    $('input[type="radio"][checked="checked"]').prop('checked', true);
+                });
+
+                var lng_my_account_msg_password_dont_match = "Passwords do not match";
+                var min_usr_speed = 50;
+                var max_usr_speed = 120;
+                var usr_max_downloads_mysite = 1000;
+
+                $(document).ready(function () {
+                    $(window).keydown(function (event) {
+                        if (event.keyCode == 13) {
+                            event.preventDefault();
+                            return false;
+                        }
+                    });
+                });
+
+                $("#payselect").change(function () {
+                    if ($(this).val() == 'bank') {
+                        $("#pay1").hide();
+                        $("#pay_address").hide();
+                        $("#pay2").show();
+                    } else {
+                        $("#pay2").hide();
+                        $("#pay1").show();
+                        $("#pay_address").show();
+                    }
+                });
+                $(".chzn-select").chosen({disable_search_threshold: 10});
+
+            </script>
+        </div>
+    </div>
+</div>
+<footer>
+    <div class="container">
+        <ul class="ul-h">
+            <li><a href="/tos.html">Terms of Service</a></li>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li><a href="/dmca.html">DMCA</a></li>
+
+            <li><a href="/webmasters.html">Webmasters</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+        </ul>
+        <div class="copyright">
+            &copy; FileFox.cc - All Rights Reserved - 2024
+        </div>
+    </div>
+</footer>
+
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+            m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-138338857-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>

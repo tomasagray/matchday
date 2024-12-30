@@ -48,6 +48,7 @@ public class FileFoxPluginProperties extends PluginProperties {
   private String premiumOnlyError;
   private String loggedOutText;
   private String ddlFormErrorText;
+  private String profilePageText;
 
   public URL getBaseUrl() {
     try {

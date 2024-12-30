@@ -27,14 +27,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
+import net.tomasbot.matchday.model.FileServerUser;
+import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import net.tomasbot.matchday.model.FileServerUser;
-import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 
 @Component
 public class FileFoxPlugin implements FileServerPlugin {
@@ -44,9 +43,9 @@ public class FileFoxPlugin implements FileServerPlugin {
   private final DownloadParser downloadParser;
 
   public FileFoxPlugin(
-      @Autowired FileFoxPluginProperties pluginProperties,
-      @Autowired LoginParser loginParser,
-      @Autowired DownloadParser downloadParser) {
+      FileFoxPluginProperties pluginProperties,
+      LoginParser loginParser,
+      DownloadParser downloadParser) {
     this.pluginProperties = pluginProperties;
     this.loginParser = loginParser;
     this.downloadParser = downloadParser;
@@ -91,13 +90,14 @@ public class FileFoxPlugin implements FileServerPlugin {
   @Override
   public Optional<URL> getDownloadURL(@NotNull URL url, @NotNull Set<HttpCookie> cookies)
       throws IOException {
-    // Force HTTPS
+    // force HTTPS
     final String httpsUrl = url.toString().replaceFirst("^http:", "https:");
     final URI uri = URI.create(httpsUrl);
+
     // add cookies
     final LinkedMultiValueMap<String, String> cookieJar = new LinkedMultiValueMap<>();
     cookies.forEach(cookie -> cookieJar.add(cookie.getName(), cookie.getValue()));
-    // Parse download page
+
     final URL downloadUrl = downloadParser.parseDownloadRequest(uri, cookieJar);
     return Optional.of(downloadUrl);
   }

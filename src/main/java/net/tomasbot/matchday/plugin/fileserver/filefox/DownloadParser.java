@@ -24,11 +24,9 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import net.tomasbot.matchday.plugin.fileserver.filefox.FileFoxPage.DownloadLanding;
 
 @Component
 public class DownloadParser {
@@ -36,9 +34,7 @@ public class DownloadParser {
   private final ConnectionManager connectionManager;
   private final PageEvaluator pageEvaluator;
 
-  public DownloadParser(
-      @Autowired ConnectionManager connectionManager, @Autowired PageEvaluator pageEvaluator) {
-
+  public DownloadParser(ConnectionManager connectionManager, PageEvaluator pageEvaluator) {
     this.connectionManager = connectionManager;
     this.pageEvaluator = pageEvaluator;
   }
@@ -47,10 +43,11 @@ public class DownloadParser {
       @NotNull final URI uri, @NotNull MultiValueMap<String, String> cookieJar) throws IOException {
     // Read remote page
     final FileFoxPage.DownloadLanding downloadLanding = readDownloadLandingPage(uri, cookieJar);
+
     // Get hidden input fields
-    final Map<String, String> queryParams = downloadLanding.getHiddenQueryParams();
     final URI hiddenFormUri = downloadLanding.getDdlSubmitUri();
     final URI formUri = uri.resolve(hiddenFormUri);
+    final Map<String, String> queryParams = downloadLanding.getHiddenQueryParams();
 
     // Fetch direct download page & parse
     final String directDownloadHtml =
@@ -59,8 +56,9 @@ public class DownloadParser {
     if (ddlPage instanceof final FileFoxPage.DirectDownload directDownload) {
       return directDownload.getDdlUrl();
     }
-    throw new FileFoxParsingException(
-        "Not a DirectDownload page, or could not parse page: " + ddlPage.getText());
+
+    FileFoxParsingException cause = new FileFoxParsingException(ddlPage.getText());
+    throw new IOException("Not a DirectDownload page, or could not parse page", cause);
   }
 
   @NotNull
@@ -69,9 +67,13 @@ public class DownloadParser {
     final ClientResponse response = connectionManager.connectTo(uri, cookieJar);
     final String downloadLandingHtml = response.bodyToMono(String.class).block();
     final FileFoxPage page = pageEvaluator.getFileFoxPage(downloadLandingHtml);
-    if (!(page instanceof FileFoxPage.DownloadLanding && page.isPremium())) {
-      throw new FileFoxParsingException("Response from FileFox was not a Premium download page");
+
+    if (page instanceof FileFoxPage.DownloadLanding landing) {
+      return landing;
     }
-    return (DownloadLanding) page;
+
+    String msg = downloadLandingHtml != null ? downloadLandingHtml : page.getText();
+    FileFoxParsingException cause = new FileFoxParsingException(msg);
+    throw new IOException("Response from FileFox was not a Premium download page", cause);
   }
 }
