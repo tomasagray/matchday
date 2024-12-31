@@ -140,7 +140,6 @@ public class FileServerUserController {
       value = "/user/{userId}/bandwidth",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ResponseBody
   public float fetchRemainingBandwidth(@PathVariable("userId") UUID userId) throws IOException {
     return userService.getRemainingBandwidthFor(userId);
   }
