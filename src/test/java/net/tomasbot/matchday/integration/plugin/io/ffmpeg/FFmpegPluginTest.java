@@ -144,7 +144,7 @@ class FFmpegPluginTest {
 
     // Start stream
     executor.submit(streamTask);
-    TimeUnit.SECONDS.sleep(SLEEP_SECONDS);
+    TimeUnit.SECONDS.sleep(SLEEP_SECONDS * 5);
 
     // Run test
     final int actualFileCount = getActualFileCount(streamingPath);

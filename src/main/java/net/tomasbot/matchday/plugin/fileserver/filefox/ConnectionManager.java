@@ -44,7 +44,7 @@ public class ConnectionManager {
 
   private final FileFoxPluginProperties pluginProperties;
 
-  public ConnectionManager(@Autowired FileFoxPluginProperties pluginProperties) {
+  public ConnectionManager(FileFoxPluginProperties pluginProperties) {
     this.pluginProperties = pluginProperties;
   }
 
@@ -105,9 +105,15 @@ public class ConnectionManager {
     return connection;
   }
 
+  /**
+   * Read data from an HTTP connection and return the response, with headers
+   *
+   * @param connection an opened HTTP connection
+   * @return the response from the server
+   * @throws IOException if we cannot connect/read
+   */
   private @NotNull ClientResponse readHttpData(@NotNull final HttpURLConnection connection)
       throws IOException {
-    // Read page with headers
     try (final InputStreamReader isr = new InputStreamReader(getInputStream(connection));
         final BufferedReader reader = new BufferedReader(isr)) {
 
@@ -118,6 +124,7 @@ public class ConnectionManager {
               .filter(entry -> entry.getKey() != null)
               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
       final String body = reader.lines().collect(Collectors.joining("\n"));
+      
       return ClientResponse.create(status)
           .headers(responseHeaders -> responseHeaders.putAll(headers))
           .body(body)
@@ -127,19 +134,19 @@ public class ConnectionManager {
 
   private @NotNull ClientResponse performPost(
       @NotNull HttpURLConnection connection, @NotNull String query) throws IOException {
-    configurePostConnection(connection);
-    final byte[] queryBytes = query.getBytes(StandardCharsets.UTF_8);
-    connection.setRequestProperty("Content-Length", Integer.toString(query.length()));
+    // attach headers, other config
+    configurePostConnection(connection, query);
 
     // POST request for download link
     final OutputStream os = connection.getOutputStream();
+    final byte[] queryBytes = query.getBytes(StandardCharsets.UTF_8);
     os.write(queryBytes);
     os.flush();
 
-    // Read complete response
+    // read complete response
     final ClientResponse response = readHttpData(connection);
-    // Close stream
     os.close();
+
     return response;
   }
 
@@ -160,12 +167,14 @@ public class ConnectionManager {
   private InputStream getInputStream(@NotNull final HttpURLConnection connection)
       throws IOException {
     InputStream is;
+
     // Check for error response
     if (connection.getResponseCode() >= 400) {
       is = connection.getErrorStream();
     } else {
       is = connection.getInputStream();
     }
+
     // Handle content encoding
     final String encoding = connection.getHeaderField("content-encoding");
     if ("br".equalsIgnoreCase(encoding)) {
@@ -176,7 +185,7 @@ public class ConnectionManager {
     return is;
   }
 
-  private void configurePostConnection(@NotNull final HttpURLConnection connection)
+  private void configurePostConnection(@NotNull HttpURLConnection connection, @NotNull String query)
       throws ProtocolException {
     connection.setRequestMethod("POST");
     connection.setDoOutput(true);
@@ -195,5 +204,6 @@ public class ConnectionManager {
     connection.setRequestProperty("sec-fetch-user", "?1");
     connection.setRequestProperty("TE", "Trailers");
     connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
+    connection.setRequestProperty("Content-Length", Integer.toString(query.length()));
   }
 }

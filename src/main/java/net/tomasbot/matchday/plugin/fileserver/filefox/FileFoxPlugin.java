@@ -23,18 +23,18 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
+import net.tomasbot.matchday.model.FileServerUser;
+import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import net.tomasbot.matchday.model.FileServerUser;
-import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 
 @Component
 public class FileFoxPlugin implements FileServerPlugin {
@@ -42,14 +42,24 @@ public class FileFoxPlugin implements FileServerPlugin {
   private final FileFoxPluginProperties pluginProperties;
   private final LoginParser loginParser;
   private final DownloadParser downloadParser;
+  private final BandwidthParser bandwidthParser;
 
   public FileFoxPlugin(
-      @Autowired FileFoxPluginProperties pluginProperties,
-      @Autowired LoginParser loginParser,
-      @Autowired DownloadParser downloadParser) {
+      FileFoxPluginProperties pluginProperties,
+      LoginParser loginParser,
+      DownloadParser downloadParser,
+      BandwidthParser bandwidthParser) {
     this.pluginProperties = pluginProperties;
     this.loginParser = loginParser;
     this.downloadParser = downloadParser;
+    this.bandwidthParser = bandwidthParser;
+  }
+
+  private static @NotNull LinkedMultiValueMap<String, String> getCookieJar(
+      @NotNull Collection<HttpCookie> cookies) {
+    final LinkedMultiValueMap<String, String> cookieJar = new LinkedMultiValueMap<>();
+    cookies.forEach(cookie -> cookieJar.add(cookie.getName(), cookie.getValue()));
+    return cookieJar;
   }
 
   @Override
@@ -91,14 +101,20 @@ public class FileFoxPlugin implements FileServerPlugin {
   @Override
   public Optional<URL> getDownloadURL(@NotNull URL url, @NotNull Set<HttpCookie> cookies)
       throws IOException {
-    // Force HTTPS
+    // force HTTPS
     final String httpsUrl = url.toString().replaceFirst("^http:", "https:");
     final URI uri = URI.create(httpsUrl);
+
     // add cookies
-    final LinkedMultiValueMap<String, String> cookieJar = new LinkedMultiValueMap<>();
-    cookies.forEach(cookie -> cookieJar.add(cookie.getName(), cookie.getValue()));
-    // Parse download page
+    final LinkedMultiValueMap<String, String> cookieJar = getCookieJar(cookies);
+
     final URL downloadUrl = downloadParser.parseDownloadRequest(uri, cookieJar);
     return Optional.of(downloadUrl);
+  }
+
+  @Override
+  public float getRemainingBandwidth(@NotNull Set<HttpCookie> cookies) throws IOException {
+    LinkedMultiValueMap<String, String> cookieJar = getCookieJar(cookies);
+    return bandwidthParser.getRemainingBandwidth(cookieJar);
   }
 }

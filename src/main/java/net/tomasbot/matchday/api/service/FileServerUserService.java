@@ -19,6 +19,7 @@
 
 package net.tomasbot.matchday.api.service;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import net.tomasbot.matchday.db.FileServerUserRepo;
@@ -26,6 +27,7 @@ import net.tomasbot.matchday.model.FileServerUser;
 import net.tomasbot.matchday.model.SecureCookie;
 import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -216,5 +218,24 @@ public class FileServerUserService {
     } else {
       throw new IllegalArgumentException("Trying to DELETE non-existent user: " + userId);
     }
+  }
+
+  public float getRemainingBandwidthFor(UUID userId) throws IOException {
+    Optional<FileServerUser> userOptional = getUserById(userId);
+    if (userOptional.isPresent()) {
+      FileServerUser user = userOptional.get();
+      UUID serverId = user.getServerId();
+      Optional<FileServerPlugin> pluginOptional = pluginService.getPluginById(serverId);
+
+      if (pluginOptional.isPresent()) {
+        FileServerPlugin plugin = pluginOptional.get();
+        Set<HttpCookie> cookies = pluginService.getHttpCookies(user);
+        return plugin.getRemainingBandwidth(cookies);
+      }
+
+      throw new IllegalArgumentException("Could not locate file server plugin: " + serverId);
+    }
+
+    throw new IllegalArgumentException("No such file server user: " + userId);
   }
 }

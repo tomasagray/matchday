@@ -26,13 +26,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import net.tomasbot.matchday.model.FileServerUser;
+import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import net.tomasbot.matchday.model.FileServerUser;
-import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 
 @Component
 public class TestFileServerPlugin implements FileServerPlugin {
@@ -86,6 +86,11 @@ public class TestFileServerPlugin implements FileServerPlugin {
       throw new RuntimeException(e);
     }
     return Optional.of(url);
+  }
+
+  @Override
+  public float getRemainingBandwidth(@NotNull Set<HttpCookie> cookies) throws IOException {
+    return 0.85f;
   }
 
   @Override

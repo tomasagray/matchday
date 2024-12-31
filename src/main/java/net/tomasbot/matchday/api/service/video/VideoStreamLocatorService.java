@@ -99,12 +99,13 @@ public class VideoStreamLocatorService {
    * @param videoFile Video data for the stream
    * @return The newly created VideoStreamLocator
    */
+  @Transactional
   public VideoStreamLocator createStreamLocator(
       @NotNull Path storageLocation, @NotNull VideoFile videoFile) {
     final UUID fileId = videoFile.getFileId();
     final Path playlistPath = storageLocation.resolve(fileId.toString()).resolve(PLAYLIST_NAME);
     final SingleStreamLocator locator = new SingleStreamLocator(playlistPath, videoFile);
-    return streamLocatorRepo.save(locator);
+    return streamLocatorRepo.saveAndFlush(locator);
   }
 
   public void updateStreamLocator(@NotNull VideoStreamLocator streamLocator) {

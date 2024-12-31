@@ -21,9 +21,14 @@ package net.tomasbot.matchday.unit.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.tomasbot.matchday.TestDataCreator;
+import net.tomasbot.matchday.api.service.FileServerUserService;
+import net.tomasbot.matchday.model.FileServerUser;
+import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -34,10 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import net.tomasbot.matchday.TestDataCreator;
-import net.tomasbot.matchday.api.service.FileServerUserService;
-import net.tomasbot.matchday.model.FileServerUser;
-import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -150,5 +151,21 @@ public class FileServerUserServiceTest {
     final Optional<FileServerUser> userOptional = userService.getUserById(testUserId);
     logger.info("User deleted; user is now: {}", userOptional);
     assertThat(userOptional).isEmpty();
+  }
+
+  @Test
+  @DisplayName("Validate retrieval of remaining bandwidth for a given user")
+  void getRemainingBandwidth() throws IOException {
+    // given
+    final float expected = 0.85f;
+    UUID userId = testFileServerUser.getUserId();
+    logger.info("Getting remaining bandwidth for user: {}", userId);
+
+    // when
+    float actual = userService.getRemainingBandwidthFor(userId);
+
+    // then
+    logger.info("Found remaining bandwidth: {}%", actual * 100);
+    assertThat(actual).isEqualTo(expected);
   }
 }

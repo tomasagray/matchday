@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script type="text/javascript" src="https://filefox.cc/SOMETHING"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138338857-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'UA-138338857-1');
+    </script>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv=X-UA-Compatible>
+    <meta content="width=device-width,initial-scale=1" name=viewport>
+    <meta name="keywords" content="">
+    <meta name="description" content="FileFox.cc">
+    <meta name="robots" content="noindex, nofollow">
+    <title>FileFox</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic&subset=cyrillic-ext,latin,cyrillic'
+          rel='stylesheet' type='text/css'>
+    <link href='/css/bootstrap.min.css' rel='stylesheet'>
+    <link href='/css/style.min.css?v=8' rel='stylesheet'>
+
+
+    <!--[if lt IE 9]>
+    <script>if (top != self) top.location.href = self.document.location;</script>
+    <script src="/js/html5shiv.min.js"></script>
+    <script src="/js/respond.min.js"></script> <![endif]-->
+    <script src="/js/jquery-latest.min.js"></script>
+    <script src="/js/jquery.easyModal.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/script.js?v=10"></script>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<div class="main-wrap" id="container">
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#collapse-1"
+                        aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">
+                    <img src="/css/img/logo3.png" id="logo" alt="FileFox.cc">
+                </a>
+            </div>
+            <div class="collapse navbar-collapse" id="collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                    <li><a href="/profile">My Account</a></li>
+                    <li><a href="/files">My Files</a></li>
+                    <li><a href="/earnings">My Stats</a></li>
+
+
+                    <li><a href="/premium">Premium</a></li>
+                    <li><a href="/logout">Logout</a></li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="bodyline">
+        <div class="container">
+
+            <link href="/css/premium_new.min.css?v=12" rel="stylesheet">
+            <script src="/js/premium_new.min.js?v=11"></script>
+            <style>
+                .premium-box2 .head-orange {
+                    margin-bottom: 25px;
+                }
+            </style>
+
+
+            <div class="row">
+                <div class="col-xs-12 full">
+                    <div class="row info-box info-box-blue text-center">
+                        Premium Account expires in 96 days, 23 hours
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-xs-12 full">
+                    <img src="/images/xmas24.jpg" class="img-responsive" style="margin-bottom:35px; border-radius:5px"
+                         id="tariff-scroll">
+                </div>
+            </div>
+
+
+            <div class="premium-box2">
+                <div class="modal-box">
+                    <div class="row head-orange">
+                        <div class="col-sm-12 box-header">
+                            <span>Upgrade to premium!</span>
+                        </div>
+                    </div>
+                    <style>
+                        .free-days {
+                            background-color: #20a29b;
+                            border: 1px solid #20a29b;
+                            color: #fff;
+                            outline: 0;
+                            box-shadow: none;
+                            border-radius: 5px;
+                            font-weight: 600;
+                            padding: 10px 0;
+                            margin: -5px 0 10px 0;
+                            text-align: center;
+                            font-size: 16px;
+                        }
+
+                        .premium-box2 .paybox .content {
+                            height: 42px;
+                        }
+
+                        .premium-box2 .i-vm {
+                            background: 50% 50%/100% no-repeat url(https://filefox.cc/css/img/creditcard.png);
+                        }
+
+                        .premium-box2 .i-pay {
+                            display: block;
+                            margin: 0 auto;
+                        }
+
+                        .premium-box2 .i-vm, .premium-box2 .i-vm2, .premium-box2 .i-vm3, .premium-box2 .i-vm4 {
+                            background: transparent;
+                            background-image: url(https://filefox.cc/css/img/creditcard.png);
+                            background-position-x: 40%;
+                            background-position-y: 35%;
+                            background-repeat: no-repeat;
+                            width: 100%;
+                            height: 100%;
+                            position: relative;
+                        }
+
+                        /*.premium-box2 .i-vm:before, .premium-box2 .i-vm2:before, .premium-box2 .i-vm3:before, .premium-box2 .i-vm4:before {*/
+                        .premium-box2 .i-vm:before {
+                            font-size: 16px;
+                            font-weight: 700;
+                            color: #f39000;
+                            position: absolute;
+                            top: 23%;
+                            right: 0;
+                        }
+
+                        .premium-box2 .i-vm:before {
+                            content: '#1';
+                        }
+
+                        .premium-box2 .i-vm2:before {
+                            content: '#2';
+                        }
+
+                        .premium-box2 .i-vm3:before {
+                            content: '#3';
+                        }
+
+                        .premium-box2 .i-vm4:before {
+                            content: '#4';
+                        }
+
+                        .premium-box2 .i-vm5:before {
+                            content: '#5';
+                        }
+
+                        .premium-box2 .i-vm6:before {
+                            content: '#6';
+                        }
+
+                        .premium-box2 .i-vm7:before {
+                            content: '#7';
+                        }
+
+                        @media (max-width: 850px) {
+                            .premium-box2 .i-vm {
+                                width: 100%;
+                            }
+                        }
+
+                        @media (max-width: 450px) {
+                            .premium-box2 .paybox {
+                                padding: 0;
+                            }
+
+                            .premium-box2 .i-vm {
+                                width: 90%;
+                            }
+
+                            .premium-box2 .i-vm:before {
+                                display: none;
+                            }
+                        }
+
+                        .premium-box2 .i-wechat {
+                            width: 95px;
+                            height: 28px;
+                            background-repeat: no-repeat;
+                            background-position-y: center;
+                            background-size: 100%;
+                            background-image: url(/css/img/wechat.png);
+                        }
+
+                        .premium-box2 .i-alfacoins {
+                            width: 132px;
+                            height: 41px;
+                            background-repeat: no-repeat;
+                            background-position-y: center;
+                            background-size: 100%;
+                            background-image: url(/images/icons/payment/alfacoins.png?v=3);
+                        }
+
+                        .premium-box2 .i-coinpay {
+                            width: 100%;
+                            height: 100%;
+                            background-repeat: no-repeat;
+                            background-position-y: center;
+                            background-size: 100%;
+                            background-image: url(/images/coinpayments.png);
+                        }
+
+                        .premium-box2 .i-mc {
+                            background-image: url(/images/master.png?v2);
+                            height: 50px;
+                            background-repeat: no-repeat;
+                            background-position: center;
+                        }
+
+                        .premium-box2 .i-visa {
+                            background-image: url(/images/visa.png);
+                            background-size: 60%;
+                            height: 38px;
+                            background-repeat: no-repeat;
+                            background-position: center;
+                        }
+                    </style>
+                    <div class="row premium-compare">
+                        <div class="col-sm-5 col-left">
+                            <div class="premium vip">
+                                <div class="row head">Premium VIP</div>
+                                <div class="row main">
+                                    <div class="col-xs-offset-0 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 traffic">
+                                        <div class="caption">300<span>.</span>000 MB</div>
+                                        <div class="label2">download traffic per any 5 days</div>
+                                    </div>
+                                    <div class="col-sm-12 price">
+                                        <div class="label2 label-top">from just</div>
+                                        <div class="caption">
+                                            <span class="d">$</span><span class="i">22</span><span class="f">.95</span>
+                                        </div>
+                                        <div class="label2">per month</div>
+                                    </div>
+                                </div>
+                                <div class="row features">
+                                    <div class="frow">Unlimited Download Speed</div>
+                                    <div class="frow">No Captcha</div>
+                                    <div class="frow">Downloads start instantly</div>
+                                    <div class="frow">Parallel downloads</div>
+                                    <div class="frow">Download Pause and Resume</div>
+                                    <div class="frow">Download Software Support</div>
+                                    <div class="frow bold">Encrypted Anonymous Downloading</div>
+                                    <div class="frow bold">Extended Storage</div>
+                                    <div class="frow bold">Unlimited File Size</div>
+                                    <div class="frow bold">Reserved Premium Download Channels</div>
+                                </div>
+                                <div class="row button">
+                                    <input type="hidden" name="price_list" class="price_list"
+                                           value="22.95,42.95,69.95,99.95">
+                                    <a class="btn" href="#" data-toggle="modal" data-target="#buy"><i
+                                            class="glyphicon glyphicon-shopping-cart"></i> Buy Premium VIP</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-5 col-right">
+                            <div class="premium pro">
+                                <div class="row head">Premium Pro</div>
+                                <div class="row main">
+                                    <div class="col-xs-offset-0 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 traffic">
+                                        <div class="caption">60<span>.</span>000 MB</div>
+                                        <div class="label2">download traffic per any 5 days</div>
+                                    </div>
+                                    <div class="col-sm-12 price">
+                                        <div class="label2 label-top">from just</div>
+                                        <div class="caption">
+                                            <span class="d">$</span><span class="i">14</span><span class="f">.95</span>
+                                        </div>
+                                        <div class="label2">per month</div>
+                                    </div>
+                                </div>
+                                <div class="row features">
+                                    <div class="frow">Unlimited Download Speed</div>
+                                    <div class="frow">No Captcha</div>
+                                    <div class="frow">Downloads start instantly</div>
+                                    <div class="frow">Parallel downloads</div>
+                                    <div class="frow">Download Pause and Resume</div>
+                                    <div class="frow">Download Software Support</div>
+                                </div>
+                                <div class="row button">
+                                    <input type="hidden" name="price_list" class="price_list"
+                                           value="14.95,29.95,49.95,89.95">
+                                    <a class="btn" href="#" data-toggle="modal" data-target="#buy"><i
+                                            class="glyphicon glyphicon-shopping-cart"></i> Buy Premium Pro</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row safe-and-secure">
+                        <div class="col-sm-12 text-center">
+                            <div class="head">
+                                <i class="pfo pfo-ssl1"></i>
+                                <i class="pfo pfo-lock4"></i>
+                            </div>
+                            <div class="main">
+                                <span>All transactions are Safe and Secure!</span>
+                            </div>
+                            <div class="bottom">
+                                <div class="pfo-row">
+                                    <i class="pf pf-verified-by-visa"></i>
+                                    <i class="pf pf-mastercard-securecode"></i>
+                                </div>
+                                <div class="pfo-row">
+                                    <i class="pf pf-discover"></i>
+                                    <i class="pf pf-american-express"></i>
+                                </div>
+                                <div class="pfo-row">
+                                    <i class="pf pf-diners"></i>
+                                    <i class="pf pf-cirrus"></i>
+                                </div>
+                                <div class="pfo-row">
+                                    <i class="pf pf-unionpay"></i>
+                                    <i class="pfo pfo-webmoney"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel" id="buy">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                            aria-hidden="true">&times;</span></button>
+                                    Buy Premium <span class="name">VIP</span>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+
+                                        <div class="col-sm-5 col-sm-offset-0 col-md-4 col-md-offset-1">
+                                            <div class="premium">
+                                                <div class="row head">Premium <span></span></div>
+                                                <div class="row main">
+                                                    <div class="col-xs-4 col-xs-offset-4 col-sm-4 col-sm-offset-4 price">
+                                                        <div class="caption"><span class="d">$</span><span
+                                                                class="i"></span><span class="f"></span></div>
+                                                        <div class="label2 fees">no extra fees <span>*</span></div>
+                                                    </div>
+                                                    <div class="col-xs-2 col-xs-offset-2 col-sm-3 col-sm-offset-1 cents">
+                                                        <div class="caption second">
+                                                            <span class="d">$</span><span class="i"></span><span
+                                                                class="f"></span>
+                                                        </div>
+                                                        <div class="label2 fees">per day</div>
+                                                    </div>
+                                                </div>
+                                                <div class="row premium-slogan" data-price-num="0">
+                                                    <div class="col-sm-12">Quick and Easy</div>
+                                                </div>
+                                                <div class="row premium-slogan" data-price-num="1">
+                                                    <div class="col-sm-12">Extended Utility</div>
+                                                </div>
+                                                <div class="row premium-slogan" data-price-num="2">
+                                                    <div class="col-sm-12">Smart Choice</div>
+                                                </div>
+                                                <div class="row premium-slogan" data-price-num="3">
+                                                    <div class="col-sm-12">Best Bang for your Buck!</div>
+                                                </div>
+                                                <div class="row months">
+                                                    <div class="col-sm-12">
+                                                        <button class="btn btn-default btn-block" data-price-num="0">30
+                                                            days
+                                                        </button>
+                                                        <button class="btn btn-default btn-block" data-price-num="1">90
+                                                            days
+                                                        </button>
+                                                        <button class="btn btn-default btn-block" data-price-num="2">180
+                                                            days
+                                                        </button>
+                                                        <button class="btn btn-default btn-block" data-price-num="3">365
+                                                            days
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="free-days">
+                                                You get +25% days for free
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-sm-7 col-md-6 payment-btns">
+                                            <div class="row">
+
+                                                <div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox">
+                                                        <div class="caption"><span>Paypal</span></div>
+                                                        <div class="content"><a href="javascript:void(0);" id="paypal31"
+                                                                                class="payBy icon" title="Paypal"><i
+                                                                class="i-pay i-pp"></i></a></div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox">
+                                                        <div class="caption"><span>Visa / MC</span></div>
+                                                        <div class="content">
+                                                            <a href="javascript:void(0);" id="bytesell1"
+                                                               class="payBy icon">
+                                                                <i class="i-pay i-vm"></i></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox">
+                                                        <div class="caption"><span>Visa / MC</span></div>
+                                                        <div class="content">
+                                                            <a href="javascript:void(0);" id="wbnt_card1"
+                                                               class="payBy icon">
+                                                                <i class="i-pay i-vm"></i></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox">
+                                                        <div class="caption"><span>UnionPay</span></div>
+                                                        <div class="content"><a href="javascript:void(0);"
+                                                                                id="rcs_union1" class="payBy icon"
+                                                                                title="UnionPay"><i
+                                                                class="i-pay i-unionpay"></i></a></div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox">
+                                                        <div class="caption"><span>Bitcoin</span></div>
+                                                        <div class="content"><a href="javascript:void(0);" id="gbtc"
+                                                                                class="payBy icon" title="Bitcoin"><i
+                                                                class="i-pay i-btc"></i></a></div>
+                                                    </div>
+                                                </div>
+
+
+                                                <!--
+                                                <div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox">
+                                                        <div class="caption"><span>Sofort</span></div>
+                                                        <div class="content"><a href="javascript:void(0);" id="webint_sofort" class="payBy icon" title="SOFORT"><i class="i-pay i-sofort"></i></a></div>
+                                                    </div>
+                                                </div>
+                                                -->
+                                                <!--<div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">-->
+                                                <!--<div class="paybox">-->
+                                                <!--<div class="caption"><span>AliPay</span></div>-->
+                                                <!--<div class="content"><a href="javascript:void(0);" id="alipay" class="payBy icon" title="AliPay"><i class="i-pay i-alipay"></i></a></div>-->
+                                                <!--</div>-->
+                                                <!--</div>-->
+                                                <!--div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox px-5">
+                                                        <div class="caption"><span>Paysafecard</span></div>
+                                                        <div class="content"><a href="javascript:void(0);" id="paysafecard" class="payBy icon" title="Paysafecard"><i class="i-pay i-paysafecard"></i></a></div>
+                                                    </div>
+                                                </div-->
+
+
+                                                <div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox">
+                                                        <div class="caption"><span>AliPay</span></div>
+                                                        <div class="content"><a href="javascript:void(0);"
+                                                                                id="rcs_alipay1" class="payBy icon"
+                                                                                title="AliPay"><i
+                                                                class="i-pay i-alipay"></i></a></div>
+                                                    </div>
+                                                </div>
+
+
+                                                <!--div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox">
+                                                        <div class="caption"><span>UnionPay</span></div>
+                                                        <div class="content"><a href="javascript:void(0);" id="unionpay" class="payBy icon" title="UnionPay"><i class="i-pay i-unionpay"></i></a></div>
+                                                    </div>
+                                                </div-->
+
+                                                <div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox resellers">
+                                                        <div class="caption"><span>Resellers</span></div>
+                                                        <div class="content"><a href="/resellers" class="icon"
+                                                                                title="Resellers" target="_blank"><i
+                                                                class="i-pay i-resel"></i></a></div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox">
+                                                        <div class="caption"><span>Webmoney</span></div>
+                                                        <div class="content"><a href="javascript:void(0);" id="wmz"
+                                                                                class="payBy icon" title="Webmoney"><i
+                                                                class="i-pay i-wm"></i></a></div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="col-xs-6 col-xs-offset-0 col-xs-8 col-xs-offset-2">
+                                                    <div class="paybox">
+                                                        <div class="caption"><span>Banking</span></div>
+                                                        <div class="content"><a href="javascript:void(0);" id="paysera"
+                                                                                class="payBy icon"
+                                                                                title="Online Banking"><i
+                                                                class="i-pay i-ob"></i></a></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <form action="/" method="post" id="goto_merch" target="_blank">
+                                                <input type="hidden" name="op" value="payments">
+                                                <input type="hidden" name="type" value="">
+                                                <input type="hidden" name="amount" value="">
+                                                <input type="hidden" name="email" value="">
+                                                <input type="hidden" name="cc" value="">
+                                                <input type="hidden" name="pm_id" value="">
+                                            </form>
+                                        </div>
+
+                                        <div class="col-sm-7 col-md-6 sign-in-up-error text-center hidden">
+                                            <div class="form-group">
+                                                <label></label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-7 col-md-6 sign-in-up" data-mode="up">
+                                            <div class="form-group">
+                                                <label>Email address</label>
+                                                <input type="text" name="usr_email" value="" class="form-control"
+                                                       placeholder="Email">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Password</label>
+                                                <input type="password" name="usr_password" value="" class="form-control"
+                                                       placeholder="Password" title="Minimum 6 characters">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Password</label>
+                                                <input type="password" name="usr_password2" value=""
+                                                       class="form-control" placeholder="Retype Password"
+                                                       title="Minimum 6 characters">
+                                            </div>
+                                            <div class="row row-nopad">
+                                                <div class="col-xs-12">
+                                                    <div class="checkbox">
+                                                        <input type="checkbox" name="tos" value="1" id="tos" checked>
+                                                        <label for="tos" class="notice-sm full">
+                                                            <span></span>I have read and agree to the FileFox <a
+                                                                href="/tos.html" target="_blank">ToS</a>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row after-table">
+
+                                                <input type="hidden" value="samwysegamgee@proton.me" name="user_logged">
+
+
+                                                <button class="btn btn-default sign-up" name="submit_btn"
+                                                        onclick="ga('send', 'event', 'buyproceed', 'click');">Proceed
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-7 col-md-6 sign-in-up" data-mode="in">
+                                            <div class="form-group">
+                                                <label>Email address</label>
+                                                <input type="text" name="usr_email" value="" class="form-control"
+                                                       placeholder="Email">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Password</label>
+                                                <input type="password" name="usr_password" value="" class="form-control"
+                                                       placeholder="Password" title="Minimum 6 characters">
+                                            </div>
+
+                                            <div class="row after-table">
+                                                <button class="btn btn-default sign-up" name="submit_btn"
+                                                        onclick="ga('send', 'event', 'buyproceed', 'click');">Proceed
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <div class="row">
+                                        <div class="col-sm-4 fees"><!--<span>*</span>except for PayPal payment--></div>
+                                        <div class="col-sm-8 proceed">
+                                            <button type="button" class="btn btn-primary btn-login " data-mode="in">Log
+                                                In
+                                            </button>
+                                            <button type="button" class="btn btn-primary btn-login hidden"
+                                                    data-mode="up">Register
+                                            </button>
+
+                                            <!--<button type="button" class="btn btn-primary btn-proceed hidden" >Proceed</button>-->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div><!-- /.modal -->
+                    <script>
+                        $(document).ready(function () {
+
+
+                            $('.i-vm').each(function (n) {
+                                $(this).removeClass('i-pay i-vm').addClass('i-pay i-vm i-vm' + (n + 1));
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <script>
+
+
+            </script>
+        </div>
+    </div>
+</div>
+<footer>
+    <div class="container">
+        <ul class="ul-h">
+            <li><a href="/tos.html">Terms of Service</a></li>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li><a href="/dmca.html">DMCA</a></li>
+
+            <li><a href="/webmasters.html">Webmasters</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+        </ul>
+        <div class="copyright">
+            &copy; FileFox.cc - All Rights Reserved - 2024
+        </div>
+    </div>
+</footer>
+
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+            m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-138338857-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>

@@ -34,6 +34,7 @@ import net.tomasbot.matchday.model.video.VideoStreamLocatorPlaylist;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @PropertySource("classpath:video.properties")
@@ -70,6 +71,7 @@ public class VideoStreamLocatorPlaylistService {
    * @param fileSource The VideoFileSource from which the stream will be created
    * @return The playlist of video streams
    */
+  @Transactional
   public VideoStreamLocatorPlaylist createVideoStreamPlaylist(@NotNull VideoFileSource fileSource) {
     final VideoFilePack playlistFiles = videoFileSelectorService.getPlaylistFiles(fileSource);
     if (playlistFiles == null || playlistFiles.size() == 0) {

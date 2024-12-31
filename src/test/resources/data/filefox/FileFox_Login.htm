@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script type="text/javascript" src="https://filefox.cc/SOMETHING"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138338857-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'UA-138338857-1');
+    </script>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv=X-UA-Compatible>
+    <meta content="width=device-width,initial-scale=1" name=viewport>
+    <meta name="keywords" content="">
+    <meta name="description" content="FileFox.cc">
+    <meta name="robots" content="noindex, nofollow">
+    <title>FileFox</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic&subset=cyrillic-ext,latin,cyrillic'
+          rel='stylesheet' type='text/css'>
+    <link href='/css/bootstrap.min.css' rel='stylesheet'>
+    <link href='/css/style.min.css?v=8' rel='stylesheet'>
+
+
+    <!--[if lt IE 9]>
+    <script>if (top != self) top.location.href = self.document.location;</script>
+    <script src="/js/html5shiv.min.js"></script>
+    <script src="/js/respond.min.js"></script> <![endif]-->
+    <script src="/js/jquery-latest.min.js"></script>
+    <script src="/js/jquery.easyModal.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/script.js?v=10"></script>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<div class="main-wrap" id="container">
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#collapse-1"
+                        aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">
+                    <img src="/css/img/logo3.png" id="logo" alt="FileFox.cc">
+                </a>
+            </div>
+            <div class="collapse navbar-collapse" id="collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                    <li><a href="/premium">Premium</a></li>
+                    <!--li><a href="/?op=registration">Register</a></li-->
+                    <li><a href="/">Login</a></li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="bodyline">
+        <div class="container">
+            <div class="col-sm-6 col-sm-offset-3 col-xs-12 col-xs-offset-0">
+                <div class="row modal-box">
+                    <div class="box-header col-sm-12">Client Login</div>
+                    <div class="box-content col-sm-12">
+                        <form action="/login" method="post" name="FL" data-type="login" class="ajax-form modal-form">
+                            <div class="form-group">
+                                <label>Email address</label>
+                                <input type="text" name="email" value="" class="form-control" placeholder="Email">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" name="password" class="form-control" placeholder="Password">
+                            </div>
+                            <div class="row row-nopad">
+                                <div class="col-xs-5 col-xs-offset-7 notify-right">
+                                    <div class="checkbox">
+                                        <label>
+                                            <a href="/forgot_password" class="notice-sm">Forgot Password</a>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group recaptcha">
+
+                            </div>
+                            <div class="row after-table">
+                                <input type="hidden" name="op" value="login">
+                                <input type="hidden" name="redirect" value="">
+                                <input type="hidden" name="rand" value="">
+                                <button class="btn btn-default" id="loginbtn" type="submit">Login</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <script>
+                var lng_login_msg_email_cant_be_blank = "Email and Password can't be blank!";
+                var lng_login_msg_valid_email_required = "Valid email required";
+
+
+            </script>
+        </div>
+    </div>
+</div>
+<footer>
+    <div class="container">
+        <ul class="ul-h">
+            <li><a href="/tos.html">Terms of Service</a></li>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li><a href="/dmca.html">DMCA</a></li>
+            <!--li><a href="/pages/affiliate.html">Affiliates</a></li>
+            <li><a href="/pages/pbtcbeta.html">Publishers</a></li-->
+            <li><a href="/webmasters.html">Webmasters</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+        </ul>
+        <div class="copyright">
+            &copy; FileFox.cc - All Rights Reserved - 2024
+        </div>
+    </div>
+</footer>
+</body>
+</html>

@@ -31,13 +31,9 @@ import lombok.experimental.SuperBuilder;
 @Getter
 public abstract class FileFoxPage {
 
-  protected final boolean premium;
-  protected final boolean loggedIn;
-  protected String text;
-
-  abstract boolean isLoggedIn();
-
-  abstract boolean isPremium();
+  private final boolean premium;
+  private final boolean loggedIn;
+  private String text;
 
   @EqualsAndHashCode(callSuper = true)
   @Data
@@ -48,13 +44,13 @@ public abstract class FileFoxPage {
     private final URI ddlSubmitUri;
 
     @Override
-    boolean isLoggedIn() {
-      return this.loggedIn;
+    public boolean isPremium() {
+      return true;
     }
 
     @Override
-    boolean isPremium() {
-      return this.premium;
+    public boolean isLoggedIn() {
+      return true;
     }
   }
 
@@ -62,17 +58,16 @@ public abstract class FileFoxPage {
   @Data
   @SuperBuilder
   public static class DirectDownload extends FileFoxPage {
-
     private final URL ddlUrl;
 
     @Override
-    boolean isLoggedIn() {
-      return this.loggedIn;
+    public boolean isPremium() {
+      return true;
     }
 
     @Override
-    boolean isPremium() {
-      return this.premium;
+    public boolean isLoggedIn() {
+      return true;
     }
   }
 
@@ -80,24 +75,44 @@ public abstract class FileFoxPage {
   @Data
   @SuperBuilder
   public static class Login extends FileFoxPage {
-    private final boolean premium = false;
-    private final boolean loggedIn = false;
+    @Override
+    public boolean isPremium() {
+      return false;
+    }
+
+    @Override
+    public boolean isLoggedIn() {
+      return false;
+    }
   }
 
   @EqualsAndHashCode(callSuper = true)
   @Data
   @SuperBuilder
   public static class Profile extends FileFoxPage {
-    private final boolean premium;
-    private final boolean loggedIn = true;
+    private float trafficAvailable;
+
+    @Override
+    public boolean isLoggedIn() {
+      return true;
+    }
   }
 
   @EqualsAndHashCode(callSuper = true)
   @Data
   @SuperBuilder
   public static class Invalid extends FileFoxPage {
-    private final boolean loggedIn = false;
-    private final boolean premium = false;
+
     private String error;
+
+    @Override
+    public boolean isPremium() {
+      return false;
+    }
+
+    @Override
+    public boolean isLoggedIn() {
+      return false;
+    }
   }
 }

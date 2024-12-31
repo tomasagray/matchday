@@ -19,20 +19,34 @@
 
 package net.tomasbot.matchday.log.plugin.ffmpeg;
 
+import net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 
 @Aspect
 public class FFmpegPluginLog {
 
   private static final Logger logger = LogManager.getLogger(FFmpegPlugin.class);
+
+  @Before("execution(* net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin.streamUri(..))")
+  public void logStreamUri(@NotNull JoinPoint jp) {
+    logger.info("Creating HLS stream with request: {}", jp.getArgs());
+  }
+
+  @AfterReturning(
+      value =
+          "execution(* net.tomasbot.ffmpeg_wrapper.task.FFmpegSingleStreamTask.createExecCommand(..))",
+      returning = "commands")
+  public void logFFmpegExecCommand(@NotNull Object commands) {
+    logger.info("Created FFmpeg stream task with commands: {}", commands);
+  }
 
   @Before(
       "execution(* net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin.interruptAllStreamTasks())")
