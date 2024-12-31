@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.4.1] - 2024-12-30
+
+### Added
+
+- File server user bandwidth monitoring, finished Filefox plugin
+
+### Fixed
+
+- VPN heartbeat at startup
+- Dependency validation now creates needed directories if they are missing
+
 ## [0.4.0] - 2024-12-26
 
 ### Added
