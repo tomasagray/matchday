@@ -1,13 +1,18 @@
 package net.tomasbot.matchday.api.service.video;
 
+import static net.tomasbot.matchday.config.settings.plugin.FFmpegAdditionalArgs.FFMPEG_ADDITIONAL_ARGS;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import net.tomasbot.ffmpeg_wrapper.request.SimpleTranscodeRequest;
 import net.tomasbot.ffmpeg_wrapper.task.FFmpegStreamTask;
+import net.tomasbot.matchday.api.service.SettingsService;
 import net.tomasbot.matchday.model.video.StreamJobState.JobStatus;
 import net.tomasbot.matchday.model.video.TaskState;
 import net.tomasbot.matchday.model.video.VideoFile;
@@ -26,14 +31,17 @@ public class VideoStreamer {
   private final VideoFileService videoFileService;
   private final VideoStreamLocatorService locatorService;
   private final FFmpegPlugin ffmpegPlugin;
+  private final SettingsService settingsService;
 
   public VideoStreamer(
       VideoFileService videoFileService,
       VideoStreamLocatorService locatorService,
-      FFmpegPlugin ffmpegPlugin) {
+      FFmpegPlugin ffmpegPlugin,
+      SettingsService settingsService) {
     this.videoFileService = videoFileService;
     this.locatorService = locatorService;
     this.ffmpegPlugin = ffmpegPlugin;
+    this.settingsService = settingsService;
   }
 
   @Async("VideoStreamExecutor")
@@ -67,7 +75,7 @@ public class VideoStreamer {
               .onError(e -> setLocatorErrorState(streamLocator, new IOException(e)))
               .onComplete(ec -> completeStream(streamLocator))
               .logFile(FFmpegStreamTask.getDefaultLogFile())
-              .additionalArgs(Map.of("-map", 0)) // include all streams
+              .additionalArgs(getAdditionalArgs())
               .build();
       FFmpegStreamTask streamTask = ffmpegPlugin.streamUri(transcodeRequest);
       streamTask.run();
@@ -116,5 +124,21 @@ public class VideoStreamer {
     taskState.setCompletionRatio(-1.0);
     taskState.setStatus(JobStatus.ERROR);
     updateLocatorTaskState(streamLocator, taskState);
+  }
+
+  @NotNull
+  @SuppressWarnings("unchecked cast")
+  private Map<String, Object> getAdditionalArgs() {
+    Map<String, Object> mapped = new LinkedHashMap<>();
+    List<String> args = settingsService.getSetting(FFMPEG_ADDITIONAL_ARGS, List.class);
+
+    int argsCount = args.size();
+    if (argsCount % 2 != 0) throw new AdditionalVideoArgException(argsCount);
+
+    for (int i = 0; i < argsCount; i += 2) {
+      mapped.put(args.get(i), args.get(i + 1));
+    }
+
+    return mapped;
   }
 }
