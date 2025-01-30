@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.4.2] - 2025-01-29
+
+### Fixed
+
+- Extracted FFmpeg additional arguments to settings
+
 ## [0.4.1] - 2024-12-30
 
 ### Added

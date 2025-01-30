@@ -19,15 +19,19 @@
 
 package net.tomasbot.matchday.api.service;
 
+import static net.tomasbot.matchday.config.settings.plugin.FFmpegAdditionalArgs.FFMPEG_ADDITIONAL_ARGS;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import net.tomasbot.matchday.api.service.video.AdditionalVideoArgException;
 import net.tomasbot.matchday.model.ApplicationSettings;
 import net.tomasbot.matchday.model.Setting;
 import net.tomasbot.matchday.util.JsonParser;
@@ -54,9 +58,17 @@ public class SettingsService {
     this.settings.putAll(settings);
   }
 
+  @SuppressWarnings("unchecked")
   private static void validateSetting(@NotNull Setting<?> setting) {
     if (setting.getPath() == null) {
       throw new IllegalArgumentException("Setting path was null");
+    }
+
+    if (setting.getPath().equals(FFMPEG_ADDITIONAL_ARGS)) {
+      int argsCount = ((List<String>) setting.getData()).size();
+      if (argsCount % 2 != 0) {
+        throw new AdditionalVideoArgException(argsCount);
+      }
     }
   }
 
