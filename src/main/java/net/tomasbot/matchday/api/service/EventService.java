@@ -32,6 +32,7 @@ import net.tomasbot.matchday.model.Highlight;
 import net.tomasbot.matchday.model.Match;
 import net.tomasbot.matchday.model.video.VideoFileSource;
 import net.tomasbot.matchday.model.video.VideoPlaylist;
+import net.tomasbot.matchday.model.video.VideoStreamLocatorPlaylist;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Example;
@@ -210,10 +211,15 @@ public class EventService implements EntityService<Event, UUID> {
       throws IOException {
     Optional<Event> eventOptional = fetchById(eventId);
     if (eventOptional.isPresent()) {
-      Event event = eventOptional.get();
-      Set<VideoFileSource> fileSources = event.getFileSources();
-      streamingService.deleteAllVideoData(fileSrcId);
+      Set<VideoFileSource> fileSources = eventOptional.get().getFileSources();
       fileSources.removeIf(source -> fileSrcId.equals(source.getFileSrcId()));
+
+      Optional<VideoStreamLocatorPlaylist> playlistOptional =
+          streamingService.getPlaylistForFileSource(fileSrcId);
+      if (playlistOptional.isPresent()) {
+        VideoStreamLocatorPlaylist playlist = playlistOptional.get();
+        streamingService.deleteAllVideoData(playlist);
+      }
     } else {
       throw new IllegalArgumentException("Event does not exist: " + eventId);
     }

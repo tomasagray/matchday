@@ -178,6 +178,10 @@ public class VideoStreamingService {
     return videoStreamManager.getActiveStreamCount();
   }
 
+  public Optional<VideoStreamLocatorPlaylist> getPlaylistForFileSource(@NotNull UUID fileSrcId) {
+    return playlistService.getVideoStreamPlaylistFor(fileSrcId);
+  }
+
   /** Destroy all currently-running video streaming tasks */
   public int killAllStreamingTasks() {
     return videoStreamManager.killAllStreams();
@@ -205,8 +209,7 @@ public class VideoStreamingService {
   }
 
   public void deleteAllVideoData(@NotNull UUID fileSrcId) throws IOException {
-    Optional<VideoStreamLocatorPlaylist> playlistOptional =
-        playlistService.getVideoStreamPlaylistFor(fileSrcId);
+    Optional<VideoStreamLocatorPlaylist> playlistOptional = getPlaylistForFileSource(fileSrcId);
     if (playlistOptional.isPresent()) {
       VideoStreamLocatorPlaylist playlist = playlistOptional.get();
       deleteAllVideoData(playlist);
