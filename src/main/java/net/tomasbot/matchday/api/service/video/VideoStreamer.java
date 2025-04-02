@@ -114,7 +114,6 @@ public class VideoStreamer {
       @NotNull VideoStreamLocator streamLocator, @NotNull TaskState state) {
     streamLocator.updateState(state.getStatus(), state.getCompletionRatio(), state.getError());
     locatorService.updateStreamLocator(streamLocator);
-    locatorService.publishLocatorStatus(streamLocator);
   }
 
   private void setLocatorErrorState(

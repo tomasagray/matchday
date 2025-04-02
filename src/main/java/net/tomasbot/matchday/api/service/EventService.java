@@ -54,18 +54,21 @@ public class EventService implements EntityService<Event, UUID> {
   private final HighlightService highlightService;
   private final CompetitionService competitionService;
   private final VideoStreamingService streamingService;
+  private final VideoStreamingService videoStreamingService;
 
   EventService(
       EventRepository eventRepository,
       MatchService matchService,
       HighlightService highlightService,
       CompetitionService competitionService,
-      VideoStreamingService streamingService) {
+      VideoStreamingService streamingService,
+      VideoStreamingService videoStreamingService) {
     this.eventRepository = eventRepository;
     this.matchService = matchService;
     this.highlightService = highlightService;
     this.competitionService = competitionService;
     this.streamingService = streamingService;
+    this.videoStreamingService = videoStreamingService;
   }
 
   @Override
@@ -194,7 +197,7 @@ public class EventService implements EntityService<Event, UUID> {
   public Optional<VideoPlaylist> getVideoStreamPlaylist(
       @NotNull UUID eventId, @NotNull UUID fileSrcId) {
     return fetchById(eventId)
-        .flatMap(event -> streamingService.getOrCreateVideoStreamPlaylist(event, fileSrcId));
+        .flatMap(event -> streamingService.beginStreamingVideo(event, fileSrcId));
   }
 
   public VideoFileSource updateVideoFileSource(
@@ -223,5 +226,11 @@ public class EventService implements EntityService<Event, UUID> {
     } else {
       throw new IllegalArgumentException("Event does not exist: " + eventId);
     }
+  }
+
+  public Optional<VideoPlaylist> downloadVideoStream(
+      UUID eventId, UUID fileSrcId, UUID videoFileID) {
+    return fetchById(eventId)
+        .flatMap(event -> videoStreamingService.downloadVideoStream(event, fileSrcId, videoFileID));
   }
 }

@@ -44,7 +44,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
@@ -92,6 +91,10 @@ public class VideoStreamManager {
     }
   }
 
+  public boolean isStreaming(Long locatorId) {
+    return streamQueue.containsKey(locatorId);
+  }
+
   public VideoStreamLocatorPlaylist createVideoStreamFrom(@NotNull VideoFileSource fileSource) {
     UUID fileSrcId = fileSource.getFileSrcId();
     Optional<VideoStreamLocatorPlaylist> existing =
@@ -103,9 +106,9 @@ public class VideoStreamManager {
     return playlistService.createVideoStreamPlaylist(fileSource);
   }
 
-  public void queueStreamJobs(@NotNull VideoStreamLocatorPlaylist playlist) {
+  public void queueStreamJobs(@NotNull Collection<VideoStreamLocator> locators) {
     List<VideoStreamLocator> sortedLocators =
-        playlist.getStreamLocators().stream()
+        locators.stream()
             // ensure streams are started in correct order
             .sorted(Comparator.comparing(VideoStreamLocator::getVideoFile))
             .toList();
@@ -115,23 +118,27 @@ public class VideoStreamManager {
   }
 
   public void queueStreamJob(@NotNull VideoStreamLocator locator) {
-    videoStreamer.updateLocatorTaskState(locator, new TaskState(JobStatus.QUEUED, 0.0));
     final Long locatorId = locator.getStreamLocatorId();
-    final Future<Long> streamTask =
-        videoStreamer.beginStreaming(
-            locator,
-            new Runnable() {
-              private boolean hasRun = false;
 
-              @Override
-              public void run() {
-                if (!hasRun) {
-                  streamQueue.remove(locatorId);
-                  hasRun = true;
+    if (!streamQueue.containsKey(locatorId)) {
+      videoStreamer.updateLocatorTaskState(locator, new TaskState(JobStatus.QUEUED, 0.0));
+
+      final Future<Long> streamTask =
+          videoStreamer.beginStreaming(
+              locator,
+              new Runnable() {
+                private boolean hasRun = false;
+
+                @Override
+                public void run() {
+                  if (!hasRun) {
+                    streamQueue.remove(locatorId);
+                    hasRun = true;
+                  }
                 }
-              }
-            });
-    streamQueue.put(locatorId, streamTask);
+              });
+      streamQueue.put(locatorId, streamTask);
+    }
   }
 
   public Optional<VideoStreamLocatorPlaylist> getLocalStreamFor(@NotNull final UUID fileSrcId) {
@@ -247,7 +254,6 @@ public class VideoStreamManager {
   public void deleteLocalStreams(@NotNull final VideoStreamLocatorPlaylist playlist)
       throws IOException {
     final List<VideoStreamLocator> streamLocators = playlist.getStreamLocators();
-    playlistService.deleteVideoStreamPlaylist(playlist);
     for (VideoStreamLocator streamLocator : streamLocators) {
       deleteVideoDataFromDisk(streamLocator);
     }
@@ -255,46 +261,26 @@ public class VideoStreamManager {
     deleteStorageLocation(playlist);
   }
 
-  @Transactional
-  public void deleteStreamLocatorWithData(@NotNull final VideoStreamLocator streamLocator)
-      throws IOException {
-    // remove locator from playlist
-    final Long locatorId = streamLocator.getStreamLocatorId();
-    final Optional<VideoStreamLocatorPlaylist> playlistOptional =
-        playlistService.getVideoStreamPlaylistContaining(locatorId);
-    if (playlistOptional.isPresent()) {
-      final VideoStreamLocatorPlaylist playlist = playlistOptional.get();
-      // update playlist
-      playlist.getState().removeTaskState(streamLocator.getState());
-      List<VideoStreamLocator> streamLocators = playlist.getStreamLocators();
-      streamLocators.remove(streamLocator);
-      if (streamLocators.isEmpty()) {
-        playlistService.deleteVideoStreamPlaylist(playlist);
-      }
-      // delete locator & data
-      locatorService.deleteStreamLocator(streamLocator);
-      deleteVideoDataFromDisk(streamLocator);
-    } else {
-      throw new IllegalArgumentException(
-          "Cannot delete non-existent VideoStreamLocator: " + locatorId);
-    }
-  }
-
-  private void deleteVideoDataFromDisk(@NotNull VideoStreamLocator streamLocator)
+  public void deleteVideoDataFromDisk(@NotNull VideoStreamLocator streamLocator)
       throws IOException {
     final Path playlistPath = streamLocator.getPlaylistPath();
     final File playlistFile = playlistPath.toFile();
+
     // if the file doesn't exist, just return
-    if (!playlistFile.exists()) {
-      return;
-    }
+    if (!playlistFile.exists()) return;
+
     if (!playlistFile.isFile()) {
       final String msg =
           String.format(
-              "VideoStreamLocator: %s does not refer to a file! Will not delete",
+              "VideoStreamLocator: %s does not refer to a file!",
               streamLocator.getStreamLocatorId());
       throw new IllegalArgumentException(msg);
     }
+
+    // update locator state
+    streamLocator.getState().setStatus(JobStatus.CREATED);
+    streamLocator.getState().setCompletionRatio(0.0);
+    locatorService.updateStreamLocator(streamLocator);
 
     // delete the data
     final Path streamDataDir = playlistPath.getParent();

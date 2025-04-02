@@ -110,6 +110,7 @@ public class VideoStreamLocatorService {
 
   public void updateStreamLocator(@NotNull VideoStreamLocator streamLocator) {
     streamLocatorRepo.saveAndFlush(streamLocator);
+    publishLocatorStatus(streamLocator);
   }
 
   /**

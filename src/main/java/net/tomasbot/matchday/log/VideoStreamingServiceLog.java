@@ -21,6 +21,8 @@ package net.tomasbot.matchday.log;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import net.tomasbot.matchday.api.service.video.VideoStreamingService;
+import net.tomasbot.matchday.model.video.VideoFileSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -30,8 +32,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.api.service.video.VideoStreamingService;
-import net.tomasbot.matchday.model.video.VideoFileSource;
 
 @Aspect
 public class VideoStreamingServiceLog {
@@ -66,11 +66,7 @@ public class VideoStreamingServiceLog {
       "execution(* net.tomasbot.matchday.api.service.video.VideoStreamingService.renderPlaylist(..))")
   public Object logRenderPlaylist(@NotNull ProceedingJoinPoint jp) throws Throwable {
     final Object[] args = jp.getArgs();
-    logger.info(
-        "Rendering playlist for Event: {}, File Source: {}, locator playlist: {}",
-        args[0],
-        args[1],
-        args[2]);
+    logger.info("Rendering playlist for Event: {}, locator playlist: {}", args[0], args[1]);
     final Object result = jp.proceed();
     logger.info("Rendered playlist: {} for File Source: {}", result, args[1]);
     return result;

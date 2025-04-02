@@ -21,12 +21,10 @@ package net.tomasbot.matchday.api.service.video;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import net.tomasbot.matchday.model.Event;
 import net.tomasbot.matchday.model.video.*;
+import net.tomasbot.matchday.model.video.StreamJobState.JobStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -63,17 +61,12 @@ public class VideoStreamingService {
   }
 
   public Optional<VideoPlaylist> getBestVideoStreamPlaylist(@NotNull Event event) {
-    // check if a stream already exists for this Event
-    final Optional<VideoStreamLocatorPlaylist> playlistOptional = findExistingStream(event);
-    if (playlistOptional.isPresent()) {
-      final VideoStreamLocatorPlaylist existingPlaylist = playlistOptional.get();
-      final UUID fileSrcId = existingPlaylist.getFileSource().getFileSrcId();
-      return getOrCreateVideoStreamPlaylist(event, fileSrcId);
-    }
-    // else...
-    final VideoFileSource fileSource = selectorService.getBestFileSource(event);
-    final UUID fileSrcId = fileSource.getFileSrcId();
-    return getOrCreateVideoStreamPlaylist(event, fileSrcId);
+    final Optional<VideoStreamLocatorPlaylist> existingStream = findExistingStream(event);
+    final VideoFileSource fileSource =
+        existingStream.isPresent()
+            ? existingStream.get().getFileSource()
+            : selectorService.getBestFileSource(event);
+    return beginStreamingVideo(event, fileSource.getFileSrcId());
   }
 
   /**
@@ -92,6 +85,44 @@ public class VideoStreamingService {
         .findFirst();
   }
 
+  public Optional<VideoPlaylist> beginStreamingVideo(
+      @NotNull Event event, @NotNull UUID fileSrcId) {
+    return getOrCreateVideoStreamPlaylist(event, fileSrcId)
+        .map(
+            playlist -> {
+              Collection<VideoStreamLocator> streamJobs = getStreamJobs(playlist);
+              videoStreamManager.queueStreamJobs(streamJobs);
+              return Optional.of(playlist);
+            })
+        .orElseThrow(
+            () ->
+                new IllegalStateException("Could not start stream for file source: " + fileSrcId));
+  }
+
+  public Optional<VideoPlaylist> downloadVideoStream(
+      @NotNull Event event, @NotNull UUID fileSrcId, @NotNull UUID videoFileId) {
+    Optional<VideoPlaylist> playlistOptional = getOrCreateVideoStreamPlaylist(event, fileSrcId);
+
+    if (playlistOptional.isPresent()) {
+      final VideoPlaylist videoPlaylist = playlistOptional.get();
+      final VideoStreamLocator streamLocator =
+          videoPlaylist.getLocatorIds().keySet().stream()
+              .map(locatorService::getStreamLocator)
+              .filter(Optional::isPresent)
+              .map(Optional::get)
+              .filter(locator -> locator.getVideoFile().getFileId().equals(videoFileId))
+              .findFirst()
+              .orElse(new SingleStreamLocator())
+          /*.orElseThrow(
+          () ->
+              new IllegalArgumentException(
+                  "No Video Stream was located for the given parameters"))*/ ;
+
+      videoStreamManager.queueStreamJob(streamLocator);
+    }
+    return playlistOptional;
+  }
+
   /**
    * Get the most recent video stream playlist for the given file source
    *
@@ -99,28 +130,46 @@ public class VideoStreamingService {
    * @return An Optional containing the playlist, if one was found; empty indicates one is being
    *     created
    */
-  public Optional<VideoPlaylist> getOrCreateVideoStreamPlaylist(
+  private Optional<VideoPlaylist> getOrCreateVideoStreamPlaylist(
       @NotNull Event event, @NotNull UUID fileSrcId) {
     final VideoFileSource videoFileSource = event.getFileSource(fileSrcId);
-    if (videoFileSource != null) {
-      return videoStreamManager
-          .getLocalStreamFor(fileSrcId)
-          .map(playlist -> renderPlaylist(event.getEventId(), fileSrcId, playlist))
-          .or(
-              () -> {
-                final VideoStreamLocatorPlaylist playlist = createVideoStream(videoFileSource);
-                return Optional.of(renderPlaylist(event.getEventId(), fileSrcId, playlist));
-              });
-    }
-    // "not found"
-    return Optional.empty();
+    return videoFileSource != null
+        ? videoStreamManager
+            .getLocalStreamFor(fileSrcId)
+            .or(() -> Optional.of(createVideoStream(videoFileSource)))
+            .map(playlist -> renderPlaylist(event.getEventId(), playlist))
+        : Optional.empty();
+  }
+
+  private @NotNull Collection<VideoStreamLocator> getStreamJobs(
+      @NotNull VideoPlaylist videoPlaylist) {
+    final UUID fileSrcId = videoPlaylist.getFileSrcId();
+    final Set<Long> requestedLocatorIds = videoPlaylist.getLocatorIds().keySet();
+
+    VideoStreamLocatorPlaylist locatorPlaylist =
+        videoStreamManager
+            .getLocalStreamFor(fileSrcId)
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException("No Video Stream for file source: " + fileSrcId));
+
+    return locatorPlaylist.getStreamLocators().stream()
+        .filter(streamLocator -> requestedLocatorIds.contains(streamLocator.getStreamLocatorId()))
+        .filter(this::isNotStreaming)
+        .toList();
+  }
+
+  private boolean isNotStreaming(@NotNull VideoStreamLocator locator) {
+    return locator.getState().getStatus().compareTo(JobStatus.QUEUED) < 0
+        && !videoStreamManager.isStreaming(locator.getStreamLocatorId());
   }
 
   public @NotNull VideoPlaylist renderPlaylist(
       @NotNull UUID eventId,
-      @NotNull UUID fileSrcId,
       @NotNull VideoStreamLocatorPlaylist playlist) {
+    final UUID fileSrcId = playlist.getFileSource().getFileSrcId();
     final VideoPlaylist videoPlaylist = new VideoPlaylist(eventId, fileSrcId);
+
     playlist
         .getStreamLocators()
         .forEach(
@@ -140,10 +189,7 @@ public class VideoStreamingService {
    */
   public @NotNull VideoStreamLocatorPlaylist createVideoStream(
       @NotNull final VideoFileSource videoFileSource) {
-    final VideoStreamLocatorPlaylist playlist =
-        videoStreamManager.createVideoStreamFrom(videoFileSource);
-    videoStreamManager.queueStreamJobs(playlist);
-    return playlist;
+    return videoStreamManager.createVideoStreamFrom(videoFileSource);
   }
 
   public String readPlaylistFile(@NotNull Long fileId) throws Exception {
@@ -231,11 +277,10 @@ public class VideoStreamingService {
   }
 
   public void deleteVideoData(@NotNull UUID videoFileId) throws IOException {
-    final Optional<VideoStreamLocator> locatorOptional =
-        locatorService.getStreamLocatorFor(videoFileId);
+    Optional<VideoStreamLocator> locatorOptional = locatorService.getStreamLocatorFor(videoFileId);
     if (locatorOptional.isPresent()) {
-      final VideoStreamLocator locator = locatorOptional.get();
-      videoStreamManager.deleteStreamLocatorWithData(locator);
+      VideoStreamLocator locator = locatorOptional.get();
+      videoStreamManager.deleteVideoDataFromDisk(locator);
     } else {
       throw new IllegalArgumentException("No stream locator exists for VideoFile: " + videoFileId);
     }

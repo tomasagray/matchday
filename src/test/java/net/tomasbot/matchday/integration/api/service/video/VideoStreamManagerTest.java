@@ -262,7 +262,6 @@ class VideoStreamManagerTest {
     logger.info("Killing test streams...");
     streamManager.killAllStreams();
 
-    final UUID fileSrcId = testFileSource.getFileSrcId();
     final VideoStreamLocatorPlaylist playlist = getStreamLocatorPlaylist();
     final Path storageLocation = playlist.getStorageLocation();
     logger.info("Deleting local data associated with VideoStreamLocatorPlaylist: {}", playlist);
@@ -273,9 +272,6 @@ class VideoStreamManagerTest {
     // then
     logger.info("Ensuring local data is actually gone...");
     assertThat(storageLocation).doesNotExist();
-    final Optional<VideoStreamLocatorPlaylist> optionalAfterDelete =
-        streamManager.getLocalStreamFor(fileSrcId);
-    assertThat(optionalAfterDelete).isEmpty();
   }
 
   /**

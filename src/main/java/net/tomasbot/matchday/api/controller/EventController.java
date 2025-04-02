@@ -145,4 +145,19 @@ public class EventController {
         .map(ResponseEntity::ok)
         .orElseThrow(() -> getPlaylistError(fileSrcId));
   }
+
+  @RequestMapping(
+      value = "/event/{eventId}/video/stream/{fileSrcId}/{videoFileId}/stream",
+      method = RequestMethod.POST,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> downloadVideoStream(
+      @PathVariable("eventId") UUID eventId,
+      @PathVariable("fileSrcId") UUID fileSrcId,
+      @PathVariable("videoFileId") UUID videoFileID) {
+    return eventService
+        .downloadVideoStream(eventId, fileSrcId, videoFileID)
+        .map(playlistAssembler::toModel)
+        .map(ResponseEntity::ok)
+        .orElseThrow(() -> getPlaylistError(fileSrcId));
+  }
 }

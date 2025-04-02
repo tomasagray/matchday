@@ -95,6 +95,8 @@ public class MatchResource extends RepresentationModel<MatchResource> {
         resource.setCompetition(competition);
         resource.setHomeTeam(homeTeam);
         resource.setAwayTeam(awayTeam);
+
+        resource.add(linkTo(methodOn(MatchController.class).fetchMatchById(eventId)).withSelfRel());
         Artwork artwork = entity.getArtwork();
         if (artwork != null) {
           resource.add(
@@ -105,7 +107,7 @@ public class MatchResource extends RepresentationModel<MatchResource> {
         }
         resource.add(
             linkTo(methodOn(EventController.class).getVideoResources(eventId)).withRel(VIDEO_LINK));
-        resource.add(linkTo(methodOn(MatchController.class).fetchMatchById(eventId)).withSelfRel());
+
         return resource;
       } catch (IOException e) {
         throw new UncheckedIOException(e);
