@@ -1,49 +1,33 @@
 package net.tomasbot.matchday.model;
 
-import java.nio.file.Path;
 import java.sql.Timestamp;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.model.video.VideoStreamLocator;
-import net.tomasbot.matchday.model.video.VideoStreamLocatorPlaylist;
+import java.util.UUID;
+import javax.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Builder
-public final class SanityReport {
+@Entity
+@AllArgsConstructor
+public class SanityReport {
 
-  private final ArtworkSanityReport artworkSanityReport;
-  private final VideoSanityReport videoSanityReport;
-  private final Timestamp timestamp;
-  private final boolean requiresHealing;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @Type(type = "uuid-char")
+  private UUID id;
 
-  @AllArgsConstructor
-  public static class DanglingVideoStreamLocator extends VideoStreamLocator {
-    public DanglingVideoStreamLocator(@NotNull VideoStreamLocator locator) {
-      this.streamLocatorId = locator.getStreamLocatorId();
-      this.videoFile = locator.getVideoFile();
-      this.playlistPath = locator.getPlaylistPath();
-      this.state = locator.getState();
-    }
-  }
+  @OneToOne(cascade = CascadeType.ALL)
+  private ArtworkSanityReport artworkSanityReport;
 
-  @Data
-  @Builder
-  public static final class ArtworkSanityReport {
-    private final List<Path> danglingFiles;
-    private final List<Artwork> danglingDbEntries;
-    private long totalFiles;
-    private long totalDbEntries;
-  }
+  @OneToOne(cascade = CascadeType.ALL)
+  private VideoSanityReport videoSanityReport;
 
-  @Data
-  @Builder
-  public static final class VideoSanityReport {
-    private final List<DanglingVideoStreamLocator> danglingStreamLocators;
-    private final List<VideoStreamLocatorPlaylist> danglingPlaylists;
-    private long totalStreamLocators;
-    private long totalLocatorPlaylists;
-  }
+  private Timestamp timestamp;
+  private boolean requiresHealing;
 }

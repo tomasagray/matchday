@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class VideoStreamingService {
@@ -286,6 +287,12 @@ public class VideoStreamingService {
     }
   }
 
+  @Transactional
+  public void deleteVideoStreamPlaylist(@NotNull VideoStreamLocatorPlaylist playlist) {
+    playlistService.deleteVideoStreamPlaylist(playlist);
+  }
+
+  @Transactional
   public void deleteVideoStreamLocator(@NotNull VideoStreamLocator locator) {
     locatorService.deleteStreamLocator(locator);
   }
@@ -311,5 +318,9 @@ public class VideoStreamingService {
     source
         .getVideoFilePacks()
         .forEach(pack -> pack.allFiles().forEach((title, file) -> file.setFileId(null)));
+  }
+
+  public Optional<VideoStreamLocator> getVideoStreamLocator(Long streamLocatorId) {
+    return locatorService.getStreamLocator(streamLocatorId);
   }
 }
