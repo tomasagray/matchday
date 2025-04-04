@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.4.3] - 2025-04-04
+
+### Fixed
+
+- Error with VideoStreamLocator relationships when auto-healing from a sanity check
+- Bug: Video Source could not be deleted if it had never been streamed
+- Bug: VPN status not accurately detected
+
+### Added
+
+- Endpoint for downloading an individual video stream
+
 ## [0.4.2] - 2025-01-29
 
 ### Fixed
