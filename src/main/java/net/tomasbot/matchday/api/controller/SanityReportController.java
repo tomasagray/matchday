@@ -20,11 +20,12 @@
 package net.tomasbot.matchday.api.controller;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import net.tomasbot.matchday.api.service.admin.SanityCheckService;
 import net.tomasbot.matchday.model.SanityReport;
-import net.tomasbot.matchday.model.video.VideoStreamLocator;
-import net.tomasbot.matchday.model.video.VideoStreamLocatorPlaylist;
+import net.tomasbot.matchday.model.VideoSanityReport.DanglingLocatorPlaylist;
+import net.tomasbot.matchday.model.VideoSanityReport.DanglingVideoStreamLocator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -52,14 +53,14 @@ public class SanityReportController {
 
   private String getDanglingLocatorIds(@NotNull SanityReport report) {
     return report.getVideoSanityReport().getDanglingStreamLocators().stream()
-        .map(VideoStreamLocator::getStreamLocatorId)
+        .map(DanglingVideoStreamLocator::getStreamLocatorId)
         .map(Object::toString)
         .collect(Collectors.joining(", "));
   }
 
   private String getDanglingPlaylistIds(@NotNull SanityReport report) {
     return report.getVideoSanityReport().getDanglingPlaylists().stream()
-        .map(VideoStreamLocatorPlaylist::getId)
+        .map(DanglingLocatorPlaylist::getPlaylistId)
         .map(Object::toString)
         .collect(Collectors.joining(", "));
   }
@@ -75,8 +76,7 @@ public class SanityReportController {
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public SanityReport attemptAutoHeal(@RequestBody SanityReport report) throws IOException {
-    System.out.println("Report: " + report);
-    return sanityCheckService.autoHealSystem(report);
+  public SanityReport attemptAutoHeal(@RequestParam("reportId") UUID reportId) throws IOException {
+    return sanityCheckService.autoHealSystem(reportId);
   }
 }

@@ -21,6 +21,7 @@ package net.tomasbot.matchday.db;
 
 import java.util.Optional;
 import java.util.UUID;
+import net.tomasbot.matchday.model.Artwork;
 import net.tomasbot.matchday.model.Event;
 import net.tomasbot.matchday.model.video.VideoFileSource;
 import org.jetbrains.annotations.NotNull;
@@ -48,4 +49,6 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
   @Query("SELECT ev FROM Event ev WHERE :fileSource IN elements(ev.fileSources)")
   Optional<Event> fetchEventForFileSource(@NotNull VideoFileSource fileSource);
+
+  Optional<Event> findByArtwork(@NotNull Artwork artwork);
 }

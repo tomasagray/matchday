@@ -1,6 +1,7 @@
 package net.tomasbot.matchday.api.service.admin;
 
 import static net.tomasbot.matchday.api.controller.VpnStatusController.VPN_STATUS_EMIT_ENDPOINT;
+import static net.tomasbot.matchday.config.settings.UnprotectedAddress.UNPROTECTED_ADDR;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import net.tomasbot.matchday.api.controller.VpnStatusController;
+import net.tomasbot.matchday.api.service.SettingsService;
 import net.tomasbot.matchday.model.VpnStatus;
 import net.tomasbot.matchday.model.VpnStatus.VpnConnectionStatus;
 import net.tomasbot.matchday.util.TelnetClientWrapper;
@@ -47,6 +49,7 @@ public class VpnService {
   private final IpService ipService;
   private final SimpMessagingTemplate messagingTemplate;
   private final VpnStatusController statusController;
+  private final SettingsService settingsService;
 
   @Value("${system.vpn.startup-arguments}")
   private String arguments;
@@ -58,11 +61,13 @@ public class VpnService {
       TelnetClientWrapper telnet,
       IpService ipService,
       SimpMessagingTemplate messagingTemplate,
-      VpnStatusController statusController) {
+      VpnStatusController statusController,
+      SettingsService settingsService) {
     this.telnet = telnet;
     this.ipService = ipService;
     this.messagingTemplate = messagingTemplate;
     this.statusController = statusController;
+    this.settingsService = settingsService;
   }
 
   private static void waitForIpRecheck() throws InterruptedException {
@@ -133,13 +138,14 @@ public class VpnService {
     process.waitFor();
     waitForIpRecheck();
 
-    final String ipAddress = ipService.getIpAddress();
     final VpnConnectionStatus vpnStatus = getVpnStatus();
-    String vpnServer = "";
     if (vpnStatus.equals(VpnConnectionStatus.CONNECTED)) {
-      vpnServer = getVpnServer(configuration);
+      String ipAddress = ipService.getIpAddress();
+      String vpnServer = getVpnServer(configuration);
+      publishVpnStatus(new VpnStatus(vpnStatus, ipAddress, vpnServer));
+    } else {
+      doHeartbeat();
     }
-    publishVpnStatus(new VpnStatus(vpnStatus, ipAddress, vpnServer));
   }
 
   public void stop() throws IOException {
@@ -167,9 +173,7 @@ public class VpnService {
       waitForIpRecheck();
       start();
     } finally {
-      final VpnConnectionStatus vpnStatus = getVpnStatus();
-      final String ipAddress = ipService.getIpAddress();
-      publishVpnStatus(new VpnStatus(vpnStatus, ipAddress));
+      doHeartbeat();
     }
   }
 
@@ -178,18 +182,26 @@ public class VpnService {
     try {
       telnet.connect(HOST, managementPort);
       telnet.receive(TERMINATOR);
+
       final String status = signal(SIGUSR2);
       if (status.startsWith(SUCCESS)) {
         vpnConnectionStatus = VpnConnectionStatus.CONNECTED;
       }
+
       telnet.disconnect();
     } catch (ConnectException ignore) {
       // VPN disconnected
     }
+
     return vpnConnectionStatus;
   }
 
-  public void heartbeat(String unprotectedIp) {
+  public void doHeartbeat() {
+    String unprotectedIp = settingsService.getSetting(UNPROTECTED_ADDR, String.class);
+    doHeartbeat(unprotectedIp);
+  }
+
+  private void doHeartbeat(String unprotectedIp) {
     if (unprotectedIp == null || unprotectedIp.isEmpty()) {
       publishVpnStatus(new VpnStatus(VpnConnectionStatus.ERROR, null));
       return;

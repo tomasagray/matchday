@@ -23,11 +23,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -57,6 +54,7 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
 
   private static final LinkRelation PREFERRED_PLAYLIST = LinkRelation.of("preferred");
   private static final LinkRelation STREAM = LinkRelation.of("stream");
+  private static final LinkRelation STREAM_REL = LinkRelation.of("video-stream");
 
   private UUID id;
   private String channel;
@@ -119,9 +117,11 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
       if (framerate > 0) {
         resource.setFrameRate(framerate);
       }
+
       resource.add(
           linkTo(methodOn(EventController.class).getVideoStreamPlaylist(eventId, fileSrcId))
               .withRel(STREAM));
+
       return resource;
     }
 
@@ -132,16 +132,29 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
 
     private @Nullable Map<PartIdentifier, VideoFileResource> getVideoFiles(
         @NotNull VideoFileSource fileSource) {
-
+      final UUID eventId = getEventId(fileSource);
+      final UUID fileSrcId = fileSource.getFileSrcId();
       final List<VideoFilePack> filePacks = fileSource.getVideoFilePacks();
-      // todo - should this be better? how to pick VideoFilePack?
+
       if (filePacks != null && !filePacks.isEmpty()) {
-        final VideoFilePack filePack = filePacks.get(0);
+        final VideoFilePack filePack =
+            filePacks.get(0); // todo - should this be better? how to pick VideoFilePack?
         final Map<PartIdentifier, VideoFileResource> unsorted =
             filePack.allFiles().entrySet().stream()
                 .collect(
                     Collectors.toMap(
-                        Entry::getKey, entry -> videoFileModeller.toModel(entry.getValue())));
+                        Entry::getKey,
+                        entry -> {
+                          VideoFile videoFile = entry.getValue();
+                          UUID videoFileId = videoFile.getFileId();
+                          VideoFileResource resource = videoFileModeller.toModel(videoFile);
+                          resource.add(
+                              linkTo(
+                                      methodOn(EventController.class)
+                                          .downloadVideoStream(eventId, fileSrcId, videoFileId))
+                                  .withRel(STREAM_REL));
+                          return resource;
+                        }));
         return new TreeMap<>(unsorted);
       }
       return null;
@@ -149,8 +162,8 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
 
     public @NotNull CollectionModel<VideoFileSourceResource> toCollectionModel(
         @NotNull UUID eventId, @NotNull Iterable<? extends VideoFileSource> entities) {
-
       final CollectionModel<VideoFileSourceResource> resources = super.toCollectionModel(entities);
+
       // Add link to master playlist
       resources.add(
           linkTo(methodOn(EventController.class).getPreferredPlaylist(eventId))

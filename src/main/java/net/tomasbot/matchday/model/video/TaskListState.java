@@ -46,9 +46,16 @@ public class TaskListState extends StreamJobState {
 
   public void removeTaskState(@NotNull TaskState state) {
     taskStates.remove(state);
+    this.computeState();
   }
 
   public void computeState() {
+    if (taskStates.isEmpty()) {
+     setStatus(JobStatus.CREATED);
+     setCompletionRatio(0.0);
+     return;
+    }
+
     Double aggregateCompletionTotal = 0.0;
     for (TaskState state : getTaskStates()) {
       JobStatus status = state.getStatus();

@@ -182,7 +182,7 @@ class VideoStreamingServiceTest {
         testFileSrcId);
 
     final Optional<VideoPlaylist> playlistOptional =
-        streamingService.getOrCreateVideoStreamPlaylist(testMatch, testFileSrcId);
+        streamingService.beginStreamingVideo(testMatch, testFileSrcId);
     assertThat(playlistOptional).isPresent();
     videoStorageDirs.add(baseVideoStorage + "\\" + testFileSrcId); // for cleanup
 
@@ -193,7 +193,7 @@ class VideoStreamingServiceTest {
     assertThat(videoPlaylist.getLocatorIds().size()).isNotZero();
 
     final Optional<VideoPlaylist> afterCreatingStreamPlaylist =
-        streamingService.getOrCreateVideoStreamPlaylist(testMatch, testFileSrcId);
+        streamingService.beginStreamingVideo(testMatch, testFileSrcId);
     assertThat(afterCreatingStreamPlaylist).isNotNull().isPresent();
     if (afterCreatingStreamPlaylist.isPresent()) {
       final VideoPlaylist playlist = afterCreatingStreamPlaylist.get();
@@ -342,7 +342,7 @@ class VideoStreamingServiceTest {
         "Beginning test stream for file source stream killing with file source ID: {}", fileSrcId);
 
     final Optional<VideoPlaylist> playlistOptional =
-        streamingService.getOrCreateVideoStreamPlaylist(testMatch, fileSrcId);
+        streamingService.beginStreamingVideo(testMatch, fileSrcId);
     assertThat(playlistOptional).isPresent();
     final VideoPlaylist videoPlaylist = playlistOptional.get();
     logger.info("Using playlist: {}", videoPlaylist);

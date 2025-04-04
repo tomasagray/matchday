@@ -21,7 +21,6 @@ package net.tomasbot.matchday.api.service;
 
 import static net.tomasbot.matchday.config.settings.PruneVideos.PRUNE_VIDEOS;
 import static net.tomasbot.matchday.config.settings.RefreshDataSetting.REFRESH_DATASOURCES;
-import static net.tomasbot.matchday.config.settings.UnprotectedAddress.UNPROTECTED_ADDR;
 import static net.tomasbot.matchday.config.settings.VideoExpireDays.VIDEO_EXPIRE_DAYS;
 import static net.tomasbot.matchday.config.settings.VpnHeartbeat.VPN_HEARTBEAT;
 
@@ -154,8 +153,7 @@ public class ScheduledTaskService {
   }
 
   public void testVpnHeartbeat() {
-    String unprotectedIp = settingsService.getSetting(UNPROTECTED_ADDR, String.class);
-    vpnService.heartbeat(unprotectedIp);
+    vpnService.doHeartbeat();
   }
 
   private enum TaskType {

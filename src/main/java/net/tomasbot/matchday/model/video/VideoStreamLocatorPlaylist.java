@@ -36,10 +36,10 @@ import javax.persistence.OneToOne;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import net.tomasbot.matchday.db.converter.PathConverter;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.db.converter.PathConverter;
 
 @Getter
 @Setter
@@ -76,6 +76,11 @@ public class VideoStreamLocatorPlaylist {
   public void addStreamLocator(@NotNull final VideoStreamLocator streamLocator) {
     this.streamLocators.add(streamLocator);
     this.state.addTaskState(streamLocator.getState());
+  }
+
+  public void removeStreamLocator(@NotNull VideoStreamLocator streamLocator) {
+    this.state.removeTaskState(streamLocator.getState());
+    this.streamLocators.remove(streamLocator);
   }
 
   public TaskListState getState() {

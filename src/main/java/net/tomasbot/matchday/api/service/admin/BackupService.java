@@ -20,11 +20,10 @@ import java.util.stream.Stream;
 import net.tomasbot.matchday.api.service.SettingsService;
 import net.tomasbot.matchday.api.service.ZipService;
 import net.tomasbot.matchday.db.RestorePointRepository;
-import net.tomasbot.matchday.model.Artwork;
-import net.tomasbot.matchday.model.RestorePoint;
-import net.tomasbot.matchday.model.SanityReport;
-import net.tomasbot.matchday.model.video.VideoStreamLocator;
-import net.tomasbot.matchday.model.video.VideoStreamLocatorPlaylist;
+import net.tomasbot.matchday.model.*;
+import net.tomasbot.matchday.model.ArtworkSanityReport.DanglingArtwork;
+import net.tomasbot.matchday.model.VideoSanityReport.DanglingLocatorPlaylist;
+import net.tomasbot.matchday.model.VideoSanityReport.DanglingVideoStreamLocator;
 import net.tomasbot.matchday.util.RecursiveDirectoryDeleter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -62,21 +61,25 @@ public class BackupService {
   }
 
   private static void analyzeReport(@NotNull SanityReport report) {
-    SanityReport.ArtworkSanityReport artworkReport = report.getArtworkSanityReport();
-    List<Path> danglingArtwork = artworkReport.getDanglingFiles();
+    ArtworkSanityReport artworkReport = report.getArtworkSanityReport();
+
+    List<Path> danglingArtwork = artworkReport.getDanglingFiles().stream().map(Path::of).toList();
     if (!danglingArtwork.isEmpty()) {
       fail("Found dangling Artwork: " + danglingArtwork);
     }
-    List<Artwork> danglingDbEntries = artworkReport.getDanglingDbEntries();
+
+    List<DanglingArtwork> danglingDbEntries = artworkReport.getDanglingDbEntries();
     if (!danglingDbEntries.isEmpty()) {
       fail("Found dangling Artwork DB entries: " + danglingDbEntries);
     }
-    SanityReport.VideoSanityReport videoSanityReport = report.getVideoSanityReport();
-    List<VideoStreamLocatorPlaylist> danglingPlaylists = videoSanityReport.getDanglingPlaylists();
+
+    VideoSanityReport videoSanityReport = report.getVideoSanityReport();
+    List<DanglingLocatorPlaylist> danglingPlaylists = videoSanityReport.getDanglingPlaylists();
     if (!danglingPlaylists.isEmpty()) {
       fail("Found dangling VideoStreamLocatorPlaylists: " + danglingPlaylists);
     }
-    List<? extends VideoStreamLocator> danglingLocators =
+
+    List<? extends DanglingVideoStreamLocator> danglingLocators =
         videoSanityReport.getDanglingStreamLocators();
     if (!danglingLocators.isEmpty()) {
       fail("Found dangling VideoStreamLocators: " + danglingLocators);

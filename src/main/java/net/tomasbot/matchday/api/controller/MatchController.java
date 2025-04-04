@@ -58,6 +58,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MatchController {
 
   private static final Logger logger = LogManager.getLogger(MatchController.class);
+  private static final String IMAGE_REL = "image";
 
   private final MatchService matchService;
   private final EventsModeller eventsAssembler;
@@ -73,6 +74,18 @@ public class MatchController {
     this.eventsAssembler = eventsAssembler;
     this.matchAssembler = matchAssembler;
     this.artworkModeller = artworkModeller;
+  }
+
+  private static void addArtworkLinks(@NotNull ArtworkResource model, UUID matchId) {
+    try {
+      model.add(
+          linkTo(methodOn(MatchController.class).fetchMatchArtworkMetadata(matchId)).withSelfRel());
+      model.add(
+          linkTo(methodOn(MatchController.class).fetchMatchArtworkImage(matchId, model.getId()))
+              .withRel(IMAGE_REL));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -161,7 +174,9 @@ public class MatchController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<ArtworkResource> fetchMatchArtworkMetadata(@PathVariable UUID matchId) {
     final Artwork artwork = matchService.fetchMatchArtworkMetadata(matchId);
-    return ResponseEntity.ok().body(artworkModeller.toModel(artwork));
+    ArtworkResource model = artworkModeller.toModel(artwork);
+    addArtworkLinks(model, matchId);
+    return ResponseEntity.ok().body(model);
   }
 
   @RequestMapping(
@@ -171,7 +186,9 @@ public class MatchController {
   public ResponseEntity<ArtworkResource> refreshMatchArtwork(@PathVariable UUID matchId)
       throws IOException {
     final Artwork artwork = matchService.refreshMatchArtwork(matchId);
-    return ResponseEntity.ok().body(artworkModeller.toModel(artwork));
+    ArtworkResource model = artworkModeller.toModel(artwork);
+    addArtworkLinks(model, matchId);
+    return ResponseEntity.ok().body(model);
   }
 
   @ExceptionHandler(InvalidEventException.class)
