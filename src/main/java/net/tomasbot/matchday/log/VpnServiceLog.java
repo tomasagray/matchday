@@ -54,7 +54,7 @@ public class VpnServiceLog {
     return result;
   }
   
-  @Before("execution(* net.tomasbot.matchday.api.service.admin.VpnService.heartbeat(..))")
+  @Before("execution(* net.tomasbot.matchday.api.service.admin.VpnService.doHeartbeat())")
   public void logScheduledVpnHeartbeatCheck() {
     logger.info("Performing VPN connection status check ...");
   }
