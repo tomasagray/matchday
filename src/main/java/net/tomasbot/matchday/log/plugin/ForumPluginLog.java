@@ -1,23 +1,24 @@
 package net.tomasbot.matchday.log.plugin;
 
+import net.tomasbot.matchday.model.DataSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.model.DataSource;
-import net.tomasbot.matchday.plugin.datasource.forum.ForumPlugin;
 
 @Aspect
 public class ForumPluginLog {
 
-  private static final Logger logger = LogManager.getLogger(ForumPlugin.class);
+  private static final Logger logger = LogManager.getLogger(ForumPluginLog.class);
 
-  @Around("execution(* net.tomasbot.matchday.plugin.datasource.forum.ForumPlugin.readUrlData(..))")
-  public Object logReadFromUrl(@NotNull ProceedingJoinPoint jp) throws Throwable {
+  @Before(
+      "execution(* net.tomasbot.matchday.plugin.datasource.forum.RemoteDataReader.readDataFrom(..))")
+  public void logReadFromUrl(@NotNull JoinPoint jp) {
     logger.info("Fetching Event data from: {}", jp.getArgs()[0]);
-    return jp.proceed();
   }
 
   @Around("execution(* net.tomasbot.matchday.plugin.datasource.forum.ForumPlugin.getSnapshot(..))")

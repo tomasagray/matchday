@@ -1,25 +1,20 @@
 package net.tomasbot.matchday.plugin.datasource.forum;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.tomasbot.matchday.model.*;
+import net.tomasbot.matchday.plugin.datasource.DataSourcePlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
-import net.tomasbot.matchday.api.service.EventService;
-import net.tomasbot.matchday.model.*;
-import net.tomasbot.matchday.model.video.VideoFileSource;
-import net.tomasbot.matchday.plugin.datasource.DataSourcePlugin;
 
 @Component
 public class ForumPlugin implements DataSourcePlugin {
@@ -28,21 +23,18 @@ public class ForumPlugin implements DataSourcePlugin {
 
   private final ForumPluginProperties pluginProperties;
   private final ForumDataSourceValidator dataSourceValidator;
-  private final EventService eventRepo;
   private final EventListParser eventListParser;
-  private final EventPageParser eventPageParser;
+  private final EventReader eventReader;
 
   public ForumPlugin(
       ForumPluginProperties pluginProperties,
       ForumDataSourceValidator dataSourceValidator,
-      EventService eventRepo,
       EventListParser eventListParser,
-      EventPageParser eventPageParser) {
+      EventReader eventReader) {
     this.pluginProperties = pluginProperties;
     this.dataSourceValidator = dataSourceValidator;
-    this.eventRepo = eventRepo;
     this.eventListParser = eventListParser;
-    this.eventPageParser = eventPageParser;
+    this.eventReader = eventReader;
   }
 
   private static boolean isValidEvent(@NotNull Event event) {
@@ -84,46 +76,46 @@ public class ForumPlugin implements DataSourcePlugin {
         .collect(Collectors.joining("&"));
   }
 
-  private static String readUrlData(@NotNull URL url) throws IOException {
-    try (final InputStreamReader in = new InputStreamReader(url.openStream());
-        final BufferedReader reader = new BufferedReader(in)) {
-      return reader.lines().collect(Collectors.joining("\n"));
-    }
-  }
-
   private static int getCurrentPage(@NotNull List<String> pages) {
     final int DEFAULT_PAGE = 0;
     if (pages.isEmpty()) return DEFAULT_PAGE;
     final String page = pages.get(0);
     return page.matches("\\d") ? Integer.parseInt(page) : DEFAULT_PAGE;
   }
-
+  
   @Override
   @SuppressWarnings("unchecked cast")
   public <T> Snapshot<T> getSnapshot(
       @NotNull SnapshotRequest request, @NotNull DataSource<T> dataSource) throws IOException {
-    this.validateDataSource(dataSource);
+    validateDataSource(dataSource);
     DataSource<? extends Event> eventDataSource = (DataSource<? extends Event>) dataSource;
 
     URL url = eventDataSource.getBaseUri().toURL();
     Stream<T> events = Stream.empty();
-    int scrapeSteps =
-        pluginProperties.getScrapeSteps() - 1; // subtract 1 to account for the initial 'do' loop
-    final AtomicInteger steps = new AtomicInteger(scrapeSteps);
+
+    int scrapeSteps = pluginProperties.getScrapeSteps();
+    // subtract 1 to account for the initial 'do' loop
+    final AtomicInteger steps = new AtomicInteger(scrapeSteps - 1);
+
     int newEventCount;
     do {
+      // read remote data
       List<T> newEvents = (List<T>) getEventStream(url, eventDataSource).toList();
+
       newEventCount = newEvents.size();
       events = Stream.concat(events, newEvents.stream());
       url = parseNextLink(url);
+
     } while (newEventCount > 0 && steps.getAndDecrement() > 0 && url != null);
+
     return Snapshot.of(events);
   }
 
   @SuppressWarnings("unchecked cast")
-  private <T> @NotNull Stream<T> getEventStream(
-      URL url, DataSource<? extends Event> eventDataSource) throws IOException {
-    String data = readUrlData(url);
+  @NotNull
+  private <T> Stream<T> getEventStream(
+      @NotNull URL url, DataSource<? extends Event> eventDataSource) throws IOException {
+    String data = RemoteDataReader.readDataFrom(url);
     return (Stream<T>) readEventStream(data, eventDataSource);
   }
 
@@ -147,39 +139,9 @@ public class ForumPlugin implements DataSourcePlugin {
       @NotNull String data, @NotNull DataSource<? extends Event> dataSource) {
     return eventListParser.getEventsList(data, dataSource).entrySet().stream()
         .filter(entry -> isValidEvent(entry.getValue()))
-        .map(entry -> readListEvent(entry, dataSource))
+        .map(entry -> eventReader.readListEvent(entry, dataSource))
+        .map(CompletableFuture::join)
         .filter(Objects::nonNull);
-  }
-
-  private @Nullable Event readListEvent(
-      Map.@NotNull Entry<URI, ? extends Event> entry,
-      @NotNull DataSource<? extends Event> dataSource) {
-    URI uri = entry.getKey();
-    Event event = entry.getValue();
-
-    Optional<? extends Event> existingOptional = eventRepo.fetchEventLike(event);
-    if (existingOptional.isEmpty()) {
-      // this Event was not found in DB; it's new!
-      try {
-        Event metadata = readEvent(uri.toURL(), dataSource);
-        if (metadata != null) {
-          Set<VideoFileSource> fileSources = metadata.getFileSources();
-          event.getFileSources().addAll(fileSources);
-          return event;
-        }
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    }
-    return null;
-  }
-
-  private Event readEvent(@NotNull URL url, @NotNull DataSource<? extends Event> dataSource)
-      throws IOException {
-    // follow link
-    String eventPage = readUrlData(url);
-    // extract match metadata
-    return eventPageParser.getEventFrom(dataSource, eventPage);
   }
 
   @Override
@@ -193,7 +155,7 @@ public class ForumPlugin implements DataSourcePlugin {
   @SuppressWarnings("unchecked cast")
   public <T> Snapshot<T> getUrlSnapshot(@NotNull URL url, @NotNull DataSource<T> dataSource)
       throws IOException {
-    Event event = readEvent(url, (DataSource<? extends Event>) dataSource);
+    Event event = eventReader.readEvent(url, (DataSource<? extends Event>) dataSource);
     return Snapshot.of(Stream.of((T) event));
   }
 
