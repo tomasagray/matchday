@@ -11,38 +11,43 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.tomasbot.matchday.api.service.EventService;
+import net.tomasbot.matchday.model.*;
+import net.tomasbot.matchday.model.video.VideoFile;
+import net.tomasbot.matchday.model.video.VideoFilePack;
+import net.tomasbot.matchday.model.video.VideoFileSource;
+import net.tomasbot.matchday.plugin.datasource.DataSourcePlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
-import net.tomasbot.matchday.api.service.EventService;
-import net.tomasbot.matchday.model.*;
-import net.tomasbot.matchday.model.video.VideoFileSource;
-import net.tomasbot.matchday.plugin.datasource.DataSourcePlugin;
 
 @Component
 public class ForumPlugin implements DataSourcePlugin {
 
   private static final String PAGE_KEY = "page";
+  private static final Pattern EXT_PATTERN = Pattern.compile("\\.([A-Za-z]+)$");
 
   private final ForumPluginProperties pluginProperties;
   private final ForumDataSourceValidator dataSourceValidator;
-  private final EventService eventRepo;
   private final EventListParser eventListParser;
   private final EventPageParser eventPageParser;
+  private final EventService eventService;
 
   public ForumPlugin(
       ForumPluginProperties pluginProperties,
       ForumDataSourceValidator dataSourceValidator,
-      EventService eventRepo,
       EventListParser eventListParser,
-      EventPageParser eventPageParser) {
+      EventPageParser eventPageParser,
+      EventService eventService) {
     this.pluginProperties = pluginProperties;
     this.dataSourceValidator = dataSourceValidator;
-    this.eventRepo = eventRepo;
     this.eventListParser = eventListParser;
     this.eventPageParser = eventPageParser;
+    this.eventService = eventService;
   }
 
   private static boolean isValidEvent(@NotNull Event event) {
@@ -98,31 +103,62 @@ public class ForumPlugin implements DataSourcePlugin {
     return page.matches("\\d") ? Integer.parseInt(page) : DEFAULT_PAGE;
   }
 
+  /**
+   * Attempt to guess the media container (file extension) of the video files for this source from
+   * one of the URLs of the supplied video source
+   *
+   * @param fileSource A video source
+   * @return A trimmed, all-caps String representing the file extension, if it can be determined, or
+   *     null if not
+   */
+  @Nullable
+  private static String getExtensionFrom(@NotNull VideoFileSource fileSource) {
+    return fileSource.getVideoFilePacks().stream()
+        .map(VideoFilePack::allFiles)
+        .flatMap(pack -> pack.values().stream())
+        .map(VideoFile::getExternalUrl)
+        .filter(Objects::nonNull)
+        .findFirst()
+        .map(
+            url -> {
+              Matcher matcher = EXT_PATTERN.matcher(url.toString());
+              return matcher.find() ? matcher.group(1).trim().toUpperCase() : null;
+            })
+        .orElse(null);
+  }
+
   @Override
   @SuppressWarnings("unchecked cast")
   public <T> Snapshot<T> getSnapshot(
       @NotNull SnapshotRequest request, @NotNull DataSource<T> dataSource) throws IOException {
-    this.validateDataSource(dataSource);
+    validateDataSource(dataSource);
     DataSource<? extends Event> eventDataSource = (DataSource<? extends Event>) dataSource;
 
     URL url = eventDataSource.getBaseUri().toURL();
     Stream<T> events = Stream.empty();
-    int scrapeSteps =
-        pluginProperties.getScrapeSteps() - 1; // subtract 1 to account for the initial 'do' loop
-    final AtomicInteger steps = new AtomicInteger(scrapeSteps);
+
+    int scrapeSteps = pluginProperties.getScrapeSteps();
+    // subtract 1 to account for the initial 'do' loop
+    final AtomicInteger steps = new AtomicInteger(scrapeSteps - 1);
+
     int newEventCount;
     do {
+      // read remote data
       List<T> newEvents = (List<T>) getEventStream(url, eventDataSource).toList();
+
       newEventCount = newEvents.size();
       events = Stream.concat(events, newEvents.stream());
       url = parseNextLink(url);
+
     } while (newEventCount > 0 && steps.getAndDecrement() > 0 && url != null);
+
     return Snapshot.of(events);
   }
 
   @SuppressWarnings("unchecked cast")
-  private <T> @NotNull Stream<T> getEventStream(
-      URL url, DataSource<? extends Event> eventDataSource) throws IOException {
+  @NotNull
+  private <T> Stream<T> getEventStream(
+      @NotNull URL url, DataSource<? extends Event> eventDataSource) throws IOException {
     String data = readUrlData(url);
     return (Stream<T>) readEventStream(data, eventDataSource);
   }
@@ -157,14 +193,18 @@ public class ForumPlugin implements DataSourcePlugin {
     URI uri = entry.getKey();
     Event event = entry.getValue();
 
-    Optional<? extends Event> existingOptional = eventRepo.fetchEventLike(event);
+    Optional<? extends Event> existingOptional = eventService.fetchEventLike(event);
     if (existingOptional.isEmpty()) {
       // this Event was not found in DB; it's new!
       try {
+        // read remote data
         Event metadata = readEvent(uri.toURL(), dataSource);
+
         if (metadata != null) {
           Set<VideoFileSource> fileSources = metadata.getFileSources();
+          correctFileSources(fileSources);
           event.getFileSources().addAll(fileSources);
+
           return event;
         }
       } catch (IOException e) {
@@ -178,8 +218,24 @@ public class ForumPlugin implements DataSourcePlugin {
       throws IOException {
     // follow link
     String eventPage = readUrlData(url);
+
     // extract match metadata
     return eventPageParser.getEventFrom(dataSource, eventPage);
+  }
+
+  /**
+   * Attempt to fill-in missing metadata fields for the supplied VideoFileSources
+   *
+   * @param fileSources A Collection of
+   */
+  private void correctFileSources(@NotNull Collection<? extends VideoFileSource> fileSources) {
+    for (VideoFileSource fileSource : fileSources) {
+      String mediaContainer = fileSource.getMediaContainer();
+      if (mediaContainer == null || mediaContainer.isEmpty()) {
+        String extension = getExtensionFrom(fileSource);
+        fileSource.setMediaContainer(extension);
+      }
+    }
   }
 
   @Override
