@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.4.4] - 2025-05-17
+
+### Fixed
+
+- Missing "media container" data in video sources scanned via Forum plugin
+
+### Changed
+
+- Made Forum plugin page scanning asynchronous
+
 ## [0.4.3] - 2025-04-04
 
 ### Fixed
