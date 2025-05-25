@@ -5,17 +5,14 @@ import static net.tomasbot.matchday.config.settings.UnprotectedAddress.UNPROTECT
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
 import net.tomasbot.matchday.api.controller.VpnStatusController;
 import net.tomasbot.matchday.api.service.SettingsService;
 import net.tomasbot.matchday.model.VpnStatus;
@@ -41,9 +38,11 @@ public class VpnService {
   private static final String SIGUSR2 = "SIGUSR2"; // get status
   // status
   private static final String SUCCESS = "SUCCESS:"; // vpn connected
+  private static final String ERROR_IP = "☠️.☠️.☠️.☠️";
   private static final String CONNECTING_IP = "---.---.---.---";
   private static final VpnStatus CONNECTING_STATUS =
-      new VpnStatus(VpnConnectionStatus.CONNECTING, CONNECTING_IP);
+          new VpnStatus(VpnConnectionStatus.CONNECTING, CONNECTING_IP);
+  private static final Random R = new Random();
 
   private final TelnetClientWrapper telnet;
   private final IpService ipService;
@@ -57,12 +56,15 @@ public class VpnService {
   @Value("${system.vpn.management.port}")
   private Integer managementPort;
 
+  private Collection<Path> vpnConfigurations;
+  private Path currentConfiguration;
+
   public VpnService(
-      TelnetClientWrapper telnet,
-      IpService ipService,
-      SimpMessagingTemplate messagingTemplate,
-      VpnStatusController statusController,
-      SettingsService settingsService) {
+          TelnetClientWrapper telnet,
+          IpService ipService,
+          SimpMessagingTemplate messagingTemplate,
+          VpnStatusController statusController,
+          SettingsService settingsService) {
     this.telnet = telnet;
     this.ipService = ipService;
     this.messagingTemplate = messagingTemplate;
@@ -72,6 +74,11 @@ public class VpnService {
 
   private static void waitForIpRecheck() throws InterruptedException {
     TimeUnit.MILLISECONDS.sleep(IP_RECHECK_WAIT);
+  }
+
+  public Collection<Path> getConfigurations() throws IOException {
+    if (vpnConfigurations == null) vpnConfigurations = readConfigurations();
+    return vpnConfigurations;
   }
 
   public void publishVpnStatus(@NotNull VpnStatus status) {
@@ -85,30 +92,34 @@ public class VpnService {
   }
 
   private @NotNull Path getRandomConfiguration() throws IOException {
-    final Random r = new Random();
-    final List<Path> configurations = getConfigurations();
-    int configCount = configurations.size();
-    if (configCount == 0) {
+    final List<Path> configurations = getConfigurations().stream().toList();
+
+    final int configCount = configurations.size();
+    if (configCount == 0)
       throw new FileNotFoundException("Did not find any VPN configurations");
-    }
-    int random = r.nextInt(configCount - 1);
+
+    int random = R.nextInt(configCount);
     return configurations.get(random);
   }
 
-  private @NotNull List<Path> getConfigurations() throws IOException {
+  private @NotNull List<Path> readConfigurations() throws IOException {
+    if (!Files.exists(CONFIG_LOCATION))
+      throw new FileNotFoundException("Could not find VPN config location: " + CONFIG_LOCATION);
+
     final List<Path> configurations = new ArrayList<>();
     Files.walkFileTree(
-        CONFIG_LOCATION,
-        new SimpleFileVisitor<>() {
-          @Override
-          public @NotNull FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) {
-            final String fileName = file.getFileName().toString();
-            if (fileName.startsWith(DEFAULT_VPN_PREFIX) && fileName.endsWith(VPN_FILE_EXT)) {
-              configurations.add(file);
-            }
-            return FileVisitResult.CONTINUE;
-          }
-        });
+            CONFIG_LOCATION,
+            new SimpleFileVisitor<>() {
+              @Override
+              public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) {
+                final String fileName = file.getFileName().toString();
+                if (fileName.startsWith(DEFAULT_VPN_PREFIX) && fileName.endsWith(VPN_FILE_EXT)) {
+                  configurations.add(file);
+                }
+                return FileVisitResult.CONTINUE;
+              }
+            });
+
     return configurations;
   }
 
@@ -117,8 +128,8 @@ public class VpnService {
     return telnet.receive(TERMINATOR);
   }
 
-  private String getVpnServer(@NotNull Path configuration) {
-    final String filename = configuration.getFileName().toString();
+  private String getVpnServer() {
+    final String filename = this.currentConfiguration.getFileName().toString();
     final String[] parts = filename.split("\\.");
     if (parts.length > 0) {
       return parts[0];
@@ -130,22 +141,15 @@ public class VpnService {
     publishVpnStatus(CONNECTING_STATUS);
 
     final List<String> arguments = getArguments();
-    final Path configuration = getRandomConfiguration();
-    arguments.add(0, "--config " + configuration);
+    this.currentConfiguration = getRandomConfiguration();
+    arguments.add(0, "--config " + this.currentConfiguration);
     final String cmd = "openvpn " + String.join(" ", arguments);
 
     final Process process = Runtime.getRuntime().exec(cmd);
     process.waitFor();
     waitForIpRecheck();
 
-    final VpnConnectionStatus vpnStatus = getVpnStatus();
-    if (vpnStatus.equals(VpnConnectionStatus.CONNECTED)) {
-      String ipAddress = ipService.getIpAddress();
-      String vpnServer = getVpnServer(configuration);
-      publishVpnStatus(new VpnStatus(vpnStatus, ipAddress, vpnServer));
-    } else {
-      doHeartbeat();
-    }
+    heartbeat();
   }
 
   public void stop() throws IOException {
@@ -165,57 +169,49 @@ public class VpnService {
 
   public void restart() throws Exception {
     try {
+      stop();
+
       publishVpnStatus(CONNECTING_STATUS);
-      telnet.connect(HOST, managementPort);
-      signal(SIGTERM);
-      telnet.disconnect();
       // wait before reconnecting
       waitForIpRecheck();
+
       start();
     } finally {
-      doHeartbeat();
+      heartbeat();
     }
   }
 
-  private VpnConnectionStatus getVpnStatus() throws IOException {
-    VpnConnectionStatus vpnConnectionStatus = VpnConnectionStatus.DISCONNECTED;
-    try {
-      telnet.connect(HOST, managementPort);
-      telnet.receive(TERMINATOR);
-
-      final String status = signal(SIGUSR2);
-      if (status.startsWith(SUCCESS)) {
-        vpnConnectionStatus = VpnConnectionStatus.CONNECTED;
-      }
-
-      telnet.disconnect();
-    } catch (ConnectException ignore) {
-      // VPN disconnected
-    }
-
-    return vpnConnectionStatus;
-  }
-
-  public void doHeartbeat() {
+  public void heartbeat() {
     String unprotectedIp = settingsService.getSetting(UNPROTECTED_ADDR, String.class);
     doHeartbeat(unprotectedIp);
   }
 
   private void doHeartbeat(String unprotectedIp) {
     if (unprotectedIp == null || unprotectedIp.isEmpty()) {
-      publishVpnStatus(new VpnStatus(VpnConnectionStatus.ERROR, null));
+      handleAmbiguousProtection();
       return;
     }
 
     try {
-      String currentIpAddress = ipService.getIpAddress();
+      final String currentIpAddress = ipService.getIpAddress();
+
       if (!currentIpAddress.equals(unprotectedIp)) {
-        publishVpnStatus(new VpnStatus(VpnConnectionStatus.CONNECTED, currentIpAddress));
+        final String server = getVpnServer();
+        publishVpnStatus(new VpnStatus(VpnConnectionStatus.CONNECTED, currentIpAddress, server));
       } else {
         publishVpnStatus(new VpnStatus(VpnConnectionStatus.DISCONNECTED, currentIpAddress));
       }
-    } catch (IOException e) {
-      publishVpnStatus(new VpnStatus(VpnConnectionStatus.ERROR, null));
+    } catch (Throwable e) {
+      handleConnectionError(e);
     }
+  }
+
+  // Exception consumed in the logging class; see VpnServiceLog.java
+  private void handleConnectionError(Throwable ignore) {
+    publishVpnStatus(new VpnStatus(VpnConnectionStatus.ERROR, ERROR_IP));
+  }
+
+  private void handleAmbiguousProtection() {
+    publishVpnStatus(new VpnStatus(VpnConnectionStatus.ERROR, ERROR_IP));
   }
 }

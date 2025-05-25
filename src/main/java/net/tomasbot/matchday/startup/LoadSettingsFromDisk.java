@@ -4,11 +4,13 @@ import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import net.tomasbot.matchday.api.service.SettingsService;
 import net.tomasbot.matchday.model.ApplicationSettings;
 
 @Component
+@Order(2)
 public class LoadSettingsFromDisk implements CommandLineRunner {
 
   private static final Logger logger = LogManager.getLogger(LoadSettingsFromDisk.class);

@@ -19,12 +19,10 @@
 
 package net.tomasbot.matchday.log.plugin.ffmpeg;
 
-import net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -33,35 +31,27 @@ import org.jetbrains.annotations.NotNull;
 @Aspect
 public class FFmpegPluginLog {
 
-  private static final Logger logger = LogManager.getLogger(FFmpegPlugin.class);
+  private static final Logger logger = LogManager.getLogger(FFmpegPluginLog.class);
 
   @Before("execution(* net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin.streamUri(..))")
   public void logStreamUri(@NotNull JoinPoint jp) {
     logger.info("Creating HLS stream with request: {}", jp.getArgs());
   }
 
-  @AfterReturning(
-      value =
-          "execution(* net.tomasbot.ffmpeg_wrapper.task.FFmpegSingleStreamTask.createExecCommand(..))",
-      returning = "commands")
-  public void logFFmpegExecCommand(@NotNull Object commands) {
-    logger.info("Created FFmpeg stream task with commands: {}", commands);
-  }
-
   @Before(
-      "execution(* net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin.interruptAllStreamTasks())")
+          "execution(* net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin.interruptAllStreamTasks())")
   public void logInterruptAllStreamingTasks() {
     logger.info("Killing all running stream tasks...");
   }
 
   @Before(
-      "execution(* net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin.interruptStreamingTask(..))")
+          "execution(* net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin.interruptStreamingTask(..))")
   public void logInterruptStreamingTask(@NotNull JoinPoint jp) {
     logger.info("Killing streaming task to: {}", jp.getArgs()[0]);
   }
 
   @Around(
-      "execution(* net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin.getStreamingTaskCount())")
+          "execution(* net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin.getStreamingTaskCount())")
   public Object logGetStreamingTaskCount(@NotNull ProceedingJoinPoint jp) throws Throwable {
     Object taskCount = jp.proceed();
     logger.info("There are currently: {} active streaming tasks.", taskCount);

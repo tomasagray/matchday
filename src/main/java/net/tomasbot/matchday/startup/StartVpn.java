@@ -1,13 +1,19 @@
 package net.tomasbot.matchday.startup;
 
+import java.util.concurrent.TimeUnit;
+
 import net.tomasbot.matchday.api.service.admin.VpnService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
 @Profile("production")
+@Order
 public class StartVpn implements CommandLineRunner {
+
+  private static final int STARTUP_DELAY_S = 5;
 
   private final VpnService vpnService;
 
@@ -15,10 +21,13 @@ public class StartVpn implements CommandLineRunner {
     this.vpnService = vpnService;
   }
 
+  /**
+   * Start VPN on application start
+   */
   @Override
   public void run(String... args) throws Exception {
-    // start VPN on application start
+    TimeUnit.SECONDS.sleep(STARTUP_DELAY_S);
+
     vpnService.start();
-    vpnService.doHeartbeat();
   }
 }
