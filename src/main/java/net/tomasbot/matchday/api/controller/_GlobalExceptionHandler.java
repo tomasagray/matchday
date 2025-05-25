@@ -20,11 +20,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class _GlobalExceptionHandler {
 
-  private static final Logger logger = LogManager.getLogger(_GlobalExceptionHandler.class);
+  private static final Logger logger = LogManager.getLogger("GlobalExceptionHandler");
 
   private static String handleError(@NotNull Throwable e) {
     final String message = e.getMessage();
-    logger.error(message, e);
+
+    logger.error(message);
+    logger.debug(message, e);
+
     return message;
   }
 

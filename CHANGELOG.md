@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.4.4.1] - 2025-05-24
+
+### Fixed
+
+- VPN service fails to connect on startup and to reconnect when commanded
+
 ## [0.4.4] - 2025-05-17
 
 ### Fixed
