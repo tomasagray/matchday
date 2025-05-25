@@ -153,7 +153,7 @@ public class ScheduledTaskService {
   }
 
   public void testVpnHeartbeat() {
-    vpnService.doHeartbeat();
+    vpnService.heartbeat();
   }
 
   private enum TaskType {

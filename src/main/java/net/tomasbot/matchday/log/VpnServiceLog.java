@@ -1,6 +1,5 @@
 package net.tomasbot.matchday.log;
 
-import net.tomasbot.matchday.api.service.admin.VpnService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 @Aspect
 public class VpnServiceLog {
 
-  private static final Logger logger = LogManager.getLogger(VpnService.class);
+  private static final Logger logger = LogManager.getLogger(VpnServiceLog.class);
 
   @Before("execution(* net.tomasbot.matchday.api.service.admin.VpnService.publishVpnStatus(..))")
   public void logPublishVpnStatus(@NotNull JoinPoint jp) {
@@ -53,9 +52,48 @@ public class VpnServiceLog {
     logger.info("VPN signal `{}` got response: {}", signal, result);
     return result;
   }
-  
-  @Before("execution(* net.tomasbot.matchday.api.service.admin.VpnService.doHeartbeat())")
+
+  @Before("execution(* net.tomasbot.matchday.api.service.admin.VpnService.heartbeat(..))")
   public void logScheduledVpnHeartbeatCheck() {
     logger.info("Performing VPN connection status check ...");
+  }
+
+  @Around("execution(* net.tomasbot.matchday.api.service.admin.VpnService.readConfigurations(..))")
+  public Object logReadVpnConfigurations(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.info("Reading VPN configurations...");
+
+    Object result = jp.proceed();
+
+    if (result instanceof Iterable<?> configurations)
+      logger.info("Found {} VPN configurations.", configurations.spliterator().estimateSize());
+
+    return result;
+  }
+
+  @Around(
+          "execution(* net.tomasbot.matchday.api.service.admin.VpnService.getRandomConfiguration(..))")
+  public Object logGetRandomConfig(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    logger.debug("Getting random VPN configuration...");
+    Object result = jp.proceed();
+    logger.info("Using VPN configuration at: {}", result);
+    return result;
+  }
+
+  @Before("execution(* net.tomasbot.matchday.api.service.admin.VpnService.handleConnectionError(..))")
+  public void logConnectionError(@NotNull JoinPoint jp) throws Throwable {
+    Object[] args = jp.getArgs();
+    if (args != null && args.length >= 1) {
+      Object arg = args[0];
+      if (arg instanceof Throwable error) {
+        String message = error.getMessage();
+        logger.error("Error connecting to VPN: {}", message);
+        logger.debug(message, error);
+      }
+    }
+  }
+
+  @Before("execution(* net.tomasbot.matchday.api.service.admin.VpnService.handleAmbiguousProtection(..))")
+  public void logAmbiguousProtection() {
+    logger.error("Could not determine unprotected IP address! VPN may not function!");
   }
 }

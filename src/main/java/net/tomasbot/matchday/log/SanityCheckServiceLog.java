@@ -14,7 +14,7 @@ public class SanityCheckServiceLog {
   private static final Logger logger = LogManager.getLogger(SanityCheckServiceLog.class);
 
   @Around(
-      "execution(* net.tomasbot.matchday.api.service.admin.SanityCheckService.createSanityReport(..))")
+          "execution(* net.tomasbot.matchday.api.service.admin.SanityCheckService.createSanityReport(..))")
   public Object logGenerateSanityReport(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Generating system Sanity Report...");
     Object result = jp.proceed();
@@ -23,7 +23,7 @@ public class SanityCheckServiceLog {
   }
 
   @Around(
-      "execution(* net.tomasbot.matchday.api.service.admin.ArtworkSanityService.createArtworkSanityReport(..))")
+          "execution(* net.tomasbot.matchday.api.service.admin.ArtworkSanityService.createArtworkSanityReport(..))")
   public Object logGenerateArtworkReport(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Generating Artwork sanity report...");
     Object result = jp.proceed();
@@ -32,7 +32,7 @@ public class SanityCheckServiceLog {
   }
 
   @Around(
-      "execution(* net.tomasbot.matchday.api.service.admin.VideoSanityService.createVideoSanityReport(..))")
+          "execution(* net.tomasbot.matchday.api.service.admin.VideoSanityService.createVideoSanityReport(..))")
   public Object logGenerateVideoReport(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Generating Video sanity report...");
     Object result = jp.proceed();
@@ -41,7 +41,7 @@ public class SanityCheckServiceLog {
   }
 
   @Around(
-      "execution(* net.tomasbot.matchday.api.service.admin.SanityCheckService.autoHealSystem(..))")
+          "execution(* net.tomasbot.matchday.api.service.admin.SanityCheckService.autoHealSystem(..))")
   public Object logAutoHealSystem(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Attempting to auto-heal system...");
     Object result = jp.proceed();
@@ -50,7 +50,7 @@ public class SanityCheckServiceLog {
   }
 
   @Around(
-      "execution(* net.tomasbot.matchday.api.service.admin.ArtworkSanityService.autoHealArtwork(..))")
+          "execution(* net.tomasbot.matchday.api.service.admin.ArtworkHealingService.autoHealArtwork(..))")
   public Object logAutoHealArtwork(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Attempting to auto-heal Artwork...");
     Object result = jp.proceed();
@@ -59,13 +59,13 @@ public class SanityCheckServiceLog {
   }
 
   @Before(
-      "execution(* net.tomasbot.matchday.api.service.admin.ArtworkSanityService.deleteArtworkFiles(..))")
+          "execution(* net.tomasbot.matchday.api.service.admin.ArtworkHealingService.deleteArtworkFiles(..))")
   public void logDeleteDanglingArtworkFiles() {
     logger.info("Deleting dangling Artwork files...");
   }
 
   @Around(
-      "execution(* net.tomasbot.matchday.api.service.admin.VideoSanityService.autoHealVideos(..))")
+          "execution(* net.tomasbot.matchday.api.service.admin.VideoHealingService.autoHealVideos(..))")
   public Object logAutoHealVideos(@NotNull ProceedingJoinPoint jp) throws Throwable {
     logger.info("Attempting to auto-heal videos...");
     Object result = jp.proceed();
