@@ -4,7 +4,7 @@
       <env name="CONFIG_ROOT" value="/projectdata/matchday/dev/persistent/config" />
       <env name="DATA_ROOT" value="/projectdata/matchday/dev/persistent" />
       <env name="DB_PASSWORD" value="{M4tchD4y}" />
-      <env name="DB_URL" value="jdbc:mysql://192.168.0.107:30306/md_dev?useSSL=false&amp;allowPublicKeyRetrieval=true" />
+        <env name="DB_URL" value="jdbc:mysql://hal9000:30306/md_dev?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
       <env name="DB_USER" value="matchday" />
       <env name="FFMPEG" value="/usr/bin/ffmpeg" />
       <env name="FFPROBE" value="/usr/bin/ffprobe" />
@@ -12,7 +12,8 @@
       <module name="matchday.main"/>
     <target name="@@@LOCAL@@@" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="net.tomasbot.matchday.MatchdayApplication"/>
-    <option name="VM_PARAMETERS" value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar --illegal-access=permit -Dspring.profiles.active=dev-persistent" />
+      <option name="VM_PARAMETERS"
+              value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar -Dspring.profiles.active=dev-persistent"/>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
