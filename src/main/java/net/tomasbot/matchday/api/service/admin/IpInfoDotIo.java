@@ -7,13 +7,18 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import lombok.Data;
+import lombok.Getter;
 import net.tomasbot.matchday.util.JsonParser;
+import org.springframework.stereotype.Service;
 
-public class IpInfo extends ExternalIpService {
+@Service
+public class IpInfoDotIo extends ExternalIpService {
 
   private static final String SERVICE_URL = "https://ipinfo.io/json";
 
-  IpInfo() {
+  @Getter private final String name = "ipinfo.io";
+
+  IpInfoDotIo() {
     super(SERVICE_URL);
   }
 
@@ -23,8 +28,8 @@ public class IpInfo extends ExternalIpService {
         InputStreamReader in = new InputStreamReader(is, StandardCharsets.UTF_8);
         BufferedReader reader = new BufferedReader(in)) {
 
-      IpAddressInfo ipAddressInfo = JsonParser.fromJson(reader, IpAddressInfo.class);
-      return ipAddressInfo.getIp();
+      IpAddressInfo addressInfo = JsonParser.fromJson(reader, IpAddressInfo.class);
+      return addressInfo.getIp();
     }
   }
 

@@ -152,8 +152,17 @@ public class ScheduledTaskService {
     }
   }
 
+  @SuppressWarnings("all")
   public void testVpnHeartbeat() {
-    vpnService.heartbeat();
+    try {
+      vpnService.heartbeat();
+    } catch (Throwable e) {
+      handleVpnHeartbeatError(e);
+    }
+  }
+
+  private void handleVpnHeartbeatError(Throwable ignore) {
+    // see: ScheduledTaskServiceLog
   }
 
   private enum TaskType {

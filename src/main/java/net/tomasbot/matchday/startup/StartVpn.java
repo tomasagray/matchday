@@ -26,8 +26,11 @@ public class StartVpn implements CommandLineRunner {
    */
   @Override
   public void run(String... args) throws Exception {
-    TimeUnit.SECONDS.sleep(STARTUP_DELAY_S);
-
-    vpnService.start();
+      try {
+          TimeUnit.SECONDS.sleep(STARTUP_DELAY_S);
+          vpnService.start();
+      } catch (Throwable e) {
+          throw new RuntimeException(e);
+      }
   }
 }

@@ -12,7 +12,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
 import net.tomasbot.matchday.api.controller.VpnStatusController;
 import net.tomasbot.matchday.api.service.SettingsService;
 import net.tomasbot.matchday.model.VpnStatus;
@@ -33,15 +32,18 @@ public class VpnService {
   private static final String VPN_FILE_EXT = ".ovpn";
   private static final String TERMINATOR = "\n";
   private static final Path CONFIG_LOCATION = Path.of("/etc/openvpn/ovpn_udp");
-  // signals
-  private static final String SIGTERM = "SIGTERM"; // stop
-  private static final String SIGUSR2 = "SIGUSR2"; // get status
-  // status
-  private static final String SUCCESS = "SUCCESS:"; // vpn connected
   private static final String ERROR_IP = "☠️.☠️.☠️.☠️";
   private static final String CONNECTING_IP = "---.---.---.---";
+  private static final String UNKNOWN_SERVER = "????";
+
+  // signals
+  private static final String SIGTERM = "SIGTERM"; // stop
+  //  private static final String SIGUSR2 = "SIGUSR2"; // get status
+  // status
+  //  private static final String SUCCESS = "SUCCESS:"; // vpn connected
+
   private static final VpnStatus CONNECTING_STATUS =
-          new VpnStatus(VpnConnectionStatus.CONNECTING, CONNECTING_IP);
+      new VpnStatus(VpnConnectionStatus.CONNECTING, CONNECTING_IP);
   private static final Random R = new Random();
 
   private final TelnetClientWrapper telnet;
@@ -86,9 +88,12 @@ public class VpnService {
     messagingTemplate.convertAndSend(VPN_STATUS_EMIT_ENDPOINT, statusController.publishVpnStatus());
   }
 
-  private @NotNull List<String> getArguments() {
-    List<String> args = Arrays.stream(arguments.split(",")).map(arg -> "--" + arg).toList();
-    return new ArrayList<>(args); // return mutable copy
+  private @NotNull List<String> getStartupArguments() {
+    List<String> args =
+        Arrays.stream(arguments.split(",")) // split args
+            .map(arg -> "--" + arg) // add leading dashes where required
+            .toList();
+    return new ArrayList<>(args); // return a mutable copy
   }
 
   private @NotNull Path getRandomConfiguration() throws IOException {
@@ -131,25 +136,35 @@ public class VpnService {
   private String getVpnServer() {
     final String filename = this.currentConfiguration.getFileName().toString();
     final String[] parts = filename.split("\\.");
-    if (parts.length > 0) {
-      return parts[0];
-    }
-    return "????";
+    return parts.length > 0 ? parts[0] : UNKNOWN_SERVER;
   }
 
-  public void start() throws Exception {
+  public void start() throws Throwable {
     publishVpnStatus(CONNECTING_STATUS);
 
-    final List<String> arguments = getArguments();
-    this.currentConfiguration = getRandomConfiguration();
-    arguments.add(0, "--config " + this.currentConfiguration);
-    final String cmd = "openvpn " + String.join(" ", arguments);
+    try {
+      // prepare arguments
+      final List<String> arguments = new ArrayList<>();
+      arguments.add("openvpn");
+      arguments.add("--config");
+      this.currentConfiguration = getRandomConfiguration();
+      arguments.add(this.currentConfiguration.toString());
+      arguments.addAll(getStartupArguments());
 
-    final Process process = Runtime.getRuntime().exec(cmd);
-    process.waitFor();
-    waitForIpRecheck();
+      // assemble arguments
+      String cmd = String.join(" ", arguments);
 
-    heartbeat();
+      // NOTE: using deprecated exec(String) method as exec(String[]) does
+      // not seem to correctly parse the arguments
+      // TODO: change this to work with exec(String[])
+      final Process process = Runtime.getRuntime().exec(cmd);
+
+      // allow VPN time to start...
+      process.waitFor();
+      waitForIpRecheck();
+    } finally {
+      heartbeat();
+    }
   }
 
   public void stop() throws IOException {
@@ -167,7 +182,7 @@ public class VpnService {
     }
   }
 
-  public void restart() throws Exception {
+  public void restart() throws Throwable {
     try {
       stop();
 
@@ -181,12 +196,12 @@ public class VpnService {
     }
   }
 
-  public void heartbeat() {
+  public void heartbeat() throws Throwable {
     String unprotectedIp = settingsService.getSetting(UNPROTECTED_ADDR, String.class);
     doHeartbeat(unprotectedIp);
   }
 
-  private void doHeartbeat(String unprotectedIp) {
+  private void doHeartbeat(String unprotectedIp) throws Throwable {
     if (unprotectedIp == null || unprotectedIp.isEmpty()) {
       handleAmbiguousProtection();
       return;
@@ -206,9 +221,9 @@ public class VpnService {
     }
   }
 
-  // Exception consumed in the logging class; see VpnServiceLog.java
-  private void handleConnectionError(Throwable ignore) {
+  private void handleConnectionError(@NotNull Throwable e) throws Throwable {
     publishVpnStatus(new VpnStatus(VpnConnectionStatus.ERROR, ERROR_IP));
+    throw e;
   }
 
   private void handleAmbiguousProtection() {

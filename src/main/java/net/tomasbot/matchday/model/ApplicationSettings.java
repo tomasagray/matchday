@@ -6,12 +6,10 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.ToString;
-import org.jetbrains.annotations.NotNull;
 import net.tomasbot.matchday.api.controller.converter.ApplicationSettingsDeserializer;
 import net.tomasbot.matchday.api.controller.converter.ApplicationSettingsSerializer;
+import org.jetbrains.annotations.NotNull;
 
-@ToString
 @JsonSerialize(using = ApplicationSettingsSerializer.class)
 @JsonDeserialize(using = ApplicationSettingsDeserializer.class)
 public class ApplicationSettings {
@@ -38,5 +36,10 @@ public class ApplicationSettings {
 
   public int size() {
     return settings.size();
+  }
+
+  @Override
+  public String toString() {
+    return String.format("ApplicationSettings[count=%d]", this.size());
   }
 }
