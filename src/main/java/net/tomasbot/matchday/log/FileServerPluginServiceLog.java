@@ -22,6 +22,7 @@ package net.tomasbot.matchday.log;
 import java.net.URL;
 import java.util.Optional;
 import java.util.UUID;
+import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -29,13 +30,11 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.api.service.FileServerPluginService;
-import net.tomasbot.matchday.plugin.fileserver.FileServerPlugin;
 
 @Aspect
 public class FileServerPluginServiceLog {
 
-  private static final Logger logger = LogManager.getLogger(FileServerPluginService.class);
+  private static final Logger logger = LogManager.getLogger(FileServerPluginServiceLog.class);
 
   @AfterReturning(
       value =
@@ -123,7 +122,8 @@ public class FileServerPluginServiceLog {
   public Object logGetEnabledPluginForUrl(@NotNull ProceedingJoinPoint jp) throws Throwable {
     Object url = jp.getArgs()[0];
     Object result = jp.proceed();
-    logger.info("Found ENABLED plugin: {} for URL: {}", result, url);
+    if (result != null) logger.info("Found ENABLED plugin: {} for URL: {}", result, url);
+    else logger.warn("No ENABLED File Server Plugin found for URL: {}", url);
     return result;
   }
 }

@@ -21,7 +21,6 @@ package net.tomasbot.matchday.log;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import net.tomasbot.matchday.api.service.video.VideoStreamingService;
 import net.tomasbot.matchday.model.video.VideoFileSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 @Aspect
 public class VideoStreamingServiceLog {
 
-  private static final Logger logger = LogManager.getLogger(VideoStreamingService.class);
+  private static final Logger logger = LogManager.getLogger(VideoStreamingServiceLog.class);
 
   @Before(
       "execution(* net.tomasbot.matchday.api.service.video.VideoStreamingService.getBestVideoStreamPlaylist(..))")

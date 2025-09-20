@@ -78,9 +78,7 @@ public class VideoStreamLocatorPlaylistService {
       throw new EmptyVideoFileSourceException(fileSource);
     }
 
-    final Path fileStorageLocation = settingsService.getSetting(VIDEO_STORAGE, Path.class);
-    final UUID fileSrcId = fileSource.getFileSrcId();
-    final Path storageLocation = fileStorageLocation.resolve(fileSrcId.toString());
+    final Path storageLocation = getStorageLocation(fileSource.getFileSrcId());
     final VideoStreamLocatorPlaylist streamPlaylist =
         new VideoStreamLocatorPlaylist(fileSource, storageLocation);
 
@@ -91,6 +89,11 @@ public class VideoStreamLocatorPlaylistService {
           streamPlaylist.addStreamLocator(streamLocator);
         });
     return playlistRepo.saveAndFlush(streamPlaylist);
+  }
+
+  private @NotNull Path getStorageLocation(@NotNull UUID fileSrcId) {
+    final Path fileStorageLocation = settingsService.getSetting(VIDEO_STORAGE, Path.class);
+    return fileStorageLocation.resolve(fileSrcId.toString());
   }
 
   /**

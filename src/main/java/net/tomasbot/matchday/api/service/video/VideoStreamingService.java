@@ -26,6 +26,7 @@ import net.tomasbot.matchday.model.Event;
 import net.tomasbot.matchday.model.video.*;
 import net.tomasbot.matchday.model.video.StreamJobState.JobStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,12 @@ public class VideoStreamingService {
     this.playlistService = playlistService;
     this.locatorService = locatorService;
     this.videoSourceService = videoSourceService;
+  }
+
+  private static boolean containsVideoFile(
+      @NotNull VideoStreamLocator locator, @NotNull UUID videoFileId) {
+    VideoFile videoFile = locator.getVideoFile();
+    return videoFile != null && videoFileId.equals(videoFile.getFileId());
   }
 
   public List<VideoStreamLocatorPlaylist> fetchAllPlaylists() {
@@ -111,17 +118,27 @@ public class VideoStreamingService {
               .map(locatorService::getStreamLocator)
               .filter(Optional::isPresent)
               .map(Optional::get)
-              .filter(locator -> locator.getVideoFile().getFileId().equals(videoFileId))
+              .filter(locator -> containsVideoFile(locator, videoFileId))
               .findFirst()
-              .orElse(new SingleStreamLocator())
-          /*.orElseThrow(
-          () ->
-              new IllegalArgumentException(
-                  "No Video Stream was located for the given parameters"))*/ ;
-
+              .orElse(createLocatorFor(fileSrcId, videoFileId));
       videoStreamManager.queueStreamJob(streamLocator);
     }
     return playlistOptional;
+  }
+
+  private @NotNull VideoStreamLocator createLocatorFor(
+      @NotNull UUID fileSrcId, @NotNull UUID videoFileId) {
+    Optional<VideoStreamLocatorPlaylist> playlistOpt =
+        playlistService.getVideoStreamPlaylistFor(fileSrcId);
+
+    if (playlistOpt.isPresent()) {
+      VideoStreamLocatorPlaylist playlist = playlistOpt.get();
+      Path storageLocation = playlist.getStorageLocation();
+      VideoStreamLocator locator = locatorService.createStreamLocator(storageLocation, videoFileId);
+      playlist.addStreamLocator(locator);
+      return locator;
+    } else
+      throw new IllegalArgumentException("No video playlist found for file source: " + fileSrcId);
   }
 
   /**
@@ -142,7 +159,8 @@ public class VideoStreamingService {
         : Optional.empty();
   }
 
-  private @NotNull Collection<VideoStreamLocator> getStreamJobs(
+
+  private @NotNull @Unmodifiable Collection<VideoStreamLocator> getStreamJobs(
       @NotNull VideoPlaylist videoPlaylist) {
     final UUID fileSrcId = videoPlaylist.getFileSrcId();
     final Set<Long> requestedLocatorIds = videoPlaylist.getLocatorIds().keySet();
@@ -255,6 +273,7 @@ public class VideoStreamingService {
             });
   }
 
+  @Transactional
   public void deleteAllVideoData(@NotNull UUID fileSrcId) throws IOException {
     Optional<VideoStreamLocatorPlaylist> playlistOptional = getPlaylistForFileSource(fileSrcId);
     if (playlistOptional.isPresent()) {
@@ -272,19 +291,29 @@ public class VideoStreamingService {
    * @param streamPlaylist The video stream playlist for the video data
    * @throws IOException If any problems with deleting data
    */
+  @Transactional
   public void deleteAllVideoData(@NotNull final VideoStreamLocatorPlaylist streamPlaylist)
       throws IOException {
     videoStreamManager.deleteLocalStreams(streamPlaylist);
   }
 
+  @Transactional
   public void deleteVideoData(@NotNull UUID videoFileId) throws IOException {
     Optional<VideoStreamLocator> locatorOptional = locatorService.getStreamLocatorFor(videoFileId);
     if (locatorOptional.isPresent()) {
       VideoStreamLocator locator = locatorOptional.get();
-      videoStreamManager.deleteVideoDataFromDisk(locator);
-    } else {
+      Optional<VideoStreamLocatorPlaylist> playlistOpt =
+          playlistService.getVideoStreamPlaylistContaining(locator.getStreamLocatorId());
+      videoStreamManager.removeLocatorFromPlaylist(locator);
+      videoStreamManager.deleteStream(locator);
+
+      // check if the containing playlist is now empty; if it is, delete it + related data
+      if (playlistOpt.isPresent()) {
+        VideoStreamLocatorPlaylist playlist = playlistOpt.get();
+        if (playlist.getStreamLocators().isEmpty()) deleteAllVideoData(playlist);
+      }
+    } else
       throw new IllegalArgumentException("No stream locator exists for VideoFile: " + videoFileId);
-    }
   }
 
   @Transactional
