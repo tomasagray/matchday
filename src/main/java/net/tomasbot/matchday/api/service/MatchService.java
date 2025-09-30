@@ -137,8 +137,9 @@ public class MatchService implements EntityService<Match, UUID> {
    * @param teamId The name of the Team.
    * @return A CollectionModel containing the Events.
    */
-  public List<Match> fetchMatchesForTeam(@NotNull final UUID teamId) {
-    return matchRepository.fetchMatchesByTeam(teamId).stream()
+  public List<Match> fetchMatchesForTeam(@NotNull UUID teamId, int page, int size) {
+    PageRequest request = PageRequest.of(page, size);
+    return matchRepository.fetchMatchesByTeam(teamId, request).stream()
         .map(this::initialize)
         .collect(Collectors.toList());
   }

@@ -26,6 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.tomasbot.matchday.TestDataCreator;
+import net.tomasbot.matchday.api.service.MatchService;
+import net.tomasbot.matchday.model.Competition;
+import net.tomasbot.matchday.model.Event;
+import net.tomasbot.matchday.model.Match;
+import net.tomasbot.matchday.model.Team;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -36,12 +42,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import net.tomasbot.matchday.TestDataCreator;
-import net.tomasbot.matchday.api.service.MatchService;
-import net.tomasbot.matchday.model.Competition;
-import net.tomasbot.matchday.model.Event;
-import net.tomasbot.matchday.model.Match;
-import net.tomasbot.matchday.model.Team;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -105,7 +105,8 @@ class MatchServiceTest {
     logger.info("All Matches in database:\n{}", matchService.fetchAll());
 
     logger.info("Fetching Matches for Team: {}", testTeam);
-    final List<Match> events = matchService.fetchMatchesForTeam(testTeam.getId());
+    final List<Match> events =
+        matchService.fetchMatchesForTeam(testTeam.getId(), 0, expectedEventCount);
     logger.info("Got Matches:\n{}", events);
     assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount);
   }

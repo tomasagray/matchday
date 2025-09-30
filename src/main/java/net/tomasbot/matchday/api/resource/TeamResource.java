@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
+import net.tomasbot.matchday.api.controller.RootController;
 import net.tomasbot.matchday.api.controller.TeamController;
 import net.tomasbot.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionModeller;
 import net.tomasbot.matchday.api.resource.ColorResource.ColorResourceModeller;
@@ -122,7 +123,11 @@ public class TeamResource extends RepresentationModel<TeamResource> {
               .withRel(FANART_REL));
       // events
       teamResource.add(
-          linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId)).withRel(EVENTS_REL));
+          linkTo(
+                  methodOn(TeamController.class)
+                      .fetchEventsForTeam(
+                          teamId, RootController.DEFAULT_PAGE, RootController.DEFAULT_PAGE_SIZE))
+              .withRel(EVENTS_REL));
 
       return teamResource;
     }

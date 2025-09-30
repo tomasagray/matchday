@@ -159,12 +159,14 @@ public class TeamController {
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CollectionModel<MatchResource>> fetchEventsForTeam(
-      @PathVariable final UUID teamId) {
-    final List<Match> events = matchService.fetchMatchesForTeam(teamId);
+      @PathVariable final UUID teamId,
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "16") int size) {
+    final List<Match> events = matchService.fetchMatchesForTeam(teamId, page, size);
     final CollectionModel<MatchResource> eventResources =
         matchAssembler
             .toCollectionModel(events)
-            .add(linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId)).withSelfRel());
+            .add(linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId, page, size)).withSelfRel());
     return ResponseEntity.ok(eventResources);
   }
 

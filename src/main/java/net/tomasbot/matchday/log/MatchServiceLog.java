@@ -28,12 +28,11 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.api.service.MatchService;
 
 @Aspect
 public class MatchServiceLog {
 
-  private static final Logger logger = LogManager.getLogger(MatchService.class);
+  private static final Logger logger = LogManager.getLogger(MatchServiceLog.class);
 
   @Before("execution(* net.tomasbot.matchday.api.service.MatchService.fetchAll(..))")
   public void logFetchAllMatches() {
@@ -55,8 +54,10 @@ public class MatchServiceLog {
   public Object logFetchEventsForTeam(@NotNull ProceedingJoinPoint jp) throws Throwable {
     Object teamId = jp.getArgs()[0];
     logger.info("Fetching Events for Team: {}", teamId);
-    List<?> events = (List<?>) jp.proceed();
-    logger.info("Retrieved: {} Events for Team: {}", events.size(), teamId);
+    Object events = jp.proceed();
+    if (events instanceof List<?> matches)
+      logger.info("Retrieved {} Matches for Team: {}", matches.size(), teamId);
+    else logger.info("Successfully retrieved Matches for Team: {}", teamId);
     return events;
   }
 
