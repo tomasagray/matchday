@@ -19,6 +19,7 @@
 
 package net.tomasbot.matchday.api.controller;
 
+import static net.tomasbot.matchday.api.controller.EventController.NEXT_LINK;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -151,7 +152,7 @@ public class CompetitionController {
           linkTo(
                   methodOn(CompetitionController.class)
                       .fetchCompetitionEvents(competitionId, eventPage.getNumber() + 1, size))
-              .withRel("next"));
+              .withRel(NEXT_LINK));
     }
     return ResponseEntity.ok(model);
   }

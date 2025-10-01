@@ -41,6 +41,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
@@ -102,12 +103,15 @@ class MatchServiceTest {
   void fetchMatchesForTeam() {
     // Minimum expected Events
     final int expectedEventCount = 1;
-    logger.info("All Matches in database:\n{}", matchService.fetchAll());
+    final int totalCount = matchService.fetchAll().size();
+
+    logger.info("Total Match count in database:\n{}", totalCount);
 
     logger.info("Fetching Matches for Team: {}", testTeam);
-    final List<Match> events =
-        matchService.fetchMatchesForTeam(testTeam.getId(), 0, expectedEventCount);
-    logger.info("Got Matches:\n{}", events);
-    assertThat(events.size()).isGreaterThanOrEqualTo(expectedEventCount);
+    Page<Match> events = matchService.fetchMatchesForTeam(testTeam.getId(), 0, expectedEventCount);
+    int actualEventCount = events.getSize();
+
+    logger.info("Got ({}) Matches:\n{}", actualEventCount, events);
+    assertThat(actualEventCount).isGreaterThanOrEqualTo(expectedEventCount);
   }
 }

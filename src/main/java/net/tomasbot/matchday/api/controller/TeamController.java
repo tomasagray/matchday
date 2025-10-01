@@ -20,22 +20,18 @@
 package net.tomasbot.matchday.api.controller;
 
 import static net.tomasbot.matchday.api.controller.CompetitionController.IMAGE_SVG_VALUE;
+import static net.tomasbot.matchday.api.controller.EventController.NEXT_LINK;
+import static net.tomasbot.matchday.api.resource.EventsResource.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.List;
 import java.util.UUID;
-import net.tomasbot.matchday.api.resource.ArtworkCollectionResource;
+import net.tomasbot.matchday.api.resource.*;
 import net.tomasbot.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionModeller;
-import net.tomasbot.matchday.api.resource.ArtworkResource;
 import net.tomasbot.matchday.api.resource.ArtworkResource.ArtworkModeller;
-import net.tomasbot.matchday.api.resource.CompetitionResource;
 import net.tomasbot.matchday.api.resource.CompetitionResource.CompetitionModeller;
-import net.tomasbot.matchday.api.resource.MatchResource;
-import net.tomasbot.matchday.api.resource.MatchResource.MatchResourceAssembler;
-import net.tomasbot.matchday.api.resource.TeamResource;
 import net.tomasbot.matchday.api.resource.TeamResource.TeamModeller;
 import net.tomasbot.matchday.api.service.CompetitionService;
 import net.tomasbot.matchday.api.service.MatchService;
@@ -68,7 +64,7 @@ public class TeamController {
   private final CompetitionService competitionService;
   private final CompetitionModeller competitionModeller;
   private final MatchService matchService;
-  private final MatchResourceAssembler matchAssembler;
+  private final EventsModeller eventsModeller;
   private final ArtworkModeller artworkModeller;
   private final ArtworkCollectionModeller collectionModeller;
 
@@ -78,16 +74,15 @@ public class TeamController {
       MatchService matchService,
       TeamModeller teamModeller,
       CompetitionModeller competitionModeller,
-      MatchResourceAssembler matchAssembler,
+      EventsModeller eventsModeller,
       ArtworkModeller artworkModeller,
       ArtworkCollectionModeller collectionModeller) {
-
     this.teamService = teamService;
     this.teamModeller = teamModeller;
     this.competitionService = competitionService;
     this.matchService = matchService;
     this.competitionModeller = competitionModeller;
-    this.matchAssembler = matchAssembler;
+    this.eventsModeller = eventsModeller;
     this.artworkModeller = artworkModeller;
     this.collectionModeller = collectionModeller;
   }
@@ -125,7 +120,7 @@ public class TeamController {
     if (teamPage.hasNext()) {
       model.add(
           linkTo(methodOn(TeamController.class).fetchAllTeams(teamPage.getNumber() + 1, size))
-              .withRel("next"));
+              .withRel(NEXT_LINK));
     }
     return ResponseEntity.ok(model);
   }
@@ -158,15 +153,23 @@ public class TeamController {
       value = "/team/{teamId}/matches",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<CollectionModel<MatchResource>> fetchEventsForTeam(
+  public ResponseEntity<EventsResource> fetchEventsForTeam(
       @PathVariable final UUID teamId,
       @RequestParam(name = "page", defaultValue = "0") int page,
       @RequestParam(name = "size", defaultValue = "16") int size) {
-    final List<Match> events = matchService.fetchMatchesForTeam(teamId, page, size);
-    final CollectionModel<MatchResource> eventResources =
-        matchAssembler
-            .toCollectionModel(events)
-            .add(linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId, page, size)).withSelfRel());
+    Page<Match> events = matchService.fetchMatchesForTeam(teamId, page, size);
+    int pageNum = events.getNumber();
+
+    // add links
+    EventsResource eventResources = eventsModeller.toModel(events.getContent());
+    eventResources.add(
+        linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId, pageNum, size))
+            .withSelfRel());
+    if (events.hasNext())
+      eventResources.add(
+          linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId, pageNum + 1, size))
+              .withRel(NEXT_LINK));
+
     return ResponseEntity.ok(eventResources);
   }
 

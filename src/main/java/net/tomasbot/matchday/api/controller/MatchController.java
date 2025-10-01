@@ -20,6 +20,7 @@
 package net.tomasbot.matchday.api.controller;
 
 import static net.tomasbot.matchday.api.controller.CompetitionController.IMAGE_SVG_VALUE;
+import static net.tomasbot.matchday.api.controller.EventController.NEXT_LINK;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -105,7 +106,7 @@ public class MatchController {
     if (matchPage.hasNext()) {
       resource.add(
           linkTo(methodOn(MatchController.class).fetchAllMatches(matchPage.getNumber() + 1, size))
-              .withRel("next"));
+              .withRel(NEXT_LINK));
     }
     return ResponseEntity.ok(resource);
   }

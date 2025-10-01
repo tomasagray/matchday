@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/events")
 public class EventController {
 
-  private static final LinkRelation NEXT_LINK = LinkRelation.of("next");
+  public static final LinkRelation NEXT_LINK = LinkRelation.of("next");
 
   private final EventService eventService;
   private final EventsModeller eventAssembler;
@@ -74,14 +74,14 @@ public class EventController {
   public ResponseEntity<EventsResource> fetchAllEvents(
       @RequestParam(name = "page", defaultValue = "0") int page,
       @RequestParam(name = "size", defaultValue = "16") int size) {
-    final Page<Event> events = eventService.fetchAllPaged(page, size);
-    final EventsResource resource = eventAssembler.toModel(events.getContent());
-    if (events.hasNext()) {
-      int nextPage = events.getNumber() + 1;
+    Page<Event> events = eventService.fetchAllPaged(page, size);
+    EventsResource resource = eventAssembler.toModel(events.getContent());
+
+    if (events.hasNext())
       resource.add(
-          linkTo(methodOn(EventController.class).fetchAllEvents(nextPage, size))
+          linkTo(methodOn(EventController.class).fetchAllEvents(events.getNumber() + 1, size))
               .withRel(NEXT_LINK));
-    }
+
     return ResponseEntity.ok(resource);
   }
 
