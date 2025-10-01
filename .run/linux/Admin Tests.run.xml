@@ -14,7 +14,7 @@
             <env name="DATA_ROOT" value="/projectdata/matchday/test/admin"/>
             <env name="DB_PASSWORD" value="{M4tchD4y}"/>
             <env name="DB_URL"
-                 value="jdbc:mysql://192.168.0.107:30306/md_test_admin?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
+                 value="jdbc:mysql://hal9000:30306/md_test_admin?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
             <env name="DB_USER" value="matchday"/>
             <env name="FFMPEG" value="/usr/bin/ffmpeg"/>
             <env name="FFPROBE" value="/usr/bin/ffprobe"/>
