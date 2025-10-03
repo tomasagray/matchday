@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.4.6] - 2025-10-03
+
+### Fixed
+
+- API version (no subversion necessary)
+- Duplicate competitions returned when searching by team
+
 ## [0.4.5] - 2025-09-29
 
 ### Fixed
