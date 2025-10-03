@@ -19,6 +19,7 @@
 
 package net.tomasbot.matchday.api.resource;
 
+import static net.tomasbot.matchday.util.Constants.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -39,7 +40,6 @@ import net.tomasbot.matchday.model.video.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.stereotype.Component;
@@ -51,10 +51,6 @@ import org.springframework.stereotype.Component;
 @JsonRootName(value = "video-source")
 @Relation(collectionRelation = "video-sources", itemRelation = "video-source")
 public class VideoFileSourceResource extends RepresentationModel<VideoFileSourceResource> {
-
-  private static final LinkRelation PREFERRED_PLAYLIST = LinkRelation.of("preferred");
-  private static final LinkRelation STREAM = LinkRelation.of("stream");
-  private static final LinkRelation STREAM_REL = LinkRelation.of("video-stream");
 
   private UUID id;
   private String channel;
@@ -120,7 +116,7 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
 
       resource.add(
           linkTo(methodOn(EventController.class).getVideoStreamPlaylist(eventId, fileSrcId))
-              .withRel(STREAM));
+              .withRel(LinkRelations.PLAYLIST_REL));
 
       return resource;
     }
@@ -152,7 +148,7 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
                               linkTo(
                                       methodOn(EventController.class)
                                           .downloadVideoStream(eventId, fileSrcId, videoFileId))
-                                  .withRel(STREAM_REL));
+                                  .withRel(LinkRelations.STREAM_REL));
                           return resource;
                         }));
         return new TreeMap<>(unsorted);
@@ -167,7 +163,7 @@ public class VideoFileSourceResource extends RepresentationModel<VideoFileSource
       // Add link to master playlist
       resources.add(
           linkTo(methodOn(EventController.class).getPreferredPlaylist(eventId))
-              .withRel(PREFERRED_PLAYLIST));
+              .withRel(LinkRelations.PREFERRED_PLAYLIST_REL));
       return resources;
     }
 

@@ -19,7 +19,7 @@
 
 package net.tomasbot.matchday.api.controller;
 
-import static net.tomasbot.matchday.api.controller.EventController.NEXT_LINK;
+import static net.tomasbot.matchday.util.Constants.LinkRelations.NEXT_LINK;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 

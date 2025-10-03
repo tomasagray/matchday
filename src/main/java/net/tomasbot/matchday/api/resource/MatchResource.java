@@ -19,7 +19,8 @@
 
 package net.tomasbot.matchday.api.resource;
 
-import static net.tomasbot.matchday.api.resource.EventsResource.VIDEO_LINK;
+import static net.tomasbot.matchday.util.Constants.LinkRelations.ARTWORK_REL;
+import static net.tomasbot.matchday.util.Constants.LinkRelations.VIDEO_LINK_REL;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -52,8 +53,6 @@ import org.springframework.stereotype.Component;
 @Relation(collectionRelation = "matches")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class MatchResource extends RepresentationModel<MatchResource> {
-
-  private static final String ARTWORK_REL = "artwork";
 
   private UUID eventId;
   private String title;
@@ -98,15 +97,16 @@ public class MatchResource extends RepresentationModel<MatchResource> {
 
         resource.add(linkTo(methodOn(MatchController.class).fetchMatchById(eventId)).withSelfRel());
         Artwork artwork = entity.getArtwork();
-        if (artwork != null) {
+        if (artwork != null)
           resource.add(
               linkTo(
                       methodOn(MatchController.class)
                           .fetchMatchArtworkImage(eventId, artwork.getId()))
                   .withRel(ARTWORK_REL));
-        }
+
         resource.add(
-            linkTo(methodOn(EventController.class).getVideoResources(eventId)).withRel(VIDEO_LINK));
+            linkTo(methodOn(EventController.class).getVideoResources(eventId))
+                .withRel(VIDEO_LINK_REL));
 
         return resource;
       } catch (IOException e) {

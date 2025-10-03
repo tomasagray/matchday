@@ -20,8 +20,8 @@
 package net.tomasbot.matchday.api.controller;
 
 import static net.tomasbot.matchday.api.controller.CompetitionController.IMAGE_SVG_VALUE;
-import static net.tomasbot.matchday.api.controller.EventController.NEXT_LINK;
 import static net.tomasbot.matchday.api.resource.EventsResource.*;
+import static net.tomasbot.matchday.util.Constants.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -93,10 +93,10 @@ public class TeamController {
       final Long artworkId = artwork.getId();
       artwork.add(
           linkTo(methodOn(TeamController.class).fetchTeamArtworkImageData(teamId, role, artworkId))
-              .withRel("image"));
+              .withRel(LinkRelations.IMAGE_REL));
       artwork.add(
           linkTo(methodOn(TeamController.class).fetchTeamArtworkMetadata(teamId, role, artworkId))
-              .withRel("metadata"));
+              .withRel(LinkRelations.METADATA_REL));
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
@@ -120,7 +120,7 @@ public class TeamController {
     if (teamPage.hasNext()) {
       model.add(
           linkTo(methodOn(TeamController.class).fetchAllTeams(teamPage.getNumber() + 1, size))
-              .withRel(NEXT_LINK));
+              .withRel(LinkRelations.NEXT_LINK));
     }
     return ResponseEntity.ok(model);
   }
@@ -168,7 +168,7 @@ public class TeamController {
     if (events.hasNext())
       eventResources.add(
           linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId, pageNum + 1, size))
-              .withRel(NEXT_LINK));
+              .withRel(LinkRelations.NEXT_LINK));
 
     return ResponseEntity.ok(eventResources);
   }
@@ -284,10 +284,10 @@ public class TeamController {
     final ArtworkResource resource = artworkModeller.toModel(artwork);
     resource.add(
         linkTo(methodOn(TeamController.class).fetchTeamArtworkMetadata(teamId, role, artworkId))
-            .withRel("metadata"));
+            .withRel(LinkRelations.METADATA_REL));
     resource.add(
         linkTo(methodOn(TeamController.class).fetchTeamArtworkImageData(teamId, role, artworkId))
-            .withRel("image"));
+            .withRel(LinkRelations.IMAGE_REL));
     return ResponseEntity.ok(resource);
   }
 

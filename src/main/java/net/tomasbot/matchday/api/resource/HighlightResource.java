@@ -19,7 +19,7 @@
 
 package net.tomasbot.matchday.api.resource;
 
-import static net.tomasbot.matchday.api.resource.EventsResource.VIDEO_LINK;
+import static net.tomasbot.matchday.util.Constants.LinkRelations.VIDEO_LINK_REL;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -86,7 +86,8 @@ public class HighlightResource extends RepresentationModel<HighlightResource> {
       resource.setFixture(entity.getFixture());
       resource.setDate(entity.getDate());
       resource.add(
-          linkTo(methodOn(EventController.class).getVideoResources(eventId)).withRel(VIDEO_LINK));
+          linkTo(methodOn(EventController.class).getVideoResources(eventId))
+              .withRel(VIDEO_LINK_REL));
       resource.add(
           linkTo(methodOn(HighlightController.class).fetchHighlightById(eventId)).withSelfRel());
       return resource;
