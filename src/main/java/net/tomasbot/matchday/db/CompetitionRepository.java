@@ -35,7 +35,7 @@ public interface CompetitionRepository extends JpaRepository<Competition, UUID> 
   Optional<Competition> findCompetitionByNameName(@NotNull String name);
 
   @Query(
-      "SELECT DISTINCT mg.competition FROM MatchGame mg" +
-              " WHERE mg.homeTeam.id = :teamId OR mg.awayTeam.id = :teamId")
+      "SELECT DISTINCT mg.competition FROM MatchGame mg"
+          + " WHERE mg.homeTeam.id = :teamId OR mg.awayTeam.id = :teamId")
   List<Competition> findCompetitionsForTeam(@Param("teamId") UUID teamId);
 }
