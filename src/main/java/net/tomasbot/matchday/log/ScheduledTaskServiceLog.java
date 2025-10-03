@@ -20,21 +20,21 @@
 package net.tomasbot.matchday.log;
 
 import java.nio.file.Path;
+import net.tomasbot.matchday.model.video.VideoStreamLocatorPlaylist;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.api.service.ScheduledTaskService;
-import net.tomasbot.matchday.model.video.VideoStreamLocatorPlaylist;
 
 @Aspect
 public class ScheduledTaskServiceLog {
 
-  private static final Logger logger = LogManager.getLogger(ScheduledTaskService.class);
+  private static final Logger logger = LogManager.getLogger(ScheduledTaskServiceLog.class);
 
   @Before("execution(* net.tomasbot.matchday.api.service.ScheduledTaskService.refreshEventData())")
   public void logRefreshAllDataSources() {
@@ -80,4 +80,16 @@ public class ScheduledTaskServiceLog {
   public void logScheduleTasks() {
     logger.info("Scheduling tasks...");
   }
+
+  @Before(
+      "execution(* net.tomasbot.matchday.api.service.ScheduledTaskService.handleVpnHeartbeatError(..))")
+  public void logVpnHeartbeatError(@NotNull JoinPoint jp) {
+    Object[] args = jp.getArgs();
+    if (args.length == 0) return;
+
+    if (args[0] instanceof Throwable e) {
+      logger.error("Error testing VPN heartbeat: {}", e.getMessage(), e);
+    }
+  }
 }
+

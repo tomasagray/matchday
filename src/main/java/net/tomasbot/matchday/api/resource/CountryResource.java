@@ -19,6 +19,7 @@
 
 package net.tomasbot.matchday.api.resource;
 
+import static net.tomasbot.matchday.util.Constants.LinkRelations.FLAG_REL;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -33,7 +34,6 @@ import lombok.NoArgsConstructor;
 import net.tomasbot.matchday.api.controller.CountryController;
 import net.tomasbot.matchday.model.Country;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
@@ -46,8 +46,6 @@ import org.springframework.stereotype.Component;
 @JsonRootName(value = "country")
 @Relation(collectionRelation = "countries")
 public class CountryResource extends RepresentationModel<CountryResource> {
-
-  private static final LinkRelation FLAG = LinkRelation.of("flag");
 
   private String name;
   private List<Locale> locales;
@@ -68,7 +66,7 @@ public class CountryResource extends RepresentationModel<CountryResource> {
         resource.setName(name);
         resource.setLocales(entity.getLocales());
         resource.add(
-            linkTo(methodOn(CountryController.class).getFlagForCountry(name)).withRel(FLAG));
+            linkTo(methodOn(CountryController.class).getFlagForCountry(name)).withRel(FLAG_REL));
         resource.add(linkTo(methodOn(CountryController.class).getCountry(name)).withSelfRel());
       } catch (IOException e) {
         // this should not happen

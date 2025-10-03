@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
+import net.tomasbot.matchday.api.controller.RootController;
 import net.tomasbot.matchday.api.controller.TeamController;
 import net.tomasbot.matchday.api.resource.ArtworkCollectionResource.ArtworkCollectionModeller;
 import net.tomasbot.matchday.api.resource.ColorResource.ColorResourceModeller;
@@ -74,12 +75,12 @@ public class TeamResource extends RepresentationModel<TeamResource> {
         final Long artworkId = resource.getId();
         resource.add(
             linkTo(methodOn(TeamController.class).fetchTeamArtworkMetadata(teamId, role, artworkId))
-                .withRel("metadata"));
+                .withRel(LinkRelations.METADATA_REL));
         resource.add(
             linkTo(
                     methodOn(TeamController.class)
                         .fetchTeamArtworkImageData(teamId, role, artworkId))
-                .withRel("image"));
+                .withRel(LinkRelations.IMAGE_REL));
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
@@ -116,13 +117,17 @@ public class TeamResource extends RepresentationModel<TeamResource> {
       // artwork
       teamResource.add(
           linkTo(methodOn(TeamController.class).fetchSelectedArtwork(teamId, ArtworkRole.EMBLEM))
-              .withRel(EMBLEM_REL));
+              .withRel(LinkRelations.EMBLEM_REL));
       teamResource.add(
           linkTo(methodOn(TeamController.class).fetchSelectedArtwork(teamId, ArtworkRole.FANART))
-              .withRel(FANART_REL));
+              .withRel(LinkRelations.FANART_REL));
       // events
       teamResource.add(
-          linkTo(methodOn(TeamController.class).fetchEventsForTeam(teamId)).withRel(EVENTS_REL));
+          linkTo(
+                  methodOn(TeamController.class)
+                      .fetchEventsForTeam(
+                          teamId, RootController.DEFAULT_PAGE, RootController.DEFAULT_PAGE_SIZE))
+              .withRel(LinkRelations.EVENTS_REL));
 
       return teamResource;
     }

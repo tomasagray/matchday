@@ -19,11 +19,11 @@
 
 package net.tomasbot.matchday.api.controller;
 
+import static net.tomasbot.matchday.util.Constants.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +36,7 @@ public class RootController {
 
   public static final int DEFAULT_PAGE_SIZE = 16;
   public static final int DEFAULT_PAGE = 0;
-  // Link relation identifiers
-  private static final LinkRelation EVENTS_REL = LinkRelation.of("events");
-  private static final LinkRelation MATCHES_REL = LinkRelation.of("matches");
-  private static final LinkRelation HIGHLIGHTS_REL = LinkRelation.of("highlights");
-  private static final LinkRelation TEAMS_REL = LinkRelation.of("teams");
-  private static final LinkRelation COMPETITIONS_REL = LinkRelation.of("competitions");
-
+  
   @RequestMapping(
       value = {"", "/"},
       method = RequestMethod.GET)
@@ -53,21 +47,21 @@ public class RootController {
     // attach top-level links
     root.add(
         linkTo(methodOn(EventController.class).fetchAllEvents(DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
-            .withRel(EVENTS_REL));
+            .withRel(LinkRelations.EVENTS_REL));
     root.add(
         linkTo(methodOn(MatchController.class).fetchAllMatches(DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
-            .withRel(MATCHES_REL));
+            .withRel(LinkRelations.MATCHES_REL));
     root.add(
         linkTo(
                 methodOn(HighlightController.class)
                     .fetchAllHighlights(DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
-            .withRel(HIGHLIGHTS_REL));
+            .withRel(LinkRelations.HIGHLIGHTS_REL));
     root.add(
         linkTo(methodOn(TeamController.class).fetchAllTeams(DEFAULT_PAGE, DEFAULT_PAGE_SIZE))
-            .withRel(TEAMS_REL));
+            .withRel(LinkRelations.TEAMS_REL));
     root.add(
         linkTo(methodOn(CompetitionController.class).fetchAllCompetitions())
-            .withRel(COMPETITIONS_REL));
+            .withRel(LinkRelations.COMPETITIONS_REL));
 
     return new ResponseEntity<>(root, HttpStatus.OK);
   }

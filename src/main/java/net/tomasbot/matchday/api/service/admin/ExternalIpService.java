@@ -1,14 +1,12 @@
 package net.tomasbot.matchday.api.service.admin;
 
-import lombok.Getter;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import lombok.Getter;
 
-@Getter
 public abstract class ExternalIpService {
 
   private static final int CONNECTION_TIMEOUT_MS = 10 * 1_000;
@@ -16,7 +14,7 @@ public abstract class ExternalIpService {
       "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.2) "
           + "Gecko/20090729 Firefox/3.5.2 (.NET CLR 3.5.30729)";
 
-  private final URL ipServiceUrl;
+  @Getter private final URL ipServiceUrl;
 
   ExternalIpService(String ipServiceUrl) {
     try {
@@ -38,5 +36,12 @@ public abstract class ExternalIpService {
 
     connection.connect();
     return connection.getInputStream();
+  }
+
+  abstract String getName();
+
+  @Override
+  public String toString() {
+    return this.getName();
   }
 }

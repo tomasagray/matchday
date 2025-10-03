@@ -27,10 +27,10 @@ public class VpnServiceLog {
       logger.info("VPN service started.");
       return result;
     } catch (Exception e) {
-      String message = "Error running VPN service: " + e.getMessage();
+      String message = "Error starting VPN service: " + e.getMessage();
       logger.error(message);
       logger.debug(message, e);
-      return null;
+      throw e;
     }
   }
 
@@ -75,4 +75,23 @@ public class VpnServiceLog {
     logger.info("Using VPN configuration at: {}", result);
     return result;
   }
+
+  @Before(
+      "execution(* net.tomasbot.matchday.api.service.admin.VpnService.handleAmbiguousProtection(..))")
+  public void logAmbiguousProtection() {
+    logger.error("Could not determine unprotected IP address; internet connection may not be secure!");
+  }
+
+  @Before("execution(* net.tomasbot.matchday.api.service.admin.VpnService.handleConnectionError(..))")
+  public void logConnectionError(@NotNull JoinPoint jp) {
+    Object[] args = jp.getArgs();
+    if (args == null || args.length == 0) return;
+
+    Object arg = args[0];
+    if (arg instanceof Throwable err) {
+      logger.error("VPN connection error: {}", err.getMessage());
+      logger.trace(err);
+    }
+  }
 }
+

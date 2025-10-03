@@ -8,6 +8,13 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.List;
 import java.util.UUID;
+import net.tomasbot.matchday.model.Match;
+import net.tomasbot.matchday.model.PlaintextDataSource;
+import net.tomasbot.matchday.model.Snapshot;
+import net.tomasbot.matchday.model.SnapshotRequest;
+import net.tomasbot.matchday.plugin.datasource.forum.ForumPlugin;
+import net.tomasbot.matchday.util.JsonParser;
+import net.tomasbot.matchday.util.ResourceFileReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,13 +24,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import net.tomasbot.matchday.model.Match;
-import net.tomasbot.matchday.model.PlaintextDataSource;
-import net.tomasbot.matchday.model.Snapshot;
-import net.tomasbot.matchday.model.SnapshotRequest;
-import net.tomasbot.matchday.plugin.datasource.forum.ForumPlugin;
-import net.tomasbot.matchday.util.JsonParser;
-import net.tomasbot.matchday.util.ResourceFileReader;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -84,7 +84,7 @@ class ForumPluginTest {
   void getUrlSnapshot() throws IOException {
     // given
     final int expectedMatchCount = 1;
-    URL testUrl = new URL("http://192.168.0.107:7000/forum/event_01.htm");
+    URL testUrl = new URL("http://hal9000:7000/forum/event_01.htm");
 
     // when
     logger.info("Getting Snapshot from: {}", testUrl);

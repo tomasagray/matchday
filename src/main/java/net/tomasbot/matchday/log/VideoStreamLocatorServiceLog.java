@@ -19,8 +19,9 @@
 
 package net.tomasbot.matchday.log;
 
-import java.nio.file.Path;
 import java.util.List;
+import net.tomasbot.matchday.model.video.TaskState;
+import net.tomasbot.matchday.model.video.VideoStreamLocator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -29,15 +30,11 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.api.service.video.VideoStreamLocatorService;
-import net.tomasbot.matchday.model.video.TaskState;
-import net.tomasbot.matchday.model.video.VideoFile;
-import net.tomasbot.matchday.model.video.VideoStreamLocator;
 
 @Aspect
 public class VideoStreamLocatorServiceLog {
 
-  private static final Logger logger = LogManager.getLogger(VideoStreamLocatorService.class);
+  private static final Logger logger = LogManager.getLogger(VideoStreamLocatorServiceLog.class);
 
   @SuppressWarnings("unchecked cast")
   @Around(
@@ -72,11 +69,13 @@ public class VideoStreamLocatorServiceLog {
   @Around(
       "execution(* net.tomasbot.matchday.api.service.video.VideoStreamLocatorService.createStreamLocator(..))")
   public Object logCreateStreamLocator(@NotNull ProceedingJoinPoint jp) throws Throwable {
-    Path storageLocation = (Path) jp.getArgs()[0];
-    VideoFile videoFile = (VideoFile) jp.getArgs()[1];
+    Object storageLocation = jp.getArgs()[0];
+    Object videoFile = jp.getArgs()[1];
+
     logger.info("Creating VideoStreamLocator at: {} for VideoFile: {}", storageLocation, videoFile);
     Object result = jp.proceed();
     logger.info("Created VideoStreamLocator: {}", result);
+    
     return result;
   }
 

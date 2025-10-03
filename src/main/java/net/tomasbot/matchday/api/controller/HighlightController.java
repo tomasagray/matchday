@@ -19,6 +19,7 @@
 
 package net.tomasbot.matchday.api.controller;
 
+import static net.tomasbot.matchday.util.Constants.LinkRelations.NEXT_LINK;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -71,7 +72,7 @@ public class HighlightController {
           linkTo(
                   methodOn(HighlightController.class)
                       .fetchAllHighlights(highlightPage.getNumber() + 1, size))
-              .withRel("next"));
+              .withRel(NEXT_LINK));
     }
     return ResponseEntity.ok(model);
   }

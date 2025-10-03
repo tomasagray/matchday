@@ -19,6 +19,7 @@
 
 package net.tomasbot.matchday.api.resource;
 
+import static net.tomasbot.matchday.util.Constants.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -38,7 +39,6 @@ import net.tomasbot.matchday.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.stereotype.Component;
@@ -60,12 +60,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
 
   @Component
   public static class CompetitionModeller extends EntityModeller<Competition, CompetitionResource> {
-
-    private static final LinkRelation TEAMS = LinkRelation.of("teams");
-    private static final LinkRelation EMBLEM = LinkRelation.of("emblem");
-    private static final LinkRelation FANART = LinkRelation.of("fanart");
-    private static final LinkRelation EVENTS = LinkRelation.of("events");
-
+    
     private final ArtworkCollectionModeller artworkModeller;
 
     public CompetitionModeller(ArtworkCollectionModeller artworkModeller) {
@@ -83,12 +78,12 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
             linkTo(
                     methodOn(CompetitionController.class)
                         .fetchArtworkMetadata(competitionId, role, artworkId))
-                .withRel("metadata"));
+                .withRel(LinkRelations.METADATA_REL));
         artworkResource.add(
             linkTo(
                     methodOn(CompetitionController.class)
                         .fetchArtworkImageData(competitionId, role, artworkId))
-                .withRel("image"));
+                .withRel(LinkRelations.IMAGE_REL));
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
@@ -129,21 +124,21 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
                           competitionId,
                           RootController.DEFAULT_PAGE,
                           RootController.DEFAULT_PAGE_SIZE))
-              .withRel(EVENTS));
+              .withRel(LinkRelations.EVENTS_REL));
       competitionResource.add(
           linkTo(methodOn(CompetitionController.class).fetchCompetitionTeams(competitionId))
-              .withRel(TEAMS));
+              .withRel(LinkRelations.TEAMS_REL));
       // artwork collection links
       competitionResource.add(
           linkTo(
                   methodOn(CompetitionController.class)
                       .fetchSelectedArtwork(competitionId, ArtworkRole.EMBLEM))
-              .withRel(EMBLEM));
+              .withRel(LinkRelations.EMBLEM_REL));
       competitionResource.add(
           linkTo(
                   methodOn(CompetitionController.class)
                       .fetchSelectedArtwork(competitionId, ArtworkRole.FANART))
-              .withRel(FANART));
+              .withRel(LinkRelations.FANART_REL));
       return competitionResource;
     }
 
@@ -178,9 +173,7 @@ public class CompetitionResource extends RepresentationModel<CompetitionResource
     private ArtworkCollection getArtworkCollection(
         @NotNull ArtworkCollectionResource resource, @NotNull ArtworkRole role) {
       final ArtworkCollection collection = artworkModeller.fromModel(resource);
-      if (collection != null) {
-        collection.setRole(role);
-      }
+      if (collection != null) collection.setRole(role);
       return collection;
     }
   }

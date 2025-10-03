@@ -6,15 +6,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CanYouSeeMe extends ExternalIpService {
 
   private static final String SERVICE_URL = "https://www.canyouseeme.org";
   private static final String IP_SELECTOR = "input#ip";
+  @Getter private final String name = "CanYouSeeMe.org";
 
   CanYouSeeMe() {
     super(SERVICE_URL);

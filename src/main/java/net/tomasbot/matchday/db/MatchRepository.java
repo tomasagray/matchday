@@ -22,6 +22,8 @@ package net.tomasbot.matchday.db;
 import java.util.List;
 import java.util.UUID;
 import net.tomasbot.matchday.model.Match;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,5 +41,5 @@ public interface MatchRepository extends JpaRepository<Match, UUID> {
   @Query(
       "SELECT mt FROM MatchGame mt JOIN mt.homeTeam ht LEFT JOIN mt.awayTeam at "
           + "WHERE ht.id = :teamId OR at.id = :teamId ORDER BY mt.date DESC")
-  List<Match> fetchMatchesByTeam(@Param("teamId") UUID teamId);
+  Page<Match> fetchMatchesByTeam(@Param("teamId") UUID teamId, Pageable request);
 }

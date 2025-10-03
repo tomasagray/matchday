@@ -18,7 +18,7 @@ public class VpnController {
   }
 
   @RequestMapping(value = "/start", method = RequestMethod.POST)
-  public ResponseEntity<?> startVpnService() throws Exception {
+  public ResponseEntity<?> startVpnService() throws Throwable {
     vpnService.start();
     return ResponseEntity.ok().build();
   }
@@ -30,7 +30,7 @@ public class VpnController {
   }
 
   @RequestMapping(value = "/restart", method = RequestMethod.POST)
-  public ResponseEntity<?> restartVpnService() throws Exception {
+  public ResponseEntity<?> restartVpnService() throws Throwable {
     vpnService.restart();
     return ResponseEntity.ok().build();
   }

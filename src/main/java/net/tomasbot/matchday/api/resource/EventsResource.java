@@ -38,7 +38,6 @@ import net.tomasbot.matchday.model.Match;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.stereotype.Component;
@@ -51,8 +50,6 @@ import org.springframework.stereotype.Component;
 @Relation(collectionRelation = "events")
 @JsonInclude(value = Include.NON_NULL)
 public class EventsResource extends RepresentationModel<EventsResource> {
-
-  public static final LinkRelation VIDEO_LINK = LinkRelation.of("video");
 
   private final List<MatchResource> matches = new ArrayList<>();
   private final List<HighlightResource> highlights = new ArrayList<>();

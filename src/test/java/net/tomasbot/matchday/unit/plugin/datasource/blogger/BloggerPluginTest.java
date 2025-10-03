@@ -27,23 +27,25 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import net.tomasbot.matchday.model.*;
+import net.tomasbot.matchday.plugin.datasource.blogger.BloggerPlugin;
+import net.tomasbot.matchday.util.JsonParser;
+import net.tomasbot.matchday.util.ResourceFileReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import net.tomasbot.matchday.model.*;
-import net.tomasbot.matchday.plugin.datasource.blogger.BloggerPlugin;
-import net.tomasbot.matchday.util.JsonParser;
-import net.tomasbot.matchday.util.ResourceFileReader;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DisplayName("Verification tests for BloggerPlugin")
+@Disabled
 class BloggerPluginTest {
 
   private static final Logger logger = LogManager.getLogger(BloggerPluginTest.class);

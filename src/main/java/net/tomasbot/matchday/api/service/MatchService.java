@@ -137,10 +137,11 @@ public class MatchService implements EntityService<Match, UUID> {
    * @param teamId The name of the Team.
    * @return A CollectionModel containing the Events.
    */
-  public List<Match> fetchMatchesForTeam(@NotNull final UUID teamId) {
-    return matchRepository.fetchMatchesByTeam(teamId).stream()
-        .map(this::initialize)
-        .collect(Collectors.toList());
+  public Page<Match> fetchMatchesForTeam(@NotNull UUID teamId, int page, int size) {
+    PageRequest request = PageRequest.of(page, size);
+    Page<Match> matches = matchRepository.fetchMatchesByTeam(teamId, request);
+    matches.forEach(this::initialize);
+    return matches;
   }
 
   public Artwork refreshMatchArtwork(@NotNull UUID matchId) throws IOException {

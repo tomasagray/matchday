@@ -2,7 +2,7 @@
   "dataSourceId": "481826b7-6622-4690-bba2-ddc6119e1725",
   "clazz": "net.tomasbot.matchday.model.Match",
   "title": "Test DataSource for Forum Plugin",
-  "baseUri": "http://192.168.0.107:7000/forum/forum_event_list.htm",
+  "baseUri": "http://hal9000:7000/forum/forum_event_list.htm",
   "pluginId": "7e230b0d-45a3-4738-8a43-c3b1d6f61df4",
   "enabled": true,
   "patternKits": [

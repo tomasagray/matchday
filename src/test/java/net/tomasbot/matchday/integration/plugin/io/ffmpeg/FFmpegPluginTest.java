@@ -159,7 +159,7 @@ class FFmpegPluginTest {
   void interruptAllStreamTasks() throws InterruptedException, IOException {
     // given
     final AtomicInteger exitCode = new AtomicInteger(-1);
-    final int expectedExitCode = 137;
+    final int expectedExitCode = 143;
 
     final SimpleTranscodeRequest transcodeRequest =
         getTranscodeRequest("FFmpegPluginTest_KILL_ALL_STREAMS_", exitCode);
@@ -189,7 +189,7 @@ class FFmpegPluginTest {
   void killStreamingTask() throws InterruptedException, IOException {
     // given
     final AtomicInteger exitCode = new AtomicInteger(-1);
-    final int expectedExitCode = 137;
+    final int expectedExitCode = 143;
 
     // Start a new task
     SimpleTranscodeRequest transcodeRequest =

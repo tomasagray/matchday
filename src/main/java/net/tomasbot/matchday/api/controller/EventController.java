@@ -19,6 +19,7 @@
 
 package net.tomasbot.matchday.api.controller;
 
+import static net.tomasbot.matchday.util.Constants.LinkRelations.NEXT_LINK;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -34,7 +35,6 @@ import net.tomasbot.matchday.model.video.VideoFileSource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,9 +42,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/events")
 public class EventController {
-
-  private static final LinkRelation NEXT_LINK = LinkRelation.of("next");
-
+  
   private final EventService eventService;
   private final EventsModeller eventAssembler;
   private final VideoFileSourceResource.VideoSourceModeller fileSourceAssembler;
@@ -74,14 +72,14 @@ public class EventController {
   public ResponseEntity<EventsResource> fetchAllEvents(
       @RequestParam(name = "page", defaultValue = "0") int page,
       @RequestParam(name = "size", defaultValue = "16") int size) {
-    final Page<Event> events = eventService.fetchAllPaged(page, size);
-    final EventsResource resource = eventAssembler.toModel(events.getContent());
-    if (events.hasNext()) {
-      int nextPage = events.getNumber() + 1;
+    Page<Event> events = eventService.fetchAllPaged(page, size);
+    EventsResource resource = eventAssembler.toModel(events.getContent());
+
+    if (events.hasNext())
       resource.add(
-          linkTo(methodOn(EventController.class).fetchAllEvents(nextPage, size))
+          linkTo(methodOn(EventController.class).fetchAllEvents(events.getNumber() + 1, size))
               .withRel(NEXT_LINK));
-    }
+
     return ResponseEntity.ok(resource);
   }
 

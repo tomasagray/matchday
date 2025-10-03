@@ -2,6 +2,8 @@ package net.tomasbot.matchday.admin.api.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import net.tomasbot.matchday.api.service.admin.IpService;
+import net.tomasbot.matchday.api.service.admin.VpnService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
@@ -10,8 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import net.tomasbot.matchday.api.service.admin.IpService;
-import net.tomasbot.matchday.api.service.admin.VpnService;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -30,7 +30,7 @@ class VpnServiceTest {
 
   @Test
   @DisplayName("Validate VPN service can be started")
-  void testVpnServiceStartup() throws Exception {
+  void testVpnServiceStartup() throws Throwable {
     // given
     logger.info("Starting VPN service for test...");
     final String beforeTestIp = ipService.getIpAddress();

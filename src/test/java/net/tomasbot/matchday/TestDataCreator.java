@@ -19,9 +19,9 @@
 
 package net.tomasbot.matchday;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static net.tomasbot.matchday.model.video.PartIdentifier.*;
 import static net.tomasbot.matchday.model.video.Resolution.R_1080p;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.reflect.TypeToken;
@@ -34,15 +34,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import net.tomasbot.matchday.api.service.*;
 import net.tomasbot.matchday.db.VideoFileSrcRepository;
 import net.tomasbot.matchday.model.*;
@@ -52,6 +43,15 @@ import net.tomasbot.matchday.model.video.VideoFileSource;
 import net.tomasbot.matchday.unit.plugin.datasource.blogger.BloggerTestEntity;
 import net.tomasbot.matchday.util.JsonParser;
 import net.tomasbot.matchday.util.ResourceFileReader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -59,7 +59,7 @@ public class TestDataCreator {
 
   private static final Logger logger = LogManager.getLogger(TestDataCreator.class);
 
-  private static final String BASE_URL = "http://192.168.0.107:7000";
+  private static final String BASE_URL = "http://hal9000:7000";
   private static final Random numGen = new Random();
 
   private final EventService eventService;

@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 import net.tomasbot.matchday.api.controller.VideoStreamStatusController;
 import net.tomasbot.matchday.api.controller.VideoStreamStatusController.VideoStreamStatusMessage;
+import net.tomasbot.matchday.db.VideoFileRepository;
 import net.tomasbot.matchday.db.VideoStreamLocatorRepo;
 import net.tomasbot.matchday.model.video.SingleStreamLocator;
 import net.tomasbot.matchday.model.video.VideoFile;
@@ -41,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class VideoStreamLocatorService {
 
   private final VideoStreamLocatorRepo streamLocatorRepo;
+  private final VideoFileRepository videoFileRepository;
   private final VideoStreamStatusController streamStatusController;
   private final SimpMessagingTemplate messagingTemplate;
 
@@ -49,9 +51,11 @@ public class VideoStreamLocatorService {
 
   public VideoStreamLocatorService(
       VideoStreamLocatorRepo streamLocatorRepo,
+      VideoFileRepository videoFileRepository,
       VideoStreamStatusController streamStatusController,
       SimpMessagingTemplate messagingTemplate) {
     this.streamLocatorRepo = streamLocatorRepo;
+    this.videoFileRepository = videoFileRepository;
     this.streamStatusController = streamStatusController;
     this.messagingTemplate = messagingTemplate;
   }
@@ -108,6 +112,18 @@ public class VideoStreamLocatorService {
     return streamLocatorRepo.saveAndFlush(locator);
   }
 
+  @Transactional
+  public VideoStreamLocator createStreamLocator(
+      @NotNull Path storageLocation, @NotNull UUID videoFileId) {
+    return videoFileRepository
+        .findById(videoFileId)
+        .map(videoFile -> createStreamLocator(storageLocation, videoFile))
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    "Cannot create stream: no VideoFile with ID: " + videoFileId));
+  }
+
   public void updateStreamLocator(@NotNull VideoStreamLocator streamLocator) {
     streamLocatorRepo.saveAndFlush(streamLocator);
     publishLocatorStatus(streamLocator);
@@ -125,7 +141,10 @@ public class VideoStreamLocatorService {
   }
 
   public void publishLocatorStatus(@NotNull VideoStreamLocator streamLocator) {
-    UUID videoFileId = streamLocator.getVideoFile().getFileId();
+    VideoFile videoFile = streamLocator.getVideoFile();
+    if (videoFile == null) return;
+
+    UUID videoFileId = videoFile.getFileId();
     VideoStreamStatusMessage message = streamStatusController.publishVideoStreamStatus(videoFileId);
     messagingTemplate.convertAndSend(VIDEO_STREAM_EMIT_ENDPOINT, message);
   }

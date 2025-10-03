@@ -44,6 +44,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
@@ -82,12 +84,11 @@ public class VideoStreamManager {
     File storageFile = storageLocation.toFile();
     if (storageFile.exists()) {
       Files.walkFileTree(storageLocation, new RecursiveDirectoryDeleter());
+
       // ensure delete was successful
-      if (storageFile.exists()) {
-        final String message =
-            "Could not delete storage directory for VideoStreamLocatorPlaylist: " + playlist;
-        throw new IOException(message);
-      }
+      if (storageFile.exists())
+        throw new IOException(
+            "Could not delete storage directory for VideoStreamLocatorPlaylist: " + playlist);
     }
   }
 
@@ -254,11 +255,24 @@ public class VideoStreamManager {
   public void deleteLocalStreams(@NotNull final VideoStreamLocatorPlaylist playlist)
       throws IOException {
     final List<VideoStreamLocator> streamLocators = playlist.getStreamLocators();
-    for (VideoStreamLocator streamLocator : streamLocators) {
-      deleteVideoDataFromDisk(streamLocator);
-    }
+    for (VideoStreamLocator locator : streamLocators) deleteVideoDataFromDisk(locator);
+
     // delete stream root dir
     deleteStorageLocation(playlist);
+    playlistService.deleteVideoStreamPlaylist(playlist);
+  }
+
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public void removeLocatorFromPlaylist(@NotNull VideoStreamLocator locator) {
+    playlistService
+        .getVideoStreamPlaylistContaining(locator.getStreamLocatorId())
+        .ifPresent(playlist -> playlist.removeStreamLocator(locator));
+  }
+
+  @Transactional
+  public void deleteStream(@NotNull VideoStreamLocator locator) throws IOException {
+    locatorService.deleteStreamLocator(locator);
+    deleteVideoDataFromDisk(locator);
   }
 
   public void deleteVideoDataFromDisk(@NotNull VideoStreamLocator streamLocator)
@@ -277,16 +291,11 @@ public class VideoStreamManager {
       throw new IllegalArgumentException(msg);
     }
 
-    // update locator state
-    streamLocator.getState().setStatus(JobStatus.CREATED);
-    streamLocator.getState().setCompletionRatio(0.0);
-    locatorService.updateStreamLocator(streamLocator);
-
     // delete the data
     final Path streamDataDir = playlistPath.getParent();
     Files.walkFileTree(streamDataDir, new RecursiveDirectoryDeleter());
-    if (streamDataDir.toFile().exists()) {
+
+    if (streamDataDir.toFile().exists())
       throw new IOException("Could not delete data at: " + streamDataDir);
-    }
   }
 }

@@ -19,6 +19,8 @@
 
 package net.tomasbot.matchday.api.controller;
 
+import static net.tomasbot.matchday.util.Constants.LinkRelations.DATA_REL;
+import static net.tomasbot.matchday.util.Constants.LinkRelations.NEXT_LINK;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -151,7 +153,7 @@ public class CompetitionController {
           linkTo(
                   methodOn(CompetitionController.class)
                       .fetchCompetitionEvents(competitionId, eventPage.getNumber() + 1, size))
-              .withRel("next"));
+              .withRel(NEXT_LINK));
     }
     return ResponseEntity.ok(model);
   }
@@ -270,7 +272,7 @@ public class CompetitionController {
           linkTo(
                   methodOn(CompetitionController.class)
                       .fetchSelectedArtworkMetadata(competitionId, role))
-              .withRel("data"));
+              .withRel(DATA_REL));
       return ResponseEntity.ok(model);
     } else {
       return ResponseEntity.notFound().build();

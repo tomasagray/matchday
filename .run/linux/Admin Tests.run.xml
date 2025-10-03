@@ -2,7 +2,7 @@
     <configuration default="false" name="Admin Tests" type="JUnit" factoryName="JUnit">
         <module name="matchday.test"/>
         <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true"/>
-        <option name="ALTERNATIVE_JRE_PATH" value="17"/>
+        <option name="ALTERNATIVE_JRE_PATH" value="openjdk-23"/>
         <option name="PACKAGE_NAME" value="net.tomasbot.matchday.admin"/>
         <option name="MAIN_CLASS_NAME" value=""/>
         <option name="METHOD_NAME" value=""/>
@@ -14,7 +14,7 @@
             <env name="DATA_ROOT" value="/projectdata/matchday/test/admin"/>
             <env name="DB_PASSWORD" value="{M4tchD4y}"/>
             <env name="DB_URL"
-                 value="jdbc:mysql://192.168.0.107:30306/md_test_admin?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
+                 value="jdbc:mysql://hal9000:30306/md_test_admin?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
             <env name="DB_USER" value="matchday"/>
             <env name="FFMPEG" value="/usr/bin/ffmpeg"/>
             <env name="FFPROBE" value="/usr/bin/ffprobe"/>
