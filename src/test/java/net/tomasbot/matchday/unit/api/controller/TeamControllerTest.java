@@ -29,6 +29,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import net.tomasbot.matchday.TestDataCreator;
+import net.tomasbot.matchday.api.resource.TeamResource;
+import net.tomasbot.matchday.model.Event;
+import net.tomasbot.matchday.model.Match;
+import net.tomasbot.matchday.model.ProperName;
+import net.tomasbot.matchday.model.Team;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -48,12 +54,6 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import net.tomasbot.matchday.TestDataCreator;
-import net.tomasbot.matchday.api.resource.TeamResource;
-import net.tomasbot.matchday.model.Event;
-import net.tomasbot.matchday.model.Match;
-import net.tomasbot.matchday.model.ProperName;
-import net.tomasbot.matchday.model.Team;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -95,7 +95,7 @@ class TeamControllerTest {
   }
 
   private Stream<Arguments> getAllTeamsArgs() {
-    final String url = "http://localhost:" + port + "/api/v1.0/teams/";
+    final String url = "http://localhost:" + port + "/api/v1/teams/";
     logger.info("Fetching all Teams from: {}", url);
 
     final ResponseEntity<CollectionModel<TeamResource>> response =
@@ -121,7 +121,7 @@ class TeamControllerTest {
   }
 
   private ResponseEntity<TeamResource> getTeam(@NotNull UUID teamId) {
-    final String url = String.format("http://localhost:%d/api/v1.0/teams/team/%s", port, teamId);
+    final String url = String.format("http://localhost:%d/api/v1/teams/team/%s", port, teamId);
     return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
   }
 
@@ -146,7 +146,7 @@ class TeamControllerTest {
   @DisplayName("Validate retrieval of Events related to Team specified by {0} via REST controller")
   void fetchEventsForTeam(@NotNull Team team) {
     final UUID teamId = team.getId();
-    final String url = String.format("http://localhost:%d/api/v1.0/teams/team/%s", port, teamId);
+    final String url = String.format("http://localhost:%d/api/v1/teams/team/%s", port, teamId);
     logger.info("Getting Events for Team: {} @ URL: {}", teamId, url);
 
     final ResponseEntity<CollectionModel<Match>> response =

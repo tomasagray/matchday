@@ -49,4 +49,9 @@ public final class Constants {
     public static final LinkRelation EMBLEM_REL = LinkRelation.of("emblem");
     public static final LinkRelation FANART_REL = LinkRelation.of("fanart");
   }
+
+  // NOTE: This property must be set statically and cannot be injected.
+  // See 'src/main/resources/application.properties' -> server.servlet.contextPath
+  public static final String API_VERSION = "v1";
+  public static final String API_PREFIX = "/api/" + API_VERSION;
 }
