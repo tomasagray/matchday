@@ -44,23 +44,18 @@ public class ForumPlugin implements DataSourcePlugin {
   private static @NotNull Map<String, List<String>> getQueryParams(@NotNull URL url) {
     Map<String, List<String>> params = new HashMap<>();
     String[] urlParts = url.toString().split("\\?");
-    if (urlParts.length < 2) {
-      return params;
-    }
+    if (urlParts.length < 2) return params;
 
-    String query = urlParts[1];
+    final String query = urlParts[1];
     for (String param : query.split("&")) {
       String[] pair = param.split("=");
       String key = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
       String value = "";
-      if (pair.length > 1) {
-        value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
-      }
+
+      if (pair.length > 1) value = URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
 
       // skip ?& and &&
-      if ("".equals(key) && pair.length == 1) {
-        continue;
-      }
+      if ("".equals(key) && pair.length == 1) continue;
 
       List<String> values = params.computeIfAbsent(key, k -> new ArrayList<>());
       values.add(value);
@@ -97,7 +92,7 @@ public class ForumPlugin implements DataSourcePlugin {
     // subtract 1 to account for the initial 'do' loop
     final AtomicInteger steps = new AtomicInteger(scrapeSteps - 1);
 
-    int newEventCount;
+    int newEventCount = 0;
     do {
       // read remote data
       List<T> newEvents = (List<T>) getEventStream(url, eventDataSource).toList();
@@ -108,7 +103,7 @@ public class ForumPlugin implements DataSourcePlugin {
 
     } while (newEventCount > 0 && steps.getAndDecrement() > 0 && url != null);
 
-    return Snapshot.of(events);
+    return Snapshot.of(events, newEventCount);
   }
 
   @SuppressWarnings("unchecked cast")
@@ -153,8 +148,7 @@ public class ForumPlugin implements DataSourcePlugin {
 
   @Override
   @SuppressWarnings("unchecked cast")
-  public <T> Snapshot<T> getUrlSnapshot(@NotNull URL url, @NotNull DataSource<T> dataSource)
-      throws IOException {
+  public <T> Snapshot<T> getUrlSnapshot(@NotNull URL url, @NotNull DataSource<T> dataSource) {
     Event event = eventReader.readEvent(url, (DataSource<? extends Event>) dataSource);
     return Snapshot.of(Stream.of((T) event));
   }

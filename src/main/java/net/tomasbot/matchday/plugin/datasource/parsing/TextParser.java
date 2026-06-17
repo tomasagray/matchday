@@ -25,19 +25,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.stream.Stream;
-
-import net.tomasbot.matchday.plugin.datasource.parsing.type.TypeHandler;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import net.tomasbot.matchday.model.PatternKit;
 import net.tomasbot.matchday.plugin.datasource.parsing.CreationStrategy.Priority;
 import net.tomasbot.matchday.plugin.datasource.parsing.strategy.UseRegisteredTypeHandlers;
 import net.tomasbot.matchday.plugin.datasource.parsing.strategy.UseStaticStringMethod;
 import net.tomasbot.matchday.plugin.datasource.parsing.strategy.UseStringConstructor;
+import net.tomasbot.matchday.plugin.datasource.parsing.type.TypeHandler;
 import net.tomasbot.matchday.util.ReflectionUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 @Component
 public class TextParser {

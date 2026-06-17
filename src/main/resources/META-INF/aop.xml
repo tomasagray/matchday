@@ -78,7 +78,7 @@
         <aspect name="net.tomasbot.matchday.log.FileServerPluginServiceLog"/>
         <aspect name="net.tomasbot.matchday.log.FileServerUserServiceLog"/>
         <aspect name="net.tomasbot.matchday.log.MatchArtworkServiceLog"/>
-        <aspect name="net.tomasbot.matchday.log.MatchDataParserLog"/>
+        <aspect name="net.tomasbot.matchday.log.plugin.parsing.MatchDataParserLog"/>
         <aspect name="net.tomasbot.matchday.log.MatchServiceLog"/>
         <aspect name="net.tomasbot.matchday.log.PatternKitTemplateServiceLog"/>
         <aspect name="net.tomasbot.matchday.log.SanityCheckServiceLog"/>
@@ -97,7 +97,7 @@
         <aspect name="net.tomasbot.matchday.log.VideoStreamManagerLog"/>
         <aspect name="net.tomasbot.matchday.log.VpnServiceLog"/>
         <!-- plugin -->
-        <aspect name="net.tomasbot.matchday.log.MatchDataParserLog"/>
+        <aspect name="net.tomasbot.matchday.log.plugin.parsing.MatchDataParserLog"/>
         <aspect name="net.tomasbot.matchday.log.plugin.blogger.BloggerPluginLog"/>
         <aspect name="net.tomasbot.matchday.log.plugin.ffmpeg.FFmpegPluginLog"/>
         <aspect name="net.tomasbot.matchday.log.plugin.ForumPluginLog"/>

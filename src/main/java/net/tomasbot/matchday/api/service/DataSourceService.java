@@ -84,7 +84,10 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
     final DataSourcePlugin dataSourcePlugin =
         pluginService.getEnabledPlugin(dataSource.getPluginId());
     final Snapshot<T> snapshot = dataSourcePlugin.getSnapshot(request, dataSource);
-    snapshotService.saveSnapshot(snapshot, dataSource.getClazz());
+    if (snapshot != null) snapshotService.saveSnapshot(snapshot, dataSource.getClazz());
+    else
+      throw new IllegalArgumentException(
+          "No snapshot returned for DataSource: " + dataSource.getDataSourceId());
   }
 
   @SuppressWarnings("unchecked cast")

@@ -36,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 public final class PlaintextDataSource<T> extends DataSource<T> {
 
+  @ToString.Exclude
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private final List<PatternKit<?>> patternKits = new ArrayList<>();
 

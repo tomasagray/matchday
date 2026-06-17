@@ -26,10 +26,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.springframework.stereotype.Component;
 import net.tomasbot.matchday.model.DataSource;
 import net.tomasbot.matchday.model.Match;
 import net.tomasbot.matchday.model.PatternKit;
@@ -37,6 +33,10 @@ import net.tomasbot.matchday.model.PlaintextDataSource;
 import net.tomasbot.matchday.model.video.VideoFile;
 import net.tomasbot.matchday.model.video.VideoFileSource;
 import net.tomasbot.matchday.plugin.datasource.parsing.fabric.Bolt;
+import org.jetbrains.annotations.NotNull;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.springframework.stereotype.Component;
 
 @Component
 public class MatchDataParser implements DataSourceParser<Match, String> {
@@ -49,21 +49,44 @@ public class MatchDataParser implements DataSourceParser<Match, String> {
   }
 
   @SuppressWarnings("unchecked cast")
+  private static void validateDataSource(@NotNull DataSource<?> dataSource) {
+    final List<Class<?>> requiredTypes =
+        List.of(Match.class, VideoFileSource.class, VideoFile.class, URL.class);
+
+    if (dataSource instanceof PlaintextDataSource<?> plaintextDataSource) {
+      for (Class<?> requiredType : requiredTypes) {
+        List<PatternKit<?>> requiredPatternKits =
+            (List<PatternKit<?>>) plaintextDataSource.getPatternKitsFor(requiredType);
+        if (requiredPatternKits == null || requiredPatternKits.isEmpty()) {
+          String msg =
+              String.format(
+                  "DataSource %s must contain at least one PatternKit for: %s",
+                  dataSource.getPluginId(), requiredType.getSimpleName());
+          throw new IllegalArgumentException(msg);
+        }
+      }
+
+    } else throw new IllegalArgumentException("DataSource must be a PlaintextDataSource");
+  }
+
+  @SuppressWarnings("unchecked cast")
   @Override
   public Stream<? extends Match> getEntityStream(
       @NotNull DataSource<? extends Match> dataSource, @NotNull String data) {
-    final Document document = Jsoup.parse(data);
-    final String text = document.text();
+    validateDataSource(dataSource);
 
-    final PlaintextDataSource<Match> plaintextDataSource = (PlaintextDataSource<Match>) dataSource;
-    final List<PatternKit<? extends Match>> eventPatternKits =
+    Document document = Jsoup.parse(data);
+    String text = document.text();
+
+    PlaintextDataSource<Match> plaintextDataSource = (PlaintextDataSource<Match>) dataSource;
+    List<PatternKit<? extends Match>> eventPatternKits =
         plaintextDataSource.getPatternKitsFor(Match.class);
-    final Stream<? extends Match> eventStream = getStreamForType(eventPatternKits, text);
-    final Stream<? extends VideoFileSource> fileSourceStream =
+    Stream<? extends Match> eventStream = getStreamForType(eventPatternKits, text);
+    Stream<? extends VideoFileSource> fileSourceStream =
         getStreamForType(plaintextDataSource.getPatternKitsFor(VideoFileSource.class), text);
-    final Stream<VideoFile> videoFileStream =
+    Stream<VideoFile> videoFileStream =
         getStreamForType(plaintextDataSource.getPatternKitsFor(VideoFile.class), text);
-    final Stream<URL> links =
+    Stream<URL> links =
         createUrlStreams(plaintextDataSource.getPatternKitsFor(URL.class), document);
 
     return Bolt.of(links)
