@@ -1,11 +1,7 @@
-package net.tomasbot.matchday.unit.plugin.fileserver.filefox;
-
-import static org.junit.jupiter.api.Assertions.*;
+package net.tomasbot.matchday.unit.plugin.fileserver;
 
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
-
-import com.sun.net.httpserver.HttpServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
@@ -17,11 +13,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-@DisplayName("Validate FileFox plugin connection manager")
+@DisplayName("Validate HTTP connection manager")
 @Disabled
-class ConnectionManagerTest {
+class HttpConnectionManagerTest {
 
-  private static final Logger logger = LogManager.getLogger(ConnectionManagerTest.class);
+  private static final Logger logger = LogManager.getLogger(HttpConnectionManagerTest.class);
 
   // TODO: implement this test!
   // NOTE: Requires upgrading project language level to >= 18

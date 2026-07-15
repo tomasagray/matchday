@@ -38,12 +38,10 @@ public class FileFoxPluginProperties extends PluginProperties {
 
   private String baseUrl;
   private String loginUrl;
-  private String userAgent;
   private String linkUrlPattern;
   private String directDownloadUrlPattern;
   private String downloadLimitPattern;
   private int refreshHours;
-  private int maxRedirectDepth;
   private String linkButtonText;
   private String premiumOnlyError;
   private String loggedOutText;

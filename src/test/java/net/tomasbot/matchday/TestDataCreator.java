@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -350,13 +351,18 @@ public class TestDataCreator {
   @Transactional
   @NotNull
   public FileServerUser createTestFileServerUser() {
-    // ensure different userdata each time
-    final String username = String.format("user-%s@server.com", numGen.nextInt(Integer.MAX_VALUE));
-    final String password = String.format("password-%s", numGen.nextInt(Integer.MAX_VALUE));
-    final FileServerUser user =
-        new FileServerUser(username, password, TestFileServerPlugin.PLUGIN_ID);
-    //    user.setLoggedIntoServer(TestFileServerPlugin.pluginId, new ArrayList<>());
-    return userService.login(user);
+    try {
+      // ensure different userdata each time
+      final String username =
+          String.format("user-%s@server.com", numGen.nextInt(Integer.MAX_VALUE));
+      final String password = String.format("password-%s", numGen.nextInt(Integer.MAX_VALUE));
+      final FileServerUser user =
+          new FileServerUser(username, password, TestFileServerPlugin.PLUGIN_ID);
+      //    user.setLoggedIntoServer(TestFileServerPlugin.pluginId, new ArrayList<>());
+      return userService.login(user);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   @Transactional

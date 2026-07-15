@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -31,6 +32,17 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import net.tomasbot.matchday.TestDataCreator;
+import net.tomasbot.matchday.TestFileServerPlugin;
+import net.tomasbot.matchday.api.service.FileServerPluginService;
+import net.tomasbot.matchday.api.service.FileServerUserService;
+import net.tomasbot.matchday.api.service.video.VideoStreamLocatorPlaylistService;
+import net.tomasbot.matchday.api.service.video.VideoStreamLocatorService;
+import net.tomasbot.matchday.api.service.video.VideoStreamingService;
+import net.tomasbot.matchday.model.Event;
+import net.tomasbot.matchday.model.FileServerUser;
+import net.tomasbot.matchday.model.video.*;
+import net.tomasbot.matchday.util.RecursiveDirectoryDeleter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -43,17 +55,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import net.tomasbot.matchday.TestDataCreator;
-import net.tomasbot.matchday.TestFileServerPlugin;
-import net.tomasbot.matchday.api.service.FileServerPluginService;
-import net.tomasbot.matchday.api.service.FileServerUserService;
-import net.tomasbot.matchday.api.service.video.VideoStreamLocatorPlaylistService;
-import net.tomasbot.matchday.api.service.video.VideoStreamLocatorService;
-import net.tomasbot.matchday.api.service.video.VideoStreamingService;
-import net.tomasbot.matchday.model.Event;
-import net.tomasbot.matchday.model.FileServerUser;
-import net.tomasbot.matchday.model.video.*;
-import net.tomasbot.matchday.util.RecursiveDirectoryDeleter;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -134,24 +135,28 @@ class VideoStreamingServiceTest {
       @NotNull FileServerPluginService fileServerPluginService,
       @NotNull TestDataCreator testDataCreator,
       @NotNull FileServerUserService userService) {
-    fileServerPluginService.enablePlugin(TestFileServerPlugin.PLUGIN_ID);
+    try {
+      fileServerPluginService.enablePlugin(TestFileServerPlugin.PLUGIN_ID);
 
-    // Create test user & login
-    FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
-    userService.login(testFileServerUser);
-    assertThat(testFileServerUser.isLoggedIn()).isTrue();
+      // Create test user & login
+      FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
+      userService.login(testFileServerUser);
+      assertThat(testFileServerUser.isLoggedIn()).isTrue();
 
-    // Create test data
-    this.testMatch = testDataCreator.createTestMatch();
-    VideoStreamingServiceTest.testFileSource = getTestFileSource(this.testMatch);
-    cleanupData.add(testMatch);
-    this.testVideoFile =
-        testFileSource.getVideoFilePacks().stream()
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("No VideoFilePacks for test data"))
-            .stream()
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("No VideoFiles for test data"));
+      // Create test data
+      this.testMatch = testDataCreator.createTestMatch();
+      VideoStreamingServiceTest.testFileSource = getTestFileSource(this.testMatch);
+      cleanupData.add(testMatch);
+      this.testVideoFile =
+          testFileSource.getVideoFilePacks().stream()
+              .findFirst()
+              .orElseThrow(() -> new IllegalArgumentException("No VideoFilePacks for test data"))
+              .stream()
+              .findFirst()
+              .orElseThrow(() -> new IllegalArgumentException("No VideoFiles for test data"));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   @Test

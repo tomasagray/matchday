@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.tomasbot.matchday.plugin.fileserver.filefox;
+package net.tomasbot.matchday.util;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -25,27 +25,41 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import org.brotli.dec.BrotliInputStream;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
 @Component
-public class ConnectionManager {
+public class HttpConnectionManager {
 
   private static final String USER_AGENT = "User-Agent";
 
-  private final FileFoxPluginProperties pluginProperties;
+  private final HttpConnectionManagerProperties pluginProperties;
 
-  public ConnectionManager(FileFoxPluginProperties pluginProperties) {
+  public HttpConnectionManager(HttpConnectionManagerProperties pluginProperties) {
     this.pluginProperties = pluginProperties;
+  }
+
+  private static @NotNull LinkedMultiValueMap<String, String> getCookieJar(
+      @NotNull Collection<HttpCookie> cookies) {
+    final LinkedMultiValueMap<String, String> cookieJar = new LinkedMultiValueMap<>();
+    cookies.forEach(cookie -> cookieJar.add(cookie.getName(), cookie.getValue()));
+    return cookieJar;
+  }
+
+  public ClientResponse connectTo(@NotNull URI uri, @NotNull Collection<HttpCookie> cookies)
+      throws IOException {
+    return connectTo(uri, getCookieJar(cookies));
   }
 
   public ClientResponse connectTo(
@@ -58,7 +72,7 @@ public class ConnectionManager {
       throws IOException {
     final ClientResponse response = get(uri, cookieJar);
     final HttpStatus status = response.statusCode();
-    final boolean shouldContinue = currentDepth < pluginProperties.getMaxRedirectDepth();
+    final boolean shouldContinue = currentDepth < pluginProperties.getMaxRedirects();
     if (status.is3xxRedirection() && shouldContinue) {
       final List<String> locations = response.headers().asHttpHeaders().get("Location");
       if (locations != null && !locations.isEmpty()) {
@@ -71,12 +85,24 @@ public class ConnectionManager {
     return response;
   }
 
+  public ClientResponse get(@NotNull final URI uri, @NotNull Collection<HttpCookie> cookies)
+      throws IOException {
+    return get(uri, getCookieJar(cookies));
+  }
+
   public ClientResponse get(
       @NotNull final URI uri, @NotNull final MultiValueMap<String, String> cookies)
       throws IOException {
     final URL url = uri.toURL();
     final HttpURLConnection connection = setupUrlConnection(url, cookies);
     return readHttpData(connection);
+  }
+
+  public ClientResponse post(
+      @NotNull URI uri,
+      @NotNull Collection<HttpCookie> cookies,
+      @NotNull Map<String, String> queryParams) {
+    return post(uri, getCookieJar(cookies), queryParams);
   }
 
   public ClientResponse post(
@@ -134,7 +160,7 @@ public class ConnectionManager {
 
   private @NotNull ClientResponse performPost(
       @NotNull HttpURLConnection connection, @NotNull String query) throws IOException {
-    // attach headers, other config
+    // attach headers, other config options
     configurePostConnection(connection, query);
 
     // POST request for download link

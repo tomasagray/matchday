@@ -52,16 +52,19 @@ public class FileServerPluginService {
   private final FileServerUserRepo userRepo;
   private final SecureDataService secureDataService;
   private final PluginService pluginService;
+  private final UrlResolverPluginService urlResolverPluginService;
 
   FileServerPluginService(
       List<FileServerPlugin> fileServerPlugins,
       FileServerUserRepo userRepo,
       SecureDataService secureDataService,
-      PluginService pluginService) {
+      PluginService pluginService,
+      UrlResolverPluginService urlResolverPluginService) {
     this.fileServerPlugins = fileServerPlugins;
     this.userRepo = userRepo;
     this.secureDataService = secureDataService;
     this.pluginService = pluginService;
+    this.urlResolverPluginService = urlResolverPluginService;
   }
 
   // === Plugin management ===
@@ -146,8 +149,11 @@ public class FileServerPluginService {
    * @return The internal (private) URL.
    */
   public Optional<URL> getDownloadUrl(@NotNull final URL externalUrl) throws IOException {
+    // Resolve forwarded URL, if necessary
+    final URL resolvedUrl = urlResolverPluginService.resolve(externalUrl);
+
     // Get correct FS manager
-    final FileServerPlugin pluginForUrl = getEnabledPluginForUrl(externalUrl);
+    final FileServerPlugin pluginForUrl = getEnabledPluginForUrl(resolvedUrl);
     if (pluginForUrl != null) {
       // Get a logged-in user
       final FileServerUser downloadUser = getDownloadUser(pluginForUrl.getPluginId());
@@ -155,13 +161,10 @@ public class FileServerPluginService {
       if (downloadUser != null) {
         final Set<HttpCookie> httpCookies = getHttpCookies(downloadUser);
         // Use the FS plugin to get the internal (download) URL
-        return pluginForUrl.getDownloadURL(externalUrl, httpCookies);
-      } else {
-        throw new IOException("No logged in user could download requested URL: " + externalUrl);
-      }
-    } else {
-      throw new IOException("Could not find plugin matching URL: " + externalUrl);
-    }
+        return pluginForUrl.getDownloadURL(resolvedUrl, httpCookies);
+      } else
+        throw new IOException("No logged in user could download requested URL: " + resolvedUrl);
+    } else throw new IOException("Could not find plugin matching URL: " + resolvedUrl);
   }
 
   public @NotNull Set<HttpCookie> getHttpCookies(@NotNull FileServerUser downloadUser) {

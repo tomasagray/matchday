@@ -58,7 +58,7 @@ public class FileServerUserServiceTest {
   public FileServerUserServiceTest(
       @NotNull TestDataCreator testDataCreator,
       FileServerUserService userService,
-      FileServerPlugin testFileServerPlugin) {
+      FileServerPlugin testFileServerPlugin)  {
     this.userService = userService;
     this.testDataCreator = testDataCreator;
     this.testFileServerPlugin = testFileServerPlugin;
@@ -75,7 +75,7 @@ public class FileServerUserServiceTest {
 
   @Test
   @DisplayName("Validate login, logout & re-login functionality of file server service")
-  void loginAndLogout() {
+  void loginAndLogout() throws IOException {
     // Login
     logger.info("Attempting login with user: {}", testFileServerUser);
     final FileServerUser loggedInUser = userService.login(testFileServerUser);
@@ -101,7 +101,7 @@ public class FileServerUserServiceTest {
   // === Users ===
   @Test
   @DisplayName("Validate retrieval of all users from server")
-  void getAllServerUsers() {
+  void getAllServerUsers() throws IOException {
     final int expectedUserCount = 1;
     // Ensure user is registered with plugin
     logger.info(
@@ -120,7 +120,7 @@ public class FileServerUserServiceTest {
 
   @Test
   @DisplayName("Validate retrieval of specific user by ID")
-  void getUserById() {
+  void getUserById() throws IOException {
     final UUID testPluginId = testFileServerPlugin.getPluginId();
     final FileServerUser testUser = testDataCreator.createTestFileServerUser();
     logger.info("Logging in to File Server Plugin: {}%n with user: {}", testPluginId, testUser);

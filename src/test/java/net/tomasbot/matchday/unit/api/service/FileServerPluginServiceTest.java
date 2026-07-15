@@ -66,7 +66,7 @@ class FileServerPluginServiceTest {
       @NotNull TestDataCreator testDataCreator,
       FileServerPluginService fileServerPluginService,
       FileServerUserService userService,
-      TestFileServerPlugin testFileServerPlugin) {
+      TestFileServerPlugin testFileServerPlugin) throws IOException {
     this.testDataCreator = testDataCreator;
     this.fileServerPluginService = fileServerPluginService;
     this.userService = userService;

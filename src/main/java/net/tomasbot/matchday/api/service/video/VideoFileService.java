@@ -21,6 +21,7 @@ package net.tomasbot.matchday.api.service.video;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -33,6 +34,8 @@ import javax.transaction.Transactional;
 import lombok.Getter;
 import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
 import net.tomasbot.matchday.api.service.FileServerPluginService;
+import net.tomasbot.matchday.api.service.UrlResolverPluginService;
+import net.tomasbot.matchday.db.VideoFileRepository;
 import net.tomasbot.matchday.model.video.VideoFile;
 import net.tomasbot.matchday.plugin.io.ffmpeg.FFmpegPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -47,13 +50,20 @@ public class VideoFileService {
 
   // already refreshing VideoFiles
   @Getter private final List<VideoFile> lockedVideoFiles = new ArrayList<>();
-  private final FileServerPluginService fileServerService;
   private final FFmpegPlugin ffmpegPlugin;
+  private final FileServerPluginService fileServerService;
+  private final UrlResolverPluginService urlResolverService;
+  private final VideoFileRepository videoFileRepository;
 
   public VideoFileService(
-      final FileServerPluginService fileServerService, final FFmpegPlugin ffmpegPlugin) {
-    this.fileServerService = fileServerService;
+      FFmpegPlugin ffmpegPlugin,
+      FileServerPluginService fileServerService,
+      UrlResolverPluginService urlResolverService,
+      VideoFileRepository videoFileRepository) {
     this.ffmpegPlugin = ffmpegPlugin;
+    this.fileServerService = fileServerService;
+    this.urlResolverService = urlResolverService;
+    this.videoFileRepository = videoFileRepository;
   }
 
   /**
@@ -114,19 +124,32 @@ public class VideoFileService {
   public CompletableFuture<VideoFile> doVideoFileRefresh(
       @NotNull VideoFile videoFile, boolean fetchMetadata) throws Exception {
     // Fetch remote internal (download) URL
-    final Optional<URL> downloadUrl = fileServerService.getDownloadUrl(videoFile.getExternalUrl());
+    URL resolved = getForwardedUrl(videoFile);
+    Optional<URL> downloadUrl = fileServerService.getDownloadUrl(resolved);
+
     if (downloadUrl.isPresent()) {
       videoFile.setInternalUrl(downloadUrl.get());
-      if (fetchMetadata) {
-        setVideoFileMetadata(videoFile);
-      }
+      if (fetchMetadata) setVideoFileMetadata(videoFile);
       videoFile.setLastRefreshed(Timestamp.from(Instant.now()));
-    } else {
-      final String message = String.format("Could not get remote URL for VideoFile: %s", videoFile);
-      throw new IOException(message);
-    }
+      videoFileRepository.save(videoFile);
+    } else throw new IOException("Could not get remote URL for VideoFile: " + videoFile);
+
     // Return updated VideoFile
     return CompletableFuture.completedFuture(videoFile);
+  }
+
+  private @NotNull URL getForwardedUrl(@NotNull VideoFile videoFile)
+      throws IOException, URISyntaxException {
+    URL externalUrl = videoFile.getExternalUrl();
+    URL resolved = urlResolverService.resolve(externalUrl);
+
+    // update database if we have a new URL
+    if (!resolved.toURI().equals(externalUrl.toURI())) {
+      videoFile.setExternalUrl(resolved);
+      videoFileRepository.save(videoFile);
+    }
+
+    return resolved;
   }
 
   /**

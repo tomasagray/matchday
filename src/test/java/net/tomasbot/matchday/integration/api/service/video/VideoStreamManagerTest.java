@@ -22,6 +22,7 @@ package net.tomasbot.matchday.integration.api.service.video;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -81,12 +82,16 @@ class VideoStreamManagerTest {
 
   private static void setup(
       @NotNull TestDataCreator testDataCreator, @NotNull FileServerUserService userService) {
-    final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
-    logger.info("Logging in test user: {}", testFileServerUser);
-    final FileServerUser loggedInUser = userService.login(testFileServerUser);
+    try {
+      final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
+      logger.info("Logging in test user: {}", testFileServerUser);
+      final FileServerUser loggedInUser = userService.login(testFileServerUser);
 
-    final boolean loginStatus = loggedInUser.isLoggedIn();
-    assertThat(loginStatus).isTrue();
+      final boolean loginStatus = loggedInUser.isLoggedIn();
+      assertThat(loginStatus).isTrue();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   private VideoStreamLocatorPlaylist createTestPlaylist() {
