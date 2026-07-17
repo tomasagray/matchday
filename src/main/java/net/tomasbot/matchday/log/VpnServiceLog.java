@@ -19,6 +19,13 @@ public class VpnServiceLog {
     logger.info("Publishing VPN connection status: {}", jp.getArgs());
   }
 
+  @Around("execution(* net.tomasbot.matchday.api.service.admin.VpnService.getConnectionArgs(..))")
+  public Object logGetConnectionArgs(@NotNull ProceedingJoinPoint jp) throws Throwable {
+    Object args = jp.proceed();
+    logger.debug("Connecting to VPN server with command:\n{}", args);
+    return args;
+  }
+
   @Around("execution(* net.tomasbot.matchday.api.service.admin.VpnService.start(..))")
   public Object logStartVpnService(@NotNull ProceedingJoinPoint jp) throws Throwable {
     try {
