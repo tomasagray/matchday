@@ -67,7 +67,7 @@ public class DataSourceController {
           produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SnapshotRequest> refreshAllSources(
           @RequestBody SnapshotRequest snapshotRequest) throws IOException {
-    final SnapshotRequest status = dataSourceService.refreshAllDataSources(snapshotRequest);
+    SnapshotRequest status = dataSourceService.refreshAllDataSources(snapshotRequest);
     return ResponseEntity.ok().body(status);
   }
 

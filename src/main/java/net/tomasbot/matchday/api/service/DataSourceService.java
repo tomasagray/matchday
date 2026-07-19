@@ -40,6 +40,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataSourceService implements EntityService<DataSource<?>, UUID> {
 
+  private static final int MAX_LABELS = 25;
+  private static final int MAX_ALLOWABLE_RESULTS = 10_000;
+
   private final SnapshotService snapshotService;
   private final DataSourcePluginService pluginService;
   private final DataSourceRepository dataSourceRepository;
@@ -56,18 +59,35 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
     this.patternKitRepository = patternKitRepository;
   }
 
+  private static SnapshotRequest validateSnapshotRequest(@NotNull SnapshotRequest request) {
+    if (request.getLabels().size() > MAX_LABELS)
+      throw new IllegalArgumentException("Too many labels");
+    if (request.getStartDate().isAfter(request.getEndDate()))
+      throw new IllegalArgumentException("Start date is after end date");
+
+    int maxResults = request.getMaxResults();
+    if (maxResults < 1 || maxResults > MAX_ALLOWABLE_RESULTS)
+      throw new IllegalArgumentException("Illegal max results: " + maxResults);
+
+    // returned sanitized version
+    return SnapshotRequest.from(request);
+  }
+
   /**
    * Refresh all <b>enabled</b> data sources with the given Snapshot
    *
    * @param request Refresh request details
    * @return The SnapshotRequest, for additional processing
    */
-  public SnapshotRequest refreshAllDataSources(@NotNull final SnapshotRequest request)
+  public SnapshotRequest refreshAllDataSources(@NotNull SnapshotRequest request)
       throws IOException {
+    SnapshotRequest cleaned = validateSnapshotRequest(request);
+
     for (DataSourcePlugin plugin : pluginService.getEnabledPlugins()) {
-      refreshDataSourcesForPlugin(request, plugin);
+      refreshDataSourcesForPlugin(cleaned, plugin);
     }
-    return request;
+
+    return cleaned;
   }
 
   public void refreshDataSourcesForPlugin(
