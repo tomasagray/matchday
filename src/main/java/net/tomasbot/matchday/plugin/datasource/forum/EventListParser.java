@@ -19,11 +19,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class EventListParser {
 
-  private final String linkSelector;
   private final TextParser textParser;
 
-  public EventListParser(ForumPluginProperties pluginProperties, TextParser textParser) {
-    this.linkSelector = pluginProperties.getLinkSelector();
+  public EventListParser(@NotNull TextParser textParser) {
     this.textParser = textParser;
   }
 
@@ -35,14 +33,43 @@ public class EventListParser {
     throw new IllegalArgumentException(msg);
   }
 
+  private static PlaintextDataSource<? extends Event> validateDataSource(
+      DataSource<? extends Event> dataSource) {
+    if (dataSource instanceof PlaintextDataSource<? extends Event> plaintextDataSource) {
+      // fields to be validated
+      URI baseUri = plaintextDataSource.getBaseUri();
+      String linkSelector = plaintextDataSource.getLinkSelector();
+
+      if (baseUri == null || baseUri.toString().isBlank())
+        throw new IllegalArgumentException("Datasource base URI cannot be null");
+
+      if (linkSelector == null || linkSelector.isBlank())
+        throw new IllegalArgumentException(
+            "PlaintextDataSource link selector cannot be null/blank");
+
+      return plaintextDataSource;
+    } else
+      throw new IllegalArgumentException(
+          "Datasource is not a PlaintextDataSource: " + dataSource.getPluginId());
+  }
+
   public Map<URI, ? extends Event> getEventsList(
-      @NotNull String data, DataSource<? extends Event> dataSource) {
+      @NotNull String data, @NotNull DataSource<? extends Event> dataSource) {
+    // convert to plaintext datasource
+    PlaintextDataSource<? extends Event> plaintextDataSource = validateDataSource(dataSource);
+
+    // fields were validated in validateDataSource()
+    String linkSelector = plaintextDataSource.getLinkSelector();
+    URI baseUri = plaintextDataSource.getBaseUri();
+    assert linkSelector != null;
+    assert baseUri != null;
+
     Document document = Jsoup.parse(data);
-    Elements links = document.select(this.linkSelector);
+    Elements links = document.select(linkSelector);
     return links.stream()
         .collect(
             Collectors.toMap(
-                link -> getLinkHref(link, dataSource.getBaseUri()),
+                link -> getLinkHref(link, baseUri),
                 link -> parseMatchLink(link, dataSource),
                 (e1, e2) -> e1));
   }

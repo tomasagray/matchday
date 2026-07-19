@@ -123,10 +123,11 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
   @Override
   public DataSource<?> save(@NotNull final DataSource<?> dataSource) {
     pluginService.validateDataSource(dataSource);
-    if (dataSource instanceof final PlaintextDataSource<?> plaintext) {
+    DataSource<?> saved = dataSourceRepository.save(dataSource);
+    if (dataSource instanceof final PlaintextDataSource<?> plaintext)
       patternKitRepository.saveAll(plaintext.getPatternKits());
-    }
-    return dataSourceRepository.save(dataSource);
+
+    return saved;
   }
 
   @Override
@@ -152,8 +153,8 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
 
   @Override
   public DataSource<?> update(@NotNull final DataSource<?> dataSource) {
-    final UUID dataSourceId = dataSource.getDataSourceId();
-    final Optional<DataSource<?>> sourceOptional = dataSourceRepository.findById(dataSourceId);
+    UUID dataSourceId = dataSource.getDataSourceId();
+    Optional<DataSource<?>> sourceOptional = fetchById(dataSourceId);
     if (sourceOptional.isPresent()) {
       pluginService.validateDataSource(dataSource);
       return dataSourceRepository.saveAndFlush(dataSource);

@@ -61,23 +61,48 @@ public class DataSourceController {
   }
 
   @RequestMapping(
+          value = "/refresh/all",
+          method = {RequestMethod.POST, RequestMethod.GET},
+          consumes = MediaType.APPLICATION_JSON_VALUE,
+          produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<SnapshotRequest> refreshAllSources(
+          @RequestBody SnapshotRequest snapshotRequest) throws IOException {
+    final SnapshotRequest status = dataSourceService.refreshAllDataSources(snapshotRequest);
+    return ResponseEntity.ok().body(status);
+  }
+
+  @RequestMapping(
       value = "/all",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<CollectionModel<DataSourceResource>> fetchAllDataSources() {
+  public ResponseEntity<CollectionModel<DataSourceResource>> getAllDataSources() {
     final List<DataSource<?>> dataSources = dataSourceService.fetchAll();
     return ResponseEntity.ok(dataSourceResourceAssembler.toCollectionModel(dataSources));
   }
 
   @RequestMapping(
-      value = "/refresh/all",
-      method = {RequestMethod.POST, RequestMethod.GET},
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SnapshotRequest> refreshAllSources(
-      @RequestBody SnapshotRequest snapshotRequest) throws IOException {
-    final SnapshotRequest status = dataSourceService.refreshAllDataSources(snapshotRequest);
-    return ResponseEntity.ok().body(status);
+          value = "/data-source/{dataSourceId}",
+          method = RequestMethod.GET,
+          produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<DataSourceResource> getDataSource(
+          @PathVariable("dataSourceId") UUID dataSourceId) {
+
+    return dataSourceService
+            .fetchById(dataSourceId)
+            .map(dataSourceResourceAssembler::toModel)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+  }
+
+  @RequestMapping(
+          value = "/plugin/{pluginId}",
+          method = RequestMethod.GET,
+          produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<CollectionModel<DataSourceResource>> getDataSourcesForPlugin(
+          @PathVariable("pluginId") UUID pluginId) {
+
+    List<DataSource<?>> dataSources = dataSourceService.getDataSourcesForPlugin(pluginId);
+    return ResponseEntity.ok(dataSourceResourceAssembler.toCollectionModel(dataSources));
   }
 
   @RequestMapping(
@@ -87,33 +112,8 @@ public class DataSourceController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<DataSource<?>> addPlaintextDataSource(
       @RequestBody PlaintextDataSource<?> dataSource) {
-    final DataSource<?> source = dataSourceService.save(dataSource);
+    DataSource<?> source = dataSourceService.save(dataSource);
     return ResponseEntity.ok(source);
-  }
-
-  @RequestMapping(
-      value = "/plugin/{pluginId}",
-      method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<CollectionModel<DataSourceResource>> getDataSourcesForPlugin(
-      @PathVariable("pluginId") UUID pluginId) {
-
-    List<DataSource<?>> dataSources = dataSourceService.getDataSourcesForPlugin(pluginId);
-    return ResponseEntity.ok(dataSourceResourceAssembler.toCollectionModel(dataSources));
-  }
-
-  @RequestMapping(
-      value = "/data-source/{dataSourceId}",
-      method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<DataSourceResource> getDataSource(
-      @PathVariable("dataSourceId") UUID dataSourceId) {
-
-    return dataSourceService
-        .fetchById(dataSourceId)
-        .map(dataSourceResourceAssembler::toModel)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
   }
 
   @RequestMapping(
@@ -123,8 +123,7 @@ public class DataSourceController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<DataSourceResource> updatePlaintextDataSource(
       @RequestBody PlaintextDataSource<?> dataSource) {
-
-    final DataSource<?> updatedDataSource = dataSourceService.update(dataSource);
+    DataSource<?> updatedDataSource = dataSourceService.update(dataSource);
     return ResponseEntity.ok(dataSourceResourceAssembler.toModel(updatedDataSource));
   }
 
