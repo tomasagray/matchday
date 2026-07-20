@@ -86,7 +86,6 @@ public class DataSourceController {
           produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<DataSourceResource> getDataSource(
           @PathVariable("dataSourceId") UUID dataSourceId) {
-
     return dataSourceService
             .fetchById(dataSourceId)
             .map(dataSourceResourceAssembler::toModel)
@@ -100,7 +99,6 @@ public class DataSourceController {
           produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CollectionModel<DataSourceResource>> getDataSourcesForPlugin(
           @PathVariable("pluginId") UUID pluginId) {
-
     List<DataSource<?>> dataSources = dataSourceService.getDataSourcesForPlugin(pluginId);
     return ResponseEntity.ok(dataSourceResourceAssembler.toCollectionModel(dataSources));
   }
@@ -131,6 +129,13 @@ public class DataSourceController {
   public ResponseEntity<UUID> deleteDataSource(@PathVariable("dataSourceId") UUID dataSourceID) {
     dataSourceService.delete(dataSourceID);
     return ResponseEntity.ok(dataSourceID);
+  }
+
+  @RequestMapping(value = "/data-source/{id}/status", method = RequestMethod.PATCH)
+  public ResponseEntity<Boolean> toggleDataSource(
+      @PathVariable UUID id, @RequestParam boolean enabled) {
+    boolean isEnabled = dataSourceService.toggleDataSourceEnabled(id, enabled);
+    return ResponseEntity.ok(isEnabled);
   }
 
   @Data

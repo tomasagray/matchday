@@ -21,6 +21,8 @@ package net.tomasbot.matchday.log;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
+import net.tomasbot.matchday.api.service.DataSourceService;
+import net.tomasbot.matchday.model.DataSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -29,8 +31,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
-import net.tomasbot.matchday.api.service.DataSourceService;
-import net.tomasbot.matchday.model.DataSource;
 
 @Aspect
 public class DataSourceServiceLog {
@@ -125,5 +125,18 @@ public class DataSourceServiceLog {
     final Iterable<?> sources = (Iterable<?>) jp.getArgs()[0];
     final List<?> sourceList = StreamSupport.stream(sources.spliterator(), false).toList();
     logger.info("Deleting: {} DataSources...", sourceList.size());
+  }
+
+  @Before("execution(* net.tomasbot.matchday.api.service.DataSourceService.toggleDataSourceEnabled(..))")
+  public void logToggleDataSource(@NotNull JoinPoint joinPoint) {
+    Object[] args = joinPoint.getArgs();
+    if (args.length == 0) return;
+
+    if (args.length == 2) {
+      if (args[1] instanceof Boolean isEnabled) {
+        if (isEnabled) logger.info("Enabling DataSource: {}", args[0]);
+        else logger.info("Disabling DataSource: {}", args[0]);
+      }
+    }
   }
 }
