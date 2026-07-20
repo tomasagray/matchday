@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.4.7] - 2026-07-20
+
+### Added
+
+- Enable/disable Data Sources
+- FileJoker data source plugin
+
+### Fixed
+
+- VPN logging, argument processing
+
+### Security
+
+- Ensure SnapshotRequests are validated
+
 ## [0.4.6] - 2025-10-03
 
 ### Fixed
