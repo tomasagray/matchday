@@ -10,8 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import net.tomasbot.matchday.api.controller.VpnStatusController;
 import net.tomasbot.matchday.api.service.SettingsService;
 import net.tomasbot.matchday.model.VpnStatus;
@@ -26,20 +31,22 @@ import org.springframework.stereotype.Service;
 public class VpnService {
 
   private static final int IP_RECHECK_WAIT = 2_000;
-
   private static final String HOST = "localhost";
   private static final String DEFAULT_VPN_PREFIX = "us";
   private static final String VPN_FILE_EXT = ".ovpn";
   private static final String TERMINATOR = "\n";
-  private static final Path CONFIG_LOCATION = Path.of("/etc/openvpn/ovpn_udp");
   private static final String ERROR_IP = "☠️.☠️.☠️.☠️";
   private static final String CONNECTING_IP = "---.---.---.---";
   private static final String UNKNOWN_SERVER = "????";
+  private static final Path CONFIG_LOCATION = Path.of("/etc/openvpn/ovpn_udp");
+  private static final FileAttribute<Set<PosixFilePermission>> LOG_DIR_ATTRS =
+      PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
+  private static final Pattern SERVER_PATTERN = Pattern.compile("^\\w{2}\\d+$");
+
 
   // signals
   private static final String SIGTERM = "SIGTERM"; // stop
   //  private static final String SIGUSR2 = "SIGUSR2"; // get status
-  // status
   //  private static final String SUCCESS = "SUCCESS:"; // vpn connected
 
   private static final VpnStatus CONNECTING_STATUS =
@@ -57,6 +64,9 @@ public class VpnService {
 
   @Value("${system.vpn.management.port}")
   private Integer managementPort;
+
+  @Value("${system.vpn.log-dir}")
+  private Path vpnLogDir;
 
   private Collection<Path> vpnConfigurations;
   private Path currentConfiguration;
@@ -90,8 +100,7 @@ public class VpnService {
 
   private @NotNull List<String> getStartupArguments() {
     List<String> args =
-        Arrays.stream(arguments.split(",")) // split args
-            .map(arg -> "--" + arg) // add leading dashes where required
+        Arrays.stream(arguments.split(" ")) // split args for acceptance into Runtime.exec()
             .toList();
     return new ArrayList<>(args); // return a mutable copy
   }
@@ -128,36 +137,75 @@ public class VpnService {
     return configurations;
   }
 
+  private @NotNull Path loadConfiguration(@NotNull String server) throws IOException {
+    // validate server string
+    if (!SERVER_PATTERN.matcher(server).find())
+      throw new IllegalArgumentException("Invalid VPN server specified: " + server);
+
+    // find config
+    try (Stream<Path> configs = Files.walk(CONFIG_LOCATION)) {
+      return configs
+          .filter(Files::isRegularFile)
+          .filter(config -> config.getFileName().toString().startsWith(server))
+          .findFirst()
+          .orElseThrow(() -> new IOException("Could not read VPN config file for: " + server));
+    }
+  }
+
   public String signal(@NotNull String signal) throws IOException {
     telnet.send("signal " + signal);
     return telnet.receive(TERMINATOR);
   }
 
+  private void checkLogDir() throws IOException {
+    if (!vpnLogDir.toFile().exists()) {
+      Files.createDirectories(vpnLogDir, LOG_DIR_ATTRS);
+    }
+  }
+
   private String getVpnServer() {
-    final String filename = this.currentConfiguration.getFileName().toString();
-    final String[] parts = filename.split("\\.");
+    if (this.currentConfiguration == null) return UNKNOWN_SERVER;
+
+    String filename = this.currentConfiguration.getFileName().toString();
+    String[] parts = filename.split("\\.");
+
     return parts.length > 0 ? parts[0] : UNKNOWN_SERVER;
   }
 
+  private String @NotNull [] getConnectionArgs() {
+    // prepare arguments
+    final List<String> arguments = new ArrayList<>();
+    arguments.add("openvpn");
+
+    arguments.add("--config");
+    arguments.add(this.currentConfiguration.toString());
+
+    List<String> startupArguments = getStartupArguments();
+    arguments.addAll(startupArguments);
+
+    // assemble arguments
+    return arguments.toArray(new String[] {});
+  }
+
   public void start() throws Throwable {
+    start("");
+  }
+
+  public void start(@NotNull String server) throws Throwable {
+    if (server.isBlank()) this.currentConfiguration = getRandomConfiguration();
+    else this.currentConfiguration = loadConfiguration(server);
+
+    startConnection();
+  }
+
+  private void startConnection() throws Throwable {
     publishVpnStatus(CONNECTING_STATUS);
 
     try {
-      // prepare arguments
-      final List<String> arguments = new ArrayList<>();
-      arguments.add("openvpn");
-      arguments.add("--config");
-      this.currentConfiguration = getRandomConfiguration();
-      arguments.add(this.currentConfiguration.toString());
-      arguments.addAll(getStartupArguments());
+      checkLogDir();
 
-      // assemble arguments
-      String cmd = String.join(" ", arguments);
-
-      // NOTE: using deprecated exec(String) method as exec(String[]) does
-      // not seem to correctly parse the arguments
-      // TODO: change this to work with exec(String[])
-      final Process process = Runtime.getRuntime().exec(cmd);
+      final String[] args = getConnectionArgs();
+      final Process process = Runtime.getRuntime().exec(args);
 
       // allow VPN time to start...
       process.waitFor();

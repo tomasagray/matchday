@@ -3,6 +3,7 @@ package net.tomasbot.matchday.unit.plugin.fileserver.filefox;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
+import java.util.HashSet;
 import net.tomasbot.matchday.plugin.fileserver.filefox.DownloadParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.util.LinkedMultiValueMap;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -39,8 +39,7 @@ class DownloadParserTest {
         getClass().getClassLoader().getResource("data/filefox/FileFox_DownloadLanding.htm");
     assertThat(landing).isNotNull();
 
-    URL downloadUrl =
-        downloadParser.parseDownloadRequest(landing.toURI(), new LinkedMultiValueMap<>());
+    URL downloadUrl = downloadParser.parseDownloadRequest(landing.toURI(), new HashSet<>());
     logger.info("Found download URL: {}", downloadUrl);
   }
 }

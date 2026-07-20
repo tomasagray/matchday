@@ -21,9 +21,10 @@ package net.tomasbot.matchday.unit.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.List;
-
 import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
 import net.tomasbot.matchday.TestDataCreator;
 import net.tomasbot.matchday.TestFileServerPlugin;
@@ -68,13 +69,18 @@ class VideoFileServiceTest {
       @NotNull TestDataCreator testDataCreator,
       @NotNull FileServerUserService userService,
       @NotNull FileServerPluginService fileServerPluginService) {
-    // Create test user & login
-    final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
-    userService.login(testFileServerUser);
-    assertThat(testFileServerUser.isLoggedIn()).isTrue();
-    fileServerPluginService.enablePlugin(TestFileServerPlugin.PLUGIN_ID);
-    // Create test VideoFileSource
-    this.testVideoFileSrc = testDataCreator.createVideoFileSourceAndSave();
+    try {
+      // Create test user & login
+      final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
+      userService.login(testFileServerUser);
+      assertThat(testFileServerUser.isLoggedIn()).isTrue();
+      fileServerPluginService.enablePlugin(TestFileServerPlugin.PLUGIN_ID);
+
+      // Create test VideoFileSource
+      this.testVideoFileSrc = testDataCreator.createVideoFileSourceAndSave();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   @Test

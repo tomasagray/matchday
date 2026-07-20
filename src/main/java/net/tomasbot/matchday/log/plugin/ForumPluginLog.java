@@ -1,5 +1,7 @@
 package net.tomasbot.matchday.log.plugin;
 
+import java.net.URI;
+import java.util.Map;
 import net.tomasbot.matchday.model.DataSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,5 +50,49 @@ public class ForumPluginLog {
     DataSource<?> dataSource = (DataSource<?>) jp.getArgs()[0];
     logger.info("Attempting to validate DataSource: {}", dataSource.getDataSourceId());
     return jp.proceed();
+  }
+
+  @Before(
+      "execution(* net.tomasbot.matchday.plugin.datasource.forum.FileSourceCorrectorMutator.correctFileSource(..))")
+  public void logFixFileSource(@NotNull JoinPoint jp) {
+    logger.info("Repairing broken/missing data in File Source: {}", jp.getArgs());
+  }
+
+  @Before(
+      "execution(* net.tomasbot.matchday.plugin.datasource.forum.EventReader.readListEvent(..))")
+  public void logReadEventMetadata(@NotNull JoinPoint jp) throws Throwable {
+    Object[] args = jp.getArgs();
+    if (args.length == 0) return;
+
+    if (args.length == 2 && args[0] instanceof Map.Entry<?, ?> entry) {
+      Object key = entry.getKey();
+      if (key instanceof URI uri) {
+        logger.info("Reading Event metadata from: {}", uri);
+      }
+    }
+  }
+
+  @Before(
+      "execution(* net.tomasbot.matchday.plugin.datasource.forum.EventReader.handleReadMetadataError(..))")
+  public void logHandleReadMetadataError(@NotNull JoinPoint jp) {
+    Object[] args = jp.getArgs();
+    if (args.length == 0) return;
+
+    if (args.length == 2 && args[0] instanceof Throwable e) {
+      Object uri = args[1];
+      logger.error("Error reading Event metadata from: {}", uri, e);
+    }
+  }
+
+  @Before(
+      "execution(* net.tomasbot.matchday.plugin.datasource.forum.EventReader.handleReadEventError(..))")
+  public void logReadEventError(@NotNull JoinPoint joinPoint) {
+    Object[] args = joinPoint.getArgs();
+    if (args.length == 0) return;
+
+    if (args.length == 2 && args[0] instanceof Throwable e) {
+      Object url = args[1];
+      logger.error("Error reading Event from: {}", url, e);
+    }
   }
 }

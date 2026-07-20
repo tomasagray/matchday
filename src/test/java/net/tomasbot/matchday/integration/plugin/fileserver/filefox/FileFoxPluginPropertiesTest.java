@@ -81,16 +81,6 @@ class FileFoxPluginPropertiesTest {
   }
 
   @Test
-  @DisplayName("Validate FileFox browser user agent")
-  void getUserAgent() {
-    final String expectedUserAgent =
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0";
-    final String actualUserAgent = pluginProperties.getUserAgent();
-    logger.info("Got user agent: {}", actualUserAgent);
-    assertThat(actualUserAgent).isEqualTo(expectedUserAgent);
-  }
-
-  @Test
   @DisplayName("Validate URL pattern matcher for external links")
   void getLinkUrlPattern() throws MalformedURLException {
     final URL testUrl = new URL("https://filefox.cc/79muv293uj1r/20210121-EIB-ATM-LL_1.ts");

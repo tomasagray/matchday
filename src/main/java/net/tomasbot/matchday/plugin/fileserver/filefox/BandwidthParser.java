@@ -5,8 +5,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
+import net.tomasbot.matchday.util.HttpConnectionManager;
+import org.springframework.http.HttpCookie;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
 @Component
@@ -14,14 +16,14 @@ public class BandwidthParser {
 
   private static final String PROFILE_URL = "/profile";
 
-  private final ConnectionManager connectionManager;
+  private final HttpConnectionManager connectionManager;
   private final FileFoxPluginProperties pluginProperties;
   private final PageEvaluator pageEvaluator;
 
   private URI profileUri;
 
   public BandwidthParser(
-      ConnectionManager connectionManager,
+      HttpConnectionManager connectionManager,
       FileFoxPluginProperties pluginProperties,
       PageEvaluator pageEvaluator) {
     this.connectionManager = connectionManager;
@@ -42,7 +44,7 @@ public class BandwidthParser {
     return profileUri;
   }
 
-  public float getRemainingBandwidth(MultiValueMap<String, String> cookies) throws IOException {
+  public float getRemainingBandwidth(Collection<HttpCookie> cookies) throws IOException {
     ClientResponse response = connectionManager.connectTo(this.getProfileUri(), cookies);
     String profileData = response.bodyToMono(String.class).block();
     FileFoxPage fileFoxPage = pageEvaluator.getFileFoxPage(profileData);

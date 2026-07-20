@@ -22,6 +22,7 @@ package net.tomasbot.matchday.integration.api.service.video;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +48,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @DisplayName("Testing for video stream manager")
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class VideoStreamManagerTest {
 
   private static final Logger logger = LogManager.getLogger(VideoStreamManagerTest.class);
@@ -81,12 +84,16 @@ class VideoStreamManagerTest {
 
   private static void setup(
       @NotNull TestDataCreator testDataCreator, @NotNull FileServerUserService userService) {
-    final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
-    logger.info("Logging in test user: {}", testFileServerUser);
-    final FileServerUser loggedInUser = userService.login(testFileServerUser);
+    try {
+      final FileServerUser testFileServerUser = testDataCreator.createTestFileServerUser();
+      logger.info("Logging in test user: {}", testFileServerUser);
+      final FileServerUser loggedInUser = userService.login(testFileServerUser);
 
-    final boolean loginStatus = loggedInUser.isLoggedIn();
-    assertThat(loginStatus).isTrue();
+      final boolean loginStatus = loggedInUser.isLoggedIn();
+      assertThat(loginStatus).isTrue();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   private VideoStreamLocatorPlaylist createTestPlaylist() {

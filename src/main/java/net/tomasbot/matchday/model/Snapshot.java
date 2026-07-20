@@ -30,6 +30,7 @@ public class Snapshot<T> {
 
   private final Instant timestamp;
   private final Stream<T> data;
+  private int dataCount;
 
   public Snapshot(Stream<T> data) {
     this(data, Instant.now());
@@ -40,8 +41,21 @@ public class Snapshot<T> {
     this.timestamp = timestamp;
   }
 
+  public Snapshot(Stream<T> data, int dataCount) {
+    this(data);
+    this.dataCount = dataCount;
+  }
+
   @Contract("_ -> new")
   public static <T> @NotNull Snapshot<T> of(@NotNull Stream<T> data) {
     return new Snapshot<>(data);
+  }
+
+  public static <T> @NotNull Snapshot<T> of(@NotNull Stream<T> data, int dataCount) {
+    return new Snapshot<>(data, dataCount);
+  }
+
+  public String toString() {
+    return "Snapshot(" + "timestamp=" + timestamp + ", dataCount=" + dataCount + ')';
   }
 }

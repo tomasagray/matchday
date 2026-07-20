@@ -58,8 +58,8 @@ public class FileServerUserController {
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CollectionModel<FileServerUserResource>> getFileServerUsers(
-      @PathVariable("id") final UUID pluginId) {
-    final List<FileServerUser> users = userService.getAllServerUsers(pluginId);
+      @PathVariable UUID id) {
+    final List<FileServerUser> users = userService.getAllServerUsers(id);
     return ResponseEntity.ok().body(userResourceAssembler.toCollectionModel(users));
   }
 
@@ -67,8 +67,7 @@ public class FileServerUserController {
       value = "/user/{userId}",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<FileServerUserResource> getUserData(
-      @PathVariable("userId") final UUID userId) {
+  public ResponseEntity<FileServerUserResource> getUserData(@PathVariable UUID userId) {
     return userService
         .getUserById(userId)
         .map(userResourceAssembler::toModel)
@@ -82,8 +81,8 @@ public class FileServerUserController {
       method = {RequestMethod.POST, RequestMethod.GET},
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<FileServerUserResource> loginToFileServer(
-      @RequestBody final FileServerUser user) {
+  public ResponseEntity<FileServerUserResource> loginToFileServer(@RequestBody FileServerUser user)
+      throws IOException {
     final FileServerUser loggedInUser = userService.login(user);
     return ResponseEntity.ok(userResourceAssembler.toModel(loggedInUser));
   }
@@ -109,8 +108,7 @@ public class FileServerUserController {
       method = {RequestMethod.POST, RequestMethod.GET},
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<FileServerUserResource> logoutOfFileServer(
-      @PathVariable("userId") UUID userId) {
+  public ResponseEntity<FileServerUserResource> logoutOfFileServer(@PathVariable UUID userId) {
     final FileServerUser user = userService.logout(userId);
     return ResponseEntity.ok(userResourceAssembler.toModel(user));
   }
@@ -120,8 +118,8 @@ public class FileServerUserController {
       method = {RequestMethod.POST, RequestMethod.GET},
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<FileServerUserResource> reloginToFileServer(
-      @PathVariable("userId") final UUID userId) {
+  public ResponseEntity<FileServerUserResource> reloginToFileServer(@PathVariable UUID userId)
+      throws IOException {
     final FileServerUser user = userService.relogin(userId);
     return ResponseEntity.ok(userResourceAssembler.toModel(user));
   }
@@ -131,7 +129,7 @@ public class FileServerUserController {
       method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<UUID> deleteFileServerUser(@PathVariable("userId") UUID userId) {
+  public ResponseEntity<UUID> deleteFileServerUser(@PathVariable UUID userId) {
     userService.deleteUser(userId);
     return ResponseEntity.ok(userId);
   }
@@ -140,7 +138,7 @@ public class FileServerUserController {
       value = "/user/{userId}/bandwidth",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public float fetchRemainingBandwidth(@PathVariable("userId") UUID userId) throws IOException {
+  public float fetchRemainingBandwidth(@PathVariable UUID userId) throws IOException {
     return userService.getRemainingBandwidthFor(userId);
   }
 

@@ -1,0 +1,26 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="[dev-persistent] Matchday" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <envs>
+      <env name="CONFIG_ROOT" value="/projectdata/matchday/dev/persistent/config" />
+      <env name="DATA_ROOT" value="/projectdata/matchday/dev/persistent/" />
+      <env name="DB_PASSWORD" value="{M4tchD4y}" />
+      <env name="DB_URL" value="jdbc:mysql://jetbrains-mysql:3306/md_dev" />
+      <env name="DB_USER" value="matchday" />
+      <env name="FFMPEG" value="/usr/bin/ffmpeg" />
+      <env name="FFPROBE" value="/usr/bin/ffprobe" />
+    </envs>
+    <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+    <module name="matchday.main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="net.tomasbot.matchday.MatchdayApplication" />
+    <option name="VM_PARAMETERS" value="-ea -javaagent:$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/5.3.24/9d8bb6af04ba5f1861281a4e7aca8b8153fbf215/spring-instrument-5.3.24.jar -Dspring.profiles.active=dev-persistent" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="net.tomasbot.matchday.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

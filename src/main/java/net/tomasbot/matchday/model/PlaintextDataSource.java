@@ -36,6 +36,9 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 public final class PlaintextDataSource<T> extends DataSource<T> {
 
+  private String linkSelector;
+
+  @ToString.Exclude
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private final List<PatternKit<?>> patternKits = new ArrayList<>();
 
@@ -49,6 +52,17 @@ public final class PlaintextDataSource<T> extends DataSource<T> {
       @NotNull Class<T> clazz,
       @NotNull List<PatternKit<?>> patternKits) {
     super(title, baseUri, clazz);
+    this.patternKits.addAll(patternKits);
+  }
+
+  public PlaintextDataSource(
+      @NotNull String title,
+      @NotNull URI baseUri,
+      @NotNull Class<T> clazz,
+      @NotNull String linkSelector,
+      @NotNull List<PatternKit<?>> patternKits) {
+    super(title, baseUri, clazz);
+    this.linkSelector = linkSelector;
     this.patternKits.addAll(patternKits);
   }
 

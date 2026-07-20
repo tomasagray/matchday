@@ -21,6 +21,7 @@ package net.tomasbot.matchday.api.service;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,10 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import net.tomasbot.matchday.db.DataSourceRepository;
 import net.tomasbot.matchday.db.PatternKitRepository;
-import net.tomasbot.matchday.model.DataSource;
-import net.tomasbot.matchday.model.PlaintextDataSource;
-import net.tomasbot.matchday.model.Snapshot;
-import net.tomasbot.matchday.model.SnapshotRequest;
+import net.tomasbot.matchday.model.*;
 import net.tomasbot.matchday.plugin.datasource.DataSourcePlugin;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +37,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DataSourceService implements EntityService<DataSource<?>, UUID> {
+
+  private static final int MAX_LABELS = 25;
+  private static final int MAX_ALLOWABLE_RESULTS = 10_000;
 
   private final SnapshotService snapshotService;
   private final DataSourcePluginService pluginService;
@@ -56,35 +57,69 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
     this.patternKitRepository = patternKitRepository;
   }
 
+  private static SnapshotRequest validateSnapshotRequest(@NotNull SnapshotRequest request) {
+    LocalDateTime startDate = request.getStartDate();
+    LocalDateTime endDate = request.getEndDate();
+    if (startDate != null && endDate != null && startDate.isAfter(endDate))
+      throw new IllegalArgumentException("Start date is after end date");
+
+    List<String> labels = request.getLabels();
+    if (labels != null && labels.size() > MAX_LABELS)
+      throw new IllegalArgumentException("Too many labels");
+
+    int maxResults = request.getMaxResults();
+    if (maxResults < 0 || maxResults > MAX_ALLOWABLE_RESULTS)
+      throw new IllegalArgumentException("Illegal max results: " + maxResults);
+
+    // returned sanitized version
+    return SnapshotRequest.from(request);
+  }
+
   /**
    * Refresh all <b>enabled</b> data sources with the given Snapshot
    *
    * @param request Refresh request details
    * @return The SnapshotRequest, for additional processing
    */
-  public SnapshotRequest refreshAllDataSources(@NotNull final SnapshotRequest request)
+  public SnapshotRequest refreshAllDataSources(@NotNull SnapshotRequest request)
       throws IOException {
-    for (DataSourcePlugin plugin : pluginService.getEnabledPlugins()) {
-      refreshDataSourcesForPlugin(request, plugin);
+    SnapshotRequest cleaned = validateSnapshotRequest(request);
+
+    List<DataSourcePlugin> enabledPlugins = pluginService.getEnabledPlugins();
+    if (enabledPlugins.isEmpty())
+      throw new SystemConfigException("No data source plugins are enabled");
+
+    for (DataSourcePlugin plugin : enabledPlugins) {
+      refreshDataSourcesForPlugin(cleaned, plugin);
     }
-    return request;
+
+    return cleaned;
   }
 
-  public void refreshDataSourcesForPlugin(
+  private void refreshDataSourcesForPlugin(
       @NotNull SnapshotRequest request, @NotNull DataSourcePlugin plugin) throws IOException {
-    final List<DataSource<?>> dataSources =
-        dataSourceRepository.findDataSourcesByPluginId(plugin.getPluginId());
-    for (final DataSource<?> dataSource : dataSources) {
+    UUID pluginId = plugin.getPluginId();
+    List<DataSource<?>> dataSources =
+        dataSourceRepository.findDataSourcesByPluginId(pluginId).stream()
+            .filter(DataSource::isEnabled)
+            .toList();
+    if (dataSources.isEmpty())
+      throw new SystemConfigException("No data sources are enabled for plugin: " + pluginId);
+
+    for (DataSource<?> dataSource : dataSources) {
       refreshDataSource(request, dataSource);
     }
   }
 
-  public <T> void refreshDataSource(
+  private <T> void refreshDataSource(
       @NotNull SnapshotRequest request, @NotNull DataSource<T> dataSource) throws IOException {
-    final DataSourcePlugin dataSourcePlugin =
-        pluginService.getEnabledPlugin(dataSource.getPluginId());
-    final Snapshot<T> snapshot = dataSourcePlugin.getSnapshot(request, dataSource);
-    snapshotService.saveSnapshot(snapshot, dataSource.getClazz());
+    DataSourcePlugin dataSourcePlugin = pluginService.getEnabledPlugin(dataSource.getPluginId());
+    Snapshot<T> snapshot = dataSourcePlugin.getSnapshot(request, dataSource);
+
+    if (snapshot != null) snapshotService.saveSnapshot(snapshot, dataSource.getClazz());
+    else
+      throw new IllegalArgumentException(
+          "No snapshot returned for DataSource: " + dataSource.getDataSourceId());
   }
 
   @SuppressWarnings("unchecked cast")
@@ -92,12 +127,13 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
     Optional<DataSource<?>> dataSourceOptional = findDataSourceForUrl(url);
     if (dataSourceOptional.isPresent()) {
       DataSource<T> dataSource = (DataSource<T>) dataSourceOptional.get();
+      if (!dataSource.isEnabled())
+        throw new IllegalArgumentException("Data source is disabled: " + dataSource.getPluginId());
+
       DataSourcePlugin plugin = pluginService.getEnabledPlugin(dataSource.getPluginId());
       Snapshot<T> snapshot = plugin.getUrlSnapshot(url, dataSource);
       snapshotService.saveSnapshot(snapshot, dataSource.getClazz());
-    } else {
-      throw new IllegalArgumentException("No matching DataSource for URL: " + url);
-    }
+    } else throw new IllegalArgumentException("No matching DataSource for URL: " + url);
   }
 
   private Optional<DataSource<?>> findDataSourceForUrl(@NotNull URL url) {
@@ -120,10 +156,11 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
   @Override
   public DataSource<?> save(@NotNull final DataSource<?> dataSource) {
     pluginService.validateDataSource(dataSource);
-    if (dataSource instanceof final PlaintextDataSource<?> plaintext) {
+    DataSource<?> saved = dataSourceRepository.save(dataSource);
+    if (dataSource instanceof final PlaintextDataSource<?> plaintext)
       patternKitRepository.saveAll(plaintext.getPatternKits());
-    }
-    return dataSourceRepository.save(dataSource);
+
+    return saved;
   }
 
   @Override
@@ -149,8 +186,8 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
 
   @Override
   public DataSource<?> update(@NotNull final DataSource<?> dataSource) {
-    final UUID dataSourceId = dataSource.getDataSourceId();
-    final Optional<DataSource<?>> sourceOptional = dataSourceRepository.findById(dataSourceId);
+    UUID dataSourceId = dataSource.getDataSourceId();
+    Optional<DataSource<?>> sourceOptional = fetchById(dataSourceId);
     if (sourceOptional.isPresent()) {
       pluginService.validateDataSource(dataSource);
       return dataSourceRepository.saveAndFlush(dataSource);
@@ -175,5 +212,16 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
   @Override
   public void deleteAll(@NotNull Iterable<? extends DataSource<?>> entities) {
     dataSourceRepository.deleteAll(entities);
+  }
+
+  public boolean toggleDataSourceEnabled(@NotNull UUID dataSourceId, boolean isEnabled) {
+    Optional<DataSource<?>> sourceOptional = dataSourceRepository.findById(dataSourceId);
+    if (sourceOptional.isPresent()) {
+      DataSource<?> dataSource = sourceOptional.get();
+      dataSource.setEnabled(isEnabled);
+      DataSource<?> saved = dataSourceRepository.saveAndFlush(dataSource);
+
+      return saved.isEnabled();
+    } else throw new IllegalArgumentException("Data source not found: " + dataSourceId);
   }
 }

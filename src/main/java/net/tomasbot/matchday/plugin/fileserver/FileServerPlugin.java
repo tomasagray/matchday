@@ -58,7 +58,7 @@ public interface FileServerPlugin extends Plugin {
    * @return The response from the remote file server
    */
   @NotNull
-  ClientResponse login(@NotNull final FileServerUser user);
+  ClientResponse login(@NotNull FileServerUser user) throws IOException;
 
   /**
    * Determine whether this file server can translate the given URL into a download URL.
@@ -74,7 +74,7 @@ public interface FileServerPlugin extends Plugin {
    * @param url The external access URL for the file server.
    * @return The internal URL needed to access this file resource from the outside world.
    */
-  Optional<URL> getDownloadURL(@NotNull final URL url, @NotNull final Set<HttpCookie> cookies)
+  Optional<URL> getDownloadURL(@NotNull final URL url, @NotNull Set<HttpCookie> cookies)
       throws IOException;
 
   /**

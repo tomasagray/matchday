@@ -21,9 +21,9 @@ package net.tomasbot.matchday.plugin.datasource.parsing;
 
 import java.util.List;
 import java.util.stream.Stream;
+import net.tomasbot.matchday.model.DataSource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import net.tomasbot.matchday.model.DataSource;
 
 @Component
 public class HypertextEntityParser {
@@ -42,7 +42,7 @@ public class HypertextEntityParser {
   }
 
   @SuppressWarnings("unchecked cast")
-  private <T, D> DataSourceParser<T, D> getParserForType(Class<T> clazz) {
+  private <T, D> @NotNull DataSourceParser<T, D> getParserForType(Class<T> clazz) {
     final String errMsg = "No entity parser registered for type: " + clazz;
     return (DataSourceParser<T, D>)
         this.parsers.stream()

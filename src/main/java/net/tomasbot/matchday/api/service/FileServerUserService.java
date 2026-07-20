@@ -60,7 +60,7 @@ public class FileServerUserService {
    * @return Was login successful? (true/false)
    */
   @Transactional
-  public FileServerUser login(@NotNull final FileServerUser user) {
+  public FileServerUser login(@NotNull final FileServerUser user) throws IOException {
     userValidationService.validateUserForLogin(user);
 
     final UUID pluginId = user.getServerId();
@@ -92,10 +92,10 @@ public class FileServerUserService {
 
   /**
    * Login a user to a file server using previously gathered cookieData. Overwrites any cookieData
-   * which may be present in the FileServerUser instance.
+   * that may be present in the FileServerUser instance.
    *
    * @param user The user to login
-   * @param cookieData A String representing a cookies file
+   * @param cookieData A String representing a cookie file
    * @return The response
    */
   @Transactional
@@ -140,7 +140,7 @@ public class FileServerUserService {
   /**
    * Log a user out of a given file server
    *
-   * @param userId The ID of user to be logged out
+   * @param userId The ID of the user to be logged out
    * @return The updated User
    * @throws IllegalArgumentException if user not found
    */
@@ -167,7 +167,7 @@ public class FileServerUserService {
    * @return The logged-in user
    */
   @Transactional
-  public FileServerUser relogin(@NotNull final UUID userId) {
+  public FileServerUser relogin(@NotNull final UUID userId) throws IOException {
     final Optional<FileServerUser> userOptional = userRepo.findById(userId);
     if (userOptional.isPresent()) {
       final FileServerUser fileServerUser = userOptional.get();

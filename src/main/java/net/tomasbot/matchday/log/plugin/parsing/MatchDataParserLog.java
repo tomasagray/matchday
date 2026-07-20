@@ -17,10 +17,12 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.tomasbot.matchday.log;
+package net.tomasbot.matchday.log.plugin.parsing;
 
 import java.util.List;
 import java.util.stream.Stream;
+import net.tomasbot.matchday.model.DataSource;
+import net.tomasbot.matchday.model.PatternKit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -30,15 +32,12 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import net.tomasbot.matchday.model.DataSource;
-import net.tomasbot.matchday.model.PatternKit;
-import net.tomasbot.matchday.plugin.datasource.parsing.MatchDataParser;
 
 @Aspect
 @Component
 public class MatchDataParserLog {
 
-  static final Logger logger = LogManager.getLogger(MatchDataParser.class);
+  static final Logger logger = LogManager.getLogger(MatchDataParserLog.class);
 
   @Before(
       "execution(* net.tomasbot.matchday.plugin.datasource.parsing.MatchDataParser.getEntityStream(..))")
@@ -65,7 +64,7 @@ public class MatchDataParserLog {
     final Object data = jp.getArgs()[1];
     logger.debug(
         "Attempting to parse text data with {} PatternKits of type: {}", patternKits.size(), type);
-    logger.debug("Parsing text data:\n{}", data);
+    logger.trace("Parsing text data:\n{}", data);
 
     final Stream<?> result = (Stream<?>) jp.proceed();
     final List<?> collected = result.toList();

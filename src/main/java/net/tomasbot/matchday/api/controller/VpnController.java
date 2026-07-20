@@ -5,6 +5,7 @@ import net.tomasbot.matchday.api.service.admin.VpnService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -18,8 +19,8 @@ public class VpnController {
   }
 
   @RequestMapping(value = "/start", method = RequestMethod.POST)
-  public ResponseEntity<?> startVpnService() throws Throwable {
-    vpnService.start();
+  public ResponseEntity<?> startVpnService(@RequestParam(defaultValue = "") String server) throws Throwable {
+    vpnService.start(server);
     return ResponseEntity.ok().build();
   }
 

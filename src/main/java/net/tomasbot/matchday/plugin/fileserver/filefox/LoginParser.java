@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.Data;
+import net.tomasbot.matchday.util.HttpConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -38,13 +39,13 @@ import net.tomasbot.matchday.model.FileServerUser;
 @Component
 public class LoginParser {
 
-  private final ConnectionManager connectionManager;
+  private final HttpConnectionManager connectionManager;
   private final PageEvaluator pageEvaluator;
   private final FileFoxPluginProperties pluginProperties;
   private final URI loginUri;
 
   public LoginParser(
-      ConnectionManager connectionManager,
+      HttpConnectionManager connectionManager,
       PageEvaluator pageEvaluator,
       @NotNull FileFoxPluginProperties pluginProperties)
       throws URISyntaxException {

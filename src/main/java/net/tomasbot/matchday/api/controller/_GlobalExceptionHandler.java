@@ -8,6 +8,7 @@ import net.tomasbot.matchday.api.service.InvalidArtworkException;
 import net.tomasbot.matchday.api.service.InvalidEventException;
 import net.tomasbot.matchday.api.service.PluginNotFoundException;
 import net.tomasbot.matchday.api.service.UnknownEntityException;
+import net.tomasbot.matchday.model.SystemConfigException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -85,6 +86,13 @@ public class _GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
   public String handleUnknownEntity(@NotNull Throwable e) {
+    return handleError(e);
+  }
+
+  @ExceptionHandler(SystemConfigException.class)
+  @ResponseStatus(HttpStatus.FAILED_DEPENDENCY)
+  @ResponseBody
+  public String handleSystemConfig(@NotNull Throwable e) {
     return handleError(e);
   }
 }

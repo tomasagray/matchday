@@ -23,26 +23,28 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Map;
+import java.util.Set;
+import net.tomasbot.matchday.util.HttpConnectionManager;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpCookie;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
 @Component
 public class DownloadParser {
 
-  private final ConnectionManager connectionManager;
+  private final HttpConnectionManager connectionManager;
   private final PageEvaluator pageEvaluator;
 
-  public DownloadParser(ConnectionManager connectionManager, PageEvaluator pageEvaluator) {
+  public DownloadParser(HttpConnectionManager connectionManager, PageEvaluator pageEvaluator) {
     this.connectionManager = connectionManager;
     this.pageEvaluator = pageEvaluator;
   }
 
-  public URL parseDownloadRequest(
-      @NotNull final URI uri, @NotNull MultiValueMap<String, String> cookieJar) throws IOException {
+  public URL parseDownloadRequest(@NotNull final URI uri, @NotNull Set<HttpCookie> cookies)
+      throws IOException {
     // Read remote page
-    final FileFoxPage.DownloadLanding downloadLanding = readDownloadLandingPage(uri, cookieJar);
+    final FileFoxPage.DownloadLanding downloadLanding = readDownloadLandingPage(uri, cookies);
 
     // Get hidden input fields
     final URI hiddenFormUri = downloadLanding.getDdlSubmitUri();
@@ -51,7 +53,7 @@ public class DownloadParser {
 
     // Fetch direct download page & parse
     final String directDownloadHtml =
-        connectionManager.post(formUri, cookieJar, queryParams).bodyToMono(String.class).block();
+        connectionManager.post(formUri, cookies, queryParams).bodyToMono(String.class).block();
     final FileFoxPage ddlPage = pageEvaluator.getFileFoxPage(directDownloadHtml);
     if (ddlPage instanceof final FileFoxPage.DirectDownload directDownload) {
       return directDownload.getDdlUrl();
@@ -63,8 +65,8 @@ public class DownloadParser {
 
   @NotNull
   private FileFoxPage.DownloadLanding readDownloadLandingPage(
-      @NotNull URI uri, @NotNull MultiValueMap<String, String> cookieJar) throws IOException {
-    final ClientResponse response = connectionManager.connectTo(uri, cookieJar);
+      @NotNull URI uri, @NotNull Set<HttpCookie> cookies) throws IOException {
+    final ClientResponse response = connectionManager.connectTo(uri, cookies);
     final String downloadLandingHtml = response.bodyToMono(String.class).block();
     final FileFoxPage page = pageEvaluator.getFileFoxPage(downloadLandingHtml);
 

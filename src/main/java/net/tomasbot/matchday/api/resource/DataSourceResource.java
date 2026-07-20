@@ -60,6 +60,7 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
   @Relation(collectionRelation = "data_source")
   static class PlaintextDataSourceResource extends DataSourceResource {
 
+    private String linkSelector;
     private List<? extends PatternKit<?>> patternKits;
 
     PlaintextDataSourceResource(@NotNull DataSourceResource base) {
@@ -96,8 +97,12 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
 
       if (entity instanceof final PlaintextDataSource<?> plaintextEntity) {
         PlaintextDataSourceResource plaintextResource = new PlaintextDataSourceResource(resource);
-        final List<PatternKit<?>> patternKits = plaintextEntity.getPatternKits();
+        List<PatternKit<?>> patternKits = plaintextEntity.getPatternKits();
+        String linkSelector = plaintextEntity.getLinkSelector();
+
         plaintextResource.setPatternKits(patternKits);
+        plaintextResource.setLinkSelector(linkSelector);
+
         return plaintextResource;
       }
       return resource;

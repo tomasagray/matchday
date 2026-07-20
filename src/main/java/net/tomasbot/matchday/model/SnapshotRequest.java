@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.*;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @ToString
@@ -49,4 +50,18 @@ public class SnapshotRequest {
   private String orderBy;
   private String pageToken;
   private String status;
+
+  public static SnapshotRequest from(@NotNull SnapshotRequest request) {
+    return SnapshotRequest.builder()
+        .endDate(request.getEndDate())
+        .startDate(request.getStartDate())
+        .fetchBodies(request.isFetchBodies())
+        .fetchImages(request.isFetchImages())
+        .maxResults(request.getMaxResults())
+        .labels(request.getLabels())
+        .orderBy(request.getOrderBy())
+        .pageToken(request.getPageToken())
+        .status(request.getStatus())
+        .build();
+  }
 }
