@@ -23,6 +23,7 @@ import net.tomasbot.matchday.model.VpnStatus;
 import net.tomasbot.matchday.model.VpnStatus.VpnConnectionStatus;
 import net.tomasbot.matchday.util.TelnetClientWrapper;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -187,10 +188,21 @@ public class VpnService {
     return arguments.toArray(new String[] {});
   }
 
+  /**
+   * Start a VPN connection to a randomly determined server.
+   *
+   * @throws Throwable If an error occurs while starting the VPN connection.
+   */
   public void start() throws Throwable {
     start("");
   }
 
+  /**
+   * Start a VPN connection to a specified server.
+   *
+   * @param server The name of the server to connect to, e.g., "us10033".
+   * @throws Throwable If an error occurs while starting the VPN connection.
+   */
   public void start(@NotNull String server) throws Throwable {
     if (server.isBlank()) this.currentConfiguration = getRandomConfiguration();
     else this.currentConfiguration = loadConfiguration(server);
@@ -230,7 +242,7 @@ public class VpnService {
     }
   }
 
-  public void restart() throws Throwable {
+  public void restart(@Nullable String server) throws Throwable {
     try {
       stop();
 
@@ -238,7 +250,10 @@ public class VpnService {
       // wait before reconnecting
       waitForIpRecheck();
 
-      start();
+      // start the specified server
+      if (server != null) start(server);
+      // start a random server
+      else start();
     } finally {
       heartbeat();
     }

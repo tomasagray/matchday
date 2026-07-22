@@ -31,8 +31,9 @@ public class VpnController {
   }
 
   @RequestMapping(value = "/restart", method = RequestMethod.POST)
-  public ResponseEntity<?> restartVpnService() throws Throwable {
-    vpnService.restart();
+  public ResponseEntity<?> restartVpnService(@RequestParam(defaultValue = "") String server)
+      throws Throwable {
+    vpnService.restart(server);
     return ResponseEntity.ok().build();
   }
 }
