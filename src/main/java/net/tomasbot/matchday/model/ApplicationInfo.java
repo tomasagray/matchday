@@ -6,7 +6,8 @@ import lombok.Data;
 @Data
 @Builder
 public class ApplicationInfo {
-  private String version;
-  private String system;
   private Long pid;
+  private String system;
+  private String appVersion;
+  private String ipAddress;
 }
