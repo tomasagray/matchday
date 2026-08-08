@@ -1,40 +1,44 @@
 package net.tomasbot.matchday.api.service.admin;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
+import java.net.URI;
+import java.util.ArrayList;
 import lombok.Getter;
+import net.tomasbot.matchday.util.HttpConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CanYouSeeMe extends ExternalIpService {
 
-  private static final String SERVICE_URL = "https://www.canyouseeme.org";
+  private static final URI SERVICE_URI = URI.create("https://www.canyouseeme.org");
   private static final String IP_SELECTOR = "input#ip";
+
   @Getter private final String name = "CanYouSeeMe.org";
 
-  CanYouSeeMe() {
-    super(SERVICE_URL);
+  private final HttpConnectionManager connectionManager;
+
+  public CanYouSeeMe(HttpConnectionManager connectionManager) {
+    this.connectionManager = connectionManager;
   }
 
   @Override
   public @NotNull String getIpAddress() throws IOException {
-    try (InputStream is = getIpDataStream();
-        InputStreamReader in = new InputStreamReader(is, StandardCharsets.UTF_8);
-        BufferedReader reader = new BufferedReader(in)) {
+    String rawResponse =
+        connectionManager.get(SERVICE_URI, new ArrayList<>()).bodyToMono(String.class).block();
+    if (rawResponse == null || rawResponse.isBlank())
+      throw new IOException("[CanYouSeeMe.org] Response was empty");
 
-      final String data = reader.lines().collect(Collectors.joining());
-      final Document document = Jsoup.parse(data);
-      final Elements input = document.select(IP_SELECTOR);
+    Document document = Jsoup.parse(rawResponse);
+    Elements inputs = document.select(IP_SELECTOR);
+    Element first = inputs.first();
+    if (first == null)
+      throw new IOException("[CanYouSeeMe.org] Response did not contain an IP address");
 
-      return input.attr("value");
-    }
+    return first.attr("value");
   }
 }

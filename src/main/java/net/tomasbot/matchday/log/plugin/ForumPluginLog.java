@@ -17,12 +17,6 @@ public class ForumPluginLog {
 
   private static final Logger logger = LogManager.getLogger(ForumPluginLog.class);
 
-  @Before(
-      "execution(* net.tomasbot.matchday.plugin.datasource.forum.RemoteDataReader.readDataFrom(..))")
-  public void logReadFromUrl(@NotNull JoinPoint jp) {
-    logger.info("Fetching Event data from: {}", jp.getArgs()[0]);
-  }
-
   @Around("execution(* net.tomasbot.matchday.plugin.datasource.forum.ForumPlugin.getSnapshot(..))")
   public Object logGetSnapshot(@NotNull ProceedingJoinPoint jp) throws Throwable {
     Object[] args = jp.getArgs();
