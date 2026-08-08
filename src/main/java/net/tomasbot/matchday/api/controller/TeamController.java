@@ -21,7 +21,7 @@ package net.tomasbot.matchday.api.controller;
 
 import static net.tomasbot.matchday.api.controller.CompetitionController.IMAGE_SVG_VALUE;
 import static net.tomasbot.matchday.api.resource.EventsResource.*;
-import static net.tomasbot.matchday.util.Constants.*;
+import static net.tomasbot.matchday.common.Constants.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 

@@ -25,6 +25,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import net.tomasbot.matchday.common.ResourceFileReader;
+import net.tomasbot.matchday.model.Color;
+import net.tomasbot.matchday.model.Match;
+import net.tomasbot.matchday.model.Param;
+import net.tomasbot.matchday.plugin.artwork.creator.ArtworkCreatorPlugin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -36,11 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import net.tomasbot.matchday.model.Color;
-import net.tomasbot.matchday.model.Match;
-import net.tomasbot.matchday.model.Param;
-import net.tomasbot.matchday.plugin.artwork.creator.ArtworkCreatorPlugin;
-import net.tomasbot.matchday.util.ResourceFileReader;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)

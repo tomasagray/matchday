@@ -6,8 +6,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import lombok.Data;
 import lombok.Getter;
-import net.tomasbot.matchday.util.HttpConnectionManager;
-import net.tomasbot.matchday.util.JsonParser;
+import net.tomasbot.matchday.common.HttpConnectionManager;
+import net.tomasbot.matchday.common.JsonParser;
 import org.springframework.stereotype.Service;
 
 @Service

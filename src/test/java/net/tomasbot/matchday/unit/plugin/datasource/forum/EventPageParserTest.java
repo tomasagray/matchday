@@ -6,6 +6,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Set;
+import net.tomasbot.matchday.common.JsonParser;
+import net.tomasbot.matchday.common.ResourceFileReader;
+import net.tomasbot.matchday.model.Event;
+import net.tomasbot.matchday.model.Match;
+import net.tomasbot.matchday.model.PlaintextDataSource;
+import net.tomasbot.matchday.model.video.VideoFileSource;
+import net.tomasbot.matchday.plugin.datasource.forum.EventPageParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,13 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import net.tomasbot.matchday.model.Event;
-import net.tomasbot.matchday.model.Match;
-import net.tomasbot.matchday.model.PlaintextDataSource;
-import net.tomasbot.matchday.model.video.VideoFileSource;
-import net.tomasbot.matchday.plugin.datasource.forum.EventPageParser;
-import net.tomasbot.matchday.util.JsonParser;
-import net.tomasbot.matchday.util.ResourceFileReader;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest

@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import net.tomasbot.matchday.api.service.SettingsService;
+import net.tomasbot.matchday.common.JsonParser;
+import net.tomasbot.matchday.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.*;
@@ -13,9 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import net.tomasbot.matchday.api.service.SettingsService;
-import net.tomasbot.matchday.model.*;
-import net.tomasbot.matchday.util.JsonParser;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest

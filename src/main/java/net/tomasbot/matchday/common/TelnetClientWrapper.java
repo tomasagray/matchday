@@ -1,4 +1,4 @@
-package net.tomasbot.matchday.util;
+package net.tomasbot.matchday.common;
 
 import java.io.*;
 import java.util.List;

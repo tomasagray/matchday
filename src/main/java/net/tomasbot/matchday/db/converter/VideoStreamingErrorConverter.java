@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.lang.reflect.Type;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+import net.tomasbot.matchday.common.JsonParser;
 import net.tomasbot.matchday.model.video.VideoStreamingError;
-import net.tomasbot.matchday.util.JsonParser;
 
 @Converter
 public class VideoStreamingErrorConverter

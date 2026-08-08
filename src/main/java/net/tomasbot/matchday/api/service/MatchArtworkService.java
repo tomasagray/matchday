@@ -2,8 +2,8 @@ package net.tomasbot.matchday.api.service;
 
 import java.io.IOException;
 import java.util.*;
+import net.tomasbot.matchday.common.ResourceFileReader;
 import net.tomasbot.matchday.model.*;
-import net.tomasbot.matchday.util.ResourceFileReader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.springframework.http.MediaType;

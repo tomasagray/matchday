@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import lombok.Getter;
-import net.tomasbot.matchday.util.HttpConnectionManager;
+import net.tomasbot.matchday.common.HttpConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

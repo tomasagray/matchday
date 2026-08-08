@@ -1,4 +1,4 @@
-package net.tomasbot.matchday.util.flaresolverr;
+package net.tomasbot.matchday.common.flaresolverr;
 
 import java.net.URL;
 import java.util.Set;

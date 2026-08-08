@@ -1,4 +1,4 @@
-package net.tomasbot.matchday.util.flaresolverr;
+package net.tomasbot.matchday.common.flaresolverr;
 
 import static net.tomasbot.matchday.config.settings.FlaresolverrMaxTimeout.FLARESOLVERR_TIMEOUT;
 import static net.tomasbot.matchday.config.settings.FlaresolverrUrl.FLARESOLVERR_URL;
@@ -9,8 +9,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.tomasbot.matchday.api.service.SettingsService;
+import net.tomasbot.matchday.common.JsonParser;
 import net.tomasbot.matchday.model.SecureCookie;
-import net.tomasbot.matchday.util.JsonParser;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

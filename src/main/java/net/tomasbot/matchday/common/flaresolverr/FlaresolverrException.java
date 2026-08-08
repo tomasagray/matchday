@@ -1,4 +1,4 @@
-package net.tomasbot.matchday.util.flaresolverr;
+package net.tomasbot.matchday.common.flaresolverr;
 
 public class FlaresolverrException extends RuntimeException {
   public FlaresolverrException(String msg) {

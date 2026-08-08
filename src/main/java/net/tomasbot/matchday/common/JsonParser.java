@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.tomasbot.matchday.util;
+package net.tomasbot.matchday.common;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;

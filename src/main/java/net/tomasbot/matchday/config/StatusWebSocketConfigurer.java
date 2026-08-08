@@ -19,7 +19,7 @@
 
 package net.tomasbot.matchday.config;
 
-import static net.tomasbot.matchday.util.Constants.API_PREFIX;
+import static net.tomasbot.matchday.common.Constants.API_PREFIX;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;

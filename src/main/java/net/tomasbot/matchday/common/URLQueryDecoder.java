@@ -17,7 +17,7 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.tomasbot.matchday.util;
+package net.tomasbot.matchday.common;
 
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;

@@ -20,8 +20,8 @@
 package net.tomasbot.matchday.api.controller;
 
 import static net.tomasbot.matchday.api.controller.CompetitionController.IMAGE_SVG_VALUE;
-import static net.tomasbot.matchday.util.Constants.LinkRelations.IMAGE_REL;
-import static net.tomasbot.matchday.util.Constants.LinkRelations.NEXT_LINK;
+import static net.tomasbot.matchday.common.Constants.LinkRelations.IMAGE_REL;
+import static net.tomasbot.matchday.common.Constants.LinkRelations.NEXT_LINK;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 

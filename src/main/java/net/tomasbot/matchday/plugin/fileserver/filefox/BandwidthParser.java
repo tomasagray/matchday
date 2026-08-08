@@ -6,7 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
-import net.tomasbot.matchday.util.HttpConnectionManager;
+import net.tomasbot.matchday.common.HttpConnectionManager;
 import org.springframework.http.HttpCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;

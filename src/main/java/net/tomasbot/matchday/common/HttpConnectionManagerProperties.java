@@ -1,4 +1,4 @@
-package net.tomasbot.matchday.util;
+package net.tomasbot.matchday.common;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

@@ -15,7 +15,7 @@ public class FlaresolverrServiceLog {
   private static final Logger logger = LogManager.getLogger(FlaresolverrServiceLog.class);
 
   @Around(
-      "execution(* net.tomasbot.matchday.util.flaresolverr.FlaresolverrService.solveChallengeFor(..) )")
+      "execution(* net.tomasbot.matchday.common.flaresolverr.FlaresolverrService.solveChallengeFor(..) )")
   public Object logSolveFlareChallenge(@NotNull ProceedingJoinPoint jp) throws Throwable {
     Instant start = Instant.now();
     logger.info("Submitting URL: {} to Flaresolverr...", jp.getArgs());

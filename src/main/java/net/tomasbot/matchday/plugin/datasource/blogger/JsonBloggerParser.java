@@ -19,9 +19,9 @@
 
 package net.tomasbot.matchday.plugin.datasource.blogger;
 
-import org.jetbrains.annotations.NotNull;
+import net.tomasbot.matchday.common.JsonParser;
 import net.tomasbot.matchday.plugin.datasource.blogger.model.Blogger;
-import net.tomasbot.matchday.util.JsonParser;
+import org.jetbrains.annotations.NotNull;
 
 public class JsonBloggerParser implements BloggerParser {
 

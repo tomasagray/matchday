@@ -15,6 +15,6 @@ public class ApplicationSettingsDeserializer extends JsonDeserializer<Applicatio
   public ApplicationSettings deserialize(@NotNull JsonParser jsonParser, DeserializationContext ctx)
       throws IOException {
     final String data = jsonParser.readValueAsTree().toString();
-    return net.tomasbot.matchday.util.JsonParser.fromJson(data, TYPE);
+    return net.tomasbot.matchday.common.JsonParser.fromJson(data, TYPE);
   }
 }

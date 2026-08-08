@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import net.tomasbot.matchday.util.flaresolverr.FlaresolverrService;
-import net.tomasbot.matchday.util.flaresolverr.FlaresolverrSolution;
+import net.tomasbot.matchday.common.flaresolverr.FlaresolverrService;
+import net.tomasbot.matchday.common.flaresolverr.FlaresolverrSolution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.DisplayName;
