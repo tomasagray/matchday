@@ -19,7 +19,7 @@
 
 package net.tomasbot.matchday.api.resource;
 
-import static net.tomasbot.matchday.util.Constants.LinkRelations.FLAG_REL;
+import static net.tomasbot.matchday.common.Constants.LinkRelations.FLAG_REL;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 

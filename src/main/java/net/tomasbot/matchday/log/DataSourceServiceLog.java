@@ -134,8 +134,22 @@ public class DataSourceServiceLog {
 
     if (args.length == 2) {
       if (args[1] instanceof Boolean isEnabled) {
-        if (isEnabled) logger.info("Enabling DataSource: {}", args[0]);
-        else logger.info("Disabling DataSource: {}", args[0]);
+        Object id = args[0];
+        if (isEnabled) logger.info("Enabling DataSource: {}", id);
+        else logger.info("Disabling DataSource: {}", id);
+      }
+    }
+  }
+
+  @Before("execution(* net.tomasbot.matchday.api.service.DataSourceService.toggleIsDataSourceFlared(..))")
+  public void logToggleIsDataSourceFlared(@NotNull JoinPoint jp) {
+    Object[] args = jp.getArgs();
+
+    if (args.length == 2) {
+      if (args[1] instanceof Boolean isFlared) {
+        Object id = args[0];
+        if (isFlared) logger.info("Configuring DataSource {} to use Flaresolverr proxy...", id);
+        else logger.info("Disabling Flaresolverr proxy for DataSource: {}", id);
       }
     }
   }

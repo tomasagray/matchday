@@ -26,6 +26,15 @@ import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import net.tomasbot.matchday.TestDataCreator;
+import net.tomasbot.matchday.common.ResourceFileReader;
+import net.tomasbot.matchday.model.DataSource;
+import net.tomasbot.matchday.model.Event;
+import net.tomasbot.matchday.model.Match;
+import net.tomasbot.matchday.model.PlaintextDataSource;
+import net.tomasbot.matchday.plugin.datasource.blogger.HtmlBloggerParser;
+import net.tomasbot.matchday.plugin.datasource.blogger.model.BloggerEntry;
+import net.tomasbot.matchday.plugin.datasource.parsing.MatchDataParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -41,15 +50,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import net.tomasbot.matchday.TestDataCreator;
-import net.tomasbot.matchday.model.DataSource;
-import net.tomasbot.matchday.model.Event;
-import net.tomasbot.matchday.model.Match;
-import net.tomasbot.matchday.model.PlaintextDataSource;
-import net.tomasbot.matchday.plugin.datasource.blogger.HtmlBloggerParser;
-import net.tomasbot.matchday.plugin.datasource.blogger.model.BloggerEntry;
-import net.tomasbot.matchday.plugin.datasource.parsing.MatchDataParser;
-import net.tomasbot.matchday.util.ResourceFileReader;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest

@@ -22,9 +22,8 @@ package net.tomasbot.matchday.model;
 import java.time.Duration;
 import java.util.Objects;
 import javax.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+
+import lombok.*;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpCookie;
@@ -36,6 +35,8 @@ import org.springframework.lang.Nullable;
 @Getter
 @Setter
 @ToString
+@Builder
+@AllArgsConstructor
 public class SecureCookie {
 
   // HttpCookie

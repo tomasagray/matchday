@@ -21,9 +21,8 @@ package net.tomasbot.matchday.db.converter;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-
 import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
-import net.tomasbot.matchday.util.JsonParser;
+import net.tomasbot.matchday.common.JsonParser;
 
 @Converter
 public class FFmpegMetadataConverter implements AttributeConverter<FFmpegMetadata, String> {

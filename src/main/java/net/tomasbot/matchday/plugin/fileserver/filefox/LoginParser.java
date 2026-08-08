@@ -26,14 +26,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.Data;
-import net.tomasbot.matchday.util.HttpConnectionManager;
+import net.tomasbot.matchday.common.HttpConnectionManager;
+import net.tomasbot.matchday.model.FileServerUser;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import net.tomasbot.matchday.model.FileServerUser;
 
 @Data
 @Component

@@ -1,36 +1,34 @@
 package net.tomasbot.matchday.api.service.admin;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import lombok.Data;
 import lombok.Getter;
-import net.tomasbot.matchday.util.JsonParser;
+import net.tomasbot.matchday.common.HttpConnectionManager;
+import net.tomasbot.matchday.common.JsonParser;
 import org.springframework.stereotype.Service;
 
 @Service
 public class IpInfoDotIo extends ExternalIpService {
 
-  private static final String SERVICE_URL = "https://ipinfo.io/json";
+  private static final URI SERVICE_URI = URI.create("https://ipinfo.io/json");
+
+  private final HttpConnectionManager connectionManager;
 
   @Getter private final String name = "ipinfo.io";
 
-  IpInfoDotIo() {
-    super(SERVICE_URL);
+  IpInfoDotIo(HttpConnectionManager connectionManager) {
+    this.connectionManager = connectionManager;
   }
 
   @Override
   public String getIpAddress() throws IOException {
-    try (InputStream is = getIpDataStream();
-        InputStreamReader in = new InputStreamReader(is, StandardCharsets.UTF_8);
-        BufferedReader reader = new BufferedReader(in)) {
-
-      IpAddressInfo addressInfo = JsonParser.fromJson(reader, IpAddressInfo.class);
-      return addressInfo.getIp();
-    }
+    String json =
+        connectionManager.get(SERVICE_URI, new ArrayList<>()).bodyToMono(String.class).block();
+    IpAddressInfo addressInfo = JsonParser.fromJson(json, IpAddressInfo.class);
+    return addressInfo.getIp();
   }
 
   @Data

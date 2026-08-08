@@ -24,6 +24,10 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import net.tomasbot.matchday.TestDataCreator;
+import net.tomasbot.matchday.api.controller.CompetitionController;
+import net.tomasbot.matchday.common.ResourceFileReader;
+import net.tomasbot.matchday.model.Competition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Contract;
@@ -48,10 +52,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import net.tomasbot.matchday.TestDataCreator;
-import net.tomasbot.matchday.api.controller.CompetitionController;
-import net.tomasbot.matchday.model.Competition;
-import net.tomasbot.matchday.util.ResourceFileReader;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)

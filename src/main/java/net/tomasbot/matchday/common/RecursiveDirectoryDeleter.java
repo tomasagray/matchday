@@ -17,28 +17,26 @@
  * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.tomasbot.matchday.util;
+package net.tomasbot.matchday.common;
 
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
-import com.google.gson.TypeAdapterFactory;
-import com.google.gson.reflect.TypeToken;
-import org.jetbrains.annotations.NotNull;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
-@SuppressWarnings("unchecked")
-public class ClassTypeAdapterFactory implements TypeAdapterFactory {
+public class RecursiveDirectoryDeleter extends SimpleFileVisitor<Path> {
 
-  private final TypeAdapter<?> typeAdapter;
-
-  public ClassTypeAdapterFactory(TypeAdapter<?> typeAdapter) {
-    this.typeAdapter = typeAdapter;
+  @Override
+  public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+    Files.delete(file);
+    return FileVisitResult.CONTINUE;
   }
 
   @Override
-  public <T> TypeAdapter<T> create(Gson gson, @NotNull TypeToken<T> typeToken) {
-    if (!Class.class.isAssignableFrom(typeToken.getRawType())) {
-      return null;
-    }
-    return (TypeAdapter<T>) this.typeAdapter;
+  public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+    Files.delete(dir);
+    return FileVisitResult.CONTINUE;
   }
 }

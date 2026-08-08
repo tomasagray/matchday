@@ -33,12 +33,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
-import org.xml.sax.SAXException;
+import net.tomasbot.matchday.common.ResourceFileReader;
 import net.tomasbot.matchday.model.ArtworkTemplate;
 import net.tomasbot.matchday.model.ArtworkTemplate.Coordinate;
 import net.tomasbot.matchday.model.ArtworkTemplate.Layer;
@@ -46,7 +41,12 @@ import net.tomasbot.matchday.model.ArtworkTemplate.Shape;
 import net.tomasbot.matchday.model.Image;
 import net.tomasbot.matchday.model.Param;
 import net.tomasbot.matchday.plugin.Plugin;
-import net.tomasbot.matchday.util.ResourceFileReader;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
 
 @Component
 public class ArtworkCreatorPlugin implements Plugin {

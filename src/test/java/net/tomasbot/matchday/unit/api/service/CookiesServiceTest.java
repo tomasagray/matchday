@@ -23,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.Set;
+import net.tomasbot.matchday.api.service.CookiesService;
+import net.tomasbot.matchday.common.ResourceFileReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,8 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpCookie;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import net.tomasbot.matchday.api.service.CookiesService;
-import net.tomasbot.matchday.util.ResourceFileReader;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest

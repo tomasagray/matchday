@@ -215,13 +215,24 @@ public class DataSourceService implements EntityService<DataSource<?>, UUID> {
   }
 
   public boolean toggleDataSourceEnabled(@NotNull UUID dataSourceId, boolean isEnabled) {
-    Optional<DataSource<?>> sourceOptional = dataSourceRepository.findById(dataSourceId);
+    Optional<DataSource<?>> sourceOptional = fetchById(dataSourceId);
     if (sourceOptional.isPresent()) {
       DataSource<?> dataSource = sourceOptional.get();
       dataSource.setEnabled(isEnabled);
       DataSource<?> saved = dataSourceRepository.saveAndFlush(dataSource);
 
       return saved.isEnabled();
+    } else throw new IllegalArgumentException("Data source not found: " + dataSourceId);
+  }
+
+  public boolean toggleIsDataSourceFlared(@NotNull UUID dataSourceId, boolean isFlared) {
+    Optional<DataSource<?>> sourceOptional = fetchById(dataSourceId);
+    if (sourceOptional.isPresent()) {
+      DataSource<?> dataSource = sourceOptional.get();
+      dataSource.setFlared(isFlared);
+      DataSource<?> saved = dataSourceRepository.saveAndFlush(dataSource);
+
+      return saved.isFlared();
     } else throw new IllegalArgumentException("Data source not found: " + dataSourceId);
   }
 }

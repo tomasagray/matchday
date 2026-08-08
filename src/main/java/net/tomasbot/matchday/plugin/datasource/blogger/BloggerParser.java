@@ -24,19 +24,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 import net.tomasbot.matchday.plugin.datasource.blogger.model.Blogger;
+import org.jetbrains.annotations.NotNull;
 
 public interface BloggerParser {
-
-  String DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss[.nnn]z";
 
   /**
    * Fetch Blogger data from a remote URL and parse it into a Blogger instance
    *
    * @param url The location of the remote blog
    * @return A Blogger instance, created from String data read from supplied URL
-   * @throws IOException If data cannot be read from remote source
+   * @throws IOException If data cannot be read from the remote source
    */
   default Blogger getBlogger(@NotNull final URL url) throws IOException {
     try (final InputStreamReader in = new InputStreamReader(url.openStream());

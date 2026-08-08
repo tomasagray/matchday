@@ -23,14 +23,14 @@ import com.google.gson.reflect.TypeToken;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.List;
+import net.tomasbot.matchday.api.service.CountryService;
+import net.tomasbot.matchday.common.JsonParser;
+import net.tomasbot.matchday.model.Country;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import net.tomasbot.matchday.api.service.CountryService;
-import net.tomasbot.matchday.model.Country;
-import net.tomasbot.matchday.util.JsonParser;
 
 @Component
 @Order(1)

@@ -41,8 +41,6 @@ public abstract class DataSource<T> {
   @Type(type = "java.lang.Class")
   private final Class<T> clazz;
 
-  private final String title;
-
   @Convert(converter = UriConverter.class)
   private final URI baseUri;
 
@@ -55,7 +53,9 @@ public abstract class DataSource<T> {
   @Type(type = "uuid-char")
   private UUID pluginId;
 
+  private final String title;
   private boolean enabled = true;
+  private boolean isFlared;
 
   public DataSource() {
     this.title = null;

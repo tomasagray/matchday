@@ -12,7 +12,11 @@ public class IpService {
 
   private static final Logger logger = LogManager.getLogger(IpService.class);
 
-  private final List<ExternalIpService> ipServices = List.of(new IpInfoDotIo(), new CanYouSeeMe());
+  private final List<ExternalIpService> ipServices;
+
+  public IpService(List<ExternalIpService> ipServices) {
+    this.ipServices = ipServices;
+  }
 
   private static @NotNull String getAddressFrom(@NotNull ExternalIpService ipService) throws IOException {
     logger.info("Attempting to determine IP address using: {}", ipService);

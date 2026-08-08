@@ -2,6 +2,7 @@ package net.tomasbot.matchday.plugin.datasource.forum;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +11,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.tomasbot.matchday.common.HttpConnectionManager;
+import net.tomasbot.matchday.common.flaresolverr.FlaresolverrService;
+import net.tomasbot.matchday.common.flaresolverr.FlaresolverrSolution;
 import net.tomasbot.matchday.model.*;
 import net.tomasbot.matchday.plugin.datasource.DataSourcePlugin;
 import org.jetbrains.annotations.NotNull;
@@ -25,16 +29,22 @@ public class ForumPlugin implements DataSourcePlugin {
   private final ForumDataSourceValidator dataSourceValidator;
   private final EventListParser eventListParser;
   private final EventReader eventReader;
+  private final FlaresolverrService flaresolverrService;
+  private final HttpConnectionManager httpConnectionManager;
 
   public ForumPlugin(
       ForumPluginProperties pluginProperties,
       ForumDataSourceValidator dataSourceValidator,
       EventListParser eventListParser,
-      EventReader eventReader) {
+      EventReader eventReader,
+      FlaresolverrService flaresolverrService,
+      HttpConnectionManager httpConnectionManager) {
     this.pluginProperties = pluginProperties;
     this.dataSourceValidator = dataSourceValidator;
     this.eventListParser = eventListParser;
     this.eventReader = eventReader;
+    this.flaresolverrService = flaresolverrService;
+    this.httpConnectionManager = httpConnectionManager;
   }
 
   private static boolean isValidEvent(@NotNull Event event) {
@@ -77,7 +87,7 @@ public class ForumPlugin implements DataSourcePlugin {
     final String page = pages.get(0);
     return page.matches("\\d") ? Integer.parseInt(page) : DEFAULT_PAGE;
   }
-  
+
   @Override
   @SuppressWarnings("unchecked cast")
   public <T> Snapshot<T> getSnapshot(
@@ -92,7 +102,7 @@ public class ForumPlugin implements DataSourcePlugin {
     // subtract 1 to account for the initial 'do' loop
     final AtomicInteger steps = new AtomicInteger(scrapeSteps - 1);
 
-    int newEventCount = 0;
+    int newEventCount;
     do {
       // read remote data
       List<T> newEvents = (List<T>) getEventStream(url, eventDataSource).toList();
@@ -109,9 +119,37 @@ public class ForumPlugin implements DataSourcePlugin {
   @SuppressWarnings("unchecked cast")
   @NotNull
   private <T> Stream<T> getEventStream(
-      @NotNull URL url, DataSource<? extends Event> eventDataSource) throws IOException {
-    String data = RemoteDataReader.readDataFrom(url);
-    return (Stream<T>) readEventStream(data, eventDataSource);
+      @NotNull URL url, @NotNull DataSource<? extends Event> dataSource) throws IOException {
+    Set<SecureCookie> cookies = new HashSet<>();
+    String data;
+
+    // [remote call] - read Events list page
+    if (dataSource.isFlared()) {
+      FlaresolverrSolution solution = flaresolverrService.solveChallengeFor(url);
+      cookies.addAll(solution.getCookies());
+      data = solution.getData();
+    } else {
+      data = httpConnectionManager.get(url, new ArrayList<>()).bodyToMono(String.class).block();
+    }
+    if (data == null || data.isBlank()) throw new IOException("Empty HTTP response");
+
+    return (Stream<T>)
+        eventListParser.getEventsList(data, dataSource).entrySet().stream()
+            // validate each Event
+            .filter(entry -> isValidEvent(entry.getValue()))
+            // package request for further data
+            .map(
+                entry ->
+                    EventMetaDataRequest.builder()
+                        .uri(entry.getKey())
+                        .event(entry.getValue())
+                        .cookies(cookies)
+                        .dataSource(dataSource)
+                        .build())
+            // [remote call] - read Event metadata, video links
+            .map(eventReader::readListEvent)
+            .map(CompletableFuture::join)
+            .filter(Objects::nonNull);
   }
 
   private @Nullable URL parseNextLink(@NotNull URL url) throws MalformedURLException {
@@ -130,15 +168,6 @@ public class ForumPlugin implements DataSourcePlugin {
     return null;
   }
 
-  private @NotNull Stream<Event> readEventStream(
-      @NotNull String data, @NotNull DataSource<? extends Event> dataSource) {
-    return eventListParser.getEventsList(data, dataSource).entrySet().stream()
-        .filter(entry -> isValidEvent(entry.getValue()))
-        .map(entry -> eventReader.readListEvent(entry, dataSource))
-        .map(CompletableFuture::join)
-        .filter(Objects::nonNull);
-  }
-
   @Override
   public void validateDataSource(@NotNull DataSource<?> dataSource) {
     dataSourceValidator.validateDataSourcePluginId(this.getPluginId(), dataSource.getPluginId());
@@ -149,7 +178,15 @@ public class ForumPlugin implements DataSourcePlugin {
   @Override
   @SuppressWarnings("unchecked cast")
   public <T> Snapshot<T> getUrlSnapshot(@NotNull URL url, @NotNull DataSource<T> dataSource) {
-    Event event = eventReader.readEvent(url, (DataSource<? extends Event>) dataSource);
+    URI uri = URI.create(url.toString());
+
+    EventMetaDataRequest request =
+        EventMetaDataRequest.builder()
+            .uri(uri)
+            .dataSource((DataSource<? extends Event>) dataSource)
+            .build();
+    Event event = eventReader.readEvent(request);
+
     return Snapshot.of(Stream.of((T) event));
   }
 

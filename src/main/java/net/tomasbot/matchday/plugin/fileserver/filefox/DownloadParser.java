@@ -24,7 +24,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import java.util.Set;
-import net.tomasbot.matchday.util.HttpConnectionManager;
+import net.tomasbot.matchday.common.HttpConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpCookie;
 import org.springframework.stereotype.Component;

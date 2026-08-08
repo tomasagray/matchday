@@ -53,6 +53,7 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
   private URI baseUri;
   private UUID pluginId;
   private boolean enabled;
+  private boolean isFlared;
 
   @Getter
   @Setter
@@ -70,6 +71,7 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
       this.setBaseUri(base.baseUri);
       this.setPluginId(base.pluginId);
       this.setEnabled(base.enabled);
+      this.setFlared(base.isFlared);
     }
   }
 
@@ -91,6 +93,7 @@ public class DataSourceResource extends RepresentationModel<DataSourceResource> 
       resource.setBaseUri(entity.getBaseUri());
       resource.setPluginId(entity.getPluginId());
       resource.setEnabled(entity.isEnabled());
+      resource.setFlared(entity.isFlared());
       resource.add(
           linkTo(methodOn(DataSourceController.class).getDataSource(entity.getDataSourceId()))
               .withSelfRel());
