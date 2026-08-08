@@ -15,6 +15,7 @@
       <env name="DB_USER" value="sa" />
       <env name="FFMPEG" value="/usr/bin/ffmpeg" />
       <env name="FFPROBE" value="/usr/bin/ffprobe" />
+      <env name="FLARE_URL" value="http://192.168.0.239:8191/v1" />
     </envs>
     <dir value="$PROJECT_DIR$/src/test/java/net/tomasbot/matchday/integration" />
     <method v="2">

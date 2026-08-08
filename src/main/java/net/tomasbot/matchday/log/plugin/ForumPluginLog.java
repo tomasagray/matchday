@@ -1,8 +1,8 @@
 package net.tomasbot.matchday.log.plugin;
 
 import java.net.URI;
-import java.util.Map;
 import net.tomasbot.matchday.model.DataSource;
+import net.tomasbot.matchday.plugin.datasource.forum.EventMetaDataRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -60,15 +60,13 @@ public class ForumPluginLog {
 
   @Before(
       "execution(* net.tomasbot.matchday.plugin.datasource.forum.EventReader.readListEvent(..))")
-  public void logReadEventMetadata(@NotNull JoinPoint jp) throws Throwable {
+  public void logReadEventMetadata(@NotNull JoinPoint jp) {
     Object[] args = jp.getArgs();
     if (args.length == 0) return;
 
-    if (args.length == 2 && args[0] instanceof Map.Entry<?, ?> entry) {
-      Object key = entry.getKey();
-      if (key instanceof URI uri) {
-        logger.info("Reading Event metadata from: {}", uri);
-      }
+    if (args.length == 1 && args[0] instanceof EventMetaDataRequest request) {
+      URI uri = request.getUri();
+      logger.info("Reading Event metadata from: {}", uri);
     }
   }
 

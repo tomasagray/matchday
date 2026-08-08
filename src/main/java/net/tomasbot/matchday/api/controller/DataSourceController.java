@@ -132,10 +132,17 @@ public class DataSourceController {
   }
 
   @RequestMapping(value = "/data-source/{id}/status", method = RequestMethod.PATCH)
-  public ResponseEntity<Boolean> toggleDataSource(
+  public ResponseEntity<Boolean> toggleDataSourceEnabled(
       @PathVariable UUID id, @RequestParam boolean enabled) {
     boolean isEnabled = dataSourceService.toggleDataSourceEnabled(id, enabled);
     return ResponseEntity.ok(isEnabled);
+  }
+
+  @RequestMapping(value = "/data-source/{id}/use-flaresolverr", method = RequestMethod.PATCH)
+  public ResponseEntity<Boolean> toggleDataSourceIsFlared(
+      @PathVariable UUID id, @RequestParam boolean enabled) {
+    boolean isFlared = dataSourceService.toggleIsDataSourceFlared(id, enabled);
+    return ResponseEntity.ok(isFlared);
   }
 
   @Data

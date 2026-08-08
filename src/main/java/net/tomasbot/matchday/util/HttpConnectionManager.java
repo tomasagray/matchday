@@ -85,15 +85,23 @@ public class HttpConnectionManager {
     return response;
   }
 
-  public ClientResponse get(@NotNull final URI uri, @NotNull Collection<HttpCookie> cookies)
+  public ClientResponse get(@NotNull URI uri, @NotNull Collection<HttpCookie> cookies)
       throws IOException {
-    return get(uri, getCookieJar(cookies));
+    return get(uri.toURL(), cookies);
   }
 
-  public ClientResponse get(
-      @NotNull final URI uri, @NotNull final MultiValueMap<String, String> cookies)
+  public ClientResponse get(@NotNull URI uri, @NotNull MultiValueMap<String, String> cookies)
       throws IOException {
-    final URL url = uri.toURL();
+    return get(uri.toURL(), cookies);
+  }
+
+  public ClientResponse get(@NotNull URL url, @NotNull Collection<HttpCookie> cookies)
+      throws IOException {
+    return get(url, getCookieJar(cookies));
+  }
+
+  public ClientResponse get(@NotNull URL url, @NotNull MultiValueMap<String, String> cookies)
+      throws IOException {
     final HttpURLConnection connection = setupUrlConnection(url, cookies);
     return readHttpData(connection);
   }
@@ -122,12 +130,15 @@ public class HttpConnectionManager {
 
   private @NotNull HttpURLConnection setupUrlConnection(
       @NotNull URL url, @NotNull MultiValueMap<String, String> cookies) throws IOException {
-    final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-    final String cookiesHeader = getCookiesHeader(cookies);
-    if (!cookiesHeader.isEmpty()) {
-      connection.setRequestProperty("Cookie", cookiesHeader);
-    }
+    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+    // setup cookies
+    String cookiesHeader = getCookiesHeader(cookies);
+    if (!cookiesHeader.isEmpty()) connection.setRequestProperty("Cookie", cookiesHeader);
+
+    // set user agent
     connection.setRequestProperty(USER_AGENT, pluginProperties.getUserAgent());
+
     return connection;
   }
 
@@ -142,15 +153,14 @@ public class HttpConnectionManager {
       throws IOException {
     try (final InputStreamReader isr = new InputStreamReader(getInputStream(connection));
         final BufferedReader reader = new BufferedReader(isr)) {
-
-      final HttpStatus status = HttpStatus.valueOf(connection.getResponseCode());
+      HttpStatus status = HttpStatus.valueOf(connection.getResponseCode());
       // Get headers, removing null entries
-      final Map<String, List<String>> headers =
+      Map<String, List<String>> headers =
           connection.getHeaderFields().entrySet().stream()
               .filter(entry -> entry.getKey() != null)
               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-      final String body = reader.lines().collect(Collectors.joining("\n"));
-      
+      String body = reader.lines().collect(Collectors.joining("\n"));
+
       return ClientResponse.create(status)
           .headers(responseHeaders -> responseHeaders.putAll(headers))
           .body(body)
